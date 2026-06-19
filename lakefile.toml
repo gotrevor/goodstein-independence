@@ -1,0 +1,16 @@
+# ⚠️ PROPOSED / UNBUILT — this is the Phase 0.1 starting point, not a verified build.
+# First real step: resolve this dependency on a networked host (the isolated box can't
+# fetch it), confirm the Foundation rev/toolchain, and pin `rev` to a v4.29.0 commit.
+# Open question (see EXPEDITION-PLAN.md 0.1): whether Gödel II is in Foundation @ v4.29.0
+# or only in the older `Incompleteness` repo @ v4.16.0-rc2 — that may change the dep + toolchain.
+name = "GoodsteinPA"
+defaultTargets = ["GoodsteinPA"]
+srcDir = "src"
+
+[[require]]
+name = "Foundation"
+git = "https://github.com/FormalizedFormalLogic/Foundation"
+rev = "master"        # TODO(0.1): pin to a v4.29.0 commit; transitively pulls mathlib
+
+[[lean_lib]]
+name = "GoodsteinPA"
