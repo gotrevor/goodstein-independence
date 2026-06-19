@@ -98,10 +98,35 @@ I then misread a cumulative log to fake a "hit." So: Phase 0 is "bounded, days-t
 faithful encoding + bridge is the real work"; Phase 2 is "the months-to-year frontier piece."
 Numbers get attached only *after* a phase lands, against authoritative timestamps.
 
-## Open questions to resolve first (Phase 0.1)
-1. Gödel II current home + toolchain: is `PA ⊬ Con(PA)` in `Foundation` @ v4.29.0, or only in the
-   older `Incompleteness` @ v4.16.0-rc2? (Decides the project toolchain + whether one project can
-   hold both the ε₀ work and Gödel II.)
-2. Does FFL's PA (`𝐏𝐀` / `ISigma` schemata) match the standard PA Kirby–Paris uses, and is its
-   `Con` the one Gödel II is proven about?
-3. Cleanest sequence-coding API in `arithmetization` for the Π₂ encoding of `γ`.
+## Phase 0.1 — resolved facts (2026-06-19, host recon)
+
+**Q1 (Gödel II home + toolchain) — RESOLVED.** Gödel II lives in the **modern `Foundation`
+monorepo @ toolchain v4.29.0**: `Foundation/FirstOrder/Incompleteness/Second.lean` +
+`Consistency.lean`, plus the full provability apparatus (`Löb.lean`, D1–D3 in
+`ProvabilityAbstraction/`, Rosser, Gödel–Rosser, Jeroslow, the `ProvabilityLogic/GL` track).
+The standalone `Incompleteness` (v4.16.0-rc2) and `Arithmetization` (v4.17.0-rc1) repos are
+**LEGACY** — the monorepo bundles `Foundation` + `Arithmetization` + `Incompleteness`. So the
+dep is **one `Foundation` @ v4.29.0**, one toolchain, transitively mathlib v4.29.0. lakefile +
+`lean-toolchain` updated to match.
+
+**⚠️ Execution constraint sharpened.** The lean-yolo box bakes **only v4.29.1**; this repo is
+v4.29.0. Since the box can't fetch a toolchain (no egress), treadmilling Track 2 needs **the box
+image rebuilt to add the v4.29.0 toolchain** (one `RUN elan toolchain install …` line +
+`./run.sh build`), OR a networked-host dev loop for Phases 0–1. Decide before any Track-2 treadmill.
+Once built on the host, the box reads the prebuilt `.lake` via the `~/src` bind-mount (the
+"can't fetch FFL" limit is a *pre-fetch-on-host* problem, not a wall — see Execution model).
+
+**Cross-link — the growth side is being built NOW (Track 1).** The mathlib-only spine of
+Kirby–Paris (Goodstein grows like `f_{ε₀}`) is an active unbounded treadmill in
+`~/src/lean-formalizations` (`Logic/FastGrowing/` + `Logic/Goodstein/{Length,Growth}`).
+Key discovery: **mathlib already has the fast-growing hierarchy** — `ONote.fastGrowing`,
+`ONote.fastGrowingε₀`, `ONote.fundamentalSequence` (`Mathlib.SetTheory.Ordinal.Notation`) — so
+Track 1 builds the *growth theory* (expansiveness/monotonicity/domination + Hardy + the
+Goodstein-length bridge) on top, not from scratch. That work feeds Phase 3 (`Goodstein ⟹ TI(ε₀)`).
+
+## Still open (next, when Track 2 is picked up)
+- Does FFL's PA (`𝐏𝐀` / `ISigma` schemata) match the standard PA Kirby–Paris uses, and is its
+  `Con` the one Gödel II is proven about? (Read `Foundation`'s PA + `Con[·]` defs.)
+- Cleanest sequence-coding API in `arithmetization` for the Π₂ encoding of `γ`.
+- First build action: `lake update Foundation && lake exe cache get && lake build` on the host;
+  confirm Foundation compiles at the pinned v4.29.0 rev; then rebuild the box image for v4.29.0.

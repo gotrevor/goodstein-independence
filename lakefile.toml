@@ -1,8 +1,15 @@
-# ⚠️ PROPOSED / UNBUILT — this is the Phase 0.1 starting point, not a verified build.
-# First real step: resolve this dependency on a networked host (the isolated box can't
-# fetch it), confirm the Foundation rev/toolchain, and pin `rev` to a v4.29.0 commit.
-# Open question (see EXPEDITION-PLAN.md 0.1): whether Gödel II is in Foundation @ v4.29.0
-# or only in the older `Incompleteness` repo @ v4.16.0-rc2 — that may change the dep + toolchain.
+# ⚠️ PROPOSED / UNBUILT — Phase 0.1 starting point, not yet a verified build.
+# RESOLVED 2026-06-19 (see EXPEDITION-PLAN.md §"Phase 0.1 — resolved facts"):
+#   • Gödel II IS in the modern `Foundation` monorepo @ toolchain v4.29.0
+#     (`Foundation/FirstOrder/Incompleteness/Second.lean` + `Consistency.lean` + the full
+#     Löb / D1–D3 / provability-logic apparatus). The standalone `Incompleteness` (v4.16.0-rc2)
+#     and `Arithmetization` (v4.17.0-rc1) repos are LEGACY — the monorepo bundles all three.
+#   • So: ONE dep (`Foundation`), ONE toolchain (v4.29.0), transitively pulling mathlib v4.29.0.
+#   • This repo's lean-toolchain is already v4.29.0 (matches). NB the lean-yolo box bakes only
+#     v4.29.1, so treadmilling THIS repo needs the box image rebuilt to add v4.29.0 first
+#     (or a networked-host dev loop for Phases 0–1). See EXPEDITION-PLAN §Execution model.
+#   • Foundation also requires doc-gen4 (docs generator) — only needed for `:docs` targets;
+#     a plain `lake build Foundation` should not need it to compile.
 name = "GoodsteinPA"
 defaultTargets = ["GoodsteinPA"]
 srcDir = "src"
@@ -10,7 +17,10 @@ srcDir = "src"
 [[require]]
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
-rev = "master"        # TODO(0.1): pin to a v4.29.0 commit; transitively pulls mathlib
+# Pin to a v4.29.0 Foundation commit at first build. `c28942b` (reservoir mirror snapshot,
+# 2026-06-14) has lean-toolchain v4.29.0 and is a verified-v4.29.0 candidate; confirm it's the
+# latest v4.29.0 commit (master may have since moved to v4.30) and bump within v4.29.x if needed.
+rev = "master"        # TODO(0.1): replace with a pinned v4.29.0 commit (candidate: c28942b)
 
 [[lean_lib]]
 name = "GoodsteinPA"
