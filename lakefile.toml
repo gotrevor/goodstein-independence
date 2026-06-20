@@ -1,26 +1,23 @@
-# ⚠️ PROPOSED / UNBUILT — Phase 0.1 starting point, not yet a verified build.
-# RESOLVED 2026-06-19 (see EXPEDITION-PLAN.md §"Phase 0.1 — resolved facts"):
-#   • Gödel II IS in the modern `Foundation` monorepo @ toolchain v4.29.0
-#     (`Foundation/FirstOrder/Incompleteness/Second.lean` + `Consistency.lean` + the full
-#     Löb / D1–D3 / provability-logic apparatus). The standalone `Incompleteness` (v4.16.0-rc2)
-#     and `Arithmetization` (v4.17.0-rc1) repos are LEGACY — the monorepo bundles all three.
-#   • So: ONE dep (`Foundation`), ONE toolchain (v4.29.0), transitively pulling mathlib v4.29.0.
-#   • This repo's lean-toolchain is already v4.29.0 (matches). NB the lean-yolo box bakes only
-#     v4.29.1, so treadmilling THIS repo needs the box image rebuilt to add v4.29.0 first
-#     (or a networked-host dev loop for Phases 0–1). See EXPEDITION-PLAN §Execution model.
-#   • Foundation also requires doc-gen4 (docs generator) — only needed for `:docs` targets;
-#     a plain `lake build Foundation` should not need it to compile.
+# GoodsteinPA — Track 2 of the Goodstein effort: the syntactic `𝗣𝗔 ⊬ γ` (Kirby–Paris).
+# Built on the `Foundation` monorepo (FormalizedFormalLogic), which supplies first-order logic,
+# PA (`𝗣𝗔 = Peano : ArithmeticTheory`), Σ₁ arithmetization, and Gödel II. Track 1 (the
+# mathlib-only growth theory) lives in ~/src/lean-formalizations.
+#
+# Foundation is required by PATH (local sibling clone ~/src/Foundation), pinned at mathlib
+# v4.31.0 (the lean-universe base). Path > git URL here because:
+#   • it points at our LOCAL v4.31 Foundation, not upstream's stale v4.29.0;
+#   • it's offline-buildable — the lean-yolo box bind-mounts all of ~/src, so it sees the
+#     prebuilt Foundation .lake and never needs to lake-fetch;
+#   • it reuses Foundation's built oleans instead of rebuilding 1665 jobs.
+# (Scaffold un-vendored from the Foundation clone 2026-06-19; switch to a git/tag require only
+#  if this ever becomes a standalone published repo.)
 name = "GoodsteinPA"
 defaultTargets = ["GoodsteinPA"]
 srcDir = "src"
 
 [[require]]
 name = "Foundation"
-git = "https://github.com/FormalizedFormalLogic/Foundation"
-# Pin to a v4.29.0 Foundation commit at first build. `c28942b` (reservoir mirror snapshot,
-# 2026-06-14) has lean-toolchain v4.29.0 and is a verified-v4.29.0 candidate; confirm it's the
-# latest v4.29.0 commit (master may have since moved to v4.30) and bump within v4.29.x if needed.
-rev = "master"        # TODO(0.1): replace with a pinned v4.29.0 commit (candidate: c28942b)
+path = "../Foundation"
 
 [[lean_lib]]
 name = "GoodsteinPA"
