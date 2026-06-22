@@ -347,4 +347,99 @@ theorem embed {Γ : Finset (SyntacticFormula ℒₒᵣ)}
       exact_mod_cast Nat.le_max_left _ _
     exact Provable.cut φ hc h1' h2'
 
+/-! ## The assignment-carrying (all-closed) embedding `embedC` — the correct frame (lap 10)
+
+The naive `embed` above cannot finish (`exs` with an open witness; `provable_rew` invalid for the new
+`axTrue` leaf). The fix is to carry a **numeral assignment** `e : ℕ → ℕ` of the free variables, so
+every sequent in the image is CLOSED. `asg e` substitutes every free variable `&x` by the numeral
+`nm (e x)`. The headline consumes `embedC d (fun _ => 0)` on the closed `↑goodsteinSentence`. -/
+
+/-- The closing substitution: free variable `&x ↦ nm (e x)`. Sends every `SyntacticFormula` to a
+closed formula (sentence image). -/
+noncomputable def asg (e : ℕ → ℕ) : Rew ℒₒᵣ ℕ 0 ℕ 0 := Rew.rewrite (fun x => nm (e x))
+
+/-- **The embedding, assignment-carrying form.** Every `Derivation2` from `𝗣𝗔` embeds into `Z_∞`
+*at every numeral assignment of its free variables* (all sequents closed). Structural cases done;
+`all`/`exs`/`axm` are the disclosed deep obligations (the latter two now unblocked by `axTrue`). -/
+theorem embedC {Γ : Finset (SyntacticFormula ℒₒᵣ)}
+    (d : Derivation2 (𝗣𝗔 : Schema ℒₒᵣ) Γ) :
+    ∀ e : ℕ → ℕ, ZProvable (Γ.image (fun φ => asg e ▹ φ)) := by
+  induction d with
+  | closed Γ φ hp hn =>
+    intro e
+    obtain ⟨a, hd⟩ := provable_em (asg e ▹ φ) (Finset.mem_image_of_mem _ hp)
+      (by have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hn; simpa using this)
+    exact ⟨a, 0, hd⟩
+  | axm φ hφ hΓ =>
+    -- closed PA axiom `↑σ` (assignment-immaterial): `𝗣𝗔⁻` instance → `axTrue`; induction → ω-rule.
+    sorry
+  | verum hΓ =>
+    intro e
+    exact ⟨0, 0, Provable.verumR (by have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hΓ; simpa using this)⟩
+  | @and Γ φ ψ h _dp _dq ihp ihq =>
+    intro e
+    obtain ⟨a1, c1, h1⟩ := ihp e
+    obtain ⟨a2, c2, h2⟩ := ihq e
+    rw [Finset.image_insert] at h1 h2
+    refine ⟨max a1 a2 + 1, max c1 c2, ?_⟩
+    have h1' := h1.mono (le_refl a1) (le_max_left c1 c2)
+    have h2' := h2.mono (le_refl a2) (le_max_right c1 c2)
+    have hand := Provable.andI (asg e ▹ φ) (asg e ▹ ψ) h1' h2'
+    have hmem : (asg e ▹ φ ⋏ asg e ▹ ψ) ∈ Γ.image (fun φ => asg e ▹ φ) := by
+      have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) h; simpa using this
+    rw [Finset.insert_eq_self.mpr hmem] at hand
+    exact hand
+  | @or Γ φ ψ h _d ih =>
+    intro e
+    obtain ⟨a, c, hd⟩ := ih e
+    rw [Finset.image_insert, Finset.image_insert] at hd
+    refine ⟨a + 1, c, ?_⟩
+    have hor := Provable.orI (asg e ▹ φ) (asg e ▹ ψ) hd
+    have hmem : (asg e ▹ φ ⋎ asg e ▹ ψ) ∈ Γ.image (fun φ => asg e ▹ φ) := by
+      have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) h; simpa using this
+    rw [Finset.insert_eq_self.mpr hmem] at hor
+    exact hor
+  | @all Γ φ h _d ih =>
+    -- `∀⁰φ ∈ Γ`. Introduce by `allω`: for each `n`, use `ih (n :>ₙ e)` — the freed var ↦ `nm n`,
+    -- the shifted `Γ` ↦ the `asg e` image. The clean ω-rule case (no `provable_rew`). DEEP next chip.
+    sorry
+  | @exs Γ φ h t _d _ih =>
+    -- `asg e ▹ t` is now CLOSED → collapse to its numeral value `nm m` (`axTrue` term eval) → `exI`. DEEP.
+    sorry
+  | @wk Δ Γ _d h ih =>
+    intro e
+    exact (ih e).weakening (Finset.image_subset_image h)
+  | @shift Γ _d ih =>
+    -- re-index the assignment: `asg e ∘ Rew.shift = asg (e ∘ succ)`, so the shifted sequent at `e`
+    -- is the original sequent at `e ∘ succ`. No `provable_rew`.
+    intro e
+    have hcomp : (asg e).comp Rew.shift = asg (e ∘ Nat.succ) := by
+      ext x
+      · exact Fin.elim0 x
+      · simp [asg, Rew.comp_app]
+    have key : (Γ.image Rewriting.shift).image (fun φ => asg e ▹ φ)
+        = Γ.image (fun φ => asg (e ∘ Nat.succ) ▹ φ) := by
+      rw [Finset.image_image]
+      refine Finset.image_congr (fun ψ _ => ?_)
+      show asg e ▹ (Rew.shift ▹ ψ) = asg (e ∘ Nat.succ) ▹ ψ
+      rw [← TransitiveRewriting.comp_app, hcomp]
+    rw [key]; exact ih (e ∘ Nat.succ)
+  | @cut Γ φ _d _dn ihd ihdn =>
+    intro e
+    obtain ⟨a1, c1, h1⟩ := ihd e
+    obtain ⟨a2, c2, h2⟩ := ihdn e
+    rw [Finset.image_insert] at h1 h2
+    rw [show (asg e ▹ (∼φ)) = ∼(asg e ▹ φ) by simp] at h2
+    refine ⟨max a1 a2 + 1, max ((asg e ▹ φ).complexity + 1) (max c1 c2), ?_⟩
+    have h1' := h1.mono (le_refl a1)
+      (show c1 ≤ max ((asg e ▹ φ).complexity + 1) (max c1 c2) from
+        le_trans (le_max_left c1 c2) (le_max_right _ _))
+    have h2' := h2.mono (le_refl a2)
+      (show c2 ≤ max ((asg e ▹ φ).complexity + 1) (max c1 c2) from
+        le_trans (le_max_right c1 c2) (le_max_right _ _))
+    have hc : (((asg e ▹ φ).complexity + 1 : ℕ) : ℕ∞)
+        ≤ ((max ((asg e ▹ φ).complexity + 1) (max c1 c2) : ℕ) : ℕ∞) := by
+      exact_mod_cast Nat.le_max_left _ _
+    exact Provable.cut (asg e ▹ φ) hc h1' h2'
+
 end GoodsteinPA.Embedding
