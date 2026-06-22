@@ -23,9 +23,13 @@ semantics `⊨^α`, sidestepping witnesses. **M6 (Hardy) + the `wip/` witness-bo
 critical path** (banked, not deleted).
 
 ## 🎯 NEXT LAP — execute the Buchholz route (`PENDING_WORK.md` lap-12 top has the full plan)
-- **0. VERIFY-FIRST (cheap, do before deep work):** (a) M5/M4 accept a set variable `X` (extend
-  `ℒₒᵣ`→`ℒₒᵣ∪{X}` or add a fixed relation symbol — `embedC.axm`/`provable_true` only need the `X`-free PA
-  axioms, so should extend); (b) Goodstein⟹TI_≺(X) is provable in PA via the Phase-0 CNF-ε₀ encoding.
+- **0a. VERIFY (a) — DONE this lap:** the set-variable extension is feasible. Foundation has `Language.add`
+  + `ORing.embedding : ℒₒᵣ →ᵥ L` for `[ORing L]`, so `ℒₒᵣ + Xpred` carries the arithmetic API. **First
+  lap-13 task: generalise M5 (`Zinfty.lean`) + M4 (`Embedding.lean`) over `{L} [ORing L]`** (mechanical
+  ~128KB port — their proofs use only logical structure + `atomTrue`/numerals; re-instantiate at `ℒₒᵣ` for
+  existing users, at `ℒₒᵣ+X` for Boundedness). Low-risk vs. Towsner's novel-math wall. See pivot analysis.
+- **0b. VERIFY (b) — STILL OPEN:** Goodstein⟹TI_≺(X) provable in PA via the Phase-0 CNF-ε₀ encoding.
+  Not a known wall; confirm before sinking laps into Boundedness.
 - **1.** Truth semantics `⊨^α Γ` (`X := {n : |n|_≺<α}`), `Prog_≺`, ≺-norm, order type `‖≺‖`, X-positivity.
 - **2.** **Boundedness (Thm 5.4)** = the new theorem: induction on the cut-free `Provable β 0`-derivation
   (8 cases, Buchholz p.29). Corollary `Z∞ ⊢^β_1 TI_≺(X) ⟹ ‖≺‖ ≤ 2^β`.

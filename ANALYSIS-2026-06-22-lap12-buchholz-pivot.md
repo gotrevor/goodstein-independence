@@ -85,7 +85,23 @@ reference for the (now off-path) operator-`H` build.
 **High confidence** this is the right route: it is the literature-standard Gentzen analysis (Buchholz §5,
 Buss Handbook ch.II), it reuses the two hardest done pieces (M4+M5), and the alternative is provably walled
 (ADDENDUM 7). It is also a return to `DIRECTION.md`'s original "Gentzen ordinal analysis, TI(ε₀)" plan.
-**Two early checks** (do these first on lap 13, before deep work): (a) M5/M4 cleanly accommodate the set
-variable `X` (extend language or add a fixed relation symbol); (b) the Goodstein ⟹ TI_≺(X) bridge's exact
-statement is provable in PA with the Phase-0 encoding. If both clear, execute steps 2–5. Neither is a known
-wall (unlike the operator-`H`), but both are unverified, so confirm before sinking laps.
+
+### VERIFY-(a) — DONE this lap: the set-variable extension is feasible; the cost is a mechanical M5/M4 port
+Foundation HAS clean language extension: `Language.add` (`L₁ + L₂`, infix `+`), `Language.add₁/add₂`
+homs `Lᵢ →ᵥ L₁+L₂`, and **`ORing.embedding : ℒₒᵣ →ᵥ L` for any `[ORing L]`** — so `ℒₒᵣ + Xpred` (with
+`Xpred` a one-unary-relation `Language`, e.g. `⟨fun _ => PEmpty, fun k => if k=1 then Unit else PEmpty⟩`)
+carries the full arithmetic API via its `ORing` instance. So the *language* is no obstacle.
+**The real cost:** M5 (`src/Zinfty.lean`, 91KB) and M4 (`src/Embedding.lean`, 37KB) are hardwired
+`Form := SyntacticFormula ℒₒᵣ`. The whole chain (PA, embedding, cut-elim, Boundedness) lives over the
+SAME extended language `ℒₒᵣ+X` (the bridge produces `PA-over-ℒₒᵣ+X ⊢ TI_≺(X)` with free `X`). So M5/M4
+must be **re-parametrised over `{L : Language} [ORing L]`** (or duplicated at `ℒₒᵣ+X`). Their proofs are
+language-generic (they use only logical structure + `atomTrue`/numerals, which the `[ORing L]` API
+provides), so this is **mechanical but sizable (~128KB) and low-risk** — contrast Towsner's operator-`H`
+which is *novel math* (high-risk). **Recommended:** generalise M5/M4 over `[ORing L]` ONCE (edit the
+`variable`/`abbrev Form` headers + the few `ℒₒᵣ`-specific spots; re-instantiate at `ℒₒᵣ` for the existing
+`src/` users and at `ℒₒᵣ+X` for Boundedness). This is the FIRST concrete lap-13 task. Net assessment:
+the Buchholz route trades Towsner's novel-math wall for a tedious-but-tractable port — the right trade for
+a project that wants to FINISH.
+
+### VERIFY-(b) — STILL OPEN (lap-13): the Goodstein ⟹ TI_≺(X) bridge's exact statement is provable in PA
+via the Phase-0 CNF-ε₀ encoding. Not a known wall, but unverified. Check before sinking laps into Boundedness.
