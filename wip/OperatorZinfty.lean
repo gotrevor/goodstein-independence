@@ -706,4 +706,47 @@ theorem weakening {α e k d c Δ Γ} (hsub : Δ ⊆ Γ) (dd : Zekd α e k d c Δ
 
 end Zekd
 
+/-! ### `ZekdProv` — the `Provable`-style wrapper (bound-as-upper-bound)
+
+`Zekd` carries an *exact* derivation ordinal, so every ordinal-raise (e.g. `wk`'s
+`γ ↦ osucc(α+γ)` in cut-elimination) needs `NF` of the source. The wrapper bundles an upper
+bound + the source's `NF`, so the `≤`-slack absorbs the `osucc`/`+1` bookkeeping uniformly and
+`NF` is always available. This is the surface §19.6 `cutReduceAll` is stated over (matching the
+unbounded `Zinfty.lean Provable`). -/
+def ZekdProv (α e : ONote) (k d c : ℕ) (Γ : Seq) : Prop :=
+  ∃ α', α' ≤ α ∧ α'.NF ∧ Zekd α' e k d c Γ
+
+namespace ZekdProv
+
+/-- Monotonicity in `α` (≤), `k`, `d`, `c` (the control `e` is raised separately by `mono_e`,
+which carries a budget side condition). -/
+theorem mono {α β e : ONote} {k d c k' d' c' : ℕ} {Γ : Seq}
+    (hα : α ≤ β) (hk : k ≤ k') (hd : d ≤ d') (hc : c ≤ c') :
+    ZekdProv α e k d c Γ → ZekdProv β e k' d' c' Γ := by
+  rintro ⟨α', hα', hNF, D⟩
+  exact ⟨α', le_trans hα' hα, hNF, ((D.mono_k hk).mono_d hd).mono_c hc⟩
+
+/-- Control-ordinal raising at the wrapper level. -/
+theorem mono_e {α e e' : ONote} {k d c : ℕ} {Γ : Seq}
+    (heNF : e.NF) (he'NF : e'.NF) (hlt : e < e') (hbudget : norm e ≤ k + d) :
+    ZekdProv α e k d c Γ → ZekdProv α e' k d c Γ := by
+  rintro ⟨α', hα', hNF, D⟩
+  exact ⟨α', hα', hNF, D.mono_e heNF he'NF hlt hbudget⟩
+
+/-- Sequent weakening. -/
+theorem weakening {α e : ONote} {k d c : ℕ} {Γ Δ : Seq} (h : Γ ⊆ Δ) :
+    ZekdProv α e k d c Γ → ZekdProv α e k d c Δ := by
+  rintro ⟨α', hα', hNF, D⟩
+  exact ⟨α', hα', hNF, D.wk h⟩
+
+/-- Respect set-equality of sequents. -/
+theorem cast {α e : ONote} {k d c : ℕ} {Γ Δ : Seq} (e0 : Γ = Δ) :
+    ZekdProv α e k d c Γ → ZekdProv α e k d c Δ := fun h => e0 ▸ h
+
+/-- Lift a raw `Zekd` derivation (with an NF ordinal) into the wrapper. -/
+theorem of {α e : ONote} {k d c : ℕ} {Γ : Seq} (hNF : α.NF) (D : Zekd α e k d c Γ) :
+    ZekdProv α e k d c Γ := ⟨α, le_refl _, hNF, D⟩
+
+end ZekdProv
+
 end GoodsteinPA.OperatorZinfty
