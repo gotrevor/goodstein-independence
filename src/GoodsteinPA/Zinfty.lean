@@ -1,5 +1,22 @@
 /-
-# Phase 2 crux — the `Z_∞` ω-rule calculus over Foundation's real PA syntax  [WIP]
+# Phase 2 crux — the `Z_∞` ω-rule calculus + cut-elimination over Foundation's real PA syntax
+
+**Status: COMPLETE and `#print axioms`-clean** (`[propext, Classical.choice, Quot.sound]`).
+This file machine-checks the full Gentzen-style cut-elimination for the infinitary ω-rule
+calculus `Z_∞`, the deep core (milestone **M5**) of Route B (Towsner, *Goodstein's Theorem, ε₀,
+and Unprovability*, §16–§19). It does **not** yet connect to the headline `peano_not_proves_goodstein`
+— that needs the embedding `PA⁺ ↪ Z_∞` (M4, §16/§18), the cut-free lower bound (M6, §17), and the
+assembly (M7, §20). Contents:
+  • the `Z_∞` calculus `Deriv` (ω-rule `allω`, numeral-witness `exI`) + measures `o` (ordinal
+    bound) / `cr` (cut rank), and the predicate `Provable α c Γ`;
+  • the predicate-level inference API + `mono`/`weakening`/`contr` (free, via set sequents);
+  • inversions **§19.2–19.4** (`orInv`, `andInvL/R`, `allInv`);
+  • cut reductions **§19.5** (`cutReduceConj/Disj`) and **§19.6** (`cutReduceAll`);
+  • atomic + `⊥` cut elimination (`atomCut`, `removeFalsum`) — *no truth layer needed*;
+  • **§19.7** `cutElimStep` (rank `c+1 → c`, bound `ω^α`) and **§19.9** `cutElim` (cut-free).
+
+Natural (Hessenberg) sum is **absent from mathlib v4.31.0**; all reduction bounds use ordinary
+ordinal `+` with a `+1` slack, kept below `ω^(·+1)` by additive principality of `ω^c`.
 
 Per HANDOFF-2026-06-22 ⭐ KEY FINDING: build `Z_∞` directly on Foundation's
 `SyntacticFormula ℒₒᵣ` (full FO with total de-Morgan negation `∼`, finite `complexity : … → ℕ`,
@@ -22,9 +39,8 @@ The calculus replaces Foundation's finitary eigenvariable `all` rule with the **
 (one premise per numeral `n`, `Ordinal` height). Ordinal bound `o` and cut rank `cr` are computed
 measures (structural recursion on the infinitely-branching tree).
 
-Status: scaffolding. Calculus + measures + predicate-level inference API typecheck. The deep
-lemmas (inversions §19.2–19.4, reductions §19.5–19.7) are the open frontier. Check with
-`lake env lean wip/ZinftyF.lean`. Promote to `src/` once a milestone closes.
+Promoted from `wip/ZinftyF.lean` once cut-elimination closed (zero sorries). The superseded
+abstract-`AForm` prototype `wip/Zinfty.lean` is kept for history.
 -/
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Arithmetic.R0.Representation

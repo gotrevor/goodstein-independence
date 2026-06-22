@@ -10,3 +10,4 @@ import GoodsteinPA.Encoding
 import GoodsteinPA.Bridge
 import GoodsteinPA.Reduction
 import GoodsteinPA.Statement
+import GoodsteinPA.Zinfty
