@@ -103,5 +103,15 @@ which is *novel math* (high-risk). **Recommended:** generalise M5/M4 over `[ORin
 the Buchholz route trades Towsner's novel-math wall for a tedious-but-tractable port — the right trade for
 a project that wants to FINISH.
 
-### VERIFY-(b) — STILL OPEN (lap-13): the Goodstein ⟹ TI_≺(X) bridge's exact statement is provable in PA
-via the Phase-0 CNF-ε₀ encoding. Not a known wall, but unverified. Check before sinking laps into Boundedness.
+### VERIFY-(b) — assessed this lap: the Goodstein⟹TI bridge is NEW work (standard, not novel)
+The project's Phase-0 (`Defs.lean`/`Encoding.lean`) has the **ℕ-level** base-bumping (`bump`/`goodsteinSeq`/
+`goodsteinTerminates`) but **NO ordinal assignment**; the ONote/ordinal content lives in `Domination.lean`
+(Goodstein dominates the fast-growing hierarchy — the ℕ-level *Towsner* lower-bound fact, not the syntactic
+descent). So the bridge **PA ⊢ Goodstein ⟹ PA ⊢ TI_≺(X)** for the ε₀-order needs new work: (i) the
+CNF-ε₀-ordinal assignment `o(m,k)` to Goodstein states with `o(m,k+1) < o(m,k)` until `0` (base-bumping ↔
+CNF descent — Phase-0's `bump` already IS the CNF base-shift, so this is a re-reading of the existing defs),
+and (ii) the PA-internal proof that termination of that descent gives `TI_≺(X)`. This is **standard
+textbook content** (Kirby–Paris 1982 §, Cichoń 1983 — both on disk in `papers/`), NOT novel math. It is
+also needed in *some* form on the Towsner route (M6's domination + arithmetization), so it is not extra cost
+unique to Buchholz. **Net: both VERIFY checks clear — the pivot has no novel-math wall, only mechanical port
+(M5/M4 over `[ORing L]`) + clean induction (Boundedness 5.4) + standard reduction (Goodstein⟹TI). Execute.**
