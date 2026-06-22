@@ -1,6 +1,6 @@
 # HANDOFF — 2026-06-22 (lap 9, deep-reflection lap)
 
-> **Branch** `plan` · **HEAD** `7e71a4a` (6 commits this lap) · build **green**
+> **Branch** `plan` · **HEAD** `5a2c36e` (8 commits this lap) · build **green**
 > (`lake build GoodsteinPA`, 1257 jobs) · headline `peano_not_proves_goodstein` = honest `sorry`
 > (`#print axioms` = `[propext, sorryAx, choice, Quot.sound]`, 0 math axioms) · working tree clean.
 > **This was a deep-reflection lap: it COURSE-CORRECTED the campaign (off the witness-bounded
@@ -33,23 +33,30 @@ wip/Embedding.lean` (only message = the expected `embed` `sorry` warning). Conne
   `src/Zinfty.lean`.** Discharges the `closed` case.
 - **`embed`: 6/10 cases DONE** (verum/and/or/wk/cut/closed).
 
-**Next lap — the 4 remaining `embed` `sorry`s are the genuine deep content + are INTERDEPENDENT
-(all need free-variable/substitution machinery for M5's `Deriv`). Build the shared enabler first:**
-0. **(enabler) M5 renaming/substitution lemma** — the analogue of Foundation's `Derivation.rewrite`
-   (`Calculus.lean:255`): `Provable α c Γ → Provable α c (Γ.image (Rew … ▹ ·))` by induction on `Deriv`
-   (8 cases; the `allω` case needs care — rewriting must commute with the numeral family). Unlocks
-   `shift`, `all`, `exs` together. **Do this first.**
-1. **`shift`** — direct corollary of the enabler (`Rewriting.shift` is a `Rew`).
-2. **`all`** — finitary ∀ (`free φ :: Γ.image shift`) → `allω`: substitute the free var `&0` by each
-   numeral `nm n` (via the enabler / Foundation's `Derivation.rewrite`), embed each premise.
-3. **`exs`** — witness term `t` → its numeral value (term-model: closed `ℒₒᵣ` terms denote numerals) →
-   `Provable.exI`. Needs the free-variable framing settled by the enabler.
-4. **`axm`** (the deepest) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`.
-   PeanoMinus = finite true ∀-sentences (finite ordinal); `univCl(succInd ψ)` derived via the ω-rule
-   `Provable.allω` (`src/Zinfty.lean:183`). Buchholz §5.5 / Towsner §16.
-**Fallback if M4 stalls → M7a** (parallel, shovel-ready): transparent `gAllReal = ∀x∃y[g_y(x)=0]`
+**LAP-9 ALSO PROVED the shared enabler** `provable_rew` (all 8 `Deriv` cases, cut-rank-preserving) +
+`ZProvable.rew`. **Sole residue: `rew_subst_nm`** (`ω ▹ (φ/[nm n]) = (ω.q ▹ φ)/[nm n]`, a one-line-ish
+`Rew`-substs algebra fact). So the next-lap order is now short:
+
+**Next lap — chip in this order (each a focused, completable step):**
+1. **`rew_subst_nm`** (the enabler's only sorry) — `ω ▹ (φ/[nm n]) = (ω.q ▹ φ)/[nm n]`. Find Foundation's
+   `Rew`-substs composition lemma (`/[t] = Rewriting.subst ![t]`; the law `ω ▹ subst v φ = subst (ω∘v)
+   (ω.q ▹ φ)`) + `ω ▹ nm n = nm n` (`nm n` closed). Search `Rewriting.lean`/`Rew.lean` for the substs
+   commutation; it may already be `@[simp]`. **This finishes `provable_rew` axiom-clean.**
+2. **`embed.shift`** — `ZProvable.rew Rew.shift ih`, modulo `Γ.image Rewriting.shift = Γ.image (Rew.shift
+   ▹ ·)` (likely `rfl`/`simp`).
+3. **`embed.all`** — finitary ∀ (`free φ :: Γ.image shift`) → `allω`: use the enabler to substitute the
+   free var by each numeral, embed each premise.
+4. **`embed.exs`** — witness term `t` → its numeral value → `Provable.exI`.
+5. **`embed.axm`** (the deepest, save for last) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme
+   ℒₒᵣ Set.univ`. PeanoMinus = finite true ∀-sentences (finite ordinal); `univCl(succInd ψ)` via the
+   ω-rule `Provable.allω` (`src/Zinfty.lean:183`). Buchholz §5.5 / Towsner §16.
+**Fallback if `axm` stalls → M7a** (parallel, shovel-ready): transparent `gAllReal = ∀x∃y[g_y(x)=0]`
 (arithmetize `goodsteinSeq` via Foundation Σ₁ tools) + `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal`, **gated by
 `Bridge.lean`'s spec** so faithfulness can't regress.
+
+> **PACING (lap-9 operator note):** keep driving the hardest open thing, but treat each *committed green
+> checkpoint* (a proved lemma) as a beat to consider wrapping to `/handoff` — don't auto-chain deep
+> lemmas indefinitely past budget. See memory `pacing-checkpoint-then-check-governor`.
 
 ### Then (downstream, not next-lap)
 - **Bounding bridge** (small once M4 + M7a land): prove `cut-free Provable α 0 Γ` (Γ in the g-fragment)
