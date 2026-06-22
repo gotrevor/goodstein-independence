@@ -1,96 +1,65 @@
-# HANDOFF — 2026-06-22 (lap 14)
+# HANDOFF — 2026-06-22 (lap 15)
 
-> **Branch** `plan` · build **green** (`lake build GoodsteinPA`, 1264 jobs) · headline
+> **Branch** `plan` · build **green** (`lake build GoodsteinPA`, 1265 jobs) · headline
 > `peano_not_proves_goodstein` = honest `sorry` (anti-fraud guard intact, untouched).
-> **Lap 14 CRACKED THE CRUX *and* CLOSED THE COROLLARY: Boundedness Thm 5.4 + the full
-> `Z∞ ⊢^β_1 TI_≺(X) ⟹ ‖≺‖ ≤ 2^β` corollary are COMPLETE and axiom-clean** (modulo the two
-> legitimate `hprec`/`hprecXPos` inputs, discharged at the arithmetization seam). Steps A + B done.
-> All 17 lap-14 deliverables are `[propext,choice,Quot.sound]` — no `sorryAx`, no math axioms.
+> **Lap 15 (review + grind) CLOSED C₁ AND D, axiom-clean.** The `XFreeAx`-preserving cut-elimination
+> (`src/GoodsteinPA/XFreeCutElim.lean`, 1290 lines) is COMPLETE, and the Thm-5.6 *tail*
+> `Z∞ ⊢ TI (any cut rank, XFreeAx) ⟹ ‖≺‖ ≤ 2^(ω_c^α)` is assembled and `[propext,choice,Quot.sound]`.
+> **The ONLY remaining gap to Thm 5.6 (= `PA ⊬ TI(ε₀)`) is C₂ (`embedC` over LX).** Then E + F.
 
-## ✅ Lap-14 headline: steps A + B of the Buchholz route, axiom-clean
-- **A. `boundedness` (Thm 5.4)** — the crux. 9-case nested induction (outer on height, inner
-  structural); hardest case 2 (`¬Prog` inversion + `α→α+2^{β₀}` rank bump) machine-checked.
-- **B. `orderType_le_of_TIderiv`** — the FULL corollary: from one cut-free `XFreeAx` derivation of
-  `{TI_≺(X)}` (height `≤ β`), invert (`orInv_xfree` on `🡒`, `allInv_xfree` on `∀x`) to
-  `{¬Prog, X(nm n)}` ∀n, apply Boundedness ⟹ `‖≺‖ ≤ 2^β`. **This is Buchholz's corollary, done.**
-- Built the **`PXF`** framework (cut-free `XFreeAx`-tracking provability + smart constructors) and the
-  full **`XFreeAx`-preserving inversion suite**: `andInv_xfree`, `orInv_xfree`, `allInv_xfree`.
+## Lap-15 review finding (validated the lap-14 design — see STATUS "What's happened")
+The lap-14 cr=0 design was feared obstructed (X-atomic cuts seemingly un-eliminable while preserving
+`XFreeAx`). **Resolved by reading `atomCutAux`:** our `Provable.axL` is the *same-atom* EM axiom
+`{Xs,¬Xs}`, so X-atomic cuts close by **set idempotence** (no truth), and the truth-surgery branch
+(`removeFalseLit`) is **vacuous under `XFreeAx`** (it needs an X-`axTrue` leaf). So C₁ is feasible as
+written — confirmed by completing it.
 
-### The ONE remaining input to B (⟹ the whole order-type bound): a cut-free `XFreeAx` `⊢{TI}`
-`orderType_le_of_TIderiv` consumes `d : Deriv {TI prec}` with `d.cr = 0 ∧ XFreeAx d ∧ d.o ≤ β`.
-That derivation = **`embedC`(`Z ⊢ TI`) [step C] + `cutElim`→c=0 [must preserve `XFreeAx`]**. Once those
-two land, B fires and `‖≺‖ ≤ 2^β` is unconditional (given the order satisfies `hprec`/`hprecXPos`).
+## ✅ Lap-15 deliverable: C₁ + D (`src/GoodsteinPA/XFreeCutElim.lean`, axiom-clean)
+The whole §19 cut-elimination, ported to a cut-rank-carrying `XFreeAx`-tracking twin
+`PXFc α c Γ := ∃ d : Deriv Γ, d.o ≤ α ∧ d.cr ≤ c ∧ XFreeAx d` (generalises lap-14 `PXF = PXFc · 0`):
+- **Builders** `PXFc.{mono,weakening,cast,axL,axTrue,verumR,andI,orI,exI,allω,cut,contr}` + bridges
+  `PXF.toPXFc`/`PXFc.toPXF`.
+- **Inversions at cut rank ≤ c** (real `cut` case now, not the lap-14 vacuous one): `orInvAux_x`,
+  `andInvAux_x` (+`PXFc.andInvL/R`), `allInvAux_x` (+`PXFc.{orInv,allInv}`).
+- **Cut reductions** `PXFc.{cutReduceConj,cutReduceDisj,cutReduceAllAux,cutReduceAll}` (§19.5/19.6).
+- **Truth layer** `PXFc.{removeFalseLitAux,removeFalsumAux,removeFalsum,atomCutAux,atomCut}`. Key:
+  `removeFalseLitAux` carries `Sum.isLeft r₀ = true` (X-free removed atom ⟹ X-free `axTrue` leaves);
+  `atomCutAux`'s truth branch extracts that via **`xfree_transport`** (an `axTrue` leaf equal to the cut
+  atom is X-free, so the cut atom is X-free; at an X-atom cut the branch is vacuous).
+- **Assembly** `PXFc.{cutElimPrincipal,cutElimStepAux,cutElimStep,cutElim}` (§19.7/19.9):
+  `cutElim : PXFc α c Γ → PXFc (omegaTower c α) 0 Γ`. **C₁.**
+- **D** `orderType_le_of_TIprovable` = `PXFc.cutElim ∘ orderType_le_of_TIderiv` (corollary B):
+  `PXFc α c {TI prec} ⟹ ‖≺‖ ≤ 2^(ω_c^α)` (given the legit seam hyps `hprec`/`hprecXPos`). **Thm 5.6 tail.**
 
-## ✅ Lap-14 deliverables (all in `src/GoodsteinPA/Boundedness.lean`, axiom-clean `[propext,choice,Quot.sound]`)
-
-1. **`boundedness` (Thm 5.4)** — THE crux. For an X-positive-decomposed sequent (every member is
-   `¬Prog_≺(X)`, a bounded `¬Xt`, or X-positive), a **cut-free `XFreeAx`** derivation of height `o d`
-   yields `⊨^{α+2^{o d}}` of some X-positive member. **All 9 `Deriv` constructor cases proven**,
-   including the hard **case 2** (`∃⁰χ = ¬Prog`): extract `χ = ∼(hyp 🡒 X#0)`, `χ/[nm n] = φ₁ ⋏ φ₂`,
-   invert (`andInv_xfree`), feed the two outer-IH calls, and do the **`α → α+2^{β₀}` rank bump**
-   (`models φ₁ ⟹ |n|_≺ ≤ α+2^{β₀}`, then `(α+2^{β₀})+2^{β₀} = α+2^{β₀+1} ≤ α+2^β`). Proof is a
-   **nested induction**: outer strong induction on the ordinal height `o d` (case 2's inversions
-   shrink it strictly), inner structural induction on `d` (the height-preserving cases).
-2. **`andInv_xfree`** — the `XFreeAx`-preserving ∧-inversion (Buchholz needs the inverted derivations
-   to keep the no-lone-X-leaf condition). Replays `ZinftyGen.andInvAux` at cut-rank 0 (so the `cut`
-   case is vacuous) via the new **`PXF`** carrier (`∃ d, o≤α ∧ cr=0 ∧ XFreeAx d`) + its smart
-   constructors (`PXF.axL/axTrue/verumR/weak/andI/orI/allω/exI`). Was the last gap; now closed.
-3. **`orderType_le_of_deriv` (Corollary core)** — from a cut-free `XFreeAx` derivation of
-   `{¬Prog_≺(X), X(nm n)}` (height `≤ β`) for **every** `n`, concludes `‖≺‖ ≤ 2^β`. Wires Boundedness
-   straight into the order-type bound. **This is the `Z∞ ⊢^β_1 TI ⟹ ‖≺‖ ≤ 2^β` corollary minus the
-   TI/∀ inversion glue** (`embedC`+`cutElim` supply the derivation).
-4. Supporting (reusable): `TruthSem.models_and/or/all/ex` (`⊨^γ` connective layer), `rk_le_of_forall`
-   (`∀m≺n, |m|<γ ⟹ |n|≤γ`), `xpos_rew`/`xpos_subst` (X-positivity is substitution-invariant),
-   `satpos_mono`/`satpos_subset`, `models_Xat'`/`models_negXat`/`models_inl_lit`, `chi_subst`/
-   `xat_subst`/`hyp_xpos`/`tval_nm`.
-
-### Two legitimate hypotheses on `boundedness`/`orderType_le_of_deriv` (NOT axioms — discharged later)
-- **`hprec`** `∀ γ n, ⊨^γ((hyp prec)/[nm n]) ↔ ∀ m≺n, |m|_≺<γ` — the semantic spec of the order
-  formula `prec` (its ℕ-interpretation = the wellfounded `lt`).
-- **`hprecXPos`** `XPos (∼prec)` — the order literal is X-free.
-Both hold for the headline's ℒₒᵣ-definable ε₀ order; **discharged at the arithmetization seam (F)**.
-
-## 🎯 Critical path to the headline (≈ 8 laps; ★ = the two real walls left)
-
+## 🎯 Critical path to the headline (★ = real walls)
 | Step | What | Status |
 |---|---|---|
-| **A** Boundedness Thm 5.4 | the crux | ✅ **DONE, axiom-clean** |
-| **B** Corollary `‖≺‖≤2^β` | invert `{TI}`→`{¬Prog,Xn}` + Boundedness | ✅ **DONE, axiom-clean** (`orderType_le_of_TIderiv`); needs a cut-free `XFreeAx` `⊢{TI}` as input |
-| **C₁** `cutElim` → `c=0`, **`XFreeAx`-preserving** | port `ZinftyGen` cut-elim to a cut-rank-carrying `PXFc` twin (`∃d, o≤α ∧ cr≤c ∧ XFreeAx d`); reductions = inversions (done) + structural builders, no new X-`axTrue` | not started, ~1–2 laps (the big port) |
-| **C₂** M4 `embedC` over `LX` | mechanical `{L}`-generalize (like M5/`ZinftyGen`); **route X-atom identity via `Deriv.axL`, never `axTrue`**, ⟹ `XFreeAx` | not started, ~1–2 laps |
-| **D** Thm 5.6 | `embedC`(C₂) + `cutElim`(C₁) → `XFreeAx ⊢{TI}` → B | ~0.5 lap once C₁,C₂ land |
-| **E** Goodstein⟹TI_≺(X) bridge | Kirby–Paris; reuse Phase-0 CNF-ε₀ encoding | ~2 laps |
-| **F ★** Arithmetization seam | ℒₒᵣ-definable ε₀ order, `‖≺‖=ε₀`, **discharge `hprec`/`hprecXPos`** | ~2–3 laps — the 2nd hard wall |
-| **G** Final assembly | chain + `#print axioms` clean | ~1 lap |
+| **A** Boundedness Thm 5.4 | crux | ✅ DONE lap 14, axiom-clean |
+| **B** Corollary `‖≺‖≤2^β` | invert TI + Boundedness | ✅ DONE lap 14, axiom-clean |
+| **C₁** `XFreeAx` cutElim → cr=0 | the big §19 port | ✅ **DONE lap 15, axiom-clean** |
+| **D** Thm 5.6 tail | C₁ ∘ B | ✅ **DONE lap 15** (`orderType_le_of_TIprovable`) |
+| **C₂** `embedC` over `LX` | the one remaining connective gap | not started — **NEXT** |
+| **E** Goodstein⟹TI_≺(X) bridge | Kirby–Paris; reuse Phase-0 CNF-ε₀ | not started |
+| **F ★** Arithmetization seam | ℒₒᵣ-def ε₀ order, `‖≺‖=ε₀`, discharge `hprec`/`hprecXPos` | not started — 2nd hard wall |
+| **G** Final assembly | chain + `#print axioms` clean | not started |
 
-**NEXT (lap 15): C₁ (cut-elim `XFreeAx`-preserving) and/or C₂ (`embedC` over LX).** Both are
-mechanical PXF-style ports; C₁ reuses the inversion suite already built this lap. For C₁: introduce
-`PXFc α c Γ := ∃ d, d.o≤α ∧ d.cr≤c ∧ XFreeAx d` and port `cutReduceConj/Disj/AllAux` + `cutElimStep` +
-`cutElim` (the reductions only compose inversions [done] + builders + `cut`, none add X-`axTrue`). For
-C₂ — **CRITICAL faithfulness correction (lap-14 finding, supersedes earlier note):** the existing
-`embedC.axm` derives PA axioms via **`provable_true`** (ω-completeness, `axTrue` at atomic leaves).
-Over ℒₒᵣ that's fine, but over `LX` **the induction scheme `Ind_φ` for an X-*formula* `φ` contains
-X-atoms**, so `provable_true Ind_φ` would `axTrue` on a lone X-atom ⟹ **breaks `XFreeAx`**. So the LX
-port MUST derive the induction axioms **via the meta-induction (a tower of `cut`s on `φ(n)` + `provable_em`
-base/step)** — Buchholz Thm 5.5's actual method, NOT ω-completeness. `provable_em` for X-atoms already
-uses `Deriv.axL` (the X-pair, no truth) ✓, so the meta-induction route is `XFreeAx`-safe. The lap-10
-HANDOFF/PENDING has the full meta-induction proof worked out — port THAT for the X-induction case.
-`𝗣𝗔⁻` axioms (PeanoMinus, finite, X-free) can still go via `provable_true` (X-free `axTrue` ✓).
-`provable_em_cong_gen` (`exs`/`exI_closed`) `axTrue`s on `ψ/[s]`: safe iff `ψ` is X-free — check the TI
-embedding never value-congruences an X-atom (likely fine: `prec` X-free, witnesses are ℒₒᵣ terms).
+## NEXT (lap 16): C₂ — `embedC` over generic `LX`, producing `PXFc α c {TI prec}`
+Port `src/Embedding.lean`'s `embedC` (over `ℒₒᵣ`, calculus `ZinftyF`) to the generic `ZinftyGen`
+calculus over `LX`, tracking `XFreeAx` (so the output is a `PXFc`). The structural cases are mechanical
+(`{L}`-generalise like M5/`ZinftyGen`). **CRITICAL faithfulness (lap-14 finding, still in force):**
+- **`𝗣𝗔⁻` X-free axioms** → `provable_true` (ω-completeness, `axTrue` on X-free atoms — `XFreeAx`-safe).
+- **X-induction scheme `Ind_φ` (φ an X-formula)** → MUST go via the **meta-induction tower of `cut`s on
+  `φ(i)` + `provable_em` base/step** (Buchholz Thm 5.5), NOT `provable_true` (would `axTrue` a lone
+  X-atom ⟹ break `XFreeAx`). `provable_em` for X-atoms already uses `Deriv.axL` (the X-pair, no truth).
+  The lap-10 HANDOFF/PENDING has the worked meta-induction; port THAT for the X-case.
+- `provable_em_cong_gen` (`exs`/`exI_closed`) `axTrue`s on `ψ/[s]`: safe iff `ψ` X-free — check the TI
+  embedding never value-congruences an X-atom (likely fine: `prec` X-free, witnesses ℒₒᵣ terms).
+Deliverable: `embedC_LX : (Z ⊢ TI(X)) → ∃ c, ∀ e, ∃ α, PXFc α c ({TI prec}.image (asg e ▹))` (or the
+closed form). Then **D fires** ⟹ Thm 5.6 ⟹ `PA ⊬ TI(ε₀)` modulo F.
 
 ## Notes
 - **LOCKED untouched:** `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `sorry`.
-- **Build:** `lake build GoodsteinPA` (1264). The `ambient` instance is `structLX ∅` (X=∅) so a lone
-  positive X-`axTrue` is impossible and `XFreeAx` only needs to forbid `axTrue false Xsym _` leaves.
-- **Literature on disk:** Buchholz §5 = the route (`papers/buchholz-…lecture-notes.pdf` pp.27–31;
-  case structure quoted in `ANALYSIS-2026-06-22-lap13-boundedness-design.md`). `WebSearch` ok, `WebFetch` dead.
-- **Aristotle:** idle. Good targets for C: an `XFreeAx`-preserving cut-elim/inversion lemma, or an
-  `embedC.axm` PA(X)-axiom case once its statement is pinned. No open `ON-LINE-REQUEST.md`.
-- **Banked off-path (do NOT resume):** witness-bounded `wip/` calculi (Towsner/operator-H); `Zᵏ`/M6.
-
-## Lap-14 commits (~16)
-models connective layer · rk_le_of_forall · Boundedness defs · base cases · xpos_rew + satpos helpers ·
-andI/orI · allω + exI(X-positive) · case-2 helpers + hprec couplings · **case 2 (¬Prog inversion)** ·
-**Boundedness COMPLETE via andInv_xfree (PXF)** · **orderType_le_of_deriv** · orInv_xfree · allInv_xfree ·
-**orderType_le_of_TIderiv (full corollary B)** · HANDOFF.
+- **Aristotle:** idle (jobs all IDLE). Good C₂ target: a self-contained `provable_em`-over-LX X-atom
+  case, or the meta-induction `cut`-tower lemma (inline defs). No open `ON-LINE-REQUEST.md`.
+- **Banked off-path (do NOT resume):** witness-bounded `wip/` calculi; `Zᵏ`/M6.
+- Build: `lake build GoodsteinPA` (1265). See `STATUS.md` for the full overview + axiom ledger.

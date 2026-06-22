@@ -11,7 +11,17 @@ cr=0 design is feasible — `atomCut` on an X-atom, applied to `XFreeAx` inputs,
 only on an `axTrue` leaf *equal to the cut atom* = an X-`axTrue` leaf, which `XFreeAx` forbids ⟹ **vacuous**.
 So `removeFalseLitAux` is only ever invoked on X-FREE cut atoms (emitting X-free `axTrue`, fine).
 
-### C₁ — XFreeAx-preserving cutElim → cr=0 (THE next target; the big port). Plan:
+### ✅ C₁ — XFreeAx-preserving cutElim → cr=0 — **DONE lap 15, axiom-clean** (`src/GoodsteinPA/XFreeCutElim.lean`).
+Full `PXFc` port: builders + inversions-at-cr≤c + cut reductions + truth layer + `cutElim` + the Thm-5.6
+tail `orderType_le_of_TIprovable` (`PXFc α c {TI} ⟹ ‖≺‖ ≤ 2^(ω_c^α)`). **C₂ is now the only connective
+gap to Thm 5.6.** (Original C₁ plan kept below for reference.)
+
+### C₂ — `embedC` over generic LX — **THE NEXT TARGET (lap 16)**. See HANDOFF §"NEXT (lap 16)".
+Port `src/Embedding.lean`'s `embedC` from `ℒₒᵣ`/`ZinftyF` to generic `ZinftyGen`/`LX`, tracking
+`XFreeAx` (output a `PXFc`). Structural cases mechanical. **X-induction axioms via the meta-induction
+tower of `cut`s on `φ(i)` + `provable_em` (NOT `provable_true`).** `𝗣𝗔⁻` X-free axioms via `provable_true`.
+
+### C₁ original plan (reference; superseded by the DONE above):
 Introduce in `Boundedness.lean` (or a new `src/GoodsteinPA/XFreeCutElim.lean`) the cut-rank-carrying carrier
 `PXFc α c Γ := ∃ d : Deriv Γ, d.o ≤ α ∧ d.cr ≤ c ∧ XFreeAx d` (generalises lap-14's `PXF` = `PXFc α 0`).
 Port, each tracking `XFreeAx` (the `Deriv` constructors used are exactly axL / X-free-axTrue / verumR / weak
