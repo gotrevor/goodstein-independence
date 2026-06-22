@@ -752,4 +752,225 @@ theorem PXFc.cutReduceAll {φ : SyntacticSemiformula LX 1} {c : ℕ} {α β : Or
     intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)).mono ?_ le_rfl
   exact add_le_add_left ((add_le_add_iff_left α).mpr ho) 1
 
+/-! ### Truth layer: removing false/⊥ literals + atomic cut, `XFreeAx`-preserving.
+
+The ONLY `axTrue` leaves cut-elimination *introduces* are in `removeFalseLitAux`'s `axL` case, on the
+**cut atom's** relation. We therefore require the removed literal to be **X-free** (`Sum.isLeft r₀`),
+making those leaves X-free. `atomCut` supplies this: at an X-atom cut the truth branch is **vacuous**
+(it needs an `axTrue` leaf equal to the cut atom = an X-`axTrue` leaf, forbidden by `XFreeAx`); the
+helper `xfree_transport` extracts X-freeness of the cut atom from that very leaf. -/
+
+/-- Head relation's `isLeft` (X-freeness) of an atomic literal; `false` on non-atoms. -/
+def headIsLeft : Form LX → Bool
+  | Semiformula.rel r _ => Sum.isLeft r
+  | Semiformula.nrel r _ => Sum.isLeft r
+  | _ => false
+
+theorem headIsLeft_signedLit (b : Bool) {k} (r : LX.Rel k) (v) :
+    headIsLeft (signedLit b r v) = Sum.isLeft r := by cases b <;> rfl
+
+/-- If a known-X-free signed literal equals another signed literal, the latter's relation is X-free
+too. (Used to discharge the `Sum.isLeft` side condition of `removeFalseLitAux` at atomic cuts.) -/
+theorem xfree_transport {k₀} (b₀ : Bool) (r₀ : LX.Rel k₀) (v₀) (hxfree : Sum.isLeft r₀ = true)
+    {k} (b : Bool) (r : LX.Rel k) (v) (h : signedLit b₀ r₀ v₀ = signedLit b r v) :
+    Sum.isLeft r = true := by
+  have hc := congrArg headIsLeft h
+  rw [headIsLeft_signedLit, headIsLeft_signedLit] at hc
+  rw [← hc]; exact hxfree
+
+/-- Frame subset (dual of `cb_frame_in`), valid when the head `a` is not the erased formula. -/
+private theorem cb_frame_out {a e : Form LX} (hne : a ≠ e) (s t : Seq LX) :
+    insert a (s.erase e ∪ t) ⊆ (insert a s).erase e ∪ t := by
+  intro x hx
+  simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+  rcases hx with rfl | (⟨hne', hxs⟩ | hxt)
+  · exact Or.inl ⟨hne, Or.inl rfl⟩
+  · exact Or.inl ⟨hne', Or.inr hxs⟩
+  · exact Or.inr hxt
+
+/-- **Removing a FALSE, X-free closed literal** from a cut-free `XFreeAx` derivation, bound- and
+`XFreeAx`-preserving (Towsner Thm 19.2 truth layer). The emitted `axTrue` leaves are on the (X-free)
+removed atom's relation. -/
+theorem PXFc.removeFalseLitAux (b₀ : Bool) {k₀} (r₀ : (LX).Rel k₀) (v₀)
+    (hxfree : Sum.isLeft r₀ = true) (hL : ¬ LitTrue (signedLit b₀ r₀ v₀)) :
+    ∀ {Δ : Seq LX} (d : Deriv Δ), XFreeAx d → d.cr ≤ (0 : ℕ∞) →
+      signedLit b₀ r₀ v₀ ∈ Δ → PXFc d.o 0 (Δ.erase (signedLit b₀ r₀ v₀)) := by
+  set Lit : Form LX := signedLit b₀ r₀ v₀ with hLdef
+  have hLne : ∀ (g : Form LX), g.complexity ≠ 0 → g ≠ Lit := by
+    intro g hg; rw [hLdef]; exact Semiformula.ne_of_ne_complexity (by cases b₀ <;> simp [signedLit, hg])
+  intro Δ d
+  induction d with
+  | @axL Δ k r v hp hn =>
+    intro _ _ _; simp only [Deriv.o]
+    by_cases h1 : Lit = Semiformula.rel r v
+    · have htn : LitTrue (signedLit false r v) := by
+        show LitTrue (Semiformula.nrel r v)
+        rw [← Semiformula.neg_rel, litTrue_neg]; exact h1 ▸ hL
+      have hxr : Sum.isLeft r = true :=
+        xfree_transport b₀ r₀ v₀ hxfree true r v (hLdef ▸ h1)
+      exact PXFc.axTrue false r v hxr htn (Finset.mem_erase.mpr ⟨by rw [h1]; simp [signedLit], hn⟩)
+    · by_cases h2 : Lit = Semiformula.nrel r v
+      · have htr : LitTrue (signedLit true r v) := by
+          show LitTrue (Semiformula.rel r v)
+          by_contra hc
+          exact (h2 ▸ hL) (by rw [← Semiformula.neg_rel, litTrue_neg]; exact hc)
+        have hxr : Sum.isLeft r = true :=
+          xfree_transport b₀ r₀ v₀ hxfree false r v (hLdef ▸ h2)
+        exact PXFc.axTrue true r v hxr htr (Finset.mem_erase.mpr ⟨by rw [h2]; simp [signedLit], hp⟩)
+      · exact PXFc.axL r v (Finset.mem_erase.mpr ⟨fun e => h1 e.symm, hp⟩)
+          (Finset.mem_erase.mpr ⟨fun e => h2 e.symm, hn⟩)
+  | @axTrue Δ k b r v htrue hmem =>
+    intro hxf _ _; simp only [Deriv.o]
+    have hne : signedLit b r v ≠ Lit := fun e => hL (e ▸ htrue)
+    exact PXFc.axTrue b r v hxf htrue (Finset.mem_erase.mpr ⟨hne, hmem⟩)
+  | @verumR Δ h =>
+    intro _ _ _; simp only [Deriv.o]
+    exact PXFc.verumR (Finset.mem_erase.mpr ⟨by rw [hLdef]; exact (lit_ne_verum b₀ r₀ v₀).symm, h⟩)
+  | @weak Δ' Δ d' hsub ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    by_cases hd : Lit ∈ Δ'
+    · exact (ih hxf hcr hd).weakening (Finset.erase_subset_erase _ hsub)
+    · refine (show PXFc d'.o 0 Δ' from ⟨d', le_rfl, hcr, hxf⟩).weakening ?_
+      intro x hx; exact Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩
+  | @andI Γ₀ χ₀ χ₁ d₀ d₁ ih₀ ih₁ =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (χ₀ ⋏ χ₁) ≠ Lit := hLne _ (by simp)
+    have hmem0 : Lit ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P0 : PXFc d₀.o 0 (insert χ₀ (Γ₀.erase Lit)) :=
+      (ih₀ hxf.1 (le_trans (le_max_left _ _) hcr) (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    have P1 : PXFc d₁.o 0 (insert χ₁ (Γ₀.erase Lit)) :=
+      (ih₁ hxf.2 (le_trans (le_max_right _ _) hcr) (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.andI χ₀ χ₁ P0 P1).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @orI Γ₀ χ₀ χ₁ d' ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (χ₀ ⋎ χ₁) ≠ Lit := hLne _ (by simp)
+    have hmem0 : Lit ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc d'.o 0 (insert χ₀ (insert χ₁ (Γ₀.erase Lit))) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.orI χ₀ χ₁ P).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @allω Γ₀ χ' d' ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (∀⁰ χ') ≠ Lit := hLne _ (by simp)
+    have hmem0 : Lit ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have key : ∀ n, PXFc (d' n).o 0 (insert (χ'/[nm n]) (Γ₀.erase Lit)) := fun n =>
+      (ih n (hxf n) (le_trans (le_iSup (fun m => (d' m).cr) n) hcr)
+        (Finset.mem_insert_of_mem hmem0)).weakening (by
+          intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.allω χ' key).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @exI Γ₀ χ' n d' ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (∃⁰ χ') ≠ Lit := hLne _ (by simp)
+    have hmem0 : Lit ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc d'.o 0 (insert (χ'/[nm n]) (Γ₀.erase Lit)) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.exI χ' n P).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro _ hcr _; simp only [Deriv.cr] at hcr
+    exact absurd ((le_max_left _ _).trans hcr) (by simp)
+
+/-- Removing `⊥` from a cut-free `XFreeAx` derivation, bound- and `XFreeAx`-preserving (no truth
+leaf is emitted — `⊥` is never an `axTrue` witness). -/
+theorem PXFc.removeFalsumAux : ∀ {Δ : Seq LX} (d : Deriv Δ), XFreeAx d → d.cr ≤ (0 : ℕ∞) →
+    (⊥ : Form LX) ∈ Δ → PXFc d.o 0 (Δ.erase ⊥) := by
+  intro Δ d
+  induction d with
+  | @axL Δ k r v hp hn =>
+    intro _ _ _; simp only [Deriv.o]
+    exact PXFc.axL r v (Finset.mem_erase.mpr ⟨by simp, hp⟩)
+      (Finset.mem_erase.mpr ⟨by simp, hn⟩)
+  | @axTrue Δ k b r v htrue hmem =>
+    intro hxf _ _; simp only [Deriv.o]
+    exact PXFc.axTrue b r v hxf htrue (Finset.mem_erase.mpr ⟨by cases b <;> simp [signedLit], hmem⟩)
+  | @verumR Δ h =>
+    intro _ _ _; simp only [Deriv.o]
+    exact PXFc.verumR (Finset.mem_erase.mpr ⟨by simp, h⟩)
+  | @weak Δ' Δ d' hsub ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    by_cases hd : (⊥ : Form LX) ∈ Δ'
+    · exact (ih hxf hcr hd).weakening (Finset.erase_subset_erase _ hsub)
+    · refine (show PXFc d'.o 0 Δ' from ⟨d', le_rfl, hcr, hxf⟩).weakening ?_
+      intro x hx; exact Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩
+  | @andI Γ₀ χ₀ χ₁ d₀ d₁ ih₀ ih₁ =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (χ₀ ⋏ χ₁) ≠ (⊥ : Form LX) := by simp [Wedge.wedge]
+    have hmem0 : (⊥ : Form LX) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P0 : PXFc d₀.o 0 (insert χ₀ (Γ₀.erase ⊥)) :=
+      (ih₀ hxf.1 (le_trans (le_max_left _ _) hcr) (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    have P1 : PXFc d₁.o 0 (insert χ₁ (Γ₀.erase ⊥)) :=
+      (ih₁ hxf.2 (le_trans (le_max_right _ _) hcr) (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.andI χ₀ χ₁ P0 P1).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @orI Γ₀ χ₀ χ₁ d' ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (χ₀ ⋎ χ₁) ≠ (⊥ : Form LX) := by simp [Vee.vee]
+    have hmem0 : (⊥ : Form LX) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc d'.o 0 (insert χ₀ (insert χ₁ (Γ₀.erase ⊥))) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.orI χ₀ χ₁ P).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @allω Γ₀ χ' d' ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (∀⁰ χ') ≠ (⊥ : Form LX) := by simp [UnivQuantifier.all]
+    have hmem0 : (⊥ : Form LX) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have key : ∀ n, PXFc (d' n).o 0 (insert (χ'/[nm n]) (Γ₀.erase ⊥)) := fun n =>
+      (ih n (hxf n) (le_trans (le_iSup (fun m => (d' m).cr) n) hcr)
+        (Finset.mem_insert_of_mem hmem0)).weakening (by
+          intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.allω χ' key).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @exI Γ₀ χ' n d' ih =>
+    intro hxf hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (∃⁰ χ') ≠ (⊥ : Form LX) := by simp [ExsQuantifier.exs]
+    have hmem0 : (⊥ : Form LX) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc d'.o 0 (insert (χ'/[nm n]) (Γ₀.erase ⊥)) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (PXFc.exI χ' n P).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro _ hcr _; simp only [Deriv.cr] at hcr
+    exact absurd ((le_max_left _ _).trans hcr) (by simp)
+
+/-- Remove a `⊥` from a cut-free `XFreeAx` sequent. -/
+theorem PXFc.removeFalsum {B : Ordinal.{0}} {Γ : Seq LX}
+    (h : PXFc B 0 (insert (⊥ : Form LX) Γ)) : PXFc B 0 Γ := by
+  rcases h with ⟨d, ho, hcr, hxf⟩
+  refine (PXFc.removeFalsumAux d hxf hcr (Finset.mem_insert_self _ _)).weakening ?_ |>.mono ho le_rfl
+  intro x hx; simp only [Finset.mem_erase, Finset.mem_insert] at hx; exact (hx.2).resolve_left hx.1
+
 end GoodsteinPA.XFreeCutElim
