@@ -53,6 +53,14 @@ NOT the headline object.**
 `provable_em`/`provable_em_cong_gen`/`Provable.exI_closed` (→16.5/14.1), `embedC` structural cases,
 M5 `cutElim` template. Do NOT discard — they are the building blocks of the bounded embedding.
 
+**Banked witness-bounded calculi (verified compiling lap 11):** `wip/OperatorZinfty.lean` (`Zekd`,
+the lap-8 control-ordinal carrier) compiles green with ONE `sorry` at the §19.6 `cutReduceAll`
+frontier — ready to revive for step 1/3. Also `wip/BoundedZinfty.lean`, `wip/SplitZinfty.lean`,
+`wip/WitnessBound.lean`. **Open design question for step 1:** dedicated `Zekd` inductive (banked, big)
+vs. a side-predicate `WitnessBounded (d : Deriv Γ) α k` over M5's existing `Deriv` (reuses M5
+`cutElim` but must prove it preserves the bound — the hard `(α,k)`/`τ` bookkeeping either way). Decide
+before grinding; the ordinal seam (`o`:mathlib `Ordinal` vs `hardy`:`ONote`) bites in both.
+
 ## State of the spine (Route B)
 - **M1, M2, Phase 0/1** — done, clean.
 - **M4 embedding** (`src/Embedding.lean`, `embedC`) — **DONE this lap, axiom-clean, in the build.**
