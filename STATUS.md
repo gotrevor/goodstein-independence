@@ -5,13 +5,14 @@ cut-elimination [M5, done] + Hardy lower bound on the cut-free result [M6, done]
 embedding [M4] + a bounding bridge).** · **Build**: 🟢 green (1257 jobs, `lake build GoodsteinPA`)
 · **Updated**: lap 10 · 2026-06-22 · `c253471`
 
-## ⏭️ Lap-10 headline (read `ANALYSIS-2026-06-22-truth-layer-gap.md`)
-M4 enabler `provable_rew`/`ZProvable.rew` **PROVED axiom-clean** (`rew_subst_nm` discharged); `embed`
-now **8/10** (`shift`+`all` proved — `all` is the ω-rule case). The deep finding: **M5's pure-logic
-`Z_∞` cannot host the embedding** — `axm` needs *true closed atomic* axioms (e.g. `nm n + 0 = nm n`),
-which M5's `Deriv` lacks, and adding them needs a **truth layer** M5 deliberately omitted (the sibling
-`LowerBound.B` already has `trueR`, so the architecture presupposes it). Next: the **M5 `axTrue`
-surgery** (contained to `Zinfty.lean`); its semantic core is banked green in `wip/ZinftyTrue.lean`.
+## ⏭️ Lap-10 headline — M5 `axTrue` truth-layer surgery DONE (read `ANALYSIS-2026-06-22-truth-layer-gap.md`)
+Uncovered + closed the **truth-layer gap**: M5's pure-logic `Z_∞` couldn't host the embedding (`axm`
+needs *true closed atomic* axioms like `nm n + 0 = nm n`, which `Deriv` lacked). The fix is now
+**implemented and axiom-clean**: `Deriv.axTrue` (ω-logic atomic-truth leaf) + a truth-layer
+cut-elimination (`removeFalseLitAux`, `atomCutAux` truth split) — `cutElim` = `[propext, choice,
+Quot.sound]`, no `sorryAx`. **M5 now hosts the embedding.** Next: the **assignment-carrying (all-closed)
+embedding** (`∀ e, ZProvable (Γ.image (ρe ▹))`) — discharges `axm` (via `axTrue`) and `exs` (closed-term
+collapse); supersedes the naive open `provable_rew`. M4 enabler `rew_subst_nm` also discharged this lap.
 
 ## Where it stands
 Two of the three Phase-2 girders are **machine-checked and `#print axioms`-clean**: the ε₀
