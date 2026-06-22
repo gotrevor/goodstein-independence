@@ -9,11 +9,13 @@ seam needs the **binary** version: an `ℒₒᵣ`-formula defining the order rel
 `codeOfREPred₂_spec` is the binary analogue of `codeOfREPred_spec` — a faithful port of that proof.
 -/
 import GoodsteinPA.EpsilonOrder
+import GoodsteinPA.Epsilon0Complete
 import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 namespace GoodsteinPA.SeamDefinability
 
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
+open GoodsteinPA.Epsilon0Complete GoodsteinPA.EpsilonOrder
 open Classical
 
 /-- Binary representability: an `ℒₒᵣ`-`Semisentence` of arity 2 coding the r.e. relation `R`. -/
@@ -34,5 +36,40 @@ lemma codeOfREPred₂_spec {R : ℕ → ℕ → Prop}
     Partrec.map hR (Computable.const 0).to₂
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton, f]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part hpart) (v := ![m, n]) (y := 0)).trans (by simp [f])
+
+/-! ## Instantiating the seam over the concrete CNF coding `natCode`
+
+`Epsilon0Complete` supplies the order-type half (`epsilon0_le_orderType_natCode : ε₀ ≤ orderType
+(ltPull natCode)`) and `codeOfREPred₂` supplies the definability tool. The only remaining gap is that
+the order `ltPull natCode` is r.e. — which is true (it is *decidable*: `NONote` has a `LinearOrder` via
+`cmp`, and `natCode` is computable, `Computable.ofNat`), but mathlib provides no `Computable`/`Primrec`
+instance for `ONote.cmp`. We disclose that single fact as an axiom and mark it the F-φ discharge target. -/
+
+/-- **DISCLOSED AXIOM (mathlib gap; the F-φ discharge target).** The order `natCode a < natCode b` on
+ℕ-codes is recursively enumerable. *True*: `NONote.cmp` makes `<` decidable (`linearOrderOfCompares`)
+and `natCode = Denumerable.ofNat NONote` is computable (`Computable.ofNat`), so the relation is in fact
+*computable*. The only missing piece is mathlib's lack of a `Computable`/`Primrec` proof that CNF
+comparison (`ONote.cmp`) is primitive recursive. Discharging this = formalizing computable CNF
+comparison (a bounded, Foundation-free recursion-framework lemma). -/
+axiom rePred_ltPull_natCode :
+    REPred fun v : List.Vector ℕ 2 ↦ natCode (v.get 0) < natCode (v.get 1)
+
+/-- The X-free `ℒₒᵣ`-`Semisentence` defining `natCode`'s order. -/
+noncomputable def precφ : Semisentence ℒₒᵣ 2 :=
+  codeOfREPred₂ fun a b ↦ natCode a < natCode b
+
+lemma precφ_spec (m n : ℕ) : ℕ ⊧/![m, n] precφ ↔ natCode m < natCode n :=
+  codeOfREPred₂_spec rePred_ltPull_natCode
+
+/-- **The arithmetization seam, fully assembled** (modulo the one disclosed comparison axiom). Both
+seam halves are now discharged: definability (`hprec`/`hprecXPos`, via `EpsilonOrder` + `precφ`/`hφ`)
+and order type (`ge`, via `Epsilon0Complete`). -/
+noncomputable def seam : Seam where
+  lt := ltPull natCode
+  φ := Rewriting.emb precφ
+  hφ a b := by
+    simp only [Semiformula.eval_emb]
+    exact precφ_spec a b
+  ge := epsilon0_le_orderType_natCode
 
 end GoodsteinPA.SeamDefinability
