@@ -48,7 +48,30 @@ through §19.5, design validated, only `cutReduceAll` remains."
    Lemmas: `mono` (α≤,k,d,c), `mono_e`, `weakening`, `cast`, `of`. This is the surface `cutReduceAll`
    is stated over (see ADDENDUM 5 cont.).
 
-## THE NEXT MOVE — §19.6 `cutReduceAll` on `Zekd` (over `ZekdProv`)
+## 🧭 STRATEGIC PIVOT (ON-LINE-FINDINGS 2026-06-22) — read this FIRST
+
+A findings doc landed (now `archive/findings/…omega-rule-commuting-bound.md`) answering the §19.6
+commuting-bound request. **Verdicts:** (1) the single-`k` Hardy inequality is **FALSE** (confirmed); (2)
+Towsner **hand-waves** the commuting case (ordinal part immediate, numeric part skipped — a real gap);
+(3) the literature **never threads the witness index through cut-elim** — it runs **TWO PHASES**:
+cut-elim on a pure-ordinal (witness-index-free) calculus, *then* Hardy-bound the cut-free result.
+
+**This means the headline path changes.** We already have BOTH phases banked:
+- **Phase 1 = M5** (`src/Zinfty.lean`, `Deriv.Provable.cutElim`, DONE, axiom-clean) — unbounded `(α,c)`
+  cut-elim; commuting cases are one-liners (`α#βₙ < α#β`).
+- **Phase 2 = M6** (`lowerBound_hardy_selfcontained`, DONE) — Hardy lower bound on the witness-bounded `B`.
+- **MISSING = the bridge:** cut-free `Z∞ ⊢^{α}_0 {gAll}` (from M4-embed + M5-cutElim) ⟹ a `B`-derivation
+  (subformula property: cut-free `{gAll}` uses only `GForm` subformulas; + a **Hardy bounding lemma**
+  reading off `∃`-witnesses `≤ H_α(N)` on the cut-free structure) ⟹ contradicts M6. **NEXT LAP: build
+  this bridge** — it avoids the commuting obstruction entirely (cut-free ⟹ no `+α` growth).
+
+The `Zekd` witness-bounded cut-elim (below) is now a **banked alternative, NOT the critical path** — its
+§19.2–19.5 + `mono_e` + 6/11 `cutReduceAllAux` structural cases stand for reference. The findings give it
+~80% odds if pursued, but the two-phase route reuses DONE work and sidesteps the false-in-single-`k` wall.
+
+---
+
+## (banked alternative) §19.6 `cutReduceAll` on `Zekd` (over `ZekdProv`)
 
 **Foundation is DONE** (leaves NF-ified; `ZekdProv` wrapper built). Remaining for §19.6:
 - **(a) `ZekdProv` rule lifts** — `axL`/`verumR` (at bound `0`, trivial), then `andI`/`orI`/`allω`/`exI`/

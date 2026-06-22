@@ -751,6 +751,18 @@ end ZekdProv
 
 /-! ### §19.6 ∀/∃ cut reduction `cutReduceAll` — SCAFFOLD (lap-8 checkpoint)
 
+> 🧭 **STRATEGIC NOTE (ON-LINE-FINDINGS 2026-06-22, archived):** the §19.6 commuting bound is
+> **provably impossible to close in a single-numeric-`k` system** (the Hardy inequality
+> `h_{βₙ#ω}(max{k,n}) ≤ max{h_{β#ω}(k),n}` is FALSE; Towsner hand-waves it). The norm-boundary friction
+> hit in the commuting rule cases below is exactly this. The literature **never threads the witness index
+> through cut-elim**; it runs TWO PHASES — (1) pure-ordinal cut-elim (commuting cases are one-liners,
+> `α#βₙ < α#β`), (2) Hardy-bound the CUT-FREE result (no `+α` growth ⟹ no obstruction). **We already have
+> both phases banked: M5 `src/Zinfty.lean` cutElim (unbounded `(α,c)`, DONE) + M6 lower bound (DONE).**
+> The recommended headline path is now the **two-phase bridge** (cut-free `Z∞ {gAll}` → `B`-derivation via
+> subformula property + a Hardy bounding lemma → contradiction), NOT finishing this `cutReduceAllAux`. The
+> `e`-control form here remains a valid (~80%-confidence) alternative kept for reference; its §19.2–19.5
+> layer + `mono_e` + structural cases stand. See `PENDING_WORK.md` / `STATUS.md` (lap-8 two-phase entry).
+
 The induction core. Port of `src/Zinfty.lean:785 cutReduceAllAux` to the control-ordinal calculus
 over the `ZekdProv` wrapper. The ∃-side ordinal's `NF` is **threaded through the induction goal**
 (`γ.NF →`), so each case's IH carries it (supplied from the constructors' own NF hyps; `wk` passes the
