@@ -49,9 +49,9 @@ inductive Zekd : ONote → ONote → ℕ → ℕ → ℕ → Seq → Prop
       (hn : Semiformula.nrel r v ∈ Γ) : Zekd α e k d c Γ
   | verumR {α e k d c Γ} (h : (⊤ : Form) ∈ Γ) : Zekd α e k d c Γ
   | trueRel {α e k d c Γ} {ar} (r : (ℒₒᵣ).Rel ar) (v) (htrue : atomTrue (Semiformula.rel r v))
-      (hτ : norm α < k + d) (hmem : Semiformula.rel r v ∈ Γ) : Zekd α e k d c Γ
+      (hτ : norm α < k + d) (hαNF : α.NF) (hmem : Semiformula.rel r v ∈ Γ) : Zekd α e k d c Γ
   | trueNrel {α e k d c Γ} {ar} (r : (ℒₒᵣ).Rel ar) (v) (htrue : atomTrue (Semiformula.nrel r v))
-      (hτ : norm α < k + d) (hmem : Semiformula.nrel r v ∈ Γ) : Zekd α e k d c Γ
+      (hτ : norm α < k + d) (hαNF : α.NF) (hmem : Semiformula.nrel r v ∈ Γ) : Zekd α e k d c Γ
   | wk {α e k d c Δ Γ} (hsub : Δ ⊆ Γ) (dd : Zekd α e k d c Δ) : Zekd α e k d c Γ
   | weak {α β e k d c Δ Γ} (hβ : β < α) (hβNF : β.NF) (hαNF : α.NF) (hτ : norm β < k + d)
       (hsub : Δ ⊆ Γ) (dd : Zekd β e k d c Δ) : Zekd α e k d c Γ
@@ -82,10 +82,10 @@ theorem mono_k : ∀ {α e k d c Γ}, Zekd α e k d c Γ → ∀ {k'}, k ≤ k' 
   induction dd with
   | axL r v hp hn => intro k' _; exact Zekd.axL r v hp hn
   | verumR h => intro k' _; exact Zekd.verumR h
-  | trueRel r v htrue hτ hmem =>
-      intro k' hk; exact Zekd.trueRel r v htrue (lt_of_lt_of_le hτ (by omega)) hmem
-  | trueNrel r v htrue hτ hmem =>
-      intro k' hk; exact Zekd.trueNrel r v htrue (lt_of_lt_of_le hτ (by omega)) hmem
+  | trueRel r v htrue hτ hαNF hmem =>
+      intro k' hk; exact Zekd.trueRel r v htrue (lt_of_lt_of_le hτ (by omega)) hαNF hmem
+  | trueNrel r v htrue hτ hαNF hmem =>
+      intro k' hk; exact Zekd.trueNrel r v htrue (lt_of_lt_of_le hτ (by omega)) hαNF hmem
   | wk hsub _ ih => intro k' hk; exact Zekd.wk hsub (ih hk)
   | weak hβ hβNF hαNF hτ hsub _ ih =>
       intro k' hk; exact Zekd.weak hβ hβNF hαNF (lt_of_lt_of_le hτ (by omega)) hsub (ih hk)
@@ -116,10 +116,10 @@ theorem mono_d : ∀ {α e k d c Γ}, Zekd α e k d c Γ → ∀ {d'}, d ≤ d' 
   induction dd with
   | axL r v hp hn => intro d' _; exact Zekd.axL r v hp hn
   | verumR h => intro d' _; exact Zekd.verumR h
-  | trueRel r v htrue hτ hmem =>
-      intro d' hd; exact Zekd.trueRel r v htrue (lt_of_lt_of_le hτ (by omega)) hmem
-  | trueNrel r v htrue hτ hmem =>
-      intro d' hd; exact Zekd.trueNrel r v htrue (lt_of_lt_of_le hτ (by omega)) hmem
+  | trueRel r v htrue hτ hαNF hmem =>
+      intro d' hd; exact Zekd.trueRel r v htrue (lt_of_lt_of_le hτ (by omega)) hαNF hmem
+  | trueNrel r v htrue hτ hαNF hmem =>
+      intro d' hd; exact Zekd.trueNrel r v htrue (lt_of_lt_of_le hτ (by omega)) hαNF hmem
   | wk hsub _ ih => intro d' hd; exact Zekd.wk hsub (ih hd)
   | weak hβ hβNF hαNF hτ hsub _ ih =>
       intro d' hd; exact Zekd.weak hβ hβNF hαNF (lt_of_lt_of_le hτ (by omega)) hsub (ih hd)
@@ -148,8 +148,8 @@ theorem mono_c : ∀ {α e k d c Γ}, Zekd α e k d c Γ → ∀ {c'}, c ≤ c' 
   induction dd with
   | axL r v hp hn => intro c' _; exact Zekd.axL r v hp hn
   | verumR h => intro c' _; exact Zekd.verumR h
-  | trueRel r v htrue hτ hmem => intro c' _; exact Zekd.trueRel r v htrue hτ hmem
-  | trueNrel r v htrue hτ hmem => intro c' _; exact Zekd.trueNrel r v htrue hτ hmem
+  | trueRel r v htrue hτ hαNF hmem => intro c' _; exact Zekd.trueRel r v htrue hτ hαNF hmem
+  | trueNrel r v htrue hτ hαNF hmem => intro c' _; exact Zekd.trueNrel r v htrue hτ hαNF hmem
   | wk hsub _ ih => intro c' hc; exact Zekd.wk hsub (ih hc)
   | weak hβ hβNF hαNF hτ hsub _ ih => intro c' hc; exact Zekd.weak hβ hβNF hαNF hτ hsub (ih hc)
   | andI φ ψ hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ihφ ihψ =>
@@ -171,8 +171,8 @@ theorem mono_e : ∀ {α e k d c Γ}, Zekd α e k d c Γ → ∀ {e'}, e.NF → 
   induction dd with
   | axL r v hp hn => intro e' _ _ _ _; exact Zekd.axL r v hp hn
   | verumR h => intro e' _ _ _ _; exact Zekd.verumR h
-  | trueRel r v htrue hτ hmem => intro e' _ _ _ _; exact Zekd.trueRel r v htrue hτ hmem
-  | trueNrel r v htrue hτ hmem => intro e' _ _ _ _; exact Zekd.trueNrel r v htrue hτ hmem
+  | trueRel r v htrue hτ hαNF hmem => intro e' _ _ _ _; exact Zekd.trueRel r v htrue hτ hαNF hmem
+  | trueNrel r v htrue hτ hαNF hmem => intro e' _ _ _ _; exact Zekd.trueNrel r v htrue hτ hαNF hmem
   | wk hsub _ ih => intro e' he heN' hlt hnorm; exact Zekd.wk hsub (ih he heN' hlt hnorm)
   | weak hβ hβNF hαNF hτ hsub _ ih =>
       intro e' he heN' hlt hnorm; exact Zekd.weak hβ hβNF hαNF hτ hsub (ih he heN' hlt hnorm)
@@ -233,13 +233,13 @@ theorem orInv {φ ψ : Form} : ∀ {α e k d c Γ}, Zekd α e k d c Γ → (φ �
       intro _
       exact Zekd.verumR (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩)))
-  | @trueRel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueRel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueRel r v htrue hτ (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+      exact Zekd.trueRel r v htrue hτ hαNF (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩)))
-  | @trueNrel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueNrel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueNrel r v htrue hτ (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+      exact Zekd.trueNrel r v htrue hτ hαNF (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩)))
   | @wk α e k d c Δ Γ hsub _ ih =>
       intro hmem
@@ -336,13 +336,13 @@ theorem andInvL {φ ψ : Form} : ∀ {α e k d c Γ}, Zekd α e k d c Γ → (φ
       intro _
       exact Zekd.verumR (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩))
-  | @trueRel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueRel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueRel r v htrue hτ (Finset.mem_insert_of_mem
+      exact Zekd.trueRel r v htrue hτ hαNF (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
-  | @trueNrel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueNrel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueNrel r v htrue hτ (Finset.mem_insert_of_mem
+      exact Zekd.trueNrel r v htrue hτ hαNF (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
   | @wk α e k d c Δ Γ hsub _ ih =>
       intro hmem
@@ -414,13 +414,13 @@ theorem andInvR {φ ψ : Form} : ∀ {α e k d c Γ}, Zekd α e k d c Γ → (φ
       intro _
       exact Zekd.verumR (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩))
-  | @trueRel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueRel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueRel r v htrue hτ (Finset.mem_insert_of_mem
+      exact Zekd.trueRel r v htrue hτ hαNF (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
-  | @trueNrel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueNrel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueNrel r v htrue hτ (Finset.mem_insert_of_mem
+      exact Zekd.trueNrel r v htrue hτ hαNF (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
   | @wk α e k d c Δ Γ hsub _ ih =>
       intro hmem
@@ -496,14 +496,14 @@ theorem allInv {φ₀ : SyntacticSemiformula ℒₒᵣ 1} (n₀ : ℕ) :
       intro _
       exact Zekd.verumR (Finset.mem_insert_of_mem
         (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩))
-  | @trueRel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueRel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueRel r v htrue (lt_of_lt_of_le hτ (Nat.add_le_add_right (le_max_left _ _) d))
+      exact Zekd.trueRel r v htrue (lt_of_lt_of_le hτ (Nat.add_le_add_right (le_max_left _ _) d)) hαNF
         (Finset.mem_insert_of_mem
           (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
-  | @trueNrel α e k d c Γ ar r v htrue hτ hmem =>
+  | @trueNrel α e k d c Γ ar r v htrue hτ hαNF hmem =>
       intro _
-      exact Zekd.trueNrel r v htrue (lt_of_lt_of_le hτ (Nat.add_le_add_right (le_max_left _ _) d))
+      exact Zekd.trueNrel r v htrue (lt_of_lt_of_le hτ (Nat.add_le_add_right (le_max_left _ _) d)) hαNF
         (Finset.mem_insert_of_mem
           (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
   | @wk α e k d c Δ Γ hsub _ ih =>
