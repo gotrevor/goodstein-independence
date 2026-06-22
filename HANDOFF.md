@@ -5,7 +5,7 @@
 > (`lake build GoodsteinPA`, 1257 jobs). `wip/BoundedZinfty.lean` compiles standalone **sorry-free**
 > (`lake env lean wip/BoundedZinfty.lean`). Headline still a literal `sorry` (anti-fraud, correct).
 
-## What landed this lap (17 commits, all verified)
+## What landed this lap (21 commits, all verified)
 
 This was a **crux-resolution + ingredient lap**, not a new-girder-built lap. The §19.6 cut-reduction
 that lap 6 pointed at turned out to have a deeper layer; this lap mapped it precisely and proved the
@@ -45,6 +45,17 @@ one ingredient that's fully tractable.
    built the calculus + `mono_k`/`mono_d`/`mono_c` + full inversion suite + §19.5 cut-reductions on it.
    `allInv`'s principal case compiling is the end-to-end validation that the design closes the
    obstruction that defeated both single-index calculi.
+
+7. **Banked all §19.6 prerequisites** into `SplitZinfty`: ordinal/norm helpers (`add_lt_add_left_NF`,
+   `le_add_left_NF`, `norm_omegaPow`, `norm_addAux_le`, `norm_add_le`) + osucc descent lemmas
+   (`osucc_lt_osucc`, `add_osucc_descent`). Everything `cutReduceAll` needs except the calculus design.
+
+8. **Found + recorded (honestly) the §19.6 SECOND obstruction (ADDENDUM 4):** the `(k,d)` split closes
+   the norm-budget but NOT the witness-index growth (principal cut's `hardy γ(·)` witness ⟹ super-linear
+   k-part through commuting ω-rules). ⟹ the full operator is needed. Refined the design to a concrete
+   **control-ordinal `e`** (witness index `hardy e (n+k)+d`); de-risked the control side (existing
+   `hardy_le_of_lt`); only the lower-bound side needs general Hardy additivity (infra B). Full
+   open-obligation inventory + 3 paths each in `PENDING_WORK.md` (A–F).
 
 5. **Mapped the real §19.6 frontier — the `allω`-commuting obstruction.** Starting `cutReduceAll`,
    found that the commuting ω-rule case (∃-side's last rule is an ω-rule) **cannot keep the ω-rule's
