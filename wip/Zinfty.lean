@@ -209,6 +209,10 @@ noncomputable def omegaTower : ℕ → Ordinal.{0} → Ordinal.{0}
   | 0, α => α
   | c + 1, α => omegaTower c (Ordinal.omega0 ^ α)
 
+@[simp] theorem omegaTower_zero (α : Ordinal.{0}) : omegaTower 0 α = α := rfl
+
+@[simp] theorem omegaTower_one (α : Ordinal.{0}) : omegaTower 1 α = Ordinal.omega0 ^ α := rfl
+
 /-- **M5.3 — one level of cut elimination (Towsner Thm 19.7, `(α,c)`-projection).** Reducing the
 cut rank by one raises the ordinal bound to `ω^α`. *(Open: §19 inversions 19.2–19.4 + reductions
 19.5–19.6 + the principal `Cut`-on-rank-`c` case; the numeric `k`/Hardy `h_{ω^α}(k)` bound is
