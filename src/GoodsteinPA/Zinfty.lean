@@ -47,6 +47,7 @@ import Foundation.FirstOrder.Arithmetic.R0.Representation
 import Mathlib.SetTheory.Ordinal.Arithmetic
 import Mathlib.SetTheory.Ordinal.Exponential
 import Mathlib.SetTheory.Ordinal.Principal
+import Mathlib.SetTheory.Ordinal.Veblen
 import Mathlib.SetTheory.Ordinal.Family
 import Mathlib.Data.ENat.Lattice
 
@@ -1320,6 +1321,29 @@ theorem Provable.cutElim {α : Ordinal.{0}} {c : ℕ} {Γ : Seq}
   induction c generalizing α with
   | zero => simpa [omegaTower] using h
   | succ c ih => exact ih (Provable.cutElimStep h)
+
+/-! ### `ε₀`-closure of the cut-elimination ordinal
+
+`cutElim` lands at `omegaTower c α = ω_c^α`. For the headline (M7) the cut-free bound must stay
+**below `ε₀`** when the input does — this is exactly what makes Towsner's argument work (`ε₀` is the
+first fixed point of `ω ↦ ω^ω`, hence closed under the `c`-fold tower). Pure ordinal facts, no
+calculus dependence; recorded now so M7 can cite them. -/
+
+open scoped Ordinal in
+/-- `ε₀` is closed under `ω^·`. -/
+theorem omega0_opow_lt_epsilon0 {a : Ordinal.{0}} (h : a < ε₀) : Ordinal.omega0 ^ a < ε₀ := by
+  obtain ⟨n, hn⟩ := Ordinal.lt_epsilon_zero.mp h
+  have hstep : Ordinal.omega0 ^ a < (fun b => Ordinal.omega0 ^ b)^[n + 1] 0 := by
+    rw [Function.iterate_succ_apply']
+    exact (Ordinal.opow_lt_opow_iff_right Ordinal.one_lt_omega0).mpr hn
+  exact hstep.trans (Ordinal.iterate_omega0_opow_lt_epsilon_zero (n + 1))
+
+open scoped Ordinal in
+/-- The full cut-elimination ordinal `ω_c^α` stays below `ε₀` whenever `α < ε₀`. -/
+theorem omegaTower_lt_epsilon0 : ∀ (c : ℕ) {α : Ordinal.{0}}, α < ε₀ → omegaTower c α < ε₀
+  | 0, _, h => by simpa [omegaTower] using h
+  | c + 1, _, h => by
+      simpa [omegaTower] using omegaTower_lt_epsilon0 c (omega0_opow_lt_epsilon0 h)
 
 end Deriv
 
