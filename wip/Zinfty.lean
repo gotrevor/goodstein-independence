@@ -145,6 +145,38 @@ theorem Provable.weakening {α : Ordinal.{0}} {c : ℕ} {Γ Δ : Seq} (h : Γ �
   · simpa [Deriv.o] using ho
   · simpa [Deriv.cr] using hcr
 
+/-- Predicate-level `∨`-introduction. -/
+theorem Provable.orI {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (φ ψ : AForm)
+    (h : Provable α c (φ ::ₘ ψ ::ₘ Γ)) : Provable (α + 1) c (or φ ψ ::ₘ Γ) := by
+  rcases h with ⟨d, ho, hcr⟩
+  refine ⟨Deriv.orI φ ψ d, ?_, ?_⟩
+  · simpa [Deriv.o] using add_le_add_right ho 1
+  · simpa [Deriv.cr] using hcr
+
+/-- Predicate-level `∃`-introduction (the witness rule). -/
+theorem Provable.exI {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (f : ℕ → AForm) (n : ℕ)
+    (h : Provable α c (f n ::ₘ Γ)) : Provable (α + 1) c (ex f ::ₘ Γ) := by
+  rcases h with ⟨d, ho, hcr⟩
+  refine ⟨Deriv.exI f n d, ?_, ?_⟩
+  · simpa [Deriv.o] using add_le_add_right ho 1
+  · simpa [Deriv.cr] using hcr
+
+/-- **Predicate-level ω-rule (`∀`-introduction).** From a uniform-cut-rank family of premises
+with ordinal bounds `β n`, conclude `∀` at bound `(⨆ n, β n) + 1` — the supremum bound is exactly
+what makes the ω-rule's ordinal arithmetic work, and is here *proved* against the `Deriv` measures
+(via `Classical.choice` to assemble the premise derivations). -/
+theorem Provable.allI {β : ℕ → Ordinal.{0}} {c : ℕ} {Γ : Seq} (f : ℕ → AForm)
+    (h : ∀ n, Provable (β n) c (f n ::ₘ Γ)) :
+    Provable ((⨆ n, β n) + 1) c (all f ::ₘ Γ) := by
+  choose d ho hcr using h
+  have hsup : (⨆ n, o (d n)) ≤ ⨆ n, β n :=
+    Ordinal.iSup_le fun n => (ho n).trans (Ordinal.le_iSup β n)
+  refine ⟨Deriv.allI f d, ?_, ?_⟩
+  · simp only [Deriv.o]
+    exact add_le_add hsup le_rfl
+  · simp only [Deriv.cr]
+    exact iSup_le fun n => hcr n
+
 end Deriv
 
 end GoodsteinPA.Zinfty

@@ -49,4 +49,12 @@ Needed to *state* Gödel II for `𝗣𝗔`; Foundation axiomatizes it (TODO in
   `primrec_bump`, `primrec_goodsteinSeq`). Phase 0 axiom-clean.
 - M2: `Reduction.lean` — Gödel II hook + meta-reduction (axiom-clean mod `PA_delta1Definable`).
 - Phase 2: `PHASE2-DECOMPOSITION.md` (Towsner-grounded ladder) + `wip/Zinfty.lean` (E2 encoding
-  prototype — compiles: ω-rule inductive, ordinal/cut-rank measures, bound-domination lemma).
+  prototype — compiles: ω-rule inductive, ordinal/cut-rank measures, bound-domination lemma,
+  `Provable.mono`/`.weakening`, and the **proved predicate-level inference API** `Provable.orI`,
+  `.exI`, `.allI` — the ω-rule with the supremum ordinal bound, machine-checked against the
+  `Deriv` measures via `Classical.choice`).
+
+## Gotcha noted (for the corpus)
+For `Ordinal`, `add_le_add_right h c` elaborates to `c + a ≤ c + b` (adds on the *left*) — use
+`add_le_add h le_rfl` to get `a + 1 ≤ b + 1` from `a ≤ b`. `gcongr` on `⨆`-bounds spawns a
+`BddAbove (Set.range …)` side-goal (discharge with `Ordinal.bddAbove_range`).
