@@ -25,8 +25,10 @@ fact (Track-1 `Logic/Goodstein/Domination*.lean`, to port).  WIP — not in buil
 -/
 import Mathlib.SetTheory.Ordinal.Notation
 import Mathlib.Order.Lattice.Nat
+import Mathlib.Order.Iterate
 import GoodsteinPA.Defs
 import GoodsteinPA.Hardy
+import GoodsteinPA.Domination
 
 namespace GoodsteinPA.LowerBoundHardy
 
@@ -219,5 +221,71 @@ theorem lowerBound_hardy {α : ONote} {k : ℕ} (Hdom : ∃ x, hardy α (max k x
   rcases hf with rfl | h
   · exact Or.inl ⟨x, rfl, hx⟩
   · exact absurd h (Finset.notMem_empty _)
+
+/-! ## Discharging `Hdom` from the ported Goodstein domination → self-contained Thm 17.1
+
+The domination input `Hdom` is supplied by Track-1's `goodsteinLength_dominates_fastGrowing` (ported
+to `GoodsteinPA.Dom`), bridged to `hardy`/`G` via `hardy_le_fastGrowing` and `G = goodsteinLength`.
+The `+2`→strict gap is closed by domination at `osucc α` (the fastGrowing-over-hardy gap swallows the
+`+2`). Result: `lowerBound_hardy_selfcontained` — no hypotheses beyond `α.NF`. -/
+
+/-- `G` = Track-1's `goodsteinLength`: both the least zero step (set nonempty by termination). -/
+theorem G_eq_goodsteinLength (n : ℕ) : G n = GoodsteinPA.Dom.goodsteinLength n := by
+  apply le_antisymm
+  · exact Nat.sInf_le (GoodsteinPA.Dom.goodsteinSeq_goodsteinLength n)
+  · exact Nat.find_le (Nat.sInf_mem (GoodsteinPA.Dom.goodstein_terminates n))
+
+/-- Iterating a strictly-inflationary map adds ≥ the iteration count. -/
+theorem add_le_iterate_of_lt {g : ℕ → ℕ}
+    (hstep : ∀ y, 1 ≤ y → y + 1 ≤ g y) (hpos : ∀ y, 1 ≤ y → 1 ≤ g y) :
+    ∀ (j : ℕ) {y : ℕ}, 1 ≤ y → y + j ≤ g^[j] y := by
+  intro j
+  induction j with
+  | zero => intro y hy; simp
+  | succ j ih =>
+    intro y hy
+    rw [Function.iterate_succ_apply]
+    have h1 : 1 ≤ g y := hpos y hy
+    have hstepy : y + 1 ≤ g y := hstep y hy
+    have := ih (y := g y) h1
+    omega
+
+/-- **`Hdom`, strict.** For NF `α`, Goodstein length eventually strictly exceeds `hardy α`. -/
+theorem hardy_lt_goodsteinLength {α : ONote} (hα : α.NF) :
+    ∃ N, ∀ m, N ≤ m → hardy α m < GoodsteinPA.Dom.goodsteinLength m := by
+  obtain ⟨N, hN⟩ := GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing (osucc_NF hα)
+  refine ⟨max N 4, fun m hm => ?_⟩
+  have hm4 : 4 ≤ m := le_trans (le_max_right _ _) hm
+  have hmN : N ≤ m := le_trans (le_max_left _ _) hm
+  have hfs : fastGrowing (osucc α) m = (fastGrowing α)^[m] m := by
+    rw [fastGrowing_succ (osucc α) (fundamentalSequence_osucc hα)]
+  have hstep : ∀ y, 1 ≤ y → y + 1 ≤ fastGrowing α y := fun y hy => lt_fastGrowing α hy
+  have hpos : ∀ y, 1 ≤ y → 1 ≤ fastGrowing α y := fun y hy => le_trans hy (le_fastGrowing α y)
+  have hsplit : (fastGrowing α)^[m] m = (fastGrowing α)^[m-1] (fastGrowing α m) := by
+    obtain ⟨n, hn⟩ : ∃ n, m = n + 1 := ⟨m-1, by omega⟩
+    rw [hn]; simp [Function.iterate_succ_apply]
+  have hiter : fastGrowing α m + (m - 1) ≤ (fastGrowing α)^[m - 1] (fastGrowing α m) :=
+    add_le_iterate_of_lt hstep hpos (m - 1) (hpos m (by omega))
+  have hHF : hardy α m ≤ fastGrowing α m := hardy_le_fastGrowing α m (by omega)
+  have hdom := hN m hmN
+  rw [hfs, hsplit] at hdom
+  omega
+
+/-- **`Hdom` in the shape `lowerBound_hardy` consumes.** -/
+theorem Hdom_of_NF {α : ONote} (hα : α.NF) (k : ℕ) : ∃ x, hardy α (max k x) < G x := by
+  obtain ⟨N, hN⟩ := hardy_lt_goodsteinLength hα
+  refine ⟨max N k, ?_⟩
+  have hxk : k ≤ max N k := le_max_right _ _
+  have hxN : N ≤ max N k := le_max_left _ _
+  rw [max_eq_right hxk, G_eq_goodsteinLength]
+  exact hN _ hxN
+
+/-- **The fully self-contained Goodstein lower bound (Towsner Thm 17.1).**  For every `α.NF` and `k`,
+the witness-bounded cut-free calculus cannot derive the Goodstein sentence `gAll` at `(α,k)` — no
+hypotheses beyond normal-formhood.  `Hdom` is discharged from the ported Goodstein-dominates-Hardy
+chain (carries documented `native_decide` Goodstein base-case axioms). -/
+theorem lowerBound_hardy_selfcontained {α : ONote} (hα : α.NF) (k : ℕ) :
+    ¬ B α k ({gAll} : Seq) :=
+  lowerBound_hardy (Hdom_of_NF hα k)
 
 end GoodsteinPA.LowerBoundHardy

@@ -1,9 +1,44 @@
 # HANDOFF — 2026-06-22 (lap 5)
 
+## ⛳ CHECKPOINT STATE (wind-down)
+Branch `plan`. **`lake build GoodsteinPA` is VERIFIED GREEN — 1256 jobs** (only the 2 expected
+headline `sorry`s in `Reduction`/`Statement`). `src/GoodsteinPA/Domination.lean` (the promoted
+Goodstein-dominates-Hardy chain) builds clean. First action next lap: **compile the `Hdom` assembly**
+`lake env lean wip/LowerBoundHardy.lean` (the Domination olean now exists, so the import resolves).
+
+**Uncommitted→committed this checkpoint (one commit, labeled WIP-unverified):**
+- `src/GoodsteinPA/Domination.lean` — promoted from `wip/` (full Goodstein-dominates-Hardy chain),
+  `import GoodsteinPA.Domination` added to the lib root. **native_decide axioms** (Goodstein base cases).
+- `wip/LowerBoundHardy.lean` — the `Hdom` assembly appended (`G_eq_goodsteinLength`,
+  `add_le_iterate_of_lt` [verified standalone], `hardy_lt_goodsteinLength`, `Hdom_of_NF`,
+  `lowerBound_hardy_selfcontained`). **NOT yet compiled** against the built `Domination` olean —
+  compile it next lap (`lake env lean wip/LowerBoundHardy.lean`). Likely-fixup lines: the
+  `fastGrowing_succ` rw form, `Nat.find_le`/`Nat.sInf_mem` set-vs-∃ defeq in `G_eq_goodsteinLength`,
+  the final `omega`. If green → **`lowerBound_hardy_selfcontained` = Thm 17.1 with no hypotheses
+  beyond `α.NF`** ⇒ M6 lower-bound half DONE. `#print axioms` will carry `native_decide`'s
+  `Lean.ofReduceBool` via the `Hdom`/domination path (expected; document in the ledger).
+- Host `ON-LINE-FINDINGS-2026-06-22-lower-bound-verification-and-hardy.md` (independently **verifies
+  the lap-5 ∀-inversion resolution as correct**, ~90%) + the host's deletion of `ON-LINE-REQUEST.md`.
+  HARVEST the findings next lap (read fully, then `git mv` to `archive/findings/`).
+
+**Then:** frontier moves to **M4** (general witness-bounded calculus `Zᵏ` + the subformula bridge to
+the fragment `B` — see `ANALYSIS-2026-06-22-bounding-resolution.md` "M4 scoping").
+
+---
+
+
 > **NEXT LAP FIRST ACTION:** read this + `STATUS.md` + `ANALYSIS-2026-06-22-bounding-resolution.md`.
 > The lap-4 "bounding / I∀ frontier" wall is **DOWN** (resolved by ∀-inversion, machine-checked).
-> Priority is now `PENDING_WORK.md` **O0′: port Track-1 Goodstein-dominates-Hardy to discharge
-> `Hdom`** → makes the full lower bound `lowerBound_hardy` self-contained.
+>
+> **LATE-LAP UPDATE:** O0′ executed — the full Goodstein-dominates-Hardy chain is **ported +
+> promoted to `src/GoodsteinPA/Domination.lean`** (compiles clean standalone; build verifying), and
+> the `Hdom` strictness-bridge assembly (`hardy_lt_goodsteinLength`, `Hdom_of_NF`,
+> `lowerBound_hardy_selfcontained`) is **written** at the end of `wip/LowerBoundHardy.lean`, awaiting
+> its first compile against the freshly-built `Domination` olean. If green: **Thm 17.1 is fully
+> self-contained** (no hypotheses beyond `α.NF`). If the assembly has fixups, they are in the
+> `G_eq_goodsteinLength` / `fastGrowing_succ` / final-`omega` lines — helper lemmas already verified
+> standalone (`add_le_iterate_of_lt`, the iterate split). Then the lower-bound half is DONE and the
+> frontier moves to **M4** (general witness-bounded calculus + subformula bridge — see ANALYSIS doc).
 
 Branch `plan`. Headline build **green** (1248 jobs, `lake build GoodsteinPA`). Headline
 `Statement.peano_not_proves_goodstein` is **still a literal `sorry`** (anti-fraud — correct; the
