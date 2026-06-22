@@ -1394,4 +1394,63 @@ theorem provable_em_x (φ : Form LX) {Γ : Seq LX} (hp : φ ∈ Γ) (hn : ∼φ 
         exact ⟨_, hall⟩
   exact key φ.complexity φ le_rfl hp hn
 
+/-! ### C₂ crux: the X-induction **meta-induction** (Buchholz Thm 5.5), `XFreeAx`-preserving.
+
+The faithfulness-critical case of the embedding. The PA induction axiom for an X-formula `ψ` is NOT
+derived by `provable_true` (ω-completeness) — that would `axTrue` a lone X-atom and break `XFreeAx`.
+Instead, after stripping `univCl` + the two `🡒`, the sequent `{∼ψ(0), ∼∀x(ψ(x)→ψ(x+1)), ∀x ψ(x)}` is
+built by a **tower of `cut`s on `ψ(i)`** (the ω-rule absorbing the metatheoretic induction), bottoming
+out at `provable_em` (`XFreeAx`-safe). Stated abstractly in the instantiated families `ψ/[nm n]`, with
+the step's `∃`-side `(∼step)/[nm n] = ψ(n) ⋏ ∼ψ(n+1)` as a hypothesis (the Foundation-DSL that produces
+`step` from `ψ` by the successor substitution is deferred to the `embedC` port). -/
+theorem metaInduction (ψ step : SyntacticSemiformula LX 1) {Γ : Seq LX}
+    (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[nm (n + 1)])) :
+    ∃ a, PXFc a (ψ.complexity + 1)
+      (insert (∼(ψ/[nm 0])) (insert (∃⁰ (∼step)) (insert (∀⁰ ψ) Γ))) := by
+  set c : ℕ := ψ.complexity + 1 with hc
+  set Δ : Seq LX := insert (∼(ψ/[nm 0])) (insert (∃⁰ (∼step)) Γ) with hΔ
+  have hcut : ∀ n, ((ψ/[nm n]).complexity + 1 : ℕ∞) ≤ (c : ℕ∞) := by
+    intro n; rw [hc]; simp
+  have hEx : ∀ n, (∃⁰ (∼step)) ∈ (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ)) := by
+    intro n; rw [hΔ]
+    exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+      (Finset.mem_insert_self _ _)))
+  -- the chain `∀ n, ⊢ ψ(n), Δ` by meta-induction on n
+  have chain : ∀ n, ∃ a, PXFc a c (insert (ψ/[nm n]) Δ) := by
+    intro n
+    induction n with
+    | zero =>
+      obtain ⟨a, ha⟩ := provable_em_x (ψ/[nm 0]) (Γ := insert (ψ/[nm 0]) Δ)
+        (Finset.mem_insert_self _ _)
+        (Finset.mem_insert_of_mem (by rw [hΔ]; exact Finset.mem_insert_self _ _))
+      exact ⟨a, ha.mono le_rfl (Nat.zero_le c)⟩
+    | succ n ih =>
+      obtain ⟨aL, hL0⟩ := ih
+      -- left premise of the cut: weaken `ψ(n), Δ` to `ψ(n), ψ(n+1), Δ`
+      have hL : PXFc aL c (insert (ψ/[nm n]) (insert (ψ/[nm (n + 1)]) Δ)) :=
+        hL0.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))
+      -- right premise `R = ∼ψ(n), ψ(n+1), Δ`, via exI on the step + two `em`s under `andI`
+      obtain ⟨aA, hA0⟩ := provable_em_x (ψ/[nm n])
+        (Γ := insert (ψ/[nm n]) (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ)))
+        (Finset.mem_insert_self _ _)
+        (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+      obtain ⟨aB, hB0⟩ := provable_em_x (ψ/[nm (n + 1)])
+        (Γ := insert (∼(ψ/[nm (n + 1)]))
+          (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ)))
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
+        (Finset.mem_insert_self _ _)
+      have hand := PXFc.andI (c := c) (ψ/[nm n]) (∼(ψ/[nm (n + 1)]))
+        (hA0.mono le_rfl (Nat.zero_le c)) (hB0.mono le_rfl (Nat.zero_le c))
+      rw [← hstep n] at hand
+      have hexI := PXFc.exI (∼step) n hand
+      rw [Finset.insert_eq_self.mpr (hEx n)] at hexI
+      -- cut `ψ(n)`: left `ψ(n),ψ(n+1),Δ` × right `∼ψ(n),ψ(n+1),Δ` ⟹ `ψ(n+1),Δ`
+      exact ⟨_, PXFc.cut (ψ/[nm n]) (hcut n) hL hexI⟩
+  choose β hβ using chain
+  have hall := PXFc.allω (β := β) ψ (Γ := Δ) hβ
+  refine ⟨_, hall.weakening ?_⟩
+  rw [hΔ]; intro x hx
+  simp only [Finset.mem_insert] at hx ⊢
+  tauto
+
 end GoodsteinPA.XFreeCutElim
