@@ -764,14 +764,19 @@ fixed over the outer `(α,e,k,dd,Γ)`; in the ω-rule commuting case it is raise
 (all are inductive indices), unlike the unbounded `Zinfty.lean Deriv` which is single-indexed by `Γ`
 (with `o`/`cr` as separate *measure functions*). So `induction D` here generalizes `e k d c` too — and
 the external `fam` (fixed over the outer `e,k,dd`) falls out of alignment with the per-case rebound
-indices (acutely in the `allω` case, premise `k ↦ max k n`). Two clean resolutions for next lap:
-  (i) **Reformulate to a single-indexed `Deriv`-style calculus** (`ZekdD : Seq → Type` with `ord`/`ctrl`/
-      `nrm`/`cr` as measure functions), port the unbounded `cutReduceAllAux` near-verbatim (it already
-      does exactly this), then bridge `ZekdD`-with-measures ↔ `Zekd`. Most faithful to the working M5.
-  (ii) **`revert`-generalize `fam`** (and `hαbud`) before `induction`, re-`intro` per case, raising via
-       `mono_k`/`mono_d` where the indices diverge. Heavier per-case but no new calculus.
-Recommendation: (i) — the unbounded `Deriv`/`o`/`cr` machinery is the proven template precisely because
-single-indexing makes the §19.6 induction tractable; replicate it with the `(ctrl,nrm,cr)` measures. -/
+indices (acutely in the `allω` case, premise `k ↦ max k n`). **SHARPER resolution (the `allInv` precedent):** the inversions ALREADY induct over multi-indexed
+`Zekd` with the `allω` `k ↦ max k n` variation — and succeed — *because they generalize `k` (and
+`α,d,c,Γ`) in the theorem statement* (`∀ {α k d c Γ}, Zekd α k d c Γ → …`), so `induction` hands back an
+IH at *every* index, incl. the premise's `max k n`. So `cutReduceAllAux` should likewise **generalize
+`k` and `dd` (and `γ,Δ`) in the induction statement** — NOT fix them to `fam`'s. The external `fam`
+(fixed at the outer `k₀,dd₀`) is then **raised per-case** to the case's `(k,dd)` via `mono_k`/`mono_d`
+(indices only grow: `allω` premise `k = max k₀ n ≥ k₀`; `dd` rides ≥). Concretely:
+  `∀ {γ : ONote} {k dd : ℕ} {Δ}, Zekd γ e k dd c Δ → γ.NF → k₀ ≤ k → dd₀ ≤ dd → (∃⁰∼φ)∈Δ →
+     ZekdProv (osucc (α+γ)) e k (dd + norm α) c (Δ.erase (∃⁰∼φ) ∪ Γ)`
+  with `fam : ∀ n, Zekd α e k₀ dd₀ c (insert (φ/[nm n]) Γ)` outside; use `(fam n).mono_k h.mono_d h'`
+  to align before each principal cut. This needs NO calculus reformulation — it's the `allInv` pattern
+  scaled to carry an external family. (A `Deriv`-style single-indexed `ZekdD` with `(ord,ctrl,nrm,cr)`
+  measures is the heavier fallback if the index-generalized induction proves unwieldy.) -/
 theorem cutReduceAllAux {φ : SyntacticSemiformula ℒₒᵣ 1} {c k dd : ℕ} {α e : ONote} {Γ : Seq}
     (hφc : φ.complexity < c) (hαNF : α.NF) (heNF : e.NF)
     (fam : ∀ n, Zekd α e k dd c (insert (φ/[nm n]) Γ)) :
