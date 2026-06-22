@@ -243,6 +243,18 @@ theorem lowerBound_existential_real (h : Ordinal.{0} → ℕ → ℕ) (τ : Ordi
       ¬ B h τ α k Γ :=
   lowerBound_existential h τ G Hmono @G_le_of_atomTrue
 
+/-- **Fully axiom-clean, unconditional instance.**  With witness bound = the numeric index `k`
+itself (`h α k = k`, trivially ordinal-monotone), the existential-fragment lower bound holds with
+**no abstract hypotheses at all** — the witness-bound mechanism, end-to-end and unconditional: a
+cut-free derivation whose witnesses are bounded by `k` cannot derive `∃y g_y(n)=0` once `k < G n`.
+(`h α k = k` is too small to make the *embedding* M4 go through — the real `h` is Hardy — but this
+pins down that the lower-bound machinery itself is complete and correct.) -/
+theorem lowerBound_existential_const (τ : Ordinal.{0} → ℕ) :
+    ∀ (α : Ordinal.{0}) (k : ℕ) (Γ : Seq),
+      (∀ f ∈ Γ, (∃ n, f = gEx n ∧ k < G n) ∨ (∃ m n, f = atom m n ∧ m < G n)) →
+      ¬ B (fun _ k => k) τ α k Γ :=
+  lowerBound_existential_real (fun _ k => k) τ (fun _ _ => le_rfl)
+
 /-! ## The full Goodstein lower bound (Towsner Thm 17.1), as an honest decomposition
 
 The full lower bound (with the Goodstein **sentence** present, hence the `I∀` ω-rule) is the
