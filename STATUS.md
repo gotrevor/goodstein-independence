@@ -16,13 +16,16 @@ witness-bounded `(α,k)` over the `GForm` fragment) and are **not yet unified**.
 the connecting spine — see Outstanding.
 
 ## What's happened (newest first)
-- **2026-06-22 (lap 6 — review):** Verified build green (1257 jobs); **M6 lower-bound half DONE** —
-  promoted `wip/LowerBoundHardy.lean → src/GoodsteinPA/LowerBound.lean`. `lowerBound_hardy_selfcontained`
-  is the full Towsner Thm 17.1, `Hdom` discharged via the ported domination chain (`+2`→strict iterate
-  split). `#print axioms` = trust base + documented `native_decide` Goodstein base-case artifacts (🟢).
-  Re-grounded the remaining direction against the ANALYSIS doc's 5-step spine: the crux is now the
-  **witness-bounded calculus `Zᵏ` over real syntax + embedding + cut-elim-with-`k` + subformula bridge**,
-  with the **opaque-Σ₁ language gap (M7a)** flagged as the other hard piece.
+- **2026-06-22 (lap 6 — review + build-out):** **M6 lower-bound half DONE** — promoted
+  `wip/LowerBoundHardy.lean → src/GoodsteinPA/LowerBound.lean`; `lowerBound_hardy_selfcontained` =
+  full Towsner Thm 17.1, only `α.NF` (axioms = trust base + 🟢 `native_decide` base cases). Then
+  **built the step-1 keystone** `wip/BoundedZinfty.lean`: the **witness-bounded calculus `Zᵏ` over real
+  `SyntacticFormula ℒₒᵣ`** (ONote-indexed, B-style, with the truth rule `τ α<k` + `∃`-witness bound
+  `v≤h_α(k)` + cut) and its whole §19.2–19.5 cut-elim front: `mono_k`/`mono_c`/`wk`/`weakening`, the
+  **full inversion suite** (∨, ∧-L/R, ∀ — all axiom-clean), and the **§19.5 ∧/∨ cut-reductions**
+  (`cutReduceConj`/`Disj`, axiom-clean). Confirmed the design is viable: `norm` is `max` over CNF
+  components, so the `norm<k` budget survives the cut-elim ordinal growth (`norm(ω^α)=max(norm α)1`,
+  etc.). Remaining: §19.6 (∀/∃ reduction) + `cutElimStep`/`cutElim`, then M4 + M7.
 - **2026-06-22 (lap 5):** RESOLVED the gAll/I∀ lower-bound frontier (the lap-4 wall), machine-checked.
   Ported the Hardy hierarchy → `src/Hardy.lean` (`hardy`/`norm` = Towsner `h_α`/`τ`); built the
   witness-bounded calculus `B` over `ONote` with the **concrete** Hardy data; proved
@@ -48,9 +51,11 @@ The lower-bound side (M6) and the cut-elim engine (M5) are done but disconnected
 (ANALYSIS doc §"M4 scoping", the 5 steps) connects them and reaches the headline:
 
 ### Short-term (mirror PENDING_WORK top) — the connecting spine, hardest-first
-1. **`Zᵏ` — witness-bounded ω-calculus over real `ℒₒᵣ` syntax** (Towsner §15). `src/Zinfty.lean`'s
-   `Deriv` + a **truth-atom rule** (`τ α < k`) + a **witness bound on `∃`** (`v ≤ h_α(k)`). The keystone
-   the embedding lands in and cut-elim operates on. **NEXT — start the definition + structural lemmas.**
+1. **`Zᵏ` — witness-bounded ω-calculus over real `ℒₒᵣ` syntax** (Towsner §15). **DEFINED + §19.2–19.5
+   DONE** (`wip/BoundedZinfty.lean`): calculus + `mono_k`/`mono_c`/`wk`/`weakening` + inversions
+   (∨,∧,∀) + ∧/∨ cut-reductions, all axiom-clean. **NEXT — §19.6** (∀/∃ cut-reduction; bound framing
+   `α + γ` via `ONote.add`, witness-cut in the principal `exI` case) then `cutElimStep` (`ω^α` blow-up;
+   needs the `norm(ω^α)`/`norm(α+γ)`/`norm(osucc)` budget-preservation lemmas) + `cutElim`.
 2. **M4 — embedding `PA ⊢ φ ⟹ Zᵏ ⊢^{α,k}_c φ`** (α<ε₀, finite c), Towsner §16/§18. Reuse Foundation's
    finitary `Derivation`; map rules across, `∀`→ω-rule; finite induction instances ⟹ finite cut rank.
 3. **Cut-elim with `k`** — redo `src/Zinfty.lean` §19 tracking the bound (`h_{ω^α}(k)`; ε₀ closed under

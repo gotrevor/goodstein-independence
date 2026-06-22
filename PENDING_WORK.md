@@ -11,22 +11,34 @@ no hypotheses beyond `α.NF`, axiom-clean modulo the 🟢 `native_decide` Goodst
 are now both complete but **disconnected** (M5 = unbounded `(α,c)` over real `ℒₒᵣ`; M6 = bounded
 `(α,k)` over the `GForm` fragment). The connecting spine (hardest-first):
 
-### Step 1 (TOP — NEXT) — `Zᵏ`: witness-bounded ω-calculus over real `SyntacticFormula ℒₒᵣ`
-Towsner §15. Take `src/Zinfty.lean`'s `Deriv` design and add the two `(α,k)` side conditions that make
-the lower bound bite (the lap-4 finding — they CANNOT be dropped):
-- a **truth-atom rule** `trueR` (decidable atomic truth in ℕ, side condition `τ α < k`) — needed by the
-  embedding to derive PA's true atomic axioms, and the `τ α < k` is what couples to the witness bound;
-- a **witness bound on `∃`** (`exI` carries `v ≤ hardy α k`).
-Design choices to settle while coding:
-- **Ordinal representation:** `B` uses `ONote` (so `hardy`/`norm` are concrete) + the **bound-as-parameter,
-  no-suprema** Prop style (the `allI` rule takes a family `β : ℕ → ONote` with each `β n < α`, NOT a
-  computed `⨆`). `src/Zinfty.lean` uses `Ordinal` + computed measures + `⨆` (clean for the `ω^α`
-  cut-elim blow-up). The keystone choice: build `Zᵏ` **ONote + B-style** (matches the M6 target, avoids
-  suprema, `ω^α = oadd α 1 0`, `< ε₀` via ε₀ closed under `ω^·`) OR Ordinal + measures (reuse M5's
-  cut-elim machinery, convert to `ONote` at the subformula-bridge). Lean: ONote/B-style for uniformity
-  with the done M6; re-derive the cut-elim strategy (the §19 *moves* port; the bound bookkeeping is new).
-- Start with: the inductive `Zᵏ`, `mono_k`, `weakening`, then the inversions, then cut-reduction.
-Bank the definition + structural lemmas first (compiles), then chip cut-elim across laps.
+### Step 1 — `Zᵏ`: witness-bounded ω-calculus over real `SyntacticFormula ℒₒᵣ` (Towsner §15)
+**DEFINED + §19.2–19.5 DONE** (`wip/BoundedZinfty.lean`, lap 6, all axiom-clean). Chosen design:
+**ONote-indexed, B-style (bound-as-parameter, no `⨆`-suprema)** over real `ℒₒᵣ` formulas, with both
+`(α,k)` side conditions the lower bound needs (lap-4 finding — cannot be dropped): truth-atom rules
+`trueRel`/`trueNrel` (`norm α < k`) + `∃`-witness bound (`exI` carries `n ≤ hardy α k`). Plus a
+height-preserving `wk`, a β<α `weak` (raises ordinals in principal inversion cases), `∧`/`∨`/`cut`.
+Built: `mono_k`, `mono_c`, `wk`/`weakening`; the **full inversion suite** `orInv`/`andInvL`/`andInvR`/
+`allInv` (reshuffle helpers `invPush`/`invPull`/`invPush2`/`inv1Push`/… kept standalone so
+`DecidableEq Form` doesn't blow the heartbeat limit inside the big inductions); the **§19.5** ∧/∨
+cut-reductions `cutReduceConj`/`cutReduceDisj` (`lt_osucc` + caller-supplied NF upper bound `δ`, result
+at `osucc δ` — no natural sum needed).
+
+**NEXT — §19.6 ∀/∃ cut-reduction `cutReduceAllAux`** (the hard, non-invertible one; the witness-bound
+survival crux). Port `src/Zinfty.lean`'s measure-style version to parameter-style:
+- **Bound framing:** the family `fam : ∀ n, Zk α k c (insert (φ/[nm n]) Γ)`; induct on the ∃-side
+  `d : Zk γ k c Δ` with running conclusion bound **`α + γ`** (`ONote.add`; `add_nf` instance gives NF,
+  `repr_add` + `Ordinal.add_lt_add_left` give strict monotonicity in `γ` for the premise-`<` conditions).
+- **Principal `exI` case** (∃-side introduces `∃⁰∼φ` at witness `n`): cut `fam n` (∀-instance) against
+  the ∃-premise on `φ/[nm n]` (complexity `< c`). This is the witness cut.
+- The non-principal cases mirror the inversions (reuse the union-reshuffle pattern; src frames the
+  running sequent as `Δ.erase (∃⁰∼φ) ∪ Γ`).
+
+**Then `cutElimStep` (§19.7, `c+1→c`, bound `ω^α = oadd α 1 0`) + `cutElim` (§19.9).** The `ω^α`
+blow-up is where the `norm<k` budget must be shown to survive — VERIFIED VIABLE this lap: `norm` is
+`max` over CNF components (`Hardy.lean:637`), so prove (small lemmas, build with their consumer):
+`norm (oadd α 1 0) = max (norm α) 1`, `norm (osucc δ) ≤ norm δ + 1`, `norm (α+γ) ≤ max (norm α)(norm γ)`.
+Towsner fixes `k` large at embedding (M4) to absorb this growth. (`Ordinal.nadd`/`♯` absent in mathlib
+v4.31.0 — use ordinary `+`/`osucc` with slack, as `src/Zinfty.lean` did.)
 
 ### Step 2 — M4 embedding `PA ⊢ φ ⟹ Zᵏ ⊢^{α,k}_c φ`
 α<ε₀, finite c (Towsner §16/§18). Reuse Foundation's finitary `Derivation`; map each rule across,
