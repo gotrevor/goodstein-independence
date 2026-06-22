@@ -1,73 +1,61 @@
-# HANDOFF — 2026-06-22 (lap 12)
+# HANDOFF — 2026-06-22 (lap 13)
 
-> **Branch** `plan` · **HEAD** `8ed1e28` · 7 commits this lap · working tree clean · build **green**
-> (`lake build GoodsteinPA`, 1258 jobs) · headline `peano_not_proves_goodstein` = honest `sorry`
-> (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms) · `wip/{OperatorZinfty,LangX,GenericZinftyProbe}.lean` all green.
-> **Lap 12 = a REVIEW lap with two findings: (a) PROVED the §19.6 norm-budget half (`cutReduceAllAux`,
-> axiom-clean); (b) PIVOTED the whole route to Buchholz's witness-FREE Boundedness analysis, which reuses
-> the done M4+M5 and avoids the witness-bounded wall.** Read `ANALYSIS-2026-06-22-lap12-buchholz-pivot.md`
-> FIRST, then `STATUS.md`, then `PENDING_WORK.md` (lap-12 top).
+> **Branch** `plan` · 8 commits this lap · working tree clean · build **green**
+> (`lake build GoodsteinPA`, 1264 jobs) · headline `peano_not_proves_goodstein` = honest `sorry`
+> (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms — anti-fraud guard intact).
+> **Lap 13 EXECUTED the Buchholz Boundedness route: read §5 end-to-end and built ALL the
+> Boundedness prerequisites green + axiom-clean in `src/`.** Read
+> `ANALYSIS-2026-06-22-lap13-boundedness-design.md` FIRST, then `PENDING_WORK.md` (lap-13 top).
 
-## 🎯 THE PIVOT (the headline of this lap — read the analysis doc)
-Reading **Buchholz "Beweistheorie" §5** (`papers/buchholz-beweistheorie-lecture-notes.pdf` pp. 26–31)
-end-to-end showed the project drifted (laps 4–11) onto Towsner's HARD witness-bounded variant. The
-**standard Gentzen analysis** bounds PA's ordinal via the **witness-FREE `Z∞`** (= our M5) + a
-**Boundedness** theorem on `TI_≺(X)` (Thm 5.4) — NOT a witness-bounded calculus. Its **Embedding** (Thm
-5.5) and **Cut-Elimination** (Thms 5.1/5.2) are EXACTLY our **M4 `embedC`** and **M5 `cutElim`**, both
-DONE & axiom-clean. So the two hardest pieces are already built; the remaining work is **Boundedness +
-Goodstein⟹TI(ε₀)** — strictly less surface than Towsner, and the textbook-standard route (= DIRECTION.md's
-original plan). The lap-11 "embedC is the wrong object / need witness-bounded `Zᵏ`" verdict was a
-**conflation**: lap 11 killed naive *witness*-extraction (height ≠ witness bound — `G(5)` at height 1),
-but Buchholz's Boundedness bounds the **order type** of `≺` via the set variable `X` + X-positive truth
-semantics `⊨^α`, sidestepping witnesses. **M6 (Hardy) + the `wip/` witness-bounded calculi drop off the
-critical path** (banked, not deleted).
+## ✅ Lap-13 deliverables (all green, axiom-clean, promoted to `src/`)
+1. **`LangX.lean`** — `structLX (S:ℕ→Prop) : Structure LX ℕ`, the **`⊨^α` carrier** (standard `ℒₒᵣ` +
+   `X↦S`) + the two `DecidableEq` instances + `eval_Xatom`. Was lap-13 task (i), the most-leveraged lego.
+2. **`ZinftyGen.lean`** — **M5 cut-elim generalised over `{L}[ORing L][Structure L ℕ][DecEq…]`**
+   (the whole 1564-line Z∞, mechanical port). `Provable.cutElim` `#print axioms` clean. Reused wholesale.
+3. **`TruthSem.lean`** — `rk`(`|n|_≺`)/`orderType`(`‖≺‖`)/`levelSet`(`U^γ`)/`models`(`⊨^γ`)/`Sat` +
+   **`models_lMap` (X-FREE INVARIANCE)** + `orderType_le_of_forall`.
+4. **`XPositive.lean`** — `XPos` + **`models_mono` (⊨^γ monotone in γ on X-positive formulas)** +
+   `eval_mono`/`val_structLX_eq`.
+5. **`Boundedness.lean`** — `Prog_≺(X)`/`TI_≺(X)`/`Xat` formula scaffolding over `LX` (de-Bruijn shapes
+   + inversion shapes verified). The home for the Boundedness theorem proper.
+6. **`wip/BoundednessProbe.lean`** — `Xatom_axiom`: the Buchholz X-atom axiom `{Xs,¬Xt}` (sᴺ=tᴺ) is
+   derivable in generic Z∞ at `(LX,structLX S)` for **any** S. (Validation; stays in wip.)
 
-## 🎯 NEXT LAP — execute the Buchholz route (`PENDING_WORK.md` lap-12 top has the full plan)
-- **0a. VERIFY (a) — DONE + two green legos BUILT this lap:**
-  - `wip/LangX.lean` — `LX := ℒₒᵣ + Xpred` (one unary set-variable `X`) + its `Language.ORing` instance
-    (6 `Sum.inl` one-liners) + numerals/`X`-atoms typecheck + the `ℒₒᵣ →ᵥ LX` hook. Plumbing was trivial.
-  - `wip/GenericZinftyProbe.lean` — M5's REAL constructs (`Form`/`nm`/`atomTrue`/`allω`/`exI`) generalise
-    over `{L}`, pinning the EXACT instance bundle: `[Language.ORing L] [Structure L ℕ] [(k)→DecidableEq
-    (L.Func k)] [(k)→DecidableEq (L.Rel k)]`. All hold for `ℒₒᵣ` and `LX` except **`Structure LX ℕ`**.
-  **Lap-13 task order:** (i) build **`Structure LX ℕ`** parametrised by a set `S ⊆ ℕ` (standard `ℒₒᵣ`
-  part + `X ↦ S`) — this DOUBLES as the carrier of Buchholz's `⊨^α` (with `S := {n : |n|_≺ < α}`), so it
-  is the single most leveraged next lego; (ii) generalise M5 (`Zinfty.lean`) + M4 (`Embedding.lean`) over
-  `{L}` + the 4 instances (header swap, ~128KB, mechanical); (iii) re-instantiate at `ℒₒᵣ` (existing
-  `src/` users) and `LX` (Boundedness). Low-risk vs. Towsner's novel-math wall.
-- **0b. VERIFY (b) — STILL OPEN:** Goodstein⟹TI_≺(X) provable in PA via the Phase-0 CNF-ε₀ encoding.
-  Not a known wall; confirm before sinking laps into Boundedness.
-- **1.** Truth semantics `⊨^α Γ` (`X := {n : |n|_≺<α}`), `Prog_≺`, ≺-norm, order type `‖≺‖`, X-positivity.
-- **2.** **Boundedness (Thm 5.4)** = the new theorem: induction on the cut-free `Provable β 0`-derivation
-  (8 cases, Buchholz p.29). Corollary `Z∞ ⊢^β_1 TI_≺(X) ⟹ ‖≺‖ ≤ 2^β`.
-- **3.** Goodstein ⟹ TI_≺(X) bridge (Kirby–Paris/Cichoń; reuse Phase-0 encoding).
-- **4.** Assembly ⟹ discharge headline, `#print axioms` clean.
+## 🎯 THE crux still open — Boundedness Thm 5.4 (the 8-case induction)
+All ingredients are now in place. **KEY SIMPLIFICATION found this lap:** our `cutElim` reduces to
+**cut-rank `0`** (fully cut-free), and Buchholz's Boundedness is stated for `⊢^β_1`; a `c=0` derivation
+is a special case, and at `c=0` there is **no `cut` node** (a cut has `cr ≥ 1`). So Boundedness for
+`Provable β 0` needs **NO cut cases** — Buchholz's cases 6/7/8 are vacuous. The induction on the
+`Deriv` over `LX` then has cases:
+- `axL`/`axTrue`/`verumR` = Buchholz case 1 (Ax): true X-free literal → `models_lMap`; X-pair `{Xs,¬Xt}`
+  → `Xatom_axiom`-style reasoning (`|s|_≺ = |t|_≺ ≤ α < α+2^β`).
+- `weak` = Rep/structural (case 5): IH + `Sat` weakening.
+- `andI` = case 3 (⋀ C, C∈Γ): IH on both + X-positivity (`models_mono`).
+- `orI` = case 4 (⋁ C): IH.
+- `allω` = the inner `∀y≺x` / Γ-∀: IH over the numeral family.
+- `exI` = **case 2 (the heart): principal `∃` is `¬Prog` ⟹ invert (`allInv` on the inner `∀y≺x`) to get
+  `…,∀y≺s₀ Xy` and `…,¬Xs₀`, IH both, combine** (else principal is a Γ-`∃`, = case 4). Conclude
+  `Sat lt (α+2^β) Γ`. Uses `models_mono` for the `β₀≤β` exponent bumps.
+Then **Corollary** `‖≺‖ ≤ 2^β` via `orderType_le_of_forall`.
 
-## ✅ Lap-12 (a): §19.6 norm-machinery PROVED (`wip/OperatorZinfty.lean`, axiom-clean) — banked off-path
-`cutReduceAllAux` (Towsner's ∀/∃ cut-reduction on the witness-bounded `Zekd`) now compiles with 0 sorries,
-`#print axioms = [propext, choice, Quot.sound]`. Cracked the **norm-budget** half of the 5-lap wall via a
-self-derived **norm-carrying `ZekdProv` wrapper** (`∃ α'≤α, α'.NF ∧ norm α'<k+d ∧ Zekd α' …`) + threaded
-`norm γ<k+dd` + `+1` d-bump (ADDENDUM 6). All 10 induction cases incl. the key `allω`-commuting +
-`exI`-principal. **BUT** the **witness-budget** half is numeric-unclosable (ADDENDUM 7): `allInv` gives the
-∀-family at `max k₀ n`, and Towsner's commuting-ω bound is false for large `n` — needs the operator `H`.
-This proof is reusable norm-machinery for an operator-`H` build IF the Buchholz route ever stalls; it is
-NOT on the live chain. (`le_add_right_NF` helper also added.)
-
-## State of the spine (Buchholz route)
-- **M1, M2, Phase 0/1** — done, clean. Phase-0 encoding feeds the Goodstein⟹TI bridge.
-- **M4 embedding** (`src/Embedding.lean`, `embedC`) — **done, axiom-clean = Buchholz Thm 5.5.** ON path.
-- **M5 ε₀ cut-elim** (`src/Zinfty.lean`, `cutElim`) — **done, axiom-clean = Buchholz Thms 5.1/5.2/5.3.** ON path.
-- **Boundedness (Thm 5.4)** — the NEW theorem, lap-13 target.
-- **M6 Hardy lower bound** (`src/LowerBound.lean`) — done, clean, but **OFF the critical path** (banked).
-- **`wip/` witness-bounded calculi** — banked off-path; lap-12 `cutReduceAllAux` is the furthest reached.
+## 🎯 After Boundedness — assemble the headline
+- **M4 `embedC` over LX** (mechanical `{L}` generalisation like M5; PA(X) axioms are true in
+  `structLX S` for *any* S, since first-order induction holds for any fixed unary predicate) ⟹ Thm 5.5.
+- **Thm 5.6** `Z⊢TI(X) ⟹ ‖≺‖<ε₀` = 5.5 + cutElim (to `c=0`, height `<ε₀`) + 5.4-Corollary.
+- **Goodstein⟹TI_≺(X)** bridge (VERIFY-(b)) + arithmetization seam (OT↔ε₀, `‖≺‖=ε₀`) ⟹ discharge headline.
 
 ## Notes
 - **LOCKED untouched:** `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `sorry` intact.
-- **Literature on disk:** Buchholz §5 (the route), Buss Handbook ch.II (PA proof theory), Cichoń/Kirby–Paris
-  (Goodstein⟹ε₀). `Read` the PDFs directly (`pages` param). `papers/SOURCES.md` catalogs them.
-- **`WebFetch` dead; `WebSearch` works.** No open `ON-LINE-REQUEST.md`.
-- **Build:** `lake build GoodsteinPA` (1258); test wip via `lake env lean wip/OperatorZinfty.lean`.
-- **Aristotle:** idle (no genuinely-open lemma on the live chain yet; Boundedness will furnish one).
+- **Build:** `lake build GoodsteinPA` (1264). Test wip via `lake env lean wip/<f>.lean`.
+- **Literature on disk:** Buchholz §5 = the route (`papers/buchholz-beweistheorie-lecture-notes.pdf`
+  pp.26–31, READ this lap; the precise statements are quoted in the lap-13 analysis doc). Read PDFs via
+  the `pages` param. No open `ON-LINE-REQUEST.md`. `WebFetch` dead; `WebSearch` works.
+- **Aristotle:** idle. Next genuinely-open self-contained lemma to feed: the `exI`/`¬Prog`-inversion
+  core of Boundedness once its statement is pinned, or the OT↔ε₀ order-type seam.
+- **Banked off-path (do NOT resume):** witness-bounded `wip/` calculi (Towsner/operator-H). The ℒₒᵣ-only
+  `src/Zinfty.lean`/`src/Embedding.lean` stay for existing users; the live chain uses the LX versions.
 
-## Lap-12 commits
-- `605d5ba` §19.6 `cutReduceAllAux` PROVED on `Zekd` (norm-machinery, axiom-clean).
-- (this lap, docs) ADDENDUM 6/7, the Buchholz-pivot analysis, STATUS/PENDING/HANDOFF refresh.
+## Lap-13 commits (8)
+structLX carrier · generic M5 (axiom-clean) · promote LangX+ZinftyGen · X-atom probe + Buchholz
+design doc · TruthSem (⊨^γ + X-free invariance) · XPositive (⊨^γ monotonicity) · Boundedness
+Prog/TI scaffolding · PENDING/HANDOFF refresh.
