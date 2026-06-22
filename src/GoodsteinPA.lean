@@ -22,3 +22,5 @@ import GoodsteinPA.Hardy
 import GoodsteinPA.Domination
 import GoodsteinPA.LowerBound
 import GoodsteinPA.Embedding
+
+import GoodsteinPA.EmbeddingX
