@@ -16,10 +16,16 @@ Full `PXFc` port: builders + inversions-at-cr≤c + cut reductions + truth layer
 tail `orderType_le_of_TIprovable` (`PXFc α c {TI} ⟹ ‖≺‖ ≤ 2^(ω_c^α)`). **C₂ is now the only connective
 gap to Thm 5.6.** (Original C₁ plan kept below for reference.)
 
-### C₂ — `embedC` over generic LX — **THE NEXT TARGET (lap 16)**. See HANDOFF §"NEXT (lap 16)".
-Port `src/Embedding.lean`'s `embedC` from `ℒₒᵣ`/`ZinftyF` to generic `ZinftyGen`/`LX`, tracking
-`XFreeAx` (output a `PXFc`). Structural cases mechanical. **X-induction axioms via the meta-induction
-tower of `cut`s on `φ(i)` + `provable_em` (NOT `provable_true`).** `𝗣𝗔⁻` X-free axioms via `provable_true`.
+### C₂ — `embedC` over LX. **CRUX DONE lap 15; structural port is THE NEXT TARGET (lap 16).**
+Done lap 15 (`src/GoodsteinPA/XFreeCutElim.lean`, axiom-clean): `provable_em_x` (LX excluded middle →
+`PXFc`, `XFreeAx`-automatic) + **`metaInduction`** (the X-induction embedding via a cut-tower on `ψ(i)`,
+`XFreeAx`-preserving — the faithfulness-critical case). **Remaining = the STRUCTURAL `embedC` port:**
+mirror `src/Embedding.lean:525–660` (induct on `Derivation2 (𝗣𝗔(LX):Schema) Γ`, emit `PXFc`), swapping
+`ZinftyF`/`ℒₒᵣ` → `ZinftyGen`/`LX`. `axm`: PA⁻(LX) via `provable_true_x` (port `provable_true`, X-free
+`axTrue`); X-induction via `metaInduction` (+ Foundation-DSL to build `step` from `ψ` + strip
+`univCl`/`🡒`). `exs`: port `exI_closed`. **First resolve: what is `Z ⊢ TI(X)` in Lean?** (the target
+schema is entangled with F — check Foundation's `PeanoMinus`/`InductionScheme` genericity over `ORing`).
+See HANDOFF §"NEXT (lap 16)" for the full breakdown.
 
 ### C₁ original plan (reference; superseded by the DONE above):
 Introduce in `Boundedness.lean` (or a new `src/GoodsteinPA/XFreeCutElim.lean`) the cut-rank-carrying carrier

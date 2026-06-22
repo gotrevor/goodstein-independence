@@ -56,9 +56,12 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
   `XFreeAx`** (it fires only on an `axTrue` leaf *equal to* the cut atom — i.e. an X-`axTrue` leaf, which
   `XFreeAx` forbids). So `atomCut` preserves `XFreeAx` when cutting X-atoms on `XFreeAx` inputs, and the
   lap-14 C₁ plan (port cutElim to a `cr`-carrying `PXFc` twin, all the way to cr=0) is **feasible as
-  written**. No refactor; proceed to C₁. Verified ledger from real `#print axioms` (headline still honest
-  `sorry`; `boundedness`/`orderType_le_of_TIderiv`/inversion suite all `[propext,choice,Quot.sound]`).
-  Refreshed STATUS; M1 (`goodsteinTerminates_re`) reconfirmed axiom-clean (Phase-0 closed).
+  written**. **Then GROUND IT OUT (same lap):** built `src/GoodsteinPA/XFreeCutElim.lean` (1456 lines,
+  all `[propext,choice,Quot.sound]`) — **C₁ DONE** (the full §19 cut-elim ported to the `XFreeAx`-tracking
+  `PXFc` carrier: builders + inversions-at-cr≤c + cut reductions + truth layer + `cutElim`), **D DONE**
+  (`orderType_le_of_TIprovable` = Thm 5.6 tail), and the **C₂ crux** (`metaInduction`, the X-induction
+  embedding via a cut-tower — the lap-14-flagged faithfulness case — + `provable_em_x`, LX excluded
+  middle). Headline still an honest `sorry`. **Remaining to Thm 5.6: the C₂ structural `embedC` port.**
 - **2026-06-22 (lap 14 — CRUX CRACKED: Boundedness Thm 5.4 + the full corollary B, axiom-clean):**
   Proved **`boundedness`** (Thm 5.4) — the 9-`Deriv`-case nested induction (outer strong-induction on the
   ordinal height `o d`, inner structural), hardest **case 2** (`¬Prog` `∃⁰`-inversion + the `α→α+2^{β₀}`
@@ -242,6 +245,8 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 | `embedC` (M4, `src/Embedding`) | PA⊢φ ⟹ Z∞⊢φ (ℒₒᵣ) | `propext, choice, Quot.sound` | 🟢 clean — needs C₂ generic-LX port for the X-route |
 | `PXFc.cutElim` (C₁, **lap 15**, `src/XFreeCutElim`) | `XFreeAx` cut-elim → cr=0 | `propext, choice, Quot.sound` | 🟢 clean — full §19 port to the `PXFc` carrier; X-atom truth branch vacuous |
 | `orderType_le_of_TIprovable` (D, **lap 15**) | Thm 5.6 tail `PXFc {TI} ⟹ ‖≺‖≤2^(ω_c^α)` | `propext, choice, Quot.sound` | 🟢 clean — C₁ ∘ corollary B; modulo seam hyps `hprec`/`hprecXPos` (F) |
+| `provable_em_x` (C₂, **lap 15**) | `Z∞` excluded middle over LX | `propext, choice, Quot.sound` | 🟢 clean — `XFreeAx`-automatic (never `axTrue`) |
+| `metaInduction` (C₂ crux, **lap 15**) | X-induction via cut-tower (Buchholz 5.5) | `propext, choice, Quot.sound` | 🟢 clean — the faithfulness-critical embedding step; abstract in `step` (Foundation-DSL glue ⟹ lap 16) |
 | `hardy_le_of_lt` (M6, `src/Hardy`) | Hardy index monotonicity (Hmono) | `propext, choice, Quot.sound` | 🟢 clean |
 | `lowerBound_existential_hardy` (M6) | ∃-fragment 17.1, concrete Hardy/`G` | `propext, choice, Quot.sound` | 🟢 clean — zero abstract hyps |
 | `B.allInv` (M6) | ∀-inversion (I∀-frontier resolution) | `propext, choice, Quot.sound` | 🟢 clean |
