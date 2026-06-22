@@ -973,4 +973,145 @@ theorem PXFc.removeFalsum {B : Ordinal.{0}} {Γ : Seq LX}
   refine (PXFc.removeFalsumAux d hxf hcr (Finset.mem_insert_self _ _)).weakening ?_ |>.mono ho le_rfl
   intro x hx; simp only [Finset.mem_erase, Finset.mem_insert] at hx; exact (hx.2).resolve_left hx.1
 
+/-- Induction core of atomic cut (Towsner Thm 19.2): cut a `rel r v` derivation `d` against a fixed
+`nrel r v` derivation `hNC`, `XFreeAx`-preserving. The truth-layer (`removeFalseLit`) branch fires
+only on an `axTrue` leaf equal to the cut atom; `XFreeAx` of that leaf forces the cut atom X-free
+(`xfree_transport`), so `removeFalseLit`'s X-free side condition is met (and at an X-atom cut the
+branch is vacuous). -/
+theorem PXFc.atomCutAux {k} (r : (LX).Rel k) (v) {B : Ordinal.{0}} {Γ : Seq LX}
+    (hNC : PXFc B 0 (insert (Semiformula.nrel r v) Γ)) :
+    ∀ {Δ : Seq LX} (d : Deriv Δ), XFreeAx d → d.cr ≤ (0 : ℕ∞) → (Semiformula.rel r v) ∈ Δ →
+      PXFc (B + d.o + 1) 0 (Δ.erase (Semiformula.rel r v) ∪ Γ) := by
+  intro Δ d
+  induction d with
+  | @axL Δ k' r' v' hp hn =>
+    intro _ _ _
+    simp only [Deriv.o]
+    have hnn : (Semiformula.nrel r' v' : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
+      Finset.mem_erase.mpr ⟨by intro h; exact absurd h (by simp), hn⟩
+    by_cases hrel : (Semiformula.rel r' v' : Form LX) = Semiformula.rel r v
+    · have hnrv : (Semiformula.nrel r' v' : Form LX) = Semiformula.nrel r v := by
+        rw [← Semiformula.neg_rel r' v', hrel, Semiformula.neg_rel]
+      refine (hNC.weakening ?_).mono ?_ le_rfl
+      · intro x hx
+        simp only [Finset.mem_insert] at hx
+        rcases hx with rfl | hxΓ
+        · exact Finset.mem_union_left _ (hnrv ▸ hnn)
+        · exact Finset.mem_union_right _ hxΓ
+      · exact le_trans le_self_add (le_of_lt (lt_add_of_pos_right _ one_pos))
+    · have hpp : (Semiformula.rel r' v' : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
+        Finset.mem_erase.mpr ⟨hrel, hp⟩
+      exact (PXFc.axL r' v' (Finset.mem_union_left _ hpp)
+        (Finset.mem_union_left _ hnn)).mono zero_le le_rfl
+  | @axTrue Δ k' b' r' v' htrue' hmem' =>
+    intro hxf _ _
+    simp only [Deriv.o]
+    by_cases heq : (signedLit b' r' v' : Form LX) = Semiformula.rel r v
+    · have htrue_rel : LitTrue (Semiformula.rel r v) := heq ▸ htrue'
+      have hfalse : ¬ LitTrue (signedLit false r v) := by
+        rw [← litTrue_flip false r v]; simpa [signedLit] using htrue_rel
+      have hxr : Sum.isLeft r = true := xfree_transport b' r' v' hxf true r v heq
+      rcases hNC with ⟨dN, hoN, hcrN, hxfN⟩
+      have hrm := PXFc.removeFalseLitAux false r v hxr hfalse dN hxfN hcrN
+        (show signedLit false r v ∈ insert (Semiformula.nrel r v) Γ by simp [signedLit])
+      refine (hrm.weakening ?_).mono ?_ le_rfl
+      · intro x hx
+        have hxΓ : x ∈ Γ := by
+          have h1 := Finset.mem_of_mem_erase hx
+          have h2 := Finset.ne_of_mem_erase hx
+          rcases Finset.mem_insert.mp h1 with rfl | h3
+          · exact absurd (show (Semiformula.nrel r v : Form LX) = signedLit false r v by simp [signedLit]) h2
+          · exact h3
+        exact Finset.mem_union_right _ hxΓ
+      · exact le_trans hoN (le_trans le_self_add (le_of_lt (lt_add_of_pos_right _ one_pos)))
+    · have hll : (signedLit b' r' v' : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
+        Finset.mem_erase.mpr ⟨heq, hmem'⟩
+      exact (PXFc.axTrue b' r' v' hxf htrue' (Finset.mem_union_left _ hll)).mono zero_le le_rfl
+  | @verumR Δ h =>
+    intro _ _ _
+    simp only [Deriv.o]
+    have ht : (⊤ : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
+      Finset.mem_erase.mpr ⟨by simp, h⟩
+    exact (PXFc.verumR (Finset.mem_union_left _ ht)).mono zero_le le_rfl
+  | @weak Δ' Δ d' hsub ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    by_cases hd : (Semiformula.rel r v) ∈ Δ'
+    · exact (ih hxf hcr hd).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase] at hx ⊢
+        rcases hx with ⟨hne, hxΔ'⟩ | hxΓ
+        · exact Or.inl ⟨hne, hsub hxΔ'⟩
+        · exact Or.inr hxΓ)
+    · refine (show PXFc d'.o 0 Δ' from ⟨d', le_rfl, hcr, hxf⟩).weakening ?_ |>.mono ?_ le_rfl
+      · intro x hx
+        exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+      · exact le_trans (CanonicallyOrderedAdd.le_add_self d'.o B)
+          (le_of_lt (lt_add_of_pos_right _ one_pos))
+  | @andI Γ₀ χ₀ χ₁ d₀ d₁ ih₀ ih₁ =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (χ₀ ⋏ χ₁) ≠ (Semiformula.rel r v) := by intro h; simp [Wedge.wedge] at h
+    have hmem0 : (Semiformula.rel r v) ∈ Γ₀ :=
+      (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have hcr0 : d₀.cr ≤ (0 : ℕ∞) := le_trans (le_max_left _ _) hcr
+    have hcr1 : d₁.cr ≤ (0 : ℕ∞) := le_trans (le_max_right _ _) hcr
+    have P0 : PXFc (B + d₀.o + 1) 0 (insert χ₀ (Γ₀.erase (Semiformula.rel r v) ∪ Γ)) :=
+      (ih₀ hxf.1 hcr0 (Finset.mem_insert_of_mem hmem0)).weakening (cb_frame_in χ₀ _ Γ₀ Γ)
+    have P1 : PXFc (B + d₁.o + 1) 0 (insert χ₁ (Γ₀.erase (Semiformula.rel r v) ∪ Γ)) :=
+      (ih₁ hxf.2 hcr1 (Finset.mem_insert_of_mem hmem0)).weakening (cb_frame_in χ₁ _ Γ₀ Γ)
+    exact ((PXFc.andI χ₀ χ₁ P0 P1).weakening (cb_frame_out hhead Γ₀ Γ)).mono
+      (cb_bnd B d₀.o d₁.o) le_rfl
+  | @orI Γ₀ χ₀ χ₁ d' ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (χ₀ ⋎ χ₁) ≠ (Semiformula.rel r v) := by intro h; simp [Vee.vee] at h
+    have hmem0 : (Semiformula.rel r v) ∈ Γ₀ :=
+      (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc (B + d'.o + 1) 0 (insert χ₀ (insert χ₁ (Γ₀.erase (Semiformula.rel r v) ∪ Γ))) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+    exact ((PXFc.orI χ₀ χ₁ P).weakening (cb_frame_out hhead Γ₀ Γ)).mono (cb_bnd1 B d'.o) le_rfl
+  | @allω Γ₀ χ' d' ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (∀⁰ χ') ≠ (Semiformula.rel r v) := by intro h; simp [UnivQuantifier.all] at h
+    have hmem0 : (Semiformula.rel r v) ∈ Γ₀ :=
+      (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have key : ∀ n, PXFc (B + (d' n).o + 1) 0
+        (insert (χ'/[nm n]) (Γ₀.erase (Semiformula.rel r v) ∪ Γ)) := fun n =>
+      (ih n (hxf n) (le_trans (le_iSup (fun m => (d' m).cr) n) hcr)
+        (Finset.mem_insert_of_mem hmem0)).weakening (cb_frame_in (χ'/[nm n]) _ Γ₀ Γ)
+    exact ((PXFc.allω χ' key).weakening (cb_frame_out hhead Γ₀ Γ)).mono
+      (cb_bnd_sup B (fun n => (d' n).o)) le_rfl
+  | @exI Γ₀ χ' n d' ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (∃⁰ χ') ≠ (Semiformula.rel r v) := by intro h; simp [ExsQuantifier.exs] at h
+    have hmem0 : (Semiformula.rel r v) ∈ Γ₀ :=
+      (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc (B + d'.o + 1) 0 (insert (χ'/[nm n]) (Γ₀.erase (Semiformula.rel r v) ∪ Γ)) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem hmem0)).weakening (cb_frame_in (χ'/[nm n]) _ Γ₀ Γ)
+    exact ((PXFc.exI χ' n P).weakening (cb_frame_out hhead Γ₀ Γ)).mono (cb_bnd1 B d'.o) le_rfl
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro _ hcr _
+    simp only [Deriv.cr] at hcr
+    exact absurd ((le_max_left _ _).trans hcr) (by simp)
+
+/-- **Atomic cut elimination** (Towsner Thm 19.2), `XFreeAx`-preserving. -/
+theorem PXFc.atomCut {k} (r : (LX).Rel k) (v) {A B : Ordinal.{0}} {Γ : Seq LX}
+    (hC : PXFc A 0 (insert (Semiformula.rel r v) Γ))
+    (hNC : PXFc B 0 (insert (Semiformula.nrel r v) Γ)) :
+    PXFc (B + A + 1) 0 Γ := by
+  rcases hC with ⟨d, ho, hcr, hxf⟩
+  refine ((PXFc.atomCutAux r v hNC d hxf hcr (Finset.mem_insert_self _ _)).weakening
+    (show (insert (Semiformula.rel r v) Γ).erase (Semiformula.rel r v) ∪ Γ ⊆ Γ from by
+      intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢;
+      tauto)).mono ?_ le_rfl
+  exact add_le_add_left ((add_le_add_iff_left B).mpr ho) 1
+
 end GoodsteinPA.XFreeCutElim
