@@ -33,12 +33,26 @@ survival crux). Port `src/Zinfty.lean`'s measure-style version to parameter-styl
 - The non-principal cases mirror the inversions (reuse the union-reshuffle pattern; src frames the
   running sequent as `Δ.erase (∃⁰∼φ) ∪ Γ`).
 
-**Then `cutElimStep` (§19.7, `c+1→c`, bound `ω^α = oadd α 1 0`) + `cutElim` (§19.9).** The `ω^α`
-blow-up is where the `norm<k` budget must be shown to survive — VERIFIED VIABLE this lap: `norm` is
-`max` over CNF components (`Hardy.lean:637`), so prove (small lemmas, build with their consumer):
-`norm (oadd α 1 0) = max (norm α) 1`, `norm (osucc δ) ≤ norm δ + 1`, `norm (α+γ) ≤ max (norm α)(norm γ)`.
-Towsner fixes `k` large at embedding (M4) to absorb this growth. (`Ordinal.nadd`/`♯` absent in mathlib
-v4.31.0 — use ordinary `+`/`osucc` with slack, as `src/Zinfty.lean` did.)
+**Then `cutElimStep` (§19.7, `c+1→c`, bound `ω^α = oadd α 1 0`) + `cutElim` (§19.9).**
+
+⚠️ **KEY FINDING (lap 6) — the `norm<k` budget does NOT survive ordinal addition; it grows.** `norm`
+is `max` over CNF coefficients (`Hardy.lean:637`), and addition MERGES coefficients when leading
+exponents coincide: machine-checked `norm ω = 1` but `norm (ω+ω) = norm (ω·2) = 2`. So the naive
+"`norm(α+γ) ≤ max`" is **false**; the true bound is additive (`norm(α+γ) ≤ norm α + norm γ`, to verify).
+Consequences for the cut-elim design:
+- **§19.7 `ω^α` blow-up is SAFE:** `norm (oadd α 1 0) = max (norm α) 1` (machine-checked, `norm_omegaPow`),
+  coefficient stays `1` — a pure ω-tower never bumps `norm` beyond `max(norm α, 1)`. So iterating the
+  rank-reduction keeps the budget (for `k ≥ 2`).
+- **§19.6 within-rank addition is where `norm` grows.** The ω-rule combines premises by *supremum*
+  (bound-as-parameter, no sum), NOT addition — so it doesn't bump `norm`. Only the §19.6 cut-combination
+  (∀-family `α` + ∃-side `γ`) is an addition, and cut-elim performs finitely many such reductions (cut
+  rank `c` finite), so `norm` grows by a *bounded* amount ⇒ choosing `k` large enough at embedding (M4)
+  absorbs it. **The precise bookkeeping (how Towsner threads `τ`/`k` through §19; the exact growth bound)
+  needs the paper — see `ON-LINE-REQUEST.md`.** Do NOT claim cut-elim closed until this is pinned down.
+- Helpers banked this lap: `lt_osucc`, `add_lt_add_left_NF`, `le_add_left_NF`, `norm_omegaPow`. Still
+  need (build with §19.6): `norm (α+γ) ≤ norm α + norm γ`, `norm (osucc δ) ≤ norm δ + 1`.
+(`Ordinal.nadd`/`♯` absent in mathlib v4.31.0; ordinary `+`/`osucc` with slack, as `src/Zinfty.lean` did
+— note natural sum would NOT help here, it merges coefficients the same way.)
 
 ### Step 2 — M4 embedding `PA ⊢ φ ⟹ Zᵏ ⊢^{α,k}_c φ`
 α<ε₀, finite c (Towsner §16/§18). Reuse Foundation's finitary `Derivation`; map each rule across,

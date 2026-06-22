@@ -23,9 +23,10 @@ the connecting spine — see Outstanding.
   `SyntacticFormula ℒₒᵣ`** (ONote-indexed, B-style, with the truth rule `τ α<k` + `∃`-witness bound
   `v≤h_α(k)` + cut) and its whole §19.2–19.5 cut-elim front: `mono_k`/`mono_c`/`wk`/`weakening`, the
   **full inversion suite** (∨, ∧-L/R, ∀ — all axiom-clean), and the **§19.5 ∧/∨ cut-reductions**
-  (`cutReduceConj`/`Disj`, axiom-clean). Confirmed the design is viable: `norm` is `max` over CNF
-  components, so the `norm<k` budget survives the cut-elim ordinal growth (`norm(ω^α)=max(norm α)1`,
-  etc.). Remaining: §19.6 (∀/∃ reduction) + `cutElimStep`/`cutElim`, then M4 + M7.
+  (`cutReduceConj`/`Disj`, axiom-clean). **Finding:** the `ω^α` blow-up preserves the `norm<k` budget
+  (`norm(ω^α)=max(norm α,1)`, machine-checked) but ordinal *addition* bumps it (`norm(ω+ω)=2`) — so
+  §19.6's bound bookkeeping needs care (filed `ON-LINE-REQUEST.md` for Towsner's precise `τ`/`k`
+  threading). Remaining: §19.6 (∀/∃ reduction) + `cutElimStep`/`cutElim`, then M4 + M7.
 - **2026-06-22 (lap 5):** RESOLVED the gAll/I∀ lower-bound frontier (the lap-4 wall), machine-checked.
   Ported the Hardy hierarchy → `src/Hardy.lean` (`hardy`/`norm` = Towsner `h_α`/`τ`); built the
   witness-bounded calculus `B` over `ONote` with the **concrete** Hardy data; proved

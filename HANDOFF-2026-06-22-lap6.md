@@ -39,11 +39,19 @@ the principal `exI` case. Parameter-style design (worked out this lap, ready to 
   `φ/[nm n]` (complexity `< c`). The witness cut.
 - Non-principal cases mirror the inversions; src frames the running sequent as `Δ.erase (∃⁰∼φ) ∪ Γ`.
 
-Then **`cutElimStep` (§19.7, `c+1→c`, bound `ω^α = oadd α 1 0`)** + **`cutElim` (§19.9)**. The `ω^α`
-blow-up is where the `norm<k` budget must survive — **VERIFIED VIABLE this lap**: `norm` is `max` over
-CNF components (`Hardy.lean:637`), so the small lemmas `norm(oadd α 1 0)=max(norm α)1`,
-`norm(osucc δ)≤norm δ+1`, `norm(α+γ)≤max(norm α)(norm γ)` hold (build them with their consumer, not as
-orphans). Towsner fixes `k` large at embedding (M4) to absorb the growth.
+Then **`cutElimStep` (§19.7, `c+1→c`, bound `ω^α = oadd α 1 0`)** + **`cutElim` (§19.9)**.
+
+⚠️ **KEY FINDING (lap 6) — the `norm<k` budget grows under ordinal addition.** Machine-checked:
+`norm ω = 1` but `norm (ω+ω) = 2` (addition merges equal-exponent CNF coefficients). So my earlier
+"`norm(α+γ) ≤ max`" was WRONG. The accurate picture:
+- **§19.7 `ω^α` blow-up is SAFE** — `norm(ω^α) = max(norm α, 1)` (machine-checked `norm_omegaPow`),
+  coefficient stays 1, so the ω-tower never bumps the budget (`k ≥ 2`).
+- **§19.6 within-rank addition is where `norm` grows.** The ω-rule combines by *supremum* (no sum),
+  only the §19.6 cut-combination (∀-family + ∃-side) adds — finitely many times — so the growth is
+  bounded and a large `k` (chosen at embedding) plausibly absorbs it. **The precise bookkeeping needs
+  Towsner §17–§19 — `ON-LINE-REQUEST.md` filed this lap.** Do NOT claim cut-elim closed until pinned.
+- Banked helpers: `lt_osucc`, `add_lt_add_left_NF`, `le_add_left_NF`, `norm_omegaPow`. (Natural sum
+  would NOT help — it merges coefficients identically.)
 
 ## Then the rest of the 5-step spine (see `ANALYSIS-2026-06-22-bounding-resolution.md` §"M4 scoping")
 - **Step 2 — M4 embedding** `PA ⊢ φ ⟹ Zᵏ ⊢^{α,k}_c φ` (Foundation-heavy; reuse finitary `Derivation`,
