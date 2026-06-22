@@ -389,6 +389,162 @@ theorem allInv {φ₀ : SyntacticSemiformula ℒₒᵣ 1} (n₀ : ℕ) :
       exact Zk.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF (lt_of_lt_of_le hτφ (le_max_left _ _))
         (lt_of_lt_of_le hτψ (le_max_left _ _)) P₁ P₂
 
+/-- **∧-inversion, left** (Towsner §19.3): replace `φ ⋏ ψ` by `φ`, same `(α,k,c)`. -/
+theorem andInvL {φ ψ : Form} : ∀ {α k c Γ}, Zk α k c Γ → (φ ⋏ ψ) ∈ Γ →
+    Zk α k c (insert φ (Γ.erase (φ ⋏ ψ))) := by
+  intro α k c Γ d
+  induction d with
+  | @axL α k c Γ ar r v hp hn =>
+      intro _
+      refine Zk.axL r v ?_ ?_ <;>
+        exact Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), by assumption⟩)
+  | @verumR α k c Γ h =>
+      intro _
+      exact Zk.verumR (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩))
+  | @trueRel α k c Γ ar r v htrue hτ hmem =>
+      intro _
+      exact Zk.trueRel r v htrue hτ (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
+  | @trueNrel α k c Γ ar r v htrue hτ hmem =>
+      intro _
+      exact Zk.trueNrel r v htrue hτ (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
+  | @wk α k c Δ Γ hsub _ ih =>
+      intro hmem
+      by_cases hd : (φ ⋏ ψ) ∈ Δ
+      · exact Zk.wk (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hd)
+      · refine Zk.wk ?_ (by assumption)
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+  | @weak α β k c Δ Γ hβ hβNF hαNF hτ hsub _ ih =>
+      intro hmem
+      by_cases hd : (φ ⋏ ψ) ∈ Δ
+      · exact Zk.weak hβ hβNF hαNF hτ
+          (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hd)
+      · refine Zk.weak hβ hβNF hαNF hτ ?_ (by assumption)
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+  | @andI α βφ' βψ' k c Γ₀ φ' ψ' hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ dφ _ ihφ ihψ =>
+      intro hmem
+      by_cases hhd : (φ' ⋏ ψ') = (φ ⋏ ψ)
+      · obtain ⟨rfl, rfl⟩ := (Semiformula.and_inj _ _ _ _).mp hhd.symm
+        rw [Finset.erase_insert_eq_erase]
+        by_cases hd : (φ ⋏ ψ) ∈ Γ₀
+        · exact Zk.weak hβφ hβφNF hαNF hτφ (princAllSub (φ ⋏ ψ) _ Γ₀)
+            (ihφ (Finset.mem_insert_of_mem hd))
+        · rw [Finset.erase_eq_of_notMem hd]
+          exact Zk.weak hβφ hβφNF hαNF hτφ (Finset.Subset.refl _) dφ
+      · have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhd e.symm
+        have Pφ := Zk.wk (inv1Push (φ ⋏ ψ) _ φ' Γ₀) (ihφ (Finset.mem_insert_of_mem hmem0))
+        have Pψ := Zk.wk (inv1Push (φ ⋏ ψ) _ ψ' Γ₀) (ihψ (Finset.mem_insert_of_mem hmem0))
+        exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhd Γ₀)
+          (Zk.andI φ' ψ' hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ Pφ Pψ)
+  | @orI α β k c Γ₀ φ' ψ' hβ hβNF hαNF hτ _ ih =>
+      intro hmem
+      have hhead : (φ' ⋎ ψ') ≠ (φ ⋏ ψ) := by intro h; simp [Vee.vee, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zk.wk (inv1Push2 (φ ⋏ ψ) _ φ' ψ' Γ₀)
+        (ih (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0)))
+      exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zk.orI φ' ψ' hβ hβNF hαNF hτ P)
+  | @allω α k c Γ₀ χ β hβ hβNF hαNF hτ _ ih =>
+      intro hmem
+      have hhead : (∀⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [UnivQuantifier.all, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have key : ∀ n, Zk (β n) (max k n) c (insert (χ/[nm n]) (insert φ (Γ₀.erase (φ ⋏ ψ)))) :=
+        fun n => Zk.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih n (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zk.allω χ β hβ hβNF hαNF hτ key)
+  | @exI α β k c Γ₀ χ n hβ hβNF hαNF hτ hbound _ ih =>
+      intro hmem
+      have hhead : (∃⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [ExsQuantifier.exs, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zk.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zk.exI χ n hβ hβNF hαNF hτ hbound P)
+  | @cut α βφ' βψ' k c Γ₀ χ hcompl hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ih₁ ih₂ =>
+      intro hmem
+      have P₁ := Zk.wk (inv1Push (φ ⋏ ψ) _ χ Γ₀) (ih₁ (Finset.mem_insert_of_mem hmem))
+      have P₂ := Zk.wk (inv1Push (φ ⋏ ψ) _ (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
+      exact Zk.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ P₁ P₂
+
+/-- **∧-inversion, right** (Towsner §19.3): replace `φ ⋏ ψ` by `ψ`, same `(α,k,c)`. -/
+theorem andInvR {φ ψ : Form} : ∀ {α k c Γ}, Zk α k c Γ → (φ ⋏ ψ) ∈ Γ →
+    Zk α k c (insert ψ (Γ.erase (φ ⋏ ψ))) := by
+  intro α k c Γ d
+  induction d with
+  | @axL α k c Γ ar r v hp hn =>
+      intro _
+      refine Zk.axL r v ?_ ?_ <;>
+        exact Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), by assumption⟩)
+  | @verumR α k c Γ h =>
+      intro _
+      exact Zk.verumR (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩))
+  | @trueRel α k c Γ ar r v htrue hτ hmem =>
+      intro _
+      exact Zk.trueRel r v htrue hτ (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
+  | @trueNrel α k c Γ ar r v htrue hτ hmem =>
+      intro _
+      exact Zk.trueNrel r v htrue hτ (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩))
+  | @wk α k c Δ Γ hsub _ ih =>
+      intro hmem
+      by_cases hd : (φ ⋏ ψ) ∈ Δ
+      · exact Zk.wk (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hd)
+      · refine Zk.wk ?_ (by assumption)
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+  | @weak α β k c Δ Γ hβ hβNF hαNF hτ hsub _ ih =>
+      intro hmem
+      by_cases hd : (φ ⋏ ψ) ∈ Δ
+      · exact Zk.weak hβ hβNF hαNF hτ
+          (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hd)
+      · refine Zk.weak hβ hβNF hαNF hτ ?_ (by assumption)
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+  | @andI α βφ' βψ' k c Γ₀ φ' ψ' hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ dψ ihφ ihψ =>
+      intro hmem
+      by_cases hhd : (φ' ⋏ ψ') = (φ ⋏ ψ)
+      · obtain ⟨rfl, rfl⟩ := (Semiformula.and_inj _ _ _ _).mp hhd.symm
+        rw [Finset.erase_insert_eq_erase]
+        by_cases hd : (φ ⋏ ψ) ∈ Γ₀
+        · exact Zk.weak hβψ hβψNF hαNF hτψ (princAllSub (φ ⋏ ψ) _ Γ₀)
+            (ihψ (Finset.mem_insert_of_mem hd))
+        · rw [Finset.erase_eq_of_notMem hd]
+          exact Zk.weak hβψ hβψNF hαNF hτψ (Finset.Subset.refl _) dψ
+      · have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhd e.symm
+        have Pφ := Zk.wk (inv1Push (φ ⋏ ψ) _ φ' Γ₀) (ihφ (Finset.mem_insert_of_mem hmem0))
+        have Pψ := Zk.wk (inv1Push (φ ⋏ ψ) _ ψ' Γ₀) (ihψ (Finset.mem_insert_of_mem hmem0))
+        exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhd Γ₀)
+          (Zk.andI φ' ψ' hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ Pφ Pψ)
+  | @orI α β k c Γ₀ φ' ψ' hβ hβNF hαNF hτ _ ih =>
+      intro hmem
+      have hhead : (φ' ⋎ ψ') ≠ (φ ⋏ ψ) := by intro h; simp [Vee.vee, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zk.wk (inv1Push2 (φ ⋏ ψ) _ φ' ψ' Γ₀)
+        (ih (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0)))
+      exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zk.orI φ' ψ' hβ hβNF hαNF hτ P)
+  | @allω α k c Γ₀ χ β hβ hβNF hαNF hτ _ ih =>
+      intro hmem
+      have hhead : (∀⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [UnivQuantifier.all, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have key : ∀ n, Zk (β n) (max k n) c (insert (χ/[nm n]) (insert ψ (Γ₀.erase (φ ⋏ ψ)))) :=
+        fun n => Zk.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih n (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zk.allω χ β hβ hβNF hαNF hτ key)
+  | @exI α β k c Γ₀ χ n hβ hβNF hαNF hτ hbound _ ih =>
+      intro hmem
+      have hhead : (∃⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [ExsQuantifier.exs, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zk.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zk.exI χ n hβ hβNF hαNF hτ hbound P)
+  | @cut α βφ' βψ' k c Γ₀ χ hcompl hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ih₁ ih₂ =>
+      intro hmem
+      have P₁ := Zk.wk (inv1Push (φ ⋏ ψ) _ χ Γ₀) (ih₁ (Finset.mem_insert_of_mem hmem))
+      have P₂ := Zk.wk (inv1Push (φ ⋏ ψ) _ (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
+      exact Zk.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ P₁ P₂
+
 end Zk
 
 end GoodsteinPA.BoundedZinfty
