@@ -537,6 +537,59 @@ Set.univ`. A hypothetical proof `Z ⊢ TI_≺(X)` is then a `Derivation2 (↑paL
 noncomputable def paLX : Theory LX :=
   Theory.lMap (Language.ORing.embedding LX) 𝗣𝗔⁻ + LO.FirstOrder.Arithmetic.InductionScheme LX Set.univ
 
+/-! ### Discharging `hax` for `paLX` (C₂-axm): X-free base axioms + X-induction instances -/
+
+/-- The `ℕ`-structure on `LX` (`Boundedness.ambient = structLX ∅`), pulled back along the `ORing`
+embedding, is exactly the standard `ℒₒᵣ`-structure on `ℕ` (they agree on every ring/order symbol,
+and there are no others in `ℒₒᵣ`). The bridge for transferring `ℕ ⊧ₘ τ` to `LitTrue (lMap τ)`. -/
+lemma ambient_lMap_eq :
+    (Boundedness.ambient.lMap (Language.ORing.embedding LX)) = (inferInstance : Structure ℒₒᵣ ℕ) := by
+  apply Structure.ext <;> · funext k r v; rcases r with _|_ <;> rfl
+
+/-- The `ORing`-embedding image of any `ℒₒᵣ`-formula is **X-free** (every relation symbol is an
+`ℒₒᵣ`-relation `Sum.inl _`, none is the set variable `X`). -/
+lemma xfreeForm_lMap {ξ n} (φ : Semiformula ℒₒᵣ ξ n) :
+    XFreeForm (Semiformula.lMap (Language.ORing.embedding LX) φ) := by
+  induction φ using Semiformula.rec' with
+  | hverum => simp
+  | hfalsum => simp
+  | hrel r v => rw [Semiformula.lMap_rel]; rw [xfreeForm_rel]; rcases r with _|_ <;> rfl
+  | hnrel r v => rw [Semiformula.lMap_nrel]; rw [xfreeForm_nrel]; rcases r with _|_ <;> rfl
+  | hand φ ψ ihφ ihψ => simp_all [Semiformula.lMap]
+  | hor φ ψ ihφ ihψ => simp_all [Semiformula.lMap]
+  | hall φ ih => simp_all
+  | hexs φ ih => simp_all
+
+/-- A `𝗣𝗔⁻`-axiom `τ` (true in `ℕ`), embedded into `LX` and closed by `asgX e`, is a TRUE closed
+literal under the ambient `ℕ`-model — `provable_true_x`'s side condition for the X-free `axm` case. -/
+lemma litTrue_lMap_axiom (τ : Sentence ℒₒᵣ) (hτ : ℕ ⊧ₘ τ) (e : ℕ → ℕ) :
+    LitTrue (asgX e ▹ (Rew.emb ▹ Semiformula.lMap (Language.ORing.embedding LX) τ)) := by
+  simp only [LitTrue, asgX, Semiformula.eval_rewrite, Semiformula.eval_emb]
+  rw [Semiformula.eval_lMap, ambient_lMap_eq]
+  rw [models_iff] at hτ
+  simpa using hτ
+
+/-- **C₂-axm: the `axm` discharge for `paLX`.** Each `paLX` axiom appearing in `Γ` yields a
+cut-rank-bounded `XFreeAx` `Z∞`-derivation of the image sequent. **X-free base axioms** (`𝗣𝗔⁻` image)
+are TRUE closed X-free formulas ⟹ `provable_true_x`. **X-induction instances** (`univCl (succInd ψ)`)
+go through `metaInduction` (DISCLOSED `sorry`: the `succInd`/`univCl`/NNF DSL unfolding connecting
+`↑(univCl (succInd ψ))` to `metaInduction`'s explicit `{∼ψ(0), ∃(∼step), ∀ψ}` shape). -/
+theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema LX)) (hΓ : φ ∈ Γ) :
+    ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)) := by
+  obtain ⟨σ, hσ, rfl⟩ := hφ
+  rcases hσ with hbase | hind
+  · obtain ⟨τ, hτ, rfl⟩ := hbase
+    refine ⟨0, fun e => ?_⟩
+    have hmod : ℕ ⊧ₘ τ := ModelsTheory.models ℕ hτ
+    have htrue := litTrue_lMap_axiom τ hmod e
+    have hxf : XFreeForm (asgX e ▹ (Rew.emb ▹ Semiformula.lMap (Language.ORing.embedding LX) τ)) := by
+      rw [xfreeForm_rew, xfreeForm_rew]; exact xfreeForm_lMap τ
+    exact provable_true_x _ _ le_rfl hxf htrue (Finset.mem_image_of_mem _ hΓ)
+  · -- DISCLOSED: X-induction instance `σ = univCl (succInd ψ)` → `metaInduction`. The DSL unfolding
+    -- (NNF of `↑(univCl (succInd ψ))` ⟹ `∼ψ(0) ⋎ ∃(∼step) ⋎ ∀ψ`, break by `orI`, apply
+    -- `metaInduction` with `step = ψ(x) → ψ(x+1)`) is the next chip.
+    sorry
+
 /-- **C₂, the target form.** The embedding of `𝗣𝗔(LX)`-derivations into the `XFreeAx` `Z∞` carrier
 `PXFc` is just `embedC_LX_gen` specialised to `𝓢 := ↑paLX`, **once the `axm` discharge `hax` for
 `paLX` is supplied** (X-free axioms — `𝗣𝗔⁻` image + X-free induction — via `provable_true_x`;
