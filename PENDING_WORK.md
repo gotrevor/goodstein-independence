@@ -59,6 +59,30 @@ Needed to *state* Gödel II for `𝗣𝗔`; Foundation axiomatizes it (TODO in
   `.exI`, `.allI` — the ω-rule with the supremum ordinal bound, machine-checked against the
   `Deriv` measures via `Classical.choice`).
 
+## ⭐ KEY FINDING (2026-06-22, end of lap) — build `Z_∞` ON Foundation's Tait calculus
+Foundation **already has a finitary Tait one-sided FO sequent calculus**:
+`FirstOrder/Basic/Calculus.lean` — `inductive Derivation (𝓢 : Schema L) : Sequent L → Type`
+with constructors `axL, verum, or, and, all, exs, wk, cut` and a `height` measure, over the *real*
+`SyntacticFormula ℒₒᵣ` (which already carries free variables, substitution, negation, rank).
+Plus `FirstOrder/Hauptsatz.lean` (finitary cut-elimination). **There is NO infinitary calculus /
+ω-rule / `PA_∞`** (confirmed by grep — only finitary Tait + Hauptsatz).
+
+**Consequence — revise M3.1:** do NOT continue the standalone `wip/Zinfty.lean` `AForm`. Instead
+define `Z_∞` as a new inductive **over Foundation's `SyntacticFormula ℒₒᵣ`/`Sequent`**, replacing
+the finitary `all` (eigenvariable, one premise, `ℕ` height) with the **ω-rule** (`all` taking an
+`ℕ`-indexed family `n ↦ φ[x ↦ numeral n]`, `Ordinal` height). This:
+- **kills the `AForm` substitution-layer prerequisite** — Foundation's formula substitution +
+  `rk` are reused, so `rk φ` is already finite and `cut`/`cutElimStep` become directly stateable;
+- **shrinks M4 (embedding):** a PA proof already yields a Foundation *finitary* `Derivation`
+  (via Hauptsatz machinery); M4 becomes "finitary `Derivation` ↪ `Z_∞`" (map each rule across,
+  ∀→ω-rule) instead of re-deriving from `True`/`Lemma 16.1` by hand;
+- **makes M7 natural:** everything is over real `ℒₒᵣ` formulas, so connecting to our
+  `goodsteinSentence` is a formula-level statement, not a re-encoding.
+The `wip/Zinfty.lean` prototype keeps its value as the *proof that the ordinal/ω-rule measures
+work* (the encoding-feasibility result) — port its `o`/`cr`/`allI`/`cutElim` skeleton onto
+Foundation's `Derivation`-shaped inductive. **This is the recommended first action next lap**
+(read `FirstOrder/Basic/Calculus.lean` + `Hauptsatz.lean` first).
+
 ## Design note — `Provable.cut` + the `ℕ∞` cut-rank (next lap, read before refactoring)
 `cr : Deriv Γ → ℕ∞` (cut rank can be `⊤` for pathological infinite families). A predicate-level
 `Provable.cut` is the one rule still missing: from `Provable α c (φ ::ₘ Γ)` and
