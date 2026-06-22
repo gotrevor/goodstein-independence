@@ -170,6 +170,14 @@ theorem Provable.orI {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (φ ψ : AForm)
   · simpa [Deriv.o] using add_le_add_right ho 1
   · simpa [Deriv.cr] using hcr
 
+/-- Predicate-level contraction. -/
+theorem Provable.contr {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (φ : AForm)
+    (h : Provable α c (φ ::ₘ φ ::ₘ Γ)) : Provable (α + 1) c (φ ::ₘ Γ) := by
+  rcases h with ⟨d, ho, hcr⟩
+  refine ⟨Deriv.contr φ d, ?_, ?_⟩
+  · simpa [Deriv.o] using add_le_add ho (le_refl 1)
+  · simpa [Deriv.cr] using hcr
+
 /-- Predicate-level `∃`-introduction (the witness rule). -/
 theorem Provable.exI {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (f : ℕ → AForm) (n : ℕ)
     (h : Provable α c (f n ::ₘ Γ)) : Provable (α + 1) c (ex f ::ₘ Γ) := by
