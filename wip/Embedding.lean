@@ -15,12 +15,13 @@ a pure rule-by-rule map with **no language translation**.
   allω/cut/weakening/mono/cast` (`src/Zinfty.lean:116–208`).
 
 ## Status of the cases (lap 9 — scaffold compiles, `lake env lean wip/Embedding.lean`)
-- **`embed`: 6/10 cases DONE** — `verum`, `and`, `or`, `wk`, `cut` (structural rule map + cut-rank
-  alignment) + **`closed`** (now via `provable_em`). All typecheck against the real Foundation
-  `Derivation2` + M5 `Provable` APIs. Remaining `sorry`s: `axm`, `all`, `exs`, `shift`.
-- **`provable_em` (the `closed`-case lemma): propositional fragment PROVED** — rel/nrel (`axL`),
-  verum/falsum (`verumR`), and/or (`andI`+`orI`, via complexity-bound induction), all machine-checked.
-  Remaining `sorry`s: the **∀/∃ cases** (need M5's numeral ω-family — see the lemma docstring).
+- **`provable_em` (Z∞ excluded-middle): FULLY PROVED, axiom-clean** (`[propext, choice, Quot.sound]`,
+  no `sorryAx`). `∀ φ Γ, φ∈Γ → ∼φ∈Γ → ∃ a, Provable a 0 Γ` by induction on a complexity bound — all
+  cases machine-checked incl. the ∀/∃ numeral ω-family (`allω` over `nm n`, premises closed by `exI`
+  + the IH at `ψ/[nm n]`). **Promotable to `src/Zinfty.lean`** (general M5 lemma, sorry-free).
+- **`embed`: 6/10 cases DONE** — `verum`, `and`, `or`, `wk`, `cut`, `closed` (via `provable_em`). All
+  typecheck against the real Foundation `Derivation2` + M5 `Provable` APIs. Remaining `sorry`s
+  (the genuine deep content): `axm`, `all`, `exs`, `shift`.
 - No `axiom` declarations; the open obligations are honest `sorry`s.
 - **DISCLOSED `sorry` (the real content), hardest-first:**
   - `axm` — each PA axiom Z∞-derivable. `𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`: PeanoMinus is a
@@ -117,13 +118,46 @@ theorem provable_em (φ : ZinftyF.Form) {Γ : ZinftyF.Seq} (hp : φ ∈ Γ) (hn 
         have hor := Provable.orI φ ψ hand
         rw [Finset.insert_eq_self.mpr (show (φ ⋎ ψ) ∈ Γ by simp [hp])] at hor
         exact ⟨_, hor⟩
-      | hall φ =>
-        -- M5 ∀-case: `allω` over `nm n`; each premise `{φ/[nm n], ∃⁰∼φ}` closed by `exI (∼φ) n`
-        -- + IH at `φ/[nm n]` (complexity = `φ`'s < `(∀⁰φ)`'s). DISCLOSED — next chip.
-        sorry
-      | hexs φ =>
-        -- dual of `hall` (∼(∃⁰φ) = ∀⁰∼φ). DISCLOSED — next chip.
-        sorry
+      | hall ψ =>
+        -- φ = ∀⁰ψ, ∼φ = ∃⁰∼ψ. Introduce ∀⁰ψ by the ω-rule; each premise closed by `exI (∼ψ) n`
+        -- over the IH at `ψ/[nm n]` (same complexity as ψ < (∀⁰ψ)'s).
+        have hψk : ψ.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+        have hex : (∃⁰ ∼ψ) ∈ Γ := by simpa using hn
+        have fam : ∀ n, ∃ a, Provable a 0 (insert (ψ/[nm n]) Γ) := by
+          intro n
+          have hcomp : (ψ/[nm n]).complexity ≤ k := by
+            have he : (ψ/[nm n]).complexity = ψ.complexity := by simp
+            rw [he]; exact hψk
+          obtain ⟨a, ha⟩ := ih (ψ/[nm n]) hcomp
+            (Γ := insert (∼(ψ/[nm n])) (insert (ψ/[nm n]) Γ)) (by simp) (by simp)
+          have hexI := Provable.exI (∼ψ) n (Γ := insert (ψ/[nm n]) Γ)
+            (by have heq : (∼ψ)/[nm n] = ∼(ψ/[nm n]) := by simp
+                rw [heq]; exact ha)
+          rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hex)] at hexI
+          exact ⟨a + 1, hexI⟩
+        choose β hβ using fam
+        have hall := Provable.allω ψ (Γ := Γ) hβ
+        rw [Finset.insert_eq_self.mpr hp] at hall
+        exact ⟨_, hall⟩
+      | hexs ψ =>
+        -- φ = ∃⁰ψ, ∼φ = ∀⁰∼ψ. Dual: introduce ∀⁰∼ψ by the ω-rule; each premise closed by `exI ψ n`.
+        have hψk : ψ.complexity ≤ k := by simp only [Semiformula.complexity_exs] at hk; omega
+        have hall' : (∀⁰ ∼ψ) ∈ Γ := by simpa using hn
+        have fam : ∀ n, ∃ a, Provable a 0 (insert ((∼ψ)/[nm n]) Γ) := by
+          intro n
+          have hcomp : (ψ/[nm n]).complexity ≤ k := by
+            have he : (ψ/[nm n]).complexity = ψ.complexity := by simp
+            rw [he]; exact hψk
+          obtain ⟨a, ha⟩ := ih (ψ/[nm n]) hcomp
+            (Γ := insert (ψ/[nm n]) (insert (∼(ψ/[nm n])) Γ)) (by simp) (by simp)
+          have hexI := Provable.exI ψ n (Γ := insert (∼(ψ/[nm n])) Γ) ha
+          rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hp)] at hexI
+          have heq : (∼ψ)/[nm n] = ∼(ψ/[nm n]) := by simp
+          rw [heq]; exact ⟨a + 1, hexI⟩
+        choose β hβ using fam
+        have hall := Provable.allω (∼ψ) (Γ := Γ) hβ
+        rw [Finset.insert_eq_self.mpr hall'] at hall
+        exact ⟨_, hall⟩
   exact key φ.complexity φ le_rfl hp hn
 
 /-- **The embedding (M4), Finset form.** Every Foundation `Derivation2` from the `𝗣𝗔` schema embeds
