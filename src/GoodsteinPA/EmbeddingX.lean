@@ -17,6 +17,7 @@ This file delivers the `axm`-abstracted structural port `embedC_LX_gen`; the X-f
 discharge for the concrete `paLX` schema (`embedC_LX`) chains on top.
 -/
 import GoodsteinPA.XFreeCutElim
+import Foundation.FirstOrder.Arithmetic.Schemata
 
 namespace GoodsteinPA.EmbeddingX
 
@@ -526,5 +527,27 @@ theorem embedC_LX_gen {𝓢 : Schema LX}
         ≤ ((max (φ.complexity + 1) (max c1 c2) : ℕ) : ℕ∞) := by
       rw [Semiformula.complexity_rew]; exact_mod_cast Nat.le_max_left _ _
     exact ⟨_, PXFc.cut (asgX e ▹ φ) hc h1' h2'⟩
+
+/-! ## The source theory `paLX` = `𝗣𝗔` over the language `LX` (resolves "what is `Z ⊢ TI(X)`?")
+
+Buchholz's `Z = PA(X)`: Peano arithmetic in the language `ℒₒᵣ ∪ {X}` with induction extended to **all**
+`LX`-formulas (incl. those mentioning the set variable `X`). Concretely: the `ORing`-embedding image
+of the finite `𝗣𝗔⁻` axioms (X-free) together with the full `LX` induction scheme `InductionScheme LX
+Set.univ`. A hypothetical proof `Z ⊢ TI_≺(X)` is then a `Derivation2 (↑paLX) {TI prec}`. -/
+noncomputable def paLX : Theory LX :=
+  Theory.lMap (Language.ORing.embedding LX) 𝗣𝗔⁻ + LO.FirstOrder.Arithmetic.InductionScheme LX Set.univ
+
+/-- **C₂, the target form.** The embedding of `𝗣𝗔(LX)`-derivations into the `XFreeAx` `Z∞` carrier
+`PXFc` is just `embedC_LX_gen` specialised to `𝓢 := ↑paLX`, **once the `axm` discharge `hax` for
+`paLX` is supplied** (X-free axioms — `𝗣𝗔⁻` image + X-free induction — via `provable_true_x`;
+X-induction instances via `metaInduction`). The structural engine (`embedC_LX_gen`) is already
+sorry-free + axiom-clean; only `hax` and the cut-elimination end (`atomCut_x` → `nrel_value_subst`)
+remain to make the full `Z ⊢ TI ⟹ ‖≺‖ < ε₀` chain clean. -/
+theorem embedC_LX
+    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ (paLX : Schema LX) → φ ∈ Γ →
+      ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)))
+    {Γ : Seq LX} (d : Derivation2 (paLX : Schema LX) Γ) :
+    ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun φ => asgX e ▹ φ)) :=
+  embedC_LX_gen hax d
 
 end GoodsteinPA.EmbeddingX
