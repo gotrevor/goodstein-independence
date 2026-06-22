@@ -85,6 +85,25 @@ This discharges the abstract `HG` hypothesis of `lowerBound_existential` against
 theorem G_le_of_atomTrue {m n : ℕ} (h : atomTrue m n) : G n ≤ m :=
   Nat.sInf_le h
 
+/-- **Upward closure of the zero-set.**  Once a Goodstein sequence reaches `0` it stays `0`. -/
+theorem goodstein_zero_mono {n m : ℕ} (h : goodsteinSeq n m = 0) :
+    ∀ {j : ℕ}, m ≤ j → goodsteinSeq n j = 0 := by
+  intro j hj
+  induction hj with
+  | refl => exact h
+  | step _ ih => exact goodstein_zero_succ ih
+
+/-- Given termination at `n`, `G n` is itself a zero step (the threshold is attained). -/
+theorem goodstein_G {n : ℕ} (hterm : ∃ m, goodsteinSeq n m = 0) : goodsteinSeq n (G n) = 0 :=
+  Nat.sInf_mem hterm
+
+/-- **The atomic truth ↔ threshold characterization.**  Under termination, `g_m(n)=0` is true iff
+`m ≥ G n`.  This is exactly the semantic content the lower bound consumes: the witness-bounded `∃`
+introduces a *false* atom precisely when its witness `v < G n`.  (`→` needs no termination.) -/
+theorem atomTrue_iff_G_le {m n : ℕ} (hterm : ∃ m, goodsteinSeq n m = 0) :
+    atomTrue m n ↔ G n ≤ m :=
+  ⟨G_le_of_atomTrue, fun hle => goodstein_zero_mono (goodstein_G hterm) hle⟩
+
 /-- A sequent is a finite **set** of fragment formulas (Tait one-sided, set-based ⇒ contraction is
 free, no explicit `C` rule). -/
 abbrev Seq := Finset GForm
