@@ -1,88 +1,16 @@
-# HANDOFF — 2026-06-22 (lap 17)
+# HANDOFF — GoodsteinPA (thin pointer)
 
-> **Branch** `plan` · build **green** (`lake build GoodsteinPA`, 1266 jobs) · headline
-> `peano_not_proves_goodstein` = honest `sorry` (anti-fraud guard intact, untouched).
-> **Lap 17 cleared the lap-16 wall AND conceptually solved the X-induction crux.**
+This is the thin baton. The durable overview lives in **`STATUS.md`** (refreshed lap 18); the open-items
++ attack paths live in **`PENDING_WORK.md`** (top = lap-18 F-seam attack plan).
 
-## 🎯 What we're doing
-Headline: `Statement.peano_not_proves_goodstein` (Kirby–Paris). Route: Buchholz §5 boundedness.
-Critical path A→G (table below). This lap: **C₁/D made axiom-clean** (`nrel_value_subst`) + **C₂-axm
-(hax) base case done + X-induction crux solved** (4 structural lemmas, all axiom-clean).
-
-## ✅ Lap-17 deliverables (all `#print axioms` = [propext, choice, Quot.sound], committed)
-1. **`PXFc.nrel_value_subst`** (`XFreeCutElim.lean`) — value-congruent negative-literal renaming.
-   Cleared the `atomCut_x` sorry ⟹ **`XFreeCutElim.lean` is sorry-free; C₁ (`cutElim`) and D
-   (`orderType_le_of_TIprovable`) are now axiom-clean.** The matched-`axLv`-leaf `r₀=r` extraction
-   (lap-16's wall) done via `injection` on the nrel formula eq + oriented `subst` (eliminate leaf
-   vars, keep params).
-2. **`hax_paLX` base case** (`EmbeddingX.lean`) — X-free `𝗣𝗔⁻`-image axioms via `provable_true_x`.
-   Helpers: `ambient_lMap_eq`, `xfreeForm_lMap`, `litTrue_lMap_axiom`.
-3. **The X-induction crux — SOLVED conceptually + 4 structural lemmas proven (`EmbeddingX.lean`):**
-   - **`PXFc.subst_value_subst`** — value-congruent *formula* renaming `ψ/[s]→ψ/[t]` (|s|=|t|), one
-     `cut` vs `provable_em_cong_gen_x`. Compound-formula analogue of `nrel_value_subst`.
-   - **`metaInduction_cong`** — generalises `metaInduction` to a value-congruent successor `succT n`
-     (|succT n|=n+1), bridging the chain's `ψ(succT n)`→`ψ(nm(n+1))` via `subst_value_subst`.
-   - **`succInd_nnf`** — NNF identity of Foundation's `succInd`.
-   - **`PXFc_allClosure`** — strip `∀⁰*` (the `univCl` closure) via iterated `allω`.
-
-## 🧠 KEY INSIGHT this lap (carry forward)
-Foundation's `succInd` uses successor term `#0 + 1`; substituting `#0 ↦ nm n` gives `nm n + 1`
-(= `Add(numeral n, 1)`), **value-equal but NOT syntactically equal** to the numeral `nm (n+1)` that
-`metaInduction`'s *syntactic* `hstep` demanded. **No syntactic `step'` can satisfy the old `hstep`** —
-this was the real, faithfulness-critical obstacle. Resolution = value-congruent reformulation
-(`metaInduction_cong` + `subst_value_subst`). Verified by `trace_state` on the actual goal, not guessed.
-
-## 🎯 Critical path (★ = real walls)
-| Step | What | Status |
-|---|---|---|
-| A,B | Boundedness Thm 5.4 + corollary | ✅ done (lap 14) |
-| C₁ | XFreeAx cut-elim → cr 0 | ✅ **axiom-clean (lap 17, `nrel_value_subst`)** |
-| D | Thm 5.6 tail (`orderType_le_of_TIprovable`) | ✅ **axiom-clean (lap 17)** |
-| C₂-struct/axLv | structural embedding `embedC_LX_gen` | ✅ done + clean |
-| **C₂-axm** | discharge `hax` for `paLX` | 🟡 **base done; X-induction = integration glue only** |
-| E | Goodstein ⟹ TI_≺(X) bridge | ⬜ not started |
-| **F ★** | arithmetization seam (`‖≺‖=ε₀`) | ⬜ not started — 2nd hard wall |
-| G | final assembly + `#print axioms` clean | ⬜ not started |
-
-## 🎬 NEXT (lap 18): finish `hax_paLX` induction case — pure integration glue
-**All four structural lemmas are PROVEN.** Remaining = assembly; the **exact recipe + friction points
-are inlined at the `sorry`** (`EmbeddingX.lean` ~line 716). Summary:
-1. `obtain ⟨ψ,-,rfl⟩ := hind`; `asgX e ▹ ↑(univCl(succInd ψ)) = ∀⁰*(fixitr 0 (succInd ψ).fvSup ▹
-   succInd ψ)` (PROVEN in scratch: `coe_univCl_eq_univCl'`+`rew_univCl'`+`rfl`).
-2. `PXFc_allClosure` → per-`v` numeral instantiation; `subst_comp_fixitr_eq_map` to get
-   `Rew.rewrite f_v ▹ succInd ψ`. **FRICTION: `0 + fvSup` vs `fvSup` Fin-index casts.**
-3. **`succInd`-rewrite-commute** `g ▹ succInd ψ = succInd (g.q ▹ ψ)` — the one un-proven helper, and
-   the gateway. **FRICTION: push `g ▹` through nested `∀` binders + the three `ψ/[·]` substs**
-   (`rew_subst_term` for the closed instance; a `g.q` variant under the `∀`). `app_all`/`app_exs` are
-   `@[simp]`; find the `⋎`/`∼`/subst distribution lemmas.
-4. `succInd_nnf ψ_v` + `ψ_v/[#0]=ψ_v` (simp) + `↑0=nm 0` (simp [nm]) → NNF; `orI`×2 (+`.weakening`
-   reorder); `metaInduction_cong ψ_v step_v succT_v` with `succT_v n := Rew.subst ![nm n] ‘(#0+1)’`.
-5. Then `embedC_LX := embedC_LX_gen hax_paLX` discharged ⟹ **C₂ complete** ⟹ D fires ⟹
-   **Thm 5.6 (`PA ⊬ TI(ε₀)`)** modulo E+F.
-
-## ⚠️ Notes
-- **Aristotle is a POOR FIT here** (checked lap 17): every open obligation needs the 8 GB
-  Foundation+mathlib build context (`.lake`); Aristotle is mathlib-only. Past `aris_emcong` (a
-  Foundation goal) was CANCELED for the same reason. Correctly idle. Reconsider for **F**'s ε₀ ordinal
-  arithmetic (may have mathlib-native sub-lemmas).
-- **LOCKED untouched:** `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `sorry`.
-- **3 src/ sorries:** `Statement.lean:22` (headline, locked), `Reduction.lean:50` (Route-A,
-  off-path — carries Foundation's `PA_delta1Definable` axiom, avoided by the Buchholz route),
-  `EmbeddingX.lean:705` (`hax_paLX` X-induction — integration glue, recipe inlined).
-- Build: `lake build GoodsteinPA` (1266). Axiom ledger in `STATUS.md`.
-
-## 📁 Key files
-- `src/GoodsteinPA/EmbeddingX.lean` — C₂; the 4 new structural lemmas + `hax_paLX` (base done,
-  induction glue inlined at the `sorry`).
-- `src/GoodsteinPA/XFreeCutElim.lean` — C₁; `nrel_value_subst` (new), `metaInduction` (old, subsumed
-  by `metaInduction_cong`), `cutElim`/`orderType_le_of_TIprovable` (now clean).
-- `src/GoodsteinPA/Boundedness.lean` — Thm 5.4; `XFreeAx`.
-
-## 📊 Lap estimate to headline (honest)
-C₂-axm finish ~1 lap · C₂→D→Thm 5.6 wiring ~0.5–1 · E (Goodstein⟹TI) ~2–4 · **F★ ~3–8+ (dominant
-risk)** · G ~1. **Total ~8–15+ laps, gated by F.** Everything from headline back through D is
-axiom-clean machine-checked.
-
----
-**→ Next session: start at NEXT #3 (`succInd`-rewrite-commute, the one un-proven helper) — gateway to
-the whole integration. Then #1,#2,#4,#5 assemble. After C₂: attack E, then F (the wall).**
+- **Newest dated baton:** `HANDOFF-2026-06-22-lap18.md` (deep-reflection — direction reaffirmed, F attack
+  plan). Prior: `HANDOFF-2026-06-22-lap17.md` (C₁/D axiom-clean; X-induction crux solved).
+- **Where it stands:** the whole Buchholz §5 machine from D back is machine-checked + `#print axioms`-clean.
+  The only `sorry` below the headline (besides locked headline + off-path Route-A) is **C₂ glue `hax_paLX`**
+  (`EmbeddingX.lean:705`, recipe inlined). Closing it ⟹ **Thm 5.6 (`PA ⊬ TI(ε₀)`)** clean modulo **E**
+  (Goodstein⟹TI) + **F** (arithmetization seam, `‖≺‖=ε₀`).
+- **The campaign wall = F.** Its order-type half is **ε₀-completeness of CNF notations**, which mathlib
+  lacks (only the order-embedding `NONote↪ε₀`) — the real girder, mathlib-only, **Aristotle-eligible**.
+  See `PENDING_WORK.md` top for the full corrected attack.
+- **Build:** `lake build GoodsteinPA` (1266 jobs, green). **Charter:** `DIRECTION.md`. **Plan/math:**
+  `EXPEDITION-PLAN.md`, `PHASE2-DECOMPOSITION.md`.

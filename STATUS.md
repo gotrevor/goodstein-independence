@@ -2,29 +2,37 @@
 
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Gentzen/Buchholz ordinal analysis — witness-FREE `Z_∞` (embedding
 [M4 `embedC`, done] + ε₀ cut-elim [M5, done]) + **Boundedness** (Thm 5.4, DONE lap 14, axiom-clean) ⟹
-`𝗣𝗔 ⊬ TI(ε₀)`, then Goodstein⟹TI(ε₀).** · **Build**: 🟢 green (1264 jobs, `lake build GoodsteinPA`)
-· **Updated**: lap 15 (review) · 2026-06-22 · `f16d3be`
+`𝗣𝗔 ⊬ TI(ε₀)`, then Goodstein⟹TI(ε₀).** · **Build**: 🟢 green (1266 jobs, `lake build GoodsteinPA`)
+· **Updated**: lap 18 (deep-reflection) · 2026-06-22 · `6521cbf`
 
-## ⏭️ Lap-15 focus — execute C₁/C₂, the connective tissue to Thm 5.6
-The Buchholz Boundedness route (lap-12 pivot) is **half-done**: the two textbook-hard pieces M4 `embedC`
-+ M5 `cutElim` were already axiom-clean, and **lap 14 added the crux Boundedness (Thm 5.4) + corollary B,
-axiom-clean**. What remains to assemble **Thm 5.6 (`Z ⊢ TI_≺(X) ⟹ ‖≺‖ < ε₀` = `PA ⊬ TI(ε₀)`)** is the
-**connective tissue**: **C₁** port `ZinftyGen.cutElim` to an `XFreeAx`-tracking, cut-rank-carrying `PXFc`
-twin (reach cr=0 keeping `XFreeAx` — validated feasible lap 15, the `atomCut` truth-branch is vacuous on
-`XFreeAx` inputs) and **C₂** port `embedC` to generic `LX` (X-induction axioms via the meta-induction
-tower of cuts, NOT `provable_true` — would lone-X-`axTrue`). Then **E** Goodstein⟹TI bridge + **F** the
-arithmetization seam (`‖≺‖=ε₀`, discharge `hprec`/`hprecXPos`) ⟹ headline. See newest `HANDOFF`.
+## ⏭️ Lap-18 focus (deep-reflection) — Thm 5.6 is ONE glue lemma from axiom-clean; the campaign wall is F
+The **entire machine from D back is now machine-checked + `#print axioms`-clean** (lap 17): Boundedness
+(Thm 5.4) + corollary B, **C₁** `PXFc.cutElim`→cr0, **D** `orderType_le_of_TIprovable`, **C₂-structural**
+`embedC_LX_gen`, M4 `embedC`, M5 `cutElim`. The single open sorry below the headline (besides the locked
+headline + off-path Route-A) is **C₂ glue** `hax_paLX`'s X-induction case (`EmbeddingX.lean:705`, "pure
+integration", recipe inlined) — closing it makes **Thm 5.6 (`PA ⊬ TI(ε₀)`)** axiom-clean modulo E+F.
+The remaining campaign walls are **E** (Goodstein⟹TI_≺(X)) and **F** (arithmetization seam, `‖≺‖=ε₀` +
+discharge `hprec`/`hprecXPos`). **Reflection finding (lap 18, see PENDING_WORK top):** F's order-type half =
+**ε₀-completeness of CNF notations** (`∀ o<ε₀, ∃ x:ONote, NF x ∧ repr x=o`), which **mathlib LACKS** (it has
+only the order-*embedding* `NONote↪ε₀`, not surjectivity) — it is the real F girder, ~1–3 laps, and being
+pure mathlib ordinal arithmetic it is **Aristotle-eligible** (the one piece with no Foundation dependency).
+E **pins which `≺` F may use** (co-design). See newest `HANDOFF`.
 
 ## Where it stands
-**THREE of the four hard pieces of the Buchholz §5 analysis are now machine-checked and `#print
-axioms`-clean** and on the critical path: the **embedding** M4 `embedC` (Thm 5.5, `src/Embedding.lean`),
-the **ε₀ cut-elimination** M5 `cutElim` (Thms 5.1–5.3, `src/Zinfty.lean` + generic `src/ZinftyGen.lean`),
-and **lap 14's Boundedness** Thm 5.4 + corollary `Z∞⊢^β_1 TI ⟹ ‖≺‖≤2^β` (`src/Boundedness.lean`,
-`boundedness`/`orderType_le_of_TIderiv`). Phase 0 (M1, `goodsteinTerminates_re` clean) + Phase 1 (Gödel II
-hook) landed. The headline `Statement.peano_not_proves_goodstein` is **still a literal `sorry`** (anti-fraud
-— correct; `#print axioms` = `[propext, sorryAx, choice, Quot.sound]`, 0 math axioms). The connective
-tissue to assemble **Thm 5.6 = `PA ⊬ TI(ε₀)`** is C₁ (XFreeAx-preserving cutElim→cr=0) + C₂ (`embedC` over
-LX); then the bridge (E, Goodstein⟹TI) + arithmetization seam (F, `‖≺‖=ε₀`). **Lap-12 pivot** (see route decision):
+**The whole Buchholz §5 analysis from D back is machine-checked and `#print axioms`-clean** (real output,
+lap 18): the **embedding** M4 `embedC` (Thm 5.5, `src/Embedding.lean`), the **ε₀ cut-elimination** M5
+`cutElim` (Thms 5.1–5.3, `src/Zinfty.lean` + generic `src/ZinftyGen.lean`), **lap 14's Boundedness** Thm
+5.4 + corollary `Z∞⊢^β_1 TI ⟹ ‖≺‖≤2^β` (`src/Boundedness.lean`), **lap 15/17's C₁** `PXFc.cutElim`→cr0 +
+**D** `orderType_le_of_TIprovable` (`src/XFreeCutElim.lean`, made axiom-clean lap 17 via `nrel_value_subst`),
+and **lap 16/17's C₂-structural** `embedC_LX_gen` (`src/EmbeddingX.lean`). Phase 0 (M1,
+`goodsteinTerminates_re` clean) + Phase 1 (Gödel II hook) landed. The **only `sorry` below the headline**
+(besides the locked headline + off-path Route-A `Reduction.lean:50`) is **C₂ glue** `hax_paLX`'s
+X-induction assembly (`EmbeddingX.lean:705`, base done, recipe inlined). The headline
+`Statement.peano_not_proves_goodstein` is **still a literal `sorry`** (anti-fraud — correct; `#print axioms`
+= `[propext, sorryAx, choice, Quot.sound]`, 0 math axioms). Closing `hax_paLX` makes **Thm 5.6 =
+`PA ⊬ TI(ε₀)`** axiom-clean modulo the two remaining campaign girders: the bridge (E, Goodstein⟹TI) +
+arithmetization seam (F, `‖≺‖=ε₀`; order-type half = ε₀-completeness, mathlib-lacking — see lap-18 focus).
+**Lap-12 pivot** (see route decision):
 the project drifted (laps 4–11) into Towsner's witness-bounded variant and hit a genuine wall (§19.6
 witness-budget needs the operator `H`). Buchholz §5 shows the witness-FREE route — M4+M5 (done) +
 **Boundedness (Thm 5.4)** + Goodstein⟹TI(ε₀) — is the standard, shorter path. Next target = the truth
@@ -44,6 +52,29 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-22 (lap 18 — DEEP REFLECTION: F seam grounded vs an outside attack plan; STATUS refreshed
+  through lap 17):** Took altitude. Confirmed (real `#print axioms`) that the *entire machine from D back
+  is axiom-clean* — only `hax_paLX` (C₂ glue), the locked headline, and off-path Route-A carry `sorry`.
+  **Evaluated an external (GPT-5.5) attack plan for F** (arithmetization seam) against the real repo +
+  mathlib. Verdict: seam-abstraction + `hprec`-as-definability + `codeOfREPred₂` are sound (all verified
+  against `Boundedness.lean:699`, `TruthSem.lean:120`, `Foundation/.../Representation.lean:233`), but the
+  plan **under-scopes the order-type half**: `rank o = repr o` ⟺ **ε₀-completeness of CNF notations**,
+  which **mathlib does NOT have** (`Notation.lean` proves only the order-embedding `NONote↪ε₀`, not
+  surjectivity). That completeness lemma is the real F girder (~1–3 laps, mathlib-only ⟹ **Aristotle-
+  eligible**). Also: the plan's order-choice ignores that **E pins which `≺` F may use** (co-design), and
+  the Goodstein base-2 coding (`toONote 2·`/`seqONote`) is the WRONG order (pullback order type ω, not ε₀).
+  Full corrected F attack-plan in `PENDING_WORK.md` top. Direction (Buchholz Boundedness route) reaffirmed.
+- **2026-06-22 (lap 17 — C₁/D made AXIOM-CLEAN; the X-induction crux SOLVED):** Cleared the lap-16
+  `atomCut_x` disclosed `sorry` via **`PXFc.nrel_value_subst`** (value-congruent negative-literal
+  renaming; matched-`axLv`-leaf `r₀=r` extraction by `injection` on the nrel eq + oriented `subst`) ⟹
+  **`XFreeCutElim.lean` sorry-free; C₁ `cutElim` + D `orderType_le_of_TIprovable` now
+  `[propext,choice,Quot.sound]`**. Discharged the **`hax_paLX` base case** (X-free `𝗣𝗔⁻`-image axioms via
+  `provable_true_x`). **Solved the X-induction crux conceptually + proved its 4 structural lemmas**
+  (`subst_value_subst`, `metaInduction_cong`, `succInd_nnf`, `PXFc_allClosure`): Foundation's `succInd`
+  successor `#0+1` substitutes to `nm n+1`, value-equal but NOT syntactically the numeral `nm(n+1)`
+  `metaInduction` demanded — no syntactic `step'` can satisfy the old `hstep`; resolved by the
+  value-congruent reformulation. Only the `hax_paLX` induction *assembly* (integration glue, recipe
+  inlined at the sorry) remains for full C₂. Headline still an honest `sorry`.
 - **2026-06-22 (lap 16 — C₂ STRUCTURAL PORT landed; the `exs` case mapped to a calculus retrofit):**
   Built `src/GoodsteinPA/EmbeddingX.lean` (green, one disclosed `sorry`): **`embedC_LX_gen`** — the
   `axm`-abstracted structural embedding of `Derivation2 𝓢 Γ` into `PXFc` over `LX`, all 9 structural
@@ -250,7 +281,8 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 ## Axiom ledger (per headline / landmark theorem — the fidelity spine)
 | theorem | paper claim | `#print axioms` shows | status |
 |---|---|---|---|
-| `peano_not_proves_goodstein` (headline) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` | 🔓 open `sorry` — **C₁ DONE (lap 15)**; C₂ (`embedC`/LX) + E (Goodstein⟹TI) + F (arithmetization seam) remain; **0** real math axioms |
+| `peano_not_proves_goodstein` (headline) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` | 🔓 open `sorry` — **C₁/D + C₂-structural DONE & clean (lap 17)**; remaining: C₂ glue (`hax_paLX`) + E (Goodstein⟹TI) + F (arithmetization seam, `‖≺‖=ε₀`) ; **0** real math axioms |
+| `hax_paLX` (C₂ glue, `src/EmbeddingX`) | `paLX`-image axioms embed to `PXFc` | `propext, sorryAx, choice, Quot.sound` | 🔓 base done (X-free via `provable_true_x`); **X-induction assembly = the one open `sorry`** (`:705`, recipe inlined). Clean ⟹ `embedC_LX` ⟹ Thm 5.6 fires. Supporting lemmas (`nrel_value_subst`, `subst_value_subst`, `metaInduction_cong`) all clean. |
 | `goodsteinSentence_faithful` (bridge) | encoding correctness | `propext, choice, Quot.sound` | 🟢 clean (trust base) |
 | `goodsteinTerminates_re` (M1) | r.e. of termination | `propext, choice, Quot.sound` | 🟢 clean |
 | `Deriv.Provable.cutElim` (M5, §19.9, `src/Zinfty`) | ε₀ cut-elimination (ℒₒᵣ) | `propext, choice, Quot.sound` | 🟢 clean — witness-FREE `(α,c)` |
@@ -258,7 +290,7 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 | `Boundedness.boundedness` (Thm 5.4, **lap 14**) | order-type Boundedness | `propext, choice, Quot.sound` | 🟢 clean — modulo seam hyps `hprec`/`hprecXPos` (discharged at F) |
 | `Boundedness.orderType_le_of_TIderiv` (Cor B, **lap 14**) | `Z∞⊢^β_1 TI ⟹ ‖≺‖≤2^β` | `propext, choice, Quot.sound` | 🟢 clean — modulo `hprec`/`hprecXPos`; consumes a cr=0 `XFreeAx` `⊢{TI}` (C₁+C₂ supply it) |
 | `embedC` (M4, `src/Embedding`) | PA⊢φ ⟹ Z∞⊢φ (ℒₒᵣ) | `propext, choice, Quot.sound` | 🟢 clean — needs C₂ generic-LX port for the X-route |
-| `PXFc.cutElim` (C₁, **lap 15**, `src/XFreeCutElim`) | `XFreeAx` cut-elim → cr=0 | `propext, choice, Quot.sound` (+ `sorryAx` since lap 16) | 🟡 was clean for the same-atom calculus; lap-16 generalised the calculus to value-congruent literal axioms (`Deriv.axLv`), and `atomCutAux`'s value-cong **X-atom-cut** case is one disclosed `sorry` pending `nrel_value_subst` (value-cong negative-literal renaming). Clears to clean once that lemma lands. |
+| `PXFc.cutElim` (C₁, lap 15, **clean lap 17**, `src/XFreeCutElim`) | `XFreeAx` cut-elim → cr=0 | `propext, choice, Quot.sound` | 🟢 clean — value-congruent literal calculus (`Deriv.axLv`); the lap-16 `atomCut_x` disclosed `sorry` was discharged lap 17 by **`PXFc.nrel_value_subst`** (value-cong negative-literal renaming). |
 | `orderType_le_of_TIprovable` (D, **lap 15**) | Thm 5.6 tail `PXFc {TI} ⟹ ‖≺‖≤2^(ω_c^α)` | `propext, choice, Quot.sound` | 🟢 clean — C₁ ∘ corollary B; modulo seam hyps `hprec`/`hprecXPos` (F) |
 | `provable_em_x` (C₂, **lap 15**) | `Z∞` excluded middle over LX | `propext, choice, Quot.sound` | 🟢 clean — `XFreeAx`-automatic (never `axTrue`) |
 | `metaInduction` (C₂ crux, **lap 15**) | X-induction via cut-tower (Buchholz 5.5) | `propext, choice, Quot.sound` | 🟢 clean — the faithfulness-critical embedding step; abstract in `step` (Foundation-DSL glue ⟹ later) |

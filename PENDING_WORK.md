@@ -1,5 +1,74 @@
 # Pending work — open obligations & attack paths
 
+## Reflection — 2026-06-22 (lap 18, deep-reflection) — the F seam, grounded vs an outside attack plan
+
+**Context.** Evaluated an external (GPT-5.5) attack plan for **F** (the arithmetization seam,
+`‖≺‖=ε₀` + discharge `hprec`/`hprecXPos`) against the real repo + mathlib. The plan is largely
+sound (it read the code: its `EpsilonOrder.hprec` reproduces `Boundedness.lean:699-702` exactly), but
+it under-scopes the hard part and omits the E-coupling. Verified facts + corrected attack below.
+
+**Direction call: KEEP the Buchholz Boundedness route; it is working.** As of lap 17 the *entire
+machine from D back is machine-checked and `#print axioms`-clean*: Boundedness (Thm 5.4) + corollary B,
+C₁ `PXFc.cutElim`→cr0, D `orderType_le_of_TIprovable`, C₂-structural `embedC_LX_gen`, M4 `embedC`,
+M5 `cutElim`. The honest realistic endpoint: **headline reduced to two well-scoped girders — E
+(Goodstein⟹TI) and F (arithmetization seam) — atop a fully-built, axiom-clean infinitary
+proof-theory core.** That is a valuable, net-new-in-Lean endpoint even if F lands as one narrow
+cited fact + built remainder. Remaining open obligations, in priority order:
+1. **C₂ glue** `hax_paLX` induction case (`EmbeddingX.lean:705`) — pure integration, recipe inlined
+   at the sorry (lap-17 HANDOFF #3). ~1 lap. Closes **Thm 5.6 (`PA ⊬ TI(ε₀)`)** axiom-clean modulo E+F.
+2. **F-girder: ε₀-completeness of CNF notations** — the real wall (below). Mathlib-only ⟹ Aristotle-eligible.
+3. **E**: Goodstein ⟹ TI_≺(X) — and it *constrains which ≺ F may use* (coupling, below).
+
+### F attack — corrected (what the outside plan got right / wrong, verified)
+- ✅ **Seam structure** (abstract `hprec`/`hprecXPos` into a record so F proceeds in parallel) — good.
+  FIX 1: `orderType lt = ε₀` is stronger than needed; the contradiction only needs **`ε₀ ≤ orderType lt`**
+  (D gives `‖≺‖ ≤ 2^β`, `β<ε₀`). The `≤ε₀`/embedding obligation is then free to drop.
+  FIX 2: carry the **X-free ℒₒᵣ defining formula** `φ` (set `prec := φ.lMap (ORing.embedding LX)`), so
+  `hprecXPos : XPos (∼prec)` is *automatic* (X-free ⟹ XPos, `XPositive.lean:18`), not a separate field.
+- ✅ **`hprec` reduces to definability** — `hprec_of_lMap_defined`. `TruthSem.models_lMap`
+  (`TruthSem.lean:120`, closed case) + the `levelSet lt γ={n|rk<γ}` interpretation (`TruthSem.lean:51`)
+  already exist; after unfolding `hyp prec=∀⁰(prec🡒Xat #0)` every `prec` occurrence is a *closed*
+  instance, so the closed `models_lMap` suffices (no need to generalize it to arity-2). **TRACTABLE —
+  do this FIRST among F bricks. Foundation-side.**
+- ✅ **`codeOfREPred₂` via `codeOfPartrec'`** — verified real: `Foundation/.../R0/Representation.lean:233`
+  `codeOfPartrec' {k} : (Vector ℕ k →. ℕ)→Semisentence ℒₒᵣ (k+1)`; `:245 codeOfREPred`+`:250` spec is the
+  unary template. Binary version constructible. (Our `lt` is computable — NONote `cmp` is decidable.)
+- 🔴 **THE under-scope — `note_rank_eq_repr : rank(·<·) o = repr o` is NOT a mathlib wire-up.** It is
+  **equivalent to completeness of the notation system up to ε₀** (every ordinal `<ε₀` is some `repr`),
+  and **mathlib does NOT have that.** `Mathlib/SetTheory/Ordinal/Notation.lean` (1298 lines) proves only
+  that `repr` is order-preserving + injective on `NF` (an *embedding* `NONote↪ε₀`: `lt_def:111`,
+  `repr_inj:319`) — no surjectivity/`ofOrdinal`/order-type lemma. The embedding gives `rank o ≤ repr o`
+  and `orderType ≤ ε₀` cheaply; the `=`/`≥` direction is the missing girder. **And the FIX-1 relaxation
+  does NOT save you**: `ε₀ ≤ orderType lt` still needs the represented set to fill `[0,ε₀)` (cof ε₀ = ω,
+  so a cofinal ω-chain has order type ω, not ε₀). ⟹ **formalize `∀ o<ε₀, ∃ x:ONote, x.NF ∧ x.repr=o`
+  (CNF existence up to ε₀). ~1–3 laps. Pure mathlib ordinal arith, ZERO Foundation dep ⟹ the one piece
+  of this project genuinely well-suited to ARISTOTLE** (contra the lap-17 blanket "poor fit").
+  - The outside plan's "Domination.lean has `towerO/repr_towerO/exists_repr_lt_omegaTower`" is **wrong**
+    — those names don't exist. Repo has `toONote`/`repr_toONote`/`toONote_NF` (base-b Goodstein coding,
+    sparse) + tower material in `Hardy.lean` (`tower i`, `fastGrowingε₀`, A4 `fastGrowing_lt_fastGrowingε₀`).
+- ✅ **Don't reuse `toOrdinal 2 n`/`seqONote`** — correct, and worse than "sparse": `toOrdinal b ·` is
+  strictly monotone, so the pullback has `rk lt n = n` and `orderType = ⨆ succ n = ω`, NOT ε₀. F needs a
+  **bijective ℕ↔NONote** coding (order type of the *whole* system), not a monotone enumeration.
+
+### F's real blind spot — E pins the order (co-design E and F)
+The `≺` whose order type F proves `=ε₀` MUST be the **same** `≺` for which PA proves `TI_≺(X)` from
+Goodstein in E. Pick an arbitrary clean NONote-coding for a tidy order-type proof → you then owe E
+(*PA ⊢ Goodstein → PA ⊢ TI along that coding*). The repo's natural Goodstein descent (`Domination.seqONote`,
+`repr_seqONote`, `seqONote_lt`) is tailored to E but has order type ω (wrong for F). **Crux = one order
+simultaneously (a) honestly ε₀ in order type [F], (b) X-free-definable [F2/F3], (c) PA-provably-TI-from-
+Goodstein [E].** Co-design, or make `EpsilonOrder` expose the E-hook (standard CNF order on ℕ-codes +
+Goodstein-descent-embeds-into-it).
+
+### Corrected F work order
+1. `hprec_of_lMap_defined` (tractable, Foundation-side, unblocks definability).
+2. `codeOfREPred₂` + spec (Foundation-side).
+3. **ε₀-completeness `∀ o<ε₀, ∃ x:ONote, NF x ∧ repr x = o`** (the real girder; mathlib-only; Aristotle).
+4. Bijective ℕ↔NONote coding + transfer order type.
+5. Instantiate `EpsilonOrder` with `ε₀ ≤ orderType lt`.
+6. Reconcile with E (same `lt`) before claiming the seam closes the headline.
+
+---
+
 ## ⏭️ LAP-16 (2026-06-22) — C₂ structural port LANDED; the `exs` wall = a calculus retrofit. Read FIRST.
 
 **Landed (green, committed):** `src/GoodsteinPA/EmbeddingX.lean` — `embedC_LX_gen` (9/10 `Derivation2`
