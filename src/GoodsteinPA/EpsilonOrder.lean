@@ -5,18 +5,22 @@ Boundedness (`src/Boundedness.lean`) consumes two seam hypotheses about the orde
 - `hprec : ∀ γ n, ⊨^γ ((hyp prec)/[nm n]) ↔ ∀ m, m ≺ n → |m|_≺ < γ` — the semantic spec of `prec`;
 - `hprecXPos : XPos (∼ prec)` — `prec` mentions no `X`.
 
-This file discharges `hprec` **from a single semantic-definability fact**: that `prec` is the `lMap` of
-an `ℒₒᵣ`-formula `φ` that defines the order `lt` in the standard ℕ-model. That is the "definability half"
-of F (per the lap-18 reflection in `PENDING_WORK.md`). Because `prec` is the image of an `ℒₒᵣ` formula it
-is `X`-free, so `hprecXPos` will be automatic (the `xpos_lMap` lemma — TODO, mechanical).
+This file discharges BOTH seam hypotheses **from a single semantic-definability fact**: that `prec` is
+the `lMap` of an `ℒₒᵣ`-formula `φ` that defines the order `lt` in the standard ℕ-model (the "definability
+half" of F; see the lap-18 reflection in `PENDING_WORK.md`). `hprec` follows by unfolding `⊨^γ`
+(`hprec_of_lMap_defined`); `hprecXPos` is automatic because the image of an `ℒₒᵣ` formula has no `X`-atom
+(`xpos_lMap` ⟹ `hprecXPos_lMap`). The `Seam` structure bundles these with the one remaining obligation.
 
 What this file does NOT do (the "order-type half", the real F girder, deferred): exhibit a *concrete* `lt`
-with `ε₀ ≤ ‖lt‖` (= ε₀-completeness of CNF notations, which mathlib lacks) and a concrete defining `φ`
-(via Foundation's `codeOfREPred₂`). Those instantiate the hypotheses below.
+with `ε₀ ≤ ‖lt‖` (= ε₀-completeness of CNF notations, which mathlib lacks; `Seam.ge`) and a concrete
+defining `φ` (via Foundation's `codeOfREPred₂`). Those instantiate the `Seam` fields.
 -/
 import GoodsteinPA.Boundedness
+import Mathlib.SetTheory.Ordinal.Veblen
 
 namespace GoodsteinPA.EpsilonOrder
+
+open scoped Ordinal
 
 open LO LO.FirstOrder
 open GoodsteinPA.ZinftyGen GoodsteinPA.LangX GoodsteinPA.TruthSem GoodsteinPA.XPositive
@@ -34,7 +38,34 @@ theorem eval_lMap_structLX (S : ℕ → Prop) {n} (e : Fin n → ℕ) (ε : ℕ 
       ↔ Semiformula.Evalm ℕ e ε ψ := by
   rw [Semiformula.eval_lMap, lMap_structLX]
 
+/-! ## `hprecXPos` is automatic for an `lMap`'d `ℒₒᵣ` formula -/
+
+/-- The `lMap` of any `ℒₒᵣ`-formula is `X`-positive: it contains no `X`-atom at all (the `ORing`
+embedding sends every `ℒₒᵣ` relation to the `Sum.inl` side, so the only `XPos`-failing shape,
+`nrel (Sum.inr X) _`, never appears). -/
+theorem xpos_lMap {n} (χ : Semiformula ℒₒᵣ ℕ n) :
+    XPos (Semiformula.lMap (Language.ORing.embedding LX) χ) := by
+  induction χ using Semiformula.rec' with
+  | hverum => trivial
+  | hfalsum => trivial
+  | hrel r v => trivial
+  | hnrel r v =>
+    show Sum.isLeft ((Language.ORing.embedding LX).rel r) = true
+    cases r <;> rfl
+  | hand φ ψ ihφ ihψ => exact ⟨ihφ, ihψ⟩
+  | hor φ ψ ihφ ihψ => exact ⟨ihφ, ihψ⟩
+  | hall φ ih => exact ih
+  | hexs φ ih => exact ih
+
+/-- **`hprecXPos` for an `lMap`-definable order is automatic.** For `prec := φ.lMap`, the Boundedness
+hypothesis `XPos (∼ prec)` holds (negation of an `X`-free formula is still `X`-free). -/
+theorem hprecXPos_lMap {n} (φ : Semiformula ℒₒᵣ ℕ n) :
+    XPos (∼ (Semiformula.lMap (Language.ORing.embedding LX) φ)) := by
+  simpa only [LogicalConnective.HomClass.map_neg] using xpos_lMap (∼ φ)
+
 /-! ## The `hprec` seam hypothesis from semantic definability -/
+
+section Definability
 
 variable (lt : ℕ → ℕ → Prop) [IsWellFounded ℕ lt]
 variable (prec : Semiformula LX ℕ 2)
@@ -73,5 +104,45 @@ theorem hprec_of_lMap_defined (φ : Semiformula ℒₒᵣ ℕ 2)
     models lt γ ((hyp (Semiformula.lMap (Language.ORing.embedding LX) φ))/[nm n])
       ↔ ∀ m : ℕ, lt m n → rk lt m < γ :=
   hprec_of_eval lt _ (fun S a b => by rw [eval_lMap_structLX]; exact hφ a b) γ n
+
+end Definability
+
+/-! ## The seam interface
+
+`Seam` bundles what F must supply to the headline assembly: a well-order `lt` of ℕ, an `X`-free
+`ℒₒᵣ`-formula `φ` defining it, and the order-type lower bound `ε₀ ≤ ‖lt‖`. The two *definability*
+obligations are discharged here (`hprec`/`hprecXPos`, via the lemmas above); the lone remaining
+obligation is `ge` — the ε₀-completeness girder (mathlib-only; see `PENDING_WORK.md`). The seam needs
+only `ε₀ ≤ orderType lt` (NOT `=`): the contradiction is `‖lt‖ ≤ 2^β`, `β < ε₀`. -/
+structure Seam where
+  /-- the order relation on ℕ -/
+  lt : ℕ → ℕ → Prop
+  /-- it is a well-order (instance-implicit so `orderType`/`rk` resolve below) -/
+  [wf : IsWellFounded ℕ lt]
+  /-- an `X`-free `ℒₒᵣ`-formula defining `lt` in the standard ℕ-model -/
+  φ : Semiformula ℒₒᵣ ℕ 2
+  /-- `φ` defines `lt` -/
+  hφ : ∀ a b : ℕ, Semiformula.Evalm ℕ ![a, b] id φ ↔ lt a b
+  /-- the order type is at least ε₀ (the only obligation not yet discharged by this file) -/
+  ge : ε₀ ≤ orderType lt
+
+namespace Seam
+
+attribute [instance] Seam.wf
+
+variable (E : Seam)
+
+/-- The `LX`-formula realising the order (the `lMap` of `E.φ`). -/
+def prec : Semiformula LX ℕ 2 := Semiformula.lMap (Language.ORing.embedding LX) E.φ
+
+/-- The Boundedness seam hypothesis `hprec`, discharged from definability. -/
+theorem hprec (γ : Ordinal.{0}) (n : ℕ) :
+    models E.lt γ ((hyp E.prec)/[nm n]) ↔ ∀ m : ℕ, E.lt m n → rk E.lt m < γ :=
+  hprec_of_lMap_defined E.lt E.φ E.hφ γ n
+
+/-- The Boundedness seam hypothesis `hprecXPos`, automatic for the `X`-free `prec`. -/
+theorem hprecXPos : XPos (∼ E.prec) := hprecXPos_lMap E.φ
+
+end Seam
 
 end GoodsteinPA.EpsilonOrder
