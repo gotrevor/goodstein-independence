@@ -26,7 +26,8 @@ import GoodsteinPA.Boundedness
 namespace GoodsteinPA.XFreeCutElim
 
 open LO LO.FirstOrder
-open GoodsteinPA.ZinftyGen GoodsteinPA.LangX GoodsteinPA.Boundedness
+open GoodsteinPA.ZinftyGen GoodsteinPA.LangX GoodsteinPA.TruthSem GoodsteinPA.XPositive
+  GoodsteinPA.Boundedness
 
 set_option linter.unusedSectionVars false
 set_option maxHeartbeats 1000000
@@ -1280,5 +1281,21 @@ theorem PXFc.cutElim {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
   induction c generalizing α with
   | zero => simpa [Deriv.omegaTower] using h
   | succ c ih => exact ih (PXFc.cutElimStep h)
+
+/-! ### D (Thm 5.6 tail): cut-eliminate the embedded `{TI}` derivation and feed corollary B.
+
+Composing **C₁** (`PXFc.cutElim`) with the lap-14 **corollary B** (`orderType_le_of_TIderiv`): any
+`XFreeAx` `Z∞`-derivation of `{TI_≺(X)}` (of *any* finite cut rank `c`, height `≤ α`) bounds the order
+type by `2^(ω_c^α)`. This is everything downstream of the embedding; **C₂** (`embedC` over `LX`,
+producing the `PXFc` hypothesis from a `Z ⊢ TI` proof) is the one remaining gap to Thm 5.6 proper. -/
+theorem orderType_le_of_TIprovable (lt : ℕ → ℕ → Prop) [IsWellFounded ℕ lt]
+    (prec : Semiformula LX ℕ 2)
+    (hprec : ∀ (γ : Ordinal.{0}) (n : ℕ),
+      models lt γ ((Boundedness.hyp prec)/[nm n]) ↔ ∀ m : ℕ, lt m n → rk lt m < γ)
+    (hprecXPos : XPos (∼ prec)) {α : Ordinal.{0}} {c : ℕ}
+    (h : PXFc α c ({Boundedness.TI prec} : Seq LX)) :
+    orderType lt ≤ 2 ^ (Deriv.omegaTower c α) := by
+  obtain ⟨d, hdo, hdc, hdx⟩ := PXFc.toPXF (PXFc.cutElim h)
+  exact Boundedness.orderType_le_of_TIderiv lt prec _ hprec hprecXPos d hdo hdc hdx
 
 end GoodsteinPA.XFreeCutElim
