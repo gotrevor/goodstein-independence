@@ -35,10 +35,13 @@ smaller. Revisit only if M7a proves intractable after sustained effort.
   large `n`). Towsner's "follows from IH" glosses this; the fix needs Buchholz operator-control or a
   controlled `Zk.allω` index. Precisely characterized + 3 attack options in
   `ANALYSIS-2026-06-22-cutelim-k-threading.md` ADDENDUM; `ON-LINE-REQUEST` re-filed (one layer down).
-  Then **de-risked the recommended fix (option 2)** by proving the one Hardy fact it needs:
-  `hardy_add_ofNat {α NF} : hardy (α + ofNat c) n = hardy α (n + c)` (banked in `src/Hardy.lean`,
-  axiom-clean, build green 1257) — finite-tail Hardy additivity, so a linearly-reindexed ω-rule premise
-  is absorbed by a constant ordinal bump and the lower bound survives via `hardy_lt_goodsteinLength`.
+  Then proved two Hardy domination lemmas (`hardy_add_ofNat`, `hardy_shift_lt_goodsteinLength`, banked in
+  `src/`, axiom-clean, build green 1257). **Tried + ELIMINATED option 2** (global index swap `max k n →
+  k + n`): fixes §19.6-commuting but breaks `allInv` (needs `max`'s idempotence; `+` ⟹ slope-2 index ⟹
+  lower bound needs multiplicative rescaling). **Revised recommendation: option 1 — function/operator-
+  valued `allω` index** (Buchholz-style; the only design closing both obstructions; slope-1, so the proved
+  domination lemmas still apply). `k+n` experiment reverted, `wip/BoundedZinfty.lean` stays sorry-free.
+  See `ANALYSIS-…-cutelim-k-threading.md` ADDENDUM 2.
 - **2026-06-22 (lap 7 — cut-elim `k`/`τ` crux RESOLVED, offline):** Read Towsner §15–§20 on disk and
   answered the open `ON-LINE-REQUEST` directly. **Finding:** the lap-6 "norm grows under addition so
   cut-elim might break `norm<k`" worry was a misframing. (a) `k` is **not** fixed — it grows (§19.5

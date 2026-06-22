@@ -131,3 +131,38 @@ This is the true remaining depth of step 1. The conceptual `k`-crux (top of this
 `norm`-subadditivity ingredient (`norm_add_le`, proved) are done; the §19.6 commuting-case bounding is
 the live frontier. `ON-LINE-REQUEST.md` re-filed for the operator-controlled / S-W bounding-lemma
 detail.
+
+---
+
+## ADDENDUM 2 (lap 7, continued) — option 2 (global index swap) is ELIMINATED; operator index needed
+
+Attempted the recommended lightweight fix (option 2: swap the ω-rule index `max k n → k + n` globally in
+`wip/BoundedZinfty.lean`). It does **not** work — a second, opposite obstruction appears, so the two
+naive global indices each break a different half:
+
+- **`max k n` (current)** — good for `allInv` (the principal case relies on **idempotence**
+  `max (max k n₀) n₀ = max k n₀` to keep a single result index), but **breaks §19.6-commuting**
+  (`norm(α+βₙ) ~ norm α + n > max K n ~ n`, ADDENDUM 1).
+- **`k + n`** — good for §19.6-commuting (`(k+n)+norm α = (k+norm α)+n`, additive shift absorbs `+α`),
+  but **breaks `allInv`**: the principal case (when the inverted `∀⁰φ₀` *also lingers in* `Γ₀`, a set-
+  sequent duplicate) must re-invert via the IH, producing index `(k+n₀)+n₀ = k + 2n₀` — there is no
+  idempotent collapse under `+`. Declaring `allInv`'s result at `k + 2·n₀` is internally consistent
+  (clean cases `mono_k` up), but then the §19.6 family `fam n` lands at index `k + 2n` — **slope 2** —
+  and the lower bound's I∀ case now needs `hardy α (2n+k) < G(n)`, a *multiplicative* rescaling that
+  `hardy_shift_lt_goodsteinLength` (additivity, slope 1) does NOT cover. (A slope-2 Hardy bound needs a
+  rescaling lemma `hardy α (2n) ≤ hardy α' n`, strictly harder than finite-tail additivity.)
+
+**Conclusion: no single numeric index `idx(k,n)` serves both `allInv` (wants idempotence) and
+§19.6-commuting (wants additive-shift absorption).** The principled fix is a **function/operator-valued
+index**: each `allω` node carries an index *function* `g : ℕ → ℕ` (with `g` controlled, e.g.
+`g n ≤ n + const`), and the rules compose `g`s — `allInv` composes idempotently, cut-elim's commuting
+case post-composes the `+norm α` shift. This is exactly **Buchholz operator-controlled derivations**
+(`H ⊢^α_c Γ`) specialized to PA. It subsumes both naive indices and keeps the controlled-index
+domination (`hardy_shift_lt_goodsteinLength`, proved) applicable at the slope-1 level.
+
+**Revised recommendation: option 1 (operator/function-valued `allω` index), NOT option 2.** It is the
+larger refactor of `wip/BoundedZinfty.lean` + `B`/lower-bound, but it is the only one that closes both
+obstructions. The two Hardy lemmas proved this lap (`hardy_add_ofNat`, `hardy_shift_lt_goodsteinLength`)
+remain the right domination ingredients for it (the controlled `g` keeps the slope at 1). The `+α`/`max`
+analysis here is the precise spec the operator index must satisfy. `wip/BoundedZinfty.lean` left
+sorry-free (the `k+n` experiment reverted); no half-broken state committed.

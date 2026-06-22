@@ -5,7 +5,7 @@
 > (`lake build GoodsteinPA`, 1257 jobs). `wip/BoundedZinfty.lean` compiles standalone **sorry-free**
 > (`lake env lean wip/BoundedZinfty.lean`). Headline still a literal `sorry` (anti-fraud, correct).
 
-## What landed this lap (9 commits, all verified)
+## What landed this lap (10 commits, all verified)
 
 This was a **crux-resolution + ingredient lap**, not a new-girder-built lap. The §19.6 cut-reduction
 that lap 6 pointed at turned out to have a deeper layer; this lap mapped it precisely and proved the
@@ -48,28 +48,33 @@ one ingredient that's fully tractable.
    remaining depth of step 1. Full derivation + 3 attack options in the ANALYSIS **ADDENDUM**;
    `ON-LINE-REQUEST` re-filed (one layer down — Buchholz operator-control / S-W bounding lemma).
 
-## THE NEXT MOVE — §19.6 attack **option 2** (controlled ω-rule index; offline, recommended)
+## THE NEXT MOVE — §19.6 attack **option 1** (function/operator-valued `allω` index)
 
 The principal `exI` case of `cutReduceAll` is clean; the live frontier is the commuting `allω` case.
-Lap-7 investigation makes **option 2 the recommended path** (lightest, no literature needed):
+**Lap-7 tried option 2 (global numeric index swap) and ELIMINATED it** — see `ANALYSIS-…-cutelim-k-
+threading.md` ADDENDUM 2. Summary of why no single numeric `idx(k,n)` works:
+- `max k n` (current): good for `allInv` (principal case needs idempotence `max(max k n₀)n₀=max k n₀`),
+  but breaks §19.6-commuting (`norm(α+βₙ)~norm α+n > max K n` for large `n`).
+- `k + n`: fixes §19.6-commuting (`(k+n)+norm α=(k+norm α)+n`), but breaks `allInv` — the lingering-
+  duplicate principal subcase produces index `k+2n₀` (slope 2, no idempotent collapse), forcing the
+  lower bound to need `hardy α (2n) < G n` (multiplicative rescaling; the additivity lemma is slope-1).
 
-- **Why it should work:** `hardy_lt_goodsteinLength {α NF} : ∃ N, ∀ m ≥ N, hardy α m < G m`
-  (`src/LowerBound.lean:258`) — G beats `hardy α` at *every* large `m`, huge margin. So a **linearly**
-  controlled ω-rule premise-index `f n ≤ n + c` is very plausibly absorbable.
-- **Plan:** (a) generalize `B.allI` (`src/LowerBound.lean`) and `Zk.allω` (`wip/BoundedZinfty.lean`) to
-  carry a controlled increasing index `f` with `f n ≥ n` (instead of the rigid `max k n`); (b) re-prove
-  `allInv` + `lowerBound_hardy_selfcontained` with `f` — the lower-bound I∀ case needs
-  `hardy α (f x) < G x`; with `f x ≤ x+c`, reduce `hardy α (x+c) < G x` to the banked
-  `hardy α' x < G x` via the **Hardy argument-shift lemma — PROVED + banked this lap** as
-  `hardy_add_ofNat {α NF} : hardy (α + ofNat c) n = hardy α (n + c)` (`src/Hardy.lean`, axiom-clean):
-  `hardy (α + ofNat c) x < G x` is then a direct `hardy_lt_goodsteinLength` instance; (c) §19.6
-  commuting case then reconstructs at
-  `f'(n) = norm α + f(n)`, which fits because `norm(α+βₙ) < norm α + f(n) = f'(n)`.
-- **Caution:** this REFACTORS the (currently sorry-free) `wip/BoundedZinfty.lean` calculus + the M6
-  lower bound. Start fresh-headed; don't half-break the clean state — branch the calculus def first,
-  prove the new Hardy shift lemma standalone, then thread it.
-- **Fallbacks:** option 1 (Buchholz operator-controlled `Zk`, `buchholz-beweistheorie` §9 on disk —
-  larger refactor) or option 3 (Hardy 16.8–16.10, likely insufficient per the `+α` analysis).
+**Revised recommendation = option 1: each `allω` carries a controlled index *function* `g : ℕ → ℕ`**
+(`g n ≤ n + const`), and rules compose `g`s — idempotently for `allInv`, post-composing the `+norm α`
+shift for cut-elim. This is Buchholz operator-controlled derivations specialized to PA; it's the only
+design that closes BOTH obstructions, and it keeps slope 1 so the proved domination lemmas apply:
+- `hardy_add_ofNat {α NF} : hardy (α + ofNat c) n = hardy α (n + c)` (`src/Hardy.lean`, axiom-clean).
+- `hardy_shift_lt_goodsteinLength {α NF} (c) : ∃ N, ∀ x ≥ N, hardy α (x+c) < G x` (`src/LowerBound.lean`).
+- **Plan:** (a) refactor `Zk.allω` (`wip/BoundedZinfty.lean`) + `B.allI` (`src/LowerBound.lean`) to carry
+  `g` with a control predicate (`∀n, g n ≤ n + c_g` or similar); (b) re-prove the inversion suite + cut
+  reductions with `g` (allInv composes `g` idempotently — should be cleaner than the numeric juggling);
+  (c) re-prove `lowerBound_hardy_selfcontained` with `g` (I∀ case: `hardy α (g x) ≤ hardy α (x+c_g) < G x`
+  via the two lemmas); (d) `cutReduceAll` commuting case reconstructs at `g'(n) = g(n) + norm α`.
+- **Caution:** REFACTORS the (currently sorry-free) `wip/BoundedZinfty.lean` + M6 lower bound. Start
+  fresh-headed; don't half-break the clean state. Reference `buchholz-beweistheorie` §9 (on disk) for the
+  operator-control pattern.
+- **Fallback:** Buchholz's full operator `H` (set-valued, not just a ℕ→ℕ function) if the function form
+  still can't express some closure; `ON-LINE-REQUEST` re-filed for the precise PA operator-control spec.
 
 ## State of the spine (Route B, hardest-first)
 - **M1, M2, Phase 0/1** — done, clean.
