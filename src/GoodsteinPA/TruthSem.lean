@@ -51,6 +51,39 @@ noncomputable def Sat (γ : Ordinal.{0}) (Γ : Seq LX) : Prop := ∃ A ∈ Γ, m
 theorem Sat.intro {γ : Ordinal.{0}} {Γ : Seq LX} {A : Form LX}
     (hA : A ∈ Γ) (h : models lt γ A) : Sat lt γ Γ := ⟨A, hA, h⟩
 
+/-! ## `⊨^γ` on connectives
+
+The Tait-formula recursion the Boundedness induction reads off: `⊨^γ` commutes with `⋏`/`⋎` and the
+quantifiers turn into the numeral family (matching the ω-rule premise shape `φ/[nm n]`). -/
+
+/-- The numeral `nm n` denotes `n` in `structLX S` (its `ℒₒᵣ`-fragment is the standard model). -/
+theorem val_nm (S : ℕ → Prop) (n : ℕ) :
+    Semiterm.val (structLX S) ![] (id : ℕ → ℕ) (nm n) = n := by
+  letI inst : Structure LX ℕ := structLX S
+  haveI : Structure.Zero LX ℕ := ⟨rfl⟩
+  haveI : Structure.One LX ℕ := ⟨rfl⟩
+  haveI : Structure.Add LX ℕ := ⟨fun _ _ => rfl⟩
+  simp [nm]
+
+/-- The 1-ary substitution vector `![nm n]` evaluates to `![n]` in `structLX S`. -/
+theorem subst_vec (S : ℕ → Prop) (n : ℕ) :
+    (fun i => Semiterm.val (structLX S) ![] id (![nm n] i)) = ![n] := by
+  funext i; refine Fin.cases ?_ (fun j => j.elim0) i; simp [val_nm]
+
+@[simp] theorem models_and (γ : Ordinal.{0}) (φ ψ : Form LX) :
+    models lt γ (φ ⋏ ψ) ↔ models lt γ φ ∧ models lt γ ψ := by unfold models; simp
+
+@[simp] theorem models_or (γ : Ordinal.{0}) (φ ψ : Form LX) :
+    models lt γ (φ ⋎ ψ) ↔ models lt γ φ ∨ models lt γ ψ := by unfold models; simp
+
+theorem models_all (γ : Ordinal.{0}) (φ : SyntacticSemiformula LX 1) :
+    models lt γ (∀⁰ φ) ↔ ∀ n : ℕ, models lt γ (φ/[nm n]) := by
+  unfold models; simp only [Semiformula.eval_all, Semiformula.eval_substs, subst_vec]
+
+theorem models_ex (γ : Ordinal.{0}) (φ : SyntacticSemiformula LX 1) :
+    models lt γ (∃⁰ φ) ↔ ∃ n : ℕ, models lt γ (φ/[nm n]) := by
+  unfold models; simp only [Semiformula.eval_ex, Semiformula.eval_substs, subst_vec]
+
 /-! ## X-free invariance
 
 The `ℒₒᵣ`-reduct of `structLX S` is the standard ℕ-model, independent of `S` — because the `ORing`
