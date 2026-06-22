@@ -9,12 +9,19 @@ abstract Hardy monotonicity hypothesis `Hmono : β < α → τ β < k → h β k
 `hardy_le_of_lt` — the index-monotonicity lemma whose budget side condition `norm α ≤ x` is exactly
 Towsner's `τ β < k`.  The Goodstein atom-truth + `G` are the real ones (from `Defs.lean`).
 
-**Result:** `lowerBound_existential_hardy` — the ∀-free Goodstein-fragment lower bound with **zero
-abstract hypotheses**, over the genuine Hardy hierarchy and genuine Goodstein function.  Axiom-clean.
+**Results (all axiom-clean):**
+* `lowerBound_existential_hardy` — the ∀-free Goodstein-fragment lower bound, **zero abstract
+  hypotheses**, over the genuine Hardy hierarchy and genuine Goodstein function.
+* `B.mono_k`, `B.allInv` — `k`-monotonicity and **∀-inversion** (the universal is inverted away,
+  not accumulated — the resolution of the lap-4 `bounding` frontier; see
+  `ANALYSIS-2026-06-22-bounding-resolution.md`).
+* `lowerBound_hardy` — the **full** Goodstein lower bound (Towsner Thm 17.1): no witness-bounded
+  cut-free derivation of `gAll = ∀x∃y g_y(x)=0` at `(α,k)`, **modulo Goodstein domination `Hdom`**
+  (`∃ x, hardy α (max k x) < G x`).  The `gAll`/`I∀` accumulation worry of the lap-4 handoff is
+  resolved here, machine-checked.
 
-This is the M6 ∃-fragment, fully grounded.  The remaining frontier is the `gAll`/`I∀` case (the full
-Thm 17.1), tracked in `wip/WitnessBound.lean : bounding` + `ON-LINE-REQUEST.md` (the disjunctive
-Schwichtenberg–Wainer / Arai boundedness invariant).  WIP — not in build target.
+Remaining gap to a self-contained Thm 17.1: discharge `Hdom` from a real Goodstein-dominates-Hardy
+fact (Track-1 `Logic/Goodstein/Domination*.lean`, to port).  WIP — not in build target.
 -/
 import Mathlib.SetTheory.Ordinal.Notation
 import Mathlib.Order.Lattice.Nat
@@ -121,5 +128,96 @@ theorem lowerBound_existential_hardy :
         · exact Or.inr ⟨m, n', hfm, hlt⟩
     | allI β hmem _ _ _ _ =>
       rcases hcond _ hmem with ⟨_, hf, _⟩ | ⟨_, _, hf, _⟩ <;> exact absurd hf (by simp)
+
+/-! ## `k`-monotonicity and ∀-inversion (toward the full Thm 17.1)
+
+The numeric bound `k` is a *weaker* constraint as it grows (`τ α < k` easier, witness bound
+`hardy α k` larger by `hardy_monotone`).  And the universal `gAll` can be **inverted away**: a
+derivation of a sequent containing `gAll` yields a derivation of the instance sequent with `gAll`
+replaced by `gEx n₀`.  Together with `lowerBound_existential_hardy` (the gAll-free fragment) and
+Goodstein domination, these give the full lower bound — see `ANALYSIS-2026-06-22-bounding-resolution.md`. -/
+
+/-- **`k`-monotonicity.**  Raising the numeric bound only relaxes every side condition. -/
+theorem B.mono_k : ∀ {α : ONote} {k : ℕ} {Γ : Seq}, B α k Γ → ∀ {k' : ℕ}, k ≤ k' → B α k' Γ := by
+  intro α k Γ d
+  induction d with
+  | trueR hmem htrue hτ => intro k' hk; exact B.trueR hmem htrue (lt_of_lt_of_le hτ hk)
+  | weak hβ hβNF hαNF hτ hsub _ ih =>
+      intro k' hk; exact B.weak hβ hβNF hαNF (lt_of_lt_of_le hτ hk) hsub (ih hk)
+  | exI hβ hβNF hαNF hτ hbound hmem _ ih =>
+      intro k' hk
+      exact B.exI hβ hβNF hαNF (lt_of_lt_of_le hτ hk)
+        (le_trans hbound (hardy_monotone _ hk)) hmem (ih hk)
+  | allI β hmem hβ hβNF hαNF hτ _ ih =>
+      intro k' hk
+      exact B.allI β hmem hβ hβNF hαNF
+        (fun n => lt_of_lt_of_le (hτ n) (max_le_max hk le_rfl))
+        (fun n => ih n (max_le_max hk le_rfl))
+
+/-- **∀-inversion for `B`.**  A derivation of `Γ ∋ gAll` yields a derivation of the instance sequent
+`{gEx n₀} ∪ (Γ \ gAll)` at the (possibly raised) numeric bound `max k n₀` and the same ordinal `α`.
+The principal `allI` case hands over the premise `B (β n₀) (max k n₀) (insert (gEx n₀) Γ)` and lifts
+the ordinal back to `α` via `weak`; the other cases commute with the inversion (k-weakened up). -/
+theorem B.allInv (n₀ : ℕ) :
+    ∀ {α : ONote} {k : ℕ} {Γ : Seq}, B α k Γ → gAll ∈ Γ →
+      B α (max k n₀) (insert (gEx n₀) (Γ.erase gAll)) := by
+  intro α k Γ d
+  induction d with
+  | @trueR α k Γ m n hmem htrue hτ =>
+      intro _
+      -- the true atom survives erasing `gAll` and the new `gEx n₀`
+      refine B.trueR (m := m) (n := n) ?_ htrue (lt_of_lt_of_le hτ (le_max_left _ _))
+      exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩)
+  | @weak α β k Δ Γ hβ hβNF hαNF hτ hsub dd ih =>
+      intro _
+      by_cases hΔ : gAll ∈ Δ
+      · exact B.weak hβ hβNF hαNF (lt_of_lt_of_le hτ (le_max_left _ _))
+          (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hΔ)
+      · -- `gAll ∉ Δ` ⇒ `Δ ⊆ Γ.erase gAll`; weaken the unchanged subderivation (k raised)
+        refine B.weak hβ hβNF hαNF (lt_of_lt_of_le hτ (le_max_left _ _)) ?_
+          (B.mono_k dd (le_max_left _ _))
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun h => hΔ (h ▸ hx), hsub hx⟩)
+  | @exI α β k Γ n v hβ hβNF hαNF hτ hbound hmem _ ih =>
+      intro hgAll
+      have key : B β (max k n₀) (insert (gEx n₀) (insert (atom v n) (Γ.erase gAll))) := by
+        have := ih (Finset.mem_insert_of_mem hgAll)
+        rwa [Finset.erase_insert_of_ne (by simp)] at this
+      refine B.exI hβ hβNF hαNF (lt_of_lt_of_le hτ (le_max_left _ _))
+        (le_trans hbound (hardy_monotone _ (le_max_left _ _)))
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩)) ?_
+      -- reorder the inserts to match `exI`'s premise shape
+      rwa [Finset.insert_comm] at key
+  | @allI α k Γ β hmem hβ hβNF hαNF hτ d ih =>
+      intro _
+      -- principal case: use the premise at index `n₀`, invert away the lingering `gAll`, lift via `weak`
+      have hprem : B (β n₀) (max k n₀) (insert (gEx n₀) (Γ.erase gAll)) := by
+        have h := ih n₀ (Finset.mem_insert_of_mem hmem)
+        rw [Finset.erase_insert_of_ne (by simp), Finset.insert_idem] at h
+        rwa [max_eq_left (le_max_right k n₀)] at h
+      exact B.weak (hβ n₀) (hβNF n₀) hαNF (hτ n₀) (fun _ h => h) hprem
+
+/-- **The full Goodstein lower bound (Towsner Thm 17.1), over the concrete Hardy hierarchy.**
+
+If Goodstein length dominates the Hardy level `α` at some argument (`∃ x, hardy α (max k x) < G x` —
+Towsner Thm 7.2/9.8, `Hdom`), then the witness-bounded cut-free calculus **cannot** derive the
+Goodstein sentence `gAll = ∀x∃y g_y(x)=0` at bound `(α,k)`.
+
+Proof: invert `gAll` at the dominating index `x` (`B.allInv`) to a gAll-free single-existential
+sequent `{gEx x}` at bound `(α, max k x)`; domination makes `gEx x` out of reach; the proven
+∃-fragment `lowerBound_existential_hardy` finishes.  **No abstract hypotheses except `Hdom`** — the
+`gAll`/`I∀` accumulation frontier of `wip/WitnessBound.lean : bounding` is resolved (invert, don't
+accumulate; see `ANALYSIS-2026-06-22-bounding-resolution.md`). -/
+theorem lowerBound_hardy {α : ONote} {k : ℕ} (Hdom : ∃ x, hardy α (max k x) < G x) :
+    ¬ B α k ({gAll} : Seq) := by
+  intro hB
+  obtain ⟨x, hx⟩ := Hdom
+  have hinv := B.allInv x hB (by simp)
+  rw [Finset.erase_singleton] at hinv
+  refine lowerBound_existential_hardy α (max k x) (insert (gEx x) ∅) (fun f hf => ?_) hinv
+  rw [Finset.mem_insert] at hf
+  rcases hf with rfl | h
+  · exact Or.inl ⟨x, rfl, hx⟩
+  · exact absurd h (Finset.notMem_empty _)
 
 end GoodsteinPA.LowerBoundHardy
