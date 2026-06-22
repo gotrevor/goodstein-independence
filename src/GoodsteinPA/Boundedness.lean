@@ -327,8 +327,63 @@ theorem boundedness (β : Ordinal.{0}) :
         exact ⟨φ ⋎ ψ, Finset.mem_insert_self _ _, ⟨hposφ, hposψ⟩,
           (models_or lt _ φ ψ).mpr (Or.inr (models_mono lt hl hposψ hmA))⟩
       · exact ⟨A, Finset.mem_insert_of_mem hAΓ, hposA, models_mono lt hl hposA hmA⟩
-  | allω χ d' ih => intro hob hcr hxf hpart; sorry
-  | exI χ n d' ih => intro hob hcr hxf hpart; sorry
+  | @allω Γ χ d' ih =>
+    intro hob hcr hxf hpart
+    set D := Deriv.allω χ d' with hD
+    have hposall : XPos (∀⁰ χ) := by
+      rcases hpart (∀⁰ χ) (Finset.mem_insert_self _ _) with h | ⟨t, heq, _⟩ | hc
+      · rw [Prog] at h; simp [Xat, Xsym] at h
+      · simp [Xat] at heq
+      · exact hc
+    have hposχ : XPos χ := hposall
+    have hole : ∀ n, (d' n).o ≤ D.o := fun n => by
+      rw [hD]; simp only [Deriv.o]
+      exact le_trans (Ordinal.le_iSup (fun m => (d' m).o) n) (self_le_add_right _ 1)
+    have hcr0 : ∀ n, (d' n).cr = 0 := fun n => by
+      have : (d' n).cr ≤ 0 := by
+        rw [hD] at hcr; simp only [Deriv.cr] at hcr
+        exact le_trans (le_iSup (fun m => (d' m).cr) n) hcr.le
+      exact nonpos_iff_eq_zero.mp this
+    have hl : ∀ n, α + 2 ^ (d' n).o ≤ α + 2 ^ D.o := fun n =>
+      (add_le_add_iff_left α).mpr (Ordinal.opow_le_opow_right two_pos (hole n))
+    by_cases hG : ∃ A ∈ Γ, XPos A ∧ models lt (α + 2 ^ D.o) A
+    · obtain ⟨A, hAΓ, hposA, hmA⟩ := hG
+      exact ⟨A, Finset.mem_insert_of_mem hAΓ, hposA, hmA⟩
+    · refine ⟨∀⁰ χ, Finset.mem_insert_self _ _, hposall, (models_all lt _ χ).mpr (fun n => ?_)⟩
+      obtain ⟨A, hA, hposA, hmA⟩ := ih n α (le_trans (hole n) hob) (hcr0 n) (hxf n)
+        (by intro B hB
+            rcases Finset.mem_insert.mp hB with rfl | hBΓ
+            · exact Or.inr (Or.inr (xpos_subst n hposχ))
+            · exact hpart B (Finset.mem_insert_of_mem hBΓ))
+      rcases Finset.mem_insert.mp hA with hAeq | hAΓ
+      · rw [hAeq] at hmA; exact models_mono lt (hl n) (xpos_subst n hposχ) hmA
+      · exact absurd ⟨A, hAΓ, hposA, models_mono lt (hl n) hposA hmA⟩ hG
+  | @exI Γ χ n d' ih =>
+    intro hob hcr hxf hpart
+    set D := Deriv.exI χ n d' with hD
+    have ho : d'.o ≤ D.o := by rw [hD]; simp only [Deriv.o]; exact self_le_add_right _ 1
+    have hl : α + 2 ^ d'.o ≤ α + 2 ^ D.o :=
+      (add_le_add_iff_left α).mpr (Ordinal.opow_le_opow_right two_pos ho)
+    have cr0 : d'.cr = 0 := by
+      have : d'.cr ≤ 0 := by rw [hD] at hcr; simpa only [Deriv.cr] using hcr.le
+      exact nonpos_iff_eq_zero.mp this
+    rcases hpart (∃⁰ χ) (Finset.mem_insert_self _ _) with hPa | ⟨t, heq, _⟩ | hPc
+    · -- **Buchholz case 2** (`∃⁰χ = ∼Prog`): invert the inner `hyp ⋏ ∼X` and combine the two IHs
+      -- (outer IH on the inversion outputs, which strictly shrink the height). THE remaining crux.
+      sorry
+    · simp [Xat] at heq
+    · -- Buchholz case 4 (X-positive `∃`): introduce the witness `n` and lift via monotonicity.
+      have hposχ : XPos χ := hPc
+      obtain ⟨A, hA, hposA, hmA⟩ := ih α (le_trans ho hob) cr0 hxf
+        (by intro B hB
+            rcases Finset.mem_insert.mp hB with rfl | hBΓ
+            · exact Or.inr (Or.inr (xpos_subst n hposχ))
+            · exact hpart B (Finset.mem_insert_of_mem hBΓ))
+      rcases Finset.mem_insert.mp hA with hAeq | hAΓ
+      · rw [hAeq] at hmA
+        exact ⟨∃⁰ χ, Finset.mem_insert_self _ _, hPc,
+          (models_ex lt _ χ).mpr ⟨n, models_mono lt hl (xpos_subst n hposχ) hmA⟩⟩
+      · exact ⟨A, Finset.mem_insert_of_mem hAΓ, hposA, models_mono lt hl hposA hmA⟩
   | cut φ d₁ d₂ ih₁ ih₂ =>
     intro hob hcr hxf hpart
     exfalso
