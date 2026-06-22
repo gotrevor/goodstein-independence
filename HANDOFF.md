@@ -23,11 +23,13 @@ semantics `⊨^α`, sidestepping witnesses. **M6 (Hardy) + the `wip/` witness-bo
 critical path** (banked, not deleted).
 
 ## 🎯 NEXT LAP — execute the Buchholz route (`PENDING_WORK.md` lap-12 top has the full plan)
-- **0a. VERIFY (a) — DONE this lap:** the set-variable extension is feasible. Foundation has `Language.add`
-  + `ORing.embedding : ℒₒᵣ →ᵥ L` for `[ORing L]`, so `ℒₒᵣ + Xpred` carries the arithmetic API. **First
-  lap-13 task: generalise M5 (`Zinfty.lean`) + M4 (`Embedding.lean`) over `{L} [ORing L]`** (mechanical
-  ~128KB port — their proofs use only logical structure + `atomTrue`/numerals; re-instantiate at `ℒₒᵣ` for
-  existing users, at `ℒₒᵣ+X` for Boundedness). Low-risk vs. Towsner's novel-math wall. See pivot analysis.
+- **0a. VERIFY (a) — DONE + first lego BUILT this lap:** `wip/LangX.lean` (green) defines
+  `LX := ℒₒᵣ + Xpred` (one unary set-variable predicate `X`), its `Language.ORing` instance (6 one-liners
+  via `Sum.inl`), and confirms numerals + `X`-atoms typecheck + the `ℒₒᵣ →ᵥ LX` embedding hook. The
+  instance plumbing was trivial. **First lap-13 task: generalise M5 (`Zinfty.lean`) + M4 (`Embedding.lean`)
+  over `{L} [Language.ORing L]`** (mechanical ~128KB port — proofs use only logical structure +
+  `atomTrue`/numerals; re-instantiate at `ℒₒᵣ` for existing `src/` users, at `LX` for Boundedness).
+  Low-risk vs. Towsner's novel-math wall.
 - **0b. VERIFY (b) — STILL OPEN:** Goodstein⟹TI_≺(X) provable in PA via the Phase-0 CNF-ε₀ encoding.
   Not a known wall; confirm before sinking laps into Boundedness.
 - **1.** Truth semantics `⊨^α Γ` (`X := {n : |n|_≺<α}`), `Prog_≺`, ≺-norm, order type `‖≺‖`, X-positivity.
