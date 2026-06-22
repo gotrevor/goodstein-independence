@@ -1100,18 +1100,112 @@ theorem Provable.atomCut {k} (r : (ℒₒᵣ).Rel k) (v) {A B : Ordinal.{0}} {Γ
       tauto)).mono ?_ le_rfl
   exact add_le_add_left ((add_le_add_iff_left B).mpr ho) 1
 
+/-- Removing `⊥` from a cut-free derivation, bound-preserving. `⊥` is never introduced by any rule
+and is never an `axL`/`verumR` witness, so it is incidental at every step (Towsner Thm 19.2 for the
+constant-`⊥` case). -/
+theorem Provable.removeFalsumAux : ∀ {Δ : Seq} (d : Deriv Δ), cr d ≤ (0 : ℕ∞) →
+    (⊥ : Form) ∈ Δ → Provable (o d) 0 (Δ.erase ⊥) := by
+  intro Δ d
+  induction d with
+  | @axL Δ k r v hp hn =>
+    intro _ _; simp only [Deriv.o]
+    exact Provable.axL r v (Finset.mem_erase.mpr ⟨by simp, hp⟩)
+      (Finset.mem_erase.mpr ⟨by simp, hn⟩)
+  | @verumR Δ h =>
+    intro _ _; simp only [Deriv.o]
+    exact Provable.verumR (Finset.mem_erase.mpr ⟨by simp, h⟩)
+  | @weak Δ' Δ d' hsub ih =>
+    intro hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    by_cases hd : (⊥ : Form) ∈ Δ'
+    · exact (ih hcr hd).weakening (Finset.erase_subset_erase _ hsub)
+    · refine (show Provable (o d') 0 Δ' from ⟨d', le_rfl, hcr⟩).weakening ?_
+      intro x hx; exact Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩
+  | @andI Γ₀ χ₀ χ₁ d₀ d₁ ih₀ ih₁ =>
+    intro hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (χ₀ ⋏ χ₁) ≠ (⊥ : Form) := by simp [Wedge.wedge]
+    have hmem0 : (⊥ : Form) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P0 : Provable (o d₀) 0 (insert χ₀ (Γ₀.erase ⊥)) :=
+      (ih₀ (le_trans (le_max_left _ _) hcr) (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    have P1 : Provable (o d₁) 0 (insert χ₁ (Γ₀.erase ⊥)) :=
+      (ih₁ (le_trans (le_max_right _ _) hcr) (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (Provable.andI χ₀ χ₁ P0 P1).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @orI Γ₀ χ₀ χ₁ d' ih =>
+    intro hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (χ₀ ⋎ χ₁) ≠ (⊥ : Form) := by simp [Vee.vee]
+    have hmem0 : (⊥ : Form) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : Provable (o d') 0 (insert χ₀ (insert χ₁ (Γ₀.erase ⊥))) :=
+      (ih hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (Provable.orI χ₀ χ₁ P).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @allω Γ₀ χ' d' ih =>
+    intro hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (∀⁰ χ') ≠ (⊥ : Form) := by simp [UnivQuantifier.all]
+    have hmem0 : (⊥ : Form) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have key : ∀ n, Provable (o (d' n)) 0 (insert (χ'/[nm n]) (Γ₀.erase ⊥)) := fun n =>
+      (ih n (le_trans (le_iSup (fun m => cr (d' m)) n) hcr)
+        (Finset.mem_insert_of_mem hmem0)).weakening (by
+          intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (Provable.allω χ' key).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @exI Γ₀ χ' n d' ih =>
+    intro hcr hmem; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have hhead : (∃⁰ χ') ≠ (⊥ : Form) := by simp [ExsQuantifier.exs]
+    have hmem0 : (⊥ : Form) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : Provable (o d') 0 (insert (χ'/[nm n]) (Γ₀.erase ⊥)) :=
+      (ih hcr (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    exact (Provable.exI χ' n P).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      rcases hx with rfl | hx
+      · exact ⟨hhead, Or.inl rfl⟩
+      · tauto)
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro hcr _; simp only [Deriv.cr] at hcr
+    exact absurd ((le_max_left _ _).trans hcr) (by simp)
+
+/-- Remove a `⊥` from a cut-free sequent. -/
+theorem Provable.removeFalsum {B : Ordinal.{0}} {Γ : Seq}
+    (h : Provable B 0 (insert (⊥ : Form) Γ)) : Provable B 0 Γ := by
+  rcases h with ⟨d, ho, hcr⟩
+  refine (Provable.removeFalsumAux d hcr (Finset.mem_insert_self _ _)).weakening ?_ |>.mono ho le_rfl
+  intro x hx; simp only [Finset.mem_erase, Finset.mem_insert] at hx; exact (hx.2).resolve_left hx.1
+
 /-- **Principal cut on a rank-`c` formula** — the heart of Thm 19.7. After both premises are
 cut-free-at-`c` (bound `ω^A`, `ω^B`), a cut on `ξ` with `complexity ξ = c` is eliminated by the
-matching reduction (∧/∨ → `cutReduceConj/Disj`; ∀/∃ → `cutReduceAll`; atomic → `atomCut`),
-staying below `ω^(max A B+1)`. The `⊤`/`⊥` cases reduce to a `removeFalsum` lemma (see HANDOFF). -/
+matching reduction (∧/∨ → `cutReduceConj/Disj`; ∀/∃ → `cutReduceAll`; atomic → `atomCut`;
+`⊤`/`⊥` → `removeFalsum`), staying below `ω^(max A B+1)`. -/
 theorem Provable.cutElimPrincipal {c : ℕ} {ξ : Form} {A B : Ordinal.{0}} {Γ : Seq}
     (hξeq : ξ.complexity = c)
     (hC : Provable (Ordinal.omega0 ^ A) c (insert ξ Γ))
     (hNC : Provable (Ordinal.omega0 ^ B) c (insert (∼ξ) Γ)) :
     Provable (Ordinal.omega0 ^ (max A B + 1)) c Γ := by
   cases ξ with
-  | verum => sorry          -- ⊤: reduces to `removeFalsum` (next lap)
-  | falsum => sorry         -- ⊥: reduces to `removeFalsum` (next lap)
+  | verum =>
+      have hc0 : c = 0 := hξeq.symm
+      subst hc0
+      have hNC' : Provable (Ordinal.omega0 ^ B) 0 (insert (⊥ : Form) Γ) := hNC
+      refine (Provable.removeFalsum hNC').mono ?_ le_rfl
+      exact Ordinal.opow_le_opow_right Ordinal.omega0_pos
+        (le_trans (le_max_right A B) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  | falsum =>
+      have hc0 : c = 0 := hξeq.symm
+      subst hc0
+      refine (Provable.removeFalsum hC).mono ?_ le_rfl
+      exact Ordinal.opow_le_opow_right Ordinal.omega0_pos
+        (le_trans (le_max_left A B) (le_of_lt (lt_add_of_pos_right _ one_pos)))
   | rel r v =>
       have hc0 : c = 0 := hξeq.symm
       subst hc0
