@@ -14,6 +14,7 @@ import GoodsteinPA.Zinfty
 import GoodsteinPA.ZinftyGen
 import GoodsteinPA.LangX
 import GoodsteinPA.TruthSem
+import GoodsteinPA.XPositive
 import GoodsteinPA.Hardy
 
 import GoodsteinPA.Domination
