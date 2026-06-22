@@ -545,6 +545,59 @@ theorem allInv {φ₀ : SyntacticSemiformula ℒₒᵣ 1} (n₀ : ℕ) :
         (lt_of_lt_of_le hτφ (Nat.add_le_add_right (le_max_left _ _) d))
         (lt_of_lt_of_le hτψ (Nat.add_le_add_right (le_max_left _ _) d)) P₁ P₂
 
+/-! ### ∧/∨ cut reductions (Towsner §19.5) — index `(k,d)` preserved (δ-trick).
+
+Both connectives invertible ⇒ a top cut on `a ⋏ b` / `a ⋎ b` reduces to two ordinary cuts on the
+strictly-smaller `a`, `b` with **no fresh induction**. Caller supplies an NF `δ` above both premise
+ordinals with `norm δ < k + d`; the result lands at `osucc δ`, same `(k,d)`. -/
+
+theorem lt_osucc {o : ONote} (h : o.NF) : o < osucc o :=
+  lt_def.mpr (by rw [repr_osucc h]; exact lt_add_one _)
+
+/-- **∧/∨ cut reduction, conjunction case** (Towsner §19.5). -/
+theorem cutReduceConj {a b : Form} {c k d : ℕ} {α β δ : ONote} {Γ : Seq}
+    (ha : a.complexity < c) (hb : b.complexity < c)
+    (hαδ : α < δ) (hβδ : β < δ) (hαNF : α.NF) (hβNF : β.NF) (hδNF : δ.NF)
+    (hτα : norm α < k + d) (hτβ : norm β < k + d) (hτδ : norm δ < k + d)
+    (hC : Zkd α k d c (insert (a ⋏ b) Γ)) (hNC : Zkd β k d c (insert (∼a ⋎ ∼b) Γ)) :
+    Zkd (osucc δ) k d c Γ := by
+  have hA : Zkd α k d c (insert a Γ) := Zkd.wk
+    (by intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    (hC.andInvL (Finset.mem_insert_self _ _))
+  have hB : Zkd α k d c (insert b Γ) := Zkd.wk
+    (by intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    (hC.andInvR (Finset.mem_insert_self _ _))
+  have hNab : Zkd β k d c (insert (∼a) (insert (∼b) Γ)) := Zkd.wk
+    (by intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    (hNC.orInv (Finset.mem_insert_self _ _))
+  have cutA : Zkd δ k d c (insert (∼b) Γ) :=
+    Zkd.cut a ha hαδ hβδ hαNF hβNF hδNF hτα hτβ
+      (Zkd.wk (Finset.insert_subset_insert _ (Finset.subset_insert _ _)) hA) hNab
+  exact Zkd.cut b hb (lt_trans hαδ (lt_osucc hδNF)) (lt_osucc hδNF) hαNF hδNF (osucc_NF hδNF)
+    hτα hτδ hB cutA
+
+/-- **∧/∨ cut reduction, disjunction case** (dual). -/
+theorem cutReduceDisj {a b : Form} {c k d : ℕ} {α β δ : ONote} {Γ : Seq}
+    (ha : a.complexity < c) (hb : b.complexity < c)
+    (hαδ : α < δ) (hβδ : β < δ) (hαNF : α.NF) (hβNF : β.NF) (hδNF : δ.NF)
+    (hτα : norm α < k + d) (hτβ : norm β < k + d) (hτδ : norm δ < k + d)
+    (hC : Zkd α k d c (insert (a ⋎ b) Γ)) (hNC : Zkd β k d c (insert (∼a ⋏ ∼b) Γ)) :
+    Zkd (osucc δ) k d c Γ := by
+  have hAB : Zkd α k d c (insert a (insert b Γ)) := Zkd.wk
+    (by intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    (hC.orInv (Finset.mem_insert_self _ _))
+  have hNa : Zkd β k d c (insert (∼a) Γ) := Zkd.wk
+    (by intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    (hNC.andInvL (Finset.mem_insert_self _ _))
+  have hNb : Zkd β k d c (insert (∼b) Γ) := Zkd.wk
+    (by intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+    (hNC.andInvR (Finset.mem_insert_self _ _))
+  have cutA : Zkd δ k d c (insert b Γ) :=
+    Zkd.cut a ha hαδ hβδ hαNF hβNF hδNF hτα hτβ hAB
+      (Zkd.wk (Finset.insert_subset_insert _ (Finset.subset_insert _ _)) hNa)
+  exact Zkd.cut b hb (lt_osucc hδNF) (lt_trans hβδ (lt_osucc hδNF)) hδNF hβNF (osucc_NF hδNF)
+    hτδ hτβ cutA hNb
+
 end Zkd
 
 end GoodsteinPA.SplitZinfty
