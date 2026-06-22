@@ -263,7 +263,8 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 | `provable_em_x` (C₂, **lap 15**) | `Z∞` excluded middle over LX | `propext, choice, Quot.sound` | 🟢 clean — `XFreeAx`-automatic (never `axTrue`) |
 | `metaInduction` (C₂ crux, **lap 15**) | X-induction via cut-tower (Buchholz 5.5) | `propext, choice, Quot.sound` | 🟢 clean — the faithfulness-critical embedding step; abstract in `step` (Foundation-DSL glue ⟹ later) |
 | `provable_true_x` (C₂, **lap 16**, `src/EmbeddingX`) | ω-completeness, true closed X-free ⟹ `XFreeAx` | `propext, choice, Quot.sound` | 🟢 clean — the X-free `axm` engine |
-| `embedC_LX_gen` (C₂-struct, **lap 16**) | structural embedding `Derivation2 𝓢 Γ ⟹ PXFc` over LX | `propext, choice, Quot.sound` + `sorryAx` | 🔓 9/10 cases; `exs` disclosed `sorry` (needs the `axLv` value-congruent-literal retrofit — Buchholz `AX(Z∞)` p.27); `axm` abstracted as `hax` |
+| `embedC_LX_gen` (C₂-struct, **lap 16**) | structural embedding `Derivation2 𝓢 Γ ⟹ PXFc` over LX | `propext, choice, Quot.sound` | 🟢 **clean** — all 10 cases (`exs` discharged via `axLv`-based `provable_em_cong_gen_x` + `PXFc.exI_closed`); `axm` abstracted as `hax` |
+| `provable_em_cong_gen_x` (C₂, **lap 16**) | value-cong EM over LX (atoms via `axLv`) | `propext, choice, Quot.sound` | 🟢 clean — the `exs` engine, X-atoms safe |
 | `hardy_le_of_lt` (M6, `src/Hardy`) | Hardy index monotonicity (Hmono) | `propext, choice, Quot.sound` | 🟢 clean |
 | `lowerBound_existential_hardy` (M6) | ∃-fragment 17.1, concrete Hardy/`G` | `propext, choice, Quot.sound` | 🟢 clean — zero abstract hyps |
 | `B.allInv` (M6) | ∀-inversion (I∀-frontier resolution) | `propext, choice, Quot.sound` | 🟢 clean |

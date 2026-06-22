@@ -2,11 +2,12 @@
 
 > **Branch** `plan` · build **green** (`lake build GoodsteinPA`, 1266 jobs) · headline
 > `peano_not_proves_goodstein` = honest `sorry` (anti-fraud guard intact, untouched).
-> **Lap 16: C₂ structural embedding `embedC_LX_gen` (9/10) + `provable_true_x` (new
-> `src/GoodsteinPA/EmbeddingX.lean`), AND the value-congruent literal-axiom retrofit `Deriv.axLv`
-> (Buchholz `AX(Z∞)` p.27) landed across ZinftyGen/Boundedness/XFreeCutElim.** Build green; **2 C₂
-> `sorry`s left** — `exs` (EmbeddingX) and `atomCut_x` X-atom-cut (XFreeCutElim), both unblocked by the
-> single lemma `nrel_value_subst` (see NEXT). C₁/D temporarily carry the `atomCut_x` sorry.
+> **Lap 16: C₂ STRUCTURAL EMBEDDING `embedC_LX_gen` is COMPLETE + axiom-clean** (all 10 cases, `axm`
+> abstracted as `hax`) — `src/GoodsteinPA/EmbeddingX.lean`. Got there via `provable_true_x`, the
+> value-congruent literal-axiom retrofit `Deriv.axLv` (Buchholz `AX(Z∞)` p.27, across
+> ZinftyGen/Boundedness/XFreeCutElim), and `provable_em_cong_gen_x`+`PXFc.exI_closed` (the `exs`
+> engine). Build green. **ONE C₂ `sorry` left:** `atomCut_x` X-atom-cut (`XFreeCutElim.lean:1048`),
+> which makes **C₁/D** carry it temporarily — unblocked by the single lemma `nrel_value_subst` (NEXT).
 
 ## ✅ Lap-16 deliverables (`src/GoodsteinPA/EmbeddingX.lean`, axiom-clean modulo the one disclosed sorry)
 - **`XFreeForm`** — structural "every relation symbol is `ℒₒᵣ` (`Sum.isLeft`)" predicate over `LX`,
@@ -39,7 +40,7 @@ Read `ANALYSIS-2026-06-22-lap16-exs-axLv.md` (full detail, grounded in the Buchh
 | **C₁** `XFreeAx` cutElim → cr=0 | the big §19 port | ✅ DONE lap 15 |
 | **D** Thm 5.6 tail | C₁ ∘ B | ✅ DONE lap 15 (`orderType_le_of_TIprovable`) |
 | **C₂-crux** X-induction meta-induction + LX-EM | faithfulness-critical | ✅ DONE lap 15 (`metaInduction`, `provable_em_x`) |
-| **C₂-struct** `embedC_LX_gen` structural port | 9/10 cases | ✅ **DONE lap 16** (`exs` = the wall below) |
+| **C₂-struct** `embedC_LX_gen` structural port | all 10 cases, `axm` abstracted | ✅ **DONE + axiom-clean lap 16** (`exs` discharged via `axLv`) |
 | **C₂-axLv** value-congruent literal axiom | the `exs` wall — a calculus retrofit | ✅ **LANDED lap 16** across 3 files; 1 disclosed `sorry` (`atomCut_x` X-atom-cut) pending `nrel_value_subst` |
 | **C₂-axm** discharge `hax` for `paLX` | X-free via `provable_true_x` + X-ind via `metaInduction` glue | not started |
 | **E** Goodstein⟹TI_≺(X) bridge | Kirby–Paris; reuse Phase-0 CNF-ε₀ | not started |
@@ -84,9 +85,11 @@ of the calculus generalisation; clears to axiom-clean the instant the lemma belo
      `valm vv = valm ww` (hvw) + `vv↔vb` from `h1`.
    Then `atomCut_x` Case `hrel`: transport `hNC` by `nrel_value_subst` into `result` — uniform, no truth
    split, no X-`axTrue`.
-2. **`exs` discharge** (`EmbeddingX.lean:203`): `litTrue_subst_congr` + `provable_em_cong_gen_x`
-   (value-cong EM over `LX`: X-atoms via `axLv`, X-free via `axTrue`) ⟹ `PXFc.exI_closed` ⟹ kills `exs`.
-3. **`embedC_LX`** = `embedC_LX_gen` at `𝓢 := ↑paLX` once `hax` proven. Then **D fires** ⟹ Thm 5.6.
+2. ~~`exs` discharge~~ ✅ **DONE lap 16** (`provable_em_cong_gen_x` + `PXFc.exI_closed`).
+3. **`embedC_LX`** = `embedC_LX_gen` at `𝓢 := ↑paLX` once `hax` proven (X-free via `provable_true_x`,
+   X-induction via `metaInduction`). Then **D fires** ⟹ Thm 5.6 (modulo F). NOTE: this only needs
+   `embedC_LX_gen` (clean) — it does NOT need `nrel_value_subst`; the `atomCut_x` sorry sits in `cutElim`
+   which D applies AFTER embedding, so clearing it (step 1) is required for the *D* end to be clean.
 
 ## Then (after C₂-struct is sorry-free): C₂-axm + the statement `embedC_LX`
 - Define `paLX : Theory LX := Theory.lMap (Language.ORing.embedding LX) 𝗣𝗔⁻ + InductionScheme LX Set.univ`

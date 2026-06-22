@@ -27,8 +27,10 @@ XFreeCutElim (7/8 `_x` sites). Remaining `sorry`: `PXFc.atomCutAux`'s value-cong
    - **fallback** if the dependent leaf cases swamp: isolate as a disclosed `axiom` (NOT on headline)
      to let `cutElim` go clean-modulo-that, OR keep the current `sorry` and move to `exs`/`embedC_LX`
      (which don't depend on `nrel_value_subst`) to make orthogonal progress.
-2. **`exs`** (`EmbeddingX.lean:203`): `provable_em_cong_gen_x` (X-atoms via `axLv`) ⟹ `exI_closed`.
+2. ~~`exs`~~ ✅ DONE lap 16 — `embedC_LX_gen` is sorry-free + axiom-clean (`provable_em_cong_gen_x`
+   via `axLv` + `PXFc.exI_closed`).
 3. **`embedC_LX`** = `embedC_LX_gen` at `↑paLX` + `hax` (X-free `provable_true_x`, X-ind `metaInduction`).
+   Independent of `nrel_value_subst` (only the cutElim end of D needs that).
 
 ### C₂-axm discharge (after structural is sorry-free) — `paLX` + `hax`
 `paLX := Theory.lMap (ORing.embedding LX) 𝗣𝗔⁻ + InductionScheme LX Set.univ`. X-free axioms via
