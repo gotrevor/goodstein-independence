@@ -1,5 +1,9 @@
 # HANDOFF — 2026-06-22 (lap 8)
 
+> **Branch** `plan` · **HEAD** `915f3a5` (16 commits this lap) · build **green** (`lake build GoodsteinPA`,
+> 1257 jobs) · headline `peano_not_proves_goodstein` = honest `sorry` · working tree clean.
+> **Lap-8 capstone: strategic pivot to the TWO-PHASE architecture — read "🧭 STRATEGIC PIVOT" below first.**
+
 > **NEXT LAP FIRST ACTION:** read this + `STATUS.md` + `ANALYSIS-2026-06-22-cutelim-k-threading.md`
 > **ADDENDUM 5** (the validated lap-8 design) + `PENDING_WORK.md` (A/B lap-8 update at top). Build is
 > **green** (`lake build GoodsteinPA`, 1257 jobs). Forward file: **`wip/OperatorZinfty.lean`** (the
