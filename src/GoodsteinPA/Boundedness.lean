@@ -168,6 +168,64 @@ def Partition (α : Ordinal.{0}) (Δ : Seq LX) : Prop := ∀ A ∈ Δ, PartItem 
 /-- The Boundedness conclusion: some **X-positive** member is `⊨^γ`-true. -/
 def SatPos (γ : Ordinal.{0}) (Δ : Seq LX) : Prop := ∃ A ∈ Δ, XPos A ∧ models lt γ A
 
+/-- **Boundedness (Buchholz Thm 5.4), cut-free.** For an X-positive-decomposed sequent `Δ` (every
+member is `¬Prog`, a bounded `¬Xt`, or X-positive), a cut-free `XFreeAx` derivation of `Δ` at height
+`o d` yields `⊨^{α+2^{o d}}` of some X-positive member. The corollary `‖≺‖ ≤ 2^β` follows. -/
+theorem boundedness (β : Ordinal.{0}) :
+    ∀ {Δ : Seq LX} (α : Ordinal.{0}) (d : Deriv Δ),
+      d.o ≤ β → d.cr = 0 → XFreeAx d → Partition lt prec α Δ →
+      SatPos lt (α + 2 ^ d.o) Δ := by
+  induction β using Ordinal.induction with
+  | _ β outerIH =>
+  intro Δ α d
+  induction d generalizing α with
+  | axL r v hp hn =>
+    intro hob hcr hxf hpart
+    cases r with
+    | inl r₀ =>
+      rcases litTrue_or_neg (Semiformula.rel (Sum.inl r₀) v) with ht | ht
+      · exact ⟨Semiformula.rel (Sum.inl r₀) v, hp, by simp [XPos],
+          models_inl_lit lt _ true r₀ v ht⟩
+      · exact ⟨Semiformula.nrel (Sum.inl r₀) v, hn, by simp [XPos],
+          models_inl_lit lt _ false r₀ v ht⟩
+    | inr rx =>
+      cases rx
+      have hv1 : v = ![v 0] := by funext i; refine Fin.cases ?_ (fun j => j.elim0) i; rfl
+      have hbound : tval lt (v 0) ≤ α := by
+        rcases hpart (Semiformula.nrel Xsym v) hn with h | ⟨t', heq, hb⟩ | hpos
+        · rw [Prog] at h; simp [Xat, Xsym] at h
+        · simp only [Xat, Xsym] at heq
+          injection heq with e1 e2 e3 e4
+          rw [show v = ![t'] from e4]; simpa using hb
+        · simp [XPos, Xsym] at hpos
+      refine ⟨Xat (v 0), hv1 ▸ hp, by simp [Xat, XPos], ?_⟩
+      rw [models_Xat']
+      simp only [Deriv.o, Ordinal.opow_zero]
+      exact lt_of_le_of_lt hbound (lt_add_of_pos_right α one_pos)
+  | axTrue b r v htrue hmem =>
+    intro hob hcr hxf hpart
+    cases r with
+    | inr rx => simp [XFreeAx] at hxf
+    | inl r₀ =>
+      exact ⟨signedLit b (Sum.inl r₀) v, hmem, by cases b <;> simp [signedLit, XPos],
+        models_inl_lit lt _ b r₀ v htrue⟩
+  | verumR h =>
+    intro hob hcr hxf hpart
+    exact ⟨⊤, h, by simp [XPos], by simp [models]⟩
+  | weak d' hsub ih =>
+    intro hob hcr hxf hpart
+    obtain ⟨A, hA, hposA, hmodA⟩ := ih α hob hcr hxf (fun B hB => hpart B (hsub hB))
+    exact ⟨A, hsub hA, hposA, hmodA⟩
+  | andI φ ψ dφ dψ ihφ ihψ => intro hob hcr hxf hpart; sorry
+  | orI φ ψ d' ih => intro hob hcr hxf hpart; sorry
+  | allω χ d' ih => intro hob hcr hxf hpart; sorry
+  | exI χ n d' ih => intro hob hcr hxf hpart; sorry
+  | cut φ d₁ d₂ ih₁ ih₂ =>
+    intro hob hcr hxf hpart
+    exfalso
+    have h1 : (↑φ.complexity + 1 : ℕ∞) ≤ 0 := hcr ▸ le_max_left _ _
+    simp at h1
+
 end Main
 
 end GoodsteinPA.Boundedness
