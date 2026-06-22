@@ -173,6 +173,155 @@ theorem Provable.contr {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (φ : Form)
     (h : Provable α c (insert φ (insert φ Γ))) : Provable α c (insert φ Γ) := by
   simpa [Finset.insert_idem] using h
 
+/-- **Predicate-level cut.** From `insert φ Γ` and `insert (∼φ) Γ` at cut rank `≤ c` with
+`complexity φ < c`, conclude `Γ` at the same cut rank. -/
+theorem Provable.cut {α β : Ordinal.{0}} {c : ℕ} {Γ : Seq} (χ : Form)
+    (hc : (χ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞))
+    (h₁ : Provable α c (insert χ Γ)) (h₂ : Provable β c (insert (∼χ) Γ)) :
+    Provable (max α β + 1) c Γ := by
+  rcases h₁ with ⟨d₁, ho₁, hcr₁⟩
+  rcases h₂ with ⟨d₂, ho₂, hcr₂⟩
+  refine ⟨Deriv.cut χ d₁ d₂, ?_, ?_⟩
+  · simp only [Deriv.o]; exact add_le_add (max_le_max ho₁ ho₂) le_rfl
+  · simp only [Deriv.cr]; exact max_le hc (max_le hcr₁ hcr₂)
+
+/-! ### Inversion lemmas (Towsner §19.2–19.4)
+
+The genuine syntactic content feeding `cutElimStep`. `orInv` (∨-inversion) is the template:
+proved by **structural induction on the derivation** (tractable precisely because set sequents
+removed the explicit `contr` rule — see the design note above). The other inversions (∧, ω/∀)
+follow the same pattern and are next. -/
+
+section Inversion
+
+variable {φ ψ : Form}
+
+/-- Reorder helper: inverting under an `insert a` lands inside `insert a` of the inversion. -/
+private theorem invPush (a : Form) (s : Seq) :
+    insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
+      ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) := by
+  intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+
+/-- Reverse reorder helper, valid when the head `a` is not the inverted formula. -/
+private theorem invPull {a : Form} (h : a ≠ (φ ⋎ ψ)) (s : Seq) :
+    insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ))))
+      ⊆ insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ))) := by
+  intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+  rcases hx with rfl | hx
+  · tauto
+  · tauto
+
+/-- **∨-inversion (Towsner §19.2 analog).** If `φ ⋎ ψ` occurs in a `Z_∞`-derivable sequent, then
+replacing it by `φ` and `ψ` is derivable at the *same* ordinal bound and cut rank. Proved by
+structural induction on the derivation. -/
+theorem orInvAux {c : ℕ} : ∀ {Γ : Seq} (d : Deriv Γ), cr d ≤ (c : ℕ∞) → (φ ⋎ ψ) ∈ Γ →
+    Provable (o d) c (insert φ (insert ψ (Γ.erase (φ ⋎ ψ)))) := by
+  have hφ0 : φ ≠ (φ ⋎ ψ) := Semiformula.ne_or_left φ ψ
+  have hψ0 : ψ ≠ (φ ⋎ ψ) := Semiformula.ne_or_right φ ψ
+  intro Γ d
+  induction d with
+  | @axL Γ k r v hp hn =>
+    intro _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hp⟩
+    have hn' : Semiformula.nrel r v ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hn⟩
+    simp only [Deriv.o]
+    exact (Provable.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))).mono le_rfl (Nat.zero_le c)
+  | @verumR Γ h =>
+    intro _ _
+    have ht : (⊤ : Form) ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩
+    simp only [Deriv.o]
+    exact (Provable.verumR (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem ht))).mono
+      le_rfl (Nat.zero_le c)
+  | @weak Δ Γ d' hsub ih =>
+    intro hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    by_cases hd : (φ ⋎ ψ) ∈ Δ
+    · exact (ih hcr hd).weakening
+        (Finset.insert_subset_insert _ (Finset.insert_subset_insert _
+          (Finset.erase_subset_erase _ hsub)))
+    · have base : Provable (o d') c Δ := ⟨d', le_rfl, hcr⟩
+      refine base.weakening ?_
+      intro x hx
+      exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩))
+  | @andI Γ₀ φ' ψ' dφ dψ ihφ ihψ =>
+    intro hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (φ' ⋏ ψ') ≠ (φ ⋎ ψ) := by intro h; simp [Wedge.wedge, Vee.vee] at h
+    have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have hcrφ : cr dφ ≤ (c : ℕ∞) := le_trans (le_max_left _ _) hcr
+    have hcrψ : cr dψ ≤ (c : ℕ∞) := le_trans (le_max_right _ _) hcr
+    have Pφ := (ihφ hcrφ (Finset.mem_insert_of_mem hmem0)).weakening (invPush φ' Γ₀)
+    have Pψ := (ihψ hcrψ (Finset.mem_insert_of_mem hmem0)).weakening (invPush ψ' Γ₀)
+    exact (Provable.andI φ' ψ' Pφ Pψ).weakening (invPull hhead Γ₀)
+  | @orI Γ₀ φ' ψ' d' ih =>
+    intro hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    by_cases hhd : (φ' ⋎ ψ') = (φ ⋎ ψ)
+    · -- principal: φ' ⋎ ψ' = φ ⋎ ψ
+      obtain ⟨rfl, rfl⟩ := (Semiformula.or_inj _ _ _ _).mp hhd.symm
+      by_cases hd : (φ ⋎ ψ) ∈ Γ₀
+      · have P := ih hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hd))
+        refine (P.weakening ?_).mono (le_of_lt (lt_add_of_pos_right _ one_pos)) le_rfl
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+      · have base : Provable (o d') c (insert φ (insert ψ Γ₀)) := ⟨d', le_rfl, hcr⟩
+        refine (base.weakening ?_).mono (le_of_lt (lt_add_of_pos_right _ one_pos)) le_rfl
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        rcases hx with rfl | rfl | hx
+        · tauto
+        · tauto
+        · exact Or.inr (Or.inr ⟨fun e => hd (e ▸ hx), Or.inr hx⟩)
+    · -- side: head ≠ the inverted formula
+      have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhd e.symm
+      have hsub : insert φ (insert ψ ((insert φ' (insert ψ' Γ₀)).erase (φ ⋎ ψ)))
+            ⊆ insert φ' (insert ψ' (insert φ (insert ψ (Γ₀.erase (φ ⋎ ψ))))) := by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+      have P := (ih hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening hsub
+      exact (Provable.orI φ' ψ' P).weakening (invPull hhd Γ₀)
+  | @allω Γ₀ χ d ih =>
+    intro hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (∀⁰ χ) ≠ (φ ⋎ ψ) := by intro h; simp [Vee.vee] at h
+    have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have key : ∀ n, Provable (o (d n)) c (insert (χ/[nm n]) (insert φ (insert ψ (Γ₀.erase (φ ⋎ ψ))))) :=
+      fun n => (ih n (le_trans (le_iSup (fun m => cr (d m)) n) hcr)
+        (Finset.mem_insert_of_mem hmem0)).weakening (invPush (χ/[nm n]) Γ₀)
+    exact (Provable.allω χ key).weakening (invPull hhead Γ₀)
+  | @exI Γ₀ χ t d ih =>
+    intro hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (∃⁰ χ) ≠ (φ ⋎ ψ) := by intro h; simp [Vee.vee] at h
+    have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P := (ih hcr (Finset.mem_insert_of_mem hmem0)).weakening (invPush (χ/[t]) Γ₀)
+    exact (Provable.exI χ t P).weakening (invPull hhead Γ₀)
+  | @cut Γ₀ χ d₁ d₂ ih₁ ih₂ =>
+    intro hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hcχ : (χ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞) := (le_max_left _ _).trans hcr
+    have hcr1 : cr d₁ ≤ (c : ℕ∞) := (le_max_left (cr d₁) (cr d₂)).trans ((le_max_right _ _).trans hcr)
+    have hcr2 : cr d₂ ≤ (c : ℕ∞) := (le_max_right (cr d₁) (cr d₂)).trans ((le_max_right _ _).trans hcr)
+    have P₁ := (ih₁ hcr1 (Finset.mem_insert_of_mem hmem)).weakening (invPush χ Γ₀)
+    have P₂ := (ih₂ hcr2 (Finset.mem_insert_of_mem hmem)).weakening (invPush (∼χ) Γ₀)
+    exact Provable.cut χ hcχ P₁ P₂
+
+/-- **∨-inversion at a relaxed bound** (the form used downstream). -/
+theorem Provable.orInv {α : Ordinal.{0}} {c : ℕ} {Γ : Seq} (hmem : (φ ⋎ ψ) ∈ Γ)
+    (h : Provable α c Γ) : Provable α c (insert φ (insert ψ (Γ.erase (φ ⋎ ψ)))) := by
+  rcases h with ⟨d, ho, hcr⟩
+  exact (orInvAux d hcr hmem).mono ho le_rfl
+
+end Inversion
+
 /-- Towsner **Def 19.8**: `ω`-tower over `α` of height `c` (`ω_c^α`), bottom-up:
 `ω_0^α = α`, `ω_{c+1}^α = ω_c^(ω^α)`. The cut-elimination ordinal blow-up. -/
 noncomputable def omegaTower : ℕ → Ordinal.{0} → Ordinal.{0}
