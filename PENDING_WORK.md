@@ -1,5 +1,40 @@
 # Pending work — open obligations & attack paths
 
+## ✅ LAP-19 (2026-06-22) — F ORDER-TYPE WALL CLOSED (axiom-clean). Read FIRST.
+
+The order-type half of **F** is **DONE + `#print axioms`-clean** in `src/GoodsteinPA/Epsilon0Complete.lean`
+(build green, 1268 jobs). This was the campaign's dominant risk (laps 12-19: "the real F girder mathlib
+LACKS"). Landed, in dependency order:
+1. `exists_NF_repr_eq : ∀ o<ε₀, ∃ x:ONote, x.NF ∧ x.repr=o` — ε₀-completeness of CNF notations (CNF
+   recursion via `WellFoundedLT.induction`; key step `log_omega0_lt_self` = no ω^· fixed point below ε₀).
+2. `repr_lt_epsilon0` (NF ⟹ repr<ε₀, induction on ONote) + `range_NONote_repr` (= `Iio ε₀`).
+3. `rk_ltPull_eq_repr` (= seam-advice `note_rank_eq_repr`) + `epsilon0_le_orderType_ltPull (e : ℕ≃NONote)`
+   — `ε₀ ≤ orderType (ltPull e)`. Proved by naming `orderType`/`rk` itself as some `repr (e n₀)` via
+   surjectivity ⟹ NO Iio-sup identity, NO universe bump (all `Ordinal.{0}`; the `NONote ≃o Iio ε₀` route
+   would land in `Ordinal.{1}` ≠ project's `orderType`).
+4. `encodeONote`/`decodeONote` (computable `Encodable ONote`; ONote only derives DecidableEq) + `Infinite`/
+   `Denumerable NONote` ⟹ `natCode : ℕ ≃ NONote` + `epsilon0_le_orderType_natCode` (concrete `Seam.ge`).
+
+**F now reduces to ONE Foundation-side wire-up** (Worker B): the X-free `ℒₒᵣ` formula `φ : Semiformula ℒₒᵣ ℕ 2`
+(via `codeOfREPred₂` from `codeOfPartrec'`) defining **`natCode`'s order** (`ltPull natCode`), then instantiate
+`GoodsteinPA.EpsilonOrder.Seam` with `φ`, `hφ`, and `ge := epsilon0_le_orderType_natCode`. The definability
+half (`hprec`/`hprecXPos`) is already discharged (lap 18, `EpsilonOrder.lean`). **Binding constraint:** `φ` must
+define the SAME order `natCode` induces (`repr(natCode a) < repr(natCode b)` — express arithmetically via the
+computable `ONote.cmp` on codes, since `<` itself routes through noncomputable `repr`).
+
+### Remaining open obligations (priority for lap 20+)
+- **C₂ glue `hax_paLX`** X-induction case (`EmbeddingX.lean:705`) — closes **Thm 5.6 (`PA ⊬ TI(ε₀)`)**
+  axiom-clean modulo E+F. Recipe inlined at the sorry (steps 1-7); all four helper lemmas proven
+  (`metaInduction_cong`, `subst_value_subst`, `succInd_nnf`, `PXFc_allClosure`). Friction = Foundation-DSL
+  Rew-pushing through `succInd`/`univCl`/`fixitr` (steps 3-5). ALL-OR-NOTHING (can't partial-commit the sorry);
+  extract step-4 `rew_succInd : g ▹ succInd ψ = succInd (g.q ▹ ψ)` as a standalone helper first.
+- **F-definability `φ`** (Worker B, Foundation-side) — see above. Independent of C₂ glue and E.
+- **E**: Goodstein⟹TI_≺(natCode order) in PA — the other unstarted wall. Per seam-advice Reviewer-2 §3:
+  commit to `natCode`'s CNF order for BOTH F and E; E uses `Domination.toONote` as a descent MAP into it
+  (E's order need not have type ε₀, only a PA-provable strictly-decreasing descent). Needs papers/ reading.
+
+---
+
 ## Reflection — 2026-06-22 (lap 18, deep-reflection) — the F seam, grounded vs an outside attack plan
 
 **Context.** Evaluated an external (GPT-5.5) attack plan for **F** (the arithmetization seam,

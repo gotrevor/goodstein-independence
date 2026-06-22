@@ -3,9 +3,23 @@
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Gentzen/Buchholz ordinal analysis — witness-FREE `Z_∞` (embedding
 [M4 `embedC`, done] + ε₀ cut-elim [M5, done]) + **Boundedness** (Thm 5.4, DONE lap 14, axiom-clean) ⟹
 `𝗣𝗔 ⊬ TI(ε₀)`, then Goodstein⟹TI(ε₀).** · **Build**: 🟢 green (1266 jobs, `lake build GoodsteinPA`)
-· **Updated**: lap 18 (deep-reflection) · 2026-06-22 · `6521cbf`
+· **Updated**: lap 19 · 2026-06-22 · `1a765a4`
 
-## ⏭️ Lap-18 focus (deep-reflection) — Thm 5.6 is ONE glue lemma from axiom-clean; the campaign wall is F
+## ✅ Lap-19 — F's ORDER-TYPE WALL CLOSED (axiom-clean) — the dominant campaign risk is down
+The order-type half of **F** (`src/GoodsteinPA/Epsilon0Complete.lean`, all `#print axioms`-clean) is now
+machine-checked end-to-end — this is the piece flagged across laps 12-19 as "the dominant risk / the real
+F girder mathlib LACKS":
+- **`exists_NF_repr_eq`** : `∀ o<ε₀, ∃ x:ONote, x.NF ∧ x.repr=o` — ε₀-completeness of CNF notations (the
+  surjectivity mathlib omits), via the standard CNF recursion (`WellFoundedLT.induction`).
+- **`repr_lt_epsilon0`** / **`range_NONote_repr`** : the embedding direction + `range NONote.repr = Iio ε₀`.
+- **`rk_ltPull_eq_repr`** (= the seam-advice `note_rank_eq_repr`) + **`epsilon0_le_orderType_ltPull`** :
+  `ε₀ ≤ orderType (ltPull e)` for ANY coding `e : ℕ ≃ NONote` (no Iio-sup / universe bump — straight to ℕ).
+- **`natCode`** (`Encodable ONote` + `Infinite`/`Denumerable NONote`) + **`epsilon0_le_orderType_natCode`** :
+  a fully concrete, hypothesis-free `ε₀ ≤ orderType` witness = the `Seam.ge` field.
+**F now reduces to one Foundation-side wire-up:** the `ℒₒᵣ` formula `φ` (`codeOfREPred₂`) defining `natCode`'s
+order, then `Seam` instantiates (`Seam.ge := epsilon0_le_orderType_natCode`). The order-type *math* is done.
+
+## ⏭️ Open obligations (lap 19 end) — Thm 5.6 is ONE glue lemma from axiom-clean; remaining walls E + F-φ
 The **entire machine from D back is now machine-checked + `#print axioms`-clean** (lap 17): Boundedness
 (Thm 5.4) + corollary B, **C₁** `PXFc.cutElim`→cr0, **D** `orderType_le_of_TIprovable`, **C₂-structural**
 `embedC_LX_gen`, M4 `embedC`, M5 `cutElim`. The single open sorry below the headline (besides the locked

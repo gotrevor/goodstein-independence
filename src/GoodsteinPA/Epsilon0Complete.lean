@@ -213,7 +213,7 @@ theorem decodeONote_encodeONote : ∀ x : ONote, decodeONote (encodeONote x) = x
       show (n : ℕ) - 1 + 1 = (n : ℕ)
       exact Nat.succ_pred_eq_of_pos n.pos
 
-noncomputable instance : Encodable ONote :=
+instance : Encodable ONote :=
   Encodable.ofLeftInverse encodeONote decodeONote decodeONote_encodeONote
 
 instance : Infinite NONote :=
@@ -221,14 +221,16 @@ instance : Infinite NONote :=
     intro m n h
     simpa [NONote.repr, NONote.ofNat] using congrArg NONote.repr h)
 
-noncomputable instance : Encodable NONote :=
+instance : Encodable NONote :=
   inferInstanceAs (Encodable {o : ONote // o.NF})
 
-noncomputable instance : Denumerable NONote :=
+instance : Denumerable NONote :=
   Denumerable.ofEncodableOfInfinite NONote
 
-/-- A concrete coding of `ℕ` by CNF notations. -/
-noncomputable def natCode : ℕ ≃ NONote := (Denumerable.eqv NONote).symm
+/-- A concrete **computable** coding of `ℕ` by CNF notations (= `Denumerable.ofNat NONote`). Worker B
+must build `φ` defining `ltPull natCode` over THIS decode so the two codings are identical by
+construction; computability (not `ofCountable`) is what keeps `ltPull natCode` an `REPred`. -/
+def natCode : ℕ ≃ NONote := (Denumerable.eqv NONote).symm
 
 /-- **A concrete `ℕ`-order of order type ≥ ε₀** (the standalone `Seam.ge` witness). -/
 theorem epsilon0_le_orderType_natCode :
