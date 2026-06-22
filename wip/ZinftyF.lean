@@ -635,21 +635,75 @@ noncomputable def omegaTower : ℕ → Ordinal.{0} → Ordinal.{0}
 
 @[simp] theorem omegaTower_one (α : Ordinal.{0}) : omegaTower 1 α = Ordinal.omega0 ^ α := rfl
 
-/-- **Cut-reduction lemma** (Towsner §19.5–19.6) — the narrowed open core under `cutElimStep`,
-now that all three inversions (`orInv`/`andInv`/`allInv`) are proved. Combine two cut-rank-`≤ c`
-derivations of `insert φ Γ` and `insert (∼φ) Γ`, where the cut formula `φ` has `complexity ≤ c`,
-into a single cut-rank-`≤ c` derivation of `Γ` — i.e. *eliminate* the top cut rather than keep it.
+/-! ### Cut reduction, ∧/∨ principal (Towsner §19.5)
 
-Proof (next lap): induction on the `insert (∼φ) Γ` derivation; when `∼φ` is principal, invert the
-*matching* connective in the `insert φ Γ` derivation (∨↔∧ via `orInv`/`andInv`, ∀↔∃ via `allInv` at
-the ∃-witness numeral), giving cuts on the strictly smaller subformulas (`complexity < c`), then
-recurse. NOTE: the honest ordinal bound is the **natural (Hessenberg) sum** `α ♯ β`
-(`Ordinal.nadd`), not `α + β`; revisit once the proof shape is fixed. Also decide whether a numeric
-Hardy `k` index must be threaded through `Provable` (Towsner carries `h_{ω^α}(k)` in 19.6/19.7). -/
-theorem Provable.cutReduce {α β : Ordinal.{0}} {c : ℕ} {φ : Form} {Γ : Seq}
-    (hc : φ.complexity ≤ c) (h₁ : Provable α c (insert φ Γ))
-    (h₂ : Provable β c (insert (∼φ) Γ)) : Provable (α + β) c Γ := by
-  sorry
+⭐ **Design note (this lap).** Natural (Hessenberg) sum `α ♯ β` is **absent from mathlib v4.31.0**
+(no `NaturalOps.lean`/`Ordinal.nadd`). The classic reduction-lemma bound `α ♯ β` is therefore
+unavailable. But for the **∧/∨** case there is a route that needs no natural sum *and no fresh
+induction at all*: both connectives are **invertible** (`andInvL/R`, `orInv`, all proved), so we
+invert *both* premises and close with **two ordinary cuts** at the strictly smaller subformulas.
+The resulting bound is `max α β + 1 + 1`, and `max(ω^a, ω^b) + 2 < ω^{max a b + 1}` keeps
+`cutElimStep` below `ω^α` with room to spare. (The ∀/∃ case is genuinely different — `∃` is *not*
+invertible — and still needs the §19.6 induction on the ∃-side; tracked as `cutReduceAll` below.) -/
+
+/-- Reduce a cut on a **conjunction** `a ⋏ b` (its negation `∼a ⋎ ∼b` on the other side), with both
+conjuncts of complexity `< c`. Invert the ∧-side (`andInvL/R`) and the ∨-side (`orInv`), then cut
+`a` and `b` separately at cut-rank `≤ c`. Towsner **Thm 19.5** (∧/∨ principal reduction). -/
+theorem Provable.cutReduceConj {a b : Form} {c : ℕ} {α β : Ordinal.{0}} {Γ : Seq}
+    (ha : (a.complexity + 1 : ℕ∞) ≤ c) (hb : (b.complexity + 1 : ℕ∞) ≤ c)
+    (hC : Provable α c (insert (a ⋏ b) Γ)) (hNC : Provable β c (insert (∼a ⋎ ∼b) Γ)) :
+    Provable (max α β + 1 + 1) c Γ := by
+  -- ∧-inversion of the left premise → `a, Γ` and `b, Γ` (same bound `α`).
+  have hA : Provable α c (insert a Γ) :=
+    (hC.andInvL (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have hB : Provable α c (insert b Γ) :=
+    (hC.andInvR (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  -- ∨-inversion of the right premise → `∼a, ∼b, Γ` (same bound `β`).
+  have hNab : Provable β c (insert (∼a) (insert (∼b) Γ)) :=
+    (hNC.orInv (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  -- cut on `a`: `(a, ∼b, Γ)` × `(∼a, ∼b, Γ)` ⟹ `(∼b, Γ)`.
+  have cutA : Provable (max α β + 1) c (insert (∼b) Γ) :=
+    Provable.cut a ha (hA.weakening (by
+      intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto)) hNab
+  -- cut on `b`: `(b, Γ)` × `(∼b, Γ)` ⟹ `Γ`.
+  have cutB : Provable (max α (max α β + 1) + 1) c Γ := Provable.cut b hb hB cutA
+  -- `max α (max α β + 1) + 1 = max α β + 1 + 1`.
+  have he : max α (max α β + 1) + 1 = max α β + 1 + 1 := by
+    congr 1
+    exact max_eq_right (le_trans (le_max_left α β) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  exact he ▸ cutB
+
+/-- Reduce a cut on a **disjunction** `a ⋎ b` (its negation `∼a ⋏ ∼b` on the other side), with both
+disjuncts of complexity `< c`. Dual to `cutReduceConj`: invert the ∨-side (`orInv`) and the ∧-side
+(`andInvL/R`), then cut `a` and `b`. Towsner **Thm 19.5**. -/
+theorem Provable.cutReduceDisj {a b : Form} {c : ℕ} {α β : Ordinal.{0}} {Γ : Seq}
+    (ha : (a.complexity + 1 : ℕ∞) ≤ c) (hb : (b.complexity + 1 : ℕ∞) ≤ c)
+    (hC : Provable α c (insert (a ⋎ b) Γ)) (hNC : Provable β c (insert (∼a ⋏ ∼b) Γ)) :
+    Provable (max α β + 1 + 1) c Γ := by
+  -- ∨-inversion of the left premise → `a, b, Γ`.
+  have hAB : Provable α c (insert a (insert b Γ)) :=
+    (hC.orInv (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  -- ∧-inversion of the right premise → `∼a, Γ` and `∼b, Γ`.
+  have hNa : Provable β c (insert (∼a) Γ) :=
+    (hNC.andInvL (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have hNb : Provable β c (insert (∼b) Γ) :=
+    (hNC.andInvR (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  -- cut on `a`: `(a, b, Γ)` × `(∼a, b, Γ)` ⟹ `(b, Γ)`.
+  have cutA : Provable (max α β + 1) c (insert b Γ) :=
+    Provable.cut a ha hAB (hNa.weakening (by
+      intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto))
+  -- cut on `b`: `(b, Γ)` × `(∼b, Γ)` ⟹ `Γ`.
+  have cutB : Provable (max (max α β + 1) β + 1) c Γ := Provable.cut b hb cutA hNb
+  have he : max (max α β + 1) β + 1 = max α β + 1 + 1 := by
+    congr 1
+    exact max_eq_left (le_trans (le_max_right α β) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  exact he ▸ cutB
 
 /-- **One level of cut elimination** (Towsner Thm 19.7). Reducing the cut rank by one raises the
 ordinal bound to `ω^α`. *(Open: the principal `cut`-on-rank-`c` case calls `cutReduce`; the rest is
