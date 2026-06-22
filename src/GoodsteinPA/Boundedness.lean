@@ -15,11 +15,12 @@ Boundedness itself is the next target. The corollary step (`‖≺‖ ≤ 2^β` 
 import GoodsteinPA.ZinftyGen
 import GoodsteinPA.LangX
 import GoodsteinPA.TruthSem
+import GoodsteinPA.XPositive
 
 namespace GoodsteinPA.Boundedness
 
 open LO LO.FirstOrder
-open GoodsteinPA.ZinftyGen GoodsteinPA.LangX GoodsteinPA.TruthSem
+open GoodsteinPA.ZinftyGen GoodsteinPA.LangX GoodsteinPA.TruthSem GoodsteinPA.XPositive
 
 /-- The set-variable atom `X t`. -/
 def Xat {n} (t : Semiterm LX ℕ n) : Semiformula LX ℕ n := Semiformula.rel Xsym ![t]
@@ -76,5 +77,97 @@ theorem orderType_le_of_models_Xat {γ : Ordinal.{0}}
   orderType_le_of_forall lt (fun n => (models_Xat_nm lt γ n).mp (h n))
 
 end Corollary
+
+/-! ## Boundedness (Buchholz Thm 5.4) — the 8→5-case induction
+
+Buchholz: for X-positive `Γ`, `Z∞ ⊢^β_1 ¬Prog_≺(X), ¬Xs₁,…,¬Xs_k, Γ` with `|sᵢ|_≺ ≤ α`
+⟹ `⊨^{α+2^β} Γ`. We prove the **cut-free** specialisation (`cr d = 0`): the three `Cut` cases
+(Buchholz 6/7/8) are then vacuous (a `cut` node has `cr ≥ 1`), leaving 5 cases.
+
+The induction is **nested**: an outer strong induction on the ordinal height `o d` (the `¬Prog`
+inversion case shrinks it strictly) wrapping an inner structural induction on the derivation `d`
+(the height-preserving `weak`/`andI`/`orI`/`allω` cases). See
+`papers/buchholz-beweistheorie-lecture-notes.pdf` p.29 + `ANALYSIS-2026-06-22-lap13-boundedness-design.md`.
+
+**Faithfulness of the X-atom leaf.** Our generic `axTrue` is more permissive than Buchholz's `Z∞`
+at `LX`: it admits a *lone* true X-literal, which Buchholz forbids (his only X-axiom is the *pair*
+`{Xs,¬Xt}`). Boundedness is false for lone-X leaves, so we carry `XFreeAx d` (every `axTrue` leaf
+uses an `ℒₒᵣ`-relation); the X-pair axiom enters via `axL` (a genuine complementary pair, handled in
+case 1.2). The embedding `embedC` over `LX` discharges `XFreeAx` by routing X-atom identity axioms
+through `axL` rather than `axTrue`. -/
+
+section Main
+
+/-- The ambient ℕ-model for the Boundedness derivations: `X := ∅`. The choice is immaterial — every
+X-free leaf is `S`-independent and `XFreeAx` forbids X-literal leaves — but fixing it lets `LitTrue`
+(under this instance) connect to `models` (under the level-set instance). -/
+noncomputable instance ambient : Structure LX ℕ := structLX (fun _ => False)
+
+variable (lt : ℕ → ℕ → Prop) [IsWellFounded ℕ lt]
+
+/-- `tval lt t = |tᴺ|_≺` — the ≺-rank of the ℕ-value of a closed `LX`-term (X-free, so the carrier
+is immaterial). -/
+noncomputable def tval (t : Semiterm LX ℕ 0) : Ordinal.{0} :=
+  rk lt (Semiterm.val (structLX (fun _ => False)) ![] id t)
+
+/-- **The X-atom on a closed term reads the ≺-rank bound.** -/
+theorem models_Xat' (γ : Ordinal.{0}) (t : Semiterm LX ℕ 0) :
+    models lt γ (Xat t) ↔ tval lt t < γ := by
+  unfold models Xat tval
+  rw [Semiformula.eval_rel₁, structLX_rel_Xsym]
+  simp only [Matrix.cons_val_zero, levelSet]
+  rw [val_structLX_eq (levelSet lt γ) (fun _ => False)]
+
+/-- **The negated X-atom is true at `γ` iff the rank is `≥ γ`.** -/
+theorem models_negXat (γ : Ordinal.{0}) (t : Semiterm LX ℕ 0) :
+    models lt γ (∼(Xat t)) ↔ γ ≤ tval lt t := by
+  have : ∼(Xat t) = Semiformula.nrel Xsym ![t] := rfl
+  rw [this]
+  unfold models tval
+  rw [Semiformula.eval_nrel₁, structLX_rel_Xsym]
+  simp only [Matrix.cons_val_zero, levelSet]
+  rw [val_structLX_eq (levelSet lt γ) (fun _ => False)]
+  exact not_lt
+
+/-- A true **X-free** literal is `models`-true at every level (its truth is carrier-independent). -/
+theorem models_inl_lit (γ : Ordinal.{0}) (b : Bool) {k} (r₀ : (ℒₒᵣ).Rel k)
+    (v : Fin k → Semiterm LX ℕ 0) (htrue : LitTrue (signedLit b (Sum.inl r₀) v)) :
+    models lt γ (signedLit b (Sum.inl r₀) v) := by
+  have hv : (fun i => Semiterm.val (structLX (levelSet lt γ)) ![] id (v i))
+      = (fun i => Semiterm.val (structLX (fun _ => False)) ![] id (v i)) :=
+    funext fun i => val_structLX_eq _ _ _ _ (v i)
+  cases b <;>
+    · simp only [signedLit, models, LitTrue, Semiformula.eval_rel, Semiformula.eval_nrel,
+        Semiformula.Evalm] at htrue ⊢
+      rw [hv]; exact htrue
+
+/-- **X-free axTrue leaves only** (Buchholz-faithfulness; see the section header). -/
+def XFreeAx : {Δ : Seq LX} → Deriv Δ → Prop
+  | _, .axL _ _ _ _ => True
+  | _, .axTrue _ r _ _ _ => Sum.isLeft r = true
+  | _, .verumR _ => True
+  | _, .weak d _ => XFreeAx d
+  | _, .andI _ _ dφ dψ => XFreeAx dφ ∧ XFreeAx dψ
+  | _, .orI _ _ d => XFreeAx d
+  | _, .allω _ d => ∀ n, XFreeAx (d n)
+  | _, .exI _ _ d => XFreeAx d
+  | _, .cut _ d₁ d₂ => XFreeAx d₁ ∧ XFreeAx d₂
+
+variable (prec : Semiformula LX ℕ 2)
+
+/-- A formula's **role** in a Boundedness sequent: the negated progressiveness `¬Prog`, a bounded
+negative X-atom `¬Xt` (`|tᴺ|_≺ ≤ α`), or an X-positive formula. -/
+def PartItem (α : Ordinal.{0}) (A : Form LX) : Prop :=
+  A = ∼(Prog prec) ∨
+  (∃ t : Semiterm LX ℕ 0, A = ∼(Xat t) ∧ tval lt t ≤ α) ∨
+  XPos A
+
+/-- The Boundedness sequent invariant: every member has a valid role. -/
+def Partition (α : Ordinal.{0}) (Δ : Seq LX) : Prop := ∀ A ∈ Δ, PartItem lt prec α A
+
+/-- The Boundedness conclusion: some **X-positive** member is `⊨^γ`-true. -/
+def SatPos (γ : Ordinal.{0}) (Δ : Seq LX) : Prop := ∃ A ∈ Δ, XPos A ∧ models lt γ A
+
+end Main
 
 end GoodsteinPA.Boundedness
