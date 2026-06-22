@@ -25,3 +25,4 @@ import GoodsteinPA.Embedding
 
 import GoodsteinPA.EmbeddingX
 import GoodsteinPA.EpsilonOrder
+import GoodsteinPA.Epsilon0Complete
