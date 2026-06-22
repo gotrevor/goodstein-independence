@@ -1,0 +1,84 @@
+/-
+# `wip/TruthSem.lean` — Buchholz's X-positive truth semantics `⊨^γ` (lap-13, Boundedness step 1)
+
+The light self-contained layer the Boundedness theorem (Buchholz Thm 5.4) sits on:
+- `rk ≺ n = |n|_≺` (the ≺-rank), via mathlib `IsWellFounded.rank`;
+- `orderType ≺ = ‖≺‖ = sup{|n|_≺ + 1}`;
+- `levelSet ≺ γ = {n : |n|_≺ < γ}` (the `X`-interpretation `U^γ`);
+- `models ≺ γ A = ⊨^γ A` and `Sat ≺ γ Γ` (the sequent reading), via the explicit `structLX` carrier
+  (NOT an ambient instance — `γ` must vary in the Boundedness induction; see
+  `ANALYSIS-2026-06-22-lap13-boundedness-design.md`);
+- the **X-free invariance** bridge: an `ℒₒᵣ`-formula's truth is independent of the `X`-set, so a true
+  X-free leaf of a derivation is `⊨^γ` for every `γ`. This is the reusable bridge from `axTrue` leaves
+  to the truth semantics.
+-/
+import GoodsteinPA.ZinftyGen
+import GoodsteinPA.LangX
+import Mathlib.SetTheory.Ordinal.Rank
+
+namespace GoodsteinPA.TruthSem
+
+open LO LO.FirstOrder
+open GoodsteinPA.ZinftyGen GoodsteinPA.LangX
+
+variable (lt : ℕ → ℕ → Prop) [IsWellFounded ℕ lt]
+
+/-- `|n|_≺` — the ≺-rank, `sup{|i|_≺ + 1 : i ≺ n}` (mathlib `IsWellFounded.rank`). -/
+noncomputable def rk (n : ℕ) : Ordinal.{0} := IsWellFounded.rank lt n
+
+theorem rk_lt_of_rel {a b : ℕ} (h : lt a b) : rk lt a < rk lt b :=
+  IsWellFounded.rank_lt_of_rel h
+
+/-- `‖≺‖` — the order type, `sup{|n|_≺ + 1}`. -/
+noncomputable def orderType : Ordinal.{0} := ⨆ n : ℕ, Order.succ (rk lt n)
+
+/-- Every rank is `< ‖≺‖.succ`; more usefully, `|n|_≺ < γ` for all `n` forces `‖≺‖ ≤ γ`. -/
+theorem orderType_le_of_forall {γ : Ordinal.{0}} (h : ∀ n, rk lt n < γ) : orderType lt ≤ γ := by
+  refine Ordinal.iSup_le ?_
+  intro n
+  exact Order.succ_le_of_lt (h n)
+
+/-- `U^γ = {n : |n|_≺ < γ}` — the level set interpreting `X` at level `γ`. -/
+def levelSet (γ : Ordinal.{0}) : ℕ → Prop := fun n => rk lt n < γ
+
+/-- `⊨^γ A :⟺ (ℕ, U^γ) ⊨ A` — truth in the `structLX (U^γ)` carrier (explicit structure). -/
+noncomputable def models (γ : Ordinal.{0}) (A : Form LX) : Prop :=
+  Semiformula.Eval (structLX (levelSet lt γ)) ![] id A
+
+/-- `⊨^γ {A₁,…,A_k} :⟺ ⊨^γ A₁ ∨ … ∨ ⊨^γ A_k` (the Tait sequent reads as a disjunction). -/
+noncomputable def Sat (γ : Ordinal.{0}) (Γ : Seq LX) : Prop := ∃ A ∈ Γ, models lt γ A
+
+theorem Sat.intro {γ : Ordinal.{0}} {Γ : Seq LX} {A : Form LX}
+    (hA : A ∈ Γ) (h : models lt γ A) : Sat lt γ Γ := ⟨A, hA, h⟩
+
+/-! ## X-free invariance
+
+The `ℒₒᵣ`-reduct of `structLX S` is the standard ℕ-model, independent of `S` — because the `ORing`
+embedding sends every `ℒₒᵣ` symbol to the `Sum.inl` side, which `structLX` interprets via the standard
+model regardless of `S`. Hence a formula lifted from `ℒₒᵣ` has `S`-independent (so `γ`-independent)
+truth: the bridge from a true X-free `axTrue` leaf to `⊨^γ`. -/
+
+/-- The `ℒₒᵣ`-reduct of `structLX S` is the standard model, for every `S`. -/
+theorem lMap_structLX (S : ℕ → Prop) :
+    (structLX S).lMap (Language.ORing.embedding LX) = (inferInstance : Structure ℒₒᵣ ℕ) := by
+  apply Structure.ext
+  · funext k f v
+    match k, f with
+    | 0, Language.Zero.zero => rfl
+    | 0, Language.One.one => rfl
+    | 2, Language.Add.add => rfl
+    | 2, Language.Mul.mul => rfl
+  · funext k r v
+    match k, r with
+    | 2, Language.Eq.eq => rfl
+    | 2, Language.LT.lt => rfl
+
+/-- **X-free invariance.** A formula lifted from `ℒₒᵣ` is `⊨^γ`-true iff it is true in the standard
+ℕ-model — independent of `γ`. -/
+theorem models_lMap (γ : Ordinal.{0}) (φ₀ : SyntacticFormula ℒₒᵣ) :
+    models lt γ (Semiformula.lMap (Language.ORing.embedding LX) φ₀)
+      ↔ Semiformula.Evalm ℕ ![] (id : ℕ → ℕ) φ₀ := by
+  unfold models
+  rw [Semiformula.eval_lMap, lMap_structLX]
+
+end GoodsteinPA.TruthSem

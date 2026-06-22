@@ -13,6 +13,7 @@ import GoodsteinPA.Statement
 import GoodsteinPA.Zinfty
 import GoodsteinPA.ZinftyGen
 import GoodsteinPA.LangX
+import GoodsteinPA.TruthSem
 import GoodsteinPA.Hardy
 
 import GoodsteinPA.Domination
