@@ -60,17 +60,18 @@ Goodstein [E].** Co-design, or make `EpsilonOrder` expose the E-hook (standard C
 Goodstein-descent-embeds-into-it).
 
 ### Corrected F work order
-1. ✅ **DONE (lap 18, `src/GoodsteinPA/EpsilonOrder.lean`, axiom-clean):** `hprec_of_lMap_defined`
-   (+ `hprec_of_eval`, `eval_lMap_structLX`). Discharges the exact Boundedness `hprec` for ANY
-   `lMap`-definable `lt`. **TODO leftover:** `xpos_lMap` (⟹ `hprecXPos` automatic — mechanical;
-   `nrel` case needs `Sum.isLeft ((ORing.embedding LX).rel r) = true`, i.e. case `ℒₒᵣ.Rel` = eq/lt),
-   and the `EpsilonOrder` structure (carry `φ`, field `ge : ε₀ ≤ orderType lt`).
-2. `codeOfREPred₂` + spec (Foundation-side). NOTE the `Semisentence ℒₒᵣ 2 = Semiformula ℒₒᵣ Empty 2`
-   ⟹ need `Empty→ℕ` embedding (`Rew.emptyMap`/`Semiformula.emb`) to feed `hprec_of_lMap_defined`'s
-   `φ : Semiformula ℒₒᵣ ℕ 2`. (Or restate `hprec_of_lMap_defined` for `Semisentence` directly.)
-3. **ε₀-completeness `∀ o<ε₀, ∃ x:ONote, NF x ∧ repr x = o`** (the real girder; mathlib-only; Aristotle).
-4. Bijective ℕ↔NONote coding + transfer order type.
-5. Instantiate `EpsilonOrder` with `ε₀ ≤ orderType lt`.
+1. ✅ **DONE (lap 18, `src/GoodsteinPA/EpsilonOrder.lean`, all axiom-clean).** The whole **definability
+   half** of F is built: `eval_lMap_structLX`, `hprec_of_eval`, `hprec_of_lMap_defined` (discharge the
+   exact Boundedness `hprec` for ANY `lMap`-definable `lt`); `xpos_lMap` + `hprecXPos_lMap` (⟹ `hprecXPos`
+   automatic); and the **`Seam` structure** (`GoodsteinPA.EpsilonOrder.Seam`) bundling `lt`/`φ`/`hφ`/`ge`
+   with methods `Seam.prec`/`hprec`/`hprecXPos`. **Only `Seam.ge : ε₀ ≤ orderType lt` is left undischarged.**
+2. **`codeOfREPred₂` + spec (Foundation-side)** — NEXT tractable brick. NOTE `Semisentence ℒₒᵣ 2 =
+   Semiformula ℒₒᵣ Empty 2` ⟹ need `Empty→ℕ` embedding (`Rew.emptyMap`/`Semiformula.emb`) to feed
+   `Seam.φ : Semiformula ℒₒᵣ ℕ 2` / `hφ`. (Or add a `Semisentence`-flavoured `hprec_of_lMap_defined`.)
+3. **ε₀-completeness `∀ o<ε₀, ∃ x:ONote, NF x ∧ repr x = o`** = `Seam.ge` (the real girder; mathlib-only;
+   Aristotle-eligible). mathlib `Ordinal.lt_epsilon_zero : o<ε₀ ↔ ∃ n, o<(ω^·)^[n] 0` is the tower hook.
+4. Bijective ℕ↔NONote coding + transfer order type (build `Seam.lt` + its `ge`).
+5. Instantiate `Seam` (combine 2+3+4). The definability fields are already discharged by step 1.
 6. Reconcile with E (same `lt`) before claiming the seam closes the headline.
 
 ---
