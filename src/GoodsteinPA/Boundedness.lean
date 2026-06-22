@@ -204,10 +204,45 @@ theorem satpos_subset {γ : Ordinal.{0}} {Δ Δ' : Seq LX} (h : Δ ⊆ Δ') :
     SatPos lt γ Δ → SatPos lt γ Δ' :=
   fun ⟨A, hA, hpos, hm⟩ => ⟨A, h hA, hpos, hm⟩
 
+/-- `(X #0)/[nm n] = X (nm n)`. -/
+theorem xat_subst (n : ℕ) : (Xat (#0 : Semiterm LX ℕ 1))/[nm n] = Xat (nm n) := by
+  simp [Xat, Semiformula.rew_rel, Matrix.constant_eq_singleton]
+
+/-- The `¬Prog` body `∼(hyp 🡒 X #0)` substitutes to `hyp/[nm n] ⋏ ¬X(nm n)` — the two Buchholz
+case-2 conjuncts (the X-positive `∀y≺n Xy` and the bounded negative atom `¬Xn`). -/
+theorem chi_subst (n : ℕ) :
+    (∼(hyp prec 🡒 Xat (#0)))/[nm n] = (hyp prec)/[nm n] ⋏ ∼(Xat (nm n)) := by
+  have h1 : ∼(hyp prec 🡒 Xat (#0)) = hyp prec ⋏ ∼(Xat (#0)) := by simp [Semiformula.imp_eq]
+  rw [h1]
+  simp only [LogicalConnective.HomClass.map_and, LogicalConnective.HomClass.map_neg, xat_subst]
+
+/-- `hyp prec = ∀y(y≺x → Xy)` is X-positive whenever the order literal `∼prec` is (it holds for the
+headline's `ℒₒᵣ`-definable, X-free order `≺`). -/
+theorem hyp_xpos (h : XPos (∼ prec)) : XPos (hyp prec) := by
+  simpa [hyp, Xat, Semiformula.imp_eq, XPos] using h
+
+/-- `|nm n|_≺ = |n|_≺`. -/
+theorem tval_nm (n : ℕ) : tval lt (nm n) = rk lt n := by unfold tval; rw [val_nm]
+
+/-- **∧-inversion preserving `XFreeAx`** (and the height/cut-rank bounds). Mechanical replay of
+`ZinftyGen.andInvAux` tracking the leaf predicate — inversions never introduce an `axTrue` node, so
+`XFreeAx` is preserved. TODO(lap 15): discharge by porting `andInvAux`'s induction. -/
+theorem andInv_xfree {Δ : Seq LX} (d : Deriv Δ) (hxf : XFreeAx d) (hcr : d.cr = 0)
+    {φ ψ : Form LX} (hmem : (φ ⋏ ψ) ∈ Δ) :
+    (∃ d₁ : Deriv (insert φ (Δ.erase (φ ⋏ ψ))), d₁.o ≤ d.o ∧ d₁.cr = 0 ∧ XFreeAx d₁) ∧
+    (∃ d₂ : Deriv (insert ψ (Δ.erase (φ ⋏ ψ))), d₂.o ≤ d.o ∧ d₂.cr = 0 ∧ XFreeAx d₂) := by
+  sorry
+
 /-- **Boundedness (Buchholz Thm 5.4), cut-free.** For an X-positive-decomposed sequent `Δ` (every
 member is `¬Prog`, a bounded `¬Xt`, or X-positive), a cut-free `XFreeAx` derivation of `Δ` at height
-`o d` yields `⊨^{α+2^{o d}}` of some X-positive member. The corollary `‖≺‖ ≤ 2^β` follows. -/
-theorem boundedness (β : Ordinal.{0}) :
+`o d` yields `⊨^{α+2^{o d}}` of some X-positive member. The corollary `‖≺‖ ≤ 2^β` follows.
+
+`hprec` is the semantic spec of the order formula `prec` (`⟦prec⟧ = lt`); `hprecXPos` says the order
+literal is X-free. Both are discharged by the arithmetization seam (the `ℒₒᵣ`-definable ε₀ order). -/
+theorem boundedness
+    (hprec : ∀ (γ : Ordinal.{0}) (n : ℕ),
+      models lt γ ((hyp prec)/[nm n]) ↔ ∀ m : ℕ, lt m n → rk lt m < γ)
+    (hprecXPos : XPos (∼ prec)) (β : Ordinal.{0}) :
     ∀ {Δ : Seq LX} (α : Ordinal.{0}) (d : Deriv Δ),
       d.o ≤ β → d.cr = 0 → XFreeAx d → Partition lt prec α Δ →
       SatPos lt (α + 2 ^ d.o) Δ := by
