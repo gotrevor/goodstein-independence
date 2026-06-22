@@ -1114,4 +1114,171 @@ theorem PXFc.atomCut {k} (r : (LX).Rel k) (v) {A B : Ordinal.{0}} {Γ : Seq LX}
       tauto)).mono ?_ le_rfl
   exact add_le_add_left ((add_le_add_iff_left B).mpr ho) 1
 
+/-! ### Cut-rank elimination (§19.7/19.9) over `PXFc` — ordinal bookkeeping + assembly. -/
+
+private theorem cb_one_lt_opow_succ (c : Ordinal.{0}) : (1 : Ordinal) < Ordinal.omega0 ^ (c + 1) := by
+  calc (1 : Ordinal) < Ordinal.omega0 := Ordinal.one_lt_omega0
+    _ = Ordinal.omega0 ^ (1 : Ordinal) := (Ordinal.opow_one _).symm
+    _ ≤ Ordinal.omega0 ^ (c + 1) :=
+        Ordinal.opow_le_opow_right Ordinal.omega0_pos (CanonicallyOrderedAdd.le_add_self 1 c)
+
+private theorem cb_opow_lt_opow_succ_of_le_max {a b x : Ordinal.{0}}
+    (hx : x ≤ max (Ordinal.omega0 ^ a) (Ordinal.omega0 ^ b)) :
+    x < Ordinal.omega0 ^ (max a b + 1) := by
+  refine lt_of_le_of_lt hx (max_lt ?_ ?_)
+  · exact (Ordinal.opow_lt_opow_iff_right Ordinal.one_lt_omega0).mpr
+      (lt_of_le_of_lt (le_max_left a b) (lt_add_of_pos_right _ one_pos))
+  · exact (Ordinal.opow_lt_opow_iff_right Ordinal.one_lt_omega0).mpr
+      (lt_of_le_of_lt (le_max_right a b) (lt_add_of_pos_right _ one_pos))
+
+private theorem cb_max_opow_add_one_le (a b : Ordinal.{0}) :
+    max (Ordinal.omega0 ^ a) (Ordinal.omega0 ^ b) + 1 ≤ Ordinal.omega0 ^ (max a b + 1) :=
+  le_of_lt (Ordinal.isPrincipal_add_omega0_opow _ (cb_opow_lt_opow_succ_of_le_max le_rfl)
+    (cb_one_lt_opow_succ _))
+
+private theorem cb_max_opow_add_two_le (a b : Ordinal.{0}) :
+    max (Ordinal.omega0 ^ a) (Ordinal.omega0 ^ b) + 1 + 1 ≤ Ordinal.omega0 ^ (max a b + 1) := by
+  have hP := Ordinal.isPrincipal_add_omega0_opow (max a b + 1)
+  exact le_of_lt (hP (hP (cb_opow_lt_opow_succ_of_le_max le_rfl) (cb_one_lt_opow_succ _))
+    (cb_one_lt_opow_succ _))
+
+private theorem cb_opow_add_opow_add_one_le (a b : Ordinal.{0}) :
+    Ordinal.omega0 ^ a + Ordinal.omega0 ^ b + 1 ≤ Ordinal.omega0 ^ (max a b + 1) := by
+  have hP := Ordinal.isPrincipal_add_omega0_opow (max a b + 1)
+  exact le_of_lt (hP (hP (cb_opow_lt_opow_succ_of_le_max (le_max_left _ _))
+    (cb_opow_lt_opow_succ_of_le_max (le_max_right _ _))) (cb_one_lt_opow_succ _))
+
+private theorem cb_opow_add_one_le' (a : Ordinal.{0}) :
+    Ordinal.omega0 ^ a + 1 ≤ Ordinal.omega0 ^ (a + 1) := by
+  have hP := Ordinal.isPrincipal_add_omega0_opow (a + 1)
+  exact le_of_lt (hP ((Ordinal.opow_lt_opow_iff_right Ordinal.one_lt_omega0).mpr
+    (lt_add_of_pos_right _ one_pos)) (cb_one_lt_opow_succ _))
+
+private theorem cb_sup_opow_add_one_le (f : ℕ → Ordinal.{0}) :
+    (⨆ n, Ordinal.omega0 ^ (f n)) + 1 ≤ Ordinal.omega0 ^ ((⨆ n, f n) + 1) := by
+  have hsup : (⨆ n, Ordinal.omega0 ^ (f n)) ≤ Ordinal.omega0 ^ (⨆ n, f n) :=
+    Ordinal.iSup_le fun n => Ordinal.opow_le_opow_right Ordinal.omega0_pos (Ordinal.le_iSup f n)
+  have hlt : Ordinal.omega0 ^ (⨆ n, f n) < Ordinal.omega0 ^ ((⨆ n, f n) + 1) :=
+    (Ordinal.opow_lt_opow_iff_right Ordinal.one_lt_omega0).mpr (lt_add_of_pos_right _ one_pos)
+  exact le_of_lt (Ordinal.isPrincipal_add_omega0_opow _ (lt_of_le_of_lt hsup hlt)
+    (cb_one_lt_opow_succ _))
+
+/-- **Principal cut on a rank-`c` formula** (Towsner Thm 19.7 core), `XFreeAx`-preserving. -/
+theorem PXFc.cutElimPrincipal {c : ℕ} {ξ : Form LX} {A B : Ordinal.{0}} {Γ : Seq LX}
+    (hξeq : ξ.complexity = c)
+    (hC : PXFc (Ordinal.omega0 ^ A) c (insert ξ Γ))
+    (hNC : PXFc (Ordinal.omega0 ^ B) c (insert (∼ξ) Γ)) :
+    PXFc (Ordinal.omega0 ^ (max A B + 1)) c Γ := by
+  cases ξ with
+  | verum =>
+      have hc0 : c = 0 := hξeq.symm
+      subst hc0
+      have hNC' : PXFc (Ordinal.omega0 ^ B) 0 (insert (⊥ : Form LX) Γ) := hNC
+      refine (PXFc.removeFalsum hNC').mono ?_ le_rfl
+      exact Ordinal.opow_le_opow_right Ordinal.omega0_pos
+        (le_trans (le_max_right A B) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  | falsum =>
+      have hc0 : c = 0 := hξeq.symm
+      subst hc0
+      refine (PXFc.removeFalsum hC).mono ?_ le_rfl
+      exact Ordinal.opow_le_opow_right Ordinal.omega0_pos
+        (le_trans (le_max_left A B) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  | rel r v =>
+      have hc0 : c = 0 := hξeq.symm
+      subst hc0
+      refine (PXFc.atomCut r v hC hNC).mono ?_ le_rfl
+      rw [max_comm A B]; exact cb_opow_add_opow_add_one_le B A
+  | nrel r v =>
+      have hc0 : c = 0 := hξeq.symm
+      subst hc0
+      have hNC' : PXFc (Ordinal.omega0 ^ B) 0 (insert (Semiformula.rel r v) Γ) := hNC
+      exact (PXFc.atomCut r v hNC' hC).mono (cb_opow_add_opow_add_one_le A B) le_rfl
+  | and a b =>
+      have hM : max a.complexity b.complexity + 1 = c := hξeq
+      have han : a.complexity + 1 ≤ c := by have := le_max_left a.complexity b.complexity; omega
+      have hbn : b.complexity + 1 ≤ c := by have := le_max_right a.complexity b.complexity; omega
+      exact (PXFc.cutReduceConj (by exact_mod_cast han) (by exact_mod_cast hbn) hC hNC).mono
+        (cb_max_opow_add_two_le A B) le_rfl
+  | or a b =>
+      have hM : max a.complexity b.complexity + 1 = c := hξeq
+      have han : a.complexity + 1 ≤ c := by have := le_max_left a.complexity b.complexity; omega
+      have hbn : b.complexity + 1 ≤ c := by have := le_max_right a.complexity b.complexity; omega
+      exact (PXFc.cutReduceDisj (by exact_mod_cast han) (by exact_mod_cast hbn) hC hNC).mono
+        (cb_max_opow_add_two_le A B) le_rfl
+  | all φ' =>
+      have hφn : φ'.complexity + 1 ≤ c := le_of_eq hξeq
+      exact (PXFc.cutReduceAll (by exact_mod_cast hφn) hC hNC).mono
+        (cb_opow_add_opow_add_one_le A B) le_rfl
+  | exs φ' =>
+      have hφn : (∼φ').complexity + 1 ≤ c := by
+        rw [Semiformula.complexity_neg]; exact le_of_eq hξeq
+      have hC' : PXFc (Ordinal.omega0 ^ A) c (insert (∃⁰ ∼(∼φ')) Γ) := by
+        rw [DeMorgan.neg]; exact hC
+      refine ((PXFc.cutReduceAll (by exact_mod_cast hφn) hNC hC').mono ?_ le_rfl)
+      rw [max_comm A B]; exact cb_opow_add_opow_add_one_le B A
+
+/-- One level of cut-rank reduction (Towsner Thm 19.7), `XFreeAx`-preserving. -/
+theorem PXFc.cutElimStepAux {c : ℕ} : ∀ {Γ : Seq LX} (d : Deriv Γ), XFreeAx d →
+    d.cr ≤ ((c + 1 : ℕ) : ℕ∞) → PXFc (Ordinal.omega0 ^ (d.o)) c Γ := by
+  intro Γ d
+  induction d with
+  | @axL Γ k r v hp hn =>
+    intro _ _; simp only [Deriv.o]
+    exact (PXFc.axL r v hp hn).mono zero_le (Nat.zero_le c)
+  | @axTrue Γ k b r v htrue hmem =>
+    intro hxf _; simp only [Deriv.o]
+    exact (PXFc.axTrue b r v hxf htrue hmem).mono zero_le (Nat.zero_le c)
+  | @verumR Γ h =>
+    intro _ _; simp only [Deriv.o]
+    exact (PXFc.verumR h).mono zero_le (Nat.zero_le c)
+  | @weak Δ Γ d' hsub ih =>
+    intro hxf hcr; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    exact (ih hxf hcr).weakening hsub
+  | @andI Γ₀ χ₀ χ₁ d₀ d₁ ih₀ ih₁ =>
+    intro hxf hcr; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    exact (PXFc.andI χ₀ χ₁ (ih₀ hxf.1 ((le_max_left _ _).trans hcr))
+      (ih₁ hxf.2 ((le_max_right _ _).trans hcr))).mono (cb_max_opow_add_one_le d₀.o d₁.o) le_rfl
+  | @orI Γ₀ χ₀ χ₁ d' ih =>
+    intro hxf hcr; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    exact (PXFc.orI χ₀ χ₁ (ih hxf hcr)).mono (cb_opow_add_one_le' d'.o) le_rfl
+  | @allω Γ₀ χ' d' ih =>
+    intro hxf hcr; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    have IH : ∀ n, PXFc (Ordinal.omega0 ^ ((d' n).o)) c (insert (χ'/[nm n]) Γ₀) :=
+      fun n => ih n (hxf n) ((le_iSup (fun m => (d' m).cr) n).trans hcr)
+    exact (PXFc.allω χ' IH).mono (cb_sup_opow_add_one_le (fun n => (d' n).o)) le_rfl
+  | @exI Γ₀ χ' n d' ih =>
+    intro hxf hcr; simp only [Deriv.cr] at hcr; simp only [Deriv.o]
+    exact (PXFc.exI χ' n (ih hxf hcr)).mono (cb_opow_add_one_le' d'.o) le_rfl
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro hxf hcr; simp only [Deriv.cr] at hcr
+    have hcr1 : d₁.cr ≤ ((c + 1 : ℕ) : ℕ∞) :=
+      (le_max_left d₁.cr d₂.cr).trans ((le_max_right _ _).trans hcr)
+    have hcr2 : d₂.cr ≤ ((c + 1 : ℕ) : ℕ∞) :=
+      (le_max_right d₁.cr d₂.cr).trans ((le_max_right _ _).trans hcr)
+    have hξc : (ξ.complexity + 1 : ℕ∞) ≤ ((c + 1 : ℕ) : ℕ∞) := (le_max_left _ _).trans hcr
+    have IH1 := ih₁ hxf.1 hcr1
+    have IH2 := ih₂ hxf.2 hcr2
+    simp only [Deriv.o]
+    by_cases hkeep : ξ.complexity < c
+    · exact (PXFc.cut ξ (by exact_mod_cast Nat.succ_le_of_lt hkeep) IH1 IH2).mono
+        (cb_max_opow_add_one_le d₁.o d₂.o) le_rfl
+    · have hξle : ξ.complexity ≤ c := Nat.le_of_succ_le_succ (by exact_mod_cast hξc)
+      have hξeq : ξ.complexity = c := le_antisymm hξle (not_lt.mp hkeep)
+      exact PXFc.cutElimPrincipal hξeq IH1 IH2
+
+/-- One level of cut elimination (Towsner Thm 19.7), `XFreeAx`-preserving. -/
+theorem PXFc.cutElimStep {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
+    (h : PXFc α (c + 1) Γ) : PXFc (Ordinal.omega0 ^ α) c Γ := by
+  rcases h with ⟨d, ho, hcr, hxf⟩
+  exact (PXFc.cutElimStepAux d hxf hcr).mono
+    (Ordinal.opow_le_opow_right Ordinal.omega0_pos ho) le_rfl
+
+/-- **Full cut elimination** (Towsner Thm 19.9), `XFreeAx`-preserving: iterate `cutElimStep` `c`
+times to a cut-free derivation at `ω_c^α`. **This is C₁** — the input to corollary B. -/
+theorem PXFc.cutElim {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
+    (h : PXFc α c Γ) : PXFc (Deriv.omegaTower c α) 0 Γ := by
+  induction c generalizing α with
+  | zero => simpa [Deriv.omegaTower] using h
+  | succ c ih => exact ih (PXFc.cutElimStep h)
+
 end GoodsteinPA.XFreeCutElim
