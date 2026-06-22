@@ -1,8 +1,8 @@
 # HANDOFF — 2026-06-22 (lap 11)
 
-> **Branch** `plan` · **HEAD** `bb0488e` (+docs after) · 5 commits this lap · build **green**
+> **Branch** `plan` · **HEAD** `e37fa89` · 8 commits this lap · build **green**
 > (`lake build GoodsteinPA`, 1258 jobs) · headline `peano_not_proves_goodstein` = honest `sorry`
-> (0 math axioms) · working tree clean.
+> (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms) · working tree clean.
 > **Lap 11 COMPLETED M4 — the embedding `embedC` (axiom-clean, promoted to `src/`) — AND uncovered
 > (via Towsner §13–17) that the headline needs the WITNESS-BOUNDED calculus `Zᵏ`: M5 drops the I∃
 > bound `k`, so `embedC` is the *unbounded* embedding (reusable, but not the headline object). The
