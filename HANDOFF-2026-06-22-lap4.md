@@ -55,10 +55,14 @@ All machine-checked + axiom-clean in **`wip/WitnessBound.lean`** (not in build t
    (Remark 10.3) is a separate deep girder. Re-evaluate **Route A** (via `Con(PA)`, `Reduction.lean`)
    which stays entirely in real PA and sidesteps this — vs Route B's external-but-bridged path.
 5. **Hardy hierarchy `h_α` + `τ` (architecture-independent, startable).** Discharges `Hmono`/`Hdom`.
-   mathlib has `ONote.fundamentalSequence`/`fastGrowing` but **no** monotonicity lemmas, no Hardy
-   `h_α`, no Goodstein connection. Building it (+ Goodstein domination, Towsner §6–§9 = Part 1) is a
-   large decoupled sub-project overlapping Track 1 `lean-formalizations Logic/FastGrowing`. Safe to
-   build in any architecture; the Goodstein-side is already started (`G`, `goodstein_zero_succ`).
+   mathlib has `ONote.fundamentalSequence`/`fastGrowing` but **no** growth lemmas, no Hardy `h_α`, no
+   Goodstein connection. Building it (+ Goodstein domination, Towsner §6–§9 = Part 1) is a large
+   decoupled sub-project overlapping Track 1 `lean-formalizations Logic/FastGrowing`. Safe in any
+   architecture. **Started** (`wip/FastGrowing.lean`): `fastGrowing_id_le` (`n ≤ fastGrowing o n`,
+   axiom-clean) — the inflationary half is clean/separable. **Confirmed** the *monotonicity* half
+   (`Hmono`/`Hmono_n`) genuinely needs the τ coefficient-control (Towsner §8) — its `fastGrowing`
+   limit case reduces to ordinal-monotonicity at fixed `n`, false for small `n` without τ. Goodstein
+   side started too (`G`, `goodstein_zero_succ`, `atomTrue_iff_G_le`).
 
 ## Recommended next-lap order (hardest-first, but unblock first)
 1. Harvest any `ON-LINE-FINDINGS-*.md` for the `bounding` invariant + architecture; **decide** the

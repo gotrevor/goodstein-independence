@@ -162,7 +162,14 @@ Needed to *state* Gödel II for `𝗣𝗔`; Foundation axiomatizes it (TODO in
 - Next deep brick (architecture-independent, but gated on the notation/architecture decision):
   the **Hardy / fast-growing hierarchy + τ-controlled monotonicity** to discharge `Hmono`/`Hmono_n`,
   and **Goodstein domination** (Towsner §5–§9) to discharge `Hdom`. mathlib `ONote.fastGrowing`
-  exists but has NO monotonicity lemmas (deliberately minimal); proving them is net-new and finicky.
+  exists but has NO growth lemmas (deliberately minimal).
+  - **STARTED** (`wip/FastGrowing.lean`, axiom-clean): `fastGrowing_id_le` — `n ≤ fastGrowing o n`
+    (the inflationary half, which IS separable from ordinal-monotonicity: successor case via
+    iterating a `≥id` map, limit case via the smaller-ordinal IH).
+  - **Confirmed entangled:** *numeric* monotonicity (`Hmono_n` analogue) of `fastGrowing` — its
+    limit case `fastGrowing (f m) m ≤ fastGrowing (f m') m` needs *ordinal* monotonicity at fixed `n`,
+    which is the τ-subtle one (false for small `n` without the coefficient control — Towsner §8). So
+    `Hmono`/`Hmono_n` for the real hierarchy genuinely need the τ machinery; not a quick brick.
 
 ## Done — lap 1
 - M1: `Encoding.goodsteinTerminates_re` proved (`Computability.lean`: `primrec_natLog`,
