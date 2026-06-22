@@ -168,6 +168,42 @@ def Partition (α : Ordinal.{0}) (Δ : Seq LX) : Prop := ∀ A ∈ Δ, PartItem 
 /-- The Boundedness conclusion: some **X-positive** member is `⊨^γ`-true. -/
 def SatPos (γ : Ordinal.{0}) (Δ : Seq LX) : Prop := ∃ A ∈ Δ, XPos A ∧ models lt γ A
 
+/-- **X-positivity is rewrite-invariant** (substitution touches terms, not relation symbols or
+connective structure): needed for the ω-rule / `∃`-witness cases, where `χ` X-positive ⟹ each
+instance `χ/[nm n]` X-positive. -/
+theorem xpos_rew : ∀ {n₁} (χ : Semiformula LX ℕ n₁) {n₂} (ω : Rew LX ℕ n₁ ℕ n₂),
+    XPos χ → XPos (ω ▹ χ) := by
+  intro n₁ χ
+  induction χ using Semiformula.rec' with
+  | hverum => intro n₂ ω h; simp [XPos]
+  | hfalsum => intro n₂ ω h; simp [XPos]
+  | hrel r v => intro n₂ ω h; rw [Semiformula.rew_rel]; simp [XPos]
+  | hnrel r v => intro n₂ ω h; rw [Semiformula.rew_nrel]; simpa [XPos] using h
+  | hand φ ψ ihφ ihψ =>
+      intro n₂ ω h
+      simp only [LogicalConnective.HomClass.map_and, XPos] at *
+      exact ⟨ihφ ω h.1, ihψ ω h.2⟩
+  | hor φ ψ ihφ ihψ =>
+      intro n₂ ω h
+      simp only [LogicalConnective.HomClass.map_or, XPos] at *
+      exact ⟨ihφ ω h.1, ihψ ω h.2⟩
+  | hall φ ih => intro n₂ ω h; rw [Rewriting.app_all]; exact ih ω.q h
+  | hexs φ ih => intro n₂ ω h; rw [Rewriting.app_exs]; exact ih ω.q h
+
+/-- `χ/[nm n]` stays X-positive. -/
+theorem xpos_subst {χ : SyntacticSemiformula LX 1} (n : ℕ) (h : XPos χ) : XPos (χ/[nm n]) :=
+  xpos_rew χ _ h
+
+/-- `SatPos` lifts to a higher level (X-positive members are monotone in `γ`). -/
+theorem satpos_mono {γ δ : Ordinal.{0}} (h : γ ≤ δ) {Δ : Seq LX} :
+    SatPos lt γ Δ → SatPos lt δ Δ :=
+  fun ⟨A, hA, hpos, hm⟩ => ⟨A, hA, hpos, models_mono lt h hpos hm⟩
+
+/-- `SatPos` transports along a superset. -/
+theorem satpos_subset {γ : Ordinal.{0}} {Δ Δ' : Seq LX} (h : Δ ⊆ Δ') :
+    SatPos lt γ Δ → SatPos lt γ Δ' :=
+  fun ⟨A, hA, hpos, hm⟩ => ⟨A, h hA, hpos, hm⟩
+
 /-- **Boundedness (Buchholz Thm 5.4), cut-free.** For an X-positive-decomposed sequent `Δ` (every
 member is `¬Prog`, a bounded `¬Xt`, or X-positive), a cut-free `XFreeAx` derivation of `Δ` at height
 `o d` yields `⊨^{α+2^{o d}}` of some X-positive member. The corollary `‖≺‖ ≤ 2^β` follows. -/
@@ -216,8 +252,81 @@ theorem boundedness (β : Ordinal.{0}) :
     intro hob hcr hxf hpart
     obtain ⟨A, hA, hposA, hmodA⟩ := ih α hob hcr hxf (fun B hB => hpart B (hsub hB))
     exact ⟨A, hsub hA, hposA, hmodA⟩
-  | andI φ ψ dφ dψ ihφ ihψ => intro hob hcr hxf hpart; sorry
-  | orI φ ψ d' ih => intro hob hcr hxf hpart; sorry
+  | @andI Γ φ ψ dφ dψ ihφ ihψ =>
+    intro hob hcr hxf hpart
+    set D := Deriv.andI φ ψ dφ dψ with hD
+    have hposφψ : XPos (φ ⋏ ψ) := by
+      rcases hpart (φ ⋏ ψ) (Finset.mem_insert_self _ _) with h | ⟨t, heq, _⟩ | hc
+      · rw [Prog] at h; simp [Xat, Xsym] at h
+      · simp [Xat] at heq
+      · exact hc
+    obtain ⟨hposφ, hposψ⟩ := hposφψ
+    have hoφ : dφ.o ≤ D.o := by
+      rw [hD]; simp only [Deriv.o]; exact le_trans (le_max_left _ _) (self_le_add_right _ 1)
+    have hoψ : dψ.o ≤ D.o := by
+      rw [hD]; simp only [Deriv.o]; exact le_trans (le_max_right _ _) (self_le_add_right _ 1)
+    have hlφ : α + 2 ^ dφ.o ≤ α + 2 ^ D.o :=
+      (add_le_add_iff_left α).mpr (Ordinal.opow_le_opow_right two_pos hoφ)
+    have hlψ : α + 2 ^ dψ.o ≤ α + 2 ^ D.o :=
+      (add_le_add_iff_left α).mpr (Ordinal.opow_le_opow_right two_pos hoψ)
+    have crφ : dφ.cr = 0 := by
+      have : dφ.cr ≤ 0 := by rw [hD] at hcr; simp only [Deriv.cr] at hcr; exact hcr ▸ le_max_left _ _
+      exact nonpos_iff_eq_zero.mp this
+    have crψ : dψ.cr = 0 := by
+      have : dψ.cr ≤ 0 := by rw [hD] at hcr; simp only [Deriv.cr] at hcr; exact hcr ▸ le_max_right _ _
+      exact nonpos_iff_eq_zero.mp this
+    have hpartφ : Partition lt prec α (insert φ Γ) := by
+      intro B hB
+      rcases Finset.mem_insert.mp hB with rfl | hBΓ
+      · exact Or.inr (Or.inr hposφ)
+      · exact hpart B (Finset.mem_insert_of_mem hBΓ)
+    have hpartψ : Partition lt prec α (insert ψ Γ) := by
+      intro B hB
+      rcases Finset.mem_insert.mp hB with rfl | hBΓ
+      · exact Or.inr (Or.inr hposψ)
+      · exact hpart B (Finset.mem_insert_of_mem hBΓ)
+    obtain ⟨A, hA, hposA, hmA⟩ := ihφ α (le_trans hoφ hob) crφ hxf.1 hpartφ
+    rcases Finset.mem_insert.mp hA with hAeq | hAΓ
+    · rw [hAeq] at hmA
+      obtain ⟨A', hA', hposA', hmA'⟩ := ihψ α (le_trans hoψ hob) crψ hxf.2 hpartψ
+      rcases Finset.mem_insert.mp hA' with hA'eq | hA'Γ
+      · rw [hA'eq] at hmA'
+        exact ⟨φ ⋏ ψ, Finset.mem_insert_self _ _, ⟨hposφ, hposψ⟩,
+          (models_and lt _ φ ψ).mpr ⟨models_mono lt hlφ hposφ hmA, models_mono lt hlψ hposψ hmA'⟩⟩
+      · exact ⟨A', Finset.mem_insert_of_mem hA'Γ, hposA', models_mono lt hlψ hposA' hmA'⟩
+    · exact ⟨A, Finset.mem_insert_of_mem hAΓ, hposA, models_mono lt hlφ hposA hmA⟩
+  | @orI Γ φ ψ d' ih =>
+    intro hob hcr hxf hpart
+    set D := Deriv.orI φ ψ d' with hD
+    have hposφψ : XPos (φ ⋎ ψ) := by
+      rcases hpart (φ ⋎ ψ) (Finset.mem_insert_self _ _) with h | ⟨t, heq, _⟩ | hc
+      · rw [Prog] at h; simp [Xat, Xsym] at h
+      · simp [Xat] at heq
+      · exact hc
+    obtain ⟨hposφ, hposψ⟩ := hposφψ
+    have ho : d'.o ≤ D.o := by rw [hD]; simp only [Deriv.o]; exact self_le_add_right _ 1
+    have hl : α + 2 ^ d'.o ≤ α + 2 ^ D.o :=
+      (add_le_add_iff_left α).mpr (Ordinal.opow_le_opow_right two_pos ho)
+    have cr0 : d'.cr = 0 := by
+      have : d'.cr ≤ 0 := by rw [hD] at hcr; simpa only [Deriv.cr] using hcr.le
+      exact nonpos_iff_eq_zero.mp this
+    have hpartd' : Partition lt prec α (insert φ (insert ψ Γ)) := by
+      intro B hB
+      rcases Finset.mem_insert.mp hB with rfl | hB'
+      · exact Or.inr (Or.inr hposφ)
+      · rcases Finset.mem_insert.mp hB' with rfl | hBΓ
+        · exact Or.inr (Or.inr hposψ)
+        · exact hpart B (Finset.mem_insert_of_mem hBΓ)
+    obtain ⟨A, hA, hposA, hmA⟩ := ih α (le_trans ho hob) cr0 hxf hpartd'
+    rcases Finset.mem_insert.mp hA with hAeq | hA'
+    · rw [hAeq] at hmA
+      exact ⟨φ ⋎ ψ, Finset.mem_insert_self _ _, ⟨hposφ, hposψ⟩,
+        (models_or lt _ φ ψ).mpr (Or.inl (models_mono lt hl hposφ hmA))⟩
+    · rcases Finset.mem_insert.mp hA' with hAeq | hAΓ
+      · rw [hAeq] at hmA
+        exact ⟨φ ⋎ ψ, Finset.mem_insert_self _ _, ⟨hposφ, hposψ⟩,
+          (models_or lt _ φ ψ).mpr (Or.inr (models_mono lt hl hposψ hmA))⟩
+      · exact ⟨A, Finset.mem_insert_of_mem hAΓ, hposA, models_mono lt hl hposA hmA⟩
   | allω χ d' ih => intro hob hcr hxf hpart; sorry
   | exI χ n d' ih => intro hob hcr hxf hpart; sorry
   | cut φ d₁ d₂ ih₁ ih₂ =>
