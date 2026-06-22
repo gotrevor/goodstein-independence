@@ -2,8 +2,27 @@
 
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Gentzen/Buchholz ordinal analysis — witness-FREE `Z_∞` (embedding
 [M4 `embedC`, done] + ε₀ cut-elim [M5, done]) + **Boundedness** (Thm 5.4, DONE lap 14, axiom-clean) ⟹
-`𝗣𝗔 ⊬ TI(ε₀)`, then Goodstein⟹TI(ε₀).** · **Build**: 🟢 green (1266 jobs, `lake build GoodsteinPA`)
-· **Updated**: lap 19 · 2026-06-22 · `1a765a4`
+`𝗣𝗔 ⊬ TI(ε₀)`, then Goodstein⟹TI(ε₀).** · **Build**: 🟢 green (1270 jobs, `lake build GoodsteinPA`)
+· **Updated**: lap 21 · 2026-06-22 · `43bfd6c`+Thm56
+
+## ✅ Lap-21 (review) — Thm 5.6 ASSEMBLED into one theorem + a hidden gap (D') surfaced
+`src/GoodsteinPA/Thm56.lean` (NEW) **assembles the entire Buchholz §5 girder** into the single
+headline-route theorem **`peano_not_proves_TI : IsEmpty (Derivation2 paLX {TI prec})`** (Gentzen 1943
+sharpness, `𝗣𝗔 ⊬ TI_≺(X)`), and reduces the headline to ONE wall **E** via
+`peano_not_proves_goodstein_of_descent (hE : DescentE) : 𝗣𝗔 ⊬ ↑goodsteinSentence`. The chain (all
+machine-checked): C₂ `embedC_LX`+`hax_paLX` → collapse the assignment image via `asgX_TI_fix` (`TI prec`
+is fvar-free, `prec = lMap (emb precφ)`, `precφ` a `Semisentence`) → C₁+D `orderType_le_of_TIprovable` →
+F `seam.ge`; the contradiction is `ε₀ ≤ ‖≺‖ ≤ 2^(ω_c^α) < ε₀`. `#print axioms peano_not_proves_TI =
+[propext, choice, Quot.sound, sorryAx, rePred_ltPull_natCode]`. Headline untouched (anti-fraud intact).
+
+**⚠️ Fresh-mind review finding — D' is a real, previously-unflagged gap.** The lap-20 handoff claimed
+"Thm 5.6 axiom-clean modulo E+F". That is **incomplete**: the contradiction needs the embedded ordinal
+`α < ε₀`, but `embedC_LX` only gives `∃ α` (no bound). `α < ε₀` is *the* Gentzen content — a **finite**
+PA-proof embeds to a `Z∞`-proof of height `< ε₀` (PA cannot certify heights up to ε₀ itself). Isolated
+as the disclosed `sorry` **`embed_TI_bounded`** (D'). It is **tractable, Foundation-light, no literature**:
+strengthen `embedC_LX_gen`/`hax_paLX` to the *uniform* conclusion `∃ c, ∃ B<ε₀, ∀ e, ∃ α≤B, PXFc α c …`
+(every builder bumps `B` by `+1`/`max+1`/`sup+1`, all `<ε₀`; the ω-rule closes because the IH's `B` is
+*outside* `∀ e`, so the family is uniformly `≤B`). **The walls are now E + F-φ + D'** (was E + F-φ).
 
 ## ✅ Lap-19 — F's ORDER-TYPE WALL CLOSED (axiom-clean) — the dominant campaign risk is down
 The order-type half of **F** (`src/GoodsteinPA/Epsilon0Complete.lean`, all `#print axioms`-clean) is now
@@ -66,6 +85,12 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-22 (lap 21 — REVIEW: Thm 5.6 assembled; D' gap surfaced):** Validated the lap-20 handoff
+  direction (E next, F-φ on Aristotle) against the real kernel. Assembled the §5 girder into one theorem
+  `peano_not_proves_TI` (`src/GoodsteinPA/Thm56.lean`) + headline reduction to E
+  (`peano_not_proves_goodstein_of_descent`). **Caught a real gap the handoff missed: D'** (embedded
+  ordinal `< ε₀`), now isolated as the disclosed `embed_TI_bounded` `sorry`. Build green 1270 jobs;
+  headline still `sorry` (anti-fraud). F-φ Aristotle job `aris_onotecmp` still RUNNING. Walls: E + F-φ + D'.
 - **2026-06-22 (lap 18 — DEEP REFLECTION: F seam grounded vs an outside attack plan; STATUS refreshed
   through lap 17):** Took altitude. Confirmed (real `#print axioms`) that the *entire machine from D back
   is axiom-clean* — only `hax_paLX` (C₂ glue), the locked headline, and off-path Route-A carry `sorry`.
@@ -260,21 +285,23 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 5.1/5.2/5.3) are **done & axiom-clean** and ARE the two hard pieces. Remaining = Boundedness + the
 Goodstein⟹TI bridge. Priorities (see `ANALYSIS-2026-06-22-lap12-buchholz-pivot.md`):
 
-### Short-term (mirror PENDING_WORK top) — execute the Buchholz route
-0. **VERIFY-FIRST (lap 13, before deep work):** (a) M5/M4 cleanly take the set variable `X` (extend
-   `ℒₒᵣ`→`ℒₒᵣ∪{X}`, or add `X` as a fixed extra relation symbol — `embedC`'s `axm`/`provable_true` only
-   needs the `X`-free PA axioms, so it should extend); (b) the **Goodstein ⟹ TI_≺(X)** bridge's exact
-   shape is provable in PA via the Phase-0 CNF-ε₀ encoding. Neither is a known wall; confirm before
-   sinking laps.
-1. **Truth semantics `⊨^α Γ`** — `X := {n : |n|_≺ < α}`, plus `Prog_≺`, the ≺-norm `|n|_≺`, order type
-   `‖≺‖`, X-positivity. Light self-contained defs over `Z∞` sequents.
-2. **Boundedness (Thm 5.4) — THE new theorem.** `Z∞ ⊢^β_1 ¬Prog_≺(X),¬Xs₁,…,¬Xsₖ,Γ & |sᵢ|_≺ ≤ α ⟹
-   ⊨^{α+2^β} Γ` (Γ X-positive), by induction on the cut-free `Provable β 0`-derivation (8 cases, p.29 of
-   Buchholz). Corollary `Z∞ ⊢^β_1 TI_≺(X) ⟹ ‖≺‖ ≤ 2^β`. No Hardy, no witness bound.
-3. **Goodstein ⟹ TI_≺(X)** for the ε₀-order `≺` (the bridge) — PA ⊢ Goodstein-termination ⟹ PA ⊢
-   `TI_≺(X)` (Goodstein descent = ε₀-descent; Kirby–Paris/Cichoń). Reuses Phase-0 encoding.
-4. **Assembly:** PA ⊢ Goodstein ⟹ (M4) Z∞-deriv ⟹ (M5) cut-free at `β<ε₀` ⟹ (Boundedness) `‖≺‖≤2^β<ε₀`,
-   but the ε₀-order has `‖≺‖=ε₀` ⟹ `False` ⟹ discharge the headline. Only if `#print axioms` is clean.
+### Short-term — three walls remain; Thm 5.6 is assembled
+1. **D' — `embed_TI_bounded` (`src/Thm56.lean`).** The embedded ordinal `< ε₀`. **Tractable, no
+   literature, the recommended next chip.** Strengthen `embedC_LX_gen` (and `hax_paLX`'s sub-engines
+   `provable_em_x`, `metaInduction`) to the *uniform* conclusion `∃ c, ∃ B<ε₀, ∀ e, ∃ α≤B, PXFc α c (…)`.
+   Every `PXFc` builder bumps the bound by `+1`/`max+1`/`(⨆ ·)+1`, all of which preserve `<ε₀` (ε₀ a
+   limit). The ω-rule (`allω`) case closes *because the IH's `B` is outside `∀ e`* ⟹ the family `{α(n)}` is
+   uniformly `≤ B` ⟹ `⨆ₙ α(n)+1 ≤ B+1 < ε₀`. `provable_em_x`'s ordinal is `<ω·(complexity)`; `metaInduction`'s
+   chain-of-`n`-cuts is `<ω²`. Discharging D' makes **Thm 5.6 axiom-clean modulo only F-φ**.
+2. **F-φ — `rePred_ltPull_natCode` (`src/SeamDefinability.lean`).** The CNF order is r.e. **ON ARISTOTLE**
+   (`aris_onotecmp`, UUID `16c9fc79-…`). On return: verify in-kernel + `#print axioms`, port. Crux =
+   `Primcodable ONote` (structural) + `Primrec₂ ONote.cmp`. Discharging it makes **F entirely axiom-clean**.
+3. **E — `DescentE` (interface pinned in `src/Thm56.lean`).** `𝗣𝗔 ⊢ γ → Nonempty (Derivation2 paLX {TI
+   prec})`: the Goodstein-to-`TI(ε₀)` descent in PA — the deep crux, **needs `papers/` reading**
+   (Cichoń/Rathjen-2014/Agboola/Towsner). Map the wall, state the per-step lemmas, formalize the first
+   prerequisite. ~2–4 laps.
+4. **G — done** (`peano_not_proves_goodstein_of_descent`): `DescentE ⟹ headline`. Discharge the headline
+   `sorry` ONLY when E is real AND `#print axioms peano_not_proves_goodstein` is clean.
 
 ### Long-term / banked
 - **BANKED, OFF the critical path (do NOT resume on the Buchholz route):** the witness-bounded cut-elim
@@ -295,8 +322,11 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 ## Axiom ledger (per headline / landmark theorem — the fidelity spine)
 | theorem | paper claim | `#print axioms` shows | status |
 |---|---|---|---|
-| `peano_not_proves_goodstein` (headline) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` | 🔓 open `sorry` — **C₁/D + C₂-structural DONE & clean (lap 17)**; remaining: C₂ glue (`hax_paLX`) + E (Goodstein⟹TI) + F (arithmetization seam, `‖≺‖=ε₀`) ; **0** real math axioms |
-| `hax_paLX` (C₂ glue, `src/EmbeddingX`) | `paLX`-image axioms embed to `PXFc` | `propext, choice, Quot.sound` | 🟢 **CLEAN (lap 20)** — X-induction assembly discharged via `PXFc_allClosure` + new `rew_succInd`/`rew_subst1_comm_q`/`subst1_comp_bShift` + `metaInduction_cong`. ⟹ `embedC_LX` clean ⟹ **Thm 5.6 (`PA ⊬ TI(ε₀)`) axiom-clean modulo E+F**. |
+| `peano_not_proves_goodstein` (headline) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` | 🔓 open `sorry` — **Thm 5.6 ASSEMBLED (lap 21)**; reduced to ONE wall E via `…_of_descent`. Remaining: E (Goodstein⟹TI) + F-φ (`rePred_ltPull_natCode`) + D' (`embed_TI_bounded`); **0** real math axioms |
+| `peano_not_proves_TI` (Thm 5.6, **lap 21**, `src/Thm56`) | Gentzen 1943: `𝗣𝗔 ⊬ TI_≺(X)` | `propext, choice, Quot.sound, sorryAx, rePred_ltPull_natCode` | 🟢 **ASSEMBLED** — full §5 chain C₂→C₁→D→F. The 2 disclosed deps: 🟡 F-φ `rePred_ltPull_natCode` (Aristotle) + D' `embed_TI_bounded` (`sorryAx`). |
+| `embed_TI_bounded` (D', **lap 21**, `src/Thm56`) | finite PA-proof ⟹ `Z∞`-proof height `<ε₀` | `…, sorryAx` | 🔓 disclosed `sorry` — the embedded ordinal `<ε₀` (Gentzen content `embedC_LX` forgets). Tractable, Foundation-light, no literature: re-run `embedC_LX_gen`/`hax_paLX` with uniform `∃B<ε₀,∀e,∃α≤B` bound. **Next chip.** |
+| `peano_not_proves_goodstein_of_descent` (G, **lap 21**, `src/Thm56`) | `DescentE ⟹ 𝗣𝗔 ⊬ γ` | same as Thm 5.6 | 🟢 reduction — pins E's interface (`𝗣𝗔 ⊢ γ → Nonempty (Derivation2 paLX {TI prec})`); headline `sorry` stays until E real |
+| `hax_paLX` (C₂ glue, `src/EmbeddingX`) | `paLX`-image axioms embed to `PXFc` | `propext, choice, Quot.sound` | 🟢 **CLEAN (lap 20)** — X-induction assembly discharged via `PXFc_allClosure` + new `rew_succInd`/`rew_subst1_comm_q`/`subst1_comp_bShift` + `metaInduction_cong`. ⟹ `embedC_LX` clean. |
 | `goodsteinSentence_faithful` (bridge) | encoding correctness | `propext, choice, Quot.sound` | 🟢 clean (trust base) |
 | `goodsteinTerminates_re` (M1) | r.e. of termination | `propext, choice, Quot.sound` | 🟢 clean |
 | `Deriv.Provable.cutElim` (M5, §19.9, `src/Zinfty`) | ε₀ cut-elimination (ℒₒᵣ) | `propext, choice, Quot.sound` | 🟢 clean — witness-FREE `(α,c)` |

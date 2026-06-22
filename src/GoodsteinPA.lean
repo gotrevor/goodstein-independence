@@ -27,3 +27,5 @@ import GoodsteinPA.EmbeddingX
 import GoodsteinPA.EpsilonOrder
 import GoodsteinPA.Epsilon0Complete
 import GoodsteinPA.SeamDefinability
+
+import GoodsteinPA.Thm56
