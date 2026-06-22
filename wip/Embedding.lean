@@ -14,25 +14,28 @@ a pure rule-by-rule map with **no language translation**.
 - M5 target: `GoodsteinPA.ZinftyF.Deriv.Provable α c Γ` with constructors `axL/verumR/andI/orI/exI/
   allω/cut/weakening/mono/cast` (`src/Zinfty.lean:116–208`).
 
-## Status of the cases (lap 9 — compiles, `lake env lean wip/Embedding.lean`)
+## Status of the cases (lap 10 — compiles, `lake env lean wip/Embedding.lean`)
 - **`provable_em` (Z∞ excluded-middle): FULLY PROVED, axiom-clean** (`[propext, choice, Quot.sound]`).
   `∀ φ Γ, φ∈Γ → ∼φ∈Γ → ∃ a, Provable a 0 Γ`, incl. the ∀/∃ numeral ω-family. Promotable to `src/`.
 - **`provable_rew` (renaming-invariance enabler): PROVED across ALL 8 `Deriv` cases**
   (axL/verumR/weak/andI/orI/allω/exI/cut) — cut-rank-preserving so `allω`'s ℕ-many premises share one
   `c`. **Sole residue = `rew_subst_nm`** (`ω ▹ (φ/[nm n]) = (ω.q ▹ φ)/[nm n]`, a `Rew`-substs algebra
-  fact). `ZProvable.rew` wraps it for the embedding (`shift` = `ω := Rew.shift`).
-- **`embed`: 6/10 cases DONE** (verum/and/or/wk/cut/closed). Remaining: `axm` (the deep PA-axiom case),
-  and `all`/`exs`/`shift` (now reducible via `provable_rew`/`ZProvable.rew` once `rew_subst_nm` lands).
-- No `axiom` declarations; open obligations are honest `sorry`s (`rew_subst_nm`, `embed`'s 4 cases).
+  fact). **`rew_subst_nm` discharged (lap 10) ⟹ `provable_rew`/`ZProvable.rew` axiom-clean.**
+- **`embed`: 8/10 cases DONE** (closed/verum/and/or/wk/cut/**shift/all**). `shift` = `ZProvable.rew
+  Rew.shift`; `all` = `provable_rew` substitutes the freed var by each `nm n` (undoing the `shift` on
+  `Γ` via `rewrite_comp_shift_eq_id`) then the ω-rule `allω` (lap 10). Remaining: `axm`, `exs`.
+- No `axiom` declarations; open obligations are honest `sorry`s (`embed`'s 2 cases: `axm`, `exs`).
 - **DISCLOSED `sorry` (the real content), hardest-first:**
   - `axm` — each PA axiom Z∞-derivable. `𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`: PeanoMinus is a
     finite set of true ∀-sentences (finite ordinal); `univCl (succInd ψ)` is derived **via the ω-rule**
     (`allω`) — THE deep case (Buchholz §5.5).
-  - `all` — finitary `∀` (`free φ :: Γ.image shift`) → M5 ω-rule `allω`: substitute the free var by each
-    numeral via Foundation's `Derivation.rewrite` (`Calculus.lean:255`), embed each premise.
-  - `exs` — witness term `t` → numeral (term-model evaluation), then `exI`.
-  - `closed` — general identity `φ, ∼φ ∈ Γ`: M5 `em` lemma, by induction on `φ.complexity` (finite).
-  - `shift` — `Provable` invariance under `Rewriting.shift` (free-variable renaming).
+  - `exs` — witness term `t` → its standard numeral value, then `exI`. **OBSTRUCTION (lap 10):** `t`
+    may be OPEN (free vars from an `all` closer to the root). The naive statement `Derivation2 𝗣𝗔 Γ →
+    ZProvable Γ` cannot close an open existential with M5's numeral-only `exI`. The fix is the
+    **assignment-carrying reformulation** `∀ e : ℕ → ℕ, ZProvable (Γ.image (ρ e ▹))`, `ρ e :=
+    Rew.rewrite (nm ∘ e)` closing all free vars to numerals; then `ρe▹t` is closed and `exI` reads its
+    value. That also needs a Z∞ closed-term→numeral collapse (`ρe▹t = nm m` is arithmetic, not
+    syntactic — built from the PeanoMinus eqns ⟹ intertwined with `axm`). Multi-lap.
 -/
 import GoodsteinPA.Zinfty
 import Foundation.FirstOrder.Basic.Calculus2
@@ -286,17 +289,39 @@ theorem embed {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     refine ⟨a + 1, c, ?_⟩
     have hor := Provable.orI φ ψ hd
     rwa [Finset.insert_eq_self.mpr h] at hor
-  | @all Γ φ h _d _ih =>
-    -- finitary ∀ (`free φ :: Γ.image shift`) → M5 ω-rule `allω` via `Derivation.rewrite`. DEEP.
-    sorry
+  | @all Γ φ h _d ih =>
+    -- The IH derives `insert (free φ) (Γ.image shift)`. For each numeral `n`, the renaming
+    -- enabler `provable_rew` substitutes the freed variable `&0` by `nm n` — which simultaneously
+    -- undoes the `shift` on `Γ` (`rewrite_comp_shift_eq_id`) — producing `insert (φ/[nm n]) Γ`.
+    -- The ω-rule `allω` collects this ℕ-family into `insert (∀⁰φ) Γ = Γ`.
+    obtain ⟨_, c, d, _ho, hcr⟩ := ih
+    have hfam : ∀ n, ∃ a, Provable a c (insert (φ/[nm n]) Γ) := by
+      intro n
+      obtain ⟨a, ha⟩ := provable_rew c d hcr (Rew.rewrite (nm n :>ₙ fun x => &x))
+      refine ⟨a, ?_⟩
+      have key : (insert (Rewriting.free φ) (Γ.image Rewriting.shift)).image
+            (fun ψ => (Rew.rewrite (nm n :>ₙ fun x => &x)) ▹ ψ) = insert (φ/[nm n]) Γ := by
+        rw [Finset.image_insert, LawfulSyntacticRewriting.rewrite_free_eq_subst,
+          Finset.image_image]
+        congr 1
+        refine Eq.trans (Finset.image_congr (fun ψ _ => ?_) ) Finset.image_id
+        show (Rew.rewrite (nm n :>ₙ fun x => &x)) ▹ (Rew.shift ▹ ψ) = id ψ
+        rw [← TransitiveRewriting.comp_app, Rew.rewrite_comp_shift_eq_id,
+          ReflectiveRewriting.id_app, id_eq]
+      rwa [key] at ha
+    choose β hβ using hfam
+    have hall := Provable.allω φ hβ
+    rw [Finset.insert_eq_self.mpr h] at hall
+    exact ⟨_, c, hall⟩
   | @exs Γ φ h t _d _ih =>
     -- witness term `t` → numeral (term-model eval), then `exI`. DEEP.
     sorry
   | @wk Δ Γ _d h ih =>
     exact ih.weakening h
   | @shift Γ _d ih =>
-    -- `Provable` invariance under `Rewriting.shift` (free-variable renaming). DEEP.
-    sorry
+    -- `Rewriting.shift φ = Rew.shift ▹ φ`, so this is exactly the renaming enabler at `ω = shift`.
+    have h := ZProvable.rew Rew.shift ih
+    simpa [Rewriting.shift] using h
   | @cut Γ φ _d _dn ihd ihdn =>
     obtain ⟨a1, c1, h1⟩ := ihd
     obtain ⟨a2, c2, h2⟩ := ihdn
