@@ -95,6 +95,19 @@ def LitTrue (φ : Form L) : Prop := Semiformula.Evalm ℕ ![] (id : ℕ → ℕ)
 theorem litTrue_or_neg (φ : Form L) : LitTrue φ ∨ LitTrue (∼φ) := by
   rw [litTrue_neg]; exact em _
 
+/-- **Value-congruence of literal truth.** A relation's truth in the ℕ-model depends only on the
+standard values of its argument terms, so equal-valued argument vectors give equal literal truth.
+The semantic content behind `Provable.axLv` (and the embedding's value-congruent witness collapse). -/
+theorem litTrue_rel_congr {k} (r : (L).Rel k) (v v' : Fin k → Semiterm L ℕ 0)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
+               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i)) :
+    LitTrue (Semiformula.rel r v) ↔ LitTrue (Semiformula.rel r v') := by
+  unfold LitTrue
+  simp only [Semiformula.eval_rel]
+  have : (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i))
+       = (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i)) := funext hval
+  rw [this]
+
 /-- The negation of a signed literal flips its sign. -/
 @[simp] theorem neg_lit (b : Bool) {k} (r : (L).Rel k) (v) :
     ∼(signedLit b r v) = signedLit (!b) r v := by cases b <;> simp [signedLit]
@@ -119,6 +132,10 @@ sub-derivation per numeral `n`: from `insert (φ/[nm n]) Γ` for every `n`, conc
 inductive Deriv : Seq L → Type
   | axL {Γ : Seq L} {k} (r : (L).Rel k) (v) (hp : Semiformula.rel r v ∈ Γ)
       (hn : Semiformula.nrel r v ∈ Γ) : Deriv Γ
+  | axLv {Γ : Seq L} {k} (r : (L).Rel k) (v v' : Fin k → Semiterm L ℕ 0)
+      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
+                 = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+      (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : Deriv Γ
   | axTrue {Γ : Seq L} {k} (b : Bool) (r : (L).Rel k) (v) (htrue : LitTrue (signedLit b r v))
       (hmem : signedLit b r v ∈ Γ) : Deriv Γ
   | verumR {Γ : Seq L} (h : (⊤ : Form L) ∈ Γ) : Deriv Γ
@@ -138,6 +155,7 @@ namespace Deriv
 `ℕ`-many premise bounds, then `+1`. Weakening is height-preserving. -/
 noncomputable def o : {Γ : Seq L} → Deriv Γ → Ordinal.{0}
   | _, axL _ _ _ _ => 0
+  | _, axLv _ _ _ _ _ _ => 0
   | _, axTrue _ _ _ _ _ => 0
   | _, verumR _ => 0
   | _, weak d _ => o d
@@ -153,6 +171,7 @@ noncomputable def o : {Γ : Seq L} → Deriv Γ → Ordinal.{0}
 derivation has `cr = 0`. -/
 noncomputable def cr : {Γ : Seq L} → Deriv Γ → ℕ∞
   | _, axL _ _ _ _ => 0
+  | _, axLv _ _ _ _ _ _ => 0
   | _, axTrue _ _ _ _ _ => 0
   | _, verumR _ => 0
   | _, weak d _ => cr d
@@ -195,6 +214,16 @@ theorem Provable.cast {α : Ordinal.{0}} {c : ℕ} {Γ Δ : Seq L} (e : Γ = Δ)
 theorem Provable.axL {Γ : Seq L} {k} (r : (L).Rel k) (v)
     (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v ∈ Γ) : Provable 0 0 Γ :=
   ⟨Deriv.axL r v hp hn, by simp [Deriv.o], by simp [Deriv.cr]⟩
+
+/-- **Value-congruent literal axiom** (Buchholz `AX(Z∞)`, lecture notes p.27): a complementary literal
+pair `{rel r v, nrel r v'}` whose argument vectors have equal standard values closes any sequent
+containing it, at bound `0`, cut rank `0`. Sound: in the ℕ-model `rel r v ↔ rel r v'` when the values
+agree. Generalises the same-atom `axL` (`v' = v`); needed for the embedding's value-congruent X-pair. -/
+theorem Provable.axLv {Γ : Seq L} {k} (r : (L).Rel k) (v v' : Fin k → Semiterm L ℕ 0)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
+               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : Provable 0 0 Γ :=
+  ⟨Deriv.axLv r v v' hval hp hn, by simp [Deriv.o], by simp [Deriv.cr]⟩
 
 /-- **Atomic-truth axiom** (the ω-logic leaf): a true closed literal closes any sequent containing
 it, at bound `0`, cut rank `0`. -/
@@ -307,6 +336,15 @@ theorem orInvAux {c : ℕ} : ∀ {Γ : Seq L} (d : Deriv Γ), cr d ≤ (c : ℕ�
       Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hn⟩
     simp only [Deriv.o]
     exact (Provable.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))).mono le_rfl (Nat.zero_le c)
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hn⟩
+    simp only [Deriv.o]
+    exact (Provable.axLv r v v' hval (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
       (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))).mono le_rfl (Nat.zero_le c)
   | @axTrue Γ k b r v htrue hmem =>
     intro _ _
@@ -448,6 +486,15 @@ theorem allInvAux {c : ℕ} (n : ℕ) : ∀ {Γ : Seq L} (d : Deriv Γ), cr d �
     simp only [Deriv.o]
     exact (Provable.axL r v (Finset.mem_insert_of_mem hr)
       (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c)
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact (Provable.axLv r v v' hval (Finset.mem_insert_of_mem hr)
+      (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c)
   | @axTrue Γ k b r v htrue hmem =>
     intro _ _
     have hl : signedLit b r v ∈ Γ.erase (∀⁰ χ) :=
@@ -577,6 +624,17 @@ theorem andInvAux {c : ℕ} : ∀ {Γ : Seq L} (d : Deriv Γ), cr d ≤ (c : ℕ
         le_rfl (Nat.zero_le c),
       (Provable.axL r v (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')).mono
         le_rfl (Nat.zero_le c)⟩
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋏ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (φ ⋏ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact ⟨(Provable.axLv r v v' hval (Finset.mem_insert_of_mem hr)
+          (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c),
+      (Provable.axLv r v v' hval (Finset.mem_insert_of_mem hr)
+          (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c)⟩
   | @axTrue Γ k b r v htrue hmem =>
     intro _ _
     have hl : signedLit b r v ∈ Γ.erase (φ ⋏ ψ) :=
@@ -872,6 +930,12 @@ theorem Provable.cutReduceAllAux {φ : SyntacticSemiformula L 1} {c : ℕ} {α :
     refine (Provable.axL r v ?_ ?_).mono zero_le (Nat.zero_le c)
     · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩)
     · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩)
+  | @axLv Δ k r v v' hval hp hn =>
+    intro _ _
+    simp only [Deriv.o]
+    refine (Provable.axLv r v v' hval ?_ ?_).mono zero_le (Nat.zero_le c)
+    · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩)
+    · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩)
   | @axTrue Δ k b r v htrue hmem =>
     intro _ _
     simp only [Deriv.o]
@@ -1110,6 +1174,27 @@ theorem Provable.removeFalseLitAux (b₀ : Bool) {k₀} (r₀ : (L).Rel k₀) (v
         exact Provable.axTrue true r v htr (Finset.mem_erase.mpr ⟨by rw [h2]; simp [signedLit], hp⟩)
       · exact Provable.axL r v (Finset.mem_erase.mpr ⟨fun e => h1 e.symm, hp⟩)
           (Finset.mem_erase.mpr ⟨fun e => h2 e.symm, hn⟩)
+  | @axLv Δ k r v v' hval hp hn =>
+    intro _ _; simp only [Deriv.o]
+    by_cases h1 : Lit = Semiformula.rel r v
+    · -- `Lit = rel r v` (false) ⟹ by value-congruence `rel r v'` false ⟹ `nrel r v'` true.
+      have htn : LitTrue (signedLit false r v') := by
+        show LitTrue (Semiformula.nrel r v')
+        rw [← Semiformula.neg_rel, litTrue_neg]
+        exact (litTrue_rel_congr r v v' hval).not.mp (h1 ▸ hL)
+      exact Provable.axTrue false r v' htn
+        (Finset.mem_erase.mpr ⟨by rw [h1]; simp [signedLit], hn⟩)
+    · by_cases h2 : Lit = Semiformula.nrel r v'
+      · -- `Lit = nrel r v'` (false) ⟹ `rel r v'` true ⟹ by value-congruence `rel r v` true.
+        have htr : LitTrue (signedLit true r v) := by
+          show LitTrue (Semiformula.rel r v)
+          refine (litTrue_rel_congr r v v' hval).mpr ?_
+          by_contra hc
+          exact (h2 ▸ hL) (by rw [← Semiformula.neg_rel, litTrue_neg]; exact hc)
+        exact Provable.axTrue true r v htr
+          (Finset.mem_erase.mpr ⟨by rw [h2]; simp [signedLit], hp⟩)
+      · exact Provable.axLv r v v' hval (Finset.mem_erase.mpr ⟨fun e => h1 e.symm, hp⟩)
+          (Finset.mem_erase.mpr ⟨fun e => h2 e.symm, hn⟩)
   | @axTrue Δ k b r v htrue hmem =>
     intro _ _; simp only [Deriv.o]
     -- the true witness `signedLit b r v ≠ Lit` (false), so it survives the erase.
@@ -1214,6 +1299,42 @@ theorem Provable.atomCutAux {k} (r : (L).Rel k) (v) {B : Ordinal.{0}} {Γ : Seq 
       have hpp : (Semiformula.rel r' v' : Form L) ∈ Δ.erase (Semiformula.rel r v) :=
         Finset.mem_erase.mpr ⟨hrel, hp⟩
       exact (Provable.axL r' v' (Finset.mem_union_left _ hpp)
+        (Finset.mem_union_left _ hnn)).mono zero_le le_rfl
+  | @axLv Δ k' r₀ va vb hval hp hn =>
+    intro _ _
+    simp only [Deriv.o]
+    have hnn : (Semiformula.nrel r₀ vb : Form L) ∈ Δ.erase (Semiformula.rel r v) :=
+      Finset.mem_erase.mpr ⟨by intro h; exact absurd h (by simp), hn⟩
+    by_cases hrel : (Semiformula.rel r₀ va : Form L) = Semiformula.rel r v
+    · -- the value-congruent pair's positive member IS the cut atom; split on its truth.
+      rcases litTrue_or_neg (Semiformula.rel r v) with htt | htf
+      · -- `rel r v` TRUE ⟹ `nrel r v` is a removable false literal on the `hNC` side.
+        have hfalse : ¬ LitTrue (signedLit false r v) := by
+          rw [← litTrue_flip false r v]; simpa [signedLit] using htt
+        obtain ⟨dN, hoN, hcrN⟩ := hNC
+        have hrm := Provable.removeFalseLitAux false r v hfalse dN hcrN
+          (show signedLit false r v ∈ insert (Semiformula.nrel r v) Γ by simp [signedLit])
+        refine (hrm.weakening ?_).mono ?_ le_rfl
+        · intro x hx
+          have hxΓ : x ∈ Γ := by
+            have h1 := Finset.mem_of_mem_erase hx
+            have h2 := Finset.ne_of_mem_erase hx
+            rcases Finset.mem_insert.mp h1 with rfl | h3
+            · exact absurd (show (Semiformula.nrel r v : Form L) = signedLit false r v by simp [signedLit]) h2
+            · exact h3
+          exact Finset.mem_union_right _ hxΓ
+        · exact le_trans hoN (le_trans le_self_add (le_of_lt (lt_add_of_pos_right _ one_pos)))
+      · -- `rel r v` FALSE ⟹ by value-congruence `rel r₀ vb` false ⟹ `nrel r₀ vb` TRUE.
+        have hva : ¬ LitTrue (Semiformula.rel r₀ va) := by rw [hrel]; exact (litTrue_neg _).mp htf
+        have htn : LitTrue (signedLit false r₀ vb) := by
+          show LitTrue (Semiformula.nrel r₀ vb)
+          rw [← Semiformula.neg_rel, litTrue_neg]
+          exact (litTrue_rel_congr r₀ va vb hval).not.mp hva
+        exact (Provable.axTrue false r₀ vb htn (Finset.mem_union_left _ hnn)).mono zero_le le_rfl
+    · -- the pair's positive member survives the erase ⟹ close by `axLv`.
+      have hpp : (Semiformula.rel r₀ va : Form L) ∈ Δ.erase (Semiformula.rel r v) :=
+        Finset.mem_erase.mpr ⟨hrel, hp⟩
+      exact (Provable.axLv r₀ va vb hval (Finset.mem_union_left _ hpp)
         (Finset.mem_union_left _ hnn)).mono zero_le le_rfl
   | @axTrue Δ k' b' r' v' htrue' hmem' =>
     intro _ _
@@ -1338,6 +1459,10 @@ theorem Provable.removeFalsumAux : ∀ {Δ : Seq L} (d : Deriv Δ), cr d ≤ (0 
   | @axL Δ k r v hp hn =>
     intro _ _; simp only [Deriv.o]
     exact Provable.axL r v (Finset.mem_erase.mpr ⟨by simp, hp⟩)
+      (Finset.mem_erase.mpr ⟨by simp, hn⟩)
+  | @axLv Δ k r v v' hval hp hn =>
+    intro _ _; simp only [Deriv.o]
+    exact Provable.axLv r v v' hval (Finset.mem_erase.mpr ⟨by simp, hp⟩)
       (Finset.mem_erase.mpr ⟨by simp, hn⟩)
   | @axTrue Δ k b r v htrue hmem =>
     intro _ _; simp only [Deriv.o]
@@ -1483,6 +1608,9 @@ theorem Provable.cutElimStepAux {c : ℕ} : ∀ {Γ : Seq L} (d : Deriv Γ), cr 
   | @axL Γ k r v hp hn =>
     intro _; simp only [Deriv.o]
     exact (Provable.axL r v hp hn).mono zero_le (Nat.zero_le c)
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _; simp only [Deriv.o]
+    exact (Provable.axLv r v v' hval hp hn).mono zero_le (Nat.zero_le c)
   | @axTrue Γ k b r v htrue hmem =>
     intro _; simp only [Deriv.o]
     exact (Provable.axTrue b r v htrue hmem).mono zero_le (Nat.zero_le c)

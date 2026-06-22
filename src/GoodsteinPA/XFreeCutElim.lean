@@ -63,6 +63,13 @@ theorem PXFc.axL {Γ : Seq LX} {k} (r : LX.Rel k) (v) (hp : Semiformula.rel r v 
     (hn : Semiformula.nrel r v ∈ Γ) : PXFc 0 0 Γ :=
   ⟨Deriv.axL r v hp hn, by simp [Deriv.o], by simp [Deriv.cr], by simp [XFreeAx]⟩
 
+/-- The value-congruent literal axiom, `XFreeAx`-safe (not an `axTrue`). -/
+theorem PXFc.axLv {Γ : Seq LX} {k} (r : LX.Rel k) (v v' : Fin k → Semiterm LX ℕ 0)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
+               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : PXFc 0 0 Γ :=
+  ⟨Deriv.axLv r v v' hval hp hn, by simp [Deriv.o], by simp [Deriv.cr], by simp [XFreeAx]⟩
+
 theorem PXFc.axTrue {Γ : Seq LX} {k} (b : Bool) (r : LX.Rel k) (v) (hxfree : Sum.isLeft r = true)
     (htrue : LitTrue (signedLit b r v)) (hmem : signedLit b r v ∈ Γ) : PXFc 0 0 Γ :=
   ⟨Deriv.axTrue b r v htrue hmem, by simp [Deriv.o], by simp [Deriv.cr], hxfree⟩
@@ -128,6 +135,15 @@ theorem orInvAux_x {φ ψ : Form LX} {c : ℕ} : ∀ {Γ : Seq LX} (d : Deriv Γ
       Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hn⟩
     simp only [Deriv.o]
     exact (PXFc.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))).mono le_rfl (Nat.zero_le c)
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hn⟩
+    simp only [Deriv.o]
+    exact (PXFc.axLv r v v' hval (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
       (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))).mono le_rfl (Nat.zero_le c)
   | @axTrue Γ k b r v htrue hmem =>
     intro hxf _ _
@@ -242,6 +258,17 @@ theorem andInvAux_x {φ ψ : Form LX} {c : ℕ} : ∀ {Γ : Seq LX} (d : Deriv �
         le_rfl (Nat.zero_le c),
       (PXFc.axL r v (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')).mono
         le_rfl (Nat.zero_le c)⟩
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋏ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (φ ⋏ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact ⟨(PXFc.axLv r v v' hval (Finset.mem_insert_of_mem hr)
+          (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c),
+      (PXFc.axLv r v v' hval (Finset.mem_insert_of_mem hr)
+          (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c)⟩
   | @axTrue Γ k b r v htrue hmem =>
     intro hxf _ _
     have hl : signedLit b r v ∈ Γ.erase (φ ⋏ ψ) :=
@@ -407,6 +434,15 @@ theorem allInvAux_x {χ : SyntacticSemiformula LX 1} {c : ℕ} (i : ℕ) : ∀ {
       Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
     simp only [Deriv.o]
     exact (PXFc.axL r v (Finset.mem_insert_of_mem hr)
+      (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c)
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact (PXFc.axLv r v v' hval (Finset.mem_insert_of_mem hr)
       (Finset.mem_insert_of_mem hn')).mono le_rfl (Nat.zero_le c)
   | @axTrue Γ k b r v htrue hmem =>
     intro hxf _ _
@@ -602,6 +638,12 @@ theorem PXFc.cutReduceAllAux {φ : SyntacticSemiformula LX 1} {c : ℕ} {α : Or
     intro _ _ _
     simp only [Deriv.o]
     refine (PXFc.axL r v ?_ ?_).mono zero_le (Nat.zero_le c)
+    · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩)
+    · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩)
+  | @axLv Δ k r v v' hval hp hn =>
+    intro _ _ _
+    simp only [Deriv.o]
+    refine (PXFc.axLv r v v' hval ?_ ?_).mono zero_le (Nat.zero_le c)
     · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩)
     · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩)
   | @axTrue Δ k b r v htrue hmem =>
@@ -820,6 +862,26 @@ theorem PXFc.removeFalseLitAux (b₀ : Bool) {k₀} (r₀ : (LX).Rel k₀) (v₀
         exact PXFc.axTrue true r v hxr htr (Finset.mem_erase.mpr ⟨by rw [h2]; simp [signedLit], hp⟩)
       · exact PXFc.axL r v (Finset.mem_erase.mpr ⟨fun e => h1 e.symm, hp⟩)
           (Finset.mem_erase.mpr ⟨fun e => h2 e.symm, hn⟩)
+  | @axLv Δ k r va vb hval hp hn =>
+    intro _ _ _; simp only [Deriv.o]
+    by_cases h1 : Lit = Semiformula.rel r va
+    · -- removed atom is the pair's positive; X-free (transported); the value-cong negative is true.
+      have htn : LitTrue (signedLit false r vb) := by
+        show LitTrue (Semiformula.nrel r vb)
+        rw [← Semiformula.neg_rel, litTrue_neg]
+        exact (litTrue_rel_congr r va vb hval).not.mp (h1 ▸ hL)
+      have hxr : Sum.isLeft r = true := xfree_transport b₀ r₀ v₀ hxfree true r va (hLdef ▸ h1)
+      exact PXFc.axTrue false r vb hxr htn (Finset.mem_erase.mpr ⟨by rw [h1]; simp [signedLit], hn⟩)
+    · by_cases h2 : Lit = Semiformula.nrel r vb
+      · have htr : LitTrue (signedLit true r va) := by
+          show LitTrue (Semiformula.rel r va)
+          refine (litTrue_rel_congr r va vb hval).mpr ?_
+          by_contra hc
+          exact (h2 ▸ hL) (by rw [← Semiformula.neg_rel, litTrue_neg]; exact hc)
+        have hxr : Sum.isLeft r = true := xfree_transport b₀ r₀ v₀ hxfree false r vb (hLdef ▸ h2)
+        exact PXFc.axTrue true r va hxr htr (Finset.mem_erase.mpr ⟨by rw [h2]; simp [signedLit], hp⟩)
+      · exact PXFc.axLv r va vb hval (Finset.mem_erase.mpr ⟨fun e => h1 e.symm, hp⟩)
+          (Finset.mem_erase.mpr ⟨fun e => h2 e.symm, hn⟩)
   | @axTrue Δ k b r v htrue hmem =>
     intro hxf _ _; simp only [Deriv.o]
     have hne : signedLit b r v ≠ Lit := fun e => hL (e ▸ htrue)
@@ -898,6 +960,10 @@ theorem PXFc.removeFalsumAux : ∀ {Δ : Seq LX} (d : Deriv Δ), XFreeAx d → d
   | @axL Δ k r v hp hn =>
     intro _ _ _; simp only [Deriv.o]
     exact PXFc.axL r v (Finset.mem_erase.mpr ⟨by simp, hp⟩)
+      (Finset.mem_erase.mpr ⟨by simp, hn⟩)
+  | @axLv Δ k r v v' hval hp hn =>
+    intro _ _ _; simp only [Deriv.o]
+    exact PXFc.axLv r v v' hval (Finset.mem_erase.mpr ⟨by simp, hp⟩)
       (Finset.mem_erase.mpr ⟨by simp, hn⟩)
   | @axTrue Δ k b r v htrue hmem =>
     intro hxf _ _; simp only [Deriv.o]
@@ -1003,6 +1069,23 @@ theorem PXFc.atomCutAux {k} (r : (LX).Rel k) (v) {B : Ordinal.{0}} {Γ : Seq LX}
     · have hpp : (Semiformula.rel r' v' : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
         Finset.mem_erase.mpr ⟨hrel, hp⟩
       exact (PXFc.axL r' v' (Finset.mem_union_left _ hpp)
+        (Finset.mem_union_left _ hnn)).mono zero_le le_rfl
+  | @axLv Δ k' r₀ va vb hval hp hn =>
+    intro _ _ _
+    simp only [Deriv.o]
+    have hnn : (Semiformula.nrel r₀ vb : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
+      Finset.mem_erase.mpr ⟨by intro h; exact absurd h (by simp), hn⟩
+    by_cases hrel : (Semiformula.rel r₀ va : Form LX) = Semiformula.rel r v
+    · -- The value-congruent pair's positive member IS the cut atom (`r₀ = r`, `va = v`, `|vb| = |v|`).
+      -- The leaf's value-congruent negative `nrel r vb` survives the erase; combining with
+      -- `hNC : ⊢ nrel r v, Γ` requires transporting `hNC` along the value congruence `|v| = |vb|`
+      -- (the `nrel_value_subst` renaming lemma). At an X-atom cut `axTrue` is forbidden (would emit a
+      -- lone X-`axTrue`, breaking `XFreeAx`), so the same-atom argument does not apply directly.
+      -- DISCLOSED: pending `PXFc.nrel_value_subst` (value-congruent negative-literal renaming).
+      sorry
+    · have hpp : (Semiformula.rel r₀ va : Form LX) ∈ Δ.erase (Semiformula.rel r v) :=
+        Finset.mem_erase.mpr ⟨hrel, hp⟩
+      exact (PXFc.axLv r₀ va vb hval (Finset.mem_union_left _ hpp)
         (Finset.mem_union_left _ hnn)).mono zero_le le_rfl
   | @axTrue Δ k' b' r' v' htrue' hmem' =>
     intro hxf _ _
@@ -1226,6 +1309,9 @@ theorem PXFc.cutElimStepAux {c : ℕ} : ∀ {Γ : Seq LX} (d : Deriv Γ), XFreeA
   | @axL Γ k r v hp hn =>
     intro _ _; simp only [Deriv.o]
     exact (PXFc.axL r v hp hn).mono zero_le (Nat.zero_le c)
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _; simp only [Deriv.o]
+    exact (PXFc.axLv r v v' hval hp hn).mono zero_le (Nat.zero_le c)
   | @axTrue Γ k b r v htrue hmem =>
     intro hxf _; simp only [Deriv.o]
     exact (PXFc.axTrue b r v hxf htrue hmem).mono zero_le (Nat.zero_le c)

@@ -144,6 +144,7 @@ theorem models_inl_lit (γ : Ordinal.{0}) (b : Bool) {k} (r₀ : (ℒₒᵣ).Rel
 /-- **X-free axTrue leaves only** (Buchholz-faithfulness; see the section header). -/
 def XFreeAx : {Δ : Seq LX} → Deriv Δ → Prop
   | _, .axL _ _ _ _ => True
+  | _, .axLv _ _ _ _ _ _ => True
   | _, .axTrue _ r _ _ _ => Sum.isLeft r = true
   | _, .verumR _ => True
   | _, .weak d _ => XFreeAx d
@@ -243,6 +244,13 @@ theorem PXF.axL {Γ : Seq LX} {k} (r : LX.Rel k) (v) (hp : Semiformula.rel r v �
     (hn : Semiformula.nrel r v ∈ Γ) : PXF 0 Γ :=
   ⟨Deriv.axL r v hp hn, by simp [Deriv.o], by simp [Deriv.cr], by simp [XFreeAx]⟩
 
+/-- The value-congruent literal axiom is `XFreeAx`-safe (it is not an `axTrue`). -/
+theorem PXF.axLv {Γ : Seq LX} {k} (r : LX.Rel k) (v v' : Fin k → Semiterm LX ℕ 0)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
+               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : PXF 0 Γ :=
+  ⟨Deriv.axLv r v v' hval hp hn, by simp [Deriv.o], by simp [Deriv.cr], by simp [XFreeAx]⟩
+
 theorem PXF.axTrue {Γ : Seq LX} {k} (b : Bool) (r : LX.Rel k) (v) (hxfree : Sum.isLeft r = true)
     (htrue : LitTrue (signedLit b r v)) (hmem : signedLit b r v ∈ Γ) : PXF 0 Γ :=
   ⟨Deriv.axTrue b r v htrue hmem, by simp [Deriv.o], by simp [Deriv.cr], hxfree⟩
@@ -309,6 +317,15 @@ theorem andInv_xfree {Δ : Seq LX} (d : Deriv Δ) {φ ψ : Form LX} :
     simp only [Deriv.o]
     exact ⟨PXF.axL r v (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn'),
       PXF.axL r v (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')⟩
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋏ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (φ ⋏ ψ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact ⟨PXF.axLv r v v' hval (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn'),
+      PXF.axLv r v v' hval (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')⟩
   | @axTrue Γ k b r v htrue hmem' =>
     intro hxf _ _
     have hl : signedLit b r v ∈ Γ.erase (φ ⋏ ψ) :=
@@ -460,6 +477,15 @@ theorem orInv_xfree {Δ : Seq LX} (d : Deriv Δ) {φ ψ : Form LX} :
     simp only [Deriv.o]
     exact PXF.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
       (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (φ ⋎ ψ) :=
+      Finset.mem_erase.mpr ⟨by intro h; simp [Vee.vee] at h, hn⟩
+    simp only [Deriv.o]
+    exact PXF.axLv r v v' hval (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hr))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))
   | @axTrue Γ k b r v htrue hmem =>
     intro hxf _ _
     have hl : signedLit b r v ∈ Γ.erase (φ ⋎ ψ) :=
@@ -563,6 +589,14 @@ theorem allInv_xfree {Δ : Seq LX} (d : Deriv Δ) {χ : SyntacticSemiformula LX 
       Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
     simp only [Deriv.o]
     exact PXF.axL r v (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')
+  | @axLv Γ k r v v' hval hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v' ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact PXF.axLv r v v' hval (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')
   | @axTrue Γ k b r v htrue hmem =>
     intro hxf _ _
     have hl : signedLit b r v ∈ Γ.erase (∀⁰ χ) :=
@@ -695,6 +729,38 @@ theorem boundedness
       refine ⟨Xat (v 0), hv1 ▸ hp, by simp [Xat, XPos], ?_⟩
       rw [models_Xat']
       simp only [Deriv.o, Ordinal.opow_zero]
+      exact lt_of_le_of_lt hbound (lt_add_of_pos_right α one_pos)
+  | axLv r va vb hval hp hn =>
+    -- Buchholz cases 1.1 (X-free literal) / 1.2 (value-congruent X-pair `{Xva, ¬Xvb}`, |va|=|vb|).
+    intro hob hcr hxf hpart
+    cases r with
+    | inl r₀ =>
+      rcases litTrue_or_neg (Semiformula.rel (Sum.inl r₀) va) with ht | ht
+      · exact ⟨Semiformula.rel (Sum.inl r₀) va, hp, by simp [XPos],
+          models_inl_lit lt _ true r₀ va ht⟩
+      · -- `rel va` false ⟹ by value-congruence `rel vb` false ⟹ `nrel vb` true.
+        rw [litTrue_neg] at ht
+        have htn : LitTrue (signedLit false (Sum.inl r₀) vb) := by
+          show LitTrue (Semiformula.nrel (Sum.inl r₀) vb)
+          rw [← Semiformula.neg_rel, litTrue_neg]
+          exact (litTrue_rel_congr (Sum.inl r₀) va vb hval).not.mp ht
+        exact ⟨Semiformula.nrel (Sum.inl r₀) vb, hn, by simp [XPos],
+          models_inl_lit lt _ false r₀ vb htn⟩
+    | inr rx =>
+      cases rx
+      have hv1 : va = ![va 0] := by funext i; refine Fin.cases ?_ (fun j => j.elim0) i; rfl
+      have hbound : tval lt (vb 0) ≤ α := by
+        rcases hpart (Semiformula.nrel Xsym vb) hn with h | ⟨t', heq, hb⟩ | hpos
+        · rw [Prog] at h; simp [Xat, Xsym] at h
+        · simp only [Xat, Xsym] at heq
+          injection heq with e1 e2 e3 e4
+          rw [show vb = ![t'] from e4]; simpa using hb
+        · simp [XPos, Xsym] at hpos
+      refine ⟨Xat (va 0), hv1 ▸ hp, by simp [Xat, XPos], ?_⟩
+      rw [models_Xat']
+      simp only [Deriv.o, Ordinal.opow_zero]
+      have hvaeq : tval lt (va 0) = tval lt (vb 0) := by unfold tval; congr 1; exact hval 0
+      rw [hvaeq]
       exact lt_of_le_of_lt hbound (lt_add_of_pos_right α one_pos)
   | axTrue b r v htrue hmem =>
     intro hob hcr hxf hpart
