@@ -1,5 +1,53 @@
 # Pending work — open obligations & attack paths
 
+## 🗺️ OPEN-OBLIGATION INVENTORY (lap-7 end) — full list + 3 attack paths each
+The headline `Statement.peano_not_proves_goodstein` is the only `src/` sorry (the designated open
+target; anti-fraud — do NOT fill until the chain genuinely closes axiom-clean). It is reached via the
+connecting spine. Open spine pieces, with attack paths:
+
+**(A) §19.6 `cutReduceAll` — the critical-path crux** (blocked on calculus design, see ADDENDUM 4).
+  1. **Control-ordinal operator calculus (RECOMMENDED).** Replace `Zkd`'s `(k,d)` with an index
+     `(e, k, d)` where `e : ONote` is a *control ordinal* and the ω-premise / witness bound use
+     `hardy e (n + k) + …` (a `hardy`-closed index). Cut-elim raises `e` to dominate cut-formula bounds;
+     the principal cut's witness `w ≤ hardy γ (max k n + d) ≤ hardy e (n + k + d)` (γ<e, hardy mono in
+     both args) stays controlled. Lower bound survives via **general Hardy additivity** `hardy α (hardy e m)
+     ~ hardy (e (#)+ α) m` (e+α<ε₀ ⟹ G dominates). Port §19.2–19.5 from `SplitZinfty` (`max k ·` ⤳
+     `hardy e ·`). **Lap-7 de-risk:** the cut-elim *control* side needs NO new lemma — the witness
+     control `hardy γ (idx) ≤ hardy e (idx)` (γ<e) is the **existing** `hardy_le_of_lt` (`src/Hardy.lean`,
+     `+ hardy_monotone` for the argument). Only the *lower-bound* side needs general Hardy additivity (B).
+  2. **Buchholz set-valued operator `H`** (Buchholz §9 / 1992) — fully general; heavier. Fallback if the
+     single control-ordinal `e` can't express some closure. `ON-LINE-REQUEST` filed for the PA spec.
+  3. **Restrict the calculus to the `GForm` fragment** (the headline only needs cut-elim for derivations
+     of `{gAll}` and its subformulas). The ∃-side may then have bounded structure making the witness
+     index controllable without a full operator. Investigate whether the subformula property pre-bounds it.
+
+**(B) General Hardy additivity** `hardy (e (#)+ α) m = hardy α (hardy e m)` (infra for A.1; generalizes
+  the proved finite-tail `hardy_add_ofNat`).
+  1. Induct on α through the fundamental-sequence structure (successor + limit), using the banked
+     `fundamentalSequence`/`Reaches`/`hardy_le_of_reaches` machinery in `src/Hardy.lean`.
+  2. Prove only the *inequality* `hardy α (hardy e m) ≤ hardy (e + α) m` (ordinary `+`) — weaker but may
+     suffice for domination; likely easier than the exact `#`-additive identity.
+  3. Aristotle target: self-contained ONote/Hardy statement (feed once A.1's exact form is pinned).
+
+**(C) §19.7 `cutElimStep` + §19.9 `cutElim`** (depend on A). Ordinal `ω^α` (`norm_omegaPow` banked);
+  iterate. Paths: port `src/Zinfty.lean` structure / the `SplitZinfty` helpers / existential-index.
+
+**(D) Subformula bridge** (cut-free operator-derivation of `{gAll}` ⟹ `B`-derivation ⟹ lower bound).
+  Paths: structural subformula-closure induction / `GForm ↪ ℒₒᵣ` identification / reuse M6 as-is.
+
+**(E) M4 embedding `PA ⊢ φ ⟹ (calculus) ⊢ φ`** — INDEPENDENT of A (parallel thread). Recon done lap 6.
+  Paths: induct on Foundation `Derivation` (axm = Lemma 16.1 + Cor 16.6 induction instances; `all`→ω-rule
+  via derivation-substitution; `exs`→witness bound) / list→finset bridge / scope `axm` first.
+
+**(F) M7a language gap** `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal` — INDEPENDENT (parallel thread). Paths:
+  arithmetize `goodsteinSeq` as a real Π₂ `ℒₒᵣ` formula (Foundation Σ₁ tools) / gate by `Bridge.lean` /
+  prove one direction first.
+
+**Lap-7 acted on (A): conceptual crux resolved, 4 lemmas proved, `(k,d)` calculus through §19.5 built,
+the two §19.6 obstructions precisely characterized (norm-budget CLOSED, witness-index ⟹ needs operator).**
+
+---
+
 ## ✅ LAP-7 — cut-elim `k`/`τ` crux RESOLVED (offline read of Towsner §15–§20). See `ANALYSIS-2026-06-22-cutelim-k-threading.md`.
 The lap-6 "norm grows under addition ⟹ cut-elim might break `norm<k`" worry was a **misframing**.
 Resolved facts (the design for ALL of §19): (a) `k` is **not** fixed — it grows (§19.5 `k↦2k`; §19.6
