@@ -77,6 +77,12 @@ def XFreeForm {ξ n} : Semiformula LX ξ n → Prop :=
     Semiterm.val Boundedness.ambient ![] (id : ℕ → ℕ) (nm n) = n :=
   Boundedness.val_nm_structLX (fun _ => False) n
 
+/-- The same fact phrased with `Semiterm.valm ℕ` (the ambient instance), so it `rw`s in `LitTrue`/EM
+goals stated with `valm`. -/
+@[simp] lemma valm_nm (n : ℕ) :
+    Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm n : Semiterm LX ℕ 0) = n :=
+  Boundedness.val_nm_structLX (fun _ => False) n
+
 /-! ## ω-completeness for TRUE closed X-free formulas, `XFreeAx`-preserving. -/
 
 /-- **ω-completeness, `XFreeAx` form.** Any closed `LX`-formula that is X-free and TRUE in the
@@ -186,6 +192,207 @@ lemma rew_subst_term (ω : Rew LX ℕ 0 ℕ 0) (φ : SyntacticSemiformula LX 1)
     · simp [Rew.comp_app]
   rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, heq]
 
+/-! ## Value-congruent excluded middle over `LX` (the `exs` engine).
+
+The `LX` port of `Embedding.provable_em_cong_gen`. Because the calculus now has the value-congruent
+literal axiom `PXFc.axLv`, every atomic case closes **uniformly via `axLv`** (no `LitTrue` split, no
+`axTrue`) — so the derivation is `XFreeAx`-safe for X-atoms too. Exactly what the `exs` collapse needs. -/
+
+/-- Value of a renamed term depends only on the values of the substituted terms. -/
+lemma valm_subst_congr {n} (w w' : Fin n → SyntacticTerm LX)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+    (t : SyntacticSemiterm LX n) :
+    Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w t)
+      = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' t) := by
+  simp only [Semiterm.valm, Semiterm.val_substs]
+  congr 1; funext x; exact hval x
+
+/-- Substitution-composition (LX port). -/
+lemma subst_q_cons (w : Fin n → SyntacticTerm LX) (m : ℕ) :
+    (Rew.subst ![nm m]).comp (Rew.subst w).q = Rew.subst (nm m :> w) := by
+  ext x
+  · cases x using Fin.cases with
+    | zero => simp [Rew.comp_app]
+    | succ i => simp [Rew.comp_app]
+  · simp [Rew.comp_app]
+
+lemma subst_q_cons_app (w : Fin n → SyntacticTerm LX) (m : ℕ)
+    (ψ : SyntacticSemiformula LX (n + 1)) :
+    ((Rew.subst w).q ▹ ψ)/[nm m] = Rew.subst (nm m :> w) ▹ ψ := by
+  show Rew.subst ![nm m] ▹ ((Rew.subst w).q ▹ ψ) = Rew.subst (nm m :> w) ▹ ψ
+  rw [← TransitiveRewriting.comp_app, subst_q_cons]
+
+/-- **Value-congruent excluded middle (arity-general), `XFreeAx` form.** -/
+theorem provable_em_cong_gen_x : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → SyntacticTerm LX)
+    (ψ : SyntacticSemiformula LX n), ψ.complexity ≤ k →
+    (∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+        = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i)) →
+    ∀ {Γ : Seq LX}, (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ → ∃ a, PXFc a 0 Γ := by
+  intro k
+  induction k with
+  | zero =>
+    intro n w w' ψ hk hval Γ hp hn
+    cases ψ using Semiformula.cases' with
+    | hverum => exact ⟨0, PXFc.verumR (by simpa using hp)⟩
+    | hfalsum => exact ⟨0, PXFc.verumR (by simpa using hn)⟩
+    | hrel r v => exact atomic_close_x w w' hval r v hp hn
+    | hnrel r v => exact atomic_close_neg_x w w' hval r v hp hn
+    | hand φ ψ => simp at hk
+    | hor φ ψ => simp at hk
+    | hall φ => simp at hk
+    | hexs φ => simp at hk
+  | succ k ih =>
+    intro n w w' ψ hk hval Γ hp hn
+    cases ψ using Semiformula.cases' with
+    | hverum => exact ⟨0, PXFc.verumR (by simpa using hp)⟩
+    | hfalsum => exact ⟨0, PXFc.verumR (by simpa using hn)⟩
+    | hrel r v => exact atomic_close_x w w' hval r v hp hn
+    | hnrel r v => exact atomic_close_neg_x w w' hval r v hp hn
+    | hand a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hp' : ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b)) ∈ Γ := by simpa using hp
+      have hn' : (∼(Rew.subst w' ▹ a) ⋎ ∼(Rew.subst w' ▹ b)) ∈ Γ := by simpa using hn
+      obtain ⟨a1, h1⟩ := ih (n := n) w w' a hak hval
+        (Γ := insert (Rew.subst w ▹ a)
+          (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))
+        (by simp) (by simp)
+      obtain ⟨a2, h2⟩ := ih (n := n) w w' b hbk hval
+        (Γ := insert (Rew.subst w ▹ b)
+          (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))
+        (by simp) (by simp)
+      have hand := PXFc.andI (Rew.subst w ▹ a) (Rew.subst w ▹ b) h1 h2
+      rw [Finset.insert_eq_self.mpr (show ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b))
+        ∈ insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ) by simp [hp'])] at hand
+      have hor := PXFc.orI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b)) hand
+      rw [Finset.insert_eq_self.mpr hn'] at hor
+      exact ⟨_, hor⟩
+    | hor a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hp' : ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ := by simpa using hp
+      have hn' : (∼(Rew.subst w' ▹ a) ⋏ ∼(Rew.subst w' ▹ b)) ∈ Γ := by simpa using hn
+      obtain ⟨a1, h1⟩ := ih (n := n) w w' a hak hval
+        (Γ := insert (∼(Rew.subst w' ▹ a))
+          (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))
+        (by simp) (by simp)
+      obtain ⟨a2, h2⟩ := ih (n := n) w w' b hbk hval
+        (Γ := insert (∼(Rew.subst w' ▹ b))
+          (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))
+        (by simp) (by simp)
+      have hand := PXFc.andI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b)) h1 h2
+      rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))]
+        at hand
+      have hor := PXFc.orI (Rew.subst w ▹ a) (Rew.subst w ▹ b) hand
+      rw [Finset.insert_eq_self.mpr (show ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ
+        by simp [hp'])] at hor
+      exact ⟨_, hor⟩
+    | hall a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+      have hp' : (∀⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+      have hn' : (∃⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+      have fam : ∀ m, ∃ x, PXFc x 0 (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
+        intro m
+        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+          intro i; cases i using Fin.cases with
+          | zero => rfl
+          | succ j => simpa using hval j
+        obtain ⟨x, hx⟩ := ih (n := n + 1) (nm m :> w) (nm m :> w') a hak hvalm
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m])
+            (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ))
+          (by rw [← subst_q_cons_app]; simp)
+          (by rw [← subst_q_cons_app]; simp)
+        have hexI := PXFc.exI ((Rew.subst w').q ▹ ∼a) m
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m]) Γ)
+          (by
+            have heq : (((Rew.subst w').q ▹ ∼a)/[nm m])
+                = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+            rw [heq, Finset.insert_comm]; exact hx)
+        rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hn')] at hexI
+        exact ⟨_, hexI⟩
+      choose β hβ using fam
+      have hallω := PXFc.allω ((Rew.subst w).q ▹ a) hβ
+      rw [Finset.insert_eq_self.mpr hp'] at hallω
+      exact ⟨_, hallω⟩
+    | hexs a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_exs] at hk; omega
+      have hp' : (∃⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+      have hn' : (∀⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+      have fam : ∀ m, ∃ x, PXFc x 0 (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
+        intro m
+        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+          intro i; cases i using Fin.cases with
+          | zero => rfl
+          | succ j => simpa using hval j
+        obtain ⟨x, hx⟩ := ih (n := n + 1) (nm m :> w) (nm m :> w') a hak hvalm
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m])
+            (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ))
+          (by rw [← subst_q_cons_app]; simp)
+          (by rw [← subst_q_cons_app]; simp)
+        have hexI := PXFc.exI ((Rew.subst w).q ▹ a) m
+          (Γ := insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ) hx
+        rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hp')] at hexI
+        have heq : (((Rew.subst w').q ▹ ∼a)/[nm m]) = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+        rw [heq]; exact ⟨_, hexI⟩
+      choose β hβ using fam
+      have hallω := PXFc.allω ((Rew.subst w').q ▹ ∼a) hβ
+      rw [Finset.insert_eq_self.mpr hn'] at hallω
+      exact ⟨_, hallω⟩
+where
+  atomic_close_x {n} (w w' : Fin n → SyntacticTerm LX)
+      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      {k} (r : (LX).Rel k) (v : Fin k → SyntacticSemiterm LX n)
+      {Γ : Seq LX} (hp : (Rew.subst w ▹ Semiformula.rel r v) ∈ Γ)
+      (hn : (∼(Rew.subst w' ▹ Semiformula.rel r v)) ∈ Γ) : ∃ a, PXFc a 0 Γ := by
+    have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
+      simpa [Semiformula.rew_rel] using hp
+    have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+      simpa [Semiformula.rew_rel] using hn
+    exact ⟨0, PXFc.axLv r _ _ (fun i => valm_subst_congr w w' hval (v i)) hp' hn'⟩
+  atomic_close_neg_x {n} (w w' : Fin n → SyntacticTerm LX)
+      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      {k} (r : (LX).Rel k) (v : Fin k → SyntacticSemiterm LX n)
+      {Γ : Seq LX} (hp : (Rew.subst w ▹ Semiformula.nrel r v) ∈ Γ)
+      (hn : (∼(Rew.subst w' ▹ Semiformula.nrel r v)) ∈ Γ) : ∃ a, PXFc a 0 Γ := by
+    have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
+      simpa [Semiformula.rew_nrel] using hp
+    have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+      simpa [Semiformula.rew_nrel] using hn
+    exact ⟨0, PXFc.axLv r _ _ (fun i => (valm_subst_congr w w' hval (v i)).symm) hn' hp'⟩
+
+/-- **Closed-term ∃-introduction, `XFreeAx` form.** From `⊢ ψ/[s], Γ` (any closed `s`) conclude
+`⊢ ∃⁰ψ, Γ`: collapse `s` to its numeral value via `provable_em_cong_gen_x` + a `cut`, then numeral
+`exI`. The cut raises the rank to `max c (ψ.complexity+1)`. -/
+theorem PXFc.exI_closed {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
+    (ψ : SyntacticSemiformula LX 1) (s : SyntacticTerm LX)
+    (h : PXFc α c (insert (ψ/[s]) Γ)) :
+    ∃ β, PXFc β (max c (ψ.complexity + 1)) (insert (∃⁰ ψ) Γ) := by
+  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set c' : ℕ := max c (ψ.complexity + 1) with hc'
+  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
+             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by
+    rw [valm_nm]
+  have h₁ : PXFc α c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
+    (h.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
+      (le_max_left _ _)
+  obtain ⟨b, h₂⟩ := provable_em_cong_gen_x ψ.complexity ![nm m] ![s] ψ le_rfl
+    (by intro i; cases i using Fin.cases with
+        | zero => simpa using hsval
+        | succ j => exact j.elim0)
+    (Γ := insert (∼(ψ/[s])) (insert (ψ/[nm m]) Γ))
+    (by show (Rew.subst ![nm m] ▹ ψ) ∈ _; simp)
+    (by show (∼(Rew.subst ![s] ▹ ψ)) ∈ _; simp)
+  have hcc : (((ψ/[s]).complexity : ℕ) + 1 : ℕ∞) ≤ (c' : ℕ∞) := by
+    have : (ψ/[s]).complexity = ψ.complexity := by simp
+    rw [this]; exact_mod_cast le_max_right _ _
+  have hcut := PXFc.cut (ψ/[s]) hcc h₁ (h₂.mono le_rfl (le_max_left _ _))
+  exact ⟨_, PXFc.exI ψ m hcut⟩
+
 /-! ## The structural embedding `embedC_LX_gen` (the `axm` discharge abstracted as `hax`).
 
 Mirrors `Embedding.embedC` rule-by-rule, swapping the `ZinftyF.Provable.*` builders for their
@@ -270,11 +477,20 @@ theorem embedC_LX_gen {𝓢 : Schema LX}
     rw [Finset.insert_eq_self.mpr hmem] at hall
     exact ⟨_, hall⟩
   | @exs Γ φ h t _d ih =>
-    -- The hard case: `asgX e ▹ (φ/[t]) = ((asgX e).q ▹ φ)/[asgX e t]` with `asgX e t` closed.
-    -- Collapsing to a numeral witness needs value-congruent EM; for an X-atom body that is Buchholz's
-    -- value-congruent X-pair axiom `{Xs,¬Xt}` (p.27), NOT derivable from our same-atom `axL`. Pending
-    -- the `axLv` retrofit (ANALYSIS-2026-06-22-lap16-exs-axLv.md).
-    sorry
+    -- `asgX e ▹ (φ/[t]) = ((asgX e).q ▹ φ)/[asgX e t]` with `asgX e t` closed; collapse to its numeral
+    -- value via `PXFc.exI_closed` (value-congruent EM, X-atoms via the `axLv` axiom). The cut bumps the
+    -- rank to `max c (φ.complexity + 1)`.
+    obtain ⟨c, ih⟩ := ih
+    refine ⟨max c (φ.complexity + 1), fun e => ?_⟩
+    obtain ⟨a, hd⟩ := ih e
+    rw [Finset.image_insert, rew_subst_term (asgX e) φ t] at hd
+    obtain ⟨β, hβ⟩ := PXFc.exI_closed ((asgX e).q ▹ φ) (asgX e t) hd
+    have hcomp : (((asgX e).q ▹ φ).complexity + 1) = (φ.complexity + 1) := by simp
+    rw [hcomp] at hβ
+    have hmem : (asgX e ▹ (∃⁰ φ)) ∈ Γ.image (fun ψ => asgX e ▹ ψ) := Finset.mem_image_of_mem _ h
+    rw [show (asgX e ▹ (∃⁰ φ)) = ∃⁰ ((asgX e).q ▹ φ) by simp] at hmem
+    rw [Finset.insert_eq_self.mpr hmem] at hβ
+    exact ⟨_, hβ⟩
   | @wk Δ Γ _d h ih =>
     obtain ⟨c, ih⟩ := ih
     refine ⟨c, fun e => ?_⟩
