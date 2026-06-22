@@ -1,6 +1,46 @@
 # Pending work — open obligations & attack paths
 
-## ⏭️ LAP-10 FINAL STATE (2026-06-22) — read this FIRST
+## ⏭️ LAP-11 FINAL STATE (2026-06-22) — read this FIRST
+
+**M4 — the embedding `embedC` — is COMPLETE, axiom-clean, promoted to `src/GoodsteinPA/Embedding.lean`,
+in the default build.** `embedC : Derivation2 (𝗣𝗔:Schema) Γ → ∃ c, ∀ e, ∃ α, Provable α c (Γ.image
+(asg e ▹))`. The two hard cases fell to two reusable lemmas: `Provable.exI_closed` (closed-witness
+∃-intro, from value-congruent EM `provable_em_cong_gen` + cut) for `exs`; `provable_true`
+(ω-completeness) for `axm`. See HANDOFF lap-11.
+
+**The headline is now isolated to TWO typed obligations** (`wip/Bounding.lean`, where
+`peano_not_proves_goodstein_routeB` is proved modulo them):
+
+### B1 — `embed_lt_eps0` (DO FIRST; paper-independent ordinal bookkeeping)
+`embedC` but returning `∃ α, α < ε₀ ∧ Provable α c (…)`. Three attack paths:
+1. **Strengthen the `embedC` statement** to carry `α < ε₀` and re-run the induction, discharging an
+   ordinal side-goal per case. Structural cases: `max+1` of `<ε₀` is `<ε₀` (ε₀ limit). `all` case:
+   `allω` gives `(⨆ₙ βₙ)+1`; need `⨆ₙ βₙ < ε₀` — use that the family is **uniformly bounded** (the
+   `ih (n:>ₙe)` sub-derivation shape is `n`-independent ⟹ ordinal independent of `n`), via
+   `Ordinal.iSup_le`/`Ordinal.lt_epsilon`/principal-ε₀ closure. `closed`/`axm`: bound `provable_em`'s
+   and `provable_true`'s ordinals `< ε₀` (complexity-recursive `allω` towers, `< ω^ω`; prove a
+   `provable_em_lt`/`provable_true_lt` variant).
+2. **Separate ordinal-measure lemma** `embedOrd (d : Derivation2 …) : Ordinal` with `embedOrd d < ε₀`
+   and `Provable (embedOrd d) c …`, computed by structural recursion on `d` (cleaner bookkeeping).
+3. **Coarse uniform bound**: prove every `embedC` ordinal is `< ω^ω` (a fixed small bound), which
+   trivially `< ε₀` — may dodge the per-case sup analysis if a global height argument works.
+
+### The bridge — `cutfree_lt_eps0_absurd` (B2–B5; the deep arithmetization core)
+`¬ ∃ α, α < ε₀ ∧ Provable α 0 {↑goodsteinSentence}`. ⚠️ `↑gs` is TRUE ⟹ it HAS a cut-free
+derivation (`provable_true`); the contradiction is the ORDINAL `< ε₀`, not existence.
+- **B2** cut-free ∀/∃ witness bound on real `Deriv`: `Provable.allInv` (in M5) strips the outer `∀`
+  per numeral `m` → cut-free `Provable β 0 {code(m)}` with `β < α`; bound the Σ₁ `∃N` witness by a
+  Hardy `H_α(m)` (Towsner boundedness lemma — READ `papers/` Towsner; `papers/SOURCES.md`).
+- **B3** arithmetization (M7a): Σ₁ `codeOfREPred goodsteinTerminates` matrix ↔ semantic `atomTrue m N`
+  (`goodsteinSeq N m = 0`, M6). THE intractability risk; `codeOfREPred_spec` is the semantic anchor.
+- **B4** ordinal seam: mathlib `Ordinal < ε₀` ↔ `ONote` NF (mathlib `ONote.repr`, `Ordinal.lt_epsilon`).
+- **B5** assembly vs `lowerBound_hardy_selfcontained` (M6) + `hardy_lt_goodsteinLength`.
+- **Aristotle candidates** (bounded, self-contained): a B4 `ONote ↔ Ordinal<ε₀` bridge lemma; a B1
+  ordinal-sup-`<ε₀` fact.
+
+---
+
+## ⏭️ LAP-10 FINAL STATE (2026-06-22) — superseded by lap-11 above; kept for context
 
 **Headline result: the M5 `axTrue` truth-layer surgery is DONE (axiom-clean) and the assignment-
 carrying embedding `embedC` is 8/10.** Full status in `HANDOFF.md`. The TWO remaining `embedC` cases

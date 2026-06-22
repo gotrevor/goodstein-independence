@@ -1,9 +1,19 @@
 # STATUS — GoodsteinPA 📊
 
-**Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Towsner's Route B (two-phase: witness-FREE `Z_∞` ε₀
-cut-elimination [M5, done] + Hardy lower bound on the cut-free result [M6, done], joined by an
-embedding [M4] + a bounding bridge).** · **Build**: 🟢 green (1257 jobs, `lake build GoodsteinPA`)
-· **Updated**: lap 10 · 2026-06-22 · `c253471`
+**Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Towsner's Route B (witness-FREE `Z_∞` ε₀ cut-elimination
+[M5, done] + Hardy lower bound [M6, done], joined by the embedding [M4, DONE lap 11] + a bounding
+bridge [M7, scaffolded]).** · **Build**: 🟢 green (1258 jobs, `lake build GoodsteinPA`)
+· **Updated**: lap 11 · 2026-06-22 · `bb0488e`
+
+## ⏭️ Lap-11 headline — M4 EMBEDDING COMPLETE; headline gap isolated to B1 + the bridge
+**M4 (`embedC`, `src/GoodsteinPA/Embedding.lean`) is DONE and axiom-clean** (`[propext, choice,
+Quot.sound]`), promoted to `src/` and in the build. `exs` fell to `Provable.exI_closed` (closed-witness
+∃-intro via the value-congruent EM `provable_em_cong_gen` + cut); `axm` fell to `provable_true`
+(ω-completeness — the ω-rule subsumes the Buchholz §5.5 meta-induction). The Route-B assembly
+`peano_not_proves_goodstein_routeB` (`wip/Bounding.lean`) is now PROVED modulo TWO typed sorries:
+**B1** `embed_lt_eps0` (embedC with ordinal `< ε₀` — paper-independent, DO FIRST) and the **bridge**
+`cutfree_lt_eps0_absurd` (a cut-free `<ε₀` derivation Hardy-bounds the witness, contradicting M6 —
+B2/B3/B4/B5, see PENDING_WORK). Headline `Statement.peano_not_proves_goodstein` still an honest `sorry`.
 
 ## ⏭️ Lap-10 headline — M5 `axTrue` truth-layer surgery DONE (read `ANALYSIS-2026-06-22-truth-layer-gap.md`)
 Uncovered + closed the **truth-layer gap**: M5's pure-logic `Z_∞` couldn't host the embedding (`axm`
