@@ -549,6 +549,113 @@ theorem orInv_xfree {Δ : Seq LX} (d : Deriv Δ) {φ ψ : Form LX} :
     have h1 : (↑ξ.complexity + 1 : ℕ∞) ≤ 0 := hcr ▸ le_max_left _ _
     simp at h1
 
+/-- **ω/∀-inversion preserving `XFreeAx`** at cut rank `0` (for inverting `∀x Xx` to `X(nm n)`).
+Replays `ZinftyGen.allInvAux` via `PXF`. -/
+theorem allInv_xfree {Δ : Seq LX} (d : Deriv Δ) {χ : SyntacticSemiformula LX 1} (n : ℕ) :
+    XFreeAx d → d.cr = 0 → (∀⁰ χ) ∈ Δ →
+    PXF d.o (insert (χ/[nm n]) (Δ.erase (∀⁰ χ))) := by
+  induction d with
+  | @axL Γ k r v hp hn =>
+    intro _ _ _
+    have hr : Semiformula.rel r v ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩
+    have hn' : Semiformula.nrel r v ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩
+    simp only [Deriv.o]
+    exact PXF.axL r v (Finset.mem_insert_of_mem hr) (Finset.mem_insert_of_mem hn')
+  | @axTrue Γ k b r v htrue hmem =>
+    intro hxf _ _
+    have hl : signedLit b r v ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by cases b <;> simp [signedLit]), hmem⟩
+    simp only [Deriv.o]
+    exact PXF.axTrue b r v hxf htrue (Finset.mem_insert_of_mem hl)
+  | @verumR Γ h =>
+    intro _ _ _
+    have ht : (⊤ : Form LX) ∈ Γ.erase (∀⁰ χ) :=
+      Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩
+    simp only [Deriv.o]
+    exact PXF.verumR (Finset.mem_insert_of_mem ht)
+  | @weak Δ' Γ d' hsub ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.o]
+    by_cases hd : (∀⁰ χ) ∈ Δ'
+    · exact (ih hxf hcr hd).weakening
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub))
+    · have base : PXF d'.o Δ' := ⟨d', le_rfl, hcr, hxf⟩
+      refine base.weakening ?_
+      intro x hx
+      exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+  | @andI Γ₀ φ' ψ' dφ dψ ihφ ihψ =>
+    intro hxf hcr hmem
+    have hhead : (φ' ⋏ ψ') ≠ (∀⁰ χ) := by intro h; simp [Wedge.wedge] at h
+    have hmem0 : (∀⁰ χ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have hcrφ : dφ.cr = 0 := by
+      have : dφ.cr ≤ 0 := by simp only [Deriv.cr] at hcr; exact hcr ▸ le_max_left _ _
+      exact nonpos_iff_eq_zero.mp this
+    have hcrψ : dψ.cr = 0 := by
+      have : dψ.cr ≤ 0 := by simp only [Deriv.cr] at hcr; exact hcr ▸ le_max_right _ _
+      exact nonpos_iff_eq_zero.mp this
+    simp only [Deriv.o]
+    have Pφ := (ihφ hxf.1 hcrφ (Finset.mem_insert_of_mem hmem0)).weakening
+      (invPush1' (χ/[nm n]) φ' (∀⁰ χ) Γ₀)
+    have Pψ := (ihψ hxf.2 hcrψ (Finset.mem_insert_of_mem hmem0)).weakening
+      (invPush1' (χ/[nm n]) ψ' (∀⁰ χ) Γ₀)
+    exact (PXF.andI φ' ψ' Pφ Pψ).weakening (invPull1' (χ/[nm n]) hhead Γ₀)
+  | @orI Γ₀ φ' ψ' d' ih =>
+    intro hxf hcr hmem
+    have hhead : (φ' ⋎ ψ') ≠ (∀⁰ χ) := by intro h; simp [Vee.vee] at h
+    have hmem0 : (∀⁰ χ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have hsub : insert (χ/[nm n]) ((insert φ' (insert ψ' Γ₀)).erase (∀⁰ χ))
+          ⊆ insert φ' (insert ψ' (insert (χ/[nm n]) (Γ₀.erase (∀⁰ χ)))) := by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+    simp only [Deriv.o]
+    have P := (ih hxf hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening hsub
+    exact (PXF.orI φ' ψ' P).weakening (invPull1' (χ/[nm n]) hhead Γ₀)
+  | @allω Γ₀ χ' d' ih =>
+    intro hxf hcr hmem
+    by_cases hhd : (∀⁰ χ') = (∀⁰ χ)
+    · obtain rfl := (Semiformula.all_inj _ _).mp hhd
+      have hcrn : (d' n).cr = 0 := by
+        have : (d' n).cr ≤ 0 := by
+          simp only [Deriv.cr] at hcr; exact le_trans (le_iSup (fun m => (d' m).cr) n) hcr.le
+        exact nonpos_iff_eq_zero.mp this
+      have hbound : (d' n).o ≤ (⨆ m, (d' m).o) + 1 :=
+        le_trans (Ordinal.le_iSup (fun m => (d' m).o) n) (le_of_lt (lt_add_of_pos_right _ one_pos))
+      by_cases hd : (∀⁰ χ') ∈ Γ₀
+      · refine ((ih n (hxf n) hcrn (Finset.mem_insert_of_mem hd)).weakening ?_).mono
+          (by simp only [Deriv.o]; exact hbound)
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+      · have base : PXF (d' n).o (insert (χ'/[nm n]) Γ₀) := ⟨d' n, le_rfl, hcrn, hxf n⟩
+        refine (base.weakening ?_).mono (by simp only [Deriv.o]; exact hbound)
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        rcases hx with rfl | hx
+        · tauto
+        · exact Or.inr ⟨fun e => hd (e ▸ hx), Or.inr hx⟩
+    · have hmem0 : (∀⁰ χ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhd e.symm
+      have hcr' : ∀ m, (d' m).cr = 0 := fun m => by
+        have : (d' m).cr ≤ 0 := by
+          simp only [Deriv.cr] at hcr; exact le_trans (le_iSup (fun j => (d' j).cr) m) hcr.le
+        exact nonpos_iff_eq_zero.mp this
+      have key : ∀ m, PXF (d' m).o
+          (insert (χ'/[nm m]) (insert (χ/[nm n]) (Γ₀.erase (∀⁰ χ)))) := fun m =>
+        (ih m (hxf m) (hcr' m) (Finset.mem_insert_of_mem hmem0)).weakening
+          (invPush1' (χ/[nm n]) (χ'/[nm m]) (∀⁰ χ) Γ₀)
+      simp only [Deriv.o]
+      exact (PXF.allω χ' key).weakening (invPull1' (χ/[nm n]) hhd Γ₀)
+  | @exI Γ₀ χ' m d' ih =>
+    intro hxf hcr hmem
+    have hhead : (∃⁰ χ') ≠ (∀⁰ χ) := by intro h; simp [ExsQuantifier.exs, UnivQuantifier.all] at h
+    have hmem0 : (∀⁰ χ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    simp only [Deriv.o]
+    have P := (ih hxf hcr (Finset.mem_insert_of_mem hmem0)).weakening
+      (invPush1' (χ/[nm n]) (χ'/[nm m]) (∀⁰ χ) Γ₀)
+    exact (PXF.exI χ' m P).weakening (invPull1' (χ/[nm n]) hhead Γ₀)
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro _ hcr _
+    exfalso
+    have h1 : (↑ξ.complexity + 1 : ℕ∞) ≤ 0 := hcr ▸ le_max_left _ _
+    simp at h1
+
 /-- **Boundedness (Buchholz Thm 5.4), cut-free.** For an X-positive-decomposed sequent `Δ` (every
 member is `¬Prog`, a bounded `¬Xt`, or X-positive), a cut-free `XFreeAx` derivation of `Δ` at height
 `o d` yields `⊨^{α+2^{o d}}` of some X-positive member. The corollary `‖≺‖ ≤ 2^β` follows.
