@@ -1,6 +1,6 @@
 # HANDOFF — 2026-06-22 (lap 10)
 
-> **Branch** `plan` · **HEAD** = latest (8 commits this lap) · build **green**
+> **Branch** `plan` · **HEAD** `4d6de6d` (+1 docs after) · 13 commits this lap · build **green**
 > (`lake build GoodsteinPA`, 1257 jobs) · headline `peano_not_proves_goodstein` = honest `sorry`
 > (0 math axioms) · working tree clean.
 > **Lap 10 closed the truth-layer gap: the M5 `axTrue` surgery is DONE — `Z∞` now has the

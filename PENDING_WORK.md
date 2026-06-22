@@ -1,6 +1,35 @@
 # Pending work — open obligations & attack paths
 
-## ⏭️ LAP-10 PROGRESS + NEXT (2026-06-22) — read this FIRST
+## ⏭️ LAP-10 FINAL STATE (2026-06-22) — read this FIRST
+
+**Headline result: the M5 `axTrue` truth-layer surgery is DONE (axiom-clean) and the assignment-
+carrying embedding `embedC` is 8/10.** Full status in `HANDOFF.md`. The TWO remaining `embedC` cases
+(`axm`, `exs`) both reduce to ONE shared deep lemma — build it next:
+
+**`provable_subst_congr` (closed-term substitution congruence — THE next chip).** For closed terms
+`s s'` of equal ℕ-value and any `ψ : SyntacticSemiformula ℒₒᵣ 1`: the sequent `{∼(ψ/[s]), ψ/[s']}` is
+Z∞-derivable (`∃ a, Provable a 0 {...}`). Proof = induction on `ψ.complexity` (the `provable_em`
+template), tracking the two terms:
+- **atomic** `ψ = rel/nrel R v` (v mentions `#0`): `ψ/[s]` and `ψ/[s']` have EQUAL truth (`Evalm`
+  depends on a term only via its value — `Semiterm.val_substs` (Semantics.lean:123) + `eval_substs`
+  (l.391)). So `∼(ψ/[s])` and `ψ/[s']` can't both be false ⟹ one is a true literal ⟹ `Provable.axTrue`.
+  (Needs the value-equality `hval` and that `(ψ/[s]).LitTrue ↔ (ψ/[s']).LitTrue`.)
+- **and/or/all/exs**: recurse structurally, exactly mirroring `provable_em`'s compound cases (the ∀/∃
+  cases use the `nm`-family + `exI`/`allω`, with the substituted term threaded through `/[·]`).
+Then derive:
+- **`Provable.exI_closed (s closed, value m)`: `Provable α c (insert (ψ/[s]) Γ) → ∃ β, Provable β c
+  (insert (∃⁰ψ) Γ)`** — cut `provable_subst_congr s (nm m)` (weakened into Γ) against the hypothesis to
+  swap `ψ/[s] ⤳ ψ/[nm m]`, then `Provable.exI ψ m`. Finishes `embedC.exs` (the `rew_subst_term` setup
+  is already in place — see `wip/Embedding.lean`).
+- **`embedC.axm`**: `𝗣𝗔⁻` instances → strip `∀` (`allω`), decompose connectives, bottom at `axTrue`;
+  `univCl(succInd ψ)` → the worked meta-induction below, with `nm n+1 = nm(n+1)` via the same congruence.
+
+API notes: term value = `Semiterm.valm ℕ ![] id s`; numeral value `valm ℕ … (nm m) = m` (find/derive
+`val_numeral`); `nm`/`signedLit`/`LitTrue` live in `src/GoodsteinPA/Zinfty.lean` now.
+
+---
+
+## ⏭️ LAP-10 PROGRESS (earlier in lap)
 
 **Done lap 10 (all committed, green):**
 - `rew_subst_nm` PROVED ⟹ `provable_rew`/`ZProvable.rew` fully axiom-clean (`[propext, choice,
