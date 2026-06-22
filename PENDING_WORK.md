@@ -20,6 +20,31 @@ Attack paths:
 
 ### O2 — the Phase-2 girder (Route B, Towsner) — milestones M3…M7 in `PHASE2-DECOMPOSITION.md`
 This is the real frontier. **Crux: M3 (`Z_∞` calculus) and M5 (cut elimination).**
+
+**STATUS UPDATE (2026-06-22 lap 2): `wip/ZinftyF.lean` — Z_∞ on Foundation's real ℒₒᵣ syntax.**
+Supersedes the abstract-`AForm` `wip/Zinfty.lean` prototype (kept for history, do not delete).
+Done and **machine-checked** (`lake env lean wip/ZinftyF.lean`, only `cutElimStep` sorry):
+- The `Z_∞` calculus `inductive Deriv` over `SyntacticFormula ℒₒᵣ`, **Finset sequents** (set-based,
+  per Towsner ⇒ contraction is FREE, no `contr` rule), ω-rule `allω`, ordinal bound `o`, `ℕ∞`
+  cut rank `cr`. The `ℕ∞/⊤` blocker is **gone**: `complexity : Form → ℕ` is finite.
+- Full predicate-level inference API: `axL/verumR/andI/orI/exI/allω/cut/mono/weakening/cast`,
+  contraction free.
+- **All three inversion lemmas PROVED** (the syntactic content of cut-elimination):
+  `orInvAux`/`Provable.orInv` (§19.2 ∨), `andInvAux`/`Provable.andInvL`/`.andInvR` (§19.3 ∧),
+  `allInvAux`/`Provable.allInv` (§19.4 ω/∀). Each by structural induction on `Deriv`, all 8 cases,
+  preserving ordinal bound and cut rank.
+- `cutElim` (Thm 19.9) reduced to the single open leaf `cutElimStep` (Thm 19.7).
+
+**NEXT (hardest-first): the cut-REDUCTION lemma (Towsner §19.5–19.7), the ordinal-arithmetic
+heart of `cutElimStep`.** With all inversions in hand, the reduction lemma is: a top-level cut on a
+formula of complexity `= c` between two `Provable _ c` derivations can be replaced by a cut-free-at-
+rank-`c` derivation with the ordinal bounds *added* (not `max+1`). The principal-formula reduction
+uses the inversions to push the cut to the immediate subformulas (∨/∧ → smaller-complexity cut;
+ω/∀ → instantiate at the ∃-witness numeral). Then `cutElimStep` does the transfinite induction over
+the derivation eliminating all rank-`c` cuts, raising `α ↦ ω^α`. Likely needs a numeric/Hardy `k`
+parameter re-added to `Provable` (Towsner threads `h_{ω^α}(k)` through 19.6/19.7) — assess whether
+the `(α,c)` indexing suffices first.
+
 Attack paths:
 1. **Continue the `wip/Zinfty.lean` prototype** (E2 encoding — *compiles*). Next: (a) connect
    `AForm` to a faithful arithmetic formula with a real free-variable/substitution layer (replace
