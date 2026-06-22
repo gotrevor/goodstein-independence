@@ -15,7 +15,26 @@ two completed girders are over *different* calculi (M5 unbounded `(α,c)` over r
 witness-bounded `(α,k)` over the `GForm` fragment) and are **not yet unified**. The remaining work is
 the connecting spine — see Outstanding.
 
+## Route decision (lap 7) — STAY ON ROUTE B (Towsner)
+The operator delegated Route A vs B to the box (`archive/findings/…operator-route-choice.md`). **Decision:
+Route B.** Rationale: (1) the one genuinely-doubtful Route-B girder — the `(α,k)` cut-elimination
+`k`/`τ` bookkeeping — was the reason to hesitate, and **lap 7 resolved it** (it is not a wall; `k`
+simply grows and the lower bound holds for all `k` — see `ANALYSIS-2026-06-22-cutelim-k-threading.md`).
+(2) M5+M6 are both Route-B assets already banked. (3) The remaining Route-B risk is M4 (embedding) +
+M7a (the PA↔PA⁺ arithmetization bridge); Route A trades those for the full Gentzen `TI(ε₀)⊢Con(PA)` +
+`Goodstein⟹TI(ε₀)` + the `PA_delta1Definable` Foundation axiom — a *larger* unproven surface, not
+smaller. Revisit only if M7a proves intractable after sustained effort.
+
 ## What's happened (newest first)
+- **2026-06-22 (lap 7 — cut-elim `k`/`τ` crux RESOLVED, offline):** Read Towsner §15–§20 on disk and
+  answered the open `ON-LINE-REQUEST` directly. **Finding:** the lap-6 "norm grows under addition so
+  cut-elim might break `norm<k`" worry was a misframing. (a) `k` is **not** fixed — it grows (§19.5
+  `k↦2k`; §19.6 `k↦h_{β#ω}(k)`; §19.7 `k↦h_{ω^α}(k)`), engineered to absorb `τ(α#β)≤τ(α)+τ(β)`.
+  (b) The lower bound `lowerBound_hardy_selfcontained` is already `∀k`, so growth is harmless.
+  (c) Every `ONote` is `<ε₀` by construction, so the ε₀ side-condition is **free**. ⟹ state the whole
+  cut-elim chain **existentially in `k`** (`CutFree α Γ := ∃k, Zk α k 0 Γ`); ordinary `+` with slack
+  suffices (no `nadd` needed). `ON-LINE-REQUEST` closed; route chosen (B). See
+  `ANALYSIS-2026-06-22-cutelim-k-threading.md`. **§19.6/§19.7 port now unblocked.**
 - **2026-06-22 (lap 6 — review + build-out):** **M6 lower-bound half DONE** — promoted
   `wip/LowerBoundHardy.lean → src/GoodsteinPA/LowerBound.lean`; `lowerBound_hardy_selfcontained` =
   full Towsner Thm 17.1, only `α.NF` (axioms = trust base + 🟢 `native_decide` base cases). Then
