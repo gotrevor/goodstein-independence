@@ -49,7 +49,9 @@ noncomputable def atomTrue (φ : Form) : Prop := Semiformula.Evalm ℕ (fun _ =>
 * `axL` — clash identity axiom (`rel`/`nrel` together), no `k`-condition.
 * `verumR` — `⊤` closes.
 * `trueRel`/`trueNrel` — **truth axiom**: a true atom closes, side condition `τ α < k` (= `norm α < k`).
-* `weak` — sequent + ordinal weakening (Towsner Lemma 19.1 / 16.4), budget `norm β < k`.
+* `wk` — height-preserving sequent weakening (Towsner Lemma 19.1): enlarge `Γ`, same `(α,k,c)`.
+* `weak` — combined ordinal-raise + weakening (β < α, budget `norm β < k`); raises the bound of an
+  existing derivation, the move the inversions' principal cases need (cf. `B.weak`).
 * `andI`/`orI` — the connective rules (premises at `β < α`).
 * `allω` — the **ω-rule**: one premise per numeral `n`, the `n`-th at numeric index `max k n`.
 * `exI` — **witness-bounded `∃`**: the numeral witness `n ≤ h_α(k)` (= `hardy α k`).
@@ -62,6 +64,7 @@ inductive Zk : ONote → ℕ → ℕ → Seq → Prop
       (hτ : norm α < k) (hmem : Semiformula.rel r v ∈ Γ) : Zk α k c Γ
   | trueNrel {α k c Γ} {ar} (r : (ℒₒᵣ).Rel ar) (v) (htrue : atomTrue (Semiformula.nrel r v))
       (hτ : norm α < k) (hmem : Semiformula.nrel r v ∈ Γ) : Zk α k c Γ
+  | wk {α k c Δ Γ} (hsub : Δ ⊆ Γ) (d : Zk α k c Δ) : Zk α k c Γ
   | weak {α β k c Δ Γ} (hβ : β < α) (hβNF : β.NF) (hαNF : α.NF) (hτ : norm β < k)
       (hsub : Δ ⊆ Γ) (d : Zk β k c Δ) : Zk α k c Γ
   | andI {α βφ βψ k c Γ} (φ ψ : Form) (hβφ : βφ < α) (hβψ : βψ < α)
@@ -92,6 +95,7 @@ theorem mono_k : ∀ {α k c Γ}, Zk α k c Γ → ∀ {k'}, k ≤ k' → Zk α 
   | trueRel r v htrue hτ hmem => intro k' hk; exact Zk.trueRel r v htrue (lt_of_lt_of_le hτ hk) hmem
   | trueNrel r v htrue hτ hmem =>
       intro k' hk; exact Zk.trueNrel r v htrue (lt_of_lt_of_le hτ hk) hmem
+  | wk hsub _ ih => intro k' hk; exact Zk.wk hsub (ih hk)
   | weak hβ hβNF hαNF hτ hsub _ ih =>
       intro k' hk; exact Zk.weak hβ hβNF hαNF (lt_of_lt_of_le hτ hk) hsub (ih hk)
   | andI φ ψ hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ihφ ihψ =>
@@ -122,6 +126,7 @@ theorem mono_c : ∀ {α k c Γ}, Zk α k c Γ → ∀ {c'}, c ≤ c' → Zk α 
   | verumR h => intro c' _; exact Zk.verumR h
   | trueRel r v htrue hτ hmem => intro c' _; exact Zk.trueRel r v htrue hτ hmem
   | trueNrel r v htrue hτ hmem => intro c' _; exact Zk.trueNrel r v htrue hτ hmem
+  | wk hsub _ ih => intro c' hc; exact Zk.wk hsub (ih hc)
   | weak hβ hβNF hαNF hτ hsub _ ih => intro c' hc; exact Zk.weak hβ hβNF hαNF hτ hsub (ih hc)
   | andI φ ψ hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ihφ ihψ =>
       intro c' hc
@@ -135,11 +140,129 @@ theorem mono_c : ∀ {α k c Γ}, Zk α k c Γ → ∀ {c'}, c ≤ c' → Zk α 
       intro c' hc
       exact Zk.cut φ (lt_of_lt_of_le hcompl hc) hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ (ih₁ hc) (ih₂ hc)
 
-/-- **Sequent weakening** (Towsner Lemma 19.1): enlarge the sequent, raising the ordinal to any
-`NF` `α' > α` (with budget `norm α < k`). Direct application of the `weak` constructor. -/
-theorem weakening {α α' k c Δ Γ} (hα : α < α') (hαNF : α.NF) (hα'NF : α'.NF) (hτ : norm α < k)
-    (hsub : Δ ⊆ Γ) (d : Zk α k c Δ) : Zk α' k c Γ :=
-  Zk.weak hα hαNF hα'NF hτ hsub d
+/-- **Height-preserving sequent weakening** (Towsner Lemma 19.1): direct `wk`. -/
+theorem weakening {α k c Δ Γ} (hsub : Δ ⊆ Γ) (d : Zk α k c Δ) : Zk α k c Γ := Zk.wk hsub d
+
+/-! ### Inversion lemmas (Towsner §19.2–19.4, parameter-style port)
+
+The syntactic content feeding cut-elimination, and (the ∀-case) the subformula bridge to `B`.
+Each is by structural induction; reshuffling uses height-preserving `wk`, and the *principal* case
+raises the premise ordinal `β < α` back to the conclusion bound via `weak` (the move `B.allInv`
+pioneered).  The `Finset` reshuffles are factored into standalone helpers (`invPush`/`invPull`/
+`princOrSub`) so their `simp; tauto` runs in a clean context — inlining them inside the big
+induction makes `DecidableEq Form` blow past the heartbeat limit. -/
+
+/-- Pull a head formula `b` out through `insert φ (insert ψ (·.erase A))` (always valid). -/
+private theorem invPush (A b : Form) (s : Seq) {φ ψ : Form} :
+    insert φ (insert ψ ((insert b s).erase A)) ⊆ insert b (insert φ (insert ψ (s.erase A))) := by
+  intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+
+/-- Push a head formula `b ≠ A` back into the erased insert (the reverse reorder). -/
+private theorem invPull (A : Form) {b : Form} (h : b ≠ A) (s : Seq) {φ ψ : Form} :
+    insert b (insert φ (insert ψ (s.erase A))) ⊆ insert φ (insert ψ ((insert b s).erase A)) := by
+  intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+  rcases hx with rfl | rfl | rfl | hx
+  · exact Or.inr (Or.inr ⟨h, Or.inl rfl⟩)
+  · exact Or.inl rfl
+  · exact Or.inr (Or.inl rfl)
+  · exact Or.inr (Or.inr ⟨hx.1, Or.inr hx.2⟩)
+
+/-- Pull two head formulas out through `insert φ (insert ψ (·.erase A))` (always valid). -/
+private theorem invPush2 (A b₁ b₂ : Form) (s : Seq) {φ ψ : Form} :
+    insert φ (insert ψ ((insert b₁ (insert b₂ s)).erase A))
+      ⊆ insert b₁ (insert b₂ (insert φ (insert ψ (s.erase A)))) := by
+  intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+
+/-- The principal-`orI` reshuffle: the doubly-inserted premise collapses (idempotence). -/
+private theorem princOrSub {A : Form} (s : Seq) {φ ψ : Form} :
+    insert φ (insert ψ ((insert φ (insert ψ s)).erase A)) ⊆ insert φ (insert ψ (s.erase A)) := by
+  intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto
+
+/-- **∨-inversion.** If `φ ⋎ ψ` occurs in a `Zᵏ`-derivable sequent, replacing it by `φ` and `ψ` is
+derivable at the same `(α,k,c)`.  Validates the connective machinery + `wk`. -/
+theorem orInv {φ ψ : Form} : ∀ {α k c Γ}, Zk α k c Γ → (φ ⋎ ψ) ∈ Γ →
+    Zk α k c (insert φ (insert ψ (Γ.erase (φ ⋎ ψ)))) := by
+  have hφ0 : φ ≠ (φ ⋎ ψ) := Semiformula.ne_or_left φ ψ
+  have hψ0 : ψ ≠ (φ ⋎ ψ) := Semiformula.ne_or_right φ ψ
+  intro α k c Γ d
+  induction d with
+  | @axL α k c Γ ar r v hp hn =>
+      intro _
+      refine Zk.axL r v ?_ ?_ <;>
+        exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), by assumption⟩))
+  | @verumR α k c Γ h =>
+      intro _
+      exact Zk.verumR (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩)))
+  | @trueRel α k c Γ ar r v htrue hτ hmem =>
+      intro _
+      exact Zk.trueRel r v htrue hτ (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩)))
+  | @trueNrel α k c Γ ar r v htrue hτ hmem =>
+      intro _
+      exact Zk.trueNrel r v htrue hτ (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+        (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hmem⟩)))
+  | @wk α k c Δ Γ hsub _ ih =>
+      intro hmem
+      by_cases hd : (φ ⋎ ψ) ∈ Δ
+      · exact Zk.wk (Finset.insert_subset_insert _ (Finset.insert_subset_insert _
+          (Finset.erase_subset_erase _ hsub))) (ih hd)
+      · refine Zk.wk ?_ (by assumption)
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩))
+  | @weak α β k c Δ Γ hβ hβNF hαNF hτ hsub _ ih =>
+      intro hmem
+      by_cases hd : (φ ⋎ ψ) ∈ Δ
+      · exact Zk.weak hβ hβNF hαNF hτ (Finset.insert_subset_insert _ (Finset.insert_subset_insert _
+          (Finset.erase_subset_erase _ hsub))) (ih hd)
+      · refine Zk.weak hβ hβNF hαNF hτ ?_ (by assumption)
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩))
+  | @andI α βφ' βψ' k c Γ₀ φ' ψ' hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ihφ ihψ =>
+      intro hmem
+      have hhead : (φ' ⋏ ψ') ≠ (φ ⋎ ψ) := by intro h; simp [Wedge.wedge, Vee.vee] at h
+      have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have Pφ := Zk.wk (invPush (φ ⋎ ψ) φ' Γ₀) (ihφ (Finset.mem_insert_of_mem hmem0))
+      have Pψ := Zk.wk (invPush (φ ⋎ ψ) ψ' Γ₀) (ihψ (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (invPull (φ ⋎ ψ) hhead Γ₀) (Zk.andI φ' ψ' hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ Pφ Pψ)
+  | @orI α β k c Γ₀ φ' ψ' hβ hβNF hαNF hτ _ ih =>
+      intro hmem
+      by_cases hhd : (φ' ⋎ ψ') = (φ ⋎ ψ)
+      · obtain ⟨rfl, rfl⟩ := (Semiformula.or_inj _ _ _ _).mp hhd.symm
+        rw [Finset.erase_insert_eq_erase]
+        by_cases hd : (φ ⋎ ψ) ∈ Γ₀
+        · -- the premise still carries `φ ⋎ ψ`; invert it there, collapse the duplicate, raise β→α
+          exact Zk.weak hβ hβNF hαNF hτ (princOrSub Γ₀)
+            (ih (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hd)))
+        · -- `φ ⋎ ψ ∉ Γ₀`: the erase is a no-op, the premise IS the target; raise β→α
+          rw [Finset.erase_eq_of_notMem hd]
+          exact Zk.weak hβ hβNF hαNF hτ (Finset.Subset.refl _) (by assumption)
+      · have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhd e.symm
+        have P := Zk.wk (invPush2 (φ ⋎ ψ) φ' ψ' Γ₀)
+          (ih (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0)))
+        exact Zk.wk (invPull (φ ⋎ ψ) hhd Γ₀) (Zk.orI φ' ψ' hβ hβNF hαNF hτ P)
+  | @allω α k c Γ₀ χ β hβ hβNF hαNF hτ _ ih =>
+      intro hmem
+      have hhead : (∀⁰ χ) ≠ (φ ⋎ ψ) := by intro h; simp [Vee.vee] at h
+      have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have key : ∀ n, Zk (β n) (max k n) c
+          (insert (χ/[nm n]) (insert φ (insert ψ (Γ₀.erase (φ ⋎ ψ))))) := fun n =>
+        Zk.wk (invPush (φ ⋎ ψ) (χ/[nm n]) Γ₀) (ih n (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (invPull (φ ⋎ ψ) hhead Γ₀) (Zk.allω χ β hβ hβNF hαNF hτ key)
+  | @exI α β k c Γ₀ χ n hβ hβNF hαNF hτ hbound _ ih =>
+      intro hmem
+      have hhead : (∃⁰ χ) ≠ (φ ⋎ ψ) := by intro h; simp [Vee.vee] at h
+      have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zk.wk (invPush (φ ⋎ ψ) (χ/[nm n]) Γ₀) (ih (Finset.mem_insert_of_mem hmem0))
+      exact Zk.wk (invPull (φ ⋎ ψ) hhead Γ₀) (Zk.exI χ n hβ hβNF hαNF hτ hbound P)
+  | @cut α βφ' βψ' k c Γ₀ χ hcompl hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ _ _ ih₁ ih₂ =>
+      intro hmem
+      have P₁ := Zk.wk (invPush (φ ⋎ ψ) χ Γ₀) (ih₁ (Finset.mem_insert_of_mem hmem))
+      have P₂ := Zk.wk (invPush (φ ⋎ ψ) (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
+      exact Zk.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hτφ hτψ P₁ P₂
 
 end Zk
 
