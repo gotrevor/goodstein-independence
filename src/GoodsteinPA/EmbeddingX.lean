@@ -652,6 +652,42 @@ theorem metaInduction_cong (ψ step : SyntacticSemiformula LX 1) {Γ : Seq LX}
   simp only [Finset.mem_insert] at hx ⊢
   tauto
 
+/-- **Stripping a universal closure.** To derive `{∀⁰* χ} ∪ Γ` it suffices to derive every numeral
+instantiation `{χ[bvars ↦ numerals]} ∪ Γ` — iterated `allω` over the `n` closure variables. The
+gateway for the X-induction axiom `↑(univCl (succInd ψ)) = ∀⁰* (fixitr ▹ succInd ψ)`. -/
+lemma PXFc_allClosure : ∀ {n} (χ : Semiformula LX ℕ n) {c : ℕ} {Γ : Seq LX},
+    (∀ (v : Fin n → ℕ), ∃ a, PXFc a c (insert (Rew.subst (fun i => nm (v i)) ▹ χ) Γ)) →
+    ∃ a, PXFc a c (insert (∀⁰* χ) Γ) := by
+  intro n
+  induction n with
+  | zero =>
+    intro χ c Γ h
+    obtain ⟨a, ha⟩ := h Fin.elim0
+    refine ⟨a, ?_⟩
+    rw [show (∀⁰* χ) = χ from rfl]
+    have : (Rew.subst (fun i : Fin 0 => nm (Fin.elim0 i)) ▹ χ) = χ := by
+      simp [Matrix.empty_eq]
+    rwa [this] at ha
+  | succ n ih =>
+    intro χ c Γ h
+    rw [allClosure_succ]
+    apply ih (∀⁰ χ)
+    intro v
+    rw [Rewriting.app_all]
+    have fam : ∀ m, ∃ a, PXFc a c
+        (insert (((Rew.subst (fun i => nm (v i))).q ▹ χ)/[nm m]) Γ) := by
+      intro m
+      rw [subst_q_cons_app (fun i => nm (v i)) m χ]
+      have hcons : ((nm m :> fun i => nm (v i)) : Fin (n+1) → Semiterm LX ℕ 0)
+          = (fun i => nm ((m :> v) i)) := by
+        funext i; cases i using Fin.cases with
+        | zero => simp
+        | succ j => simp
+      rw [hcons]
+      exact h (m :> v)
+    choose β hβ using fam
+    exact ⟨_, PXFc.allω _ hβ⟩
+
 /-- The NNF of Foundation's `succInd ψ` (`ψ(0) → (∀x, ψx → ψ(x+1)) → ∀x ψx`): a disjunction of the
 induction-axiom's three Tait components, matching `metaInduction_cong`'s `{∼ψ(0), ∃(∼step), ∀ψ}`. -/
 lemma succInd_nnf (ψ : Semiformula LX ℕ 1) :
