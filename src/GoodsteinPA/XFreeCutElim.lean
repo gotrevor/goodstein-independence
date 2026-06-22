@@ -508,4 +508,248 @@ theorem PXFc.allInv {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX} {χ : SyntacticSe
   rcases h with ⟨d, ho, hcr, hxf⟩
   exact (allInvAux_x i d hxf hcr hmem).mono ho le_rfl
 
+/-! ### Cut reductions (§19.5 ∧/∨, §19.6 ∀/∃) over `PXFc` (port of `ZinftyGen.cutReduce*`). -/
+
+/-- ∧/∨ principal cut reduction (Towsner Thm 19.5), `XFreeAx`-preserving. -/
+theorem PXFc.cutReduceConj {a b : Form LX} {c : ℕ} {α β : Ordinal.{0}} {Γ : Seq LX}
+    (ha : (a.complexity + 1 : ℕ∞) ≤ c) (hb : (b.complexity + 1 : ℕ∞) ≤ c)
+    (hC : PXFc α c (insert (a ⋏ b) Γ)) (hNC : PXFc β c (insert (∼a ⋎ ∼b) Γ)) :
+    PXFc (max α β + 1 + 1) c Γ := by
+  have hA : PXFc α c (insert a Γ) :=
+    (hC.andInvL (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have hB : PXFc α c (insert b Γ) :=
+    (hC.andInvR (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have hNab : PXFc β c (insert (∼a) (insert (∼b) Γ)) :=
+    (hNC.orInv (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have cutA : PXFc (max α β + 1) c (insert (∼b) Γ) :=
+    PXFc.cut a ha (hA.weakening (by
+      intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto)) hNab
+  have cutB : PXFc (max α (max α β + 1) + 1) c Γ := PXFc.cut b hb hB cutA
+  have he : max α (max α β + 1) + 1 = max α β + 1 + 1 := by
+    congr 1
+    exact max_eq_right (le_trans (le_max_left α β) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  exact he ▸ cutB
+
+/-- ∨/∧ principal cut reduction (dual; Towsner Thm 19.5), `XFreeAx`-preserving. -/
+theorem PXFc.cutReduceDisj {a b : Form LX} {c : ℕ} {α β : Ordinal.{0}} {Γ : Seq LX}
+    (ha : (a.complexity + 1 : ℕ∞) ≤ c) (hb : (b.complexity + 1 : ℕ∞) ≤ c)
+    (hC : PXFc α c (insert (a ⋎ b) Γ)) (hNC : PXFc β c (insert (∼a ⋏ ∼b) Γ)) :
+    PXFc (max α β + 1 + 1) c Γ := by
+  have hAB : PXFc α c (insert a (insert b Γ)) :=
+    (hC.orInv (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have hNa : PXFc β c (insert (∼a) Γ) :=
+    (hNC.andInvL (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have hNb : PXFc β c (insert (∼b) Γ) :=
+    (hNC.andInvR (Finset.mem_insert_self _ _)).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  have cutA : PXFc (max α β + 1) c (insert b Γ) :=
+    PXFc.cut a ha hAB (hNa.weakening (by
+      intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto))
+  have cutB : PXFc (max (max α β + 1) β + 1) c Γ := PXFc.cut b hb cutA hNb
+  have he : max (max α β + 1) β + 1 = max α β + 1 + 1 := by
+    congr 1
+    exact max_eq_left (le_trans (le_max_right α β) (le_of_lt (lt_add_of_pos_right _ one_pos)))
+  exact he ▸ cutB
+
+/-- Bound bookkeeping (binary commuting): `max (α+a+1) (α+b+1) + 1 ≤ α + (max a b + 1) + 1`. -/
+private theorem cb_bnd (α a b : Ordinal.{0}) :
+    max (α + a + 1) (α + b + 1) + 1 ≤ α + (max a b + 1) + 1 := by
+  refine add_le_add_left (max_le ?_ ?_) 1
+  · calc α + a + 1 = α + (a + 1) := add_assoc α a 1
+      _ ≤ α + (max a b + 1) := (add_le_add_iff_left α).mpr (add_le_add_left (le_max_left a b) 1)
+  · calc α + b + 1 = α + (b + 1) := add_assoc α b 1
+      _ ≤ α + (max a b + 1) := (add_le_add_iff_left α).mpr (add_le_add_left (le_max_right a b) 1)
+
+/-- Bound bookkeeping (unary commuting): `α + a + 1 + 1 = α + (a + 1) + 1`. -/
+private theorem cb_bnd1 (α a : Ordinal.{0}) : α + a + 1 + 1 ≤ α + (a + 1) + 1 :=
+  le_of_eq (by rw [add_assoc α a 1])
+
+/-- Bound bookkeeping (ω-rule commuting). -/
+private theorem cb_bnd_sup (α : Ordinal.{0}) (f : ℕ → Ordinal.{0}) :
+    (⨆ n, (α + f n + 1)) + 1 ≤ α + ((⨆ n, f n) + 1) + 1 := by
+  refine add_le_add_left ?_ 1
+  apply Ordinal.iSup_le
+  intro n
+  calc α + f n + 1 = α + (f n + 1) := add_assoc α (f n) 1
+    _ ≤ α + ((⨆ m, f m) + 1) := (add_le_add_iff_left α).mpr (add_le_add_left (Ordinal.le_iSup f n) 1)
+
+/-- Frame subset: push an `insert` out of the `erase`/`∪`-framed context. -/
+private theorem cb_frame_in (a e : Form LX) (s t : Seq LX) :
+    (insert a s).erase e ∪ t ⊆ insert a (s.erase e ∪ t) := by
+  intro x hx
+  simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+  rcases hx with ⟨hne, hxa | hxs⟩ | hxt
+  · exact Or.inl hxa
+  · exact Or.inr (Or.inl ⟨hne, hxs⟩)
+  · exact Or.inr (Or.inr hxt)
+
+/-- The induction core of the ∀/∃ reduction over `PXFc` (port of `cutReduceAllAux`), `XFreeAx`-
+preserving. `fam` is the ∀-inversion family; induct on the ∃-side derivation `d`. -/
+theorem PXFc.cutReduceAllAux {φ : SyntacticSemiformula LX 1} {c : ℕ} {α : Ordinal.{0}}
+    {Γ : Seq LX} (hφc : (φ.complexity + 1 : ℕ∞) ≤ c)
+    (fam : ∀ n, PXFc α c (insert (φ/[nm n]) Γ)) :
+    ∀ {Δ : Seq LX} (d : Deriv Δ), XFreeAx d → d.cr ≤ (c : ℕ∞) → (∃⁰ ∼φ) ∈ Δ →
+      PXFc (α + d.o + 1) c (Δ.erase (∃⁰ ∼φ) ∪ Γ) := by
+  intro Δ d
+  induction d with
+  | @axL Δ k r v hp hn =>
+    intro _ _ _
+    simp only [Deriv.o]
+    refine (PXFc.axL r v ?_ ?_).mono zero_le (Nat.zero_le c)
+    · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hp⟩)
+    · exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), hn⟩)
+  | @axTrue Δ k b r v htrue hmem =>
+    intro hxf _ _
+    simp only [Deriv.o]
+    refine (PXFc.axTrue b r v hxf htrue ?_).mono zero_le (Nat.zero_le c)
+    exact Finset.mem_union_left _ (Finset.mem_erase.mpr
+      ⟨Semiformula.ne_of_ne_complexity (by cases b <;> simp [signedLit]), hmem⟩)
+  | @verumR Δ h =>
+    intro _ _ _
+    simp only [Deriv.o]
+    refine (PXFc.verumR ?_).mono zero_le (Nat.zero_le c)
+    exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), h⟩)
+  | @weak Δ' Δ d' hsub ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    by_cases hd : (∃⁰ ∼φ) ∈ Δ'
+    · exact (ih hxf hcr hd).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase] at hx ⊢
+        rcases hx with ⟨hne, hxΔ'⟩ | hxΓ
+        · exact Or.inl ⟨hne, hsub hxΔ'⟩
+        · exact Or.inr hxΓ)
+    · refine (show PXFc d'.o c Δ' from ⟨d', le_rfl, hcr, hxf⟩).weakening ?_ |>.mono ?_ le_rfl
+      · intro x hx
+        exact Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩)
+      · exact le_trans (CanonicallyOrderedAdd.le_add_self d'.o α)
+          (le_of_lt (lt_add_of_pos_right _ one_pos))
+  | @andI Γ₀ χ₀ χ₁ d₀ d₁ ih₀ ih₁ =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (χ₀ ⋏ χ₁) ≠ (∃⁰ ∼φ) := by intro h; simp [Wedge.wedge, ExsQuantifier.exs] at h
+    have hmem0 : (∃⁰ ∼φ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have hcr0 : d₀.cr ≤ (c : ℕ∞) := le_trans (le_max_left _ _) hcr
+    have hcr1 : d₁.cr ≤ (c : ℕ∞) := le_trans (le_max_right _ _) hcr
+    have P0 : PXFc (α + d₀.o + 1) c (insert χ₀ (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)) :=
+      (ih₀ hxf.1 hcr0 (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+    have P1 : PXFc (α + d₁.o + 1) c (insert χ₁ (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)) :=
+      (ih₁ hxf.2 hcr1 (Finset.mem_insert_of_mem hmem0)).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+    refine ((PXFc.andI χ₀ χ₁ P0 P1).weakening (show
+        insert (χ₀ ⋏ χ₁) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ) ⊆ (insert (χ₀ ⋏ χ₁) Γ₀).erase (∃⁰ ∼φ) ∪ Γ from by
+      intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+      rcases hx with rfl | hx
+      · exact Or.inl ⟨hhead, Or.inl rfl⟩
+      · tauto)).mono (cb_bnd α d₀.o d₁.o) le_rfl
+  | @orI Γ₀ χ₀ χ₁ d' ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (χ₀ ⋎ χ₁) ≠ (∃⁰ ∼φ) := by intro h; simp [Vee.vee, ExsQuantifier.exs] at h
+    have hmem0 : (∃⁰ ∼φ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have P : PXFc (α + d'.o + 1) c (insert χ₀ (insert χ₁ (Γ₀.erase (∃⁰ ∼φ) ∪ Γ))) :=
+      (ih hxf hcr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmem0))).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+    refine ((PXFc.orI χ₀ χ₁ P).weakening (show
+        insert (χ₀ ⋎ χ₁) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ) ⊆ (insert (χ₀ ⋎ χ₁) Γ₀).erase (∃⁰ ∼φ) ∪ Γ from by
+      intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+      rcases hx with rfl | hx
+      · exact Or.inl ⟨hhead, Or.inl rfl⟩
+      · tauto)).mono (cb_bnd1 α d'.o) le_rfl
+  | @allω Γ₀ χ' d' ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hhead : (∀⁰ χ') ≠ (∃⁰ ∼φ) := by intro h; simp [UnivQuantifier.all, ExsQuantifier.exs] at h
+    have hmem0 : (∃⁰ ∼φ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+    have key : ∀ n, PXFc (α + (d' n).o + 1) c (insert (χ'/[nm n]) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)) :=
+      fun n => (ih n (hxf n) (le_trans (le_iSup (fun m => (d' m).cr) n) hcr)
+        (Finset.mem_insert_of_mem hmem0)).weakening (by
+          intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+    refine ((PXFc.allω χ' key).weakening (show
+        insert (∀⁰ χ') (Γ₀.erase (∃⁰ ∼φ) ∪ Γ) ⊆ (insert (∀⁰ χ') Γ₀).erase (∃⁰ ∼φ) ∪ Γ from by
+      intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+      rcases hx with rfl | hx
+      · exact Or.inl ⟨hhead, Or.inl rfl⟩
+      · tauto)).mono (cb_bnd_sup α (fun n => (d' n).o)) le_rfl
+  | @exI Γ₀ χ' n d' ih =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    by_cases hhd : (∃⁰ χ') = (∃⁰ ∼φ)
+    · have hχ : χ' = ∼φ := by have := hhd; simpa [ExsQuantifier.exs] using this
+      subst hχ
+      rw [Finset.erase_insert_eq_erase]
+      have hcutfml : (((φ/[nm n]).complexity + 1 : ℕ∞)) ≤ c := by simpa using hφc
+      have hNeg : (∼φ)/[nm n] = ∼(φ/[nm n]) := by simp
+      have famn := (fam n).weakening (show insert (φ/[nm n]) Γ
+          ⊆ insert (φ/[nm n]) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ) from by
+        intro x hx; simp only [Finset.mem_insert, Finset.mem_union] at hx ⊢; tauto)
+      by_cases hd : (∃⁰ ∼φ) ∈ Γ₀
+      · have Premise : PXFc (α + d'.o + 1) c (insert ((∼φ)/[nm n]) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)) :=
+          (ih hxf hcr (Finset.mem_insert_of_mem hd)).weakening (by
+            intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+        have hctx : insert ((∼φ)/[nm n]) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)
+            = insert (∼(φ/[nm n])) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ) := by rw [hNeg]
+        have hcut := PXFc.cut (φ/[nm n]) hcutfml famn (Premise.cast hctx)
+        refine hcut.mono ?_ le_rfl
+        refine add_le_add_left ?_ 1
+        exact max_le le_self_add (le_of_eq (add_assoc α d'.o 1))
+      · have base : PXFc d'.o c (insert (∼(φ/[nm n])) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)) := by
+          refine (show PXFc d'.o c (insert ((∼φ)/[nm n]) Γ₀) from ⟨d', le_rfl, hcr, hxf⟩).weakening ?_
+          intro x hx
+          simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_erase] at hx ⊢
+          rcases hx with rfl | hxΓ₀
+          · left; rw [hNeg]
+          · exact Or.inr (Or.inl ⟨fun e => hd (e ▸ hxΓ₀), hxΓ₀⟩)
+        have hcut := PXFc.cut (φ/[nm n]) hcutfml famn base
+        refine hcut.mono ?_ le_rfl
+        refine add_le_add_left ?_ 1
+        exact max_le le_self_add
+          (le_trans (le_of_lt (lt_add_of_pos_right _ one_pos))
+            (CanonicallyOrderedAdd.le_add_self (d'.o + 1) α))
+    · have hhead : (∃⁰ χ') ≠ (∃⁰ ∼φ) := hhd
+      have hmem0 : (∃⁰ ∼φ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P : PXFc (α + d'.o + 1) c (insert (χ'/[nm n]) (Γ₀.erase (∃⁰ ∼φ) ∪ Γ)) :=
+        (ih hxf hcr (Finset.mem_insert_of_mem hmem0)).weakening (by
+          intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+      refine ((PXFc.exI χ' n P).weakening (show
+          insert (∃⁰ χ') (Γ₀.erase (∃⁰ ∼φ) ∪ Γ) ⊆ (insert (∃⁰ χ') Γ₀).erase (∃⁰ ∼φ) ∪ Γ from by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+        rcases hx with rfl | hx
+        · exact Or.inl ⟨hhead, Or.inl rfl⟩
+        · tauto)).mono (cb_bnd1 α d'.o) le_rfl
+  | @cut Γ₀ ξ d₁ d₂ ih₁ ih₂ =>
+    intro hxf hcr hmem
+    simp only [Deriv.cr] at hcr
+    simp only [Deriv.o]
+    have hcξ : (ξ.complexity + 1 : ℕ∞) ≤ c := (le_max_left _ _).trans hcr
+    have hcr1 : d₁.cr ≤ (c : ℕ∞) := (le_max_left d₁.cr d₂.cr).trans ((le_max_right _ _).trans hcr)
+    have hcr2 : d₂.cr ≤ (c : ℕ∞) := (le_max_right d₁.cr d₂.cr).trans ((le_max_right _ _).trans hcr)
+    have P1 := (ih₁ hxf.1 hcr1 (Finset.mem_insert_of_mem hmem)).weakening (cb_frame_in ξ (∃⁰ ∼φ) Γ₀ Γ)
+    have P2 := (ih₂ hxf.2 hcr2 (Finset.mem_insert_of_mem hmem)).weakening (cb_frame_in (∼ξ) (∃⁰ ∼φ) Γ₀ Γ)
+    exact (PXFc.cut ξ hcξ P1 P2).mono (cb_bnd α d₁.o d₂.o) le_rfl
+
+/-- **Cut reduction, ∀/∃ principal** (Towsner Thm 19.6), `XFreeAx`-preserving. -/
+theorem PXFc.cutReduceAll {φ : SyntacticSemiformula LX 1} {c : ℕ} {α β : Ordinal.{0}}
+    {Γ : Seq LX} (hφc : (φ.complexity + 1 : ℕ∞) ≤ c)
+    (hC : PXFc α c (insert (∀⁰ φ) Γ)) (hNC : PXFc β c (insert (∃⁰ ∼φ) Γ)) :
+    PXFc (α + β + 1) c Γ := by
+  have fam : ∀ n, PXFc α c (insert (φ/[nm n]) Γ) := fun n =>
+    (hC.allInv (Finset.mem_insert_self _ _) n).weakening (by
+      intro x hx; simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢; tauto)
+  rcases hNC with ⟨d, ho, hcr, hxf⟩
+  have haux := PXFc.cutReduceAllAux hφc fam d hxf hcr (Finset.mem_insert_self _ _)
+  refine (haux.weakening (show (insert (∃⁰ ∼φ) Γ).erase (∃⁰ ∼φ) ∪ Γ ⊆ Γ from by
+    intro x hx; simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)).mono ?_ le_rfl
+  exact add_le_add_left ((add_le_add_iff_left α).mpr ho) 1
+
 end GoodsteinPA.XFreeCutElim
