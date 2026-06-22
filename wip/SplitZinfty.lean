@@ -554,6 +554,16 @@ ordinals with `norm δ < k + d`; the result lands at `osucc δ`, same `(k,d)`. -
 theorem lt_osucc {o : ONote} (h : o.NF) : o < osucc o :=
   lt_def.mpr (by rw [repr_osucc h]; exact lt_add_one _)
 
+/-- **`osucc` strict monotonicity** (the §19.6 descent: `βᵢ < γ ⟹ osucc(α+βᵢ) < osucc(α+γ)`). -/
+theorem osucc_lt_osucc {x y : ONote} (hx : x.NF) (hy : y.NF) (h : x < y) : osucc x < osucc y := by
+  refine lt_def.mpr ?_
+  rw [repr_osucc hx, repr_osucc hy, ← Order.succ_eq_add_one, ← Order.succ_eq_add_one]
+  exact Order.succ_lt_succ (lt_def.mp h)
+
+/-- `x < y ⟹ x < osucc y` (NF). -/
+theorem lt_osucc_of_lt {x y : ONote} (hy : y.NF) (h : x < y) : x < osucc y :=
+  lt_trans h (lt_osucc hy)
+
 /-! #### Ordinal/`norm` bookkeeping for §19.6/§19.7 (copied from `BoundedZinfty`; all axiom-clean). -/
 
 theorem add_lt_add_left_NF {α γ' γ : ONote} (hαNF : α.NF) (hγ'NF : γ'.NF) (hγNF : γ.NF)
@@ -564,6 +574,11 @@ theorem add_lt_add_left_NF {α γ' γ : ONote} (hαNF : α.NF) (hγ'NF : γ'.NF)
 theorem le_add_left_NF {α γ : ONote} (hαNF : α.NF) (hγNF : γ.NF) : γ ≤ α + γ := by
   haveI := hαNF; haveI := hγNF
   exact le_def.mpr (by rw [repr_add]; exact le_add_self)
+
+/-- **The §19.6 descent step**, assembled: `γ' < γ ⟹ osucc (α + γ') < osucc (α + γ)`. -/
+theorem add_osucc_descent {α γ' γ : ONote} (hαNF : α.NF) (hγ'NF : γ'.NF) (hγNF : γ.NF)
+    (h : γ' < γ) : osucc (α + γ') < osucc (α + γ) :=
+  osucc_lt_osucc (ONote.add_nf α γ') (ONote.add_nf α γ) (add_lt_add_left_NF hαNF hγ'NF hγNF h)
 
 @[simp] theorem norm_omegaPow {α : ONote} : norm (oadd α 1 0) = max (norm α) 1 := by
   simp [norm_oadd]
