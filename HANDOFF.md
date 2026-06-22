@@ -64,14 +64,16 @@ adding the bounded `(α, e, k, d)` bookkeeping:
 - **Bounds:** conclusion ordinal `osucc(α+γ)` (`add_osucc_descent` banked); `k` unchanged; `d ↦ d +
   norm α` (norm-budget `d`-bump, via `norm_add_le`); `e` raised to a common control at the **top-level**
   `cutReduceAll` (combining ∀/∃ sides) via `mono_e`.
-- **⚠️ FIRST — the NF-threading subtlety (surfaced lap 8, see ADDENDUM 5):** the `Zekd` leaf rules
-  (`axL`/`verumR`/`trueRel`/`trueNrel`) carry NO `hαNF` on the node ordinal, but the leaf cases of
-  `cutReduceAll` need `norm(α+γ) ≤ norm α + norm γ` (`norm_add_le`, **NF-essential** — NF-free is
-  machine-checked FALSE). **Fix (recommended, option (b)): NF-ify the `Zekd` leaf rules** — add `hαNF :
-  α.NF` to `trueRel`/`trueNrel` (the only leaves with a norm condition; `axL`/`verumR` need no ordinal
-  constraint so can be issued at `osucc(α+γ)` directly). Then re-thread `hαNF` through the
-  `trueRel`/`trueNrel` cases of `mono_k/d/c/e` + the 4 inversions (~12 mechanical spots). Matches Towsner
-  (every `Z_∞` node is `<ε₀` ⟹ NF).
+- **NF-threading — RESOLVED mechanism (lap-8 final insight):** state `cutReduceAllAux` with the
+  ∃-side ordinal's NF threaded *through the induction goal* (NOT intro'd before `induction`):
+  `∀ {γ Δ}, Zekd γ e k dd c Δ → γ.NF → (∃⁰∼φ)∈Δ → ZekdProv (osucc (α+γ)) e k (dd+norm α) c (…)`.
+  Then each case's IH carries `γ''.NF → …`; supply it from the constructor's own NF hyps
+  (`andI/orI/allω/exI/weak/cut` all carry `hβNF`; `wk` passes the same `γ` NF; leaves `trueRel/trueNrel`
+  carry `hαNF` from commit `c8cd83d`, and `axL/verumR` wrap the inner `Zekd` at ordinal `0` so need no
+  NF). **This needs NO further calculus change** — the leaf-NF refactor (`c8cd83d`) is a bonus, not load-
+  bearing once `γ.NF` is threaded. The `ZekdProv` wrapper supplies the `≤`-slack + NF for every
+  ordinal-raise (`wk`'s `γ↦osucc(α+γ)`, `weak`'s `osucc(α+β)→osucc(α+γ)` via `ZekdProv.mono` +
+  `add_osucc_descent`).
 - **Budget arithmetic tip:** for a leaf at node ordinal `γ` (norm `γ < k+d`), issue the atom at `γ` then
   `weak` up to `osucc(α+γ)` — avoids the `osucc`-`+1`-vs-strict-`<` boundary that bites if you issue
   directly at `osucc(α+γ)` (norm could hit the budget exactly).

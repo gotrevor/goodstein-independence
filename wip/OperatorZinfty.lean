@@ -749,4 +749,34 @@ theorem of {α e : ONote} {k d c : ℕ} {Γ : Seq} (hNF : α.NF) (D : Zekd α e 
 
 end ZekdProv
 
+/-! ### §19.6 ∀/∃ cut reduction `cutReduceAll` — SCAFFOLD (lap-8 checkpoint)
+
+The induction core. Port of `src/Zinfty.lean:785 cutReduceAllAux` to the control-ordinal calculus
+over the `ZekdProv` wrapper. The ∃-side ordinal's `NF` is **threaded through the induction goal**
+(`γ.NF →`), so each case's IH carries it (supplied from the constructors' own NF hyps; `wk` passes the
+same `γ`; leaves wrap at `0`/carry `hαNF`). Conclusion ordinal `osucc(α+γ)`; `d`-bump `dd ↦ dd+norm α`;
+`e` inert here (raised at the top-level cut, future `cutReduceAll`). `fam` is the ∀-inversion family,
+fixed over the outer `(α,e,k,dd,Γ)`; in the ω-rule commuting case it is raised via `mono_k`/`mono_d`.
+
+**Signature typechecks** (validated lap 8). Body is a disclosed `sorry` — next-lap focus.
+
+⚠️ **STRUCTURAL CHALLENGE for the body (surfaced lap 8):** `Zekd` is multi-indexed by `(α e k d c Γ)`
+(all are inductive indices), unlike the unbounded `Zinfty.lean Deriv` which is single-indexed by `Γ`
+(with `o`/`cr` as separate *measure functions*). So `induction D` here generalizes `e k d c` too — and
+the external `fam` (fixed over the outer `e,k,dd`) falls out of alignment with the per-case rebound
+indices (acutely in the `allω` case, premise `k ↦ max k n`). Two clean resolutions for next lap:
+  (i) **Reformulate to a single-indexed `Deriv`-style calculus** (`ZekdD : Seq → Type` with `ord`/`ctrl`/
+      `nrm`/`cr` as measure functions), port the unbounded `cutReduceAllAux` near-verbatim (it already
+      does exactly this), then bridge `ZekdD`-with-measures ↔ `Zekd`. Most faithful to the working M5.
+  (ii) **`revert`-generalize `fam`** (and `hαbud`) before `induction`, re-`intro` per case, raising via
+       `mono_k`/`mono_d` where the indices diverge. Heavier per-case but no new calculus.
+Recommendation: (i) — the unbounded `Deriv`/`o`/`cr` machinery is the proven template precisely because
+single-indexing makes the §19.6 induction tractable; replicate it with the `(ctrl,nrm,cr)` measures. -/
+theorem cutReduceAllAux {φ : SyntacticSemiformula ℒₒᵣ 1} {c k dd : ℕ} {α e : ONote} {Γ : Seq}
+    (hφc : φ.complexity < c) (hαNF : α.NF) (heNF : e.NF)
+    (fam : ∀ n, Zekd α e k dd c (insert (φ/[nm n]) Γ)) :
+    ∀ {γ : ONote} {Δ : Seq}, Zekd γ e k dd c Δ → γ.NF → (∃⁰ ∼φ) ∈ Δ →
+      ZekdProv (osucc (α + γ)) e k (dd + norm α) c (Δ.erase (∃⁰ ∼φ) ∪ Γ) := by
+  sorry
+
 end GoodsteinPA.OperatorZinfty
