@@ -5,7 +5,7 @@
 > (`lake build GoodsteinPA`, 1257 jobs). `wip/BoundedZinfty.lean` compiles standalone **sorry-free**
 > (`lake env lean wip/BoundedZinfty.lean`). Headline still a literal `sorry` (anti-fraud, correct).
 
-## What landed this lap (10 commits, all verified)
+## What landed this lap (17 commits, all verified)
 
 This was a **crux-resolution + ingredient lap**, not a new-girder-built lap. The §19.6 cut-reduction
 that lap 6 pointed at turned out to have a deeper layer; this lap mapped it precisely and proved the
@@ -40,6 +40,12 @@ one ingredient that's fully tractable.
    index + re-prove `allInv` + `lowerBound_hardy_selfcontained`) — a fresh undertaking; **start it
    fresh-headed, do not half-break the clean state.**
 
+6. **IMPLEMENTED the split-index design through §19.5** (`wip/SplitZinfty.lean`, 603 lines, sorry-free).
+   See the ⭐ section below. Eliminated option 2 (numeric swap), derived the `(k,d)` split (ADDENDUM 3),
+   built the calculus + `mono_k`/`mono_d`/`mono_c` + full inversion suite + §19.5 cut-reductions on it.
+   `allInv`'s principal case compiling is the end-to-end validation that the design closes the
+   obstruction that defeated both single-index calculi.
+
 5. **Mapped the real §19.6 frontier — the `allω`-commuting obstruction.** Starting `cutReduceAll`,
    found that the commuting ω-rule case (∃-side's last rule is an ω-rule) **cannot keep the ω-rule's
    `max{k,n}` norm budget after adding `α` to the bound**: `norm(α+βₙ) ~ norm α + n` exceeds `max K n ~
@@ -48,7 +54,43 @@ one ingredient that's fully tractable.
    remaining depth of step 1. Full derivation + 3 attack options in the ANALYSIS **ADDENDUM**;
    `ON-LINE-REQUEST` re-filed (one layer down — Buchholz operator-control / S-W bounding lemma).
 
-## THE NEXT MOVE — §19.6 attack **option 1** (function/operator-valued `allω` index)
+## ⭐ LAP-7 LATE PROGRESS — split-index design IMPLEMENTED through §19.5 (`wip/SplitZinfty.lean`)
+
+The option-1 design was not just recommended — it was instantiated and validated. **`wip/SplitZinfty.lean`
+(603 lines, sorry-free, compiles standalone)** defines the **split-index calculus `Zkd α k d c Γ`** (the
+`(k,d)` design of ADDENDUM 3: ω-premise `n` at `(max k n, d)`, budget `max(k,n)+d`) and ports the entire
+§19.2–19.5 layer onto it:
+- `mono_k` (idempotent `max`-part), **`mono_d`** (new — the additive cut-shift part), `mono_c`, `weakening`;
+- full inversion suite `orInv`/`andInvL`/`andInvR`/`allInv` — **`allInv`'s principal case validates the
+  design**: `d` rides inert, `k`-part collapses idempotently (`max (max k n₀) n₀ = max k n₀`), exactly
+  the move that defeated both naive single-index swaps;
+- §19.5 `cutReduceConj`/`cutReduceDisj` (+ `lt_osucc`), index `(k,d)` preserved.
+
+This is full parity with the old single-index `wip/BoundedZinfty.lean` §19.2–19.5, but on the design that
+can complete §19.6. **`wip/BoundedZinfty.lean` is now superseded by `wip/SplitZinfty.lean`** for the
+forward path (keep it as the single-index reference / history).
+
+### THE NEXT MOVE — §19.6 `cutReduceAll` on `Zkd` (the d-bump payoff)
+Port `src/Zinfty.lean:785 cutReduceAllAux` (lap-3, fully proved for the unbounded calculus) to `Zkd`:
+- invert the ∀-side via `allInv` → `fam : ∀ n, Zkd α (max k n) d c (insert (φ/[nm n]) Γ)`;
+- induct on the ∃-side `Zkd γ k d c (Δ, ∃⁰∼φ)` (Prop-valued — induct directly; running ordinal = the
+  constructor bound `γ`); ordinal framing `α + γ` (helpers to copy from `BoundedZinfty`:
+  `add_lt_add_left_NF`, `le_add_left_NF`; `norm_add_le` already proved there) + `osucc` slack at cuts;
+- **principal `exI`**: cut `fam n` (witness `n`) against the ∃-premise (`mono_d`/`mono_k` to unify indices);
+- **commuting `allω` (THE PAYOFF):** reconstruct the ω-rule bumping `d ↦ d + norm α`. The premise budget
+  check `norm(α+βₙ) ≤ norm α + norm βₙ < norm α + (max k n + d) = max k n + (d + norm α)` ✓ — the `+norm α`
+  shift lands exactly in the bumped `d`. This is the obstruction (ADDENDA 1–2) closed by the design.
+- conclusion: `Zkd (osucc (α+γ)) k (d + norm α) c (Δ.erase(∃⁰∼φ) ∪ Γ)`, then `cutReduceAll` wraps it.
+
+Then **§19.7 `cutElimStep`** (`c+1↦c`, ordinal `ω^α`, `norm_omegaPow` — copy from `BoundedZinfty`; `d`
+grows by the `ω^α` blow-up but stays finite — track existentially) + **§19.9 `cutElim`**. Finally re-prove
+**`lowerBound_hardy_selfcontained` for the `(k,d)` calculus** (or its `B`-analogue): I∀ case discharged by
+`hardy α (max k n + d) ≤ hardy α (n + (k+d)) < G n` via `hardy_shift_lt_goodsteinLength (c := k+d)`
+(`src/LowerBound.lean`, proved). Then the **subformula bridge** connects cut-free `Zkd` of `{gAll}` to the
+lower bound ⟹ headline.
+
+<details><summary>Superseded: the abstract option-1 recommendation (now implemented above)</summary>
+## (superseded) §19.6 attack **option 1** (function/operator-valued `allω` index)
 
 The principal `exI` case of `cutReduceAll` is clean; the live frontier is the commuting `allω` case.
 **Lap-7 tried option 2 (global numeric index swap) and ELIMINATED it** — see `ANALYSIS-…-cutelim-k-
@@ -75,6 +117,7 @@ design that closes BOTH obstructions, and it keeps slope 1 so the proved dominat
   operator-control pattern.
 - **Fallback:** Buchholz's full operator `H` (set-valued, not just a ℕ→ℕ function) if the function form
   still can't express some closure; `ON-LINE-REQUEST` re-filed for the precise PA operator-control spec.
+</details>
 
 ## State of the spine (Route B, hardest-first)
 - **M1, M2, Phase 0/1** — done, clean.
@@ -100,7 +143,8 @@ design that closes BOTH obstructions, and it keeps slope 1 so the proved dominat
 - `ANALYSIS-2026-06-22-cutelim-k-threading.md` — **NEW**: the `k`/`τ` crux resolution + §19.6 ADDENDUM.
 - `src/GoodsteinPA/Hardy.lean` — added `hardy_add_ofNat` (+ 2 private helpers); proved, build green.
 - `src/GoodsteinPA/LowerBound.lean` — added `hardy_shift_lt_goodsteinLength`; proved, build green.
-- `wip/BoundedZinfty.lean` — added `norm_addAux_le`, `norm_add_le` (both proved); sorry-free.
+- `wip/BoundedZinfty.lean` — added `norm_addAux_le`, `norm_add_le` (both proved); sorry-free (single-index reference, now superseded).
+- `wip/SplitZinfty.lean` — **NEW**: split-index `(k,d)` calculus `Zkd` + §19.2–19.5 layer, sorry-free (the forward path).
 - `STATUS.md`, `PENDING_WORK.md` — lap-7 entries, route decision, §19.6 plan + option 2.
 - `ON-LINE-REQUEST.md` — re-filed (§19.6 commuting-case bounding).
 - `archive/findings/…operator-route-choice.md` — archived; `OPERATOR-NOTE…` removed.
