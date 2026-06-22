@@ -166,3 +166,41 @@ obstructions. The two Hardy lemmas proved this lap (`hardy_add_ofNat`, `hardy_sh
 remain the right domination ingredients for it (the controlled `g` keeps the slope at 1). The `+α`/`max`
 analysis here is the precise spec the operator index must satisfy. `wip/BoundedZinfty.lean` left
 sorry-free (the `k+n` experiment reverted); no half-broken state committed.
+
+---
+
+## ADDENDUM 3 (lap 7) — THE FIX: a split index `(k, d)` (concrete, lighter than full operators)
+
+ADDENDUM 2 concluded "operator-valued index needed". Working it out gives a **concrete minimal form**:
+add ONE numeric parameter `d` (a cut-shift budget) alongside `k`. The two obstructions want opposite
+things from the index — `allInv` wants idempotence (use `max`), §19.6-commuting wants additive-shift
+absorption (use `+`). **Give each its own component:**
+
+- Calculus index becomes `(k, d) : ℕ × ℕ`. Effective norm budget for a node is `k + d`; the **ω-rule's
+  `n`-th premise** sits at index `(max k n, d)` (so its budget is `max(k,n) + d` — the `+d` is OUTSIDE
+  the `max`, shifting the whole thing uniformly).
+- **`allInv` (and all inversions) transform only `k`** (via `max`, leaving `d` fixed): the principal
+  lingering-duplicate subcase re-inverts at `n₀`, giving `(max (max k n₀) n₀, d) = (max k n₀, d)` —
+  **idempotent** (max), `d` untouched. ✓ The numeric juggling stays exactly as the current `max`-based
+  proofs, just carrying an inert `d`.
+- **§19.6 cut-elim transforms only `d`** (additive, leaving `k` fixed): the commuting `allω` case bumps
+  `d ↦ d + norm α`. Reconstructed premise `n` budget `max(k,n) + (d + norm α) = (max(k,n)+d) + norm α >
+  norm α + norm βₙ ≥ norm(α+βₙ)`. ✓ exactly absorbs the `+α` shift.
+- **Slope stays 1:** every node budget `max(k,n) + d ≤ n + (k + d)` — linear in `n` with constant
+  `k+d`. So the lower bound's I∀ case needs `hardy α (max(k,n)+d) < G n`, discharged by
+  `hardy α (max(k,n)+d) ≤ hardy α (n + (k+d))` (`hardy_monotone`) `< G n`
+  (`hardy_shift_lt_goodsteinLength` with `c = k+d`). ✓ **Both proved lemmas apply directly — no
+  multiplicative rescaling needed.**
+
+This is the operator control of Buchholz §9 in its **minimal PA form** (`d` is the additive part of the
+"operator"; `max(k,·)` is the cofinal part). **It is the recommended implementation** — lighter than a
+general `g : ℕ → ℕ` or set-valued `H`, and every existing `max`-based proof in `wip/BoundedZinfty.lean`
+ports by threading an inert `d`.
+
+**Refactor plan (next lap):** add `d : ℕ` to `Zk` (and `B`); rule norm conditions `< k` become `< k + d`
+(ω-premise `< max k n + d`); witness bound `≤ hardy α (k+d)` (or `(max k n + d)` in ω); re-prove the
+inversion suite (`d` inert, `k`-juggling unchanged), the ∧/∨ cut-reductions (`d` inert), then
+`cutReduceAll` (the commuting `allω` case bumps `d ↦ d + norm α`, the §19.6 payoff), `cutElimStep`,
+`cutElim`; re-prove `lowerBound_hardy_selfcontained` (I∀ case via `hardy_shift_lt_goodsteinLength`).
+`hardy_add_ofNat` + `hardy_shift_lt_goodsteinLength` are the banked domination ingredients. Sanity-check
+the principal `exI` case threads the witness bound under `(k,d)`.
