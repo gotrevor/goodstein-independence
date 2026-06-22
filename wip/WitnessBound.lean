@@ -224,4 +224,47 @@ theorem lowerBound_existential_real (h : Ordinal.{0} → ℕ → ℕ) (τ : Ordi
       ¬ B h τ α k Γ :=
   lowerBound_existential h τ G Hmono @G_le_of_atomTrue
 
+/-! ## The full Goodstein lower bound (Towsner Thm 17.1), as an honest decomposition
+
+The full lower bound (with the Goodstein **sentence** present, hence the `I∀` ω-rule) is the
+headline-relevant girder M6.  We isolate its single open frontier — the **bounding lemma** — as a
+named disclosed `sorry`, and machine-check the contradiction-extraction from it.  Any rigorous proof
+of `bounding` (see `ON-LINE-REQUEST.md`) immediately yields the full lower bound `lowerBound`. -/
+section FullLowerBound
+variable (h : Ordinal.{0} → ℕ → ℕ) (τ : Ordinal.{0} → ℕ)
+
+/-- **Bounded satisfaction** of a fragment formula at `(α,k)`: a witness bounded by the Hardy value
+`h α (max k ·)`, input-adjusted (the universal at input `x` is allowed witness up to `h α (max k x)`).
+Provisional interpretation — its exact shape is part of the `bounding` invariant design. -/
+def sat (α : Ordinal.{0}) (k : ℕ) : GForm → Prop
+  | .gAll     => ∀ x, G x ≤ h α (max k x)
+  | .gEx n    => G n ≤ h α (max k n)
+  | .atom m n => G n ≤ m
+
+/-- **Bounding lemma — THE FRONTIER (disclosed `sorry`).**  A cut-free, witness-bounded derivation
+of `Γ` makes *some* formula of `Γ` bounded-true.  Provable cleanly for `True`/`W`/`I∃` (and the
+`I∀` sub-cases that return the fresh existential, a recursive `gAll`, or a true atom); the open
+sub-case is `I∀` returning an *accumulated* old existential at the grown numeric bound — exactly the
+invariant subtlety in `ON-LINE-REQUEST.md`.  Held at `sorry` per the anti-fraud charter (no fake
+proof of the load-bearing inequality). -/
+theorem bounding (Hmono : ∀ {a b : Ordinal.{0}} {j : ℕ}, a < b → τ a < j → h a j ≤ h b j) :
+    ∀ {α : Ordinal.{0}} {k : ℕ} {Γ : Seq}, B h τ α k Γ → ∃ f ∈ Γ, sat h α k f := by
+  sorry
+
+/-- **The full Goodstein lower bound (Towsner Thm 17.1), modulo `bounding`** — machine-checked
+contradiction-extraction.  Goodstein domination (`Hdom`: some input `x` whose Goodstein length `G x`
+outruns the Hardy bound `h α (max k x)`, Towsner Thm 7.2/9.8) rules out any cut-free witness-bounded
+derivation of the Goodstein sentence.  This is the headline-relevant shape of M6. -/
+theorem lowerBound (Hmono : ∀ {a b : Ordinal.{0}} {j : ℕ}, a < b → τ a < j → h a j ≤ h b j)
+    (α : Ordinal.{0}) (k : ℕ) (Hdom : ∃ x, h α (max k x) < G x) :
+    ¬ B h τ α k ({gAll} : Seq) := by
+  intro hB
+  obtain ⟨f, hf, hsat⟩ := bounding h τ Hmono hB
+  rw [Finset.mem_singleton] at hf
+  subst hf
+  obtain ⟨x, hx⟩ := Hdom
+  exact absurd (hsat x) (not_le.mpr hx)
+
+end FullLowerBound
+
 end GoodsteinPA.WitnessBound
