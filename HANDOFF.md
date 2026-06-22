@@ -19,19 +19,28 @@ path** (single-index Hardy inequality is false; M5's witness-FREE cut-elim, done
 the headline path uses, as-is). `wip/{BoundedZinfty,SplitZinfty,OperatorZinfty}.lean` are now
 **reference only** — never the headline path.
 
-### Concrete M4 plan (next lap)
-1. **Read Foundation's finitary `Derivation`** — its definition, constructors, and recursor/induction
-   principle (the Tait-style sequent calculus for `ℒₒᵣ` PA that backs `𝗣𝗔 ⊢ φ`). Find where `𝗣𝗔 ⊢ φ`
-   unfolds to a `Derivation`.
-2. **Write the embedding skeleton** `embed : 𝗣𝗔 ⊢ φ → ∃ α c, ZinftyF.Provable α c {φ-image}` by
-   induction on `Derivation`. The **structural** rules port to existing `ZinftyF.Provable.*`
-   constructors (`axL`/`verumR`/`andI`/`orI`/`cut`, see `src/Zinfty.lean:144–238`). Get those green.
-3. **Isolate the crux** = **finite induction axiom → ω-rule** (`Provable.allω`, `src/Zinfty.lean:183`).
-   This is the lap-6 "derivation-substitution" 2nd-deep-case. Leave it as the single disclosed `sorry`.
-   That alone is a clean feasibility readout on Route B's deepest unknown — a successful lap.
-4. If M4 hits a Foundation-`Derivation` wall, **pivot to M7a** (parallel/fallback, shovel-ready):
-   transparent `gAllReal = ∀x∃y[g_y(x)=0]` (arithmetize `goodsteinSeq` via Foundation Σ₁ tools) +
-   `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal`, **gated by `Bridge.lean`'s spec** so faithfulness can't regress.
+### M4 — LAP-9 BUILT THE SCAFFOLD (`wip/Embedding.lean`, COMPILES)
+`embed : Derivation2 (𝗣𝗔:Schema ℒₒᵣ) Γ → ∃ α c, ZinftyF.Provable α c Γ` over the **same**
+`Finset (SyntacticFormula ℒₒᵣ)` substrate (no language translation). Verify: `lake env lean
+wip/Embedding.lean` (only message = expected `sorry` warning). **5/10 cases DONE** (verum/and/or/wk/cut
+— structural rule-map validated end-to-end against the real Foundation `Derivation2` + M5 `Provable`
+APIs). Connection chain (verified): `𝗣𝗔 ⊢ φ` —`provable_def`→ `(𝗣𝗔:Schema) ⊢ ↑φ` —`provable_iff_derivable2`→
+`Nonempty (Derivation2 (𝗣𝗔:Schema) {↑φ})`.
+
+**Next lap — chip the 5 disclosed deep `sorry`s, hardest-first:**
+1. **`axm`** (the deep one) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`.
+   PeanoMinus = finite true ∀-sentences (finite ordinal); `univCl(succInd ψ)` derived via the ω-rule
+   `Provable.allω` (`src/Zinfty.lean:183`). Buchholz §5.5 / Towsner §16.
+2. **`all`** — finitary ∀ (`free φ :: Γ.image shift`) → `allω`, via Foundation's `Derivation.rewrite`
+   (`Calculus.lean:255`) substituting the free var by each numeral `nm n`. **Enabling lemma** for both
+   `axm`(Induction) and `all`: an M5 numeral-substitution / `em` helper likely falls first.
+3. **`closed`** — general identity `φ,∼φ∈Γ` ⟹ `Provable` by induction on `φ.complexity` (finite). Add
+   as M5 helper `Provable.em` in `src/Zinfty.lean` (sorry-free, promotable to `src/`).
+4. **`exs`** — witness term `t` → numeral (term-model eval) → `Provable.exI`.
+5. **`shift`** — `Provable` invariance under `Rewriting.shift`.
+**Fallback if M4 stalls → M7a** (parallel, shovel-ready): transparent `gAllReal = ∀x∃y[g_y(x)=0]`
+(arithmetize `goodsteinSeq` via Foundation Σ₁ tools) + `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal`, **gated by
+`Bridge.lean`'s spec** so faithfulness can't regress.
 
 ### Then (downstream, not next-lap)
 - **Bounding bridge** (small once M4 + M7a land): prove `cut-free Provable α 0 Γ` (Γ in the g-fragment)

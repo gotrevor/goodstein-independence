@@ -6,10 +6,37 @@ SUPERSEDED.** New order, hardest-first = **unavoidable-first**:
 
 1. **M4 — embedding `𝗣𝗔 ⊢ φ ⟹ Z_∞ ⊢^{α}_c {φ}` = THE next target.** The *universal bottleneck*:
    needed on Route A, two-phase Route B, AND the abandoned Zekd route — there is no headline path that
-   skips it. Untouched since lap-6 recon. **Plan:** read Foundation `Derivation` + recursor; write
-   `embed : 𝗣𝗔 ⊢ φ → ∃ α c, ZinftyF.Provable α c {φ-image}` by induction; structural cases
-   (axL/verumR/andI/orI/cut) mirror `src/Zinfty.lean:144–238`; isolate **finite-induction → ω-rule**
-   (`Provable.allω`) as the one disclosed crux = clean feasibility readout.
+   skips it. **LAP-9 FEASIBILITY PROBE (done this lap) — the machinery EXISTS; here is the mapped path:**
+   - **Foundation's finitary calculus** (`.lake/.../Foundation/FirstOrder/Basic/Calculus.lean`):
+     `Derivation 𝓢 : Sequent L → Type` (List sequents), constructors
+     `axm (φ∈𝓢) | axL | verum | or | and | all (φ.free :: Γ⁺) | exs t | wk | cut` — maps almost 1-1
+     onto M5's `ZinftyF.Deriv`. A **Finset** variant `Derivation2` exists (`Calculus2.lean:13`, same
+     constructors) + `provable_iff_derivable2 : 𝓢 ⊢ φ ↔ 𝓢 ⊢!₂! φ` (`Calculus2.lean:94`) — matches M5's
+     Finset substrate (use it to skip the List→Finset bridge).
+   - **The lap-6 "derivation-substitution" deep case is ALREADY PROVIDED:**
+     `Derivation.rewrite : 𝓢 ⟹ Γ → ∀ (f:ℕ→SyntacticTerm L), 𝓢 ⟹ Γ.map (Rew.rewrite f ▹ ·)`
+     (`Calculus.lean:255`). So the **finitary `all` (`φ.free :: Γ⁺`) → M5 ω-rule `allω`** conversion is:
+     for each numeral `n`, `rewrite` the free var by `n` to get `𝓢 ⟹ φ/[n] :: Γ`, embed each, assemble
+     via `Provable.allω` (`src/Zinfty.lean:183`). **No missing machinery.**
+   - **The `axm` case** splits cleanly because `𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`
+     (`Foundation/FirstOrder/Arithmetic/Schemata.lean:52`): (a) `φ ∈ 𝗣𝗔⁻` (PeanoMinus, **finite**) —
+     each a true ∀-sentence, Z∞-derivable at a finite ordinal (bounded grind); (b) `φ = univCl(succInd ψ)`
+     (`mem_InductionScheme_of_mem`, Schemata.lean:85) — derive in Z∞ **via the ω-rule** (`ψ(n)` for each
+     `n` by `n`-fold step, then `allω`), ordinal ~`ω·k`. **This is the one genuine deep case** (Buchholz
+     §5.5 / Towsner §16) — but it's standard textbook content and `Provable.allω` is already built.
+   - **LAP-9 DID THIS: `wip/Embedding.lean` SCAFFOLD COMPILES** (`lake env lean wip/Embedding.lean`).
+     `embed : Derivation2 (𝗣𝗔:Schema) Γ → ∃ α c, Provable α c Γ` over the SAME `Finset (SyntacticFormula
+     ℒₒᵣ)` substrate (no language translation). **5/10 cases DONE** (verum/and/or/wk/cut — structural
+     rule-map validated end-to-end vs real APIs). **5 disclosed `sorry`s = the actual content:**
+     - **`axm`** (hardest) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme`. PeanoMinus finite-
+       derivable; `univCl(succInd ψ)` via ω-rule (`allω`). Buchholz §5.5. **Chip this first.**
+     - **`all`** — finitary ∀ → `allω` via `Derivation.rewrite` (numeral substitution per `n`).
+     - **`exs`** — witness term `t` → numeral (term-model eval) → `exI`.
+     - **`closed`** — general identity `φ,∼φ∈Γ`: M5 `em` by induction on `φ.complexity` (finite).
+     - **`shift`** — `Provable` invariance under `Rewriting.shift`.
+   - **Next-lap concrete:** open `wip/Embedding.lean`; chip the `axm` Induction-via-ω-rule case (the
+     deep one) — likely needs an M5 helper `Provable.em` (the `closed` case) and a numeral-substitution
+     lemma (the `all` case) as prerequisites, so those two may fall first as enabling lemmas.
 2. **M7a — transparent arithmetization** = parallel/fallback (shovel-ready, faithfulness-gated):
    `gAllReal = ∀x∃y[g_y(x)=0]` + `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal`, gated by `Bridge.lean`.
 3. **Bounding bridge (small, downstream):** prove on M5's **real cut-free `Deriv`** directly
