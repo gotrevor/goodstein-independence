@@ -19,6 +19,7 @@ uses that `ω^·` has no fixed point below ε₀), so well-founded recursion on 
 -/
 import Mathlib.SetTheory.Ordinal.Notation
 import Mathlib.SetTheory.Ordinal.Veblen
+import GoodsteinPA.TruthSem
 
 namespace GoodsteinPA.Epsilon0Complete
 
@@ -72,5 +73,110 @@ theorem exists_NF_repr_eq :
           simp [ONote.repr]
         rw [hval, heRepr, hrRepr, hr, ← hm]
         exact div_add_mod o (ω ^ e)
+
+/-- `ε₀` is a limit ordinal: it is `ω ^ ε₀`, a nonzero power of the limit `ω`. -/
+theorem isSuccLimit_epsilon0 : Order.IsSuccLimit ε₀ := by
+  have h := isSuccLimit_opow_left isSuccLimit_omega0 (epsilon_pos 0).ne'
+  rwa [omega0_opow_epsilon] at h
+
+/-- Every normal-form `ONote` represents an ordinal `< ε₀` (the embedding direction; mathlib states
+the type's purpose informally but provides no `repr < ε₀` lemma). -/
+theorem repr_lt_epsilon0 : ∀ x : ONote, x.NF → ONote.repr x < ε₀ := by
+  intro x
+  induction x with
+  | zero => intro _; exact epsilon_pos 0
+  | oadd e n a _IHe IHa =>
+    intro h
+    have hee : ONote.repr e < ε₀ := _IHe h.fst
+    have hbelow : ONote.repr a < ω ^ ONote.repr e := h.snd'.repr_lt
+    have hsucc : Order.succ (ONote.repr e) < ε₀ := isSuccLimit_epsilon0.succ_lt hee
+    have key : ONote.repr (ONote.oadd e n a) < ω ^ (Order.succ (ONote.repr e)) := by
+      rw [opow_succ]
+      have h1 : ONote.repr (ONote.oadd e n a)
+          = ω ^ ONote.repr e * ((n : ℕ) : Ordinal) + ONote.repr a := by simp [ONote.repr]
+      rw [h1]
+      calc ω ^ ONote.repr e * ((n : ℕ) : Ordinal) + ONote.repr a
+          < ω ^ ONote.repr e * ((n : ℕ) : Ordinal) + ω ^ ONote.repr e :=
+            (add_lt_add_iff_left _).2 hbelow
+        _ = ω ^ ONote.repr e * (((n : ℕ) : Ordinal) + 1) := by rw [mul_add, mul_one]
+        _ ≤ ω ^ ONote.repr e * ω := by
+            gcongr
+            rw [← Nat.cast_one, ← Nat.cast_add]
+            exact (natCast_lt_omega0 _).le
+    exact key.trans (((opow_lt_opow_iff_right one_lt_omega0).2 hsucc).trans_eq
+      (omega0_opow_epsilon 0))
+
+/-- The range of `NONote.repr` is exactly the ordinals `< ε₀`: the embedding (`repr_lt_epsilon0`)
+together with the new surjectivity (`exists_NF_repr_eq`). -/
+theorem range_NONote_repr : Set.range NONote.repr = Set.Iio ε₀ := by
+  ext o
+  constructor
+  · rintro ⟨x, rfl⟩
+    exact repr_lt_epsilon0 x.1 x.2
+  · intro ho
+    obtain ⟨x, hx, hxo⟩ := exists_NF_repr_eq o ho
+    exact ⟨⟨x, hx⟩, hxo⟩
+
+/-! ## Transfer to an `ℕ`-order: `ε₀ ≤ orderType` of any pullback of the `NONote` order
+
+The Boundedness/Seam machinery needs a well-order `lt : ℕ → ℕ → Prop` with `ε₀ ≤ orderType lt`.
+Pulling the `NONote` order back along *any* bijection `e : ℕ ≃ NONote` works: the project's rank
+`rk (ltPull e) n` equals `NONote.repr (e n)`, and since `repr ∘ e` is onto `[0, ε₀)` (the girder),
+no ordinal `< ε₀` can bound all the ranks, forcing `ε₀ ≤ orderType (ltPull e)`. This decouples the
+order-type half of F from the concrete *computable* coding (which Worker B/D will pin for the
+`ℒₒᵣ`-definability `φ`): the lemma holds for any equiv, so the eventual coding instantiates it. -/
+
+open GoodsteinPA.TruthSem
+
+/-- The `NONote` order pulled back to `ℕ` along a coding `e`. -/
+def ltPull (e : ℕ ≃ NONote) (a b : ℕ) : Prop := e a < e b
+
+instance ltPull_wf (e : ℕ ≃ NONote) : IsWellFounded ℕ (ltPull e) :=
+  ⟨InvImage.wf e NONote.lt_wf⟩
+
+/-- The ≺-rank of `n` in the pullback order is the ordinal `NONote.repr (e n)`. This is the
+`note_rank_eq_repr` of the seam advice — true precisely because `repr ∘ e` is *onto* `[0, ε₀)`. -/
+theorem rk_ltPull_eq_repr (e : ℕ ≃ NONote) (n : ℕ) :
+    rk (ltPull e) n = NONote.repr (e n) := by
+  refine IsWellFounded.induction
+    (motive := fun k => rk (ltPull e) k = NONote.repr (e k)) (ltPull e) n ?_
+  intro n IH
+  refine le_antisymm (rk_le_of_forall (ltPull e) ?_) ?_
+  · intro m hm
+    rw [IH m hm]
+    exact hm
+  · by_contra hlt
+    rw [not_le] at hlt
+    have hlt' : rk (ltPull e) n < ε₀ :=
+      hlt.trans (repr_lt_epsilon0 (e n).1 (e n).2)
+    obtain ⟨x, hxNF, hxo⟩ := exists_NF_repr_eq (rk (ltPull e) n) hlt'
+    -- `m₀ := e.symm ⟨x, hxNF⟩` has `repr (e m₀) = rk n`, and `e m₀ < e n` from `rk n < repr (e n)`.
+    set m₀ := e.symm ⟨x, hxNF⟩ with hm₀
+    have he : NONote.repr (e m₀) = rk (ltPull e) n := by
+      rw [hm₀, Equiv.apply_symm_apply]; exact hxo
+    have hrel : ltPull e m₀ n := by
+      show e m₀ < e n
+      show NONote.repr (e m₀) < NONote.repr (e n)
+      rw [he]; exact hlt
+    have := rk_lt_of_rel (ltPull e) hrel
+    rw [IH m₀ hrel, he] at this
+    exact lt_irrefl _ this
+
+/-- **The order-type half of F.** For any coding `e : ℕ ≃ NONote`, the pullback order on `ℕ` has
+order type at least `ε₀` — exactly the `Seam.ge` obligation. -/
+theorem epsilon0_le_orderType_ltPull (e : ℕ ≃ NONote) :
+    ε₀ ≤ orderType (ltPull e) := by
+  by_contra hlt
+  rw [not_le] at hlt
+  -- name `orderType` itself as some `repr (e n₀)`, then `succ` of it exceeds the sup — contradiction.
+  obtain ⟨x, hxNF, hxo⟩ := exists_NF_repr_eq (orderType (ltPull e)) hlt
+  set n₀ := e.symm ⟨x, hxNF⟩ with hn₀
+  have he : rk (ltPull e) n₀ = orderType (ltPull e) := by
+    rw [rk_ltPull_eq_repr, hn₀, Equiv.apply_symm_apply]; exact hxo
+  -- `succ (rk n₀) ≤ orderType` (a term of the sup), but `succ (rk n₀) = succ orderType > orderType`.
+  have hle : Order.succ (rk (ltPull e) n₀) ≤ orderType (ltPull e) :=
+    Ordinal.le_iSup (fun n => Order.succ (rk (ltPull e) n)) n₀
+  rw [he] at hle
+  exact (Order.lt_succ _).not_ge hle
 
 end GoodsteinPA.Epsilon0Complete
