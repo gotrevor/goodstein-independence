@@ -41,6 +41,7 @@ transparent, hand-built Π₂ form; if so, that refactor is gated by *matching t
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Arithmetic.R0.Representation
 import GoodsteinPA.Defs
+import GoodsteinPA.Computability
 
 namespace GoodsteinPA
 
@@ -56,7 +57,14 @@ def goodsteinTerminates (m : ℕ) : Prop := ∃ N, goodsteinSeq m N = 0
 Goodstein function, which bottoms out at `Computable bump` (well-founded recursion on `Nat.log`,
 not auto-derived by mathlib). Bounded, compiler-checkable, faithfulness-risk-free. -/
 theorem goodsteinTerminates_re : REPred goodsteinTerminates := by
-  sorry
+  -- `(m, N) ↦ goodsteinSeq m N = 0` is a (primitive-recursive, hence) computable predicate …
+  have hpred : PrimrecPred (fun mN : ℕ × ℕ => goodsteinSeq mN.1 mN.2 = 0) :=
+    Primrec.eq.comp primrec_goodsteinSeq (Primrec.const 0)
+  have hcomp : ComputablePred (fun mN : ℕ × ℕ => goodsteinSeq mN.1 mN.2 = 0) :=
+    hpred.computablePred
+  -- … hence r.e., and r.e. is closed under the existential projection over `N`.
+  have hproj := REPred.projection (β := ℕ) hcomp.to_re
+  exact hproj.of_eq (fun m => by simp [goodsteinTerminates])
 
 /-- **The Goodstein sentence `γ`.** The `ℒₒᵣ`-sentence "every Goodstein sequence terminates",
 obtained as the universal closure of Foundation's r.e.-predicate code for `goodsteinTerminates`.
