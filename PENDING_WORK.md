@@ -34,8 +34,11 @@ calculus, fully proved) to `Zk`, adding the `(k,NF,norm)` bookkeeping:
   the M6 domination is STRONG: `hardy_lt_goodsteinLength {α NF} : ∃ N, ∀ m ≥ N, hardy α m < G m` (G
   beats `hardy α` at *every* large `m`, not just one `x`). So a *linearly*-controlled index `f n ≤ n+c`
   is very plausibly absorbable: the lower-bound I∀ case needs `hardy α (f x) < G x`; with `f x ≤ x+c`,
-  reduce `hardy α (x+c) < G x` to the banked `hardy α' x < G x` via a **Hardy argument-shift lemma**
-  (`hardy α (x+c) ≤ hardy (bump α by c) x`, to prove — the one new Hardy fact option 2 needs). Plan:
+  reduce `hardy α (x+c) < G x` to the banked `hardy α' x < G x` via the **Hardy argument-shift lemma**
+  — **PROVED + banked lap 7** as `hardy_add_ofNat {α NF} : hardy (α + ofNat c) n = hardy α (n + c)`
+  (`src/Hardy.lean`, axiom-clean; finite-tail additivity via the successor rule). So the lower-bound
+  I∀ case reduces to `hardy (α + ofNat c) x < G x` = a direct instance of `hardy_lt_goodsteinLength`
+  applied to the NF ordinal `α + ofNat c`. **The one new Hardy fact option 2 needed is now in hand.** Plan:
   (a) generalize `B.allI`/`Zk.allω` to a controlled increasing index `f` with `f n ≥ n`; (b) re-prove
   `allInv` + `lowerBound_hardy_selfcontained` with `f` (via the argument-shift + domination); (c) §19.6
   commuting case then reconstructs at `f'(n) = norm α + f(n)`. Refactors `wip/BoundedZinfty.lean` —

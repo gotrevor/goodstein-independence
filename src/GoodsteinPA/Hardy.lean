@@ -1227,6 +1227,49 @@ decreasing_by
 theorem hardy_le_succ (o : ONote) (n : ℕ) : hardy o n ≤ hardy o (n + 1) :=
   hardy_monotone o (Nat.le_succ n)
 
+/-! ### Hardy argument-shift (additivity for a finite tail)
+
+`H_{α+c}(n) = H_α(n+c)` for finite `c` — the Hardy hierarchy's additivity restricted to a finite
+ordinal added on the right. The §19.6-cut-elimination "option 2" ingredient: it lets a *linearly*
+reindexed ω-rule premise (index `n ↦ n+c`) be absorbed by a constant bump of the ordinal, so the
+witness bound `H_α(n+c) < G(n)` reduces (for the `c`-bumped ordinal) to the banked domination
+`H_{α+c}(n) < G(n)`. Proof: induction on `c` via the successor rule and `α + (c+1) = osucc (α + c)`. -/
+
+private theorem add_ofNat_zero {α : ONote} (hα : α.NF) : α + ofNat 0 = α := by
+  haveI := hα
+  haveI : (0 : ONote).NF := NF.zero
+  rw [ofNat_zero]
+  haveI : (α + 0).NF := ONote.add_nf α 0
+  apply repr_inj.mp
+  rw [repr_add, repr_zero, add_zero]
+
+private theorem add_ofNat_succ {α : ONote} (hα : α.NF) (c : ℕ) :
+    α + ofNat (c + 1) = osucc (α + ofNat c) := by
+  haveI := hα
+  haveI hac : (α + ofNat c).NF := ONote.add_nf α (ofNat c)
+  haveI : (α + ofNat (c + 1)).NF := ONote.add_nf α (ofNat (c + 1))
+  haveI : (osucc (α + ofNat c)).NF := osucc_NF hac
+  apply repr_inj.mp
+  rw [repr_osucc hac, repr_add, repr_add, repr_ofNat, repr_ofNat,
+    Nat.cast_add, Nat.cast_one, ← add_assoc]
+
+/-- **Hardy argument-shift / finite-tail additivity:** `H_{α+c}(n) = H_α(n+c)`. -/
+theorem hardy_add_ofNat {α : ONote} (hα : α.NF) :
+    ∀ (c n : ℕ), hardy (α + ofNat c) n = hardy α (n + c) := by
+  intro c
+  induction c with
+  | zero => intro n; rw [add_ofNat_zero hα]; simp
+  | succ c ih =>
+    intro n
+    rw [add_ofNat_succ hα c]
+    have hs := hardy_succ (osucc (α + ofNat c))
+      (fundamentalSequence_osucc (ONote.add_nf α (ofNat c)))
+    rw [hs]
+    simp only []
+    rw [ih (n + 1)]
+    congr 1
+    omega
+
 /-- **The Hardy index-monotonicity crux (limit step), now fully proved.** The Hardy
 analogue of `fastGrowing_fundSeq_step`: for a limit `o` with fundamental sequence `f`,
 `H_{o[n]}(n+1) ≤ H_{o[n+1]}(n+1)`. A corollary of `hardy_le_of_reaches` on the Bachmann
