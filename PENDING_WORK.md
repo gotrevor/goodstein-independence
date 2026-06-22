@@ -24,19 +24,19 @@ SUPERSEDED.** New order, hardest-first = **unavoidable-first**:
      (`mem_InductionScheme_of_mem`, Schemata.lean:85) — derive in Z∞ **via the ω-rule** (`ψ(n)` for each
      `n` by `n`-fold step, then `allω`), ordinal ~`ω·k`. **This is the one genuine deep case** (Buchholz
      §5.5 / Towsner §16) — but it's standard textbook content and `Provable.allω` is already built.
-   - **LAP-9 DID THIS: `wip/Embedding.lean` SCAFFOLD COMPILES** (`lake env lean wip/Embedding.lean`).
+   - **LAP-9 DID THIS: `wip/Embedding.lean` COMPILES** (`lake env lean wip/Embedding.lean`).
      `embed : Derivation2 (𝗣𝗔:Schema) Γ → ∃ α c, Provable α c Γ` over the SAME `Finset (SyntacticFormula
-     ℒₒᵣ)` substrate (no language translation). **5/10 cases DONE** (verum/and/or/wk/cut — structural
-     rule-map validated end-to-end vs real APIs). **5 disclosed `sorry`s = the actual content:**
-     - **`axm`** (hardest) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme`. PeanoMinus finite-
-       derivable; `univCl(succInd ψ)` via ω-rule (`allω`). Buchholz §5.5. **Chip this first.**
-     - **`all`** — finitary ∀ → `allω` via `Derivation.rewrite` (numeral substitution per `n`).
-     - **`exs`** — witness term `t` → numeral (term-model eval) → `exI`.
-     - **`closed`** — general identity `φ,∼φ∈Γ`: M5 `em` by induction on `φ.complexity` (finite).
-     - **`shift`** — `Provable` invariance under `Rewriting.shift`.
-   - **Next-lap concrete:** open `wip/Embedding.lean`; chip the `axm` Induction-via-ω-rule case (the
-     deep one) — likely needs an M5 helper `Provable.em` (the `closed` case) and a numeral-substitution
-     lemma (the `all` case) as prerequisites, so those two may fall first as enabling lemmas.
+     ℒₒᵣ)` substrate (no language translation). **6/10 cases DONE** (verum/and/or/wk/cut/closed).
+     **`provable_em` FULLY PROVED + axiom-clean** (`[propext,choice,Quot.sound]`): the Z∞ excluded-middle
+     `∀ φ Γ, φ∈Γ → ∼φ∈Γ → ∃ a, Provable a 0 Γ`, incl. the ∀/∃ numeral ω-family. Promotable to `src/`.
+   - **4 disclosed `sorry`s remain = the genuine deep content, ALL needing free-var/subst machinery
+     for M5's `Deriv` (interdependent). Build the shared enabler FIRST:**
+     - **(0, enabler) M5 renaming/subst lemma** = analogue of Foundation `Derivation.rewrite`
+       (`Calculus.lean:255`): `Provable α c Γ → Provable α c (Γ.image (Rew…▹·))`, induction on `Deriv`
+       (8 cases; `allω` case = the care point). Unlocks `shift`/`all`/`exs` together.
+     - **`shift`** — corollary of the enabler. **`all`** — free var `&0` → each numeral via enabler →
+       `allω`. **`exs`** — witness term → numeral value → `exI`. **`axm`** (deepest) — PeanoMinus finite +
+       `univCl(succInd ψ)` via ω-rule. Buchholz §5.5.
 2. **M7a — transparent arithmetization** = parallel/fallback (shovel-ready, faithfulness-gated):
    `gAllReal = ∀x∃y[g_y(x)=0]` + `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal`, gated by `Bridge.lean`.
 3. **Bounding bridge (small, downstream):** prove on M5's **real cut-free `Deriv`** directly

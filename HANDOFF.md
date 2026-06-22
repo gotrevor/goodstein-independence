@@ -19,25 +19,31 @@ path** (single-index Hardy inequality is false; M5's witness-FREE cut-elim, done
 the headline path uses, as-is). `wip/{BoundedZinfty,SplitZinfty,OperatorZinfty}.lean` are now
 **reference only** — never the headline path.
 
-### M4 — LAP-9 BUILT THE SCAFFOLD (`wip/Embedding.lean`, COMPILES)
+### M4 — LAP-9 BUILT THE SCAFFOLD + PROVED `em` (`wip/Embedding.lean`, COMPILES)
 `embed : Derivation2 (𝗣𝗔:Schema ℒₒᵣ) Γ → ∃ α c, ZinftyF.Provable α c Γ` over the **same**
 `Finset (SyntacticFormula ℒₒᵣ)` substrate (no language translation). Verify: `lake env lean
-wip/Embedding.lean` (only message = expected `sorry` warning). **5/10 cases DONE** (verum/and/or/wk/cut
-— structural rule-map validated end-to-end against the real Foundation `Derivation2` + M5 `Provable`
-APIs). Connection chain (verified): `𝗣𝗔 ⊢ φ` —`provable_def`→ `(𝗣𝗔:Schema) ⊢ ↑φ` —`provable_iff_derivable2`→
-`Nonempty (Derivation2 (𝗣𝗔:Schema) {↑φ})`.
+wip/Embedding.lean` (only message = the expected `embed` `sorry` warning). Connection chain (verified):
+`𝗣𝗔 ⊢ φ` —`provable_def`→ `(𝗣𝗔:Schema) ⊢ ↑φ` —`provable_iff_derivable2`→ `Nonempty (Derivation2
+(𝗣𝗔:Schema) {↑φ})`.
+- **`provable_em` FULLY PROVED, axiom-clean** (`[propext, choice, Quot.sound]`): the Z∞ excluded-middle
+  `∀ φ Γ, φ∈Γ → ∼φ∈Γ → ∃ a, Provable a 0 Γ`, incl. the ∀/∃ numeral ω-family. **Promotable to
+  `src/Zinfty.lean`.** Discharges the `closed` case.
+- **`embed`: 6/10 cases DONE** (verum/and/or/wk/cut/closed).
 
-**Next lap — chip the 5 disclosed deep `sorry`s, hardest-first:**
-1. **`axm`** (the deep one) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`.
+**Next lap — the 4 remaining `embed` `sorry`s are the genuine deep content + are INTERDEPENDENT
+(all need free-variable/substitution machinery for M5's `Deriv`). Build the shared enabler first:**
+0. **(enabler) M5 renaming/substitution lemma** — the analogue of Foundation's `Derivation.rewrite`
+   (`Calculus.lean:255`): `Provable α c Γ → Provable α c (Γ.image (Rew … ▹ ·))` by induction on `Deriv`
+   (8 cases; the `allω` case needs care — rewriting must commute with the numeral family). Unlocks
+   `shift`, `all`, `exs` together. **Do this first.**
+1. **`shift`** — direct corollary of the enabler (`Rewriting.shift` is a `Rew`).
+2. **`all`** — finitary ∀ (`free φ :: Γ.image shift`) → `allω`: substitute the free var `&0` by each
+   numeral `nm n` (via the enabler / Foundation's `Derivation.rewrite`), embed each premise.
+3. **`exs`** — witness term `t` → its numeral value (term-model: closed `ℒₒᵣ` terms denote numerals) →
+   `Provable.exI`. Needs the free-variable framing settled by the enabler.
+4. **`axm`** (the deepest) — `φ ∈ (𝗣𝗔:Schema)` = `↑σ`, `σ ∈ 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`.
    PeanoMinus = finite true ∀-sentences (finite ordinal); `univCl(succInd ψ)` derived via the ω-rule
    `Provable.allω` (`src/Zinfty.lean:183`). Buchholz §5.5 / Towsner §16.
-2. **`all`** — finitary ∀ (`free φ :: Γ.image shift`) → `allω`, via Foundation's `Derivation.rewrite`
-   (`Calculus.lean:255`) substituting the free var by each numeral `nm n`. **Enabling lemma** for both
-   `axm`(Induction) and `all`: an M5 numeral-substitution / `em` helper likely falls first.
-3. **`closed`** — general identity `φ,∼φ∈Γ` ⟹ `Provable` by induction on `φ.complexity` (finite). Add
-   as M5 helper `Provable.em` in `src/Zinfty.lean` (sorry-free, promotable to `src/`).
-4. **`exs`** — witness term `t` → numeral (term-model eval) → `Provable.exI`.
-5. **`shift`** — `Provable` invariance under `Rewriting.shift`.
 **Fallback if M4 stalls → M7a** (parallel, shovel-ready): transparent `gAllReal = ∀x∃y[g_y(x)=0]`
 (arithmetize `goodsteinSeq` via Foundation Σ₁ tools) + `𝗣𝗔 ⊢ goodsteinSentence ↔ gAllReal`, **gated by
 `Bridge.lean`'s spec** so faithfulness can't regress.

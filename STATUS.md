@@ -51,8 +51,13 @@ smaller. Revisit only if M7a proves intractable after sustained effort.
   fact — the reusable core of M6 — not transporting into the abstract `B` calculus). **Decision:** STOP
   the `cutReduceAllAux`/Zekd thread (bank `wip/` as reference); next target = **M4 feasibility probe**,
   with **M7a (transparent arithmetization)** as the parallel shovel-ready / fallback thread. Refreshed
-  STATUS + wrote `REFLECTION-2026-06-22.md` + rewrote HANDOFF to inherit the course change. Build green
-  (1257), headline `sorry` intact, ledger re-confirmed by real `#print axioms`.
+  STATUS + wrote `REFLECTION-2026-06-22.md` + rewrote HANDOFF to inherit the course change. **Then
+  started the M4 grind (post-synthesis):** `wip/Embedding.lean` — `embed : Derivation2 (𝗣𝗔:Schema) Γ →
+  ∃ α c, Provable α c Γ` over the SAME `Finset (SyntacticFormula ℒₒᵣ)` substrate (no language
+  translation). **6/10 cases proved** (verum/and/or/wk/cut/closed); **`provable_em` (Z∞ excluded-middle)
+  FULLY PROVED + axiom-clean.** 4 deep cases remain (`axm`/`all`/`exs`/`shift`), all needing a shared M5
+  renaming/subst lemma (the `Derivation.rewrite` analogue) = the next target. Build green (1257),
+  headline `sorry` intact, ledger re-confirmed by real `#print axioms`.
 - **2026-06-22 (lap 8 — control-ordinal operator calculus built through §19.5; Hardy infra BANKED):**
   Resolved the **Hardy-infrastructure layer** of the §19.6 crux (both directions, axiom-clean, in
   `src/`): `hardy_add_comp`/`hardy_add_collapse` (`H_{γ+δ}=H_γ∘H_δ` for non-absorbing `γ+δ` — the
