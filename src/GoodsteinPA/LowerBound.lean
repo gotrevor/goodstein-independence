@@ -20,8 +20,12 @@ Towsner's `τ β < k`.  The Goodstein atom-truth + `G` are the real ones (from `
   (`∃ x, hardy α (max k x) < G x`).  The `gAll`/`I∀` accumulation worry of the lap-4 handoff is
   resolved here, machine-checked.
 
-Remaining gap to a self-contained Thm 17.1: discharge `Hdom` from a real Goodstein-dominates-Hardy
-fact (Track-1 `Logic/Goodstein/Domination*.lean`, to port).  WIP — not in build target.
+**`Hdom` is now discharged** (lap 6): `Hdom_of_NF` supplies `∃ x, hardy α (max k x) < G x` from the
+ported Goodstein-dominates-fastGrowing chain (`GoodsteinPA.Dom`, `src/Domination.lean`) bridged via
+`hardy_le_fastGrowing` + `G = goodsteinLength` + the `+2`→strict iterate split (`add_le_iterate_of_lt`).
+So `lowerBound_hardy_selfcontained` is the **full Towsner Thm 17.1 with no hypotheses beyond `α.NF`**.
+Promoted to `src/` — terminal asset (M6 lower-bound half complete). `#print axioms` carries the
+documented `native_decide` Goodstein base-case artifacts (🟢 finite witnesses) via the domination path.
 -/
 import Mathlib.SetTheory.Ordinal.Notation
 import Mathlib.Order.Lattice.Nat

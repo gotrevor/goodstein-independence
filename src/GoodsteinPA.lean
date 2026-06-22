@@ -14,3 +14,4 @@ import GoodsteinPA.Zinfty
 import GoodsteinPA.Hardy
 
 import GoodsteinPA.Domination
+import GoodsteinPA.LowerBound
