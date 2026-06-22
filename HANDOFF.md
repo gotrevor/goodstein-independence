@@ -86,10 +86,15 @@ of the calculus generalisation; clears to axiom-clean the instant the lemma belo
    Then `atomCut_x` Case `hrel`: transport `hNC` by `nrel_value_subst` into `result` — uniform, no truth
    split, no X-`axTrue`.
 2. ~~`exs` discharge~~ ✅ **DONE lap 16** (`provable_em_cong_gen_x` + `PXFc.exI_closed`).
-3. **`embedC_LX`** = `embedC_LX_gen` at `𝓢 := ↑paLX` once `hax` proven (X-free via `provable_true_x`,
-   X-induction via `metaInduction`). Then **D fires** ⟹ Thm 5.6 (modulo F). NOTE: this only needs
-   `embedC_LX_gen` (clean) — it does NOT need `nrel_value_subst`; the `atomCut_x` sorry sits in `cutElim`
-   which D applies AFTER embedding, so clearing it (step 1) is required for the *D* end to be clean.
+3. **`embedC_LX`** ✅ STATED + compiles (`paLX := lMap(𝗣𝗔⁻) + InductionScheme LX univ`,
+   `embedC_LX = embedC_LX_gen` at `↑paLX`). **Remaining = discharge `hax`** (independent of step 1):
+   - **X-free axioms** (`lMap 𝗣𝗔⁻` image + X-free induction instances) ⟹ `provable_true_x`. Sub-lemmas:
+     `XFreeForm (lMap (ORing.embedding LX) ψ)` (rel case: `Φ.rel r = Sum.inl r`, so `isLeft = true`),
+     and `LitTrue (asgX e ▹ lMap Φ ↑σ)` from `ℕ ⊧ₘ σ` (Foundation `eval_lMap` transfer).
+   - **X-induction instances** `univCl (succInd φ)` ⟹ `metaInduction` — the Foundation-DSL glue (build
+     `step` from `ψ` via successor substitution, prove `hstep`, strip `univCl`+the two `🡒`).
+   Then **D fires** ⟹ Thm 5.6 (modulo F + step 1). NOTE: `embedC_LX` itself only needs `embedC_LX_gen`
+   (clean); `nrel_value_subst`/`atomCut_x` is needed for the *cutElim* end of D (applied after embedding).
 
 ## Then (after C₂-struct is sorry-free): C₂-axm + the statement `embedC_LX`
 - Define `paLX : Theory LX := Theory.lMap (Language.ORing.embedding LX) 𝗣𝗔⁻ + InductionScheme LX Set.univ`
