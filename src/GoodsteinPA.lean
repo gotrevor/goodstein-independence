@@ -29,3 +29,4 @@ import GoodsteinPA.Epsilon0Complete
 import GoodsteinPA.SeamDefinability
 
 import GoodsteinPA.Thm56
+import GoodsteinPA.EmbeddingBound
