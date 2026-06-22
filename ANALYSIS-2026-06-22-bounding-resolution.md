@@ -59,11 +59,44 @@ piece the lap-4 decomposition was missing.
       preserving; if `k` cannot be held (the `allI` premise grows it to `max k n`), state it
       existentially `∃ α' k', … ∧ α' ≤ α ∧ k ≤ k'` and transfer the out-of-reach condition via
       `hardy_le_of_lt` + `hardy_monotone`.
+- [ ] **Strictness bridge for `Hdom` (the one genuinely-open bit).** Track-1's domination is
+      `goodsteinLength_dominates_fastGrowing (ho:α.NF) : ∃ N, ∀ m≥N, fastGrowing α m ≤ goodsteinLength m + 2`
+      — i.e. `G m = goodsteinLength m ≥ fastGrowing α m − 2`. Combined with `hardy α m ≤ fastGrowing α m`
+      this only gives `hardy α m ≤ G m + 2`, the WRONG direction for the strict `hardy α (max k x) < G x`
+      that `Hdom` needs. Fix: apply domination at a **larger ordinal** `β > α` (e.g. `β = α+1` via
+      `osucc`): then `G x ≥ fastGrowing β x − 2`, and the fastGrowing-over-hardy gap
+      (`fastGrowing (α+1) x = (fastGrowing α)^[x] x ≫ hardy α x + 3` for `x ≥ 4`) yields
+      `hardy α (max k x) = hardy α x < G x` for large `x ≥ max k`. Pick `x` past all thresholds.
+      The `α=0` corner (`fastGrowing 0 = succ`, gap 1) uses `β = α+1 = 1` or just that `goodsteinLength`
+      is super-linear. Bounded, self-contained → good Aristotle target once the chain is ported.
 - [ ] `Hdom` : `∃ x, hardy α (max k x) < G x` — Goodstein dominates Hardy. Track-1
       (`~/src/lean-formalizations Logic/Goodstein/Domination*.lean`) has `goodsteinLength`-domination
       of `fastGrowing_*`; needs (a) `hardy ≤ fastGrowing`-style bridge or direct `hardy` domination,
       (b) relating `goodsteinLength` to our `G` (least-zero step). Largely a port.
-- [ ] `lowerBound_hardy` : assemble — invert at `n*` from `Hdom`, apply `lowerBound_existential_hardy`.
+- [x] `lowerBound_hardy` : assemble — invert at `n*` from `Hdom`, apply `lowerBound_existential_hardy`.
+      DONE (lap 5, modulo `Hdom`).
+
+## M4 scoping (lap 5) — how the fragment lower bound connects to the headline
+
+`B` (`wip/LowerBoundHardy.lean`) is a **specialized Goodstein-fragment** calculus: its formulas are
+only `atom`/`gEx`/`gAll`. Foundation's finitary calculus (`FirstOrder/Basic/Calculus.lean`:
+`Derivation` with `axL`/`verum`/`or`/`and`/`all`/`exs`/`wk`/`cut`) is general over
+`SyntacticFormula ℒₒᵣ`. So the headline chain is NOT "embed PA directly into `B`"; it is:
+
+1. **General witness-bounded ω-calculus `Zᵏ`** — `src/Zinfty.lean`'s `Deriv` *plus* the Towsner §15
+   `(α,k)` witness bound on `∃` (the bound `src/Zinfty.lean` currently drops — the lap-4 finding).
+2. **M4 embed** `PA⁺ ⊢ φ ⟹ Zᵏ ⊢^{α,k}_c φ` (α<ε₀, finite c). Map Foundation `Derivation` rules
+   across; finitary `∀`→ω-rule; finite induction instances ⟹ finite cut rank.
+3. **Cut-elim with `k`** (redo `src/Zinfty.lean`'s §19 tracking the bound) ⟹ cut-free `Zᵏ ⊢^{α,k}_0 gAll`.
+4. **Subformula restriction** (the bridge to `B`): a *cut-free* `Zᵏ`-derivation of `{gAll}` contains
+   only subformulas of `gAll` = exactly `atom`/`gEx`/`gAll` (the `GForm` fragment), so it **is** a
+   `B`-derivation. Hence `lowerBound_hardy` (+ `Hdom`) ⟹ no cut-free `Zᵏ ⊢^{α,k}_0 gAll`. Contradiction
+   with steps 2–3. This subformula lemma is the clean, *small* connector — much easier than redoing
+   17.1 in the general calculus.
+5. **M7**: PA↔PA⁺ language bridge (opaque Σ₁ `goodsteinSentence` vs `∀x∃y g_y(x)=0`) + assemble.
+
+So the load-bearing 17.1 content (`B` + `lowerBound_hardy`) is **done**; the remaining lower-bound
+work is the general calculus plumbing (steps 1–4), where step 4 reuses the fragment result as-is.
 
 ## Literature anchors (WebSearch, lap 5)
 - Schwichtenberg–Wainer, *Proofs and Computations*, Ch. 4 — bounding/boundedness lemma for `PA_∞`,
