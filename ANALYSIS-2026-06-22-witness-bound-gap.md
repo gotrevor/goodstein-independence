@@ -75,3 +75,29 @@ All in `src/GoodsteinPA/Embedding.lean`, `[propext, choice, Quot.sound]`:
 
 The lap-11 `wip/Bounding.lean` assembly skeleton stays valid in SHAPE (embed → cutElim → bridge), but
 every arrow must be over `Zᵏ` (with `k`), and the bridge must read `value ≤ h_α k`, not just `α < ε₀`.
+
+## Reconciliation with the lap-9 reflection (REFLECTION-2026-06-22.md §3c) — it is WRONG, here's why
+The lap-9 reflection retired the witness-bounded thread and proposed (3c) to "prove the bounding lemma
+**directly on M5's real cut-free `Deriv`** … read the `exI` witness numeral off the cut-free structure
+— no `+α` growth, that *is* the point of cut-freeness — yielding witness `≤ hardy (toONote α) N`."
+**This is unworkable: there is NO boundedness theorem for the *unbounded* cut-free `Z∞`.** Concrete
+disproof (in our actual M5):
+- `∃y g_y(5)=0` is true with smallest (and only) witness `G(5)` (the Goodstein length — astronomically
+  large; note `G` is deliberately NOT a language symbol, so it does not appear in the formula; the only
+  numeral present is `5`). A cut-free M5 derivation EXISTS at ordinal `1`: `exI` with witness `nm (G 5)`
+  over the `axTrue` leaf `g_{G(5)}(5)=0`. (`o(exI _ _ d) = o d + 1`, independent of the witness VALUE.)
+- Any boundedness read-off — "every witness used `≤ h_α(k)`" OR "some witness `≤ h_α(k)`" — would force
+  `G(5) ≤ h_1(5)`, which is false; and there is no smaller witness. So BOTH forms fail.
+- Hence cut-freeness alone does NOT bound witnesses; `provable_true` (ω-completeness) realises this for
+  the whole `{↑gs}` at ordinal `< ε₀`. The `+α`-growth intuition is about CUT formulas; it says nothing
+  about `I∃` witnesses, which cost `+1` regardless of value in BOTH the cut and cut-free systems.
+
+The boundedness/lower-bound (Thm 17.1) is a property of the **bounded** system `Z∞^{α,k}` — the `I∃`
+rule there simply FORBIDS `value(t) > h_α(k)`, and the `I∀` rule raises `k → max(k,n)` for the `n`-th
+premise (so premise `n` may witness up to `~h_α(n)`; the bound bites for `{↑gs}` because `G(n) > h_α(n)`
+eventually for `α<ε₀`, M6 domination). The bound MUST live in the calculus and be PRESERVED by
+cut-elimination. The reflection's separate claim — that "the literature never threads the witness index
+through cut-elim" / "the §19.6 commuting bound is false in any single-index system" — is really about a
+specific *bookkeeping* (single numeric index); Towsner Thm 19.9 and the lap-8 **control-ordinal `e`**
+(`wip/OperatorZinfty.lean`, `Zekd`) DO carry `(α,k)` through cut-elim. That thread was abandoned on a
+strategic misjudgment ("off critical path"), not a real wall — it is the correct, if hard, path.
