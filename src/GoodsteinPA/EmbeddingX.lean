@@ -713,9 +713,23 @@ theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema LX)) 
     have hxf : XFreeForm (asgX e ▹ (Rew.emb ▹ Semiformula.lMap (Language.ORing.embedding LX) τ)) := by
       rw [xfreeForm_rew, xfreeForm_rew]; exact xfreeForm_lMap τ
     exact provable_true_x _ _ le_rfl hxf htrue (Finset.mem_image_of_mem _ hΓ)
-  · -- DISCLOSED: X-induction instance `σ = univCl (succInd ψ)` → `metaInduction`. The DSL unfolding
-    -- (NNF of `↑(univCl (succInd ψ))` ⟹ `∼ψ(0) ⋎ ∃(∼step) ⋎ ∀ψ`, break by `orI`, apply
-    -- `metaInduction` with `step = ψ(x) → ψ(x+1)`) is the next chip.
+  · -- DISCLOSED: X-induction instance. All four structural lemmas are PROVEN above
+    -- (`metaInduction_cong`, `subst_value_subst`, `succInd_nnf`, `PXFc_allClosure`); what remains is
+    -- the integration glue. RECIPE (lap-17 recon):
+    --   1. `obtain ⟨ψ, -, rfl⟩ := hind` ⟹ `σ = univCl (succInd ψ)`; pick `c := ψ.complexity + 1`.
+    --   2. `asgX e ▹ ↑(univCl (succInd ψ)) = ∀⁰* (Rew.fixitr 0 (succInd ψ).fvSup ▹ succInd ψ)`
+    --      (PROVEN in scratch: `coe_univCl_eq_univCl'` + `rew_univCl'` (asgX-invariant) + `rfl`).
+    --   3. `PXFc_allClosure` ⟹ per `v : Fin n → ℕ` derive the numeral instantiation; reduce
+    --      `Rew.subst (nm∘v) ▹ (fixitr ▹ succInd ψ)` via `subst_comp_fixitr_eq_map` to
+    --      `Rew.rewrite f_v ▹ succInd ψ` (FRICTION: `0 + fvSup` vs `fvSup` Fin-index casts).
+    --   4. `succInd`-rewrite-commute: `g ▹ succInd ψ = succInd (g.q ▹ ψ)` (FRICTION: push `g ▹`
+    --      through nested binders + the three `ψ/[·]` substitutions — `rew_subst_term` for the closed
+    --      one, a `g.q` variant under the `∀`). Gives `succInd ψ_v` with `ψ_v := g_v.q ▹ ψ`.
+    --   5. `succInd_nnf ψ_v` + `ψ_v/[#0]=ψ_v` (simp) + `↑0=nm 0` (simp [nm]) ⟹ the NNF
+    --      `∼ψ_v/[nm 0] ⋎ (∃(∼step_v) ⋎ ∀ψ_v)`, `step_v := ∼ψ_v/[#0] ⋎ ψ_v/[‘#0+1’]`.
+    --   6. break by `PXFc.orI` ×2 (+ `.weakening` to reorder) to `{∼ψ_v(0), ∃(∼step_v), ∀ψ_v} ∪ image`.
+    --   7. `metaInduction_cong ψ_v step_v (succT_v) hsval hstep` with
+    --      `succT_v n := Rew.subst ![nm n] ‘(#0+1)’` (|·| = n+1, PROVEN approach); `hstep` by simp.
     sorry
 
 /-- **C₂, the target form.** The embedding of `𝗣𝗔(LX)`-derivations into the `XFreeAx` `Z∞` carrier
