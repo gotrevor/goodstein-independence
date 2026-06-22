@@ -299,6 +299,62 @@ theorem hardy_shift_lt_goodsteinLength {α : ONote} (hα : α.NF) (c : ℕ) :
   rw [← hardy_add_ofNat hα c, G_eq_goodsteinLength]
   exact hN x hx
 
+/-- **Wrong-order composition domination** (the §19.6 control-ordinal operator-calculus
+lower-bound ingredient). For NF `α`, `e`, the nested composition `H_α(H_e(m))` — the small
+cut-formula bound `α` applied *outside* a large control value `H_e(m)` — is eventually
+strictly below Goodstein length. Unlike the control-side collapse `hardy_add_collapse`
+(`H_e∘H_α = H_{e+α}`, big ordinal outside), this order is NOT a single Hardy level
+(concatenation always puts the larger ordinal outside); instead it is dominated by
+`H_{ω^Q·2}` with `Q = osucc(lead α + lead e)` exceeding both `α` and `e`
+(`H_α(H_e(m)) ≤ H_{ω^Q}(H_{ω^Q}(m)) = H_{ω^Q·2}(m)` via index monotonicity + the coefficient
+law `hardy_oadd_coeff`), and `ω^Q·2 < ε₀` is Goodstein-dominated by `hardy_lt_goodsteinLength`.
+This is what the operator-calculus lower bound needs to absorb the nested control index
+`hardy α (hardy e (·) + d)` (the finite `+d` reduces first via `hardy_add_ofNat`). -/
+theorem hardy_comp_lt_goodsteinLength {α e : ONote} (hα : α.NF) (he : e.NF) :
+    ∃ N, ∀ m, N ≤ m → hardy α (hardy e m) < GoodsteinPA.Dom.goodsteinLength m := by
+  haveI : (lead α).NF := lead_NF hα
+  haveI : (lead e).NF := lead_NF he
+  have hSnf : (lead α + lead e).NF := ONote.add_nf (lead α) (lead e)
+  set S : ONote := lead α + lead e with hSdef
+  have hQnf : (osucc S).NF := osucc_NF hSnf
+  set Q : ONote := osucc S with hQdef
+  have hPnf : (oadd Q 1 0).NF := NF.oadd hQnf 1 NFBelow.zero
+  set P : ONote := oadd Q 1 0 with hPdef
+  have hβnf : (oadd Q (Nat.succPNat 1) 0).NF := NF.oadd hQnf _ NFBelow.zero
+  have hSrepr : S.repr = (lead α).repr + (lead e).repr := by rw [hSdef]; exact repr_add _ _
+  have hQrepr : Q.repr = S.repr + 1 := by rw [hQdef]; exact repr_osucc hSnf
+  have hPrepr : P.repr = ω ^ Q.repr := by rw [hPdef]; simp [ONote.repr]
+  have hαP : α < P := by
+    rw [lt_def, hPrepr, hQrepr]
+    apply repr_lt_omega_opow_succ hα
+    rw [hSrepr]; exact le_self_add
+  have heP : e < P := by
+    rw [lt_def, hPrepr, hQrepr]
+    apply repr_lt_omega_opow_succ he
+    rw [hSrepr]; exact le_add_self
+  have hQ0 : Q ≠ 0 := by
+    intro h
+    have h0 : Q.repr = 0 := by rw [h, repr_zero]
+    rw [hQrepr] at h0
+    exact (lt_of_lt_of_le zero_lt_one le_add_self).ne' h0
+  have hβP2 : ∀ m, hardy (oadd Q (Nat.succPNat 1) 0) m = hardy P (hardy P m) := by
+    intro m
+    rw [hardy_oadd_coeff Q hQ0 1 m]
+    show (hardy P)^[1 + 1] m = hardy P (hardy P m)
+    rfl
+  obtain ⟨N₀, hN₀⟩ := hardy_lt_goodsteinLength hβnf
+  refine ⟨max N₀ (max (norm α) (norm e)), fun m hm => ?_⟩
+  have hmN₀ : N₀ ≤ m := le_trans (le_max_left _ _) hm
+  have hmα : norm α ≤ m := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hm
+  have hme : norm e ≤ m := le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hm
+  have hem : hardy e m ≤ hardy P m := hardy_le_of_lt he hPnf heP hme
+  have hαnorm : norm α ≤ hardy e m := le_trans hmα (le_hardy e m)
+  calc hardy α (hardy e m)
+      ≤ hardy P (hardy e m) := hardy_le_of_lt hα hPnf hαP hαnorm
+    _ ≤ hardy P (hardy P m) := hardy_monotone P hem
+    _ = hardy (oadd Q (Nat.succPNat 1) 0) m := (hβP2 m).symm
+    _ < GoodsteinPA.Dom.goodsteinLength m := hN₀ m hmN₀
+
 /-- **The fully self-contained Goodstein lower bound (Towsner Thm 17.1).**  For every `α.NF` and `k`,
 the witness-bounded cut-free calculus cannot derive the Goodstein sentence `gAll` at `(α,k)` — no
 hypotheses beyond normal-formhood.  `Hdom` is discharged from the ported Goodstein-dominates-Hardy

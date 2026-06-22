@@ -1688,6 +1688,30 @@ theorem hardy_add_collapse {e α : ONote} (he : e.NF) (hα : α.NF)
     hardy (e + α) x = hardy e (hardy α x) :=
   hardy_add_comp e he α hα hbelow x
 
+/-- Leading exponent of a notation's Cantor normal form (`0` for `0`). Companion to
+`lastExp`; used to build a single `ω^Q` notation dominating a given `α`. -/
+def lead : ONote → ONote
+  | 0 => 0
+  | oadd e _ _ => e
+
+theorem lead_NF {o : ONote} (ho : o.NF) : (lead o).NF := by
+  cases o with
+  | zero => exact NF.zero
+  | oadd e n a => exact ho.fst
+
+/-- A notation is below `ω^(E+1)` whenever its leading exponent is `≤ E`. The basic
+domination brick: any `α` sits below `ω^(osucc (lead α))`. -/
+theorem repr_lt_omega_opow_succ {o E : ONote} (ho : o.NF) (hle : (lead o).repr ≤ E.repr) :
+    o.repr < ω ^ (E.repr + 1) := by
+  cases o with
+  | zero => show (0 : ONote).repr < ω ^ (E.repr + 1); rw [repr_zero]; exact opow_pos _ omega0_pos
+  | oadd e' c R =>
+    have hle' : e'.repr ≤ E.repr := hle
+    have hb : NFBelow (oadd e' c R) (e'.repr + 1) := ho.below_of_lt (lt_add_one _)
+    refine lt_of_lt_of_le hb.repr_lt (opow_le_opow_right omega0_pos ?_)
+    rw [← Order.succ_eq_add_one, ← Order.succ_eq_add_one]
+    exact Order.succ_le_succ hle'
+
 /-- Iterate-offset transfer: if `g y + 1 = F (y+1)` for all `y`, then `g^[m] y + 1 = F^[m] (y+1)`. -/
 theorem iterate_offset {g F : ℕ → ℕ} (h : ∀ y, g y + 1 = F (y + 1)) (m y : ℕ) :
     g^[m] y + 1 = F^[m] (y + 1) := by
