@@ -608,6 +608,92 @@ theorem Provable.exI_closed {α : Ordinal.{0}} {c : ℕ} {Γ : Seq}
   exact ⟨_, Provable.exI ψ m hcut⟩
 
 
+
+/-- **ω-completeness for true closed formulas.** Any closed (`SyntacticFormula ℒₒᵣ`) formula that is
+TRUE in the standard model `ℕ` (`LitTrue`) is `Z∞`-derivable, cut-free. Proof by induction on
+`complexity`: atomic via `axTrue`, `∀` via the ω-rule `allω`, `∃` by choosing a true witness. -/
+theorem provable_true : ∀ (k : ℕ) (φ : Form), φ.complexity ≤ k → LitTrue φ →
+    ∀ {Γ : Seq}, φ ∈ Γ → ∃ a, Provable a 0 Γ := by
+  intro k
+  induction k with
+  | zero =>
+    intro φ hk htrue Γ hmem
+    cases φ using Semiformula.cases' with
+    | hverum => exact ⟨0, Provable.verumR hmem⟩
+    | hfalsum => simp [LitTrue] at htrue
+    | hrel r v => exact ⟨0, Provable.axTrue true r v htrue hmem⟩
+    | hnrel r v => exact ⟨0, Provable.axTrue false r v htrue hmem⟩
+    | hand φ ψ => simp at hk
+    | hor φ ψ => simp at hk
+    | hall φ => simp at hk
+    | hexs φ => simp at hk
+  | succ k ih =>
+    intro φ hk htrue Γ hmem
+    cases φ using Semiformula.cases' with
+    | hverum => exact ⟨0, Provable.verumR hmem⟩
+    | hfalsum => simp [LitTrue] at htrue
+    | hrel r v => exact ⟨0, Provable.axTrue true r v htrue hmem⟩
+    | hnrel r v => exact ⟨0, Provable.axTrue false r v htrue hmem⟩
+    | hand a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have htab : LitTrue a ∧ LitTrue b := by simpa [LitTrue] using htrue
+      obtain ⟨hta, htb⟩ := htab
+      obtain ⟨a1, h1⟩ := ih a hak hta (Γ := insert a Γ) (by simp)
+      obtain ⟨a2, h2⟩ := ih b hbk htb (Γ := insert b Γ) (by simp)
+      have hand := Provable.andI a b h1 h2
+      rw [Finset.insert_eq_self.mpr hmem] at hand
+      exact ⟨_, hand⟩
+    | hor a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have htor : LitTrue a ∨ LitTrue b := by simpa [LitTrue] using htrue
+      rcases htor with hta | htb
+      · obtain ⟨a1, h1⟩ := ih a hak hta (Γ := insert a (insert b Γ)) (by simp)
+        have hor := Provable.orI a b h1
+        rw [Finset.insert_eq_self.mpr hmem] at hor
+        exact ⟨_, hor⟩
+      · obtain ⟨a1, h1⟩ := ih b hbk htb (Γ := insert a (insert b Γ)) (by simp)
+        have hor := Provable.orI a b h1
+        rw [Finset.insert_eq_self.mpr hmem] at hor
+        exact ⟨_, hor⟩
+    | hall a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+      have hfam : ∀ n, LitTrue (a/[nm n]) := by
+        intro n
+        have := htrue
+        simp only [LitTrue, Semiformula.eval_all] at this
+        simpa [LitTrue, Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton]
+          using this n
+      have fam : ∀ n, ∃ x, Provable x 0 (insert (a/[nm n]) Γ) := by
+        intro n
+        have hcomp : (a/[nm n]).complexity ≤ k := by
+          have : (a/[nm n]).complexity = a.complexity := by simp
+          rw [this]; exact hak
+        exact ih (a/[nm n]) hcomp (hfam n) (by simp)
+      choose β hβ using fam
+      have hallω := Provable.allω a hβ
+      rw [Finset.insert_eq_self.mpr hmem] at hallω
+      exact ⟨_, hallω⟩
+    | hexs a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_exs] at hk; omega
+      have hex : ∃ n, LitTrue (a/[nm n]) := by
+        have := htrue
+        simp only [LitTrue, Semiformula.eval_ex] at this
+        obtain ⟨x, hx⟩ := this
+        exact ⟨x, by simpa [LitTrue, Semiformula.eval_substs, valm_nm,
+          Matrix.constant_eq_singleton] using hx⟩
+      obtain ⟨n, hn⟩ := hex
+      have hcomp : (a/[nm n]).complexity ≤ k := by
+        have : (a/[nm n]).complexity = a.complexity := by simp
+        rw [this]; exact hak
+      obtain ⟨x, hx⟩ := ih (a/[nm n]) hcomp hn (Γ := insert (a/[nm n]) Γ) (by simp)
+      have hexI := Provable.exI a n hx
+      rw [Finset.insert_eq_self.mpr hmem] at hexI
+      exact ⟨_, hexI⟩
+
+
+
 /-! ## The assignment-carrying (all-closed) embedding `embedC` — the correct frame (lap 10)
 
 The naive `embed` above cannot finish (`exs` with an open witness; `provable_rew` invalid for the new
@@ -630,8 +716,17 @@ theorem embedC {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     exact ⟨0, fun e => provable_em (asg e ▹ φ) (Finset.mem_image_of_mem _ hp)
       (by have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hn; simpa using this)⟩
   | axm φ hφ hΓ =>
-    -- closed PA axiom `↑σ` (assignment-immaterial): `𝗣𝗔⁻` instance → `axTrue`; induction → ω-rule.
-    sorry
+    -- closed PA axiom `φ = ↑σ`, `σ ∈ 𝗣𝗔`. Since `ℕ ⊧ₘ* 𝗣𝗔`, `↑σ` is a TRUE closed formula, so
+    -- (even after the closing substitution `asg e`, which fixes it) `provable_true` (ω-completeness)
+    -- derives it directly — no Buchholz meta-induction needed; the ω-rule subsumes it.
+    obtain ⟨σ, hσ, rfl⟩ := hφ
+    refine ⟨0, fun e => ?_⟩
+    have htrue : LitTrue (asg e ▹ (↑σ : SyntacticFormula ℒₒᵣ)) := by
+      have hmod : ℕ ⊧ₘ σ := ModelsTheory.models ℕ hσ
+      simp only [LitTrue, asg, Semiformula.eval_rewrite, Semiformula.eval_emb]
+      rw [models_iff] at hmod
+      simpa using hmod
+    exact provable_true _ _ le_rfl htrue (Finset.mem_image_of_mem _ hΓ)
   | verum hΓ =>
     exact ⟨0, fun e => ⟨0, Provable.verumR
       (by have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hΓ; simpa using this)⟩⟩
