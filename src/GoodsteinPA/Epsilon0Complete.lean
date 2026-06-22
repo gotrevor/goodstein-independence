@@ -179,4 +179,60 @@ theorem epsilon0_le_orderType_ltPull (e : ℕ ≃ NONote) :
   rw [he] at hle
   exact (Order.lt_succ _).not_ge hle
 
+/-! ## A concrete coding `ℕ ≃ NONote`
+
+`ONote` derives only `DecidableEq`, so we supply a computable `Encodable ONote` (a structural
+pairing) and `Infinite NONote` (the numerals `ofNat n` are distinct), giving `Denumerable NONote`
+and hence a coding `ℕ ≃ NONote`. Plugged into `epsilon0_le_orderType_ltPull`, this exhibits a
+concrete `ℕ`-order with `ε₀ ≤ orderType`. -/
+
+/-- Structural encoding `ONote → ℕ`. -/
+def encodeONote : ONote → ℕ
+  | ONote.zero => 0
+  | ONote.oadd e n a =>
+      Nat.pair (encodeONote e) (Nat.pair ((n : ℕ) - 1) (encodeONote a)) + 1
+
+/-- Structural decoding `ℕ → ONote`, a left inverse of `encodeONote`. -/
+def decodeONote : ℕ → ONote
+  | 0 => ONote.zero
+  | (m + 1) =>
+      ONote.oadd (decodeONote (Nat.unpair m).1)
+        ⟨(Nat.unpair (Nat.unpair m).2).1 + 1, Nat.succ_pos _⟩
+        (decodeONote (Nat.unpair (Nat.unpair m).2).2)
+  decreasing_by
+    · exact Nat.lt_succ_of_le (Nat.unpair_left_le m)
+    · exact Nat.lt_succ_of_le ((Nat.unpair_right_le _).trans (Nat.unpair_right_le m))
+
+theorem decodeONote_encodeONote : ∀ x : ONote, decodeONote (encodeONote x) = x
+  | ONote.zero => by simp only [encodeONote, decodeONote]
+  | ONote.oadd e n a => by
+      rw [encodeONote, decodeONote]
+      simp only [Nat.unpair_pair, decodeONote_encodeONote e, decodeONote_encodeONote a]
+      congr 1
+      apply Subtype.ext
+      show (n : ℕ) - 1 + 1 = (n : ℕ)
+      exact Nat.succ_pred_eq_of_pos n.pos
+
+noncomputable instance : Encodable ONote :=
+  Encodable.ofLeftInverse encodeONote decodeONote decodeONote_encodeONote
+
+instance : Infinite NONote :=
+  Infinite.of_injective NONote.ofNat (by
+    intro m n h
+    simpa [NONote.repr, NONote.ofNat] using congrArg NONote.repr h)
+
+noncomputable instance : Encodable NONote :=
+  inferInstanceAs (Encodable {o : ONote // o.NF})
+
+noncomputable instance : Denumerable NONote :=
+  Denumerable.ofEncodableOfInfinite NONote
+
+/-- A concrete coding of `ℕ` by CNF notations. -/
+noncomputable def natCode : ℕ ≃ NONote := (Denumerable.eqv NONote).symm
+
+/-- **A concrete `ℕ`-order of order type ≥ ε₀** (the standalone `Seam.ge` witness). -/
+theorem epsilon0_le_orderType_natCode :
+    ε₀ ≤ orderType (ltPull natCode) :=
+  epsilon0_le_orderType_ltPull natCode
+
 end GoodsteinPA.Epsilon0Complete
