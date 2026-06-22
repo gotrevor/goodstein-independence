@@ -23,6 +23,7 @@ Downstream chips (next laps): `provable_true_x_bdd`, `exI_closed_bdd`, `metaIndu
 -/
 import GoodsteinPA.XFreeCutElim
 import GoodsteinPA.EmbeddingX
+import GoodsteinPA.Epsilon0Complete
 
 namespace GoodsteinPA.EmbeddingBound
 
@@ -32,6 +33,98 @@ open GoodsteinPA.ZinftyGen GoodsteinPA.LangX GoodsteinPA.XFreeCutElim GoodsteinP
 
 /-- `⨆ₙ c = c` over `ℕ` (constant family), specialised to `Ordinal`. -/
 private theorem iSup_const_ord (c : Ordinal.{0}) : (⨆ _ : ℕ, c) = c := ciSup_const
+
+/-! ## ε₀-closure helpers + the `PXFcFin` / `PXFcLt` bound-tracking layer
+
+`PXFcFin c Γ` = "derivable with a **finite** (natural-number) ordinal height", closed under every
+structural builder + the ω-rule **with a uniform finite family**. `PXFcLt c Γ` = "derivable with
+height `< ε₀`". The single transfinite jump (the ω-rule over a *non*-constant finite family, as in
+`metaInduction`) is `PXFcLt.allω_fin` : `⨆ₙ (↑N n) ≤ ω < ε₀`. -/
+
+open GoodsteinPA.Epsilon0Complete (isSuccLimit_epsilon0)
+
+/-- ε₀ is closed under successor (it is a limit ordinal). -/
+theorem add_one_lt_epsilon0 {B : Ordinal.{0}} (h : B < ε₀) : B + 1 < ε₀ := by
+  rw [← Order.succ_eq_add_one]; exact isSuccLimit_epsilon0.succ_lt h
+
+/-- `ω < ε₀`. -/
+theorem omega0_lt_epsilon0 : Ordinal.omega0 < ε₀ := Ordinal.omega0_lt_epsilon 0
+
+/-- Naturals are `< ε₀`. -/
+theorem natCast_lt_epsilon0 (n : ℕ) : (n : Ordinal.{0}) < ε₀ := Ordinal.natCast_lt_epsilon n 0
+
+/-- `↑(max a b) = max ↑a ↑b` in `Ordinal`. -/
+private theorem natCast_max (a b : ℕ) : ((max a b : ℕ) : Ordinal.{0}) = max (a : Ordinal) b :=
+  Nat.mono_cast.map_max
+
+/-- A finite-height `PXFc` derivation (natural-number ordinal). -/
+def PXFcFin (c : ℕ) (Γ : Seq LX) : Prop := ∃ N : ℕ, PXFc (N : Ordinal) c Γ
+
+/-- A `PXFc` derivation of height `< ε₀`. -/
+def PXFcLt (c : ℕ) (Γ : Seq LX) : Prop := ∃ α : Ordinal.{0}, α < ε₀ ∧ PXFc α c Γ
+
+theorem PXFcFin.toLt {c Γ} (h : PXFcFin c Γ) : PXFcLt c Γ := by
+  obtain ⟨N, hN⟩ := h; exact ⟨_, natCast_lt_epsilon0 N, hN⟩
+
+theorem PXFcFin.mono_c {c c' Γ} (hc : c ≤ c') (h : PXFcFin c Γ) : PXFcFin c' Γ := by
+  obtain ⟨N, hN⟩ := h; exact ⟨N, hN.mono le_rfl hc⟩
+
+theorem PXFcFin.weakening {c Γ Δ} (h : Γ ⊆ Δ) (hd : PXFcFin c Γ) : PXFcFin c Δ := by
+  obtain ⟨N, hN⟩ := hd; exact ⟨N, hN.weakening h⟩
+
+theorem PXFcFin.verumR {c Γ} (h : (⊤ : Form LX) ∈ Γ) : PXFcFin c Γ :=
+  ⟨0, (PXFc.verumR h).mono (by simp) (Nat.zero_le c)⟩
+
+theorem PXFcFin.axLv {c Γ k} (r : LX.Rel k) (v v' : Fin k → Semiterm LX ℕ 0)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
+              = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : PXFcFin c Γ :=
+  ⟨0, (PXFc.axLv r v v' hval hp hn).mono (by simp) (Nat.zero_le c)⟩
+
+theorem PXFcFin.axTrue {c Γ k} (b : Bool) (r : LX.Rel k) (v) (hxfree : Sum.isLeft r = true)
+    (htrue : LitTrue (signedLit b r v)) (hmem : signedLit b r v ∈ Γ) : PXFcFin c Γ :=
+  ⟨0, (PXFc.axTrue b r v hxfree htrue hmem).mono (by simp) (Nat.zero_le c)⟩
+
+theorem PXFcFin.andI {c Γ} (φ ψ : Form LX) (hφ : PXFcFin c (insert φ Γ))
+    (hψ : PXFcFin c (insert ψ Γ)) : PXFcFin c (insert (φ ⋏ ψ) Γ) := by
+  obtain ⟨N1, h1⟩ := hφ; obtain ⟨N2, h2⟩ := hψ
+  refine ⟨max N1 N2 + 1, ?_⟩
+  have := PXFc.andI φ ψ h1 h2
+  rwa [← natCast_max, ← Nat.cast_add_one] at this
+
+theorem PXFcFin.orI {c Γ} (φ ψ : Form LX) (h : PXFcFin c (insert φ (insert ψ Γ))) :
+    PXFcFin c (insert (φ ⋎ ψ) Γ) := by
+  obtain ⟨N, hN⟩ := h
+  exact ⟨N + 1, by rw [Nat.cast_add_one]; exact PXFc.orI φ ψ hN⟩
+
+theorem PXFcFin.exI {c Γ} (φ : SyntacticSemiformula LX 1) (n : ℕ)
+    (h : PXFcFin c (insert (φ/[nm n]) Γ)) : PXFcFin c (insert (∃⁰ φ) Γ) := by
+  obtain ⟨N, hN⟩ := h
+  exact ⟨N + 1, by rw [Nat.cast_add_one]; exact PXFc.exI φ n hN⟩
+
+theorem PXFcFin.cut {c : ℕ} {Γ} (χ : Form LX) (hc : (χ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞))
+    (h₁ : PXFcFin c (insert χ Γ)) (h₂ : PXFcFin c (insert (∼χ) Γ)) : PXFcFin c Γ := by
+  obtain ⟨N1, h1⟩ := h₁; obtain ⟨N2, h2⟩ := h₂
+  refine ⟨max N1 N2 + 1, ?_⟩
+  have := PXFc.cut χ hc h1 h2
+  rwa [← natCast_max, ← Nat.cast_add_one] at this
+
+/-- The ω-rule with a **uniform finite** family: every premise at the same finite height `N`. -/
+theorem PXFcFin.allω_unif {c Γ} (φ : SyntacticSemiformula LX 1) (N : ℕ)
+    (h : ∀ n, PXFc (N : Ordinal) c (insert (φ/[nm n]) Γ)) : PXFcFin c (insert (∀⁰ φ) Γ) := by
+  refine ⟨N + 1, ?_⟩
+  rw [Nat.cast_add_one]
+  have := PXFc.allω (β := fun _ => (N : Ordinal)) φ (Γ := Γ) h
+  rwa [iSup_const_ord] at this
+
+/-- **The single transfinite jump.** The ω-rule over a *non*-constant finite family: each premise has
+some finite height `N n`, but `⨆ₙ (↑N n) ≤ ω < ε₀`, so the conclusion is `< ε₀`. -/
+theorem PXFcLt.allω_fin {c Γ} (φ : SyntacticSemiformula LX 1)
+    (h : ∀ n, PXFcFin c (insert (φ/[nm n]) Γ)) : PXFcLt c (insert (∀⁰ φ) Γ) := by
+  choose N hN using h
+  refine ⟨(⨆ n, ((N n : ℕ) : Ordinal)) + 1, ?_, PXFc.allω (β := fun n => ((N n : ℕ) : Ordinal)) φ hN⟩
+  refine add_one_lt_epsilon0 (lt_of_le_of_lt ?_ omega0_lt_epsilon0)
+  exact Ordinal.iSup_le (fun n => (Ordinal.natCast_lt_omega0 (N n)).le)
 
 /-- **Bounded `Z∞` excluded middle over `LX`.** The cut-free `XFreeAx` derivation of `{φ, ∼φ}` has
 **finite** ordinal `≤ 2·complexity φ`. The bound is complexity-determined (not instantiation-determined),
@@ -126,5 +219,250 @@ theorem provable_em_x_bdd : ∀ (k : ℕ) (φ : Form LX), φ.complexity ≤ k �
       have hall := PXFc.allω (β := fun _ => ((2 * k : ℕ) : Ordinal) + 1) (∼ψ) (Γ := Γ) fam
       rw [Finset.insert_eq_self.mpr hall', iSup_const_ord] at hall
       rw [hcast]; exact hall
+
+/-! ## The complexity-driven leaf engines, with explicit uniform bounds
+
+`provable_em_cong_gen_x` and `provable_true_x` re-proved returning the **explicit** ordinal `↑(2k)`
+(resp. `↑k`) — uniform in every instantiation, so their ω-rule families are literally constant. -/
+
+set_option maxHeartbeats 1000000 in
+/-- Bounded value-congruent EM: explicit finite height `↑(2k)`. Mirrors
+`EmbeddingX.provable_em_cong_gen_x`. -/
+theorem provable_em_cong_gen_x_bdd : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → SyntacticTerm LX)
+    (ψ : SyntacticSemiformula LX n), ψ.complexity ≤ k →
+    (∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+        = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i)) →
+    ∀ {Γ : Seq LX}, (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ →
+      PXFc ((2 * k : ℕ) : Ordinal) 0 Γ := by
+  intro k
+  induction k with
+  | zero =>
+    intro n w w' ψ hk hval Γ hp hn
+    have h0 : ((2 * 0 : ℕ) : Ordinal) = 0 := by norm_num
+    rw [h0]
+    cases ψ using Semiformula.cases' with
+    | hverum => exact PXFc.verumR (by simpa using hp)
+    | hfalsum => exact PXFc.verumR (by simpa using hn)
+    | hrel r v =>
+      have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_rel] using hp
+      have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_rel] using hn
+      exact PXFc.axLv r _ _ (fun i => valm_subst_congr w w' hval (v i)) hp' hn'
+    | hnrel r v =>
+      have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_nrel] using hp
+      have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_nrel] using hn
+      exact PXFc.axLv r _ _ (fun i => (valm_subst_congr w w' hval (v i)).symm) hn' hp'
+    | hand φ ψ => simp at hk
+    | hor φ ψ => simp at hk
+    | hall φ => simp at hk
+    | hexs φ => simp at hk
+  | succ k ih =>
+    intro n w w' ψ hk hval Γ hp hn
+    have hcast : ((2 * (k + 1) : ℕ) : Ordinal) = ((2 * k : ℕ) : Ordinal) + 1 + 1 := by
+      have : (2 * (k + 1) : ℕ) = (2 * k + 1) + 1 := by omega
+      rw [this]; simp only [Nat.cast_add, Nat.cast_one]
+    cases ψ using Semiformula.cases' with
+    | hverum => exact (PXFc.verumR (by simpa using hp)).mono (by simp) (le_refl 0)
+    | hfalsum => exact (PXFc.verumR (by simpa using hn)).mono (by simp) (le_refl 0)
+    | hrel r v =>
+      have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_rel] using hp
+      have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_rel] using hn
+      exact (PXFc.axLv r _ _ (fun i => valm_subst_congr w w' hval (v i)) hp' hn').mono
+        (by simp) (le_refl 0)
+    | hnrel r v =>
+      have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_nrel] using hp
+      have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+        simpa [Semiformula.rew_nrel] using hn
+      exact (PXFc.axLv r _ _ (fun i => (valm_subst_congr w w' hval (v i)).symm) hn' hp').mono
+        (by simp) (le_refl 0)
+    | hand a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hp' : ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b)) ∈ Γ := by simpa using hp
+      have hn' : (∼(Rew.subst w' ▹ a) ⋎ ∼(Rew.subst w' ▹ b)) ∈ Γ := by simpa using hn
+      have h1 := ih (n := n) w w' a hak hval
+        (Γ := insert (Rew.subst w ▹ a)
+          (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))
+        (by simp) (by simp)
+      have h2 := ih (n := n) w w' b hbk hval
+        (Γ := insert (Rew.subst w ▹ b)
+          (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))
+        (by simp) (by simp)
+      have hand := PXFc.andI (Rew.subst w ▹ a) (Rew.subst w ▹ b) h1 h2
+      rw [Finset.insert_eq_self.mpr (show ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b))
+        ∈ insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ) by simp [hp'])] at hand
+      have hor := PXFc.orI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b)) hand
+      rw [Finset.insert_eq_self.mpr hn'] at hor
+      rw [hcast]; simpa only [max_self] using hor
+    | hor a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hp' : ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ := by simpa using hp
+      have hn' : (∼(Rew.subst w' ▹ a) ⋏ ∼(Rew.subst w' ▹ b)) ∈ Γ := by simpa using hn
+      have h1 := ih (n := n) w w' a hak hval
+        (Γ := insert (∼(Rew.subst w' ▹ a))
+          (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))
+        (by simp) (by simp)
+      have h2 := ih (n := n) w w' b hbk hval
+        (Γ := insert (∼(Rew.subst w' ▹ b))
+          (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))
+        (by simp) (by simp)
+      have hand := PXFc.andI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b)) h1 h2
+      rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))]
+        at hand
+      have hor := PXFc.orI (Rew.subst w ▹ a) (Rew.subst w ▹ b) hand
+      rw [Finset.insert_eq_self.mpr (show ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ
+        by simp [hp'])] at hor
+      rw [hcast]; simpa only [max_self] using hor
+    | hall a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+      have hp' : (∀⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+      have hn' : (∃⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+      have fam : ∀ m, PXFc (((2 * k : ℕ) : Ordinal) + 1) 0
+          (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
+        intro m
+        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+          intro i; cases i using Fin.cases with
+          | zero => rfl
+          | succ j => simpa using hval j
+        have hx := ih (n := n + 1) (nm m :> w) (nm m :> w') a hak hvalm
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m])
+            (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ))
+          (by rw [← subst_q_cons_app]; simp)
+          (by rw [← subst_q_cons_app]; simp)
+        have hexI := PXFc.exI ((Rew.subst w').q ▹ ∼a) m
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m]) Γ)
+          (by
+            have heq : (((Rew.subst w').q ▹ ∼a)/[nm m])
+                = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+            rw [heq, Finset.insert_comm]; exact hx)
+        rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hn')] at hexI
+        exact hexI
+      have hallω := PXFc.allω (β := fun _ => ((2 * k : ℕ) : Ordinal) + 1)
+        ((Rew.subst w).q ▹ a) (Γ := Γ) fam
+      rw [Finset.insert_eq_self.mpr hp', iSup_const_ord] at hallω
+      rw [hcast]; exact hallω
+    | hexs a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_exs] at hk; omega
+      have hp' : (∃⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+      have hn' : (∀⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+      have fam : ∀ m, PXFc (((2 * k : ℕ) : Ordinal) + 1) 0
+          (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
+        intro m
+        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+          intro i; cases i using Fin.cases with
+          | zero => rfl
+          | succ j => simpa using hval j
+        have hx := ih (n := n + 1) (nm m :> w) (nm m :> w') a hak hvalm
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m])
+            (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ))
+          (by rw [← subst_q_cons_app]; simp)
+          (by rw [← subst_q_cons_app]; simp)
+        have hexI := PXFc.exI ((Rew.subst w).q ▹ a) m
+          (Γ := insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ) hx
+        rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hp')] at hexI
+        have heq : (((Rew.subst w').q ▹ ∼a)/[nm m]) = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+        rw [heq]; exact hexI
+      have hallω := PXFc.allω (β := fun _ => ((2 * k : ℕ) : Ordinal) + 1)
+        ((Rew.subst w').q ▹ ∼a) (Γ := Γ) fam
+      rw [Finset.insert_eq_self.mpr hn', iSup_const_ord] at hallω
+      rw [hcast]; exact hallω
+
+set_option maxHeartbeats 1000000 in
+/-- Bounded ω-completeness for true closed X-free formulas: explicit finite height `↑k`. Mirrors
+`EmbeddingX.provable_true_x`. -/
+theorem provable_true_x_bdd : ∀ (k : ℕ) (φ : Form LX), φ.complexity ≤ k → XFreeForm φ → LitTrue φ →
+    ∀ {Γ : Seq LX}, φ ∈ Γ → PXFc ((k : ℕ) : Ordinal) 0 Γ := by
+  intro k
+  induction k with
+  | zero =>
+    intro φ hk hxf htrue Γ hmem
+    have h0 : ((0 : ℕ) : Ordinal) = 0 := by norm_num
+    rw [h0]
+    cases φ using Semiformula.cases' with
+    | hverum => exact PXFc.verumR hmem
+    | hfalsum => simp [LitTrue] at htrue
+    | hrel r v => exact PXFc.axTrue true r v (by simpa using hxf) htrue hmem
+    | hnrel r v => exact PXFc.axTrue false r v (by simpa using hxf) htrue hmem
+    | hand φ ψ => simp at hk
+    | hor φ ψ => simp at hk
+    | hall φ => simp at hk
+    | hexs φ => simp at hk
+  | succ k ih =>
+    intro φ hk hxf htrue Γ hmem
+    have hcast : (((k + 1 : ℕ)) : Ordinal) = ((k : ℕ) : Ordinal) + 1 := by
+      simp only [Nat.cast_add, Nat.cast_one]
+    cases φ using Semiformula.cases' with
+    | hverum => exact (PXFc.verumR hmem).mono (by simp) (le_refl 0)
+    | hfalsum => simp [LitTrue] at htrue
+    | hrel r v => exact (PXFc.axTrue true r v (by simpa using hxf) htrue hmem).mono (by simp) (le_refl 0)
+    | hnrel r v => exact (PXFc.axTrue false r v (by simpa using hxf) htrue hmem).mono (by simp) (le_refl 0)
+    | hand a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      obtain ⟨hxa, hxb⟩ : XFreeForm a ∧ XFreeForm b := by simpa using hxf
+      obtain ⟨hta, htb⟩ : LitTrue a ∧ LitTrue b := by simpa [LitTrue] using htrue
+      have h1 := ih a hak hxa hta (Γ := insert a Γ) (by simp)
+      have h2 := ih b hbk hxb htb (Γ := insert b Γ) (by simp)
+      have hand := PXFc.andI a b h1 h2
+      rw [Finset.insert_eq_self.mpr hmem] at hand
+      rw [hcast]; simpa only [max_self] using hand
+    | hor a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      obtain ⟨hxa, hxb⟩ : XFreeForm a ∧ XFreeForm b := by simpa using hxf
+      have htor : LitTrue a ∨ LitTrue b := by simpa [LitTrue] using htrue
+      rcases htor with hta | htb
+      · have h1 := ih a hak hxa hta (Γ := insert a (insert b Γ)) (by simp)
+        have hor := PXFc.orI a b h1
+        rw [Finset.insert_eq_self.mpr hmem] at hor
+        rw [hcast]; exact hor
+      · have h1 := ih b hbk hxb htb (Γ := insert a (insert b Γ)) (by simp)
+        have hor := PXFc.orI a b h1
+        rw [Finset.insert_eq_self.mpr hmem] at hor
+        rw [hcast]; exact hor
+    | hall a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+      have hxa : XFreeForm a := by simpa using hxf
+      have hfam : ∀ n, LitTrue (a/[nm n]) := by
+        intro n
+        have := htrue
+        simp only [LitTrue, Semiformula.eval_all] at this
+        simpa [LitTrue, Semiformula.eval_substs, val_nm_ambient, Matrix.constant_eq_singleton]
+          using this n
+      have fam : ∀ n, PXFc ((k : ℕ) : Ordinal) 0 (insert (a/[nm n]) Γ) := by
+        intro n
+        have hcomp : (a/[nm n]).complexity ≤ k := by
+          have : (a/[nm n]).complexity = a.complexity := by simp
+          rw [this]; exact hak
+        exact ih (a/[nm n]) hcomp (by simpa using hxa) (hfam n) (by simp)
+      have hallω := PXFc.allω (β := fun _ => ((k : ℕ) : Ordinal)) a fam
+      rw [Finset.insert_eq_self.mpr hmem, iSup_const_ord] at hallω
+      rw [hcast]; exact hallω
+    | hexs a =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_exs] at hk; omega
+      have hxa : XFreeForm a := by simpa using hxf
+      have hex : ∃ n, LitTrue (a/[nm n]) := by
+        have := htrue
+        simp only [LitTrue, Semiformula.eval_ex] at this
+        obtain ⟨x, hx⟩ := this
+        exact ⟨x, by simpa [LitTrue, Semiformula.eval_substs, Boundedness.val_nm_structLX,
+          Matrix.constant_eq_singleton] using hx⟩
+      obtain ⟨n, hn⟩ := hex
+      have hcomp : (a/[nm n]).complexity ≤ k := by
+        have : (a/[nm n]).complexity = a.complexity := by simp
+        rw [this]; exact hak
+      have hx := ih (a/[nm n]) hcomp (by simpa using hxa) hn (Γ := insert (a/[nm n]) Γ) (by simp)
+      have hexI := PXFc.exI a n hx
+      rw [Finset.insert_eq_self.mpr hmem] at hexI
+      rw [hcast]; exact hexI
 
 end GoodsteinPA.EmbeddingBound
