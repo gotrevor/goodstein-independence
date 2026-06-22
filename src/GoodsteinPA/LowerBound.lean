@@ -284,6 +284,21 @@ theorem Hdom_of_NF {α : ONote} (hα : α.NF) (k : ℕ) : ∃ x, hardy α (max k
   rw [max_eq_right hxk, G_eq_goodsteinLength]
   exact hN _ hxN
 
+/-- **Controlled-index domination** (the §19.6-option-2 lower-bound ingredient). For a *linearly
+shifted* Hardy argument `x ↦ x + c`, Goodstein length still eventually dominates: `hardy α (x+c) <
+G x` for all large `x`. Proof: `hardy α (x+c) = hardy (α + ofNat c) x` (`hardy_add_ofNat`, finite-tail
+additivity), then `hardy_lt_goodsteinLength` on the NF ordinal `α + ofNat c`. This is exactly what a
+controlled ω-rule (premise index `≤ x + c`, as cut-elimination's commuting case produces) needs so the
+witness-bound lower bound survives the reindexing. -/
+theorem hardy_shift_lt_goodsteinLength {α : ONote} (hα : α.NF) (c : ℕ) :
+    ∃ N, ∀ x, N ≤ x → hardy α (x + c) < G x := by
+  haveI := hα
+  have hNF : (α + ONote.ofNat c).NF := ONote.add_nf α (ONote.ofNat c)
+  obtain ⟨N, hN⟩ := hardy_lt_goodsteinLength hNF
+  refine ⟨N, fun x hx => ?_⟩
+  rw [← hardy_add_ofNat hα c, G_eq_goodsteinLength]
+  exact hN x hx
+
 /-- **The fully self-contained Goodstein lower bound (Towsner Thm 17.1).**  For every `α.NF` and `k`,
 the witness-bounded cut-free calculus cannot derive the Goodstein sentence `gAll` at `(α,k)` — no
 hypotheses beyond normal-formhood.  `Hdom` is discharged from the ported Goodstein-dominates-Hardy
