@@ -17,7 +17,9 @@
 4. **`XPositive.lean`** — `XPos` + **`models_mono` (⊨^γ monotone in γ on X-positive formulas)** +
    `eval_mono`/`val_structLX_eq`.
 5. **`Boundedness.lean`** — `Prog_≺(X)`/`TI_≺(X)`/`Xat` formula scaffolding over `LX` (de-Bruijn shapes
-   + inversion shapes verified). The home for the Boundedness theorem proper.
+   + inversion shapes verified) **+ the corollary's downstream half**: `val_nm_structLX`,
+   `models_Xat_nm` (`⊨^γ X(nm n) ↔ |n|_≺<γ`), `orderType_le_of_models_Xat` (`∀n ⊨^γ X(nm n) ⟹ ‖≺‖≤γ`).
+   So once Boundedness 5.4 supplies `⊨^{2^β} Xn ∀n`, the corollary `‖≺‖ ≤ 2^β` is **already wired**.
 6. **`wip/BoundednessProbe.lean`** — `Xatom_axiom`: the Buchholz X-atom axiom `{Xs,¬Xt}` (sᴺ=tᴺ) is
    derivable in generic Z∞ at `(LX,structLX S)` for **any** S. (Validation; stays in wip.)
 
@@ -36,7 +38,8 @@ is a special case, and at `c=0` there is **no `cut` node** (a cut has `cr ≥ 1`
 - `exI` = **case 2 (the heart): principal `∃` is `¬Prog` ⟹ invert (`allInv` on the inner `∀y≺x`) to get
   `…,∀y≺s₀ Xy` and `…,¬Xs₀`, IH both, combine** (else principal is a Γ-`∃`, = case 4). Conclude
   `Sat lt (α+2^β) Γ`. Uses `models_mono` for the `β₀≤β` exponent bumps.
-Then **Corollary** `‖≺‖ ≤ 2^β` via `orderType_le_of_forall`.
+Then **Corollary** `‖≺‖ ≤ 2^β` — **already wired** via `orderType_le_of_models_Xat` (just feed it the
+Boundedness output `∀n, ⊨^{2^β} (Xat (nm n))`).
 
 ## 🎯 After Boundedness — assemble the headline
 - **M4 `embedC` over LX** (mechanical `{L}` generalisation like M5; PA(X) axioms are true in
