@@ -465,4 +465,114 @@ theorem provable_true_x_bdd : ∀ (k : ℕ) (φ : Form LX), φ.complexity ≤ k 
       rw [Finset.insert_eq_self.mpr hmem] at hexI
       rw [hcast]; exact hexI
 
+/-- Bounded `Z∞` excluded middle as a `PXFcFin` (finite height `2·complexity`). -/
+theorem provable_em_x_fin {c : ℕ} {Γ : Seq LX} (φ : Form LX) (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
+    PXFcFin c Γ :=
+  ⟨2 * φ.complexity, (provable_em_x_bdd φ.complexity φ le_rfl hp hn).mono le_rfl (Nat.zero_le c)⟩
+
+/-! ## Bounded value-substitution + closed ∃-introduction (finite-preserving) -/
+
+/-- Bounded `PXFc.subst_value_subst`: value-congruent substitution preserves finite height. -/
+theorem subst_value_subst_bdd {c : ℕ} {Γ : Seq LX}
+    (ψ : SyntacticSemiformula LX 1) (s t : SyntacticTerm LX)
+    (hval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) s = Semiterm.valm ℕ ![] (id : ℕ → ℕ) t)
+    (hc : (ψ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞))
+    (h : PXFcFin c (insert (ψ/[s]) Γ)) :
+    PXFcFin c (insert (ψ/[t]) Γ) := by
+  obtain ⟨N, hN⟩ := h
+  have h₁ : PXFc (N : Ordinal) c (insert (ψ/[s]) (insert (ψ/[t]) Γ)) :=
+    hN.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))
+  have h₂ := provable_em_cong_gen_x_bdd ψ.complexity ![t] ![s] ψ le_rfl
+    (by intro i; cases i using Fin.cases with
+        | zero => simpa using hval.symm
+        | succ j => exact j.elim0)
+    (Γ := insert (∼(ψ/[s])) (insert (ψ/[t]) Γ))
+    (by show (Rew.subst ![t] ▹ ψ) ∈ _; simp)
+    (by show (∼(Rew.subst ![s] ▹ ψ)) ∈ _; simp)
+  have hcc : (((ψ/[s]).complexity : ℕ) + 1 : ℕ∞) ≤ (c : ℕ∞) := by
+    have : (ψ/[s]).complexity = ψ.complexity := by simp
+    rw [this]; exact hc
+  exact PXFcFin.cut (ψ/[s]) hcc ⟨N, h₁⟩ ⟨2 * ψ.complexity, h₂.mono le_rfl (Nat.zero_le c)⟩
+
+/-- Bounded `PXFc.exI_closed`: closed-term ∃-introduction preserves finite height (the rank rises to
+`max c (ψ.complexity + 1)`). -/
+theorem exI_closed_bdd {c : ℕ} {Γ : Seq LX}
+    (ψ : SyntacticSemiformula LX 1) (s : SyntacticTerm LX)
+    (h : PXFcFin c (insert (ψ/[s]) Γ)) :
+    PXFcFin (max c (ψ.complexity + 1)) (insert (∃⁰ ψ) Γ) := by
+  obtain ⟨N, hN⟩ := h
+  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set c' : ℕ := max c (ψ.complexity + 1) with hc'
+  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
+             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
+  have h₁ : PXFc (N : Ordinal) c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
+    (hN.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
+      (le_max_left _ _)
+  have h₂ := provable_em_cong_gen_x_bdd ψ.complexity ![nm m] ![s] ψ le_rfl
+    (by intro i; cases i using Fin.cases with
+        | zero => simpa using hsval
+        | succ j => exact j.elim0)
+    (Γ := insert (∼(ψ/[s])) (insert (ψ/[nm m]) Γ))
+    (by show (Rew.subst ![nm m] ▹ ψ) ∈ _; simp)
+    (by show (∼(Rew.subst ![s] ▹ ψ)) ∈ _; simp)
+  have hcc : (((ψ/[s]).complexity : ℕ) + 1 : ℕ∞) ≤ (c' : ℕ∞) := by
+    have : (ψ/[s]).complexity = ψ.complexity := by simp
+    rw [this]; exact_mod_cast le_max_right _ _
+  have hcut : PXFcFin c' (insert (ψ/[nm m]) Γ) :=
+    PXFcFin.cut (ψ/[s]) hcc ⟨N, h₁⟩ ⟨2 * ψ.complexity, h₂.mono le_rfl (Nat.zero_le c')⟩
+  exact PXFcFin.exI ψ m hcut
+
+/-! ## The cut-tower: `metaInduction_cong_bdd` — height `< ε₀` (the single transfinite jump)
+
+The chain `{ψ(n)}ₙ` of cuts is built at **finite** height per `n` (each step adds finitely-many
+`provable_em_x_fin`/`andI`/`exI`/`cut`/`subst_value_subst_bdd` bumps). The ω-rule over this
+*non*-constant finite family lands at `⨆ₙ (↑Nₙ) + 1 ≤ ω + 1 < ε₀` (`PXFcLt.allω_fin`). This is the
+sole place the embedded ordinal goes transfinite — exactly Gentzen's content. -/
+set_option maxHeartbeats 1000000 in
+theorem metaInduction_cong_bdd (ψ step : SyntacticSemiformula LX 1) {Γ : Seq LX}
+    (succT : ℕ → SyntacticTerm LX)
+    (hsval : ∀ n, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1)
+    (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[succT n])) :
+    PXFcLt (ψ.complexity + 1)
+      (insert (∼(ψ/[nm 0])) (insert (∃⁰ (∼step)) (insert (∀⁰ ψ) Γ))) := by
+  set c : ℕ := ψ.complexity + 1 with hc
+  set Δ : Seq LX := insert (∼(ψ/[nm 0])) (insert (∃⁰ (∼step)) Γ) with hΔ
+  have hcut : ∀ n, ((ψ/[nm n]).complexity + 1 : ℕ∞) ≤ (c : ℕ∞) := by
+    intro n; rw [hc]; simp
+  have hcc : (ψ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞) := by rw [hc]; push_cast; exact le_rfl
+  have hEx : ∀ n, (∃⁰ (∼step)) ∈ (insert (∼(ψ/[nm n])) (insert (ψ/[succT n]) Δ)) := by
+    intro n; rw [hΔ]
+    exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+      (Finset.mem_insert_self _ _)))
+  have chain : ∀ n, PXFcFin c (insert (ψ/[nm n]) Δ) := by
+    intro n
+    induction n with
+    | zero =>
+      exact provable_em_x_fin (ψ/[nm 0]) (Finset.mem_insert_self _ _)
+        (Finset.mem_insert_of_mem (by rw [hΔ]; exact Finset.mem_insert_self _ _))
+    | succ n ih =>
+      have hL : PXFcFin c (insert (ψ/[nm n]) (insert (ψ/[succT n]) Δ)) :=
+        ih.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))
+      have hA : PXFcFin c (insert (ψ/[nm n])
+          (insert (∼(ψ/[nm n])) (insert (ψ/[succT n]) Δ))) :=
+        provable_em_x_fin (ψ/[nm n]) (Finset.mem_insert_self _ _)
+          (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+      have hB : PXFcFin c (insert (∼(ψ/[succT n]))
+          (insert (∼(ψ/[nm n])) (insert (ψ/[succT n]) Δ))) :=
+        provable_em_x_fin (ψ/[succT n])
+          (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)))
+          (Finset.mem_insert_self _ _)
+      have hand := PXFcFin.andI (c := c) (ψ/[nm n]) (∼(ψ/[succT n])) hA hB
+      rw [← hstep n] at hand
+      have hexI := PXFcFin.exI (∼step) n hand
+      rw [Finset.insert_eq_self.mpr (hEx n)] at hexI
+      have hcutd : PXFcFin c (insert (ψ/[succT n]) Δ) :=
+        PXFcFin.cut (ψ/[nm n]) (hcut n) hL hexI
+      exact subst_value_subst_bdd ψ (succT n) (nm (n+1)) (by rw [hsval, valm_nm]) hcc hcutd
+  obtain ⟨a, ha_lt, ha⟩ := PXFcLt.allω_fin (c := c) (Γ := Δ) ψ chain
+  refine ⟨a, ha_lt, ha.weakening ?_⟩
+  rw [hΔ]; intro x hx
+  simp only [Finset.mem_insert] at hx ⊢
+  tauto
+
 end GoodsteinPA.EmbeddingBound
