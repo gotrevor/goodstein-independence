@@ -2,7 +2,7 @@
 
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Towsner's Route B (witness-bounded `Z_∞` ω-rule calculus + ε₀
 cut-elimination + Hardy lower bound).** · **Build**: 🟢 green (1257 jobs, `lake build GoodsteinPA`)
-· **Updated**: lap 6 · 2026-06-22 · `2e7ba5c`
+· **Updated**: lap 8 · 2026-06-22
 
 ## Where it stands
 Two of the three Phase-2 girders are **machine-checked and `#print axioms`-clean**: the ε₀
@@ -26,6 +26,21 @@ M7a (the PA↔PA⁺ arithmetization bridge); Route A trades those for the full G
 smaller. Revisit only if M7a proves intractable after sustained effort.
 
 ## What's happened (newest first)
+- **2026-06-22 (lap 8 — control-ordinal operator calculus built through §19.5; Hardy infra BANKED):**
+  Resolved the **Hardy-infrastructure layer** of the §19.6 crux (both directions, axiom-clean, in
+  `src/`): `hardy_add_comp`/`hardy_add_collapse` (`H_{γ+δ}=H_γ∘H_δ` for non-absorbing `γ+δ` — the
+  cut-elim control collapse) and `hardy_comp_lt_goodsteinLength` (`H_α(H_e(m)) < G(m)` eventually, any
+  NF `α,e` — the lower-bound nested-index domination, via `ω^Q·2` exceeding both + the coefficient law).
+  Then built `wip/OperatorZinfty.lean`: the **control-ordinal operator calculus `Zekd α e k d c Γ`**
+  (witness bound `hardy e (k+d)` decoupled from the derivation ordinal `α`), sorry-free through §19.5 —
+  inductive + `mono_k/d/c` + the NEW **`mono_e`** (control-axis monotonicity, via the banked
+  `hardy_le_of_lt`) + full inversion suite (orInv/andInvL/R/allInv) + §19.5 cutReduceConj/Disj + all
+  §19.6/19.7 ordinal/norm helpers. **Design validated (`ANALYSIS-…-cutelim-k-threading.md` ADDENDUM 5):**
+  the single control ordinal `e` (numeric Buchholz form, NOT the set-valued `H`) closes the ADDENDUM-4
+  witness-index obstruction — commuting cases keep `e` inert, `e` rises only at the top cut via `mono_e`,
+  the lower bound survives via `hardy_comp_lt_goodsteinLength`. **Remaining girder = §19.6 `cutReduceAll`
+  on `Zekd`** (port `Zinfty.lean:785` + bounded bookkeeping); a NF-threading subtlety in the leaf cases
+  surfaced (norm_add_le is NF-essential) — fix + 3 options recorded in ADDENDUM 5.
 - **2026-06-22 (lap 7, cont. — §19.6 norm ingredient PROVED; commuting-case frontier mapped):**
   Proved `norm_addAux_le` and `norm_add_le {α γ NF} : norm(α+γ) ≤ norm α + norm γ` (axiom-clean; the
   `τ(α#β)≤τα+τβ` budget fact; NF essential — NF-free version machine-checked FALSE, eq-merge killed by
@@ -132,6 +147,8 @@ the domination path — 🟢 finite witnesses; no `PA_delta1Definable` on Route 
 | `B.allInv` (M6) | ∀-inversion (I∀-frontier resolution) | `propext, choice, Quot.sound` | 🟢 clean |
 | `lowerBound_hardy` (M6) | full Thm 17.1 mod `Hdom` | `propext, choice, Quot.sound` | 🟢 clean |
 | `lowerBound_hardy_selfcontained` (M6, **lap 6**) | **full Thm 17.1, only `α.NF`** | `propext, choice, Quot.sound` + 12 `native_decide` base-case `ax_*` | 🟢 clean — the `ax_*` are 🟢 finite Goodstein base-case witnesses (acceptable indefinitely) |
+| `hardy_add_comp`/`_collapse` (lap 8, `src/Hardy`) | `H_{γ+δ}=H_γ∘H_δ` (non-absorbing) | `propext, choice, Quot.sound` | 🟢 clean — §19.6 operator-calculus control collapse |
+| `hardy_comp_lt_goodsteinLength` (lap 8, `src/LowerBound`) | `H_α(H_e(m)) < G(m)` eventually | `propext, choice, Quot.sound` + the M6 `native_decide` base-cases | 🟢 clean — §19.6 operator-calculus lower-bound domination |
 | `not_proves_of_implies_consistency` (Route A) | meta-reduction | `…, PA_delta1Definable` | 🟡 Foundation axiom; **Route A only** — Route B avoids it |
 
 Math-axiom count on the (eventual) Route-B headline target: **0** beyond the trust base + the 🟢

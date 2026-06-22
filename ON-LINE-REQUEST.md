@@ -1,5 +1,17 @@
 # ON-LINE-REQUEST — Towsner §19.6 commuting cases: the ω-rule cut-elimination bounding detail
 
+> **LAP-8 UPDATE — largely RESOLVED OFFLINE; request narrowed.** The Hardy/operator-control layer is
+> solved without literature: a **single control ordinal `e`** (numeric Buchholz form, not set-valued
+> `H`) closes the witness-index obstruction — the `exI` witness bound `hardy e (k+d)` is decoupled from
+> the derivation ordinal `α`, stays inert through commuting ω-rules, rises only at the top cut via
+> `mono_e`. Hardy infra BANKED + axiom-clean (`hardy_add_collapse`, `hardy_comp_lt_goodsteinLength`);
+> calculus `Zekd` built through §19.5 (`wip/OperatorZinfty.lean`). See ADDENDUM 5. **Still mildly useful
+> (low priority):** Towsner/Buchholz's §19.6 reduction stated with the per-node ε₀/NF invariant explicit
+> — confirms the leaf-NF fix (`norm(α+βₙ)≤norm α+norm βₙ` needs leaf `NF`; surfaced lap 8). NOT blocking
+> — NF-ifying the `Zekd` leaves proceeds offline next lap.
+
+---
+
 **Filed:** 2026-06-22 (lap 7). **Asker:** box (offline). **Unblocks:** the §19.6 ∀/∃ cut-reduction
 (`cutReduceAll`) for the witness-bounded `Zᵏ` calculus — the one genuinely-deep step left in step 1 of
 the connecting spine. (The numeric `k`/`τ` threading itself is RESOLVED offline — see
