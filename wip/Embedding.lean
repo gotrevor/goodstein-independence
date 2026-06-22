@@ -361,6 +361,253 @@ theorem embed {Γ : Finset (SyntacticFormula ℒₒᵣ)}
       exact_mod_cast Nat.le_max_left _ _
     exact Provable.cut φ hc h1' h2'
 
+
+/-! ## Closed-term existential introduction (ported from wip/ScratchEmCong.lean, lap 11)
+    The shared chip for `embedC`'s `exs`/`axm`: a value-congruent law of excluded middle
+    (`provable_em_cong_gen`) ⟹ closed-term `∃`-intro `Provable.exI_closed`. -/
+
+/-- Substitution-composition: substituting the freed (q) variable by `nm m` after a renaming
+`Rew.subst w` is the same as substituting by the extended vector `nm m :> w`. -/
+lemma subst_q_cons (w : Fin n → SyntacticTerm ℒₒᵣ) (m : ℕ) :
+    (Rew.subst ![nm m]).comp (Rew.subst w).q = Rew.subst (nm m :> w) := by
+  ext x
+  · cases x using Fin.cases with
+    | zero => simp [Rew.comp_app]
+    | succ i => simp [Rew.comp_app]
+  · simp [Rew.comp_app]
+
+/-- Formula form: `((Rew.subst w).q ▹ ψ)/[nm m] = Rew.subst (nm m :> w) ▹ ψ`. -/
+lemma subst_q_cons_app (w : Fin n → SyntacticTerm ℒₒᵣ) (m : ℕ)
+    (ψ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
+    ((Rew.subst w).q ▹ ψ)/[nm m] = Rew.subst (nm m :> w) ▹ ψ := by
+  show Rew.subst ![nm m] ▹ ((Rew.subst w).q ▹ ψ) = Rew.subst (nm m :> w) ▹ ψ
+  rw [← TransitiveRewriting.comp_app, subst_q_cons]
+
+/-- Value of a renamed term depends only on the values of the substituted terms. -/
+lemma valm_subst_congr {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+    (t : SyntacticSemiterm ℒₒᵣ n) :
+    Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w t)
+      = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' t) := by
+  simp only [Semiterm.valm, Semiterm.val_substs]
+  congr 1
+  funext x; exact hval x
+
+/-- Literal-truth congruence under value-equal substitutions. -/
+lemma litTrue_subst_congr {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+    (b : Bool) {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → SyntacticSemiterm ℒₒᵣ n) :
+    LitTrue (signedLit b r (fun i => Rew.subst w (v i)))
+      ↔ LitTrue (signedLit b r (fun i => Rew.subst w' (v i))) := by
+  have hv : (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w (v i)))
+          = (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' (v i))) := by
+    funext i; exact valm_subst_congr w w' hval (v i)
+  cases b <;>
+    simp only [signedLit, LitTrue, Semiformula.eval_rel, Semiformula.eval_nrel, hv]
+
+/-- The numeral `nm m` evaluates to `m` in the standard ℕ-model (any free assignment). -/
+lemma valm_nm (m : ℕ) (f : ℕ → ℕ) : Semiterm.valm ℕ ![] f (nm m) = m := by
+  simp [nm]
+
+/-- **Value-congruent excluded middle (arity-general).** -/
+theorem provable_em_cong_gen : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (ψ : SyntacticSemiformula ℒₒᵣ n), ψ.complexity ≤ k →
+    (∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+        = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i)) →
+    ∀ {Γ : Seq}, (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ → ∃ a, Provable a 0 Γ := by
+  intro k
+  induction k with
+  | zero =>
+    intro n w w' ψ hk hval Γ hp hn
+    cases ψ using Semiformula.cases' with
+    | hverum => exact ⟨0, Provable.verumR (by simpa using hp)⟩
+    | hfalsum => exact ⟨0, Provable.verumR (by simpa using hn)⟩
+    | hrel r v => exact atomic_close w w' hval r v hp hn
+    | hnrel r v => exact atomic_close_neg w w' hval r v hp hn
+    | hand φ ψ => simp at hk
+    | hor φ ψ => simp at hk
+    | hall φ => simp at hk
+    | hexs φ => simp at hk
+  | succ k ih =>
+    intro n w w' ψ hk hval Γ hp hn
+    cases ψ using Semiformula.cases' with
+    | hverum => exact ⟨0, Provable.verumR (by simpa using hp)⟩
+    | hfalsum => exact ⟨0, Provable.verumR (by simpa using hn)⟩
+    | hrel r v => exact atomic_close w w' hval r v hp hn
+    | hnrel r v => exact atomic_close_neg w w' hval r v hp hn
+    | hand a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+      have hp' : ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b)) ∈ Γ := by simpa using hp
+      have hn' : (∼(Rew.subst w' ▹ a) ⋎ ∼(Rew.subst w' ▹ b)) ∈ Γ := by simpa using hn
+      obtain ⟨a1, h1⟩ := ih (n := n) w w' a hak hval
+        (Γ := insert (Rew.subst w ▹ a)
+          (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))
+        (by simp) (by simp)
+      obtain ⟨a2, h2⟩ := ih (n := n) w w' b hbk hval
+        (Γ := insert (Rew.subst w ▹ b)
+          (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))
+        (by simp) (by simp)
+      have hand := Provable.andI (Rew.subst w ▹ a) (Rew.subst w ▹ b) h1 h2
+      rw [Finset.insert_eq_self.mpr (show ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b))
+        ∈ insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ) by simp [hp'])] at hand
+      have hor := Provable.orI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b)) hand
+      rw [Finset.insert_eq_self.mpr hn'] at hor
+      exact ⟨_, hor⟩
+    | hor a b =>
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+      have hp' : ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ := by simpa using hp
+      have hn' : (∼(Rew.subst w' ▹ a) ⋏ ∼(Rew.subst w' ▹ b)) ∈ Γ := by simpa using hn
+      obtain ⟨a1, h1⟩ := ih (n := n) w w' a hak hval
+        (Γ := insert (∼(Rew.subst w' ▹ a))
+          (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))
+        (by simp) (by simp)
+      obtain ⟨a2, h2⟩ := ih (n := n) w w' b hbk hval
+        (Γ := insert (∼(Rew.subst w' ▹ b))
+          (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))
+        (by simp) (by simp)
+      have hand := Provable.andI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b)) h1 h2
+      rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn'))]
+        at hand
+      have hor := Provable.orI (Rew.subst w ▹ a) (Rew.subst w ▹ b) hand
+      rw [Finset.insert_eq_self.mpr (show ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ
+        by simp [hp'])] at hor
+      exact ⟨_, hor⟩
+    | hall a =>
+      -- ψ = ∀⁰a ; positive side ∀⁰((subst w).q ▹ a), negative side ∃⁰((subst w').q ▹ ∼a)
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+      have hp' : (∀⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+      have hn' : (∃⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+      have fam : ∀ m, ∃ x, Provable x 0 (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
+        intro m
+        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+          intro i; cases i using Fin.cases with
+          | zero => rfl
+          | succ j => simpa using hval j
+        obtain ⟨x, hx⟩ := ih (n := n + 1) (nm m :> w) (nm m :> w') a hak hvalm
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m])
+            (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ))
+          (by rw [← subst_q_cons_app]; simp)
+          (by rw [← subst_q_cons_app]; simp)
+        -- reconstruct ∃⁰((subst w').q ▹ ∼a) via exI with witness m
+        have hexI := Provable.exI ((Rew.subst w').q ▹ ∼a) m
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m]) Γ)
+          (by
+            have heq : (((Rew.subst w').q ▹ ∼a)/[nm m])
+                = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+            rw [heq, Finset.insert_comm]; exact hx)
+        rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hn')] at hexI
+        exact ⟨_, hexI⟩
+      choose β hβ using fam
+      have hallω := Provable.allω ((Rew.subst w).q ▹ a) hβ
+      rw [Finset.insert_eq_self.mpr hp'] at hallω
+      exact ⟨_, hallω⟩
+    | hexs a =>
+      -- ψ = ∃⁰a ; positive side ∃⁰((subst w).q ▹ a), negative side ∀⁰((subst w').q ▹ ∼a)
+      have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_exs] at hk; omega
+      have hp' : (∃⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+      have hn' : (∀⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+      have fam : ∀ m, ∃ x, Provable x 0 (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
+        intro m
+        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+          intro i; cases i using Fin.cases with
+          | zero => rfl
+          | succ j => simpa using hval j
+        obtain ⟨x, hx⟩ := ih (n := n + 1) (nm m :> w) (nm m :> w') a hak hvalm
+          (Γ := insert (((Rew.subst w).q ▹ a)/[nm m])
+            (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ))
+          (by rw [← subst_q_cons_app]; simp)
+          (by rw [← subst_q_cons_app]; simp)
+        -- reconstruct ∃⁰((subst w).q ▹ a) via exI with witness m
+        have hexI := Provable.exI ((Rew.subst w).q ▹ a) m
+          (Γ := insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ) hx
+        rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hp')] at hexI
+        have heq : (((Rew.subst w').q ▹ ∼a)/[nm m]) = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+        rw [heq]; exact ⟨_, hexI⟩
+      choose β hβ using fam
+      have hallω := Provable.allω ((Rew.subst w').q ▹ ∼a) hβ
+      rw [Finset.insert_eq_self.mpr hn'] at hallω
+      exact ⟨_, hallω⟩
+where
+  atomic_close {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → SyntacticSemiterm ℒₒᵣ n)
+      {Γ : Seq} (hp : (Rew.subst w ▹ Semiformula.rel r v) ∈ Γ)
+      (hn : (∼(Rew.subst w' ▹ Semiformula.rel r v)) ∈ Γ) : ∃ a, Provable a 0 Γ := by
+    have hp' : signedLit true r (fun i => Rew.subst w (v i)) ∈ Γ := by
+      simpa [signedLit, Semiformula.rew_rel] using hp
+    have hn' : signedLit false r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+      simpa [signedLit, Semiformula.rew_rel] using hn
+    rcases litTrue_or_neg (signedLit true r (fun i => Rew.subst w (v i))) with htt | htf
+    · exact ⟨0, Provable.axTrue true r _ htt hp'⟩
+    · rw [neg_lit] at htf
+      have htf' : LitTrue (signedLit false r (fun i => Rew.subst w' (v i))) :=
+        (litTrue_subst_congr w w' hval false r v).mp htf
+      exact ⟨0, Provable.axTrue false r _ htf' hn'⟩
+  atomic_close_neg {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
+                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → SyntacticSemiterm ℒₒᵣ n)
+      {Γ : Seq} (hp : (Rew.subst w ▹ Semiformula.nrel r v) ∈ Γ)
+      (hn : (∼(Rew.subst w' ▹ Semiformula.nrel r v)) ∈ Γ) : ∃ a, Provable a 0 Γ := by
+    have hp' : signedLit false r (fun i => Rew.subst w (v i)) ∈ Γ := by
+      simpa [signedLit, Semiformula.rew_nrel] using hp
+    have hn' : signedLit true r (fun i => Rew.subst w' (v i)) ∈ Γ := by
+      simpa [signedLit, Semiformula.rew_nrel] using hn
+    rcases litTrue_or_neg (signedLit false r (fun i => Rew.subst w (v i))) with htt | htf
+    · exact ⟨0, Provable.axTrue false r _ htt hp'⟩
+    · rw [neg_lit] at htf
+      have htf' : LitTrue (signedLit true r (fun i => Rew.subst w' (v i))) :=
+        (litTrue_subst_congr w w' hval true r v).mp htf
+      exact ⟨0, Provable.axTrue true r _ htf' hn'⟩
+
+/-- **Value-congruent excluded middle (single-term form).** For closed terms `s, s'` of equal
+standard value, a sequent containing `ψ/[s]` and `∼(ψ/[s'])` is `Z∞`-derivable cut-free. -/
+theorem provable_em_cong (s s' : SyntacticTerm ℒₒᵣ)
+    (hval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) s = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s')
+    (ψ : SyntacticSemiformula ℒₒᵣ 1) {Γ : Seq}
+    (hp : (ψ/[s]) ∈ Γ) (hn : (∼(ψ/[s'])) ∈ Γ) : ∃ a, Provable a 0 Γ := by
+  refine provable_em_cong_gen ψ.complexity ![s] ![s'] ψ le_rfl ?_ ?_ ?_
+  · intro i; cases i using Fin.cases with
+    | zero => simpa using hval
+    | succ j => exact j.elim0
+  · exact hp
+  · exact hn
+
+/-- **Closed-term existential introduction.** From a derivation of `insert (ψ/[s]) Γ` for ANY
+(closed) witness term `s`, conclude `insert (∃⁰ψ) Γ`. The witness need not be a numeral: `s` is
+collapsed to its standard value `m` via `provable_em_cong` + `cut`, then the numeral-witness rule
+`Provable.exI` applies. (The cut raises the cut-rank bound to `max c (ψ.complexity + 1)`.) -/
+theorem Provable.exI_closed {α : Ordinal.{0}} {c : ℕ} {Γ : Seq}
+    (ψ : SyntacticSemiformula ℒₒᵣ 1) (s : SyntacticTerm ℒₒᵣ)
+    (h : Provable α c (insert (ψ/[s]) Γ)) :
+    ∃ β, Provable β (max c (ψ.complexity + 1)) (insert (∃⁰ ψ) Γ) := by
+  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set c' : ℕ := max c (ψ.complexity + 1) with hc'
+  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m)
+             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
+  -- left cut premise: ψ/[s] available (from h, weakened to add ψ/[nm m])
+  have h₁ : Provable α c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
+    (h.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
+      (le_max_left _ _)
+  -- right cut premise: ∼(ψ/[s]) and ψ/[nm m] — value-congruent em (nm m vs s, equal values)
+  obtain ⟨b, h₂⟩ := provable_em_cong (nm m) s hsval ψ
+    (Γ := insert (∼(ψ/[s])) (insert (ψ/[nm m]) Γ)) (by simp) (by simp)
+  -- cut on χ = ψ/[s]
+  have hcc : (((ψ/[s]).complexity : ℕ) + 1 : ℕ∞) ≤ (c' : ℕ∞) := by
+    have : (ψ/[s]).complexity = ψ.complexity := by simp
+    rw [this]; exact_mod_cast le_max_right _ _
+  have hcut := Provable.cut (ψ/[s]) hcc h₁ (h₂.mono le_rfl (le_max_left _ _))
+  -- hcut : Provable _ c' (insert (ψ/[nm m]) Γ); introduce ∃ by exI with numeral m
+  exact ⟨_, Provable.exI ψ m hcut⟩
+
+
 /-! ## The assignment-carrying (all-closed) embedding `embedC` — the correct frame (lap 10)
 
 The naive `embed` above cannot finish (`exs` with an open witness; `provable_rew` invalid for the new
@@ -453,12 +700,18 @@ theorem embedC {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     -- a `Provable.exI_closed` derived from `Provable.exI` + Z∞ equality-congruence (`s = nm m` via
     -- `axTrue`, then Leibniz). The term-evaluation content — next chip.
     obtain ⟨c, ih⟩ := ih
-    refine ⟨c, fun e => ?_⟩
+    refine ⟨max c (φ.complexity + 1), fun e => ?_⟩
     obtain ⟨a, hd⟩ := ih e
     rw [Finset.image_insert, rew_subst_term (asg e) φ t] at hd
     -- hd : Provable a c (insert (((asg e).q ▹ φ)/[asg e t]) (Γ.image (asg e ▹)))
-    -- want : ∃ α, Provable α c (Γ.image (asg e ▹)), introducing `∃⁰((asg e).q ▹ φ) = asg e ▹ ∃⁰φ ∈ Γ`.
-    sorry
+    obtain ⟨β, hβ⟩ := Provable.exI_closed ((asg e).q ▹ φ) (asg e t) hd
+    -- hβ : Provable β (max c (((asg e).q▹φ).complexity+1)) (insert (∃⁰((asg e).q▹φ)) (Γ.image (asg e▹)))
+    have hcomp : (((asg e).q ▹ φ).complexity + 1) = (φ.complexity + 1) := by simp
+    rw [hcomp] at hβ
+    have hmem : (asg e ▹ (∃⁰ φ)) ∈ Γ.image (fun ψ => asg e ▹ ψ) := Finset.mem_image_of_mem _ h
+    rw [show (asg e ▹ (∃⁰ φ)) = ∃⁰ ((asg e).q ▹ φ) by simp] at hmem
+    rw [Finset.insert_eq_self.mpr hmem] at hβ
+    exact ⟨_, hβ⟩
   | @wk Δ Γ _d h ih =>
     obtain ⟨c, ih⟩ := ih
     refine ⟨c, fun e => ?_⟩
