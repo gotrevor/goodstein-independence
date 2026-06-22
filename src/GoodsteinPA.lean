@@ -16,6 +16,7 @@ import GoodsteinPA.LangX
 import GoodsteinPA.TruthSem
 import GoodsteinPA.XPositive
 import GoodsteinPA.Boundedness
+import GoodsteinPA.XFreeCutElim
 import GoodsteinPA.Hardy
 
 import GoodsteinPA.Domination
