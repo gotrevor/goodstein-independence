@@ -5,7 +5,7 @@
 > (`lake build GoodsteinPA`, 1257 jobs). `wip/BoundedZinfty.lean` compiles standalone **sorry-free**
 > (`lake env lean wip/BoundedZinfty.lean`). Headline still a literal `sorry` (anti-fraud, correct).
 
-## What landed this lap (7 commits, all verified)
+## What landed this lap (9 commits, all verified)
 
 This was a **crux-resolution + ingredient lap**, not a new-girder-built lap. The §19.6 cut-reduction
 that lap 6 pointed at turned out to have a deeper layer; this lap mapped it precisely and proved the
@@ -29,12 +29,16 @@ one ingredient that's fully tractable.
    **additive-principality absorption** (`a + γ = γ` when `repr a < ω^(repr e) ≤ repr γ`, via
    `Ordinal.add_of_omega0_opow_le`). `wip/BoundedZinfty.lean` is now **sorry-free**.
 
-4. **PROVED the Hardy argument-shift lemma** `hardy_add_ofNat {α NF} : hardy (α + ofNat c) n =
-   hardy α (n + c)` (banked in `src/Hardy.lean`, axiom-clean, build green at 1257). Finite-tail Hardy
-   additivity via the successor rule. **This is the one new Hardy fact option-2 (below) needed** — so
-   the recommended §19.6 path is now de-risked: a linearly-reindexed ω-rule premise is absorbed by a
-   constant ordinal bump, and the lower bound's I∀ case reduces to a direct `hardy_lt_goodsteinLength`
-   instance on the bumped ordinal.
+4. **PROVED both Hardy ingredients option-2 (below) needs** (axiom-clean, in `src/`, build green 1257):
+   - `hardy_add_ofNat {α NF} : hardy (α + ofNat c) n = hardy α (n + c)` (`src/Hardy.lean`) — finite-tail
+     Hardy additivity via the successor rule.
+   - `hardy_shift_lt_goodsteinLength {α NF} (c) : ∃ N, ∀ x ≥ N, hardy α (x+c) < G x` (`src/LowerBound.lean`)
+     — controlled-index domination (the lower bound survives a linear ω-rule reindexing).
+   **So the recommended §19.6 fix is de-risked at the Hardy layer**: a linearly-reindexed ω-rule premise
+   is absorbed by a constant ordinal bump, and the lower bound's I∀ case reduces to a direct instance.
+   What remains for option 2 is the *calculus refactor* (generalize `B.allI`/`Zk.allω` to a controlled
+   index + re-prove `allInv` + `lowerBound_hardy_selfcontained`) — a fresh undertaking; **start it
+   fresh-headed, do not half-break the clean state.**
 
 5. **Mapped the real §19.6 frontier — the `allω`-commuting obstruction.** Starting `cutReduceAll`,
    found that the commuting ω-rule case (∃-side's last rule is an ω-rule) **cannot keep the ω-rule's
@@ -90,6 +94,7 @@ Lap-7 investigation makes **option 2 the recommended path** (lightest, no litera
 ## File map (changes this lap)
 - `ANALYSIS-2026-06-22-cutelim-k-threading.md` — **NEW**: the `k`/`τ` crux resolution + §19.6 ADDENDUM.
 - `src/GoodsteinPA/Hardy.lean` — added `hardy_add_ofNat` (+ 2 private helpers); proved, build green.
+- `src/GoodsteinPA/LowerBound.lean` — added `hardy_shift_lt_goodsteinLength`; proved, build green.
 - `wip/BoundedZinfty.lean` — added `norm_addAux_le`, `norm_add_le` (both proved); sorry-free.
 - `STATUS.md`, `PENDING_WORK.md` — lap-7 entries, route decision, §19.6 plan + option 2.
 - `ON-LINE-REQUEST.md` — re-filed (§19.6 commuting-case bounding).
