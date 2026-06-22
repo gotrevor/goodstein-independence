@@ -21,6 +21,7 @@ Status: scaffolding. The calculus and measures below typecheck; the proof-theore
 -/
 import Mathlib.SetTheory.Ordinal.Arithmetic
 import Mathlib.SetTheory.Ordinal.Family
+import Mathlib.SetTheory.Ordinal.Exponential
 import Mathlib.Data.ENat.Lattice
 
 namespace GoodsteinPA.Zinfty
@@ -176,6 +177,30 @@ theorem Provable.allI {β : ℕ → Ordinal.{0}} {c : ℕ} {Γ : Seq} (f : ℕ �
     exact add_le_add hsup le_rfl
   · simp only [Deriv.cr]
     exact iSup_le fun n => hcr n
+
+/-- Towsner **Def 19.8**: the `ω`-tower over `α` of height `c` (`ω_c^α`), written bottom-up to
+match the cut-elimination iteration: `ω_0^α = α`, `ω_{c+1}^α = ω_c^(ω^α)`. (Equivalent to the
+top-down `ω^(ω_{c}^α)`.) The ordinal blow-up of cut elimination. -/
+noncomputable def omegaTower : ℕ → Ordinal.{0} → Ordinal.{0}
+  | 0, α => α
+  | c + 1, α => omegaTower c (Ordinal.omega0 ^ α)
+
+/-- **M5.3 — one level of cut elimination (Towsner Thm 19.7, `(α,c)`-projection).** Reducing the
+cut rank by one raises the ordinal bound to `ω^α`. *(Open: §19 inversions 19.2–19.4 + reductions
+19.5–19.6 + the principal `Cut`-on-rank-`c` case; the numeric `k`/Hardy `h_{ω^α}(k)` bound is
+elided since `Provable` tracks only `(α,c)`.)* -/
+theorem Provable.cutElimStep {α : Ordinal.{0}} {c : ℕ} {Γ : Seq}
+    (h : Provable α (c + 1) Γ) : Provable (Ordinal.omega0 ^ α) c Γ := by
+  sorry
+
+/-- **M5.4 — full cut elimination (Towsner Thm 19.9).** Iterate `cutElimStep` `c` times to reach
+a cut-free derivation, at ordinal `ω_c^α`. Since `< ε₀` is closed under `ω^·` for finite towers,
+a `< ε₀` input stays `< ε₀` — the key to combining with the §17 lower bound. -/
+theorem Provable.cutElim {α : Ordinal.{0}} {c : ℕ} {Γ : Seq}
+    (h : Provable α c Γ) : Provable (omegaTower c α) 0 Γ := by
+  induction c generalizing α with
+  | zero => simpa [omegaTower] using h
+  | succ c ih => exact ih (Provable.cutElimStep h)
 
 end Deriv
 
