@@ -30,6 +30,16 @@ calculus, fully proved) to `Zk`, adding the `(k,NF,norm)` bookkeeping:
   `+α`, the lower bound wants witnesses `≤ h(f n) < G(n)` BOUNDED), or (3) re-derived Towsner 16.8–16.10
   Hardy inequalities (likely insufficient per the `+α` analysis).** Full derivation +
   attack options in `ANALYSIS-2026-06-22-cutelim-k-threading.md` ADDENDUM. `ON-LINE-REQUEST` re-filed.
+  **RECOMMENDED next-lap direction = option (2)** (lightest, offline-doable). Lap-7 investigation found
+  the M6 domination is STRONG: `hardy_lt_goodsteinLength {α NF} : ∃ N, ∀ m ≥ N, hardy α m < G m` (G
+  beats `hardy α` at *every* large `m`, not just one `x`). So a *linearly*-controlled index `f n ≤ n+c`
+  is very plausibly absorbable: the lower-bound I∀ case needs `hardy α (f x) < G x`; with `f x ≤ x+c`,
+  reduce `hardy α (x+c) < G x` to the banked `hardy α' x < G x` via a **Hardy argument-shift lemma**
+  (`hardy α (x+c) ≤ hardy (bump α by c) x`, to prove — the one new Hardy fact option 2 needs). Plan:
+  (a) generalize `B.allI`/`Zk.allω` to a controlled increasing index `f` with `f n ≥ n`; (b) re-prove
+  `allInv` + `lowerBound_hardy_selfcontained` with `f` (via the argument-shift + domination); (c) §19.6
+  commuting case then reconstructs at `f'(n) = norm α + f(n)`. Refactors `wip/BoundedZinfty.lean` —
+  start fresh-headed, don't half-break the current sorry-free state.
   **This is now the hardest-first crux of step 1 — the principal `exI` case is clean; the commuting
   `allω` bounding is the live frontier.** Use `hardy` (`src/Hardy.lean`; `Reaches`/`fundamentalSequence`/
   `hardy_le_of_reaches`/`hardy_monotone` already banked).
