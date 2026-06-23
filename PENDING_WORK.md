@@ -21,6 +21,14 @@ The chain, all landed:
 - `lMap_PA_subset`, `coe_schema_lMap`, `schema_lMap_PA_subset` — `(𝗣𝗔:Schema).lMap Φ ⊆ (paLX:Schema)`.
 - The lift: `provable_def` → `Derivation.lMap` → schema-weaken → `provable_iff_derivable2`.
 
+**E-core brick landed** (`src/GoodsteinPA/DescentCore.lean`, axiom-clean): `evalNat_lt_iff` /
+`evalNat_le_iff` / `evalNat_lt_of_lt` — Rathjen Lemma 2.3(iii), `evalNat` (= `T̂^b_ω`) order-reflects
+on the `Canon`/`NF` domain (immediate from the already-present `Domination.canon_repr` round-trip +
+`toOrdinal` strict monotonicity, also added `toOrdinal_lt_iff`/`le_iff`). **Note:** `Domination.lean`
+is far more developed than the lap-22 map implied — it already has `Canon`/`Good`/`canon_repr`/
+`canon_round_trip` (the full T̂/T round-trip) plus the entire `goodsteinLength ~ fastGrowingε₀` growth
+analysis. Grep it before building any semantic ONote/Goodstein lemma.
+
 **Next (E-core — the real remaining content):** the **X-essential** step `𝗣𝗔 ⊢ goodstein → Derivation2
 paLX {TI prec}`. `TI prec` mentions the set variable `X` so it is NOT an `lMap`-image (the lift above
 does NOT produce it directly). Path: (a) `𝗣𝗔 ⊢ goodsteinSentence → 𝗣𝗔 ⊢ ⌜PRWO(ε₀)⌝` (Rathjen §3
