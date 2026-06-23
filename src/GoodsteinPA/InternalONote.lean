@@ -1733,4 +1733,49 @@ lemma iC_iomul (c : V) : iC (iomul c) ≤ iC c + 1 := by
       · exact le_trans hne_le le_self_add
       · exact le_trans h2 (add_le_add hre_le (le_refl 1))
 
+/-- `1 + e ≠ 0` on codes (internal `DescentCore.one_add_ne_zero`): left-adding `1` always leaves a
+head term. Used to see that every leading exponent of `ω·c` is non-zero (so `ω·c` is `NoFin`). -/
+lemma iadd_one_ne_zero (e : V) : iadd (ocOadd 0 1 0) e ≠ 0 := by
+  rw [iadd_ocOadd]
+  by_cases he : e = 0
+  · rw [if_pos he]; exact (ocOadd_pos _ _ _).ne'
+  · rw [if_neg he]
+    by_cases hee : ocExp e = 0
+    · have h2 : icmp 0 (ocExp e) = 1 := by rw [hee]; exact icmp_zero_zero
+      have h1 : icmp 0 (ocExp e) ≠ 0 := by rw [h2]; exact _root_.one_ne_zero
+      rw [if_neg h1, if_pos h2]; exact (ocOadd_pos _ _ _).ne'
+    · have h0 : icmp 0 (ocExp e) = 0 := (ocOadd_destruct hee) ▸ icmp_zero_ocOadd _ _ _
+      rw [if_pos h0]; exact he
+
+/-- **`iC (ω·c + m) ≤ max (iC (ω·c)) m`** for a finite `m`-term `ocOadd 0 m 0` (internal
+`DescentCore.C_add_ofNat_le`, specialized to the `NoFin` ordinal `ω·c`). Because every leading
+exponent of `ω·c` is non-zero, the finite term lands as a fresh bottom summand and never merges into
+an existing coefficient. With `iC_iomul` this gives `C(βₖ) ≤ k+1` for `βₖ = ω·αₖ + (K-i)`. -/
+lemma iC_iadd_finite (c m : V) :
+    iC (iadd (iomul c) (ocOadd 0 m 0)) ≤ max (iC (iomul c)) m := by
+  induction c using ISigma1.sigma1_order_induction
+  · definability
+  case ind c ih =>
+    rcases eq_or_ne c 0 with hc | hc
+    · subst hc
+      rw [iomul_zero, iadd_zero_left, iC_ocOadd, iC_zero]
+      simp
+    · obtain ⟨ee, ne, re, rfl⟩ : ∃ ee ne re, c = ocOadd ee ne re :=
+        ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+      rw [iomul_ocOadd]
+      set E := iadd (ocOadd 0 1 0) ee with hE
+      have hEne : E ≠ 0 := iadd_one_ne_zero ee
+      have hicmp : icmp E 0 = 2 := (ocOadd_destruct hEne) ▸ icmp_ocOadd_zero _ _ _
+      have hre_lt : re < ocOadd ee ne re := by
+        have := ocTail_lt ee ne re; rwa [ocTail_ocOadd] at this
+      rw [iadd_ocOadd, if_neg (ocOadd_pos 0 m 0).ne', ocExp_ocOadd]
+      rw [if_neg (by rw [hicmp]; exact _root_.two_ne_zero),
+          if_neg (by rw [hicmp]; exact (one_lt_two).ne'), iC_ocOadd]
+      -- gt-branch: ocOadd E ne (iadd (iomul re) (ocOadd 0 m 0))
+      calc max (max (iC E) ne) (iC (iadd (iomul re) (ocOadd 0 m 0)))
+          ≤ max (max (iC E) ne) (max (iC (iomul re)) m) :=
+            max_le_max (le_refl _) (ih re hre_lt)
+        _ = max (max (max (iC E) ne) (iC (iomul re))) m := (max_assoc _ _ _).symm
+        _ = max (iC (ocOadd E ne (iomul re))) m := by rw [iC_ocOadd]
+
 end GoodsteinPA.InternalONote
