@@ -28,6 +28,33 @@ not free-X-TI — §3 is primrec-only, the free-X bridge is the *wrong direction
   upstream axiom (orthogonal to the Goodstein mathematics). Needs a review/operator call before the
   headline `sorry` is ever discharged.
 
+## ⭐⭐ Lap 54 — ALL 5 `igt`-interface props BUILT (`higt_within` + `higt0`, axiom-clean, wip)
+The two remaining `StdCor34.igt` bricks landed in `wip/InternalIg.lean` (`lake env lean` green, full
+`lake build GoodsteinPA` still green 1314; all axiom-clean `[propext, choice, Quot.sound]`):
+- **`higt_within` — THE deep brick** (`m < iF l n → icmp (ig l n (m+1)) (ig l n m) = 0`, internal
+  `Grz.g_desc`). Meta-induction; base `icmp_ig0_desc`; step decomposes `m`'s block via the **new
+  `iblock_step` dichotomy** (within: `iblockOff↦+1`, index fixed ⟹ `icmp_iblk_within` + IH with offset
+  `< iF l (iIter…)` from `iblockOff_lt_width`; boundary: `iblockOff↦0`, index `+1` ⟹ coeff strict drop
+  via `iblockIdx_lt` + monus arithmetic ⟹ `icmp_iblk_boundary`; exhaustion: `ig(m+1)=0 ≺` positive
+  `iblk` via `icmp_zero_ocOadd`).
+- Supporting generic bricks added (all in the `Support` section, generic `f`/`fDef`/`hf`):
+  `iblockIdx_common`/`iblockOff_common` (prefix-invariance re-express `m`-state on the longer common
+  code `iwseq…(m+1+1)` so the `BlkRec` step laws apply — the `m` vs `m+1` codes differ otherwise),
+  `iblock_step` (`BlkRec.blk_off_within`/`_boundary`), `ipsum_le_add`/`ipsum_le_of_le` (monotonicity),
+  `iter_le_ipsum_diag` (`Grz.F_succ_le_psum`), `iblockIdx_lt` (`Grz.blockIdx_lt`, by contradiction).
+- **`ig_ne_zero` = `higt0`** (`m < iF l n → ig l n m ≠ 0`): `ig0`/`iblk` are `ocOadd…≠0`.
+
+**5 of 5 igt props DONE: `isNF_ig`(higtNF), `higt_exp_ig`(higt_exp), `iC_ig_bound`(higtC),
+`higt_within`, `ig_ne_zero`(higt0).** NEXT crux-1 step (no more `ig`-internal bricks): wire them into
+`wip/StdCor34.lean` — `igt n m := ig l₀ n m`, supply the 5 hyps to `salpha_isNF`/`salpha_desc`/
+`salpha_C_le`, then `salpha_*` → `InternalThm35.bbeta` → `DescentArith.nonterminating_internal`
+(Lemma 3.6) ⟹ `goodstein_implies_prwo`. ⚠️ STILL OWED before claiming crux 1: (a) the `habove`/`iAbove`
+input the `salpha_*` lemmas want (relate `ocExp (ig …)` to `iVbigMul (β…) (l+1)` — `higt_exp_ig` gives
+the `< ω^(l+1)` shape; need the `iAbove` packaging); (b) reconcile the `salpha` `higt0` hyp being stated
+UNCONDITIONALLY vs `ig_ne_zero` being in-range only (guard `igt` or weaken `salpha`); (c) the DEFERRED
+`icmp`-code ↔ `natCode`-order seam; (d) the `off j < iF l₀ (blk j)` within-block hypothesis feeding
+`higt_within` at the StdCor34 level.
+
 ## ⭐ Lap 53 (post-reflection grind) — `ig` recursion + structural invariants BUILT (axiom-clean)
 Started the crux-1 `ig` assembly (the lap-52 NEXT). Two deliverables:
 - **Promoted `InternalGrz` → `src/`** (sorry-free, axiom-clean since lap 52; charter says completed

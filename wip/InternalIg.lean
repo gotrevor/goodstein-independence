@@ -156,6 +156,89 @@ theorem iter_add_iblockOff_le {n m : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x �
         rw [add_assoc]
     _ = n + m := by rw [h2]
 
+/-! ### Block-step laws for the descent (mirror of `Grz.blockIdx_eq`'s within/boundary outcomes)
+
+The descent `g_desc` reasons about how `blockIdx`/`blockOff` change under `m ↦ m+1`. Internally the
+`BlkRec` step laws (`blk_off_within`/`blk_off_boundary`) give this directly — but `iblockIdx … n m`
+and `iblockIdx … n (m+1)` read *different* width codes (`iwseq … (m+1)` vs `iwseq … (m+2)`), so we
+first re-express the `m`-state against the longer common code `iwseq … (m+1+1)` via prefix-invariance
+(`BlkRec.blk_prefix_congr`). -/
+
+/-- `iblockIdx … n m` against the *longer* common code `iwseq … n (m+1+1)` (prefix-invariance: the two
+codes agree on `[0,m]`, the indices `blk m` actually reads). -/
+theorem iblockIdx_common (n m : V) :
+    iblockIdx fDef f hf n m = BlkRec.blk (iwseq fDef f hf n (m + 1 + 1)) m := by
+  rw [iblockIdx]
+  apply BlkRec.blk_prefix_congr
+  intro b hb
+  rw [znth_iwseq (hf := hf) b (lt_of_le_of_lt hb (lt_add_one m)),
+      znth_iwseq (hf := hf) b (lt_trans (lt_of_le_of_lt hb (lt_add_one m)) (lt_add_one (m + 1)))]
+
+/-- `iblockOff … n m` against the longer common code (prefix-invariance, as `iblockIdx_common`). -/
+theorem iblockOff_common (n m : V) :
+    iblockOff fDef f hf n m = BlkRec.off (iwseq fDef f hf n (m + 1 + 1)) m := by
+  rw [iblockOff]
+  apply BlkRec.off_prefix_congr
+  intro b hb
+  rw [znth_iwseq (hf := hf) b (lt_of_le_of_lt hb (lt_add_one m)),
+      znth_iwseq (hf := hf) b (lt_trans (lt_of_le_of_lt hb (lt_add_one m)) (lt_add_one (m + 1)))]
+
+/-- **The block step dichotomy** (`Grz.blockIdx_eq` outcomes, internalised). Under `m ↦ m+1` either the
+block index is fixed and the offset advances by one (within block), or the index rolls to the next
+block and the offset resets to `0` (boundary). Read straight off the `BlkRec` step laws on the common
+code `iwseq … n (m+1+1)`. -/
+theorem iblock_step (n m : V) :
+    (iblockIdx fDef f hf n (m + 1) = iblockIdx fDef f hf n m ∧
+        iblockOff fDef f hf n (m + 1) = iblockOff fDef f hf n m + 1)
+      ∨ (iblockIdx fDef f hf n (m + 1) = iblockIdx fDef f hf n m + 1 ∧
+        iblockOff fDef f hf n (m + 1) = 0) := by
+  have hI1 : iblockIdx fDef f hf n (m + 1)
+      = BlkRec.blk (iwseq fDef f hf n (m + 1 + 1)) (m + 1) := rfl
+  have hO1 : iblockOff fDef f hf n (m + 1)
+      = BlkRec.off (iwseq fDef f hf n (m + 1 + 1)) (m + 1) := rfl
+  rw [hI1, hO1, iblockIdx_common (hf := hf) n m, iblockOff_common (hf := hf) n m]
+  by_cases h : BlkRec.off (iwseq fDef f hf n (m + 1 + 1)) m + 1
+      < znth (iwseq fDef f hf n (m + 1 + 1)) (BlkRec.blk (iwseq fDef f hf n (m + 1 + 1)) m)
+  · exact Or.inl (BlkRec.blk_off_within _ m h)
+  · exact Or.inr (BlkRec.blk_off_boundary _ m (not_lt.mp h))
+
+/-! ### `ipsum` monotonicity and the `iblockIdx < n` bound (mirror of `Grz.blockIdx_lt`) -/
+
+/-- `ipsum f n i ≤ ipsum f n (i + d)`: each extra block has nonneg width. -/
+theorem ipsum_le_add {n i : V} : ∀ d : V, ipsum fDef f hf n i ≤ ipsum fDef f hf n (i + d) := by
+  intro d
+  induction d using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ d ih => rw [← add_assoc, ipsum_succ]; exact le_trans ih le_self_add
+
+/-- `ipsum` is monotone in the block count. -/
+theorem ipsum_le_of_le {n i j : V} (h : i ≤ j) :
+    ipsum fDef f hf n i ≤ ipsum fDef f hf n j := by
+  have he : i + (j - i) = j := by rw [add_comm]; exact sub_add_self_of_le h
+  calc ipsum fDef f hf n i ≤ ipsum fDef f hf n (i + (j - i)) := ipsum_le_add _
+    _ = ipsum fDef f hf n j := by rw [he]
+
+/-- The diagonal iterate is below the full block-sum: `f^[n] n ≤ ipsum f n n` (mirror of
+`Grz.F_succ_le_psum`; the last summand `f^[n] n` is one term of `ipsum f n n`). -/
+theorem iter_le_ipsum_diag {n : V} (hn : 1 ≤ n) :
+    iIter fDef f hf n n ≤ ipsum fDef f hf n n := by
+  obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, (sub_add_self_of_le hn).symm⟩
+  rw [ipsum_succ]; exact le_add_self
+
+/-- **`iblockIdx … n m < n`** in the live range (mirror of `Grz.blockIdx_lt`). If `iblockIdx ≥ n` then
+`ipsum f n n ≤ ipsum f n iblockIdx ≤ m`, contradicting `m < ipsum f n n`. -/
+theorem iblockIdx_lt {n m : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x → 1 ≤ f x)
+    (hm : m < ipsum fDef f hf n n) : iblockIdx fDef f hf n m < n := by
+  by_contra hge
+  rw [not_lt] at hge
+  have hdecomp := ipsum_iblockIdx_add_iblockOff (hf := hf) (m := m) hn hfpos
+  have h1 : ipsum fDef f hf n (iblockIdx fDef f hf n m) ≤ m :=
+    le_trans le_self_add (le_of_eq hdecomp)
+  have h2 : ipsum fDef f hf n n ≤ ipsum fDef f hf n (iblockIdx fDef f hf n m) :=
+    ipsum_le_of_le hge
+  exact absurd hm (not_lt.mpr (le_trans h2 h1))
+
 end Support
 
 /-- **Lemma 3.3(2) — the coefficient bound** (internal `Grz.g_C_bound`). For each standard level `l`
@@ -206,5 +289,83 @@ theorem iC_ig_bound : ∀ (l : ℕ), ∃ Kg : V, 0 < Kg ∧ ∀ (n m : V), iC (i
             _ ≤ M * (n + m + 1) := by gcongr; exact le_max_right _ _
         exact max_le (max_le hA hB) hCt
       · rw [ig_succ_of_ge (not_lt.mpr h), iC_zero]; exact Arithmetic.zero_le _
+
+/-! ## The within-block descent: `m < iF l n → ig l n (m+1) ≺ ig l n m` (internal `Grz.g_desc`)
+
+THE deep brick of the `igt` interface (`StdCor34.salpha_desc`'s `higt_within`). Meta-induction on the
+standard level `l`; base is `icmp_ig0_desc`. The step decomposes `m`'s block via `iblock_step`:
+- **within block** (`iblockOff ↦ +1`, index fixed): the lead `ω^(l+1)·c` is unchanged and the
+  `ig l`-tail descends by the IH (offset `< iF l (iIter … iblockIdx)` by `iblockOff_lt_width`) —
+  `icmp_iblk_within`;
+- **block boundary** (`iblockOff ↦ 0`, index `+1`): the lead coefficient `max 1 (n - iblockIdx)`
+  *strictly drops* (since `iblockIdx (m+1) < n` by `iblockIdx_lt`, so `n - (i+1) < n - i` with both
+  `≥ 1`), deciding `≺` outright regardless of the tails — `icmp_iblk_boundary`;
+- **exhaustion** (`m+1 ≥ iF(l+1)n`): `ig l n (m+1) = 0 ≺ ig l n m` (a positive `iblk`) by
+  `icmp_zero_ocOadd`. -/
+theorem higt_within : ∀ (l : ℕ) (n m : V), m < iF l n →
+    icmp (ig l n (m + 1)) (ig l n m) = 0 := by
+  intro l
+  induction l with
+  | zero =>
+      intro n m hm
+      simp only [ig_zero]
+      rw [iF_zero] at hm
+      exact icmp_ig0_desc hm
+  | succ l ih =>
+      intro n m hm
+      have hn : 1 ≤ n := by
+        rcases eq_or_ne n 0 with rfl | hn0
+        · rw [iF_succ, iIter_zero] at hm
+          exact absurd hm (not_lt.mpr (Arithmetic.zero_le m))
+        · exact pos_iff_one_le.mp (pos_iff_ne_zero.mpr hn0)
+      have hfpos := iF_pos (V := V) l
+      rw [ig_succ_of_lt hm]
+      by_cases hm1 : m + 1 < iF (l + 1) n
+      · rw [ig_succ_of_lt hm1]
+        rcases iblock_step (hf := iF_defined l) n m with ⟨hidx, hoff⟩ | ⟨hidx, hoff⟩
+        · -- within block: lead fixed, the `ig l`-tail descends by the IH
+          rw [hidx, hoff]
+          refine icmp_iblk_within (l + 1) _ (ih _ _ ?_)
+          have h := iblockOff_lt_width (hf := iF_defined l) (m := m) hn hfpos
+          rwa [iIter_succ] at h
+        · -- block boundary: the lead coefficient strictly drops
+          rw [hidx, hoff]
+          refine icmp_iblk_boundary (l + 1) ?_
+          have hlt : iblockIdx (iFDef l) (iF l) (iF_defined l) n (m + 1) < n :=
+            iblockIdx_lt (hf := iF_defined l) hn hfpos
+              (lt_of_lt_of_le hm1 (by rw [iF_succ]; exact iter_le_ipsum_diag (hf := iF_defined l) hn))
+          rw [hidx] at hlt
+          have hbin : iblockIdx (iFDef l) (iF l) (iF_defined l) n m < n :=
+            lt_trans (lt_add_one _) hlt
+          have hnbi : 1 ≤ n - iblockIdx (iFDef l) (iF l) (iF_defined l) n m :=
+            pos_iff_one_le.mp (pos_sub_iff_lt.mpr hbin)
+          have h1 : 1 ≤ n - (iblockIdx (iFDef l) (iF l) (iF_defined l) n m + 1) :=
+            pos_iff_one_le.mp (pos_sub_iff_lt.mpr hlt)
+          have heq : n - (iblockIdx (iFDef l) (iF l) (iF_defined l) n m + 1)
+              = n - iblockIdx (iFDef l) (iF l) (iF_defined l) n m - 1 := Arithmetic.sub_sub.symm
+          rw [max_eq_right h1, heq]
+          calc n - iblockIdx (iFDef l) (iF l) (iF_defined l) n m - 1
+                < (n - iblockIdx (iFDef l) (iF l) (iF_defined l) n m - 1) + 1 := lt_add_one _
+            _ = n - iblockIdx (iFDef l) (iF l) (iF_defined l) n m := sub_add_self_of_le hnbi
+            _ ≤ max 1 (n - iblockIdx (iFDef l) (iF l) (iF_defined l) n m) := le_max_right _ _
+      · -- exhaustion: `ig (l+1) n (m+1) = 0 ≺` a positive `iblk`
+        rw [ig_succ_of_ge hm1, iblk]
+        exact icmp_zero_ocOadd _ _ _
+
+/-! ## Nonzero in range: `m < iF l n → ig l n m ≠ 0` (internal `Grz.g`-positivity, the `higt0` prop)
+
+In the live range `ig l n m` is a positive code: `ig0` is `ω^0·(n+2-m)` (`ig0_ne_zero`) and `iblk (l+1)`
+is `ω^(ω·…)·c + x` (`ocOadd_ne_zero`). This is the `StdCor34.salpha_*` `higt0` input. -/
+theorem ig_ne_zero (l : ℕ) (n m : V) (hm : m < iF l n) : ig l n m ≠ 0 := by
+  cases l with
+  | zero =>
+      rw [ig_zero, iF_zero] at *
+      have hm2 : m < n + 2 := by
+        have h : m < n + 1 + 1 := lt_trans hm (lt_add_one _)
+        rwa [add_assoc, one_add_one_eq_two] at h
+      exact ig0_ne_zero hm2
+  | succ l =>
+      rw [ig_succ_of_lt hm, iblk]
+      exact ocOadd_ne_zero _ _ _
 
 end GoodsteinPA.InternalIg
