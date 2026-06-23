@@ -630,6 +630,41 @@ lemma iC_iadd_clean {b : V} (hb : b ≠ 0) :
             max_le_max (le_refl _) (IH ra hra_lt hra)
         _ = max (max (max (iC ea) na) (iC ra)) (iC b) := (max_assoc _ _ _).symm
 
+/-- **Clean-append NF** (the missing sibling of `icmp_iadd_clean`/`iC_iadd_clean`): when the tail `b`
+is clean below `a`'s spine (`iAbove (ocExp b) a`), grafting `b` as the bottom summand preserves normal
+form — the whole CNF spine of `a` is followed by `b`'s exponents, all strictly decreasing. Strong
+induction on `a` peeling its spine via `iadd_clean_step`: the new bottom head-condition is the `iAbove`
+head at the spine's end (`icmp_two_iff_swap_zero`), and `a`'s own head-condition transported through
+`ocExp_iadd_clean` above it. This certifies `isNF (icorAlpha β g l)` for `InternalThm35.bbeta`. -/
+lemma isNF_iadd_clean {b : V} (hb : b ≠ 0) (hbNF : isNF b) :
+    ∀ a, isNF a → iAbove (ocExp b) a → isNF (iadd a b) := by
+  intro a
+  induction a using ISigma1.sigma1_order_induction
+  · definability
+  case ind a IH =>
+    intro haNF habove
+    rcases eq_or_ne a 0 with rfl | ha
+    · rw [iadd_zero_left]; exact hbNF
+    · obtain ⟨ea, na, ra, rfl⟩ : ∃ ea na ra, a = ocOadd ea na ra :=
+        ⟨ocExp a, ocCoeff a, ocTail a, (ocOadd_destruct ha).symm⟩
+      obtain ⟨hc, hra_above⟩ := iAbove_ocOadd.mp habove
+      rw [isNF_ocOadd] at haNF
+      obtain ⟨hna, hea_NF, hra_NF, hhead⟩ := haNF
+      have hra_lt : ra < ocOadd ea na ra := by
+        have := ocTail_lt ea na ra; rwa [ocTail_ocOadd] at this
+      rw [iadd_clean_step hb hc, isNF_ocOadd]
+      refine ⟨hna, hea_NF, IH ra hra_lt hra_NF hra_above, ?_⟩
+      rcases eq_or_ne ra 0 with rfl | hra0
+      · -- spine ends: the grafted `b` becomes the new bottom; its exp `≺ ea` by `iAbove`'s head
+        rw [iadd_zero_left]
+        exact Or.inr (icmp_two_iff_swap_zero.mp hc)
+      · -- above the bottom: the original head-condition transports through `ocExp_iadd_clean`
+        right
+        rw [ocExp_iadd_clean hb hra0 hra_above]
+        rcases hhead with h0 | hlt
+        · exact absurd h0 hra0
+        · exact hlt
+
 /-! ### `iAbove` preservation under `ω·` (internal `Grz.MinExpGe_omega_mul`)
 
 `iomul` bumps every leading exponent `e ↦ 1+e`, and `1+·` is order-faithful (`icmp_one_add`, NF
@@ -854,6 +889,16 @@ lemma icorAlpha_C_le {β g l : V} (hg : g ≠ 0)
     iC (icorAlpha β g l) ≤ max (iC β + (l + 1)) (iC g) := by
   rw [icorAlpha]
   exact le_trans (iC_iadd_clean hg _ hab) (max_le_max (iC_iVbigMul_le β (l + 1)) le_rfl)
+
+/-- **NF of the Cor 3.4 slowed term** `ω^(l+1)·β + g`: the lead `ω^(l+1)·β` is NF (`isNF_iVbigMul`)
+and the `g`-tail is NF and clean below it (`iAbove`), so the clean append is NF (`isNF_iadd_clean`).
+Completes the `icorAlpha` brick set (within / boundary / C-bound / NF) needed to feed the slowed
+sequence into `InternalThm35.bbeta` (Thm 3.5). -/
+lemma isNF_icorAlpha {β g l : V} (hβNF : isNF β) (hgNF : isNF g) (hg0 : g ≠ 0)
+    (hab : iAbove (ocExp g) (iVbigMul β (l + 1))) :
+    isNF (icorAlpha β g l) := by
+  rw [icorAlpha]
+  exact isNF_iadd_clean hg0 hgNF (iVbigMul β (l + 1)) (isNF_iVbigMul hβNF (l + 1)) hab
 
 /-- **Constant-absorption** (`Grz.const_add_le_mul`, internal): `A + j ≤ A·(j+1)` for `A ≥ 1`. Absorbs the
 lead's constant `iC β + (l+1)` into the linear Cor 3.4 bound `K·(j+1)`. No `omega` (generic `V`): `j ≤ A·j`
