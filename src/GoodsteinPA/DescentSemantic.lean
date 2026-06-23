@@ -36,6 +36,7 @@ import GoodsteinPA.Thm56
 import GoodsteinPA.DescentLift
 import GoodsteinPA.ReductModel
 import GoodsteinPA.DescentInternal
+import GoodsteinPA.DescentSlowdown
 
 namespace GoodsteinPA.DescentSemantic
 
@@ -368,6 +369,43 @@ theorem descent_step {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M
     ∃ y, (Mlt f y a ∧ ¬ MX y) ∧ ∀ z, z < y → ¬ (Mlt f z a ∧ ¬ MX z) := by
   letI oM : ORingStructure M := ReductModel.reductORing
   exact lx_least_number hM (descentQ_lxDef f a) (no_min a ha)
+
+/-! ### Wall C+D bridge — slowed code-descent ⟹ non-terminating run (the `hbound` payoff, X-essential) -/
+
+/-- **The seam payoff: a slowed `X`-definable code-descent gives a non-terminating internal run.**
+This is the clean reduction of `hbound` (`hCD`'s content) to the *single* hard sub-wall — building the
+slowed-down code sequence `β : M → M`. Given `β` with the three pure-code structural facts (NF,
+`iCanon (k+1)`, `icmp`-descent — all supplied by lap-41's `InternalONote` toolkit on the reindexed
+`ω·αₖ + (K-i)`) **and** the `LX`-definability of the run comparison `T̂^{k+2}(βₖ) ≤ mₖ` (`hPdef` — `β` is
+`X`-dependent, so this is the genuinely `X`-essential hypothesis), the special Goodstein run seeded at
+`T̂²(β₀)` never reaches `0`.
+
+`slowdown_run_facts` (X-agnostic code arithmetic) supplies `base`/`step`/`hpos`; `lx_nonterminating`
+(the `X`-essential `lx_succ_induction` iteration) closes it. **What remains for `hbound` is exactly
+producing such a `β`** (the M-internal `X`-definable descent-recursion from `descent_step`, reindexed
+to codes) — see `HANDOFF` step (i). -/
+theorem nonterminating_of_xDescent {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) :
+    letI : ORingStructure M := ReductModel.reductORing
+    letI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+    ∀ {β : M → M},
+      (∀ k, InternalONote.isNF (β k)) →
+      (∀ k, InternalONote.iCanon (k + 1) (β k)) →
+      (∀ k, InternalONote.icmp (β (k + 1)) (β k) = 0) →
+      (∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+        ∀ k, (InternalONote.ievalNat (k + 1) (β k) ≤
+            InternalPow.igoodstein (InternalONote.ievalNat 1 (β 0)) k)
+          ↔ Semiformula.Evalm M ![k] e φ) →
+      ∃ m₀ : M, ∀ k : M, 0 < InternalPow.igoodstein m₀ k := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  intro β hNF hCanon hdesc hPdef
+  obtain ⟨base, step, hpos⟩ :=
+    DescentSlowdown.slowdown_run_facts hNF hCanon hdesc (b := fun k => InternalONote.ievalNat (k + 1) (β k))
+      (m₀ := InternalONote.ievalNat 1 (β 0)) rfl (fun _ => rfl)
+  -- `lx_nonterminating` wants `base : b 0 ≤ m₀`; `slowdown_run_facts` gives `b 0 ≤ igoodstein m₀ 0`.
+  rw [InternalPow.igoodstein_zero] at base
+  exact ⟨InternalONote.ievalNat 1 (β 0), lx_nonterminating hM (InternalONote.ievalNat 1 (β 0)) hPdef base step hpos⟩
 
 /-! ### Step 3 — the genuine remaining obligation (Rathjen §3 in `M`), as ONE named `sorry` -/
 
