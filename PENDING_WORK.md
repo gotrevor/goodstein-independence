@@ -1,5 +1,33 @@
 # Pending work — open obligations & attack paths
 
+## Reflection — 2026-06-23 (lap 53, DEEP) — direction KEEP; honest endpoint named
+Full synthesis: `REFLECTION-2026-06-23-lap53.md`. Kernel re-verified (headline 0 math axioms, faithful
+bridge clean, build green 1313). Route A **re-derived from the mathematics and KEPT** (Goodstein⟹PRWO,
+not free-X-TI — §3 is primrec-only, the free-X bridge is the *wrong direction*, not merely hard).
+
+- **DIRECTION CALL: KEEP.** Route A (Rathjen Cor 3.7) is correct and standard. The lap-52 NEXT (assemble
+  `ig` + port g-properties + wire `StdCor34`) is the right next move.
+- **KEEP doing:** drive **crux 1** (`goodstein_implies_prwo`, 🟡 tractable, ~80% built) to a clean
+  axiom-free assembly — this is the hardest-first move among *resolvable* doubts and lands `γ→PRWO`
+  axiom-clean, the next real milestone. Keep the `wip/GentzenCon.lean` scaffold + SEAM guards. Keep the
+  banked Thm-5.6 monument (do not touch/resurrect/delete).
+- **STOP doing:** (1) open-ended crux-1 substrate that isn't on the `ig → StdCor34.salpha →
+  InternalThm35 → nonterminating_internal → goodstein_implies_prwo` critical path — every brick must
+  answer "does this bring the `goodstein_implies_prwo` *body* closer?" (lap-49's generic-V `icorAlpha`
+  tower failed that test and was banked). (2) Further crux-2 investment beyond the existing scaffold:
+  crux 2 (`PRWO→Con`) is **🟠 GENERATIONAL** — arithmetizing Gentzen's `ord`/`R`/eq-(5) inside PA, with
+  **no upstream shortcut** (confirmed lap 53: Foundation's `Hauptsatz.main` is meta-level; no arithmetized
+  ordinal analysis in Foundation/mathlib; the meta-level Thm-5.6 machine can't be reused). The scaffold
+  already isolates it to the single cited `ord_R_descends` axiom; chip only opportunistically.
+- **HIGHEST-VALUE NEXT TARGET:** finish crux-1's `goodstein_implies_prwo` (the lap-52 NEXT list).
+  Reasoning: it is the *resolvable* feasibility doubt, it de-risks half the headline with a concrete
+  checkable win, and it crystallizes the honest endpoint — *crux-1 built + crux-2 cited eq-(5) +
+  `PA_delta1Definable` upstream*, best-case headline `[propext, choice, Quot.sound, PA_delta1Definable]`.
+- **FLAGGED FOR OPERATOR:** that best-case is NOT DIRECTION rule #1's strict trust base; the
+  `PA_delta1Definable` cost is inherent to Route A's Gödel II. Recommendation: accept the single disclosed
+  upstream axiom (orthogonal to the Goodstein mathematics). Needs a review/operator call before the
+  headline `sorry` is ever discharged.
+
 ## ⭐⭐⭐ Lap 52 — crux-1 bricks 1 + 2-core BUILT (green, axiom-clean, wip)
 Discharged the two `wip/StdCor34` interface obligations' substrate (lap-51 designated NEXT):
 
