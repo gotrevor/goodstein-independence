@@ -284,6 +284,43 @@ current one. `descent_step` realizes that selector via `lx_least_number`, given 
 step predicate `Q y := Mlt f y a ∧ ¬MX y` (both `Mlt` — `prec` is fvar-free X-free — and `MX` — the
 `Xsym`-atom — are `LX`-definable). Axiom-clean. -/
 
+/-- **Bridge `ℒₒᵣ`-definability on the reduct into `LX`-definability.** Any predicate defined on `M`'s
+`ℒₒᵣ`-reduct (`inst.lMap Φ`) by an `ℒₒᵣ`-formula `ψ` is `LX`-definable by `lMap Φ ψ` (`Semiformula.eval_lMap`).
+The workhorse that carries the entire `ℒₒᵣ`-`𝚺₁` substrate (`Seq`/`znth`/`igoodstein`/`T̂` graphs) into the
+`LX`-definable predicates `lx_succ_induction`/`lx_least_number` consume in wall C's descent recursion. -/
+theorem lxDef_of_reduct {M : Type} [Nonempty M] [inst : Structure LX M] {P : M → Prop}
+    (hP : ∃ e : ℕ → M, ∃ ψ : Semiformula ℒₒᵣ ℕ 1,
+      ∀ x, P x ↔ Semiformula.Eval (inst.lMap Φ) ![x] e ψ) :
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, P x ↔ Semiformula.Evalm M ![x] e φ := by
+  rcases hP with ⟨e, ψ, hψ⟩
+  exact ⟨e, Semiformula.lMap Φ ψ, fun x => (hψ x).trans Semiformula.eval_lMap.symm⟩
+
+/-- **`LX`-definability is closed under conjunction.** The two defining formulas may use different free
+assignments; merge them by relabelling free variables to even/odd indices (`Rew.rewriteMap`). -/
+theorem lxDef_and {M : Type} [Nonempty M] [Structure LX M] {P Q : M → Prop}
+    (hP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, P x ↔ Semiformula.Evalm M ![x] e φ)
+    (hQ : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, Q x ↔ Semiformula.Evalm M ![x] e φ) :
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, (P x ∧ Q x) ↔ Semiformula.Evalm M ![x] e φ := by
+  rcases hP with ⟨eP, φP, hφP⟩
+  rcases hQ with ⟨eQ, φQ, hφQ⟩
+  refine ⟨fun n => if n % 2 = 0 then eP (n / 2) else eQ (n / 2),
+    (Rew.rewriteMap (fun n => 2 * n) ▹ φP) ⋏ (Rew.rewriteMap (fun n => 2 * n + 1) ▹ φQ),
+    fun x => ?_⟩
+  rw [LogicalConnective.HomClass.map_and, Semiformula.eval_rewriteMap, Semiformula.eval_rewriteMap]
+  apply and_congr
+  · have heqP : (fun z : ℕ => (fun n => if n % 2 = 0 then eP (n / 2) else eQ (n / 2)) (2 * z)) = eP := by
+      funext z
+      have h1 : (2 * z) % 2 = 0 := by omega
+      have h2 : (2 * z) / 2 = z := by omega
+      simp [h1, h2]
+    rw [heqP]; exact hφP x
+  · have heqQ : (fun z : ℕ => (fun n => if n % 2 = 0 then eP (n / 2) else eQ (n / 2)) (2 * z + 1)) = eQ := by
+      funext z
+      have h1 : ¬ (2 * z + 1) % 2 = 0 := by omega
+      have h2 : (2 * z + 1) / 2 = z := by omega
+      simp [h1, h2]
+    rw [heqQ]; exact hφQ x
+
 /-- `MX` is `LX`-definable (it *is* the `Xsym`-atom). -/
 theorem MX_lxDef {M : Type} [Nonempty M] [Structure LX M] :
     ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, MX x ↔ Semiformula.Evalm M ![x] e φ := by
