@@ -15,7 +15,8 @@ import GoodsteinPA.InternalONote
 
 namespace GoodsteinPA.InternalONote
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic
+open Classical
+open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
@@ -204,5 +205,208 @@ lemma iC_betaTail_le {c K n i : V} (hslow : iC c ≤ K * (n + 1)) :
     calc K - i ≤ K := hKi
       _ ≤ K * (n + 1) := hK
       _ ≤ K * (n + 1) + i + 1 := le_trans le_self_add le_self_add
+
+/-! ## General clean-append for `iadd` (Cor 3.4's `ω^(l+1)·β + g`, `g` a genuine ordinal `< ω^(l+1)`)
+
+Cor 3.4's slowed term is `αⱼ = ω^(l+1)·βₙ + g(l,n,m)` where the padding `g` is NOT finite (its `C` must
+stay linear while it descends over a whole block of width `f_l(n)`). So the existing finite-tail toolkit
+(`icmp_betaTail_within/_boundary`, tail `ocOadd 0 m 0`) does not apply: we need a **general clean append**
+`iadd a b` where every leading exponent down `a`'s spine strictly dominates `b`'s leading exponent
+(`icmp ea (ocExp b) = 2`), so `iadd` grafts `b` as a pure tail without merging. This is the internal
+analog of `Grz.AllExpAbove` / `C_add_clean` / `corAlpha_within` / `corAlpha_boundary`.
+
+The foundational fact is the single-step recursion `iadd_clean_step`: under the clean head condition the
+`iadd` recursion takes its `gt` branch, preserving the head term and recursing into the tail. -/
+
+/-- **Clean-append step.** When the second summand `b` is nonzero and the head exponent `ea` strictly
+dominates `b`'s leading exponent (`icmp ea (ocExp b) = 2`), `iadd` keeps the head term and recurses into
+the tail: `iadd (ω^ea·na + ra) b = ω^ea·na + iadd ra b`. (The `gt` branch of `iadd_ocOadd`.) -/
+lemma iadd_clean_step {ea na ra b : V} (hb : b ≠ 0) (hcmp : icmp ea (ocExp b) = 2) :
+    iadd (ocOadd ea na ra) b = ocOadd ea na (iadd ra b) := by
+  rw [iadd_ocOadd, if_neg hb, if_neg (by rw [hcmp]; exact _root_.two_ne_zero),
+      if_neg (by rw [hcmp]; exact (one_lt_two).ne')]
+
+/-! ### The spine-dominance flag `iAbove e0 a` (every leading exponent down `a`'s spine `≻ e0`)
+
+`iAbove e0 a = 1` iff every leading exponent occurring in `a`'s CNF spine strictly dominates `e0`
+(`icmp · e0 = 2`) — the internal analog of `Grz.MinExpGe`/`AllExpAbove`. Then `iadd a b` with
+`e0 = ocExp b` is a *clean append* (`b` grafted as a pure tail). Built as a parameterized (`e0`) `0/1`
+flag via a course-of-values table, exactly like `isNFb` (parameter handled like `iaddTable`'s `b`). -/
+
+/-- Step flag for `iAbove` (only evaluated at positive codes `i`, since index `0` is seeded): `1` iff
+`i`'s leading exponent dominates `e0` AND the tail's flag (read at `ocTail i < i`) is `1`. -/
+noncomputable def iAboveNext (e0 i s : V) : V :=
+  if icmp (ocExp i) e0 = 2 then znth s (ocTail i) else 0
+
+def _root_.LO.FirstOrder.Arithmetic.iAboveNextDef : 𝚺₁.Semisentence 4 := .mkSigma
+  “y e0 i s.
+    ∃ ei, !ocExpDef ei i ∧ ∃ cm, !icmpDef cm ei e0 ∧
+      ( (cm = 2 ∧ ∃ ti, !sndIdxDef ti i ∧ !znthDef y s ti)
+      ∨ (cm ≠ 2 ∧ y = 0) )”
+
+instance iAboveNext_defined : 𝚺₁-Function₃ (iAboveNext : V → V → V → V) via iAboveNextDef := .mk
+  fun v ↦ by
+  simp [iAboveNextDef, iAboveNext, ocExp_defined.iff, ocTail, sndIdx_defined.iff,
+    icmp_defined.iff, znth_defined.iff]
+  by_cases h2 : icmp (ocExp (v 2)) (v 1) = 2 <;> simp [h2]
+
+instance iAboveNext_definable : 𝚺₁-Function₃ (iAboveNext : V → V → V → V) :=
+  iAboveNext_defined.to_definable
+
+/-- Blueprint for the `iAbove` table (parameter = the threshold exponent `e0`). -/
+def iAboveTable.blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y x. !mkSeq₁Def y 1”
+  succ := .mkSigma “y ih n x. ∃ v, !iAboveNextDef v x (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def iAboveTable.construction : PR.Construction V iAboveTable.blueprint where
+  zero := fun _ ↦ !⟦1⟧
+  succ := fun x n ih ↦ seqCons ih (iAboveNext (x 0) (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [iAboveTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [iAboveTable.blueprint, iAboveNext_defined.iff, seqCons_defined.iff]
+
+noncomputable def iAboveTable (e0 n : V) : V := iAboveTable.construction.result ![e0] n
+
+@[simp] lemma iAboveTable_zero (e0 : V) : iAboveTable e0 0 = !⟦1⟧ := by
+  simp [iAboveTable, iAboveTable.construction]
+
+@[simp] lemma iAboveTable_succ (e0 n : V) :
+    iAboveTable e0 (n + 1) = seqCons (iAboveTable e0 n) (iAboveNext e0 (n + 1) (iAboveTable e0 n)) := by
+  simp [iAboveTable, iAboveTable.construction]
+
+/-- **Spine-dominance flag** (`0/1`): `1` iff every leading exponent of `a`'s spine `≻ e0`. -/
+noncomputable def iAboveb (e0 a : V) : V := znth (iAboveTable e0 a) a
+
+/-- **Spine-dominance predicate**: every leading exponent down `a`'s CNF spine strictly dominates `e0`. -/
+def iAbove (e0 a : V) : Prop := iAboveb e0 a = 1
+
+def _root_.LO.FirstOrder.Arithmetic.iAboveTableDef : 𝚺₁.Semisentence 3 :=
+  iAboveTable.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
+
+instance iAboveTable_defined : 𝚺₁-Function₂ (iAboveTable : V → V → V) via iAboveTableDef := .mk
+  fun v ↦ by simp [iAboveTable.construction.result_defined_iff, iAboveTableDef]; rfl
+
+instance iAboveTable_definable : 𝚺₁-Function₂ (iAboveTable : V → V → V) := iAboveTable_defined.to_definable
+instance iAboveTable_definable' (Γ) : Γ-[m + 1]-Function₂ (iAboveTable : V → V → V) :=
+  iAboveTable_definable.of_sigmaOne
+
+def _root_.LO.FirstOrder.Arithmetic.iAvbDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y e0 a. ∃ t, !iAboveTableDef t e0 a ∧ !znthDef y t a”
+
+instance iAboveb_defined : 𝚺₁-Function₂ (iAboveb : V → V → V) via iAvbDef := .mk fun v ↦ by
+  simp [iAvbDef, iAboveb, iAboveTable_defined.iff, znth_defined.iff]
+
+instance iAboveb_definable : 𝚺₁-Function₂ (iAboveb : V → V → V) := iAboveb_defined.to_definable
+instance iAboveb_definable' (Γ) : Γ-[m + 1]-Function₂ (iAboveb : V → V → V) :=
+  iAboveb_definable.of_sigmaOne
+
+instance iAbove_definable (Γ) : Γ-[m + 1]-Relation (iAbove : V → V → Prop) := by
+  unfold iAbove; definability
+
+/-! #### Structural correctness of the `iAbove` table -/
+
+private lemma def_iAboveTable {k} (e0 : V) (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ iAboveTable e0 (v i)) :=
+  DefinableFunction₂.comp (F := iAboveTable) (DefinableFunction.const e0) (DefinableFunction.var i)
+
+@[simp] lemma iAboveTable_seq (e0 n : V) : Seq (iAboveTable e0 n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_iAboveTable e0 0)
+  case zero => simp
+  case succ n ih => rw [iAboveTable_succ]; exact ih.seqCons _
+
+@[simp] lemma iAboveTable_lh (e0 n : V) : lh (iAboveTable e0 n) = n + 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_iAboveTable e0 0)) (by definability)
+  case zero => simp
+  case succ n ih => rw [iAboveTable_succ, Seq.lh_seqCons _ (iAboveTable_seq e0 n), ih]
+
+lemma znth_iAboveTable_succ {e0 n k : V} (hk : k < n + 1) :
+    znth (iAboveTable e0 (n + 1)) k = znth (iAboveTable e0 n) k := by
+  rw [iAboveTable_succ]
+  exact znth_seqCons_of_lt (iAboveTable_seq e0 n) _ (by rw [iAboveTable_lh]; exact hk)
+
+lemma znth_iAboveTable_eq_iAboveb (e0 : V) : ∀ N : V, ∀ k ≤ N, znth (iAboveTable e0 N) k = iAboveb e0 k := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_le (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := znth) (def_iAboveTable e0 1) (DefinableFunction.var 0))
+      (DefinableFunction₂.comp (F := iAboveb) (DefinableFunction.const e0) (DefinableFunction.var 0))
+  case zero =>
+    intro k hk
+    rcases (nonpos_iff_eq_zero.mp hk) with rfl
+    rfl
+  case succ N ih =>
+    intro k hk
+    rcases eq_or_lt_of_le hk with rfl | hlt
+    · rfl
+    · rw [znth_iAboveTable_succ hlt]
+      exact ih k (le_iff_lt_succ.mpr hlt)
+
+@[simp] lemma iAboveb_zero (e0 : V) : iAboveb e0 0 = 1 := by
+  rw [iAboveb, iAboveTable_zero]
+  exact (singleton_seq 1).znth_eq_of_mem ((mem_singleton_seq_iff 1 1).mpr rfl)
+
+@[simp] lemma iAbove_zero (e0 : V) : iAbove e0 0 := by rw [iAbove, iAboveb_zero]
+
+/-- **`iAbove` recursion law**: a positive code dominates iff its head exponent does and its tail does. -/
+lemma iAboveb_pos {e0 c : V} (hc : c ≠ 0) :
+    iAboveb e0 c = if icmp (ocExp c) e0 = 2 then iAboveb e0 (ocTail c) else 0 := by
+  have hpos : 0 < c := pos_iff_ne_zero.mpr hc
+  obtain ⟨M, hM⟩ : ∃ M, c = M + 1 :=
+    ⟨c - 1, (sub_add_self_of_le (pos_iff_one_le.mp hpos)).symm⟩
+  have key : znth (iAboveTable e0 c) c = iAboveNext e0 c (iAboveTable e0 M) := by
+    rw [hM, iAboveTable_succ]
+    have := znth_seqCons_self (iAboveTable_seq e0 M) (iAboveNext e0 (M + 1) (iAboveTable e0 M))
+    rwa [iAboveTable_lh] at this
+  have htail : ocTail c ≤ M := le_iff_lt_succ.mpr (hM ▸ ocTail_lt_of_pos hpos)
+  rw [iAboveb, key, iAboveNext, znth_iAboveTable_eq_iAboveb e0 M (ocTail c) htail]
+
+/-- `iAbove` of an `ocOadd`: head dominates and tail dominates. -/
+lemma iAbove_ocOadd {e0 ec n rc : V} :
+    iAbove e0 (ocOadd ec n rc) ↔ icmp ec e0 = 2 ∧ iAbove e0 rc := by
+  rw [iAbove, iAboveb_pos (ocOadd_ne_zero ec n rc), ocExp_ocOadd, ocTail_ocOadd]
+  by_cases h : icmp ec e0 = 2
+  · simp [h, iAbove]
+  · simp [h]
+
+/-! ### Clean-append comparison lemmas (the internal `corAlpha_within` core)
+
+With both tails `b₁`, `b₂` clean below `a`'s spine (`iAbove (ocExp bᵢ) a`), the additions `iadd a bᵢ`
+share the entire `a`-spine and differ only in the grafted tail. So they compare exactly by their tails:
+`icmp (iadd a b₁) (iadd a b₂) = icmp b₁ b₂` — the internal analog of `corAlpha_within` (fixed lead
+`ω^(l+1)·βₙ`, the `g`-tail decides). Proved by strong induction peeling `a`'s spine via `iadd_clean_step`
++ `icmp_ocOadd_same_head`. -/
+
+/-- **Within-block clean-append comparison.** Two clean appends onto the *same* head compare by their
+tails. (`Grz.corAlpha_within`, internal & general — `g`'s descent transfers through the fixed lead.) -/
+lemma icmp_iadd_clean_within {b₁ b₂ : V} (hb₁ : b₁ ≠ 0) (hb₂ : b₂ ≠ 0) :
+    ∀ a, iAbove (ocExp b₁) a → iAbove (ocExp b₂) a → icmp (iadd a b₁) (iadd a b₂) = icmp b₁ b₂ := by
+  intro a
+  induction a using ISigma1.sigma1_order_induction
+  · definability
+  case ind a IH =>
+    intro h₁ h₂
+    rcases eq_or_ne a 0 with rfl | ha
+    · rw [iadd_zero_left, iadd_zero_left]
+    · obtain ⟨ea, na, ra, rfl⟩ : ∃ ea na ra, a = ocOadd ea na ra :=
+        ⟨ocExp a, ocCoeff a, ocTail a, (ocOadd_destruct ha).symm⟩
+      obtain ⟨hc₁, hr₁⟩ := iAbove_ocOadd.mp h₁
+      obtain ⟨hc₂, hr₂⟩ := iAbove_ocOadd.mp h₂
+      rw [iadd_clean_step hb₁ hc₁, iadd_clean_step hb₂ hc₂, icmp_ocOadd_same_head]
+      have hra_lt : ra < ocOadd ea na ra := by
+        have := ocTail_lt ea na ra; rwa [ocTail_ocOadd] at this
+      exact IH ra hra_lt hr₁ hr₂
+
+/-- **`iadd` preserves the head exponent under a clean append** (the spine is untouched): if every
+spine exponent of `a` dominates `ocExp b` and `a` is positive, `iadd a b` keeps `a`'s leading exponent. -/
+lemma ocExp_iadd_clean {a b : V} (hb : b ≠ 0) (ha : a ≠ 0) (habove : iAbove (ocExp b) a) :
+    ocExp (iadd a b) = ocExp a := by
+  obtain ⟨ea, na, ra, rfl⟩ : ∃ ea na ra, a = ocOadd ea na ra :=
+    ⟨ocExp a, ocCoeff a, ocTail a, (ocOadd_destruct ha).symm⟩
+  obtain ⟨hc, _⟩ := iAbove_ocOadd.mp habove
+  rw [iadd_clean_step hb hc, ocExp_ocOadd, ocExp_ocOadd]
 
 end GoodsteinPA.InternalONote

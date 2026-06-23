@@ -21,6 +21,27 @@ only the leading exponent, so `sigma1_order_induction` at `ocExp c < c` decides 
 genuine `g`-padding math land green now without first building internal Ackermann. See `Reduction.lean`
 docstring + STATUS "Where it stands" for the full chain.
 
+**Crux-1 PROGRESS (lap 47, `InternalCor34.lean`, axiom-clean):** Cor 3.4's slowed term
+`αⱼ = ω^(l+1)·βₙ + g(l,n,m)` needs a GENERAL clean append (`g` is a genuine ordinal `< ω^(l+1)`, not the
+finite tail the `betaTail` lemmas handle). Built the internal analog of `Grz.AllExpAbove`/`C_add_clean`:
+- `iadd_clean_step` — the `gt`-branch recursion of `iadd` under the clean head condition.
+- `iAbove e0 a` (Σ₁-flag predicate via a parameterized course-of-values table, + `iAbove_zero`/`iAbove_ocOadd`
+  recursion) — "every leading exponent down `a`'s spine `≻ e0`" (internal `MinExpGe`).
+- **`icmp_iadd_clean_within`** — two clean appends onto the SAME head compare by their tails:
+  `icmp (iadd a b₁)(iadd a b₂) = icmp b₁ b₂` (= internal `corAlpha_within`, the `g`-descent through the
+  fixed lead). Plus `ocExp_iadd_clean` (head exponent preserved).
+**Crux-1 NEXT (hardest-first):**
+1. **`icmp_iadd_clean_boundary`** — `icmp a₁ a₂ = 0 → icmp (iadd a₁ b₁)(iadd a₂ b₂) = 0` (head drops; =
+   internal `corAlpha_boundary`). Needs the shared-prefix recursion; cleanest with `isNF a₁/a₂` + the
+   `icmp = 1 ⟹ equal-code` fact (so equal exponents are literal, enabling `icmp_ocOadd_same_head`). For
+   Cor 3.4 use `icmp_ibigMul` gives `icmp a₁ a₂ = icmp β' β`. A unified `icmp (iadd a₁ b₁)(iadd a₂ b₂) =
+   thenV (icmp a₁ a₂)(icmp b₁ b₂)` would subsume within+boundary.
+2. **`iC_iadd_clean`** — `iC (iadd a b) ≤ max (iC a)(iC b)` under `iAbove (ocExp b) a` (= internal
+   `C_add_clean`, the slowness C-split). Also `iAbove`-preservation lemmas for `ibigMul`/`iomul` (the head
+   `ω^(l+1)·βₙ` satisfies `iAbove (ocExp g) ·` since `g < ω^(l+1)`) = internal `MinExpGe_bigMul`/`AllExpAbove_bigMul`.
+3. Then the abstract-`ig` interface (recursion eqns + descent + `iC ≤ K(n+m+1)` + `ig < ω^(l+1)` as hyps),
+   `icorAlpha`, and the internal `ig` recursion on level `l:V` (the f-recursion; the genuinely deep last step).
+
 ## ⭐⭐⭐ Lap 46 (2026-06-23) — ROUTE RESOLVED: PRWO(ε₀)→Con(PA)+Gödel II (Rathjen Thm 2.8)
 Operator-directed Route A. Lap-45's fork is **settled** (memory `route-resolved-prwo-gentzen`):
 - **Headline path** = Rathjen Cor 3.7: `𝗣𝗔⊢γ →(§3, primrec) 𝗣𝗔⊢PRWO(ε₀) →(Gentzen Thm 2.8(i)) 𝗣𝗔⊢Con(PA)`,
