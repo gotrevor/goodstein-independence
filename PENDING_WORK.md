@@ -1,9 +1,16 @@
 # Pending work — open obligations & attack paths
 
-## ⭐⭐⭐ Lap 49 (2026-06-23) — generic-route (non-standard level) Cor 3.4 lead bricks
+## ⭐⭐⭐ Lap 49 (2026-06-23) — generic-route Cor 3.4 lead bricks + crux-2 grounded
 Confirmed **M1 (`goodsteinTerminates_re`) and Phase-1 reduction (`not_proves_of_implies_consistency`)
 are already complete & axiom-clean** — the operator's named M1 target was done by a prior lap; the only
 open obligation is the deep Phase-2 girder `Reduction.goodstein_implies_consistency` (crux 1+2 below).
+
+**CRUX 2 grounded this lap (Rathjen 2014 Thm 2.8, read pp. 8–11) → `CRUX2-GENTZEN-2026-06-23.md`.** The
+Phase-2 Gentzen girder `PRWO(ε₀)→Con(PA)` decomposed lemma-by-lemma over Foundation's ARITHMETIZED
+`Theory.Derivation : V → Prop` (located): `prwoSentence` (the hinge — formulate PRWO, highest confab risk),
+primrec `ord`/`R` on coded derivations, `ord(R D) ≺ ord D` (Gentzen reduction, the deep core), assemble
+via primrec descent `n ↦ ord(R^[n] d)` vs PRWO. Independent of crux 1; NOT blocked on Ackermann. Next-lap
+candidate if crux-1's Ackermann-`F` infra stays blocked. Keep crux-2 scaffold sorries in `wip/`.
 
 **Done this lap (`InternalCor34.lean`, axiom-clean, green 1311):** the generic Cor 3.4 lead at a
 *non-standard* level `l : V` (the meta-`ibigMul (k:ℕ)` was only the standard-level special case).
