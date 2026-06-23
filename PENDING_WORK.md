@@ -1,5 +1,27 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 46 (2026-06-23) — ROUTE RESOLVED: PRWO(ε₀)→Con(PA)+Gödel II (Rathjen Thm 2.8)
+Operator-directed Route A. Lap-45's fork is **settled** (memory `route-resolved-prwo-gentzen`):
+- **Headline path** = Rathjen Cor 3.7: `𝗣𝗔⊢γ →(§3, primrec) 𝗣𝗔⊢PRWO(ε₀) →(Gentzen Thm 2.8(i)) 𝗣𝗔⊢Con(PA)`,
+  then Gödel II. This IS `Reduction.goodstein_implies_consistency` (now decomposed in its docstring).
+- **The free-X β-wall (`DescentSemantic:582`) is the WRONG target**: §3 is primrec-only; an oracle X
+  descent isn't dominated (machine-checked `not_dominated_of_diag_le`). But a **PRWO** descent is
+  *internally* primrec ⟹ Lemma 3.2 applies internally ⟹ unblocked. `peano_not_proves_TI` (free-X)
+  does NOT chain (free-X-TI ⊢ PRWO, wrong direction) — banked asset, off-path.
+- **DONE this lap (axiom-clean):** `InternalThm35.bbtail_isNF/_C_le/_desc` — the model-internal Thm 3.5
+  block-tail (`r ≥ K`): from a slow internal descent α produce βᵣ = ω·α_{(r-K)/K}+(K-(r-K)%K) with
+  strict ≺-descent and the TIGHT `iC(βᵣ) ≤ r+1`, via internal division. Route-independent.
+- **Open cruxes (hardest-first), both deep / multi-lap:**
+  1. **Internal Cor 3.4** — Grzegorczyk hierarchy `f:V→V→V` over `V ⊧ 𝗣𝗔` (internal level `l:V`,
+     Ackermann, not IΣ₁-total ⟹ needs the PA substrate `reduct_models_PA`). Produces the slow α that
+     `bbtail_*` consumes. lap-45 path #2 (parameterize over abstract f) recommended first.
+  2. **Gentzen Thm 2.8(i) `PRWO(ε₀)→Con(PA)`** — primrec `ord` + reduction `R`, `ord(R D)<ord D`,
+     arithmetized in PA over Foundation's `Derivation`. The deep ordinal-analysis girder.
+  3. **Formulate `PRWO(ε₀)` as a `Sentence ℒₒᵣ`** (∀ primrec-code descent → finite); gates both 1,2.
+  4. Thm 3.5 **prefix** `r < K` (internal ω-tower on codes) — finishes the single-index β from 0.
+- Foundation `PA_delta1Definable` axiom rides Gödel II (separate residual; lap-6 noted upstream burndown).
+
+
 ## ⭐⭐ Lap 45 (2026-06-23) — VALIDATED PIVOT: §3-on-X is BLOCKED; route is now Trevor's call
 **Read `E-ARCHITECTURE-REVIEW-2026-06-23.md` §H + `HANDOFF.md`.** Independently re-derived in-box AND
 confirmed against the external review. The lap-27→44 plan (run Rathjen §3 slow-down on the X-definable

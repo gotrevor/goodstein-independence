@@ -44,9 +44,25 @@ theorem not_proves_of_implies_consistency
     𝗣𝗔 ⊬ ↑goodsteinSentence := fun h => peano_not_proves_consistency (H h)
 
 /-- **The Phase 2–3 girder (disclosed open target).** Inside `𝗣𝗔`, the Goodstein sentence `γ`
-implies `Con(𝗣𝗔)`. This is the deep content: the ordinal analysis `TI(ε₀) ⊢ Con(𝗣𝗔)` (Gentzen)
-composed with the syntactic Goodstein-to-`TI(ε₀)` descent. Held at `sorry` — the honest
-checkpoint for Phases 2–3. -/
+implies `Con(𝗣𝗔)`. Held at `sorry` — the honest checkpoint for Phases 2–3.
+
+**Faithful decomposition (Rathjen 2014 "Goodstein revisited" Cor 3.7 / Thm 2.8; lap-46 route
+resolution, see memory `route-resolved-prwo-gentzen`).** Two girders, both deep:
+
+1. **§3 reduction `𝗣𝗔 ⊢ γ → 𝗣𝗔 ⊢ PRWO(ε₀)`** — Rathjen §3, all *primitive recursive*: from a primrec
+   ε₀-descent (witnessing `¬PRWO`), Cor 3.4 (Grzegorczyk `g`-padding) makes it *slow*, Thm 3.5
+   reindexes it to `C(βᵣ) ≤ r+1`, and Lemma 3.6 then yields a non-terminating special Goodstein
+   sequence — contradicting `γ`. Status: the ℕ-template is complete (`Grzegorczyk.lean`, sorry-free);
+   the model-internal Thm 3.5 block-tail is `InternalThm35.bbtail_*` (lap 46); the crux is the
+   *internal* Cor 3.4 (Grzegorczyk hierarchy over `V ⊧ 𝗣𝗔`, internal level `l : V`).
+2. **`PRWO(ε₀) → Con(𝗣𝗔)`** — Gentzen Thm 2.8(i) (PRA-provable): a primrec ordinal assignment `ord`
+   + reduction procedure `R` with `ord(R D) < ord D`; an empty-sequent derivation would give an
+   infinite primrec ε₀-descent, forbidden by `PRWO`. THE deep ordinal-analysis girder.
+
+The free-X back-end `Thm56.peano_not_proves_TI` (Buchholz §5, axiom-clean) does NOT chain here
+(free-X-TI ⊢ PRWO, wrong direction); it is a banked asset, off the headline path. NB: this route
+surfaces Gödel II for `𝗣𝗔`, hence carries Foundation's `PA_delta1Definable` — a separate residual
+to a fully clean headline. ANTI-FRAUD: do not discharge until `#print axioms` is clean. -/
 theorem goodstein_implies_consistency :
     𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := by
   sorry
