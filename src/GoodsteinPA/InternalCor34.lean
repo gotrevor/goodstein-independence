@@ -113,4 +113,65 @@ lemma iC_ig0_le (n m : V) : iC (ig0 n m) ≤ n + 2 := by
     exact sub_le_self _ _
   · rw [ig0_of_ge (not_lt.mpr h), iC_zero]; exact Arithmetic.zero_le _
 
+/-! ## The internal block term `iblk k c x = ω^k·c + x` (Rathjen Lemma 3.3 step lead term)
+
+Mirror of `Grz.blk k c x = oadd (ofNat k) c x`. The lead exponent is the (standard) Grzegorczyk
+level `k = l+1 ≥ 1`, so its code is the finite-ordinal code `ocOadd 0 k 0`. Two descent laws — the
+*within-block* comparison (same `ω^k·c` head, the tail decides: `icmp_ocOadd_same_head`) and the
+*block-boundary* comparison (a strictly smaller coefficient `c' < c` decides outright on NF codes:
+`icmp_ocOadd_lt_coeff`) — are the internal `repr_blk_within`/`repr_blk_boundary`, proved purely by
+the digit-direct `icmp_ocOadd` (no ordinals). They port verbatim into the `ig (l+1)` recursion. -/
+
+/-- `iC (ocOadd 0 c 0) = c`: a finite-ordinal code's only coefficient is its value. -/
+lemma iC_finCode (c : V) : iC (ocOadd 0 c 0) = c := by
+  rw [iC_ocOadd]
+  simp only [iC_zero]
+  rw [max_eq_right (Arithmetic.zero_le c), max_eq_left (Arithmetic.zero_le c)]
+
+/-- **Within-block comparison**: codes sharing the SAME head `ω^?·c` compare by their tails.
+`icmp (ω^E·c + x') (ω^E·c + x) = icmp x' x`. (`Grz.repr_blk_within`, internal & general.) -/
+lemma icmp_ocOadd_same_head (E c x x' : V) :
+    icmp (ocOadd E c x') (ocOadd E c x) = icmp x' x := by
+  rw [icmp_ocOadd, icmp_self E E le_rfl, cmpV_self]
+  simp [thenV]
+
+/-- **Block-boundary comparison**: a strictly smaller head coefficient decides `≺` outright — for
+NF codes the tail is below `ω^E`, so the CNF (lexicographic) comparison ignores it.
+`c' < c ⟹ icmp (ω^E·c' + x') (ω^E·c + x) = 0`. (`Grz.repr_blk_boundary`, internal & general.) -/
+lemma icmp_ocOadd_lt_coeff {E c c' x x' : V} (hcc : c' < c) :
+    icmp (ocOadd E c' x') (ocOadd E c x) = 0 := by
+  rw [icmp_ocOadd, icmp_self E E le_rfl]
+  have hc : cmpV c' c = 0 := cmpV_eq_zero.mpr hcc
+  simp [thenV, hc]
+
+/-- The internal block term `ω^k·c + x` on codes, lead exponent the finite level `k` (`k = l+1 ≥ 1`
+in the recursion). Mirror of `Grz.blk`. -/
+noncomputable def iblk (k : ℕ) (c x : V) : V := ocOadd (ocOadd 0 (k : V) 0) c x
+
+/-- `iC (iblk k c x) = max (max k c) (iC x)` (`Grz.C_blk`, internal). -/
+lemma iC_iblk (k : ℕ) (c x : V) : iC (iblk k c x) = max (max (k : V) c) (iC x) := by
+  rw [iblk, iC_ocOadd, iC_finCode]
+
+/-- **Within-block descent for `iblk`**: a strictly `≺`-smaller tail descends. -/
+lemma icmp_iblk_within (k : ℕ) (c : V) {x x' : V} (hx : icmp x' x = 0) :
+    icmp (iblk k c x') (iblk k c x) = 0 := by
+  rw [iblk, iblk, icmp_ocOadd_same_head, hx]
+
+/-- **Block-boundary descent for `iblk`**: a strictly smaller coefficient descends (any tails). -/
+lemma icmp_iblk_boundary (k : ℕ) {c c' x x' : V} (hcc : c' < c) :
+    icmp (iblk k c' x') (iblk k c x) = 0 := by
+  rw [iblk, iblk]; exact icmp_ocOadd_lt_coeff hcc
+
+/-- **NF of `iblk`** (`Grz.NF` step): NF when the level is live (`k ≥ 1`), the coefficient nonzero,
+the tail NF, and the tail's lead exponent below the block exponent (`x = 0 ∨ icmp (ocExp x) … = 0`). -/
+lemma isNF_iblk {k : ℕ} (hk : 1 ≤ k) {c x : V} (hc : c ≠ 0) (hx : isNF x)
+    (htail : x = 0 ∨ icmp (ocExp x) (ocOadd 0 (k : V) 0) = 0) :
+    isNF (iblk k c x) := by
+  rw [iblk, isNF_ocOadd]
+  refine ⟨hc, ?_, hx, htail⟩
+  rw [isNF_ocOadd]
+  refine ⟨?_, isNF_zero, isNF_zero, Or.inl rfl⟩
+  have : (0 : V) < (k : V) := by exact_mod_cast hk
+  exact this.ne'
+
 end GoodsteinPA.InternalONote
