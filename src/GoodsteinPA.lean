@@ -37,3 +37,4 @@ import GoodsteinPA.EmbeddingBound
 import GoodsteinPA.DescentLift
 import GoodsteinPA.DescentCore
 import GoodsteinPA.DescentArith
+import GoodsteinPA.InternalPow
