@@ -58,6 +58,18 @@ This is the Rathjen §3 slow-down, internalized in `M`'s `𝗜𝚺₁`-reduct. D
 This is multi-lap infrastructure (internalizing ONote arithmetic into a nonstandard `M`); attack hardest-
 first = piece 2 (`ievalNat`) + piece 4 (`ineq6_step` internal), since pieces 1/3 are codings on top.
 
+**LAP-37 progress (numeric bricks + Aristotle dispatch).** Landed `InternalLog.ilog_mono` (`2≤b`,
+`0<n≤n'` ⟹ `ilog b n ≤ ilog b n'`, green). Identified that pieces 2/4 both bottom out on **`ibump`/
+`evalNat` monotonicity** — the digit-direct "next hard chip" (lap-29 NB1), which is genuinely interdependent
+(the per-digit bound and monotonicity are mutually recursive — `ibump b r < (b+1)^(ibump b e)` needs
+`ibump b (ilog b r) < ibump b e`, i.e. mono, while mono's `e<e'` case needs that bound). Architected the
+self-contained statement and **submitted `ibump_mono` to Aristotle** (UUID `7c8bb0e8-23cc-4118-9bab-70b37a2debbc`,
+`scratchpad/ibump_mono.lean`): goal `2≤b → n≤n' → ibump b n ≤ ibump b n'` over ℕ with the true `ibump`/`ipow`/
+`ilog` laws as axioms (algebra identical to the V-model, so a clean proof PORTS to `InternalBump`).
+NEXT-LAP: poll `aristotle list`; on COMPLETE, verify + port to `src/GoodsteinPA/InternalBump.lean` as
+`ibump_mono` (then strict-mono `ibump_strictMono` follows). This is the numeric core that internal `evalNat`
+order-reflection (piece 2) and internal `ineq6_step` (piece 4) both consume.
+
 ---
 
 ## 🎯 LAP-34 (2026-06-23) — wall-C/D model-internal induction TOOLKIT landed. Read FIRST.

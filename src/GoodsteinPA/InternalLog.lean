@@ -92,6 +92,20 @@ lemma ilog_pos {b n : V} (hb : 2 ≤ b) (hn : b ≤ n) : 1 ≤ ilog b n := by
   rw [h0, zero_add, ipow_one] at hlt
   exact absurd hlt (not_lt.mpr hn)
 
+/-- **Monotonicity of `ilog`.** For `2 ≤ b` and `0 < n ≤ n'`, the leading exponent does not decrease:
+`ilog b n ≤ ilog b n'`. (If it did, `b^(ilog b n) ≤ n ≤ n' < b^(ilog b n' + 1) ≤ b^(ilog b n)` — a
+strict contradiction.) -/
+lemma ilog_mono {b n n' : V} (hb : 2 ≤ b) (hn : 0 < n) (hle : n ≤ n') : ilog b n ≤ ilog b n' := by
+  have hb1 : (1 : V) ≤ b := le_trans (by simp) hb
+  have hn' : 0 < n' := lt_of_lt_of_le hn hle
+  by_contra h
+  -- `ilog b n' < ilog b n`, i.e. `ilog b n' + 1 ≤ ilog b n`.
+  have hstep : ilog b n' + 1 ≤ ilog b n := lt_iff_succ_le.mp (not_le.mp h)
+  have h1 : n' < ipow b (ilog b n' + 1) := lt_ipow_ilog_succ hb hn'
+  have h2 : ipow b (ilog b n' + 1) ≤ ipow b (ilog b n) := ipow_le_ipow_right hb1 hstep
+  have h3 : ipow b (ilog b n) ≤ n := ipow_ilog_le hb hn
+  exact absurd (lt_of_lt_of_le (lt_of_lt_of_le (lt_of_le_of_lt hle h1) h2) h3) (_root_.lt_irrefl n)
+
 /-- Graph of `ilog`, for the `𝚺₁`-definability instance below. -/
 lemma ilog_graph {e b n : V} :
     e = ilog b n ↔ ((2 ≤ b ∧ 0 < n) → ipow b e ≤ n ∧ n < ipow b (e + 1))
