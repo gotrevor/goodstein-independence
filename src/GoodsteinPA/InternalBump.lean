@@ -195,4 +195,46 @@ lemma ibump_succ {b : V} (hb : 2 ≤ b) (n : V) :
     znth_ibumpTable_eq_ibump b n (ilog b (n + 1)) hen,
     znth_ibumpTable_eq_ibump b n ((n + 1) % ipow b (ilog b (n + 1))) hrn]
 
+/-- **The internal `bump` recursion at any positive argument** (general form of `ibump_succ`):
+`ibump b n = n/b^e · (b+1)^(ibump b e) + ibump b (n mod b^e)` with `e = ilog b n`, for `0 < n`. The
+workhorse equation behind the strong-induction internal `bump` lemmas (the `Δ₀`-numeral analogues of
+`Domination`'s `ℕ` facts). -/
+lemma ibump_pos {b : V} (hb : 2 ≤ b) {n : V} (hn : 0 < n) :
+    ibump b n
+      = n / ipow b (ilog b n) * ipow (b + 1) (ibump b (ilog b n))
+        + ibump b (n % ipow b (ilog b n)) := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 :=
+    ⟨n - 1, (sub_add_self_of_le (pos_iff_one_le.mp hn)).symm⟩
+  exact ibump_succ hb m
+
+/-- **`n ≤ ibump b n`** (internal analogue of `Domination.le_bump`). The hereditary base-change never
+shrinks its argument: each digit-block grows (`b^e ≤ (b+1)^(ibump b e)`) and the remainder dominates
+its own bump by the strong IH. Proved by `𝚺₁` order-induction on `n`, peeling via `ibump_pos`. -/
+theorem le_ibump {b : V} (hb : 2 ≤ b) : ∀ n, n ≤ ibump b n := by
+  have hb0 : (0 : V) < b := lt_of_lt_of_le (by simp) hb
+  intro n
+  induction n using ISigma1.sigma1_order_induction
+  · exact Definable.comp₂ (DefinableFunction.var 0) (def_ibump b 0)
+  case ind n ih =>
+    rcases eq_or_ne n 0 with rfl | hn
+    · simp
+    · have hnpos : 0 < n := pos_iff_ne_zero.mpr hn
+      set e := ilog b n with he
+      have hpe : 0 < ipow b e := ipow_pos hb0 e
+      have hen : e < n :=
+        lt_of_lt_of_le (self_lt_ipow hb e) (ipow_ilog_le hb hnpos)
+      have hrn : n % ipow b e < n :=
+        lt_of_lt_of_le (mod_lt _ hpe) (ipow_ilog_le hb hnpos)
+      rw [ibump_pos hb hnpos, ← he]
+      -- leading block: b^e ≤ (b+1)^(ibump b e)
+      have h1 : ipow b e ≤ ipow (b + 1) (ibump b e) :=
+        le_trans (ipow_le_ipow_left (by simp) e) (ipow_le_ipow_right (by simp) (ih e hen))
+      have h2 : n % ipow b e ≤ ibump b (n % ipow b e) := ih _ hrn
+      have hdm : n / ipow b e * ipow b e + n % ipow b e = n := by
+        rw [mul_comm]; exact div_add_mod n (ipow b e)
+      calc n = n / ipow b e * ipow b e + n % ipow b e := hdm.symm
+        _ ≤ n / ipow b e * ipow (b + 1) (ibump b e) + ibump b (n % ipow b e) := by
+            gcongr
+        _ = _ := rfl
+
 end GoodsteinPA.InternalPow

@@ -114,4 +114,13 @@ lemma ipow_lt_ipow_right {b : V} (hb : 1 < b) {x y : V} (h : x < y) :
         calc b = ipow b 1 := (ipow_one b).symm
           _ ≤ ipow b d := ipow_le_ipow_right hb1 (pos_iff_one_le.mp hd)
 
+/-- `ipow` is monotone in the **base**: `b ≤ c → ipow b x ≤ ipow c x`. -/
+lemma ipow_le_ipow_left {b c : V} (h : b ≤ c) (x : V) : ipow b x ≤ ipow c x := by
+  induction x using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ x ih =>
+    rw [ipow_succ, ipow_succ]
+    exact mul_le_mul ih h (Arithmetic.zero_le b) (Arithmetic.zero_le (ipow c x))
+
 end GoodsteinPA.InternalPow

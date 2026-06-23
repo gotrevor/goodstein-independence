@@ -36,10 +36,20 @@ m₀`. **This makes the RUN side of E-core(b) axiom-clean and pins the precise r
 (numeral-Δ₀ form of `DescentCore.ineq6_step`); `b`/`βₖ` is the slow-down side, fed in Route B by the
 `X`-definable descent from `¬TI prec`.
 
+**Internal-arithmetic bricks STARTED (lap 29, green, axiom-clean) toward the internal `ineq6_step`:**
+- `InternalPow.ipow_le_ipow_left` — `ipow` monotone in the base (`b ≤ c → ipow b x ≤ ipow c x`).
+- `InternalBump.ibump_pos` — the general positive-argument recursion (`ibump_succ` for arbitrary `0<n`).
+- `InternalBump.le_ibump` — `n ≤ ibump b n` (Δ₀-numeral analogue of `Domination.le_bump`), via `𝚺₁`
+  order-induction (`ISigma1.sigma1_order_induction`) peeling through `ibump_pos`. **NB:** the ℕ proofs
+  of `bump_mono`/`bump_gt` go *via ordinals* (`toOrdinal` StrictMono) which is NOT internalizable
+  (`DESCENT-PLAN §3b` says avoid internal ONote) — must reprove them digit-direct inside `V` (the
+  `le_ibump` style). That digit-direct internal monotonicity is the next chip.
+
 **NEXT (hardest-first, offline-tractable pieces):**
 1. **Internal `ineq6_step`** (the `step` hyp): the genuine non-vacuous Π₁ kernel as a `Δ₀`-numeral fact
    inside `V` — base-`b` digit form (Rathjen 2.2(ii)), NOT internalized ONote (`DESCENT-PLAN §3b`).
-   Build on `ibump` (bridged) + internal digit/value reading. Deep, multi-lap; the irreducible content.
+   Build on `ibump` (bridged) + `le_ibump` + internal `ibump`-monotonicity (digit-direct) + internal
+   `ibump_gt` (`b ≤ n → n+1 ≤ ibump b n`). Deep, multi-lap; the irreducible content.
 2. **The `b`/`βₖ` side**: requires the descending input. In Route B this is `X`-definable from `¬TI
    prec` — literature-gated on the exact paLX shape (`ON-LINE-REQUEST.md`).
 3. **Route-B paLX glue**: from `¬TI prec` (free-`X`) extract the descent via the LX least-number scheme;
