@@ -382,3 +382,84 @@ habove : forall n m a, iAbove (ocExp (igt n m)) (iVbigMul (beta (blk a)) (l + 1)
 6. **Best next chip:** implement the internal `corW/wsum/blk/off` bookkeeping as a small wip module that
    proves exactly the hypotheses consumed by `salpha_desc` and `salpha_C_le`. This is more mechanical than
    `igt`, and it will harden the interface before the deeper standard-level `g` recursion starts.
+
+## Addendum - after HEAD a25c408
+
+Update after reading HEAD `a25c408` (`feat(lap 51): habove_of_igt_exp - discharge StdCor34 clean-append
+family from g<omega^(l+1)`):
+
+Good new movement: `wip/StdCor34.lean` now has
+
+```lean
+habove_of_igt_exp :
+  0 < l →
+  (∀ n, β n ≠ 0) →
+  (∀ n, isNF (β n)) →
+  (∀ n m, ocExp (igt n m) = 0 ∨
+      ∃ j, j ≤ l ∧ ocExp (igt n m) = ocOadd 0 j 0) →
+  ∀ n m a, iAbove (ocExp (igt n m)) (iVbigMul (β (blk a)) (l + 1))
+```
+
+That is the right interface simplification. The old 3-argument `habove` obligation should now be treated
+as an internal implementation detail of `StdCor34`, not as something every downstream worker tries to
+prove directly.
+
+Explicit feedback for box / watcher:
+
+1. **Promote the exponent-bound interface.** Add wrapper theorems or a small structure around
+   `salpha_isNF` / `salpha_desc` / `salpha_C_le` that take `higt_exp`, `hbeta0`, and `hbetaNF`, then call
+   `habove_of_igt_exp` once. This prevents the next worker from targeting the obsolete bulky `habove`
+   shape.
+
+2. **Do not hide the `0 < l` requirement.** `habove_of_igt_exp` currently needs `hl : 0 < l`. That is fine
+   if the eventual standard level is explicitly chosen as a positive/successor level, but it should be
+   justified at the headline interface. Either prove a "bump the standard domination level" lemma, or split
+   the helper so the finite-tail branch does not require global `0 < l`.
+
+3. **The crux-1 interface is now very clean.** Block bookkeeping should deliver:
+   `hblk_dich`, `blk j + off j <= j`, and `hbetaC : iC (beta (blk j)) <= Cbeta + j`.
+   The `igt` recursion should deliver:
+   `higtNF`, `higt0`, `higt_within`, `higtC`, and the new `higt_exp`.
+   Keep those two deliverable lists separate; it will make failures local.
+
+4. **Prove beta nonzero once, not everywhere.** The new helper needs `∀ n, β n ≠ 0`. For a strict
+   infinite descent this should follow from `hbetaDesc : ∀ n, icmp (β (n+1)) (β n) = 0` plus
+   `icmp_right_zero_ne_zero` in `InternalONote`. Bank that as a tiny lemma before wiring wrappers.
+
+5. **Block bookkeeping is still the best next chip.** The latest commit shrinks the `igt` clean-append
+   side condition, but it does not reduce the need for internal `corW/iwsum/iwidx/iwoff`. Mirror
+   `Grzegorczyk.wsum` / `widx` / `woff` first, including the C-bound consumer `hbetaC`; that hardens the
+   global `salpha_C_le` path before starting the deeper standard-level `g`.
+
+6. **Docs are now more stale, not less.** `HANDOFF.md`, `STATUS.md`, and the top of `PENDING_WORK.md` still
+   do not mention `a25c408` or `habove_of_igt_exp`. If a worker is choosing from docs alone, they can still
+   be sent back to proving the old `habove` family.
+
+## Addendum - after concurrent Gentzen seam checks
+
+Update after seeing the fresh uncommitted `wip/GentzenCon.lean` seam-check examples:
+
+This is good defensive engineering. The three new examples compile-check exactly the integration points
+that have been risky in this repo:
+
+- crux 1 and crux 2 use the same `prwoInstance gentzenDescentφ`;
+- crux 2 outputs Foundation's actual `↑𝗣𝗔.consistent`;
+- the assembled route has exactly the `Reduction.not_proves_of_implies_consistency` input type.
+
+Feedback for box / watcher:
+
+1. **Keep these guards.** They are cheap and useful even while the crux bodies are still `sorry`; they will
+   keep protecting the interfaces as the placeholder bodies are replaced.
+
+2. **They do not remove the `goodstein_implies_prwo` overbreadth.** The examples currently compose through
+   `goodstein_implies_prwo (seq)`, which is still too broad for arbitrary `seq`. When that theorem is
+   narrowed to a fixed Gentzen instance or a `PrimrecDescentInstance` record, update the examples rather
+   than deleting them.
+
+3. **Consider naming them if they become part of the watcher protocol.** Anonymous `example`s are fine as
+   compile guards, but named theorems like `seam_prwo_shared`, `seam_con_foundation`, and
+   `seam_reduction_hook` would make later audits and grep-based status checks easier.
+
+4. **Still do not promote `wip/GentzenCon` to `src/`.** The seam is now well guarded, but the file still has
+   the two disclosed crux `sorry`s plus placeholder axioms for `ord`, `R`, `derivesEmpty`,
+   `R_preserves_empty`, `ord_R_descends`, and `gentzenDescentφ`.

@@ -1,5 +1,27 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 51 — SEAM CHECKS (operator-directed): crux-1↔crux-2 chain VERIFIED at statement level
+Added 3 machine-checked guards to `wip/GentzenCon.lean` (compile iff the seams hold; green modulo the
+2 disclosed crux sorries):
+- **Seam 1 (ONE shared PRWO):** crux 1 *outputs* `𝗣𝗔 ⊢ prwoInstance gentzenDescentφ`, crux 2 *consumes*
+  the same — the composition `gentzen_prwo_implies_consistency (goodstein_implies_prwo gentzenDescentφ ·)`
+  type-checks ⟹ both reference the **identical** `prwoInstance` def (same `precφ` ε₀-order). ✓
+- **Seam 2 (Con is Foundation's `Con[𝗣𝗔]`):** `example (hγ) : False := peano_not_proves_consistency
+  (goodstein_implies_consistency_via_gentzen hγ)` type-checks ⟹ the assembly's `↑𝗣𝗔.consistent` is
+  **definitionally** the object Gödel II (`consistent_unprovable 𝗣𝗔`) forbids — not a lookalike. ✓
+- **Seam 3 (end-to-end = the girder):** `not_proves_of_implies_consistency
+  goodstein_implies_consistency_via_gentzen : 𝗣𝗔 ⊬ ↑goodsteinSentence` — same type as `Reduction.lean`'s
+  `goodstein_implies_consistency` girder; the assembly drops in once both crux sorries are real. ✓
+
+**⚠️ ONE DEEPER SEAM STILL DEFERRED (verify when crux-1's BODY is wired):** the above guard seam 1 only
+checks the prwoInstance *def* is shared between the two crux STATEMENTS. The crux-1 *proof*
+(StdCor34 slow-down → `goodstein_implies_prwo`) works on `InternalONote` codes ordered by `icmp`/`isNF`;
+but `prwoInstance`/`precφ` order the descent by `natCode` (`precφ_spec : ℕ⊧![m,n] precφ ↔ natCode m <
+natCode n`). So wiring crux-1's body needs the bridge **`icmp a b = 0 ↔ natCode-order`** (and
+`isNF`-code ↔ valid CNF notation) — i.e. that the StdCor34 descent β (icmp-code form) IS the descent
+`prwoInstance gentzenDescentφ` quantifies over. This is the F-φ-flavoured code↔order seam; check it the
+moment `goodstein_implies_prwo`'s sorry starts getting filled (ANTI-FRAUD: re-`#print axioms` the route).
+
 ## ⭐⭐⭐ Lap 51 — standard-level Cor 3.4 global assembly BUILT (green); crux-1 reduced to 2 concrete bricks
 Followed the lap-50 designated next action. Two deliverables, both green:
 - **`isNF_iadd_clean` + `isNF_icorAlpha`** (`src/InternalCor34.lean`, axiom-clean, in the build) — the

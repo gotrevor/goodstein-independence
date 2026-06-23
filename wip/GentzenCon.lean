@@ -145,4 +145,34 @@ theorem goodstein_implies_consistency_via_gentzen :
     𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := fun hγ =>
   gentzen_prwo_implies_consistency (goodstein_implies_prwo gentzenDescentφ hγ)
 
+/-! ## Seam checks (machine-checked integration guards)
+
+Integration seams are this project's historical bug source (free-X vs primrec, code↔order encoding
+mismatches). The `example`s below **compile iff the two cruxes actually chain into the headline route** —
+they are guards, not new content, and will keep guarding as the `sorry` bodies are discharged. -/
+
+/-- **SEAM 1 — ONE shared `PRWO(ε₀)`.** Crux 1 *outputs* `𝗣𝗔 ⊢ prwoInstance gentzenDescentφ` and crux 2
+*consumes* the same; this composition type-checks **only if both reference the identical `prwoInstance`
+Lean def** (same ε₀-order `precφ`, same descent encoding). Two faithful-but-distinct PRWO statements
+would fail here. -/
+example (hγ : 𝗣𝗔 ⊢ ↑goodsteinSentence) : 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent :=
+  gentzen_prwo_implies_consistency (goodstein_implies_prwo gentzenDescentφ hγ)
+
+/-- **SEAM 2 — crux 2's `Con(𝗣𝗔)` is Foundation's `Con[𝗣𝗔]`.** The whole route ends at Gödel II
+(`peano_not_proves_consistency = consistent_unprovable 𝗣𝗔`, proven about `↑𝗣𝗔.consistent`). This
+`example` discharges `False` from `𝗣𝗔 ⊢ γ` by feeding the assembly's output **straight into Gödel II** —
+it type-checks **only if that output is definitionally Foundation's `↑𝗣𝗔.consistent`** (not a
+hand-rolled consistency lookalike). -/
+example (hγ : 𝗣𝗔 ⊢ ↑goodsteinSentence) : False :=
+  peano_not_proves_consistency (goodstein_implies_consistency_via_gentzen hγ)
+
+/-- **SEAM 3 — the assembly IS the open girder, end-to-end.** Routing the assembly through the
+already-axiom-clean Gödel-II hook `not_proves_of_implies_consistency` yields the headline precursor
+`𝗣𝗔 ⊬ ↑goodsteinSentence`. This single type-check validates: (a) crux-1 output = crux-2 input (seam 1),
+(b) crux-2 output = Foundation Con (seam 2), and (c) `goodsteinSentence`/`Con` match the `Reduction.lean`
+girder `goodstein_implies_consistency : 𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent` (identical type).
+Once both crux `sorry`s are real, `goodstein_implies_consistency_via_gentzen` drops in for that girder. -/
+example : 𝗣𝗔 ⊬ ↑goodsteinSentence :=
+  not_proves_of_implies_consistency goodstein_implies_consistency_via_gentzen
+
 end GoodsteinPA.GentzenCon
