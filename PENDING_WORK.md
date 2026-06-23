@@ -18,7 +18,19 @@ from lap-33's `lx_succ_induction`:
   `igoodstein_nonterminating_of_dominating`, which wants an `ℒₒᵣ`-`𝚺₁` bound — but the Rathjen §3 bound
   `b k = T̂^{k+2}(βₖ)` is `X`-dependent, so that ℒₒᵣ tool is the wrong one; this is the corrected substrate).
 
-**NEXT (wall C — the genuine remaining construction), hardest-first:**
+**Wall-C SCAFFOLD landed in `wip/DescentConstruction.lean`** (typechecks, ONE disclosed `sorry`, off the
+build so `src/` stays sorry-free): the `Seq`-coded `M`-internal descent.
+- `IsDescent f a₀ W` — `W` codes a finite `Mlt`-descending sequence through `¬MX` from `a₀`.
+- `descent_base` / `descent_extend` — **PROVEN** (real content): length-1 base + the canonical one-step
+  `seqCons` extension via `descent_step` (incl. all the `znth`-preservation/`¬MX`/descent clauses; the
+  generic-`M` order arithmetic uses Foundation `PeanoMinus` lemmas, NOT `omega`/`ring`).
+- `descent_seq_exists` — `∀ k, ∃ W, IsDescent W ∧ lh W = k+1`, by `lx_succ_induction` (base/step wired).
+  **The lone `sorry`** = `hDdef`, the `LX`-definability of `D(k) := ∃ W, IsDescent f a₀ W ∧ lh W = k+1`
+  (a `Seq`-existential `LX`-formula with `Mlt`/`¬MX` atoms on `znth`-terms). NEXT-LAP TASK: build that
+  formula — `lxDef_of_reduct` carries the `Seq`/`lh`/`znth` `ℒₒᵣ` graph; the `znth`-term `X`-atoms
+  (`Xat (Φ-image of znth-term)`) are built directly; assemble with `lxDef_and` under one `∃W`.
+
+**NEXT (wall C — after `hDdef`), hardest-first:**
 1. **Build the `X`-descent `a : M → M`** from `no_min`/`ha₀`: `a 0 = a₀`, `a (k+1) =` `lx_least_number`
    applied to the `LX`-predicate `Q y := Mlt f y (a k) ∧ ¬MX y` (nonempty by `no_min`). This needs
    **M-internal recursion** so `a` is `LX`-definable as a function of `k` (Foundation `PR.Construction`,
