@@ -1,5 +1,52 @@
 # Pending work — open obligations & attack paths
 
+## 🎯 LAP-31 (2026-06-23) — reduct→𝗜𝚺₁ bridge DONE + architecture correction (equality). Read FIRST.
+
+**Verified this lap (green 1303 jobs, axiom-clean `[propext, choice, Quot.sound]`):**
+`src/GoodsteinPA/ReductModel.lean` (NEW). The lap-30 plan to run Rathjen §3 inside `M` via the lap-26
+`igoodstein` substrate needs `M`'s `ℒₒᵣ`-reduct presented as `[ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]`. This
+brick does it:
+- `reductORing : ORingStructure M` — read off `M`'s `LX`-interpretation of the ring/order symbols.
+- `reduct_eq_standardModel : inst.lMap Φ = @standardModel M reductORing` — via `standardModel_unique`
+  (template: Foundation `FirstOrder/Arithmetic/TA/Nonstandard.lean`).
+- `reduct_models_PA` / `reduct_models_isigma1` — `M ⊧ paLX ⟹ reduct ⊧ 𝗣𝗔 ⟹ ⊧ 𝗜𝚺₁`
+  (via `lMap_PA_subset` + `modelsTheory_onTheory₁` + `models_of_subtheory` on `𝗜𝚺₁ ⪯ 𝗣𝗔`).
+
+**⚠ ARCHITECTURE CORRECTION (the lap-30 plan understated this).** Two genuine subtleties for the
+completeness route, BOTH must be handled before the substrate can run inside `M`:
+
+1. **Equality.** The Tait `Derivation.completeness_of_encodable` (used by `descentE`) quantifies its
+   semantic premise over models `M` with `[Structure LX M]` ONLY — `=` is whatever the structure
+   interprets, NOT real Lean equality. The substrate (`igoodstein` etc.) is plain Lean arithmetic over
+   `V`, needing real `=`. **Honest precondition = `[Structure.Eq LX M]`** (proved sufficient in
+   `ReductModel`). To SUPPLY it, re-route `descentE` through the equality-respecting completeness:
+   `EQ.provOf` (`Foundation/.../Completeness/Corollaries.lean`) gives `paLX ⊨ φ` from a premise over
+   `[Structure.Eq L M]`-models, needs `[L.Eq]` (LX has it) + `𝗘𝗤 ⪯ paLX` (TODO: prove — the LX eq
+   axioms are `lMap Φ`-images of ℒₒᵣ eq axioms in `lMap Φ 𝗣𝗔⁻`). Then `completeness_of_encodable :
+   T ⊨ φ → T ⊢ φ` → `Derivation2`. SOUND because `TI prec` is closed (`freeVariables_TI = ∅`) → a
+   `Sentence` (coerce via `Semiformula.toEmpty`). **NEXT-LAP TASK A** (bounded plumbing; keep build
+   green — changing `paLX_models_TI_of_PA_provable`'s signature to add `[Structure.Eq LX M]` forces the
+   `descentE` re-route in the same edit).
+
+2. **Opaque headline blob ↔ transparent substrate (THE arithmetization wall).** `hgood` gives
+   `reduct ⊧ goodsteinSentence`, and `goodsteinSentence = ∀⁰ (codeOfREPred goodsteinTerminates)` is an
+   OPAQUE Foundation r.e.-code (`Encoding.lean`), NOT `∃N, igoodstein m N = 0`. They agree on ℕ
+   (`InternalBridge`), but in a nonstandard `M` you need them **IΣ₁-provably equivalent** to use the
+   descent contradiction. This is the #4 arithmetization wall (landscape doc). **NEXT-LAP TASK B**
+   (deep): either (i) prove `IΣ₁ ⊢ codeOfREPred goodsteinTerminates m ↔ ∃N, igoodstein m N = 0`
+   (needs the register-machine ↔ igoodstein computation internalized — very deep), or (ii) reconsider
+   making `goodsteinSentence` a transparent igoodstein-Σ₁ form whose ℕ-faithfulness is `InternalBridge`
+   (touches the audit surface `Encoding.lean`; Bridge.lean RHS is LOCKED so re-prove faithfulness with
+   SAME RHS — `InternalBridge.igoodstein_nat` already supplies it). (ii) is architecturally cleaner but
+   needs an anti-fraud review; do NOT do it silently.
+
+**Remaining decomposition of `no_min_descent_absurd_of_goodstein` (the lone wall), hardest-first:**
+- (A) reduct→𝗜𝚺₁ — ✅ DONE (this lap, modulo wiring `[Structure.Eq]` via Task A).
+- (B) opaque↔transparent (Task B above) — deep, unstarted.
+- (C) M-internal `Mlt`-descent from `no_min` via `M`'s LX least-number principle — deep, unstarted.
+- (D) slow-down `βₖ`-definable + internal `ineq6` iteration (`DescentCore.ineq6_step` is the kernel) —
+  deep; substrate (`igoodstein_nonterminating_of_dominating`) ready to consume `(b, step, hpos)`.
+
 ## 🎯 LAP-30 (2026-06-23) — STRATEGIC REDIRECT: the E wall = ONE semantic lemma via completeness. Read FIRST.
 
 **The whole headline now reduces to a single model-theoretic statement.** Fresh-mind review found the
