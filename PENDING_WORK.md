@@ -1,5 +1,47 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Lap 56 — crux-1 redirect: natCode↔NF bridge DISSOLVED (transparent icmp); over-generality sharpened
+
+**FRESH-MIND REVIEW. Build green 1315; headline honest sorry; M1+Phase 1 done; faithfulness clean.
+Direction VALIDATED** (crux 1 right hardest-but-tractable target; crux-2 eq-5 stays 🟠 parked). Two
+crux-1 findings, both acted on (`wip/GentzenCon.lean`, verified `lake env lean` green; memory
+`prwo-transparent-icmp-not-opaque-precphi`):
+
+**(1) DONE — opacity dissolved.** Lap-55 built `prwoInstance` on `SeamDefinability.precφ` =
+`codeOfREPred₂ (natCode a < natCode b)`, Foundation's **opaque r.e. blob** whose spec is std-model-ONLY;
+in nonstandard `M`, `M⊧/![z,y]precφ` is an opaque Σ₁ search, NOT cleanly `z≺y` — re-creating the wall-B
+opacity lap 36 dissolved. **Fix (mirrors lap 36):** rebuilt on the transparent internal `icmp`:
+- `prec_internal : Semisentence ℒₒᵣ 2 := “z y. ∃ c, !icmpDef c z y ∧ c = 0”`
+- `eval_prec_internal : M⊧/![z,y]prec_internal ↔ icmp z y = 0` (every `M⊧IΣ₁`; `simp [prec_internal,
+  Semiformula.eval_substs, icmp_defined.iff]`).
+- `prwoInstance`/`prwoInstance_models_iff`/`prwoInstance_faithful` (now `M=ℕ` corollary) all on `icmp`,
+  axiom-clean `[propext,choice,Quot.sound]` — `_faithful` even SHED its F-φ `native_decide` artifact.
+- `ord_R_descends`/`gentzenDescent_descends` switched to `icmp` form for coherence.
+⟹ **the natCode↔NF order bridge (lap-55's "new sub-target") DISSOLVES**: `nonterminating_of_seq_descent`'s
+descent hyp is ALREADY `∀ n y z, seq[y,n]→seq[z,n+1]→icmp z y=0`, the exact `icmp`-descent form
+`StdCor34.crux1_internal_run_of_width_dom` consumes (`hβdesc`). PRWO + `igoodstein` now share ONE coding.
+`goodstein_implies_prwo` clean modulo the lone bridge sorry.
+
+**(2) THE concrete next target — standard-level domination certificate.** `nonterminating_of_seq_descent`
+for *arbitrary* `seq` (no domination hyp) is **UNPROVABLE on the built standard girder**:
+`crux1_internal_run_of_width_dom` needs a STANDARD `l₀:ℕ` with `∀ n, znth wseq n ≤ iF l₀ n`, but
+`Grz.F_diag_not_dominated` kills standard domination of a diagonal-fast descent (lap-55 flagged this;
+confirmed). **Attack paths (do one next lap):**
+- **(A, recommended) Thread the certificate.** Add to `nonterminating_of_seq_descent` a hypothesis
+  packaging the Cor-3.4 slowdown inputs derived from `seq` — concretely `∃ (β:M→M)(wseq Cβ:M)(l₀:ℕ),
+  0<l₀ ∧ (∀n,isNF(β n)) ∧ (∀n,β n≠0) ∧ (∀n,icmp(β(n+1))(β n)=0) ∧ (∀j,iC(β(blk wseq j))≤Cβ+j) ∧
+  𝚺₁-Function₁ β ∧ (∀n,znth wseq n≤iF l₀ n)`. Then the proof is `obtain ... ; exact
+  crux1_internal_run_of_width_dom ...` — **discharges the sorry**. (Requires `wip/GentzenCon` to import
+  `wip/StdCor34`.) Thread the certificate up through `prwoInstance_models_of_goodstein` /
+  `goodstein_implies_prwo`; supply it at `gentzenDescentφ` in the assembly as a disclosed axiom (Lemma 3.2,
+  discharged once `ord`/`R` exist). This makes the chain HONEST (no unprovable general lemma).
+- **(B) Construct β from seq's value-graph.** The β for the girder = `seq`'s value function (the unique `y`
+  with `seq[y,n]`); needs `seq` functional/total + NF nonzero values. Then `hβdesc` = the descent hyp
+  directly. This is the seq→β extraction half of the construction; pairs with (A) for the wseq half.
+- **(C) Build the seq→wseq Cor-3.4 slowdown** (the deep half: `InternalCor34.ibigMul`-standard lead +
+  `Grzegorczyk.lean` blueprint; item 1 below). This is what eventually discharges the certificate for
+  `gentzenDescentφ` rather than axiomatizing it.
+
 ## ⭐ Lap 55 — crux-1 frontier collapsed to TWO clean inputs + the model-theoretic route for `goodstein_implies_prwo`
 
 **Done this lap (all axiom-clean `[propext, choice, Quot.sound]`, src build green 1315):**

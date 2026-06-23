@@ -21,21 +21,50 @@ This is exactly what the proof needs:
 * **crux 1** (`γ → PRWO`, Rathjen §3) proves the instance for an *arbitrary* primrec descent graph;
 * **crux 2** (`PRWO → Con`, Gentzen) uses the *single* instance for `n ↦ ord(Rⁿ d₀)`.
 
-## The ε₀-ordering is already a machine-checked ℒₒᵣ formula
-`SeamDefinability.precφ : Semisentence ℒₒᵣ 2` codes `natCode a < natCode b` (a ≺ b in ε₀) with the spec
-`precφ_spec : ℕ ⊧/![m,n] precφ ↔ natCode m < natCode n` (axiom-clean modulo one `native_decide`, F-φ).
-Since `natCode : ℕ ≃ NONote` is a *bijection onto all CNF notations*, every `n : ℕ` already denotes a
-valid `< ε₀` ordinal — so PRWO needs **no separate `isNF` predicate**, only `precφ`.
+## The ε₀-ordering is the **transparent internal `icmp`-comparison** (lap-56 REDIRECT)
+**Prior (lap-50) choice — REJECTED lap 56.** `SeamDefinability.precφ : Semisentence ℒₒᵣ 2` is
+`codeOfREPred₂ (natCode a < natCode b)` — Foundation's **opaque r.e.-code blob**. Its spec
+`precφ_spec` is a **standard-model-ONLY** statement (`ℕ ⊧/![m,n] precφ ↔ natCode m < natCode n`); in a
+**nonstandard** `M`, `M ⊧/![z,y] precφ` is an opaque Σ₁ existential search whose truth is NOT cleanly
+`z ≺ y`. Building `prwoInstance` on `precφ` therefore re-creates the **wall-B opacity** that lap 36
+*dissolved* for `goodsteinSentence` (memory `crux1-headline-needs-only-standard-level` neighbour;
+`STATUS` lap-36) — the per-model crux-1 obligation cannot reason through it, and it forces a separate
+`natCode ↔ internal-NF-code` order bridge (the lap-55 "new sub-target").
+
+**Lap-56 fix (mirrors the lap-36 wall-B dissolution).** Use the repo's **transparent internal** ε₀-code
+comparison `InternalONote.icmp` (`icmp a b = 0` ⟺ `a ≺ b`), whose graph formula
+`icmpDef : 𝚺₁.Semisentence 3` has the **model-general** spec `icmp_defined.iff`
+(`M ⊧/![c,a,b] icmpDef ↔ c = icmp a b`, in EVERY `M ⊧ₘ* 𝗜𝚺₁`, ℕ included). Then `prec_internal z y`
+(below) unfolds transparently to `icmp z y = 0` in any `M`. Two wins: (i) the per-model obligation reasons
+directly with `icmp z y = 0` — the **same** internal order `igoodstein` uses, so PRWO and the Goodstein
+bridge share ONE ε₀-coding (no cross-coding mismatch), and (ii) the `natCode↔NF` bridge **dissolves**:
+`nonterminating_of_seq_descent`'s descent hypothesis IS already the `icmp`-descent form
+`StdCor34.crux1_internal_run_of_width_dom` consumes (`hβdesc : icmp (β (n+1)) (β n) = 0`).
+*Faithfulness follow-up:* strengthen the std-model anchor with `icmp a b = 0 ↔ natCode a < natCode b`
+on ℕ (a decidable std-only fact) to tie `icmp` to the mathlib-ε₀ order-type anchor; not blocking.
 -/
 import GoodsteinPA.SeamDefinability
+import GoodsteinPA.InternalONote
 import GoodsteinPA.Reduction
 
 namespace GoodsteinPA.GentzenCon
 
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
 open GoodsteinPA GoodsteinPA.SeamDefinability GoodsteinPA.Epsilon0Complete GoodsteinPA.InternalPow
+open GoodsteinPA.InternalONote
 
 /-! ## Step 1 — the PRWO formulation (the shared hinge) -/
+
+/-- **Transparent internal ε₀-order** (lap-56). `prec_internal z y` ⟺ `icmp z y = 0` ⟺ `z ≺ y`, in
+EVERY `M ⊧ₘ* 𝗜𝚺₁`. Built from `InternalONote.icmpDef` (the `𝚺₁` graph of `icmp`), so — unlike the opaque
+`precφ` (`codeOfREPred₂`, std-model-only spec) — it unfolds the SAME way in nonstandard models. -/
+noncomputable def prec_internal : Semisentence ℒₒᵣ 2 :=
+  “z y. ∃ c, !icmpDef c z y ∧ c = 0”
+
+/-- `prec_internal` evaluates transparently to the internal `icmp`-order in any model. -/
+theorem eval_prec_internal {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁] (z y : M) :
+    (M ⊧/![z, y] prec_internal) ↔ icmp z y = 0 := by
+  simp [prec_internal, Semiformula.eval_substs, icmp_defined.iff]
 
 /-- **PRWO(ε₀), one schema instance.** For a sequence presented by its graph formula
 `seq(y, n)` ("`y` is the value at position `n`"; arg `#0` = value, `#1` = index, matching the
@@ -46,31 +75,40 @@ open GoodsteinPA GoodsteinPA.SeamDefinability GoodsteinPA.Epsilon0Complete Goods
 i.e. **"`seq` does not strictly ≺-descend at every step"** = "no infinite descent through `seq`."
 For a *total functional* graph this is literally Rathjen's `∃ n, ¬(f(n+1) ≺ f n)` — which is the whole
 content of PRWO, because `ε₀` is well-founded so any total `f` must fail to descend somewhere.
-`z ≺ y` is `precφ z y` (= `natCode z < natCode y`). -/
+`z ≺ y` is `prec_internal z y` (= the transparent `icmp z y = 0`). -/
 noncomputable def prwoInstance (seq : Semisentence ℒₒᵣ 2) : Sentence ℒₒᵣ :=
-  “¬ ∀ n y z, (!seq y n ∧ !seq z (n + 1)) → !precφ z y”
+  “¬ ∀ n y z, (!seq y n ∧ !seq z (n + 1)) → !prec_internal z y”
 
-/-- **Faithfulness audit (standard model).** In `ℕ`, `prwoInstance seq` holds **iff** the sequence
-described by `seq` is not everywhere-≺-descending — the meta-level PRWO statement, with the order read
-through the *same* `natCode` coding the rest of the seam uses. This is the encoding-correctness anchor
-for the formulation (cf. `Bridge.goodsteinSentence_faithful` for `γ`). -/
-theorem prwoInstance_faithful (seq : Semisentence ℒₒᵣ 2) :
-    (ℕ ⊧ₘ prwoInstance seq) ↔
-      ¬ (∀ n y z : ℕ, (ℕ ⊧/![y, n] seq) → (ℕ ⊧/![z, n + 1] seq) →
-          natCode z < natCode y) := by
+/-- **General-model unfolding of `prwoInstance`** (the shared hinge of both cruxes). In any
+`M ⊧ₘ* 𝗜𝚺₁`, `prwoInstance seq` holds iff the `seq`-graph does *not* `icmp`-descend at every step —
+the clean ∀/∃ statement the per-model crux-1 obligation reasons with, stripped of the syntactic layer.
+Transparent (`eval_prec_internal`), so it holds identically in nonstandard `M`. -/
+theorem prwoInstance_models_iff (seq : Semisentence ℒₒᵣ 2)
+    (M : Type*) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁] :
+    (M ⊧ₘ prwoInstance seq) ↔
+      ¬ (∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0) := by
   unfold prwoInstance
   rw [models_iff]
-  simp only [Nat.reduceAdd, Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
+  simp only [Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
     Semiformula.eval_substs, LogicalConnective.HomClass.map_neg,
     LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_and,
     LogicalConnective.Prop.neg_eq, LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq,
     Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one,
     Matrix.constant_eq_singleton, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
     Semiterm.val_bvar, Semiterm.val_operator₂, Semiterm.val_operator₀, Structure.Add.add,
-    Structure.numeral_eq_numeral, ORingStructure.one_eq_one, precφ_spec]
+    Structure.numeral_eq_numeral, ORingStructure.one_eq_one, eval_prec_internal]
   constructor
   · intro h hall; exact h (fun a b c hconj => hall a b c hconj.1 hconj.2)
   · intro h hall; exact h (fun n y z hYN hZN => hall n y z ⟨hYN, hZN⟩)
+
+/-- **Faithfulness audit (standard model).** In `ℕ`, `prwoInstance seq` holds **iff** the sequence
+described by `seq` is not everywhere-≺-descending — the meta-level PRWO statement, with the order read
+through `icmp` (the **same** internal ε₀-coding `igoodstein` uses). Encoding-correctness anchor (cf.
+`Bridge.goodsteinSentence_faithful` for `γ`); a corollary of the general `prwoInstance_models_iff`. -/
+theorem prwoInstance_faithful (seq : Semisentence ℒₒᵣ 2) :
+    (ℕ ⊧ₘ prwoInstance seq) ↔
+      ¬ (∀ n y z : ℕ, (ℕ ⊧/![y, n] seq) → (ℕ ⊧/![z, n + 1] seq) → icmp z y = 0) :=
+  prwoInstance_models_iff seq ℕ
 
 /-! ## Step 2 — the Gentzen reduction substrate (Rathjen 2014 Thm 2.8(i), p. 9)
 
@@ -94,14 +132,15 @@ axiom derivesEmpty : ℕ → Prop
 
 axiom R_preserves_empty {d : ℕ} : derivesEmpty d → derivesEmpty (R d)
 
-/-- **Equation (5) — the deep Gentzen core.** The reduction strictly lowers the assigned ordinal.
-THE ordinal-analysis content (Buchholz [6] = `papers/buchholz-on-gentzens-first-consistency-proof.pdf`
+/-- **Equation (5) — the deep Gentzen core.** The reduction strictly lowers the assigned ordinal,
+in the **same transparent `icmp` order** `prwoInstance` measures (lap-56; was `natCode <`). THE
+ordinal-analysis content (Buchholz [6] = `papers/buchholz-on-gentzens-first-consistency-proof.pdf`
 + `papers/siders-gentzen-consistency-proofs-arithmetic.pdf`). -/
-axiom ord_R_descends {d : ℕ} : derivesEmpty d → natCode (ord (R d)) < natCode (ord d)
+axiom ord_R_descends {d : ℕ} : derivesEmpty d → icmp (ord (R d)) (ord d) = 0
 
 /-- The Gentzen descent sequence `n ↦ ord(Rⁿ d)` from a derivation `d` of `⊥`. Strictly
-≺-descending below `ε₀` by `ord_R_descends` + `R_preserves_empty` — an infinite primrec descent,
-the witness against PRWO. -/
+≺-descending below `ε₀` (`icmp (·) (·) = 0`) by `ord_R_descends` + `R_preserves_empty` — an infinite
+primrec descent, the witness against PRWO. -/
 noncomputable def gentzenDescent (d : ℕ) : ℕ → ℕ := fun n => ord (R^[n] d)
 
 theorem derivesEmpty_iterate {d : ℕ} (hd : derivesEmpty d) (n : ℕ) :
@@ -111,7 +150,7 @@ theorem derivesEmpty_iterate {d : ℕ} (hd : derivesEmpty d) (n : ℕ) :
   | succ k ih => rw [Function.iterate_succ_apply']; exact R_preserves_empty ih
 
 theorem gentzenDescent_descends {d : ℕ} (hd : derivesEmpty d) (n : ℕ) :
-    natCode (gentzenDescent d (n + 1)) < natCode (gentzenDescent d n) := by
+    icmp (gentzenDescent d (n + 1)) (gentzenDescent d n) = 0 := by
   have hiter : derivesEmpty (R^[n] d) := derivesEmpty_iterate hd n
   simpa [gentzenDescent, Function.iterate_succ_apply'] using ord_R_descends hiter
 
@@ -131,37 +170,27 @@ theorem gentzen_prwo_implies_consistency :
     𝗣𝗔 ⊢ prwoInstance gentzenDescentφ → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := by
   sorry
 
-/-- **General-model unfolding of `prwoInstance`** (the model-internal analog of the ℕ-only
-`prwoInstance_faithful`). In any arithmetic structure `M`, `prwoInstance seq` holds iff the `seq`-graph
-does *not* ≺-descend (via `precφ`) at every step — the clean ∀/∃ statement the per-model crux-1
-obligation reasons with, stripped of the syntactic layer. -/
-theorem prwoInstance_models_iff (seq : Semisentence ℒₒᵣ 2)
-    (M : Type*) [ORingStructure M] [Nonempty M] :
-    (M ⊧ₘ prwoInstance seq) ↔
-      ¬ (∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → (M ⊧/![z, y] precφ)) := by
-  unfold prwoInstance
-  rw [models_iff]
-  simp only [Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
-    Semiformula.eval_substs, LogicalConnective.HomClass.map_neg,
-    LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_and,
-    LogicalConnective.Prop.neg_eq, LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq,
-    Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one,
-    Matrix.constant_eq_singleton, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
-    Semiterm.val_bvar, Semiterm.val_operator₂, Semiterm.val_operator₀, Structure.Add.add,
-    Structure.numeral_eq_numeral, ORingStructure.one_eq_one]
-  constructor
-  · intro h hall; exact h (fun a b c hconj => hall a b c hconj.1 hconj.2)
-  · intro h hall; exact h (fun n y z hYN hZN => hall n y z ⟨hYN, hZN⟩)
+/-- **The deep crux-1 bridge (isolated).** From a model-internal everywhere-`icmp`-descending
+`seq`-graph, construct the internal-Grzegorczyk inputs and run the lap-54/55 girder
+`StdCor34.crux1_internal_run_of_width_dom` to produce a non-terminating internal Goodstein run.
 
-/-- **The deep crux-1 bridge (isolated).** From a model-internal everywhere-≺-descending `seq`-graph,
-construct the internal-Grzegorczyk inputs (NF descending `β` + width-domination) and run the lap-54/55
-girder `StdCor34.crux1_internal_run_of_width_dom` to produce a non-terminating internal Goodstein run.
-This is the genuine remaining content: the `seq`-descent → (`β`, `wseq`, standard-`l₀` width-domination)
-construction (Rathjen Cor 3.4 inputs), needed for the headline only at `seq = gentzenDescentφ`. Held at
-`sorry`. -/
+**Lap-56 status — TWO findings (see `STATUS`/`PENDING_WORK`):**
+1. **Bridge dissolved (DONE this lap).** With the transparent `prec_internal`, `hdesc` is ALREADY the
+   `icmp`-descent form the girder consumes (`hβdesc : icmp (β (n+1)) (β n) = 0`); no separate
+   `natCode↔NF` bridge is needed. The `β` for the girder is `seq`'s value function itself.
+2. **Over-generality (OPEN, the real remaining content).** As stated — *arbitrary* `seq`, no domination
+   hypothesis — this is **UNPROVABLE on the built (standard-level) girder**: `crux1_internal_run_of_width_dom`
+   needs a STANDARD `l₀ : ℕ` with width-domination `∀ n, znth wseq n ≤ iF l₀ n`, but
+   `Grz.F_diag_not_dominated` shows no standard `l₀` dominates a diagonal-fast descent. Proving it for
+   arbitrary `seq` would need the internal-Ackermann level (laps 45–49 wall) — exactly what lap 50 showed
+   the HEADLINE avoids by only ever instantiating at `seq = gentzenDescentφ`, whose width IS
+   standard-dominated (Rathjen Lemma 3.2, via `ord`/`R`'s fixed build tree). **Fix (next lap):** thread a
+   standard-level domination certificate (the Cor-3.4 slowdown inputs `β`/`wseq`/`l₀`/bounds derived from
+   `seq`) as a hypothesis here, discharge it for `gentzenDescentφ` in the assembly, then this reduces to
+   `crux1_internal_run_of_width_dom` with no `sorry`. Held at `sorry` pending that certificate. -/
 theorem nonterminating_of_seq_descent (seq : Semisentence ℒₒᵣ 2)
     (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
-    (_hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → (M ⊧/![z, y] precφ)) :
+    (_hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0) :
     ∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k := by
   sorry
 
