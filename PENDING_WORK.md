@@ -31,12 +31,23 @@ induction on the `ONote.mul` recursion). **✅ Also landed lap 25 (`DescentCore.
 `C_ofNat`, `one_add_ne_zero`, `NoFin`/`noFin_omega_mul` (ω·α has no finite part), `C_add_ofNat_le`
 (`C(a+finite) ≤ max(C a, finite)` for `NoFin` NF `a`; mirrors `add_nfBelow` with cmp-gt), `NF_omegaO`,
 and the headline **`C_betaTail_le : C(ω·αₙ + (K-i)) ≤ K(n+1)+i+1`** (= `C(βᵣ)≤r+1` for the tail block,
-given `C(αₙ)≤K(n+1)`, `i<K`). **Next §3 brick = the single-step DESCENT `βᵣ₊₁ < βᵣ`** (repr-based, cleaner
-than C): within-block (smaller finite tail) via `repr_add`; block-boundary `ω·αₙ+1 > ω·αₙ₊₁+K` via
-`αₙ₊₁<αₙ ⟹ ω·αₙ ≥ ω·αₙ₊₁+ω > ω·αₙ₊₁+K` (mathlib `repr_mul`, ordinal `mul`/`add` monotonicity). Then
-assemble `βᵣ` (head = `Σ ω_{s-i}` tower terms via `omegaStack`; head `C=1` from `C_omegaStack`) into one
-`β : ℕ → ONote` with both pointwise properties. After that: the **arithmetization** (the dominant wall) —
-re-express these as `𝗣𝗔`-internal facts (Σ₁ glue free; inequality (6)'s `∀k` the one real PA-induction).
+given `C(αₙ)≤K(n+1)`, `i<K`). **✅ Tail-block DESCENT done lap 25 (`DescentCore.lean`, axiom-clean):** `repr_omegaO` (repr ω=ω),
+`repr_betaTail_within` (larger finite tail → larger value), `repr_betaTail_boundary`
+(`ω·αₙ₊₁+K < ω·αₙ` from `αₙ₊₁≺αₙ`; ω absorbs the finite K). **Both halves of Thm 3.5's TAIL block —
+`C(βᵣ)≤r+1` and `βᵣ₊₁<βᵣ` — are now machine-checked.** This is the asymptotic (non-vacuous) content.
+
+**ARITHMETIZATION MAP VERIFIED lap 25 (see `DESCENT-PLAN.md §3b`):** the inequality-(6) PA-induction is
+feasibility-confirmed — `sigma_one_completeness` (Σ₁ free) and `sigma1_pos_succ_induction` (the internal
+`𝗜𝚺₁` induction; `succ` = internal `ineq6_step`) both exist with verified signatures; `P(k):=mₖ≥T̂^{k+2}(βₖ)`
+is Δ₀ hence a `𝚺₁-Predicate`, so the induction applies directly. **The one gating prerequisite = make
+`bump`/`goodsteinSeq`/`T̂`/`βₖ` `𝚺₁`-definable *inside* `V`** (the `PA_delta1Definable`-flavoured gap, here
+only for the concrete primrec `bump` the repo already has `computable_bump` for). 
+
+**Next bricks (priority):** (1) **THE WALL — internalized definability:** define `bump`/`goodsteinSeq` as a
+`𝚺₁`-function in `V ⊧ₘ* 𝗜𝚺₁` via Foundation bootstrapping/`codeOfREPred`, then the internal `ineq6_step`,
+then `sigma1_pos_succ_induction`. Multi-lap. (2) Optional completeness: the Thm 3.5 HEAD block (`βⱼ=Σω_{s-i}`,
+`j<K`) — a finite boundary detail, vacuous on its own; `headBeta s t := oadd (omegaStack (s-1)) 1
+(headBeta (s-1) t)`, `C=1` from `C_omegaStack`, descent by `repr_add`. Low value vs (1).
 
 **Next concrete bricks (route-independent §3):** (1) the slow-down constructions Rathjen Lemma 3.3 / Cor
 3.4 / Thm 3.5 — the explicit padding function `g : ℕ² → ω^ω` and the bounded-coefficient sequence `βⱼ`,

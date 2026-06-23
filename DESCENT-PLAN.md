@@ -165,6 +165,33 @@ own; only their PA-internal (arithmetized) form does. The reusable non-vacuous c
 `PRA ⊢ PRWO(ε₀) → Con(PA)`, then Gödel II. Avoids E-lift but **reintroduces `PA_delta1Definable`** (a
 Foundation-side axiom) — keep B (the `peano_not_proves_TI` route) as primary; A only if B stalls.
 
+### 3b. Arithmetization tooling VERIFIED (lap 25) — the induction path is concrete; the gate is named
+
+Probed the real Foundation API for the inequality-(6) PA-induction (E-core(b)'s irreducible core).
+**Verified present (exact signatures):**
+- `LO.FirstOrder.Arithmetic.sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+  ℕ ⊧ₘ σ → T ⊢ σ` (`R0/Basic.lean:146`, for `[𝗥₀ ⪯ T]`, so `𝗣𝗔`). Every TRUE `𝚺₁` sentence is
+  PA-provable — the "Σ₁ glue is free" engine, **confirmed real**. (`…_iff` adds the converse under
+  `SoundOnHierarchy`.)
+- `Arithmetic.sigma1_pos_succ_induction {P : V → Prop} (hP : 𝚺₁-Predicate P) (zero : P 0) (one : P 1)
+  (succ : ∀ x, P (x+1) → P (x+2)) : ∀ x, P x` (`Arithmetic/Induction.lean:18`, in `[V ⊧ₘ* 𝗜𝚺₁]`). The
+  **internalized-model** induction the Π₁ inequality (6) needs: work inside an arbitrary `V ⊧ 𝗜𝚺₁`,
+  prove the Σ₁-predicate by `zero/one/succ`, get the `𝗜𝚺₁`/`𝗣𝗔` theorem. `succ` is exactly the
+  internalized **`ineq6_step`**. (Siblings: `bounded_all_sigma1_order_induction`, strong-induction forms.)
+
+**The feasibility verdict + the named gate.** Inequality (6)'s predicate `P(k) := mₖ ≥ T̂^{k+2}(βₖ)` is a
+*comparison of two primitive-recursive functions* — **Δ₀, hence a `𝚺₁-Predicate`** — so
+`sigma1_pos_succ_induction` applies directly. The whole induction is therefore structurally available.
+**The one gating prerequisite is making `goodsteinSeq`/`T̂`/`βₖ` `𝚺₁`-definable *inside* `V`** (so `P` is a
+genuine `𝚺₁-Predicate` there). For arbitrary computable functions this is precisely the
+**`PA_delta1Definable`**-flavoured gap (the disclosed Foundation TODO that Route A carries, see
+`Reduction.lean:21`); here we need it only for the *concrete primrec* `bump`/`goodsteinSeq` (repo already
+has `computable_bump`/`goodsteinTerminates_re`), buildable via Foundation's bootstrapping/`codeOfREPred`
+machinery. **So E-core(b) = define the internalized `bump`/`T̂`/`βₖ` as `𝚺₁`-functions in `V`
+(multi-lap, the wall) → internal `ineq6_step` → `sigma1_pos_succ_induction` → `∀k P(k)` → contradict the
+lifted `goodsteinSentence`.** The induction scaffold is no longer in doubt; the definability layer is the
+remaining deep work.
+
 ---
 
 ## 4. Priority for next laps
