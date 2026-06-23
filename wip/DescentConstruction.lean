@@ -19,11 +19,13 @@ This file is OUTSIDE the build target (`wip/`), so its disclosed `sorry`s do not
 gate; `src/` stays sorry-free. Promote to `src/` once `descent_seq_exists` is sorry-free.
 -/
 import GoodsteinPA.DescentSemantic
+import Mathlib.Tactic.FinCases
 
 namespace GoodsteinPA.DescentConstruction
 
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
 open GoodsteinPA GoodsteinPA.LangX GoodsteinPA.EmbeddingX GoodsteinPA.DescentSemantic
+open GoodsteinPA.DescentLift (Φ)
 
 variable {M : Type} [Nonempty M] [Structure LX M]
 
@@ -196,6 +198,42 @@ theorem descent_extend
     · rw [hpreserve i hlt]; exact hnotMX i hlt
     · rw [heq, hlast]; exact hyMX
   · rw [hlhW', hk, add_assoc, one_add_one_eq_two]
+
+/-- **Piece C of `hDdef`: the `X`-clause `∀ i x, ⟪i,x⟫∈W → ¬MX x` is binary-`LX`-definable.** The novel
+content: the `∈`-guard is `ℒₒᵣ`-on-reduct (`memRelOpr`, `lMap Φ`), the consequent is the primitive
+`Xsym`-atom on the bound `x`. Built directly: `β := ∀⁰ ∀⁰ (lMap Φ (memRelOpr ![#2,#1,#0]) 🡒 ∼Xsym ![#0])`
+(bvars after wrapping: `#0=x, #1=i, #2=W, #3=k`). Eval: `eval_lMap` carries the guard to the reduct
+`inst.lMap Φ = standardModel reductORing` where `eval_memRel` reads it as `⟪i,x⟫∈W`. -/
+theorem xclause_lxDef :
+    letI : ORingStructure M := ReductModel.reductORing
+    haveI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+    ∃ e : ℕ → M, ∃ β : Semiformula LX ℕ 2,
+      ∀ W k : M, (∀ i x : M, ⟪i, x⟫ ∈ W → ¬ MX x) ↔ Semiformula.Evalm M ![W, k] e β := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  have hred := ReductModel.reduct_eq_standardModel (M := M)
+  set e : ℕ → M := fun _ => Classical.arbitrary M with he
+  refine ⟨e, ∀⁰ ∀⁰ ((Semiformula.lMap Φ (memRelOpr.operator ![#2, #1, #0])) 🡒
+      ∼(Semiformula.rel Xsym ![#0])), fun W k => ?_⟩
+  -- guard-eval: the `ℒₒᵣ` membership operator (carried to the reduct) reads as `⟪i,x⟫∈W`.
+  have hguard : ∀ x i : M,
+      Semiformula.Evalm M ![x, i, W, k] e (Semiformula.lMap Φ (memRelOpr.operator ![#2, #1, #0]))
+        ↔ ⟪i, x⟫ ∈ W := by
+    intro x i
+    rw [Semiformula.eval_lMap, hred, Semiformula.eval_operator]
+    have hv : (fun j : Fin 3 =>
+        Semiterm.val (@standardModel M oM) ![x, i, W, k] e (![(#2 : Semiterm ℒₒᵣ ℕ 4), #1, #0] j))
+        = ![W, i, x] := by
+      funext j; fin_cases j <;> simp [Semiterm.val_bvar]
+    simp only [hv, eval_memRel]
+  simp only [Semiformula.eval_all, LogicalConnective.HomClass.map_imply,
+    LogicalConnective.HomClass.map_neg, Semiformula.eval_rel₁, Semiterm.val_bvar,
+    Matrix.cons_val_zero]
+  constructor
+  · intro hC i x hg
+    exact hC i x ((hguard x i).mp hg)
+  · intro hR i x hmem
+    exact hR i x ((hguard x i).mpr hmem)
 
 /-- **The descent sequence exists for every length.** By `lx_succ_induction` (`base`/`extend`). The lone
 remaining obligation is the `LX`-definability of `D(k) := ∃ W, IsDescent W ∧ lh W = k+1` — see the file
