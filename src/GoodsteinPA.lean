@@ -37,6 +37,7 @@ import GoodsteinPA.EmbeddingBound
 -- still a `Prop`), but kept in the build so the §3 bricks stay green.
 import GoodsteinPA.DescentLift
 import GoodsteinPA.DescentCore
+import GoodsteinPA.Grzegorczyk
 import GoodsteinPA.DescentArith
 import GoodsteinPA.InternalPow
 import GoodsteinPA.InternalDigits
