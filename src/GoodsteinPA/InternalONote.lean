@@ -1987,4 +1987,80 @@ lemma icmp_iomul {a b : V} (ha : isNF a) (hb : isNF b) :
     icmp (iomul a) (iomul b) = icmp a b :=
   icmp_iomul_aux (max a b) a (le_max_left _ _) b (le_max_right _ _) ha hb
 
+/-! ### Boundary descent of the slow-down (`ω·α + finite` across distinct blocks) -/
+
+/-- Appending a finite term `+ m` to `ω·(oadd e n r)` walks down the NoFin spine: the head `(1+e, n)`
+is untouched and the recursion continues into the tail. (The finite term lands as a fresh bottom
+summand because every leading exponent `1+e` of `ω·c` is non-zero.) -/
+lemma iadd_iomul_ocOadd_finite (e n r s : V) :
+    iadd (iomul (ocOadd e n r)) (ocOadd 0 s 0)
+      = ocOadd (iadd (ocOadd 0 1 0) e) n (iadd (iomul r) (ocOadd 0 s 0)) := by
+  rw [iomul_ocOadd]
+  set E := iadd (ocOadd 0 1 0) e with hE
+  have hEne : E ≠ 0 := iadd_one_ne_zero e
+  have hic : icmp E 0 = 2 := (ocOadd_destruct hEne) ▸ icmp_ocOadd_zero _ _ _
+  rw [iadd_ocOadd, if_neg (ocOadd_pos 0 s 0).ne', ocExp_ocOadd,
+      if_neg (by rw [hic]; exact _root_.two_ne_zero),
+      if_neg (by rw [hic]; exact (one_lt_two).ne')]
+
+/-- `thenV` propagates a `≺` (value `0`) decision monotonically through a fixed two-level head: if the
+nested comparison `thenV x (thenV y u) = 0` and the innermost `u = 0` forces `v = 0`, then
+`thenV x (thenV y v) = 0`. The head levels (`x`, `y`) are shared, so either they already decide `0`
+or the decision descends to the innermost slot. -/
+lemma thenV_zero_mono {x y u v : V} (huv : u = 0 → v = 0)
+    (h : thenV x (thenV y u) = 0) : thenV x (thenV y v) = 0 := by
+  rw [thenV_eq_zero] at h ⊢
+  rcases h with hx | ⟨hx, hyu⟩
+  · exact Or.inl hx
+  · refine Or.inr ⟨hx, ?_⟩
+    rw [thenV_eq_zero] at hyu ⊢
+    rcases hyu with hy | ⟨hy, hu⟩
+    · exact Or.inl hy
+    · exact Or.inr ⟨hy, huv hu⟩
+
+/-- **Boundary descent** (auxiliary, bounded form): if `ω·a ≺ ω·b` then appending arbitrary finite
+tails preserves the strict order — `ω·a + s ≺ ω·b + t`. The decision is reached on the NoFin spine
+(via `icmp_iomul`/the head comparison) before the finite tails matter; `thenV_zero_mono` carries it. -/
+private theorem icmp_iadd_finite_mono (s t : V) :
+    ∀ w : V, ∀ a ≤ w, ∀ b ≤ w, isNF a → isNF b →
+      icmp (iomul a) (iomul b) = 0 →
+      icmp (iadd (iomul a) (ocOadd 0 s 0)) (iadd (iomul b) (ocOadd 0 t 0)) = 0 := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro a haw b hbw ha hb hlt
+    rcases eq_or_ne a 0 with rfl | hane
+    · rcases eq_or_ne b 0 with rfl | hbne
+      · rw [iomul_zero, icmp_zero_zero] at hlt; exact absurd hlt _root_.one_ne_zero
+      · obtain ⟨eb, cb, tb, rfl⟩ : ∃ e n r, b = ocOadd e n r :=
+          ⟨_, _, _, (ocOadd_destruct hbne).symm⟩
+        rw [iomul_zero, iadd_zero_left, iadd_iomul_ocOadd_finite]
+        exact icmp_finHead_infHead (ocOadd_pos 0 s 0).ne' (ocOadd_pos _ _ _).ne'
+          (ocExp_ocOadd 0 s 0) (by rw [ocExp_ocOadd]; exact iadd_one_ne_zero eb)
+    · rcases eq_or_ne b 0 with rfl | hbne
+      · rw [iomul_zero, icmp_pos_zero (iomul_ne_zero hane)] at hlt
+        exact absurd hlt _root_.two_ne_zero
+      · obtain ⟨ea, ca, ta, rfl⟩ : ∃ e n r, a = ocOadd e n r :=
+          ⟨_, _, _, (ocOadd_destruct hane).symm⟩
+        obtain ⟨eb, cb, tb, rfl⟩ : ∃ e n r, b = ocOadd e n r :=
+          ⟨_, _, _, (ocOadd_destruct hbne).symm⟩
+        rw [iadd_iomul_ocOadd_finite, iadd_iomul_ocOadd_finite, icmp_ocOadd]
+        rw [iomul_ocOadd, iomul_ocOadd, icmp_ocOadd] at hlt
+        refine thenV_zero_mono ?_ hlt
+        intro htail
+        obtain ⟨_, hnea, hnta, _⟩ := (isNF_ocOadd ea ca ta).1 ha
+        obtain ⟨_, hneb, hntb, _⟩ := (isNF_ocOadd eb cb tb).1 hb
+        exact ih (max ta tb) (max_lt (code_lt_of_tail haw) (code_lt_of_tail hbw))
+          ta (le_max_left _ _) tb (le_max_right _ _) hnta hntb htail
+
+/-- **Boundary descent of the slow-down** (`DescentCore.repr_betaTail_boundary`, internal): when the
+prefixes descend (`a ≺ b` as NF codes), the slowed-down terms descend regardless of their finite
+tails — `ω·a + s ≺ ω·b + t`. Built on `icmp_iomul` (the block comparison reduces to `icmp a b`). -/
+lemma icmp_betaTail_boundary {a b : V} (ha : isNF a) (hb : isNF b)
+    (hab : icmp a b = 0) (s t : V) :
+    icmp (iadd (iomul a) (ocOadd 0 s 0)) (iadd (iomul b) (ocOadd 0 t 0)) = 0 :=
+  icmp_iadd_finite_mono s t (max a b) a (le_max_left _ _) b (le_max_right _ _) ha hb
+    (by rw [icmp_iomul ha hb]; exact hab)
+
 end GoodsteinPA.InternalONote
