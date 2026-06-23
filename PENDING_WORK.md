@@ -39,6 +39,10 @@ internal-Grzegorczyk tail into the Thm-3.5 sequence (both axiom-clean `[propext,
 - **`bbeta_of_igtTot …`** — feeds that triple into `InternalThm35.bbeta_isNF`/`bbeta_C_le`/
   `bbeta_desc_exists`, producing `∃ K s, 0<K ∧ NF ∧ iC(β'ᵣ)≤r+1 ∧ ≺-descent` — the complete Thm 3.5
   output (the input `DescentArith`/Lemma 3.6 consume).
+- **`bbeta_of_igtTot_blkRec …`** — specializes `blk/off := BlkRec.blk/off wseq`, discharging the
+  bookkeeping (`hblk_dich`/`hoff_adv`/`hnm`) directly from the src `BlkRec` laws. So the whole Cor 3.4
+  → Thm 3.5 girder is now built from a single width code `wseq` + **just two deep inputs**: the input
+  ≺-descending NF `β` and the domination `hdom` (`∀ j, blk(j+1)=blk j → off j + 1 < iF l₀ (blk j)`).
 
 **REMAINING crux-1 frontier (hardest-first), all now isolated as named hypotheses of `bbeta_of_igtTot`:**
 1. **`hdom` = domination (Rathjen Lemma 3.2)**: `off j + 1 < iF l₀ (blk j)` — the within-block offset

@@ -210,4 +210,28 @@ theorem bbeta_of_igtTot (l₀ : ℕ) (hl₀ : 0 < l₀)
   obtain ⟨s, hs⟩ := bbeta_desc_exists hKpos hNF hdesc
   exact ⟨K, s, hKpos, bbeta_isNF hKpos hNF, bbeta_C_le hslow, hs⟩
 
+/-- **Cor 3.4 → Thm 3.5 with the bookkeeping discharged by `BlkRec`.** The abstract `blk`/`off`
+dichotomy/advance/`≤j` hypotheses of `bbeta_of_igtTot` are *exactly* the `BlkRec` block-state laws
+(`blk_succ_dich`/`off_succ_of_blk_eq`/`blk_add_off_le`) for any width code `wseq`. So specializing
+`blk := BlkRec.blk wseq`, `off := BlkRec.off wseq` discharges all the bookkeeping internally — the
+crux-1 frontier collapses to just **(input ≺-descending NF `β`) + (domination `hdom`)**. -/
+theorem bbeta_of_igtTot_blkRec (l₀ : ℕ) (hl₀ : 0 < l₀) (wseq : V)
+    {β : V → V} {Cβ : V}
+    (hβNF : ∀ n, isNF (β n)) (hβ0 : ∀ n, β n ≠ 0)
+    (hβdesc : ∀ n, icmp (β (n + 1)) (β n) = 0)
+    (hβC : ∀ j, iC (β (BlkRec.blk wseq j)) ≤ Cβ + j)
+    (hdom : ∀ j, BlkRec.blk wseq (j + 1) = BlkRec.blk wseq j →
+        BlkRec.off wseq j + 1 < iF l₀ (BlkRec.blk wseq j)) :
+    ∃ K s : V, 0 < K ∧
+      (∀ r, isNF (bbeta K s
+        (salpha (l₀ : V) β (BlkRec.blk wseq) (BlkRec.off wseq) (igtTot l₀)) r)) ∧
+      (∀ r, iC (bbeta K s
+        (salpha (l₀ : V) β (BlkRec.blk wseq) (BlkRec.off wseq) (igtTot l₀)) r) ≤ r + 1) ∧
+      (∀ r, icmp (bbeta K s
+              (salpha (l₀ : V) β (BlkRec.blk wseq) (BlkRec.off wseq) (igtTot l₀)) (r + 1))
+            (bbeta K s
+              (salpha (l₀ : V) β (BlkRec.blk wseq) (BlkRec.off wseq) (igtTot l₀)) r) = 0) :=
+  bbeta_of_igtTot l₀ hl₀ hβNF hβ0 hβdesc hβC
+    (BlkRec.blk_succ_dich wseq) (BlkRec.off_succ_of_blk_eq wseq) (BlkRec.blk_add_off_le wseq) hdom
+
 end GoodsteinPA.StdCor34
