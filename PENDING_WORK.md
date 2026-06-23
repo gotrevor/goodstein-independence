@@ -34,9 +34,10 @@ arithmetic; **Cor 3.4 (the `g`/Grzegorczyk padding) is NOT started and is the ge
    Lemma 3.2 = mathlib `exists_lt_ack_of_nat_primrec` (ack ≈ Grzegorczyk fₙ). **This is multi-lap.**
    Decompose: (a) ℕ-template `g : ℕ²→ONote` + descent/bound lemmas (Aristotle-eligible, self-contained);
    (b) internalize as `M`-code recursion.
-2. **(plumbing) Extract `α : M → M`** from `descent_iterate_seq_total` — `α k := znth (choose …) k`,
-   coherent across lengths via `descentR_functional` (prove prefix-agreement by induction). Gives
-   `α 0=a₀`, `∀k ¬MX(α k)`, `∀k descentR f (α k)(α(k+1))` ⟹ `Mlt`-descent + each `¬MX`. Tractable.
+2. ✅ **(DONE lap 42) Extract `α : M → M`** — `descent_alpha_exists` (`DescentConstruction.lean`):
+   `α 0=a₀`, `∀k ¬MX(α k)`, `∀k descentR f (α k)(α(k+1))`. Coherence via `IterPrefix_agree` (prefix
+   agreement by X-free `sigma1_succ_induction` + `descentR_functional`). Axiom-clean. ⟹ `Mlt`-descent +
+   each `¬MX` (`descentR_descends`). NOTE: `α` is NOT yet known slow — that's piece 1 (Cor 3.4).
 3. **(plumbing) Decode `Mlt`→`icmp`** on codes (the route-b seam): `Mlt f y x` (`=prec`, X-free) ⟺
    `icmp y x = 0` on the ε₀-code reading; `isNF (α k)`. Needs the `prec`↔`icmp` bridge in `M`.
 4. **(ARITH, toolkit ready) Thm 3.5 reindex** `α(slow) → β`, `βᵣ=ω·αₙ+(K-i)` — `iCanon(r+1)`
