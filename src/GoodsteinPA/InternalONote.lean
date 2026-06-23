@@ -1733,6 +1733,28 @@ lemma iC_iomul (c : V) : iC (iomul c) ≤ iC c + 1 := by
       · exact le_trans hne_le le_self_add
       · exact le_trans h2 (add_le_add hre_le (le_refl 1))
 
+/-! ### `icmp` reflexivity + the within-block descent of the slow-down -/
+
+@[simp] lemma cmpV_self (a : V) : cmpV a a = 1 := by simp [cmpV]
+
+/-- **`icmp a a = 1`** (reflexivity / equality of a code with itself). Structural induction: at an
+`oadd` head the exponent and coefficient compare equal (`icmp e e = 1`, `cmpV n n = 1`) and `thenV`
+passes through to the tail. -/
+lemma icmp_self : ∀ w : V, ∀ a ≤ w, icmp a a = 1 := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro a haw
+    rcases eq_or_ne a 0 with rfl | ha
+    · exact icmp_zero_zero
+    · obtain ⟨e, n, r, rfl⟩ : ∃ e n r, a = ocOadd e n r :=
+        ⟨ocExp a, ocCoeff a, ocTail a, (ocOadd_destruct ha).symm⟩
+      have he_lt : e < w := lt_of_lt_of_le (by have := ocExp_lt e n r; rwa [ocExp_ocOadd] at this) haw
+      have hr_lt : r < w := lt_of_lt_of_le (by have := ocTail_lt e n r; rwa [ocTail_ocOadd] at this) haw
+      rw [icmp_ocOadd, ih e he_lt e le_rfl, cmpV_self, ih r hr_lt r le_rfl]
+      simp [thenV]
+
 /-- `1 + e ≠ 0` on codes (internal `DescentCore.one_add_ne_zero`): left-adding `1` always leaves a
 head term. Used to see that every leading exponent of `ω·c` is non-zero (so `ω·c` is `NoFin`). -/
 lemma iadd_one_ne_zero (e : V) : iadd (ocOadd 0 1 0) e ≠ 0 := by
@@ -1777,5 +1799,39 @@ lemma iC_iadd_finite (c m : V) :
             max_le_max (le_refl _) (ih re hre_lt)
         _ = max (max (max (iC E) ne) (iC (iomul re))) m := (max_assoc _ _ _).symm
         _ = max (iC (ocOadd E ne (iomul re))) m := by rw [iC_ocOadd]
+
+/-- **Within-block comparison of slow-down terms**: two `ω·α + (finite)` codes with the *same*
+`ω·α` prefix compare exactly by their finite tails — `icmp (ω·α + p) (ω·α + q) = cmpV p q`. Structural
+induction down the shared `ω·α` spine (`icmp E E = 1`, `cmpV n n = 1`, `thenV` passes through). -/
+lemma icmp_iadd_iomul_finite (α p q : V) :
+    icmp (iadd (iomul α) (ocOadd 0 p 0)) (iadd (iomul α) (ocOadd 0 q 0)) = cmpV p q := by
+  induction α using ISigma1.sigma1_order_induction
+  · definability
+  case ind α ih =>
+    rcases eq_or_ne α 0 with rfl | hα
+    · rw [iomul_zero, iadd_zero_left, iadd_zero_left, icmp_ocOadd, icmp_zero_zero]
+      by_cases hpq : cmpV p q = 1 <;> simp [thenV, hpq]
+    · obtain ⟨e, n, r, rfl⟩ : ∃ e n r, α = ocOadd e n r :=
+        ⟨ocExp α, ocCoeff α, ocTail α, (ocOadd_destruct hα).symm⟩
+      rw [iomul_ocOadd]
+      set E := iadd (ocOadd 0 1 0) e with hE
+      have hEne : E ≠ 0 := iadd_one_ne_zero e
+      have hic : icmp E 0 = 2 := (ocOadd_destruct hEne) ▸ icmp_ocOadd_zero _ _ _
+      have hexpand : ∀ s : V, iadd (ocOadd E n (iomul r)) (ocOadd 0 s 0)
+          = ocOadd E n (iadd (iomul r) (ocOadd 0 s 0)) := by
+        intro s
+        rw [iadd_ocOadd, if_neg (ocOadd_pos 0 s 0).ne', ocExp_ocOadd,
+            if_neg (by rw [hic]; exact _root_.two_ne_zero),
+            if_neg (by rw [hic]; exact (one_lt_two).ne')]
+      have hr_lt : r < ocOadd e n r := by
+        have := ocTail_lt e n r; rwa [ocTail_ocOadd] at this
+      rw [hexpand p, hexpand q, icmp_ocOadd, icmp_self E E le_rfl, cmpV_self, ih r hr_lt]
+      simp [thenV]
+
+/-- **Within-block descent** (`DescentCore.repr_betaTail_within`, internal): a larger finite tail
+gives a strictly `≺`-larger code, so `ω·α + p ≺ ω·α + (p+1)`. -/
+lemma icmp_betaTail_within (α p : V) :
+    icmp (iadd (iomul α) (ocOadd 0 p 0)) (iadd (iomul α) (ocOadd 0 (p + 1) 0)) = 0 := by
+  rw [icmp_iadd_iomul_finite]; simp [cmpV, lt_succ_iff_le]
 
 end GoodsteinPA.InternalONote
