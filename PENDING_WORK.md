@@ -37,13 +37,18 @@ m₀`. **This makes the RUN side of E-core(b) axiom-clean and pins the precise r
 `X`-definable descent from `¬TI prec`.
 
 **Internal-arithmetic bricks STARTED (lap 29, green, axiom-clean) toward the internal `ineq6_step`:**
-- `InternalPow.ipow_le_ipow_left` — `ipow` monotone in the base (`b ≤ c → ipow b x ≤ ipow c x`).
+- `InternalPow.ipow_le_ipow_left` / `ipow_lt_ipow_left` — `ipow` (strict) monotone in the base.
+- `InternalLog.ilog_pos` — `1 ≤ ilog b n` for `b ≤ n`.
 - `InternalBump.ibump_pos` — the general positive-argument recursion (`ibump_succ` for arbitrary `0<n`).
 - `InternalBump.le_ibump` — `n ≤ ibump b n` (Δ₀-numeral analogue of `Domination.le_bump`), via `𝚺₁`
-  order-induction (`ISigma1.sigma1_order_induction`) peeling through `ibump_pos`. **NB:** the ℕ proofs
-  of `bump_mono`/`bump_gt` go *via ordinals* (`toOrdinal` StrictMono) which is NOT internalizable
-  (`DESCENT-PLAN §3b` says avoid internal ONote) — must reprove them digit-direct inside `V` (the
-  `le_ibump` style). That digit-direct internal monotonicity is the next chip.
+  order-induction (`ISigma1.sigma1_order_induction`) peeling through `ibump_pos`.
+- `InternalBump.ibump_gt` — `b ≤ n → n+1 ≤ ibump b n` (analogue of `Domination.bump_gt`), digit-direct.
+- **NB1:** the ℕ proof of `bump_mono` goes *via ordinals* (`toOrdinal` StrictMono), NOT internalizable
+  (`DESCENT-PLAN §3b`: avoid internal ONote) — internal `ibump_mono` needs a fresh **digit-direct** proof
+  (genuinely subtle: comparing hereditary reps of `a ≤ a'`). This is the next hard chip.
+- **NB2 (reusable):** `omega` and `ring` do **NOT** work over a generic model `V` (only `ℕ`/`Int`);
+  `ring` is also not imported in the `Internal*` files. Use manual ordered-semiring lemmas
+  (`add_le_add`, `mul_le_mul`, `add_right_comm`, `lt_iff_succ_le`, `pos_iff_one_le`, `le_iff_lt_succ`).
 
 **NEXT (hardest-first, offline-tractable pieces):**
 1. **Internal `ineq6_step`** (the `step` hyp): the genuine non-vacuous Π₁ kernel as a `Δ₀`-numeral fact
