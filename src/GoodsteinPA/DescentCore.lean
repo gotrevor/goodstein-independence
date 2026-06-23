@@ -187,6 +187,42 @@ theorem C_omega_mul_le : ∀ α : ONote, C (omegaO * α) ≤ C α + 1
       have e3 : C a₂ ≤ max (max (C e₂) (n₂ : ℕ)) (C a₂) := le_max_right _ _
       refine Nat.max_le.mpr ⟨Nat.max_le.mpr ⟨?_, ?_⟩, ?_⟩ <;> omega
 
+/-- `C (ofNat m) = m` — the max-coefficient of a finite ordinal is its value. -/
+@[simp] theorem C_ofNat (m : ℕ) : C (ONote.ofNat m) = m := by
+  cases m with
+  | zero => rfl
+  | succ k => simp [ONote.ofNat, C, Nat.succPNat]
+
+/-- `1 + e` is never `0` (its CNF always has a head term). -/
+theorem one_add_ne_zero (e : ONote) : (1 : ONote) + e ≠ 0 := by
+  cases e with
+  | zero => decide
+  | oadd e' n' a' => rw [one_add_oadd]; split <;> exact fun h => ONote.noConfusion h
+
+/-- **`a` has no finite (exponent-`0`) summand**: every CNF term has a non-zero exponent. `ω·α`
+always satisfies this (its exponents are all `1 + …`), so adding a finite tail to it never *merges*
+into an existing coefficient — the key to the tight `C(ω·α + finite) = max(C(ω·α), finite)` bound. -/
+def NoFin : ONote → Prop
+  | 0 => True
+  | ONote.oadd e _ r => e ≠ 0 ∧ NoFin r
+
+@[simp] theorem NoFin_zero : NoFin 0 := trivial
+
+theorem NoFin_oadd {e : ONote} {n : ℕ+} {r : ONote} (he : e ≠ 0) (hr : NoFin r) :
+    NoFin (ONote.oadd e n r) := ⟨he, hr⟩
+
+/-- **`ω·α` has no finite part.** Its head exponent is `1` (the `e₂=0` case) or `1+e₂` (the `e₂≠0`
+case), both non-zero, and the tail recurses. -/
+theorem noFin_omega_mul : ∀ α, NoFin (omegaO * α)
+  | 0 => by simp [omegaO]
+  | ONote.oadd e₂ n₂ a₂ => by
+    rw [omegaO, ONote.oadd_mul]
+    by_cases h : e₂ = 0
+    · subst h; exact NoFin_oadd (by decide) NoFin_zero
+    · rw [if_neg h]
+      refine NoFin_oadd (one_add_ne_zero e₂) ?_
+      rw [← omegaO]; exact noFin_omega_mul a₂
+
 /-! ## Rathjen Lemma 3.6 — the special Goodstein run from `T̂²_ω(β₀)` does not terminate
 
 This is the **kernel of E-core** (see `DESCENT-PLAN.md`): from a descending ε₀-sequence with bounded
