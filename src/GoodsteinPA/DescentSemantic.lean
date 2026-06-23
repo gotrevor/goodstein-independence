@@ -277,6 +277,61 @@ theorem lx_nonterminating {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq
   intro k
   exact lt_of_lt_of_le (hpos k) (hineq k)
 
+/-! ### Tools for wall C — the canonical `Mlt`-descent step (the M-internal selector)
+
+The descent `a : M → M` from `no_min` picks, at each step, the `<`-least non-`MX` element `Mlt`-below the
+current one. `descent_step` realizes that selector via `lx_least_number`, given the `LX`-definability of the
+step predicate `Q y := Mlt f y a ∧ ¬MX y` (both `Mlt` — `prec` is fvar-free X-free — and `MX` — the
+`Xsym`-atom — are `LX`-definable). Axiom-clean. -/
+
+/-- `MX` is `LX`-definable (it *is* the `Xsym`-atom). -/
+theorem MX_lxDef {M : Type} [Nonempty M] [Structure LX M] :
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, MX x ↔ Semiformula.Evalm M ![x] e φ := by
+  refine ⟨fun _ => Classical.arbitrary M, Semiformula.rel Xsym ![#0], fun x => ?_⟩
+  simp only [Semiformula.eval_rel₁, Semiterm.val_bvar, Matrix.cons_val_zero]
+  rfl
+
+/-- The step predicate `Q y := Mlt f y a ∧ ¬MX y` is `LX`-definable (parametrized by `a` via a free
+variable). `Mlt` is `prec ⇜ ![#0, &0]` (fvar-free `prec`, so the free assignment only carries `a`); `¬MX`
+is `∼(Xsym #0)`. -/
+theorem descentQ_lxDef {M : Type} [Nonempty M] [Structure LX M] (f : ℕ → M) (a : M) :
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+      ∀ y, (Mlt f y a ∧ ¬ MX y) ↔ Semiformula.Evalm M ![y] e φ := by
+  refine ⟨Function.update f 0 a,
+    (Thm56.prec ⇜ ![#0, &0]) ⋏ ∼(Semiformula.rel Xsym ![#0]), fun y => ?_⟩
+  rw [LogicalConnective.HomClass.map_and, LogicalConnective.HomClass.map_neg,
+    Semiformula.eval_substs]
+  apply and_congr
+  · -- `Mlt f y a ↔ Eval ![y, a] (update f 0 a) prec`
+    show Semiformula.Eval _ ![y, a] f Thm56.prec ↔ _
+    rw [Semiformula.eval_iff_of_funEqOn (ε := f) Thm56.prec (ε' := Function.update f 0 a)
+      (by intro x hx; simp [Semiformula.FVar?, Thm56.freeVariables_prec] at hx)]
+    have hb : ∀ i : Fin 2, ![y, a] i =
+        Semiterm.valm M ![y] (Function.update f 0 a) (![(#0 : Semiterm LX ℕ 1), &0] i) := by
+      intro i
+      refine Fin.cases ?_ (fun j => ?_) i
+      · simp
+      · refine Fin.cases ?_ (fun k => k.elim0) j
+        simp [Semiterm.val_fvar, Function.update_self]
+    constructor
+    · intro h; exact Semiformula.Eval.of_eq h (funext hb) rfl
+    · intro h; exact Semiformula.Eval.of_eq h (funext hb).symm rfl
+  · -- `¬MX y ↔ ¬ Eval (Xsym #0)`
+    rw [Semiformula.eval_rel₁]
+    simp only [Semiterm.val_bvar, Matrix.cons_val_zero]
+    exact Iff.rfl
+
+/-- **The canonical `Mlt`-descent step.** Given `¬MX a` and the `no_min` progressivity, there is a
+*canonical* `<`-least non-`MX` element `y` with `Mlt f y a` — the M-internal selector wall C's descent
+recursion picks. ("`<`" is `M`'s reduct arithmetic order.) -/
+theorem descent_step {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) (f : ℕ → M)
+    (no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y) {a : M} (ha : ¬ MX a) :
+    letI : ORingStructure M := ReductModel.reductORing
+    ∃ y, (Mlt f y a ∧ ¬ MX y) ∧ ∀ z, z < y → ¬ (Mlt f z a ∧ ¬ MX z) := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  exact lx_least_number hM (descentQ_lxDef f a) (no_min a ha)
+
 /-! ### Step 3 — the genuine remaining obligation (Rathjen §3 in `M`), as ONE named `sorry` -/
 
 /-- **The lone remaining wall: a non-`MX`-minimal seed yields a contradiction with Goodstein-in-`M`
