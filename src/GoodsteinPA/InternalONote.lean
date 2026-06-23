@@ -1680,4 +1680,57 @@ lemma iomul_ocOadd (ec n rc : V) :
   rw [iomul, key, iomulNext, if_neg hcne,
     znth_iomulTable_eq_iomul M (ocTail c) htail, ocExp_ocOadd, ocCoeff_ocOadd, ocTail_ocOadd]
 
+/-! ### `iC`-arithmetic of the slow-down (Rathjen Thm 3.5: multiplying by `ω` bumps `C` by ≤ 1) -/
+
+/-- **`iC (1 + e) ≤ iC e + 1`** — left-adding `1` raises the max-coefficient by at most one
+(internal `DescentCore.C_one_add_le`). `1 = ocOadd 0 1 0`; the addition only merges into the head
+when `e`'s leading exponent is `0` (a finite head), bumping the head coefficient by `1`. -/
+lemma iC_one_add (e : V) : iC (iadd (ocOadd 0 1 0) e) ≤ iC e + 1 := by
+  rw [iadd_ocOadd]
+  by_cases he : e = 0
+  · subst he; simp [iC_ocOadd]
+  · rw [if_neg he]
+    by_cases hee : ocExp e = 0
+    · have h2 : icmp 0 (ocExp e) = 1 := by rw [hee]; exact icmp_zero_zero
+      have h1 : icmp 0 (ocExp e) ≠ 0 := by rw [h2]; exact _root_.one_ne_zero
+      rw [if_neg h1, if_pos h2, iC_ocOadd, iC_zero]
+      have hde : iC e = max (max (iC (ocExp e)) (ocCoeff e)) (iC (ocTail e)) := by
+        rw [← iC_ocOadd, ocOadd_destruct he]
+      have hcoeff : ocCoeff e ≤ iC e := by rw [hde]; exact le_max_of_le_left (le_max_right _ _)
+      have htail : iC (ocTail e) ≤ iC e := by rw [hde]; exact le_max_right _ _
+      refine max_le_iff.mpr ⟨max_le_iff.mpr ⟨?_, ?_⟩, ?_⟩
+      · exact zero_le
+      · rw [add_comm 1 (ocCoeff e)]; exact add_le_add hcoeff (le_refl 1)
+      · exact le_trans htail le_self_add
+    · have h0 : icmp 0 (ocExp e) = 0 :=
+        (ocOadd_destruct hee) ▸
+          icmp_zero_ocOadd (ocExp (ocExp e)) (ocCoeff (ocExp e)) (ocTail (ocExp e))
+      rw [if_pos h0]
+      exact le_self_add
+
+/-- **`iC (ω·c) ≤ iC c + 1`** (Rathjen Thm 3.5; internal `DescentCore.C_omega_mul_le`). Strong
+induction on the code: `ω·(oadd e n r) = oadd (1+e) n (ω·r)`, with `iC (1+e) ≤ iC e + 1` (`iC_one_add`)
+and the IH on the tail `r`. -/
+lemma iC_iomul (c : V) : iC (iomul c) ≤ iC c + 1 := by
+  induction c using ISigma1.sigma1_order_induction
+  · definability
+  case ind c ih =>
+    rcases eq_or_ne c 0 with hc | hc
+    · subst hc; simp
+    · obtain ⟨ee, ne, re, rfl⟩ : ∃ ee ne re, c = ocOadd ee ne re :=
+        ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+      rw [iomul_ocOadd, iC_ocOadd, iC_ocOadd]
+      have h1 : iC (iadd (ocOadd 0 1 0) ee) ≤ iC ee + 1 := iC_one_add ee
+      have hre : re < ocOadd ee ne re := by
+        have := ocTail_lt ee ne re; rwa [ocTail_ocOadd] at this
+      have h2 : iC (iomul re) ≤ iC re + 1 := ih re hre
+      set Mx := max (max (iC ee) ne) (iC re) with hMx
+      have hee_le : iC ee ≤ Mx := le_max_of_le_left (le_max_left _ _)
+      have hne_le : ne ≤ Mx := le_max_of_le_left (le_max_right _ _)
+      have hre_le : iC re ≤ Mx := le_max_right _ _
+      refine max_le_iff.mpr ⟨max_le_iff.mpr ⟨?_, ?_⟩, ?_⟩
+      · exact le_trans h1 (add_le_add hee_le (le_refl 1))
+      · exact le_trans hne_le le_self_add
+      · exact le_trans h2 (add_le_add hre_le (le_refl 1))
+
 end GoodsteinPA.InternalONote
