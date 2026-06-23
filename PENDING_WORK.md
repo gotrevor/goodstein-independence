@@ -1,5 +1,36 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐ Lap 45 (2026-06-23) — VALIDATED PIVOT: §3-on-X is BLOCKED; route is now Trevor's call
+**Read `E-ARCHITECTURE-REVIEW-2026-06-23.md` §H + `HANDOFF.md`.** Independently re-derived in-box AND
+confirmed against the external review. The lap-27→44 plan (run Rathjen §3 slow-down on the X-definable
+descent → free-X `TI_≺(X)`) is **structurally blocked, not merely hard**:
+- `peano_not_proves_TI` is genuinely **free-X** (checklist #1: `Xsym` free, `prec` concrete) — the
+  *strong* back-end; a §3 reduction to primrec-PRWO cannot reach it.
+- The §3 domination `∃ l, ∀ n, C(β(n+1)) ≤ F_l n` is **FALSE for an X-definable descent** — now
+  MACHINE-CHECKED (`Grz.not_dominated_of_diag_le`/`F_diag_not_dominated`, commit `279050d`): the
+  Grzegorczyk hierarchy's diagonal escapes every fixed level, so domination is primrec-only.
+- Root cause of the misalignment: a non-standard / X-definable descent needs an **internal** (V-level,
+  Ackermann) Grzegorczyk level — NOT a fixed meta-l — and `f_l` for `l:V` is NOT IΣ₁-provably total.
+  So the lap-40→44 meta-iterate `ibigMul` / meta-recursion `ig` design cannot produce the needed β.
+
+**THE FORK (Trevor decides — do NOT pick unilaterally; lap-12 forbade Route A's axiom on the headline):**
+1. **Route A** (Rathjen's actual proof): primrec §3 → primrec-PRWO → Con(PA) → Gödel II.
+   `Grzegorczyk.lean` already fits (primrec). Cost: disclosed `PA_delta1Definable` (still an `axiom` in
+   the pin) + the unbuilt `TI(ε₀)⊢Con(PA)` girder (`Reduction.lean:52`; PA∞ cut-elim — distinct from
+   Buchholz §5). Attack paths: (a) check if a Foundation pin-bump discharges `PA_delta1Definable`
+   upstream (lap-6 noted a session was on it); (b) build the Gentzen ordinal-analysis girder.
+2. **Route B via Kirby–Paris 1982** (model-theoretic indicators): keep free-X; replace §3-on-X with
+   the KP indicator argument inside `M ⊧ paLX` (the wall `no_min_descent_absurd_of_goodstein` is already
+   model-internal — natural continuation). Avoids the axiom. Read `papers/kirby-paris-1982-…pdf`.
+   Attack paths: (a) formalize indicators / the Σ₁-definable "gap" function; (b) the
+   Paris–Harrington-style density argument adapted to Goodstein.
+3. **§3-on-X: DEAD** — `InternalCor34` meta-l grind must NOT resume.
+
+**Survives regardless:** `peano_not_proves_TI` (axiom-clean), `Grzegorczyk.lean` (primrec §3, Lemma 3.3
+complete + the obstruction lemma), `InternalONote` code arithmetic, `InternalCor34.ig0` + general
+`ocOadd` descent lemmas (substrate-agnostic leaves).
+
+
 ## ⭐ Reflection — 2026-06-23 (lap 44, DEEP) — the wall `sorry` is framed on a DEAD path; rewire it FIRST
 
 Full synthesis in `REFLECTION-2026-06-23-lap44.md`. Two findings:
