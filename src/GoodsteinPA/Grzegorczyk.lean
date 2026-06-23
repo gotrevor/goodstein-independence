@@ -290,6 +290,58 @@ theorem g_NF : ∀ (l n m : ℕ), (g l n m).NF := by
       exact_mod_cast g_lt l _ _
     · rw [g_succ_of_ge h]; exact ONote.NF.zero
 
+/-- `f^[i] n ≤ n + psum f n i` (for `i ≥ 1` the iterate is itself a summand of `psum`). -/
+theorem iter_le_add_psum (f : ℕ → ℕ) (n i : ℕ) : f^[i] n ≤ n + psum f n i := by
+  cases i with
+  | zero => simp
+  | succ i => rw [psum_succ]; omega
+
+/-- Block bookkeeping for the bound: `f^[i] n + j ≤ n + m` where `i,j` is `m`'s block decomposition. -/
+theorem iter_add_blockOff_le (l n m : ℕ) :
+    (F l)^[blockIdx (F l) n m] n + blockOff (F l) n m ≤ n + m := by
+  have h1 := iter_le_add_psum (F l) n (blockIdx (F l) n m)
+  have h2 := psum_add_blockOff (F l) n m
+  omega
+
+/-- `(x.toPNat' : ℕ) ≤ x + 1` (equals `x` when `x>0`, else `1`). -/
+theorem toPNat'_le_succ (x : ℕ) : ((x.toPNat' : ℕ)) ≤ x + 1 := by
+  rcases Nat.eq_zero_or_pos x with h | h
+  · subst h; simp [Nat.toPNat']
+  · rw [PNat.toPNat'_coe h]; omega
+
+/-- **Lemma 3.3(2) — the coefficient bound.** For each level `l` there is a constant `K` with
+`C (g l n m) ≤ K·(n+m+1)` for all `n,m`. Induction on `l`: base `K=2` (`g₀_bound`); step takes
+`max (l+1) K`, since the new leading data (`l+1`, the coefficient `n-i ≤ n`) and the tail's bound
+`K·(f^[i] n + j + 1) ≤ K·(n+m+1)` (by `iter_add_blockOff_le`) are each `≤ max(l+1,K)·(n+m+1)`. -/
+theorem g_C_bound : ∀ l, ∃ K, ∀ n m, C (g l n m) ≤ K * (n + m + 1) := by
+  intro l
+  induction l with
+  | zero => exact ⟨2, fun n m => g0_bound n m⟩
+  | succ l ih =>
+    obtain ⟨K, hK⟩ := ih
+    refine ⟨max (l + 1) K, fun n m => ?_⟩
+    set M := max (l + 1) K with hM
+    have hW : 1 ≤ n + m + 1 := by omega
+    have hMpos : 1 ≤ M := by rw [hM]; omega
+    by_cases h : m < F (l + 1) n
+    · rw [g_succ_of_lt h, C_blk]
+      -- the three pieces, each ≤ M*(n+m+1)
+      have hA : l + 1 ≤ M * (n + m + 1) :=
+        le_trans (le_max_left _ _) (Nat.le_mul_of_pos_right M hW)
+      have hB : ((n - blockIdx (F l) n m).toPNat' : ℕ) ≤ M * (n + m + 1) := by
+        have h1 : ((n - blockIdx (F l) n m).toPNat' : ℕ) ≤ n + m + 1 :=
+          le_trans (toPNat'_le_succ _) (by omega)
+        exact le_trans h1 (Nat.le_mul_of_pos_left _ hMpos)
+      have hC : C (g l ((F l)^[blockIdx (F l) n m] n) (blockOff (F l) n m)) ≤ M * (n + m + 1) := by
+        have hbnd := hK ((F l)^[blockIdx (F l) n m] n) (blockOff (F l) n m)
+        have hle := iter_add_blockOff_le l n m
+        calc C (g l ((F l)^[blockIdx (F l) n m] n) (blockOff (F l) n m))
+            ≤ K * ((F l)^[blockIdx (F l) n m] n + blockOff (F l) n m + 1) := hbnd
+          _ ≤ K * (n + m + 1) := Nat.mul_le_mul_left _ (by omega)
+          _ ≤ M * (n + m + 1) := Nat.mul_le_mul_right _ (le_max_right _ _)
+      omega
+    · rw [g_succ_of_ge h, C_zero]; exact Nat.zero_le _
+
 /-- **Lemma 3.3(1) — descent.** `g l n (m+1) ≺ g l n m` whenever `m < F l n`. Base: `g₀_desc`.
 Step (`l+1`): decompose `m`'s block `i, j`; the increment `m ↦ m+1` either stays in block `i`
 (`blockOff` becomes `j+1`, descent by the IH via `repr_blk_within`) or crosses into block `i+1`
