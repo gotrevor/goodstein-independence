@@ -136,4 +136,19 @@ theorem salpha_C_le
       _ ≤ Kg * (j + 1) := by gcongr; exact hnm j
       _ ≤ max (Cβ + (l + 1)) Kg * (j + 1) := by gcongr; exact le_max_right _ _
 
+/-- **Discharge the clean-append `habove` family from a per-`igt` top-exponent bound.** The 3-arg
+`habove` hypothesis of `salpha_*` is exactly the statement that every `igt n m` is clean below every
+lead `ω^(l+1)·β_{blk a}`, which holds iff `igt n m < ω^(l+1)` — i.e. its top exponent is either `0`
+(a finite code) or a finite code `j ≤ l`. This is the defining property of Rathjen's `g` (Lemma 3.3:
+`|g l n m| < ω^(l+1)`), so the real `ig` recursion supplies `higt_exp` directly; here we route it
+through the existing `iAbove_ocExp_iVbigMul_fin`/`_inf`. -/
+theorem habove_of_igt_exp (hl : 0 < l)
+    (hβ0 : ∀ n, β n ≠ 0) (hβNF : ∀ n, isNF (β n))
+    (higt_exp : ∀ n m, ocExp (igt n m) = 0 ∨ ∃ j, j ≤ l ∧ ocExp (igt n m) = ocOadd 0 j 0) :
+    ∀ n m a, iAbove (ocExp (igt n m)) (iVbigMul (β (blk a)) (l + 1)) := by
+  intro n m a
+  rcases higt_exp n m with h0 | ⟨j, hjl, hj⟩
+  · exact iAbove_ocExp_iVbigMul_fin (hβ0 (blk a)) l h0
+  · exact iAbove_ocExp_iVbigMul_inf (hβNF (blk a)) (hβ0 (blk a)) hl hjl hj
+
 end GoodsteinPA.StdCor34

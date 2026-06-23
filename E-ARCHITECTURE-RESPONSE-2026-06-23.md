@@ -323,3 +323,62 @@ theorem goodstein_implies_prwo (seq : Semisentence Lor 2) :
    task is not full internal Ackermann. It is a fixed-level Cor 3.4 consumer theorem for one represented
    primrec descent, plus a corrected crux-2 interface that applies `prwoInstance` only to that represented
    descent.
+
+## Addendum - after lap 51
+
+Update after reading HEAD `fb0edef` (`feat(lap 51): wip/StdCor34 - internal global Cor 3.4 assembly
+(green)`):
+
+Lap 51 did the right next thing. `wip/StdCor34.lean` now proves the global standard-level Cor 3.4 assembly
+over explicit abstract hypotheses:
+
+- `salpha_isNF`
+- `salpha_desc`
+- `salpha_C_le`
+
+Together with `isNF_icorAlpha` in `src/InternalCor34.lean`, the `icorAlpha` brick set is now NF/descent/
+C-bound complete. The remaining risk has moved from "can the global assembly be made to typecheck?" to
+"are the remaining interface hypotheses exactly the right ones, and are they discharged in the right layer?"
+
+Explicit feedback for box / watcher:
+
+1. **Update stale docs immediately.** `HANDOFF.md` still says HEAD `8119a3e`, `src/` untouched, and "start
+   `wip/StdCor34.lean`" as next action. HEAD is now `fb0edef`, `src/InternalCor34.lean` was touched, and
+   `wip/StdCor34.lean` exists. `STATUS.md` top is also still lap-50/`1ef8e1e`. `PENDING_WORK.md` is the
+   current source of truth.
+
+2. **Do block bookkeeping first, and include all its consumers.** `PENDING_WORK.md` lists `blk/off`
+   dichotomy and `blk j + off j <= j`, but `salpha_C_le` also needs:
+
+```lean
+hbetaC : forall j, iC (beta (blk j)) <= Cbeta + j
+```
+
+   In the Nat template this came from `C_le_wsum_corW` plus `wsum_corBlk_le`, not from descent itself.
+   Make it an explicit deliverable of the internal `iwsum`/`iwidx`/`iwoff` bookkeeping brick.
+
+3. **Pin the "standard level" in the eventual consumer.** `StdCor34.salpha` is generic in `l : V` because it
+   reuses `icorAlpha`/`iVbigMul`; that is fine as an abstract theorem. The real headline instance should
+   visibly specialize `l` to the cast of a fixed meta-level `l0 : Nat`, supplied by Lemma 3.2 for the
+   concrete Gentzen descent. Do not let a theorem with free `l : V` drift back into the internal-Ackermann
+   obligation.
+
+4. **Track the nonzero/clean side conditions for beta.** To discharge `habove`, the future `igt` proof will
+   likely use "tail below `omega^(l+1)`" plus nonzero/NF of the lead `beta (blk a)`. The current abstract
+   theorem hides this inside:
+
+```lean
+habove : forall n m a, iAbove (ocExp (igt n m)) (iVbigMul (beta (blk a)) (l + 1))
+```
+
+   When implementing `igt`, expose and prove the source facts once rather than re-solving them at every
+   `habove` call.
+
+5. **Do not wire into `wip/GentzenCon`'s broad `goodstein_implies_prwo` yet.** The lap-50 warning still
+   stands: `goodstein_implies_prwo (seq)` is too broad for arbitrary `seq`. Once `StdCor34` is connected to
+   Thm 3.5/Lemma 3.6, apply it to a represented fixed primrec graph, especially `gentzenDescentphi`, or use
+   a record carrying totality/functionality/primrec/standard-domination data.
+
+6. **Best next chip:** implement the internal `corW/wsum/blk/off` bookkeeping as a small wip module that
+   proves exactly the hypotheses consumed by `salpha_desc` and `salpha_C_le`. This is more mechanical than
+   `igt`, and it will harden the interface before the deeper standard-level `g` recursion starts.
