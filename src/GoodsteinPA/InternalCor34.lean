@@ -600,6 +600,22 @@ lemma iAbove_ibigMul_iter {β : V} (hβNF : isNF β) (hβ0 : β ≠ 0) (k : ℕ)
     rw [Function.iterate_succ_apply', ibigMul_succ]
     exact iAbove_iomul (isNF_oadd1iter k) _ (isNF_ibigMul (k + 1) hβNF) ih
 
+/-- **Cast identity for the `MinExpGe` threshold iterate.** For `k ≥ 1` the iterated `1+·` collapses
+to the finite code `ocOadd 0 (k:V) 0`: each `1+·` step bumps a finite head coefficient by one
+(`iadd_one_fin`), the base `k=1` is `iadd_one_zero`. Bridges `iAbove_ibigMul_iter`'s threshold
+`(1+·)^[k] 0` to the `ocOadd 0 (l:V) 0` finite-code shape that `iAbove_finThresh_mono` consumes. -/
+lemma oadd1iter_eq_succ (k : ℕ) :
+    (iadd (ocOadd 0 1 0))^[k + 1] (0 : V) = ocOadd 0 ((k : V) + 1) 0 := by
+  induction k with
+  | zero => simp only [zero_add, Function.iterate_one, iadd_one_zero, Nat.cast_zero]
+  | succ k ih =>
+    rw [Function.iterate_succ_apply', ih,
+        iadd_one_fin (ocOadd_ne_zero 0 ((k : V) + 1) 0) (ocExp_ocOadd 0 ((k : V) + 1) 0),
+        ocCoeff_ocOadd, ocTail_ocOadd]
+    congr 1
+    push_cast
+    rw [add_comm 1 ((k : V) + 1)]
+
 /-- **Finite-threshold weakening of `iAbove`** (spine-lifted `icmp_finThresh_mono`): dominance above
 the finite code `l` implies dominance above any smaller finite code `j ≤ l`. Used to bring the
 `MinExpGe` threshold down to `ocExp g` (a finite code `⪯ l`) when `g < ω^(l+1)`. -/

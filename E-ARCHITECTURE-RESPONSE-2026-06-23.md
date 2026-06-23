@@ -226,3 +226,45 @@ sequence". Otherwise Cor 3.4 may grow against a moving target.
    the Foundation burndown lands. Since older docs say this was anti-fraud-forbidden, add an explicit
    current policy statement: either "temporarily accepted as a disclosed upstream axiom" or "must be
    burned down before headline discharge". Do not let this stay implicit.
+
+## Addendum - after lap 48 close
+
+Update after reading HEAD `16bc690` (`docs(lap 48 close): HANDOFF - Cor 3.4 clean-append + MinExpGe chain
+complete`):
+
+No route change. Route A is still the live headline route, and lap 48 made real local progress: the
+clean-append comparison, `iC_iadd_clean`, `iAbove_iomul`, `iAbove_zero_iomul`,
+`iAbove_ibigMul_iter`, and `iAbove_finThresh_mono` are now in place. The next useful advice is about
+keeping the Cor 3.4 interface narrow enough that the next session does not bury the real obligation.
+
+Explicit feedback for box / watcher:
+
+1. **Freeze the clean-condition contract before abstract `ig`.** The next lemma should not just say
+   "`g < omega^(l+1)`" informally. State the exact consumer shape needed by `icorAlpha`: turn
+   `iAbove_ibigMul_iter` plus `iAbove_finThresh_mono` into a small lemma whose hypotheses expose
+   "the exponent of `g` is the finite code `j` with `j <= l`". Then `ig` only has to prove that finite
+   exponent bound, not rediscover the whole MinExpGe argument.
+
+2. **Keep abstract `ig` tiny.** A good first structure/interface should contain only the laws consumed by
+   `icorAlpha`: NF of `ig`, within-block descent, `iC` bound, finite-exponent/below-level bound, and the
+   block-width/domination hypothesis. Do not start by internalizing Ackermann or Lemma 3.2; prove Cor 3.4
+   relative to this interface first, then supply the interface from `V |= PA`.
+
+3. **The `IΣ1`/`PA` boundary is now important.** The clean-append and MinExpGe lemmas are correctly local
+   to `[V |= IΣ1]`. The existence/recursion of the internal Grzegorczyk hierarchy is the part that needs
+   `[V |= PA]`. Keep those assumptions separated so reusable ordinal-code algebra does not acquire PA
+   by accident.
+
+4. **Package Thm 3.5 before wiring it downstream.** `bbeta_desc_exists` exists, but there is still no
+   single `internal_thm35` theorem returning the `beta` sequence with NF, `iC beta r <= r+1`, and descent
+   in one package. This is a low-risk cleanup that will make the Cor 3.4 -> Thm 3.5 handoff much cleaner.
+
+5. **Docs are still slightly out of phase.** `HANDOFF.md` is semantically current but still names HEAD
+   `7b36ad1` while the live HEAD is `16bc690`; `STATUS.md` still says lap 47 / `c8ba8a6`; the top of
+   `PENDING_WORK.md` still has the pre-lap-48 "next" list even though the lap-48 append supersedes it.
+   `InternalThm35.lean` also still opens as if the prefix/cofinality work were pending. These are not math
+   blockers, but they are exactly the kind of stale text that can send a worker back into completed tasks.
+
+6. **The other girder is unchanged.** `PRWO(epsilon_0)` as a concrete `Sentence Lor` and Gentzen
+   `PRWO -> Con(PA)` remain the parallel crux. Even a stub with a precise docstring would reduce target
+   drift while `icorAlpha` is being assembled.
