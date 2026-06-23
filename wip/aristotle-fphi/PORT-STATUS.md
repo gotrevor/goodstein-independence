@@ -1,5 +1,21 @@
-# F-φ port status — v4.28 → v4.31 (lap 27)
+# F-φ port status — v4.28 → v4.31 — ✅ **COMPLETE (lap 28)**
 
+**DONE.** The port landed at `src/GoodsteinPA/ONoteComp.lean` (in the build, green, 1300 jobs). The
+`axiom rePred_ltPull_natCode` in `SeamDefinability.lean` is now a **theorem** chaining
+`GoodsteinPA.ONoteComp.rePred_ltPull_natCode`. `#print axioms Thm56.peano_not_proves_TI` =
+`[propext, Classical.choice, Quot.sound, ONoteComp.cmpStep_spec._native.native_decide.ax_1_5]` — the
+F-φ math axiom is GONE; only one 🟢 `native_decide` finite base-case witness remains. **F wall fully
+discharged.** This dir keeps the v4.28 reference (`ONoteComp.lean`, `ARISTOTLE_SUMMARY.md`).
+
+Lap-28 port fixes (over the lap-27 wip): `ordCode_cmp` (`not_lt`→`Nat.not_lt.mpr`); deleted 2 unused
+`getElem?_range_map` lemmas; **rewrote `computable_cmpStep`/`computable_nfTB`/`computable_nthNF` as
+direct combinator terms** (added `primrec_thenNat`/`primrec_cmpNat`/`primrec_cmpNV`); `of_eq` id-goals
+→ `exact` (defeq); added `import Mathlib.Tactic.Linarith`; **reproved `enc_strictMono`** structurally
+via `Nat.Subtype.ofNat` enumeration + `ofEquiv_ofNat` (the v4.31-drift item); replaced the heavy
+`nlinarith` index-bound in `cmpStep_spec` with `pair_lt_pair`+`omega`.
+
+---
+## Original goal (lap 27, now met)
 **Goal:** port Aristotle's verified proof of `rePred_ltPull_natCode` (`ONoteComp.lean`, proved on Lean
 `v4.28.0`) into our `v4.31.0` repo, then replace the `axiom rePred_ltPull_natCode` in
 `src/GoodsteinPA/SeamDefinability.lean` with it — making `Thm56.peano_not_proves_TI` fully axiom-clean.

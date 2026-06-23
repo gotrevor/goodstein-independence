@@ -10,6 +10,7 @@ seam needs the **binary** version: an `ℒₒᵣ`-formula defining the order rel
 -/
 import GoodsteinPA.EpsilonOrder
 import GoodsteinPA.Epsilon0Complete
+import GoodsteinPA.ONoteComp
 import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 namespace GoodsteinPA.SeamDefinability
@@ -45,14 +46,14 @@ the order `ltPull natCode` is r.e. — which is true (it is *decidable*: `NONote
 `cmp`, and `natCode` is computable, `Computable.ofNat`), but mathlib provides no `Computable`/`Primrec`
 instance for `ONote.cmp`. We disclose that single fact as an axiom and mark it the F-φ discharge target. -/
 
-/-- **DISCLOSED AXIOM (mathlib gap; the F-φ discharge target).** The order `natCode a < natCode b` on
-ℕ-codes is recursively enumerable. *True*: `NONote.cmp` makes `<` decidable (`linearOrderOfCompares`)
-and `natCode = Denumerable.ofNat NONote` is computable (`Computable.ofNat`), so the relation is in fact
-*computable*. The only missing piece is mathlib's lack of a `Computable`/`Primrec` proof that CNF
-comparison (`ONote.cmp`) is primitive recursive. Discharging this = formalizing computable CNF
-comparison (a bounded, Foundation-free recursion-framework lemma). -/
-axiom rePred_ltPull_natCode :
-    REPred fun v : List.Vector ℕ 2 ↦ natCode (v.get 0) < natCode (v.get 1)
+/-- **F-φ DISCHARGED (lap 28).** The order `natCode a < natCode b` on ℕ-codes is recursively
+enumerable (in fact computable). Formerly the lone disclosed math axiom on the Thm 5.6 route; now a
+machine-checked theorem — `GoodsteinPA.ONoteComp.rePred_ltPull_natCode` supplies the `Computable`
+proof of CNF comparison via a structural strong recursion (the piece mathlib lacks). Its only
+non-`[propext,choice,Quot.sound]` dependency is one 🟢 `native_decide` base-case witness. -/
+theorem rePred_ltPull_natCode :
+    REPred fun v : List.Vector ℕ 2 ↦ natCode (v.get 0) < natCode (v.get 1) :=
+  GoodsteinPA.ONoteComp.rePred_ltPull_natCode
 
 /-- The X-free `ℒₒᵣ`-`Semisentence` defining `natCode`'s order. -/
 noncomputable def precφ : Semisentence ℒₒᵣ 2 :=
