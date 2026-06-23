@@ -35,19 +35,28 @@ Durable overview = **`STATUS.md`** (refreshed this lap). The lone deep wall is u
    bridging it to `igoodstein` *inside a nonstandard `M ⊧ 𝗜𝚺₁`* needs provable code-correctness Foundation
    doesn't expose. Anti-fraud forbids axiomatizing it. Filed a sharp request (Foundation `Arithmetization`
    API? Hájek–Pudlák Σ₁-definitional-equivalence technique? non-epsilon `codeOf…` variant?).
+5. **`00b2e13` — `lx_succ_induction` (the X-essential induction tool for wall D, AXIOM-CLEAN).** Wall D's
+   bound `b k = T̂^{k+2}(βₖ)` is X-definable, so its non-termination induction runs over an LX-formula —
+   Foundation's `InductionScheme.succ_induction` (ℒₒᵣ-only) can't reach it. New in `DescentSemantic.lean`:
+   `models_inductionScheme_LX` (`M ⊧ paLX ⟹ M ⊧ InductionScheme LX univ`) + `lx_succ_induction` (ordinary
+   `0`/`+1` induction for any LX-formula-definable predicate on `M ⊧ paLX`, over `reductORing`'s ops).
+   `[propext, choice, Quot.sound]`. GOTCHA banked in the commit msg (install `Structure.Zero/One/Add LX M`
+   read-offs, unfold succInd with the listed simp set).
 
-## NEXT — attack wall C+D (independent of the B literature gate)
+## NEXT — wall C (the descent construction feeding `lx_succ_induction`)
 Prove `no_min_descent_absurd_of_goodstein`'s `hCD` (`DescentSemantic.lean`), i.e.
-`∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k`, from `no_min`/`ha₀`. This is independent of wall B and not
-literature-gated. Sub-pieces (substrate built laps 26–32):
-- **C — M-internal `Mlt`-descent.** From `no_min` + `ha₀`, build a *definable* descending `G : M → M` (or
-  the `β`-sequence directly) via `M`'s LX least-number principle (`reduct_models_isigma1`/`InductionScheme
-  LX`; `MX`/`¬MX` is the LX-atomic `Xsym`, so least-number applies). M-internal, NOT `choice` — see
-  `PENDING_WORK.md` ⚠.
-- **D — slow-down + dominating bound.** Slow `(G k)` ⟹ `(βₖ)`, `C(βₖ) ≤ k+1`; set `b k = T̂^{k+2}(βₖ)` as a
-  `𝚺₁`-function in `M`; discharge `(base, step, hpos)` for `igoodstein_nonterminating_of_dominating`
-  (`step` = internal `DescentCore.ineq6_step`). Kernel: `DescentCore.lemma36_nonterminating`/`lemma36_ineq6`
-  (route-neutral ONote/ℕ) — port to internal-M.
+`∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k`, from `no_min`/`ha₀`. Independent of wall B, not literature-gated.
+The wall-D induction tool is now IN HAND (`lx_succ_induction`); what remains:
+- **C — M-internal `Mlt`-descent (next).** From `no_min` + `ha₀`, build a *definable* descending
+  `G : M → M` (or the `β`-sequence directly) via `M`'s LX least-number principle. Note `MX`/`¬MX` is the
+  LX-atomic `Xsym` (so an LX-formula), and `lx_succ_induction` now gives the recursion/induction substrate.
+  M-internal, NOT `choice` — see `PENDING_WORK.md` ⚠. **Sub-step:** an LX *least-number* companion to
+  `lx_succ_induction` (from `M ⊧ InductionScheme LX`, derive the least-number principle for LX-predicates;
+  Foundation's `Arithmetic.leastNumber`/`orderInd` are the ℒₒᵣ analogs — port via the same recipe).
+- **D — slow-down + dominating bound.** Slow `(G k)` ⟹ `(βₖ)`, `C(βₖ) ≤ k+1`; set `b k = T̂^{k+2}(βₖ)`;
+  discharge `(base, step, hpos)` then run the induction. The induction is `lx_succ_induction` (X-bound), NOT
+  the ℒₒᵣ `igoodstein_nonterminating_of_dominating` (that wants a 𝚺₁ bound). Kernel:
+  `DescentCore.lemma36_nonterminating`/`ineq6_step` (route-neutral ONote/ℕ) — port to internal-M.
 
 Meanwhile **probe Foundation's `Arithmetization`/`ISigma1.Metamath` library** for any model-internal
 `codeOfREPred` correctness (wall B), in case the offline-request answer is already on disk.
