@@ -202,39 +202,47 @@ instance wsumc_definable' (Γ) : Γ-[m + 1]-Function₂ (wsumc : V → V → V) 
 
 /-- **Offset stays below the current block width** (under positive widths). The within-block invariant
 that makes a boundary fire exactly at `off = width - 1`. -/
-theorem off_lt_width (wseq : V) (hpos : ∀ b, 1 ≤ znth wseq b) :
-    ∀ j, off wseq j < znth wseq (blk wseq j) := by
+-- Positivity is needed only on the **prefix** `[0, j]` (the indices `blk`/`off` actually read), so a
+-- *finite* width code (`znth = 0` past its length) still works once it covers `[0, j]`.
+theorem off_lt_width (wseq : V) :
+    ∀ j, (∀ b, b ≤ j → 1 ≤ znth wseq b) → off wseq j < znth wseq (blk wseq j) := by
   intro j
   induction j using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simpa using lt_of_lt_of_le _root_.zero_lt_one (hpos 0)
+  case zero => intro hpos; simpa using lt_of_lt_of_le _root_.zero_lt_one (hpos 0 (le_refl _))
   case succ j ih =>
+    intro hpos
     by_cases h : off wseq j + 1 < znth wseq (blk wseq j)
     · obtain ⟨hb, ho⟩ := blk_off_within wseq j h; rw [hb, ho]; exact h
     · obtain ⟨hb, ho⟩ := blk_off_boundary wseq j (not_lt.mp h)
-      rw [hb, ho]; exact lt_of_lt_of_le _root_.zero_lt_one (hpos _)
+      rw [hb, ho]
+      refine lt_of_lt_of_le _root_.zero_lt_one (hpos (blk wseq j + 1) ?_)
+      have := blk_le wseq j; gcongr
 
-/-- **The elapsed-width identity** (under positive widths): `wsumc (blk j) + off j = j`. The total
-steps `j` is exactly the cumulative width of completed blocks plus the current in-block offset. -/
-theorem wsumc_blk_add_off (wseq : V) (hpos : ∀ b, 1 ≤ znth wseq b) :
-    ∀ j, wsumc wseq (blk wseq j) + off wseq j = j := by
+/-- **The elapsed-width identity** (under prefix-positive widths): `wsumc (blk j) + off j = j`. The
+total steps `j` is exactly the cumulative width of completed blocks plus the current in-block offset. -/
+theorem wsumc_blk_add_off (wseq : V) :
+    ∀ j, (∀ b, b ≤ j → 1 ≤ znth wseq b) → wsumc wseq (blk wseq j) + off wseq j = j := by
   intro j
   induction j using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp
+  case zero => intro _; simp
   case succ j ih =>
+    intro hpos
+    have hpos_j : ∀ b, b ≤ j → 1 ≤ znth wseq b := fun b hb => hpos b (le_trans hb le_self_add)
     by_cases h : off wseq j + 1 < znth wseq (blk wseq j)
     · obtain ⟨hb, ho⟩ := blk_off_within wseq j h
-      rw [hb, ho, ← add_assoc, ih]
+      rw [hb, ho, ← add_assoc, ih hpos_j]
     · obtain ⟨hb, ho⟩ := blk_off_boundary wseq j (not_lt.mp h)
       have hw : znth wseq (blk wseq j) = off wseq j + 1 :=
-        le_antisymm (not_lt.mp h) (lt_iff_succ_le.mp (off_lt_width wseq hpos j))
-      rw [hb, ho, add_zero, wsumc_succ, hw, ← add_assoc, ih]
+        le_antisymm (not_lt.mp h) (lt_iff_succ_le.mp (off_lt_width wseq j hpos_j))
+      rw [hb, ho, add_zero, wsumc_succ, hw, ← add_assoc, ih hpos_j]
 
 /-- **`wsumc (blk j) ≤ j`** — the elapsed-*width* bound `StdCor34.salpha_C_le`'s `hβC` consumes on the
 width/block route (the honest replacement for the over-claimed `blk_le`). -/
-theorem wsumc_blk_le (wseq : V) (hpos : ∀ b, 1 ≤ znth wseq b) (j : V) : wsumc wseq (blk wseq j) ≤ j :=
-  le_trans le_self_add (le_of_eq (wsumc_blk_add_off wseq hpos j))
+theorem wsumc_blk_le (wseq j : V) (hpos : ∀ b, b ≤ j → 1 ≤ znth wseq b) :
+    wsumc wseq (blk wseq j) ≤ j :=
+  le_trans le_self_add (le_of_eq (wsumc_blk_add_off wseq j hpos))
 
 /-! ## Prefix-invariance (the `wseq` seam, codex review lap 52)
 

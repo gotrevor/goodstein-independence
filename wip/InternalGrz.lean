@@ -121,4 +121,62 @@ theorem wsumc_iwseq {n N : V} : ∀ i ≤ N,
     have hi_lt : i < N := lt_of_lt_of_le (lt_add_one i) hiN
     rw [BlkRec.wsumc_succ, ih hi_le, znth_iwseq (hf := hf) i hi_lt, ipsum_succ]
 
+/-! ## Positivity of the iterates (so the block widths are positive)
+
+For `f` that preserves positivity (`1 ≤ x → 1 ≤ f x`, e.g. every `iF l` for `l ≥ 0`) and `1 ≤ n`,
+every iterate `f^[c] n ≥ 1`, hence every block width `f^[i+1] n ≥ 1`. -/
+
+theorem iIter_pos {n : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x → 1 ≤ f x) :
+    ∀ c, 1 ≤ iIter fDef f hf n c := by
+  intro c
+  induction c using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using hn
+  case succ c ih => rw [IIter.iIter_succ]; exact hfpos _ ih
+
+/-- Each block width `znth (iwseq f n N) b = f^[b+1] n` is `≥ 1` on the code's prefix. -/
+theorem one_le_znth_iwseq {n N : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x → 1 ≤ f x) :
+    ∀ b, b < N → 1 ≤ znth (iwseq fDef f hf n N) b := by
+  intro b hb
+  rw [znth_iwseq (hf := hf) b hb]
+  exact iIter_pos (hf := hf) hn hfpos (b + 1)
+
+/-! ## The block decomposition `m ↦ (iblockIdx, iblockOff)` via `BlkRec` -/
+
+/-- Block index of `m` for the width hierarchy `f^[·+1] n` (`= Grz.blockIdx (F l) n m`). -/
+noncomputable def iblockIdx (fDef : 𝚺₁.Semisentence 2) (f : V → V)
+    (hf : 𝚺₁.DefinedFunction₁ f fDef) (n m : V) : V := BlkRec.blk (iwseq fDef f hf n (m + 1)) m
+
+/-- Within-block offset of `m` (`= Grz.blockOff (F l) n m`). -/
+noncomputable def iblockOff (fDef : 𝚺₁.Semisentence 2) (f : V → V)
+    (hf : 𝚺₁.DefinedFunction₁ f fDef) (n m : V) : V := BlkRec.off (iwseq fDef f hf n (m + 1)) m
+
+/-- `iblockIdx ≤ m`. -/
+theorem iblockIdx_le (n m : V) : iblockIdx fDef f hf n m ≤ m := BlkRec.blk_le _ m
+
+/-- Prefix-positivity of the width code `iwseq f n (m+1)` on `[0, m]` (its live indices). -/
+private theorem hpos_prefix {n m : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x → 1 ≤ f x) :
+    ∀ b, b ≤ m → 1 ≤ znth (iwseq fDef f hf n (m + 1)) b := fun b hb =>
+  one_le_znth_iwseq (hf := hf) hn hfpos b (lt_of_le_of_lt hb (lt_add_one m))
+
+/-- **The decomposition law** `m = ipsum f n (iblockIdx) + iblockOff` (`Grz.psum_add_blockOff`,
+internalised): the `BlkRec` elapsed-width identity transported through the `wsumc = ipsum` bridge. -/
+theorem ipsum_iblockIdx_add_iblockOff {n m : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x → 1 ≤ f x) :
+    ipsum fDef f hf n (iblockIdx fDef f hf n m) + iblockOff fDef f hf n m = m := by
+  have hbridge : BlkRec.wsumc (iwseq fDef f hf n (m + 1)) (iblockIdx fDef f hf n m)
+      = ipsum fDef f hf n (iblockIdx fDef f hf n m) :=
+    wsumc_iwseq (hf := hf) _ (le_trans (iblockIdx_le n m) le_self_add)
+  rw [← hbridge, iblockIdx, iblockOff]
+  exact BlkRec.wsumc_blk_add_off _ m (hpos_prefix (hf := hf) hn hfpos)
+
+/-- **The offset is below its block width** `iblockOff < f^[iblockIdx + 1] n` (`Grz.blockOff_lt_width`,
+internalised). -/
+theorem iblockOff_lt_width {n m : V} (hn : 1 ≤ n) (hfpos : ∀ x, 1 ≤ x → 1 ≤ f x) :
+    iblockOff fDef f hf n m < iIter fDef f hf n (iblockIdx fDef f hf n m + 1) := by
+  have hlt := BlkRec.off_lt_width (iwseq fDef f hf n (m + 1)) m
+    (hpos_prefix (hf := hf) hn hfpos)
+  rwa [← iblockIdx, ← iblockOff,
+    znth_iwseq (hf := hf) (iblockIdx fDef f hf n m)
+      (lt_of_le_of_lt (iblockIdx_le n m) (lt_add_one m))] at hlt
+
 end GoodsteinPA.InternalGrz
