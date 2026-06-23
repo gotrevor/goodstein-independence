@@ -62,6 +62,9 @@ theorem isPrincipal_add_epsilon0 : Ordinal.IsPrincipal (· + ·) (ε₀ : Ordina
 theorem add_lt_epsilon0 {a b : Ordinal.{0}} (ha : a < ε₀) (hb : b < ε₀) : a + b < ε₀ :=
   isPrincipal_add_epsilon0 ha hb
 
+/-- `0 < ε₀`. -/
+theorem zero_lt_epsilon0 : (0 : Ordinal.{0}) < ε₀ := Ordinal.epsilon_pos 0
+
 /-- `↑(max a b) = max ↑a ↑b` in `Ordinal`. -/
 private theorem natCast_max (a b : ℕ) : ((max a b : ℕ) : Ordinal.{0}) = max (a : Ordinal) b :=
   Nat.mono_cast.map_max
@@ -537,6 +540,34 @@ theorem exI_closed_bdd {c : ℕ} {Γ : Seq LX}
     PXFcFin.cut (ψ/[s]) hcc ⟨N, h₁⟩ ⟨2 * ψ.complexity, h₂.mono le_rfl (Nat.zero_le c')⟩
   exact PXFcFin.exI ψ m hcut
 
+/-- `< ε₀`-preserving closed-term ∃-introduction (explicit ordinal): from a derivation at *any*
+height `α` of `ψ/[s]`, conclude `∃⁰ ψ` at `max α ↑(2·complexity) + 1 + 1` (collapse `s` to its
+numeral value via the value-congruent EM `provable_em_cong_gen_x_bdd` + a cut, then numeral `exI`). -/
+theorem exI_closed_lt {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
+    (ψ : SyntacticSemiformula LX 1) (s : SyntacticTerm LX)
+    (h : PXFc α c (insert (ψ/[s]) Γ)) :
+    PXFc (max α ((2 * ψ.complexity : ℕ) : Ordinal) + 1 + 1) (max c (ψ.complexity + 1))
+      (insert (∃⁰ ψ) Γ) := by
+  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set c' : ℕ := max c (ψ.complexity + 1) with hc'
+  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
+             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
+  have h₁ : PXFc α c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
+    (h.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
+      (le_max_left _ _)
+  have h₂ := provable_em_cong_gen_x_bdd ψ.complexity ![nm m] ![s] ψ le_rfl
+    (by intro i; cases i using Fin.cases with
+        | zero => simpa using hsval
+        | succ j => exact j.elim0)
+    (Γ := insert (∼(ψ/[s])) (insert (ψ/[nm m]) Γ))
+    (by show (Rew.subst ![nm m] ▹ ψ) ∈ _; simp)
+    (by show (∼(Rew.subst ![s] ▹ ψ)) ∈ _; simp)
+  have hcc : (((ψ/[s]).complexity : ℕ) + 1 : ℕ∞) ≤ (c' : ℕ∞) := by
+    have : (ψ/[s]).complexity = ψ.complexity := by simp
+    rw [this]; exact_mod_cast le_max_right _ _
+  have hcut := PXFc.cut (ψ/[s]) hcc h₁ (h₂.mono le_rfl (Nat.zero_le c'))
+  exact PXFc.exI ψ m hcut
+
 /-! ## The cut-tower: `metaInduction_cong_bdd` — height `< ε₀` (the single transfinite jump)
 
 The chain `{ψ(n)}ₙ` of cuts is built at **finite** height per `n` (each step adds finitely-many
@@ -711,5 +742,146 @@ theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema L
       have h3 := PXFc.orI (∼ψv/[nm 0]) ((∃⁰ ∼step) ⋎ (∀⁰ ψv/[(#0:Semiterm LX ℕ 1)]))
         (h2.weakening (by intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto))
       exact h3
+
+/-! ## `embedC_LX_gen_bdd` — the structural embedding with a uniform-over-`e` bound `< ε₀`
+
+Mirrors `EmbeddingX.embedC_LX_gen`, but threads a single ordinal bound `B < ε₀` (determined by the
+derivation's structure, **independent of the closing assignment `e`**) and pushes every premise up to
+it via `mono`. Each structural rule bumps `B` by `+1`/`max+1`/`(⨆ const)+1`/`exI_closed_lt`, all of
+which preserve `< ε₀`. The only transfinite contribution comes through the axiom case (`hax_bdd`,
+discharged by the cut-tower `metaInduction_cong_bdd`). -/
+set_option maxHeartbeats 1600000 in
+theorem embedC_LX_gen_bdd {𝓢 : Schema LX}
+    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ 𝓢 → φ ∈ Γ →
+      ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
+        ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun ψ => asgX e ▹ ψ)))
+    {Γ : Seq LX} (d : Derivation2 𝓢 Γ) :
+    ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
+      ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun φ => asgX e ▹ φ)) := by
+  induction d with
+  | closed Γ φ hp hn =>
+    refine ⟨0, ((2 * φ.complexity : ℕ) : Ordinal), natCast_lt_epsilon0 _, fun e => ?_⟩
+    have hpm : (asgX e ▹ φ) ∈ Γ.image (fun ψ => asgX e ▹ ψ) := Finset.mem_image_of_mem _ hp
+    have hnm : ∼(asgX e ▹ φ) ∈ Γ.image (fun ψ => asgX e ▹ ψ) := by
+      have := Finset.mem_image_of_mem (fun ψ => asgX e ▹ ψ) hn; simpa using this
+    have hk : (asgX e ▹ φ).complexity = φ.complexity := by rw [Semiformula.complexity_rew]
+    exact provable_em_x_bdd φ.complexity (asgX e ▹ φ) (le_of_eq hk) hpm hnm
+  | axm φ hφ hΓ => exact hax φ hφ hΓ
+  | verum hΓ =>
+    refine ⟨0, 0, zero_lt_epsilon0, fun e => ?_⟩
+    exact PXFc.verumR (by have := Finset.mem_image_of_mem (fun ψ => asgX e ▹ ψ) hΓ; simpa using this)
+  | @and Γ φ ψ h _dp _dq ihp ihq =>
+    obtain ⟨c1, B1, hB1, ihp⟩ := ihp; obtain ⟨c2, B2, hB2, ihq⟩ := ihq
+    refine ⟨max c1 c2, max B1 B2 + 1, add_one_lt_epsilon0 (max_lt hB1 hB2), fun e => ?_⟩
+    have h1 := ihp e; have h2 := ihq e
+    rw [Finset.image_insert] at h1 h2
+    have h1' := h1.mono (le_refl B1) (le_max_left c1 c2)
+    have h2' := h2.mono (le_refl B2) (le_max_right c1 c2)
+    have hand := PXFc.andI (asgX e ▹ φ) (asgX e ▹ ψ) h1' h2'
+    have hmem : (asgX e ▹ φ ⋏ asgX e ▹ ψ) ∈ Γ.image (fun φ => asgX e ▹ φ) := by
+      have := Finset.mem_image_of_mem (fun φ => asgX e ▹ φ) h; simpa using this
+    rw [Finset.insert_eq_self.mpr hmem] at hand
+    exact hand
+  | @or Γ φ ψ h _d ih =>
+    obtain ⟨c, B, hB, ih⟩ := ih
+    refine ⟨c, B + 1, add_one_lt_epsilon0 hB, fun e => ?_⟩
+    have hd := ih e
+    rw [Finset.image_insert, Finset.image_insert] at hd
+    have hor := PXFc.orI (asgX e ▹ φ) (asgX e ▹ ψ) hd
+    have hmem : (asgX e ▹ φ ⋎ asgX e ▹ ψ) ∈ Γ.image (fun φ => asgX e ▹ φ) := by
+      have := Finset.mem_image_of_mem (fun φ => asgX e ▹ φ) h; simpa using this
+    rw [Finset.insert_eq_self.mpr hmem] at hor
+    exact hor
+  | @all Γ φ h _d ih =>
+    obtain ⟨c, B, hB, ih⟩ := ih
+    refine ⟨c, B + 1, add_one_lt_epsilon0 hB, fun e => ?_⟩
+    have hfam : ∀ n, PXFc B c
+        (insert (((asgX e).q ▹ φ)/[nm n]) (Γ.image (fun ψ => asgX e ▹ ψ))) := by
+      intro n
+      have hd := ih (n :>ₙ e)
+      rw [Finset.image_insert] at hd
+      have hA : asgX (n :>ₙ e) ▹ (Rewriting.free φ) = ((asgX e).q ▹ φ)/[nm n] := by
+        have hRew : (asgX (n :>ₙ e)).comp Rew.free = (Rew.subst ![nm n]).comp (asgX e).q := by
+          ext x
+          · refine Fin.cases ?_ (fun i => Fin.elim0 i) x
+            simp [asgX, Rew.comp_app]
+          · simp [asgX, Rew.comp_app]
+        show asgX (n :>ₙ e) ▹ (Rew.free ▹ φ) = Rew.subst ![nm n] ▹ ((asgX e).q ▹ φ)
+        rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, hRew]
+      have hB' : (Γ.image Rewriting.shift).image (fun ψ => asgX (n :>ₙ e) ▹ ψ)
+          = Γ.image (fun ψ => asgX e ▹ ψ) := by
+        have hcompB : (asgX (n :>ₙ e)).comp Rew.shift = asgX e := by
+          ext x
+          · exact Fin.elim0 x
+          · simp [asgX, Rew.comp_app]
+        rw [Finset.image_image]
+        refine Finset.image_congr (fun ψ _ => ?_)
+        show asgX (n :>ₙ e) ▹ (Rew.shift ▹ ψ) = asgX e ▹ ψ
+        rw [← TransitiveRewriting.comp_app, hcompB]
+      rw [hA, hB'] at hd
+      exact hd
+    have hall := PXFc.allω (β := fun _ => B) ((asgX e).q ▹ φ) hfam
+    rw [iSup_const_ord] at hall
+    have hmem : (asgX e ▹ (∀⁰ φ)) ∈ Γ.image (fun ψ => asgX e ▹ ψ) := Finset.mem_image_of_mem _ h
+    rw [show (asgX e ▹ (∀⁰ φ)) = ∀⁰ ((asgX e).q ▹ φ) by simp] at hmem
+    rw [Finset.insert_eq_self.mpr hmem] at hall
+    exact hall
+  | @exs Γ φ h t _d ih =>
+    obtain ⟨c, B, hB, ih⟩ := ih
+    refine ⟨max c (φ.complexity + 1),
+      max B ((2 * φ.complexity : ℕ) : Ordinal) + 1 + 1,
+      add_one_lt_epsilon0 (add_one_lt_epsilon0 (max_lt hB (natCast_lt_epsilon0 _))), fun e => ?_⟩
+    have hd := ih e
+    rw [Finset.image_insert, rew_subst_term (asgX e) φ t] at hd
+    have hβ := exI_closed_lt ((asgX e).q ▹ φ) (asgX e t) hd
+    have hcomp : (((asgX e).q ▹ φ).complexity) = (φ.complexity) := by simp
+    rw [hcomp] at hβ
+    have hmem : (asgX e ▹ (∃⁰ φ)) ∈ Γ.image (fun ψ => asgX e ▹ ψ) := Finset.mem_image_of_mem _ h
+    rw [show (asgX e ▹ (∃⁰ φ)) = ∃⁰ ((asgX e).q ▹ φ) by simp] at hmem
+    rw [Finset.insert_eq_self.mpr hmem] at hβ
+    exact hβ
+  | @wk Δ Γ _d h ih =>
+    obtain ⟨c, B, hB, ih⟩ := ih
+    refine ⟨c, B, hB, fun e => ?_⟩
+    exact (ih e).weakening (Finset.image_subset_image h)
+  | @shift Γ _d ih =>
+    obtain ⟨c, B, hB, ih⟩ := ih
+    refine ⟨c, B, hB, fun e => ?_⟩
+    have hcomp : (asgX e).comp Rew.shift = asgX (e ∘ Nat.succ) := by
+      ext x
+      · exact Fin.elim0 x
+      · simp [asgX, Rew.comp_app]
+    have key : (Γ.image Rewriting.shift).image (fun φ => asgX e ▹ φ)
+        = Γ.image (fun φ => asgX (e ∘ Nat.succ) ▹ φ) := by
+      rw [Finset.image_image]
+      refine Finset.image_congr (fun ψ _ => ?_)
+      show asgX e ▹ (Rew.shift ▹ ψ) = asgX (e ∘ Nat.succ) ▹ ψ
+      rw [← TransitiveRewriting.comp_app, hcomp]
+    rw [key]; exact ih (e ∘ Nat.succ)
+  | @cut Γ φ _d _dn ihd ihdn =>
+    obtain ⟨c1, B1, hB1, ihd⟩ := ihd; obtain ⟨c2, B2, hB2, ihdn⟩ := ihdn
+    refine ⟨max (φ.complexity + 1) (max c1 c2), max B1 B2 + 1,
+      add_one_lt_epsilon0 (max_lt hB1 hB2), fun e => ?_⟩
+    have h1 := ihd e; have h2 := ihdn e
+    rw [Finset.image_insert] at h1 h2
+    rw [show (asgX e ▹ (∼φ)) = ∼(asgX e ▹ φ) by simp] at h2
+    have h1' := h1.mono (le_refl B1)
+      (show c1 ≤ max (φ.complexity + 1) (max c1 c2) from
+        le_trans (le_max_left c1 c2) (le_max_right _ _))
+    have h2' := h2.mono (le_refl B2)
+      (show c2 ≤ max (φ.complexity + 1) (max c1 c2) from
+        le_trans (le_max_right c1 c2) (le_max_right _ _))
+    have hc : (((asgX e ▹ φ).complexity + 1 : ℕ) : ℕ∞)
+        ≤ ((max (φ.complexity + 1) (max c1 c2) : ℕ) : ℕ∞) := by
+      rw [Semiformula.complexity_rew]; exact_mod_cast Nat.le_max_left _ _
+    exact PXFc.cut (asgX e ▹ φ) hc h1' h2'
+
+/-- **D' fully assembled: `embedC_LX_bdd`.** The embedding of `paLX`-derivations into `PXFc`, with the
+embedded ordinal **uniformly `< ε₀`** (Gentzen's content). Specialises `embedC_LX_gen_bdd` to the
+concrete `paLX` axiom discharge `hax_paLX_bdd`. -/
+theorem embedC_LX_bdd {Γ : Seq LX} (d : Derivation2 (paLX : Schema LX) Γ) :
+    ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
+      ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun φ => asgX e ▹ φ)) :=
+  embedC_LX_gen_bdd hax_paLX_bdd d
 
 end GoodsteinPA.EmbeddingBound
