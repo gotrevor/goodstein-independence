@@ -370,6 +370,44 @@ theorem descent_step {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M
   letI oM : ORingStructure M := ReductModel.reductORing
   exact lx_least_number hM (descentQ_lxDef f a) (no_min a ha)
 
+/-! ### The descent step relation `descentR` — the LX-definable, functional selector to be iterated -/
+
+/-- **The canonical descent-step relation.** `descentR f a y` says `y` is the `<`-least element with
+`Mlt f y a ∧ ¬MX y` (the canonical `Mlt`-smaller non-`MX` successor of `a`). This is the *functional*
+relation the M-internal descent recursion iterates: `descent_step` gives its existence on `¬MX a`,
+`descentR_functional` its uniqueness, `descentR_lxDef` its `LX`-definability (so the iteration's
+existence formula is `LX` and `lx_succ_induction` applies). -/
+def descentR {M : Type} [Nonempty M] [Structure LX M] (f : ℕ → M) (a y : M) : Prop :=
+  letI : ORingStructure M := ReductModel.reductORing
+  (Mlt f y a ∧ ¬ MX y) ∧ ∀ z, z < y → ¬ (Mlt f z a ∧ ¬ MX z)
+
+/-- `descentR` **descends** and **preserves `¬MX`**: its witness is `Mlt`-below `a` and itself non-`MX`. -/
+theorem descentR_descends {M : Type} [Nonempty M] [Structure LX M]
+    (f : ℕ → M) {a y : M} (h : descentR f a y) : Mlt f y a ∧ ¬ MX y := h.1
+
+/-- `descentR` **exists** on the `¬MX` domain (this is exactly `descent_step`). -/
+theorem descentR_exists {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) (f : ℕ → M)
+    (no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y) {a : M} (ha : ¬ MX a) :
+    ∃ y, descentR f a y :=
+  descent_step hM f no_min ha
+
+/-- **`descentR f a` is `LX`-definable** (in `y`, parametrized by `a`). Conjunction of the step
+predicate `Q y := Mlt f y a ∧ ¬MX y` (`descentQ_lxDef`) with its bounded-`∀` minimality
+`∀ z < y, ¬Q z` (`lxDef_ballLT` of `∼Q`). The formula `lx_succ_induction` consumes in the iteration. -/
+theorem descentR_lxDef {M : Type} [Nonempty M] [Structure LX M] (f : ℕ → M) (a : M) :
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ y, descentR f a y ↔ Semiformula.Evalm M ![y] e φ := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  -- `∼Q` is `LX`-definable from `descentQ_lxDef`.
+  have hnotQ : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+      ∀ y, (¬ (Mlt f y a ∧ ¬ MX y)) ↔ Semiformula.Evalm M ![y] e φ := by
+    obtain ⟨e, φ, hφ⟩ := descentQ_lxDef f a
+    exact ⟨e, ∼φ, fun y => by rw [LogicalConnective.HomClass.map_neg]; exact not_congr (hφ y)⟩
+  -- the minimality `∀ z < y, ∼Q z` is `LX`-definable by `lxDef_ballLT`.
+  have hmin := lxDef_ballLT hnotQ
+  -- conjoin with `Q` itself.
+  exact lxDef_and (descentQ_lxDef f a) hmin
+
 /-! ### Wall C+D bridge — slowed code-descent ⟹ non-terminating run (the `hbound` payoff, X-essential) -/
 
 /-- **The seam payoff: a slowed `X`-definable code-descent gives a non-terminating internal run.**
