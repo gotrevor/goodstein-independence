@@ -6,8 +6,8 @@ Gödel II.** The §3 internal pipeline = internal Cor 3.4 (Grzegorczyk `g`-paddi
 open) → internal Thm 3.5 (slow α → tight `C(βᵣ)≤r+1` — **COMPLETE lap 47**, `InternalThm35`) → Lemma 3.6
 (`nonterminating_internal`, done). The Buchholz free-X `peano_not_proves_TI` (axiom-clean) is a **banked
 asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). · **Build**: 🟢 green (1311 jobs,
-`lake build GoodsteinPA`) · **Updated**: lap 47 (REVIEW — ω-tower cofinality lands ⟹ internal Thm 3.5
-hypothesis-free; STATUS re-framed onto Route A) · 2026-06-23 · `c8ba8a6`
+`lake build GoodsteinPA`) · **Updated**: lap 50 (REVIEW — crux-2 scaffold grounded; PRWO formulation
+built + faithfulness-certified in `wip/GentzenCon.lean`) · 2026-06-23 · `1ef8e1e`
 
 ## ⭐ Lap-44 (DEEP REFLECTION) — kernel re-verified, slow-down re-grounded; the wall's `sorry` is framed on a DEAD path
 **Direction: KEEP** (Buchholz §5 girder DONE+axiom-clean; E = one semantic wall = Rathjen §3 slow-down in `M`).
@@ -338,6 +338,20 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-23 (lap 50 — REVIEW + crux-2 PRWO formulation built & faithfulness-certified):** Fresh-mind
+  pass. Validated direction (Route A, KEEP) against the real kernel (headline honest `sorry`, 0 math
+  axioms, 1311 jobs). Confirmed crux-1 step-3 (internal `ig` f-recursion → internal Grzegorczyk `F`,
+  Ackermann) is **blocked on infra Foundation lacks** ⟹ followed the lap-49 handoff's recommendation and
+  advanced the *unblocked* **crux 2** (Gentzen `PRWO→Con`). Mapped Foundation's substrate (Explore):
+  **NO universal evaluator / Kleene-T** ⟹ PRWO must be a **per-formula schema** (memory
+  `crux2-prwo-schema-no-universal-evaluator`). Built `wip/GentzenCon.lean` (type-checks, 2 disclosed
+  crux sorries): **`prwoInstance seq := “¬∀ n y z, (!seq y n ∧ !seq z (n+1)) → !precφ z y”`** — reuses the
+  existing ε₀-ordering formula `SeamDefinability.precφ` (no `isNF` needed; `natCode` bijects onto all CNF).
+  **`prwoInstance_faithful` PROVED** (std-model ↔ meta-PRWO; axioms = trust base + 1 🟢 F-φ native_decide —
+  the formulation is kernel-certified faithful). Also proved `gentzenDescent_descends`/`derivesEmpty_iterate`
+  + the assembly `goodstein_implies_consistency_via_gentzen` (crux1∘crux2 = the `Reduction.lean` interface,
+  types validated). Deep cores left as cited sorries: `ord`/`R`/eq-(5) (Buchholz [6]) — Foundation's
+  Hauptsatz is meta-level only, no shortcut. `src/` untouched (anti-fraud); build green 1311 jobs.
 - **2026-06-23 (lap 47 — REVIEW + internal Thm 3.5 COMPLETED):** Validated the lap-46 route resolution
   against the real kernel (headline honest `sorry`, 0 math axioms; `peano_not_proves_TI` clean; Gödel-II
   surface carries `PA_delta1Definable`). Direction **KEEP** (Route A = Rathjen Cor 3.7). Landed the one
@@ -432,29 +446,7 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
   (`peano_not_proves_goodstein_of_descent`). **Caught a real gap the handoff missed: D'** (embedded
   ordinal `< ε₀`), now isolated as the disclosed `embed_TI_bounded` `sorry`. Build green 1270 jobs;
   headline still `sorry` (anti-fraud). F-φ Aristotle job `aris_onotecmp` still RUNNING. Walls: E + F-φ + D'.
-- **2026-06-22 (lap 18 — DEEP REFLECTION: F seam grounded vs an outside attack plan; STATUS refreshed
-  through lap 17):** Took altitude. Confirmed (real `#print axioms`) that the *entire machine from D back
-  is axiom-clean* — only `hax_paLX` (C₂ glue), the locked headline, and off-path Route-A carry `sorry`.
-  **Evaluated an external (GPT-5.5) attack plan for F** (arithmetization seam) against the real repo +
-  mathlib. Verdict: seam-abstraction + `hprec`-as-definability + `codeOfREPred₂` are sound (all verified
-  against `Boundedness.lean:699`, `TruthSem.lean:120`, `Foundation/.../Representation.lean:233`), but the
-  plan **under-scopes the order-type half**: `rank o = repr o` ⟺ **ε₀-completeness of CNF notations**,
-  which **mathlib does NOT have** (`Notation.lean` proves only the order-embedding `NONote↪ε₀`, not
-  surjectivity). That completeness lemma is the real F girder (~1–3 laps, mathlib-only ⟹ **Aristotle-
-  eligible**). Also: the plan's order-choice ignores that **E pins which `≺` F may use** (co-design), and
-  the Goodstein base-2 coding (`toONote 2·`/`seqONote`) is the WRONG order (pullback order type ω, not ε₀).
-  Full corrected F attack-plan in `PENDING_WORK.md` top. Direction (Buchholz Boundedness route) reaffirmed.
-- **2026-06-22 (lap 17 — C₁/D made AXIOM-CLEAN; the X-induction crux SOLVED):** Cleared the lap-16
-  `atomCut_x` disclosed `sorry` via **`PXFc.nrel_value_subst`** (value-congruent negative-literal
-  renaming; matched-`axLv`-leaf `r₀=r` extraction by `injection` on the nrel eq + oriented `subst`) ⟹
-  **`XFreeCutElim.lean` sorry-free; C₁ `cutElim` + D `orderType_le_of_TIprovable` now
-  `[propext,choice,Quot.sound]`**. Discharged the **`hax_paLX` base case** (X-free `𝗣𝗔⁻`-image axioms via
-  `provable_true_x`). **Solved the X-induction crux conceptually + proved its 4 structural lemmas**
-  (`subst_value_subst`, `metaInduction_cong`, `succInd_nnf`, `PXFc_allClosure`): Foundation's `succInd`
-  successor `#0+1` substitutes to `nm n+1`, value-equal but NOT syntactically the numeral `nm(n+1)`
-  `metaInduction` demanded — no syntactic `step'` can satisfy the old `hstep`; resolved by the
-  value-congruent reformulation. Only the `hax_paLX` induction *assembly* (integration glue, recipe
-  inlined at the sorry) remains for full C₂. Headline still an honest `sorry`.
+  *(Older bullets laps 17–18 trimmed; see git history / dated HANDOFFs.)*
 
 ## Outstanding
 **Route A = Rathjen Cor 3.7 (resolved lap 45→46).** The headline reduces (axiom-clean) to
@@ -470,11 +462,14 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
    existence separately. Blueprint = the sorry-free ℕ-template `Grzegorczyk.lean` (Lemma 3.3 complete + Cor
    3.4 bricks `corAlpha_C_bound`/`corAlpha_within`/`corAlpha_boundary`). The existing meta-`l` `InternalCor34`
    (`ig0`/`iblk`/`ibigMul`) is the **standard-`l` special case** — reusable bricks, not the generic route.
-2. **Gentzen Thm 2.8(i): `PRWO(ε₀) → Con(𝗣𝗔)`** + formulate **`PRWO(ε₀)` as a `Sentence ℒₒᵣ`** (∀ primrec
-   ε₀-descent → finite). Primrec ordinal assignment `ord` on Foundation `Derivation`s + reduction `R` with
-   `ord(R D)<ord D`; an empty-sequent derivation would give an infinite primrec ε₀-descent, forbidden by PRWO.
-3. **Assemble `goodstein_implies_consistency`** from 1+2 (internal Thm 3.5 + Lemma 3.6 are DONE), then —
-   only if `#print axioms` is clean — discharge the headline `sorry`.
+2. **Gentzen Thm 2.8(i): `PRWO(ε₀) → Con(𝗣𝗔)`** — **PRWO formulation DONE (lap 50, `wip/GentzenCon.lean`):**
+   it is a **per-formula schema** `prwoInstance seq` (Foundation has no universal evaluator ⟹ no single
+   ∀-over-indices sentence) built on `precφ`, with `prwoInstance_faithful` PROVED (std-model ↔ meta-PRWO,
+   kernel-certified). The assembly `crux1∘crux2 = Reduction interface` type-checks. **Open deep cores:**
+   primrec ordinal assignment `ord` + reduction `R` on Foundation `Derivation`s with `ord(R D)≺ord D` (eq 5,
+   Buchholz [6]) — Foundation's Hauptsatz is meta-level only (no shortcut). Disclosed sorries in `wip/`.
+3. **Assemble `goodstein_implies_consistency`** from 1+2 (internal Thm 3.5 + Lemma 3.6 + PRWO formulation
+   are DONE), then — only if `#print axioms` is clean — discharge the headline `sorry`.
 
 ### Long-term / banked
 - **Internal Thm 3.5 — COMPLETE (lap 47), route-independent.** `InternalThm35.bbeta_isNF`/`bbeta_C_le`/
@@ -502,6 +497,7 @@ DIRECTION anti-fraud rule #1, which a future call must reconcile against Route A
 | `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` (disclosed, the one open girder) | 🎯 **THE single open obligation.** Two deep girders (docstring): §3 `γ→PRWO(ε₀)` (internal Cor 3.4 → Thm 3.5 [DONE lap 47] → Lemma 3.6 [done]) + Gentzen Thm 2.8 `PRWO→Con(PA)`. 🟡 project-scale formalization. |
 | `not_proves_of_implies_consistency` / `peano_not_proves_consistency` (Phase 1, `src/Reduction`) | meta-reduction + Gödel II for `𝗣𝗔` | `propext, choice, Quot.sound, PA_delta1Definable` (**lap-47 real**) | 🟡 the **Route-A Gödel-II hook** (NO LONGER "rejected" — Route A is the chosen route, lap 46). `PA_delta1Definable` = Δ₁-definability of `𝗣𝗔`, a true theorem held as a disclosed `axiom` in the Foundation pin; the headline inherits it on this route. Discharge = upstream burndown. |
 | `InternalThm35.bbeta_*` / `iwtower_cofinal` (internal Thm 3.5, **lap 47**, `src/InternalThm35`) | Rathjen Thm 3.5: slow α → `β` with tight `C(βᵣ)≤r+1` | `propext, choice, Quot.sound` | 🟢 **CLEAN + COMPLETE** — `bbeta_isNF`/`bbeta_C_le`/`bbeta_desc_exists`; ω-tower cofinality `iwtower_cofinal` discharges the seam. Route-independent; consumed by Lemma 3.6 (`nonterminating_internal`). |
+| `GentzenCon.prwoInstance_faithful` (crux-2 PRWO formulation, **lap 50**, `wip/GentzenCon`) | Rathjen Thm 2.8: PRWO(ε₀) is the `ℒₒᵣ`-sentence "no primrec ε₀-descent" | `propext, choice, Quot.sound, ONoteComp…native_decide.ax_1_5` | 🟢 **CLEAN** — std-model audit `ℕ⊧prwoInstance seq ↔ ¬∀n y z, seq[y,n]→seq[z,n+1]→z≺y`. Formulation kernel-certified faithful (1 🟢 F-φ artifact). The crux-2 deep cores (`ord`/`R`/eq-5) remain disclosed sorries in the same `wip` file. |
 | `peano_not_proves_goodstein_modulo_semantic` / `descentE` / `no_min_descent_absurd_of_goodstein` / `paLX_models_TI_of_PA_provable` (laps 30–44, `src/DescentSemantic`) | the free-X completeness route (Rathjen §3-on-X) | `sorryAx` + native_decide | 🚫 **OFF-PATH (lap 45 obstruction).** The free-X β-wall (`:582`) is the WRONG target — §3-on-X is structurally blocked (`not_dominated_of_diag_le`). Banked, not deleted; `wip/` candidate. NOT wired to `Statement.lean`. |
 | `eqLX_subset_paLX` / `eqAxiom_weakerThan_paLX` (lap 32, `src/DescentLift`) | `𝗘𝗤(LX) ⊆ paLX`, hence `𝗘𝗤 ⪯ paLX` | `propext, choice, Quot.sound` | 🟢 clean — every `𝗘𝗤(LX)` axiom is an `lMap Φ`-image of a `𝗣𝗔⁻` axiom or `relExt Xsym`; gives models of `paLX` genuine equality (enables the A2-pt2 `consequence_iff_eq` route). |
 | `peano_not_proves_TI` (Thm 5.6, lap 21, **F-φ DISCHARGED lap 28**, `src/Thm56`) | Gentzen 1943: `𝗣𝗔 ⊬ TI_≺(X)` | `propext, choice, Quot.sound, ONoteComp…native_decide.ax_1_5` (lap-30 real) | 🟢 **CLEAN** — full §5 chain C₂→C₁→D→F + D'; F-φ now a theorem (`ONoteComp`). Only 1 🟢 `native_decide` finite artifact. No `sorryAx`, no math axiom. |

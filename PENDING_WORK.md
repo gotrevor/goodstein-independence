@@ -1,5 +1,37 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 50 (2026-06-23) — REVIEW + crux-2 PRWO formulation BUILT & faithfulness-certified
+Fresh-mind review. **Direction KEEP** (Route A = Rathjen Cor 3.7). Crux-1 step-3 (internal `ig`
+f-recursion → internal Grzegorczyk `F`, Ackermann-level) is **blocked on infra Foundation lacks** —
+so this lap advanced the *unblocked* **crux 2** (Gentzen `PRWO→Con`), per the lap-49 handoff.
+
+**Foundation map (Explore, lap 50):** NO universal evaluator / Kleene-T predicate (`code`/
+`codeOfPartrec'`/`codeOfREPred` all encode a *meta* function into a *fixed* formula). ⟹ **PRWO must be
+a per-formula schema**, which is exactly what the proof needs (crux 1 proves all instances; crux 2 uses
+the one for `n↦ord(Rⁿd₀)`). `Con(𝗣𝗔)` = `Theory.consistent : 𝚷₁.Sentence`; Gödel II =
+`consistent_unprovable [T.Δ₁][𝗜𝚺₁⪯T][Consistent T]`; arithmetized derivations =
+`Theory.Derivation : V→Prop` (`Bootstrapping/Syntax/Proof/Basic.lean:459`); Hauptsatz is **meta-level
+only** (not arithmetized — no shortcut for eq 5). See memory `crux2-prwo-schema-no-universal-evaluator`.
+
+**DONE this lap (`wip/GentzenCon.lean`, type-checks, 2 disclosed crux sorries):**
+- `prwoInstance seq := “¬∀ n y z, (!seq y n ∧ !seq z (n+1)) → !precφ z y”` — reuses `SeamDefinability.precφ`
+  (the ε₀-ordering ℒₒᵣ-formula); no `isNF` needed (`natCode : ℕ ≃ NONote` bijects onto all CNF).
+- **`prwoInstance_faithful` PROVED** (`ℕ⊧prwoInstance seq ↔ ¬∀n y z, seq[y,n]→seq[z,n+1]→natCode z<natCode y`;
+  axioms = trust base + 1 🟢 F-φ native_decide) — the formulation is **kernel-certified faithful**.
+- `gentzenDescent_descends`/`derivesEmpty_iterate` PROVED (the `n↦ord(Rⁿd)` descent from `ord_R_descends`).
+- assembly `goodstein_implies_consistency_via_gentzen` = `crux2 ∘ crux1` type-checks = the `Reduction.lean`
+  girder interface (validates the architecture).
+
+**NEXT — crux-2 deep cores (hardest-first), all in `wip/GentzenCon.lean`:**
+1. **`ord_R_descends` (eq 5)** — THE Gentzen reduction ordinal-descent. Ground in Buchholz [6]
+   (`papers/buchholz-on-gentzens-first-consistency-proof.pdf` + `siders-…pdf`). Hardest.
+2. **`ord`/`R` as arithmetized primrec functions** over `Theory.Derivation` + `R_preserves_empty` +
+   `gentzenDescentφ` (the ℒₒᵣ graph of `n↦ord(Rⁿd₀)`, `d₀`=least ⊥-proof).
+3. **`gentzen_prwo_implies_consistency` (crux 2)** — assemble: `¬Con ⟹` derivation `d₀` of ⊥ ⟹ the
+   `gentzenDescent` is an infinite ≺-descent ⟹ contradicts `prwoInstance gentzenDescentφ`. Needs the
+   reasoning INSIDE 𝗣𝗔 (the `prwoInstance` must be applied to the internal `d₀`).
+4. (crux 1, separate girder) **`goodstein_implies_prwo`** — Rathjen §3 internal Cor 3.4 (blocked, see below).
+
 ## ⭐⭐⭐ Lap 49 (2026-06-23) — generic-route Cor 3.4 lead bricks + crux-2 grounded
 Confirmed **M1 (`goodsteinTerminates_re`) and Phase-1 reduction (`not_proves_of_implies_consistency`)
 are already complete & axiom-clean** — the operator's named M1 target was done by a prior lap; the only
