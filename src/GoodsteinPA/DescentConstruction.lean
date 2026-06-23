@@ -297,6 +297,91 @@ theorem descentMlt_lxDef :
   · intro hR i x x' h1 h2
     exact (hp x' x i).mp (hR i x x' ((hg1 x' x i).mpr h1) ((hg2 x' x i).mpr h2))
 
+/-- **Minimality clause (for `IterPrefix`'s `descentR`-definability): `∀ i x x', ⟪i,x⟫∈W → ⟪i+1,x'⟫∈W →
+∀ z<x', ¬(Mlt f z x ∧ ¬MX z)` is binary-`LX`-definable.** Same `∀⁰`-over-`∈`-guards membership shape as
+`descentMlt_lxDef`, but the consequent is the bounded `∀ z < x'` (the `<`-least minimality witness of
+`descentR`). Built directly: two `∈`-guards (`memRelOpr`, `lMap Φ`), then `(∼((prec ⇜ ![#0,#2]) ⋏
+∼Xsym ![#0])).ballLT #0` — `z=#0` after the `ballLT` binder, `x=#2`, with `Mlt f z x` the X-free `prec`
+atom and `¬MX z` the `Xsym`-atom on the bound `z`. Bvars after the three `∀⁰`: `#0=x', #1=x, #2=i, #3=W,
+#4=k`; inside `ballLT`: `#0=z, #1=x', #2=x, #3=i, #4=W, #5=k`. -/
+theorem minClause_lxDef :
+    letI : ORingStructure M := ReductModel.reductORing
+    haveI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+    ∃ e : ℕ → M, ∃ β : Semiformula LX ℕ 2,
+      ∀ W k : M, (∀ i x x' : M, ⟪i, x⟫ ∈ W → ⟪i + 1, x'⟫ ∈ W →
+          ∀ z : M, z < x' → ¬ (Mlt f z x ∧ ¬ MX z))
+        ↔ Semiformula.Evalm M ![W, k] e β := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  haveI hSLT : Structure.LT LX M := ⟨fun a b => by
+    simp only [Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel₂]
+    rfl⟩
+  have hred := ReductModel.reduct_eq_standardModel (M := M)
+  set e : ℕ → M := fun _ => Classical.arbitrary M with he
+  refine ⟨e, ∀⁰ ∀⁰ ∀⁰ (
+      (Semiformula.lMap Φ (memRelOpr.operator ![#3, #2, #1])) 🡒
+      (Semiformula.lMap Φ (memRelOpr.operator ![#3, ‘(#2 + 1)’, #0])) 🡒
+      ((∼((Thm56.prec ⇜ ![(#0 : Semiterm LX ℕ 6), #2]) ⋏
+          ∼(Semiformula.rel Xsym ![(#0 : Semiterm LX ℕ 6)]))).ballLT (#0 : Semiterm LX ℕ 5))),
+    fun W k => ?_⟩
+  -- guard 1: `⟪i,x⟫∈W`
+  have hg1 : ∀ x' x i : M,
+      Semiformula.Evalm M ![x', x, i, W, k] e (Semiformula.lMap Φ (memRelOpr.operator ![#3, #2, #1]))
+        ↔ ⟪i, x⟫ ∈ W := by
+    intro x' x i
+    rw [Semiformula.eval_lMap, hred, Semiformula.eval_operator]
+    have hv : (fun j : Fin 3 =>
+        Semiterm.val (@standardModel M oM) ![x', x, i, W, k] e (![(#3 : Semiterm ℒₒᵣ ℕ 5), #2, #1] j))
+        = ![W, i, x] := by funext j; fin_cases j <;> simp [Semiterm.val_bvar]
+    simp only [hv, eval_memRel]
+  -- guard 2: `⟪i+1,x'⟫∈W`
+  have hg2 : ∀ x' x i : M,
+      Semiformula.Evalm M ![x', x, i, W, k] e
+        (Semiformula.lMap Φ (memRelOpr.operator ![#3, ‘(#2 + 1)’, #0])) ↔ ⟪i + 1, x'⟫ ∈ W := by
+    intro x' x i
+    rw [Semiformula.eval_lMap, hred, Semiformula.eval_operator]
+    have hv : (fun j : Fin 3 =>
+        Semiterm.val (@standardModel M oM) ![x', x, i, W, k] e
+          (![(#3 : Semiterm ℒₒᵣ ℕ 5), ‘(#2 + 1)’, #0] j)) = ![W, i + 1, x'] := by
+      funext j; fin_cases j <;> simp [Semiterm.val_bvar]
+    simp only [hv, eval_memRel]
+  -- the bounded-`∀` minimality body: `∀ z < x', ¬(Mlt f z x ∧ ¬MX z)`
+  have hbody : ∀ x' x i : M,
+      Semiformula.Evalm M ![x', x, i, W, k] e
+          ((∼((Thm56.prec ⇜ ![(#0 : Semiterm LX ℕ 6), #2]) ⋏
+              ∼(Semiformula.rel Xsym ![(#0 : Semiterm LX ℕ 6)]))).ballLT (#0 : Semiterm LX ℕ 5))
+        ↔ ∀ z : M, z < x' → ¬ (Mlt f z x ∧ ¬ MX z) := by
+    intro x' x i
+    rw [Semiformula.eval_ballLT]
+    simp only [Semiterm.val_bvar, Matrix.cons_val_zero]
+    refine forall_congr' fun z => imp_congr_right fun _ => ?_
+    rw [LogicalConnective.HomClass.map_neg, LogicalConnective.HomClass.map_and,
+      LogicalConnective.HomClass.map_neg]
+    -- `Mlt f z x` via the X-free `prec` atom on `![z, x]`
+    have hpz : Semiformula.Evalm M (z :> ![x', x, i, W, k]) e
+        (Thm56.prec ⇜ ![(#0 : Semiterm LX ℕ 6), #2]) ↔ Mlt f z x := by
+      rw [Semiformula.eval_substs]
+      have hbv : (fun j : Fin 2 =>
+          Semiterm.valm M (z :> ![x', x, i, W, k]) e (![(#0 : Semiterm LX ℕ 6), #2] j)) = ![z, x] := by
+        funext j; fin_cases j <;> simp [Semiterm.val_bvar]
+      rw [hbv]
+      show Semiformula.Eval _ ![z, x] e Thm56.prec ↔ Semiformula.Eval _ ![z, x] f Thm56.prec
+      exact Semiformula.eval_iff_of_funEqOn Thm56.prec
+        (fun w hw => absurd hw (by simp [Semiformula.FVar?, Thm56.freeVariables_prec]))
+    -- `¬MX z` via the `Xsym`-atom on `z`
+    have hxz : Semiformula.Evalm M (z :> ![x', x, i, W, k]) e
+        (Semiformula.rel Xsym ![(#0 : Semiterm LX ℕ 6)]) ↔ MX z := by
+      rw [Semiformula.eval_rel₁]
+      simp only [Semiterm.val_bvar, Matrix.cons_val_zero]
+      rfl
+    rw [hpz, hxz]; exact Iff.rfl
+  simp only [Semiformula.eval_all, LogicalConnective.HomClass.map_imply]
+  constructor
+  · intro hM' i x x' h1 h2
+    exact (hbody x' x i).mpr (hM' i x x' ((hg1 x' x i).mp h1) ((hg2 x' x i).mp h2))
+  · intro hR i x x' h1 h2
+    exact (hbody x' x i).mp (hR i x x' ((hg1 x' x i).mpr h1) ((hg2 x' x i).mpr h2))
+
 /-- **Piece A of `hDdef`: the skeleton `Seq W ∧ ⟪0,a₀⟫∈W ∧ lh W = k+1` is binary-`LX`-definable** (with
 `a₀` a parameter, carried by the free assignment `e 0 = a₀`). Pure `ℒₒᵣ`-on-reduct: `Seq` via `seqDef`,
 membership via `memRelOpr`, `lh W = k+1` via `lhDef` (both `𝚺₀` Foundation `Defined` predicates, read off
@@ -339,6 +424,79 @@ theorem skel_lxDef (a₀ : M) :
     rw [hv]
     rw [show (lh W = k + 1) ↔ (k + 1 = lh W) from eq_comm]
     simp
+
+/-- **`IterPrefix` is `LX`-definable (the lap-41 lone wall, DISCHARGED).** `IterPrefix hM f a₀ k :=
+∃ s, Seq s ∧ lh s = k+1 ∧ znth s 0 = a₀ ∧ (∀ i<k, descentR f (znth s i)(znth s (i+1))) ∧ (∀ i≤k,
+¬MX(znth s i))` — the *canonical* (`descentR`-stepped) coded descent-prefix. Via the **membership-form
+trick** (`isDescent_iff_mem`): the four clauses sit on bound variables, so each is binary-`LX`-definable
+(`skel_lxDef`/`descentMlt_lxDef`/`minClause_lxDef`/`xclause_lxDef`), conjoined by `lxDef2_and` and
+`∃`-closed by `lxDef_exists`. `descentR`'s `(Mlt f y a ∧ ¬MX y) ∧ ∀ z<y, ¬(Mlt f z a ∧ ¬MX z)` splits
+into the `Mlt` atom (`descentMlt`), the bounded minimality (`minClause`), and the `¬MX y` part (folded
+into the global `xclause`, since `i<k ⟹ i+1≤k`). This is exactly the `hPdef` hypothesis that
+`DescentSemantic.descent_iterate_seq_exists` factored out. -/
+theorem IterPrefix_lxDef (a₀ : M) :
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+      ∀ k, IterPrefix hM f a₀ k ↔ Semiformula.Evalm M ![k] e φ := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  haveI hPA : M ⊧ₘ* (𝗣𝗔⁻ : Theory ℒₒᵣ) := models_of_subtheory (ReductModel.reduct_models_PA hM)
+  obtain ⟨e, φ, hφ⟩ := lxDef_exists (lxDef2_and (skel_lxDef hM a₀)
+      (lxDef2_and (descentMlt_lxDef hM f) (lxDef2_and (minClause_lxDef hM f) (xclause_lxDef hM))))
+  refine ⟨e, φ, fun k => ?_⟩
+  rw [← hφ k]
+  show IterPrefix hM f a₀ k ↔ _
+  unfold IterPrefix
+  refine exists_congr fun W => ?_
+  have h0 : (0 : M) < k + 1 := lt_of_le_of_lt (by simp) (lt_add_one k)
+  constructor
+  · rintro ⟨hSeq, hlh, hz0, hdesc, hnotMX⟩
+    have hmem0 : ⟪(0 : M), a₀⟫ ∈ W := by have := hSeq.znth (hlh ▸ h0); rwa [hz0] at this
+    refine ⟨⟨hSeq, hmem0, hlh⟩, ?_, ?_, ?_⟩
+    · -- descentMlt
+      intro i x x' hix hix'
+      have hi1 : i + 1 < lh W := hSeq.lt_lh_of_mem hix'
+      have hik : i < k := by rw [hlh] at hi1; exact succ_le_iff_lt.mp (lt_succ_iff_le.mp hi1)
+      rw [← hSeq.znth_eq_of_mem hix, ← hSeq.znth_eq_of_mem hix']
+      exact (hdesc i hik).1.1
+    · -- minClause
+      intro i x x' hix hix' z hz
+      have hi1 : i + 1 < lh W := hSeq.lt_lh_of_mem hix'
+      have hik : i < k := by rw [hlh] at hi1; exact succ_le_iff_lt.mp (lt_succ_iff_le.mp hi1)
+      have hxeq : znth W i = x := hSeq.znth_eq_of_mem hix
+      have hx'eq : znth W (i + 1) = x' := hSeq.znth_eq_of_mem hix'
+      rw [← hxeq]
+      exact (hdesc i hik).2 z (hx'eq ▸ hz)
+    · -- xclause
+      intro i x hix
+      have hi : i < lh W := hSeq.lt_lh_of_mem hix
+      rw [← hSeq.znth_eq_of_mem hix]
+      exact hnotMX i (by rw [hlh] at hi; exact lt_succ_iff_le.mp hi)
+  · rintro ⟨⟨hSeq, hmem0, hlh⟩, hdMlt, hMin, hxcl⟩
+    refine ⟨hSeq, hlh, hSeq.znth_eq_of_mem hmem0, ?_, ?_⟩
+    · -- descentR clause
+      intro i hik
+      have hi : i < lh W := by rw [hlh]; exact lt_succ_iff_le.mpr (le_of_lt hik)
+      have hi1 : i + 1 < lh W := by rw [hlh]; exact lt_succ_iff_le.mpr (succ_le_iff_lt.mpr hik)
+      refine ⟨⟨?_, ?_⟩, ?_⟩
+      · exact hdMlt i (znth W i) (znth W (i + 1)) (hSeq.znth hi) (hSeq.znth hi1)
+      · exact hxcl (i + 1) (znth W (i + 1)) (hSeq.znth hi1)
+      · exact hMin i (znth W i) (znth W (i + 1)) (hSeq.znth hi) (hSeq.znth hi1)
+    · -- ¬MX clause
+      intro i hik
+      have hi : i < lh W := by rw [hlh]; exact lt_succ_iff_le.mpr hik
+      exact hxcl i (znth W i) (hSeq.znth hi)
+
+/-- **The canonical descent iteration exists at every length, UNCONDITIONALLY** (lap-42). Feeds the
+discharged `IterPrefix_lxDef` into `DescentSemantic.descent_iterate_seq_exists`, removing its last
+hypothesis. Gives, for every `k : M`, a coded length-`k+1` `descentR`-prefix from `a₀` — the canonical
+`Mlt`-descent whose `k`-th entry is (by `descentR_functional`) the iterate `α k` the Rathjen §3
+slow-down reindexes. -/
+theorem descent_iterate_seq_total
+    (no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y)
+    {a₀ : M} (ha₀ : ¬ MX a₀) :
+    letI : ORingStructure M := ReductModel.reductORing
+    ∀ k : M, IterPrefix hM f a₀ k :=
+  descent_iterate_seq_exists hM f no_min ha₀ (IterPrefix_lxDef hM f a₀)
 
 /-- **The descent sequence exists for every length.** By `lx_succ_induction` (`base`/`extend`). The lone
 remaining obligation is the `LX`-definability of `D(k) := ∃ W, IsDescent W ∧ lh W = k+1` — see the file
