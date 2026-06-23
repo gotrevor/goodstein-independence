@@ -1,5 +1,26 @@
 # Pending work — open obligations & attack paths
 
+## 🎯 LAP-23 (2026-06-23) — E decomposition GROUNDED + first E-lift bricks LANDED. Read FIRST.
+
+Read **`DESCENT-PLAN.md`** (new, this lap): the full E wall mapped from Rathjen 2014 §2–3 to repo defs,
+with the exact Foundation E-lift bricks (`Derivation.lMap`, `provable_iff_derivable2`,
+`Derivation.toDerivation2`) verified present, and the **X-essential subtlety** spelled out (`TI prec`
+mentions the set variable `X`, so it is NOT the `lMap` of any `ℒₒᵣ` sentence — E genuinely needs the
+X-induction instance, not just proof-translation).
+
+**Landed (axiom-clean, `src/GoodsteinPA/DescentLift.lean`):** `lMap (ORing.embedding LX)` commutes with
+Foundation's induction-axiom builder — `lMap_zero_const`, `lMap_one_const`, `lMap_succT`,
+**`lMap_succInd`** (`#print axioms = [propext, Quot.sound]`). These are the leaves of the schema
+inclusion `lMap (InductionScheme ℒₒᵣ univ) ⊆ InductionScheme LX univ` (the binding step of the X-free
+E-lift). Friction cracked this lap: the arithmetic DSL desugars `0`/`#0+1` into `Rew.subst _ (Rew.emb
+op.term)` and there is **no `Semiterm.lMap_operator` lemma** — prove operator-`lMap` symbol-by-symbol;
+also **`fin_cases` is NOT available** in this build (use `Fin.cases`/`.elim0`).
+
+**Next (E-lift, ~1 lap):** (1) `lMap_univCl : lMap Φ (univCl χ) = univCl (lMap Φ χ)` (watch `fvSup`
+under lMap — should be preserved). (2) schema inclusion `(𝗣𝗔:Schema).lMap Φ ⊆ (paLX:Schema)`. (3) the
+**X-free lift lemma** `𝗣𝗔 ⊢ σ → Derivation2 paLX {lMap Φ ↑σ}` via `Derivation.lMap` + `toDerivation2`.
+Then the X-essential `PRWO ⟹ TI prec` construction (E-core's reversal). See `DESCENT-PLAN.md §2–4`.
+
 ## 🎯 LAP-22 (2026-06-23) — D' DISCHARGED + E (DescentE) MAPPED FROM RATHJEN. Read FIRST.
 
 **D' is closed.** `Thm56.embed_TI_bounded` is now machine-checked (the embedded ordinal `< ε₀`); the
