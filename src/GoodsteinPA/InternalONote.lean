@@ -1948,4 +1948,43 @@ lemma icmp_one_add {e1 e2 : V} (h1 : isNF e1) (h2 : isNF e2) :
         icmp_infHead_finHead hz1 hz2 hf1 hf2]
     · rw [iadd_one_inf hf1, iadd_one_inf hf2]
 
+/-- `ω·c ≠ 0` for a positive code `c` (the head term survives the exponent bump). -/
+lemma iomul_ne_zero {c : V} (hc : c ≠ 0) : iomul c ≠ 0 := by
+  obtain ⟨e, n, r, rfl⟩ : ∃ e n r, c = ocOadd e n r := ⟨_, _, _, (ocOadd_destruct hc).symm⟩
+  rw [iomul_ocOadd]; exact (ocOadd_pos _ _ _).ne'
+
+/-- **`ω·` preserves the code comparison** on NF codes (auxiliary, bounded form):
+`icmp (ω·a) (ω·b) = icmp a b`. Structural induction down the shared spine — at each `oadd` head the
+exponents `e ↦ 1+e` compare identically (`icmp_one_add`, needs the exponents NF) and the coefficients
+are untouched, so `thenV` passes the decision to the tails (IH). -/
+private theorem icmp_iomul_aux :
+    ∀ w : V, ∀ a ≤ w, ∀ b ≤ w, isNF a → isNF b → icmp (iomul a) (iomul b) = icmp a b := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro a haw b hbw ha hb
+    rcases eq_or_ne a 0 with rfl | hane
+    · rcases eq_or_ne b 0 with rfl | hbne
+      · simp
+      · rw [iomul_zero, icmp_zero_pos (iomul_ne_zero hbne), icmp_zero_pos hbne]
+    · rcases eq_or_ne b 0 with rfl | hbne
+      · rw [iomul_zero, icmp_pos_zero (iomul_ne_zero hane), icmp_pos_zero hane]
+      · obtain ⟨ea, ca, ta, rfl⟩ : ∃ e n r, a = ocOadd e n r :=
+          ⟨_, _, _, (ocOadd_destruct hane).symm⟩
+        obtain ⟨eb, cb, tb, rfl⟩ : ∃ e n r, b = ocOadd e n r :=
+          ⟨_, _, _, (ocOadd_destruct hbne).symm⟩
+        obtain ⟨_, hnea, hnta, _⟩ := (isNF_ocOadd ea ca ta).1 ha
+        obtain ⟨_, hneb, hntb, _⟩ := (isNF_ocOadd eb cb tb).1 hb
+        have hta_w : ta < w := code_lt_of_tail haw
+        have htb_w : tb < w := code_lt_of_tail hbw
+        rw [iomul_ocOadd, iomul_ocOadd, icmp_ocOadd, icmp_ocOadd, icmp_one_add hnea hneb,
+          ih (max ta tb) (max_lt hta_w htb_w) ta (le_max_left _ _) tb (le_max_right _ _) hnta hntb]
+
+/-- **`ω·` preserves the code comparison** on NF codes (`DescentCore.repr_omega_mul_mono`, internal):
+`icmp (ω·a) (ω·b) = icmp a b`. The order-preservation of the Rathjen §3 slow-down across blocks. -/
+lemma icmp_iomul {a b : V} (ha : isNF a) (hb : isNF b) :
+    icmp (iomul a) (iomul b) = icmp a b :=
+  icmp_iomul_aux (max a b) a (le_max_left _ _) b (le_max_right _ _) ha hb
+
 end GoodsteinPA.InternalONote
