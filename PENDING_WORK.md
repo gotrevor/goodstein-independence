@@ -116,12 +116,26 @@ n⟩`, `iCNext` reads the two sub-results at `ocExp`/`ocTail` out of the table).
 (`iC_defined`), `iC_zero`, and the **recursion `iC_ocOadd : iC (ocOadd ec n rc) = max (max (iC ec) n)
 (iC rc)`** (Rathjen's `C_oadd`). The CofV-table pattern now proven to work on the new codes.
 
-NEXT bricks (hardest-first): (1) `ievalNat : V → V → V` (base, code → value) via the SAME CofV table —
-`ievalNat b (ocOadd ec n rc) = n * ipow (b+1) (ievalNat b ec) + ievalNat b rc` (mirrors
-`Domination.evalNat_oadd`), matching `evalNat_succ_base`'s `ibump` base-bump on standard inputs;
-(2) `icmp : V → V → V` CNF comparison `𝚫₁` + internal `evalNat_lt_iff` (the order-reflection the
-descent consumes — the deep piece); (3) `isONoteCode`/`isNF` predicate. Then the seam/F re-wire to
-`natCodeT` (route b, `ANALYSIS-2026-06-23-lap37-order-reflection-opacity.md`) and the slow-down `βₖ`.
+**✅ `ievalNat` + `iCanon` LANDED lap 37 (green, sorry-free, `InternalONote.lean`).**
+- `ievalNat : V → V → V` (Rathjen `T̂^b_ω` on codes) via the binary CofV table (parameter = base `b`),
+  `𝚺₁`-definable, with `ievalNat_zero` + recursion `ievalNat_ocOadd : ievalNat b (ocOadd ec n rc) =
+  n * ipow (b+1) (ievalNat b ec) + ievalNat b rc` (mirrors `Domination.evalNat_oadd`).
+- `iCanon b c := iC c ≤ b` (internal `Canon`, FREE from `iC` via `Canon_iff_C_le`), with `iCanon_zero`,
+  recursion `iCanon_ocOadd : iCanon b (ocOadd ec n rc) ↔ n ≤ b ∧ iCanon b ec ∧ iCanon b rc`, and the
+  `Γ-Relation` definability instance.
+
+**NEXT — the deep piece: internal order-reflection.** Two routes to the order the descent consumes:
+1. `icmp : V → V → V` — 3-valued CNF lexicographic comparison via a BINARY CofV table indexed by the
+   pair `⟪o,p⟫` (sub-calls `icmp(ocExp o, ocExp p)`/`icmp(ocTail o, ocTail p)` sit at `⟪e1,e2⟫`/
+   `⟪r1,r2⟫` `< ⟪o,p⟫` by `pair_lt_pair`). Then `icmp` ≡ ievalNat-order on `iCanon` codes.
+2. Direct internal `evalNat_lt_iff`: `iCanon b o → iCanon b p → isNF o → isNF p → (ievalNat b o <
+   ievalNat b p ↔ o ≺ p)`. Structural induction using ievalNat arithmetic + the "tail value < leading
+   power" NF bound (`ievalNat b rc < ipow (b+1) (ievalNat b ec)`). This is the SAME difficulty family
+   as `ibump_mono` (on Aristotle, UUID `7c8bb0e8`) — harvest that proof's digit-direct technique first.
+Also needed: internal `isNF` predicate (exponents strictly decreasing — needs `icmp`), and the internal
+`evalNat_succ_base` (`ievalNat (b+1) c = ibump (b+1) (ievalNat b c)` for `iCanon b c ∧ isNF c`, by
+structural induction + `ibump_pos`, given the NF leading-power bound). Then seam/F re-wire to `natCodeT`
+(route b, `ANALYSIS-2026-06-23-lap37-order-reflection-opacity.md`) and the slow-down `βₖ`.
 
 ---
 

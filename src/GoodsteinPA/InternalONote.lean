@@ -411,4 +411,26 @@ lemma ievalNat_ocOadd (b ec n rc : V) :
     znth_ievalTable_eq_ievalNat b M (ocExp c) hexp, znth_ievalTable_eq_ievalNat b M (ocTail c) htail,
     ocExp_ocOadd, ocCoeff_ocOadd, ocTail_ocOadd]
 
+/-! ### Internal `Canon` (`C ≤ b`) — free from `iC`
+
+Rathjen's `Canon b o` ("every coefficient `≤ b`") is `C o ≤ b` (`DescentCore.Canon_iff_C_le`), so the
+internal `Canon` predicate is just `iC c ≤ b` — no separate recursion needed. Its `oadd` law is the
+`iC_ocOadd` recursion read through `max ≤`. `iCanon` is `𝚺₁` (in fact `𝚫₁`) via `iC_defined`. -/
+
+/-- Internal `Canon b c`: every coefficient of the code `c` is `≤ b`, i.e. `iC c ≤ b`. -/
+def iCanon (b c : V) : Prop := iC c ≤ b
+
+lemma iCanon_def (b c : V) : iCanon b c ↔ iC c ≤ b := Iff.rfl
+
+@[simp] lemma iCanon_zero (b : V) : iCanon b 0 := by simp [iCanon]
+
+/-- **Internal `Canon_oadd`**: `Canon b (oadd e n r) ↔ n ≤ b ∧ Canon b e ∧ Canon b r`. -/
+lemma iCanon_ocOadd (b ec n rc : V) :
+    iCanon b (ocOadd ec n rc) ↔ n ≤ b ∧ iCanon b ec ∧ iCanon b rc := by
+  simp only [iCanon, iC_ocOadd, max_le_iff]
+  tauto
+
+instance iCanon_definable (Γ) : Γ-[m + 1]-Relation (iCanon : V → V → Prop) := by
+  unfold iCanon; definability
+
 end GoodsteinPA.InternalONote
