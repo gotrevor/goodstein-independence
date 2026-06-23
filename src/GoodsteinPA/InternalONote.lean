@@ -1834,4 +1834,118 @@ lemma icmp_betaTail_within (α p : V) :
     icmp (iadd (iomul α) (ocOadd 0 p 0)) (iadd (iomul α) (ocOadd 0 (p + 1) 0)) = 0 := by
   rw [icmp_iadd_iomul_finite]; simp [cmpV, lt_succ_iff_le]
 
+/-! ### `1 + e` order-preservation (toward `icmp_iomul`, the boundary descent) -/
+
+/-- Clean normal form of `1 + e` on codes: `ocOadd 0 1 0` if `e = 0`; the head coefficient bumped
+by `1` if `e` has a finite head (`ocExp e = 0`); else `e` unchanged (the `1` is absorbed). -/
+lemma iadd_one_eq (e : V) :
+    iadd (ocOadd 0 1 0) e =
+      (if e = 0 then ocOadd 0 1 0
+       else if ocExp e = 0 then ocOadd 0 (1 + ocCoeff e) (ocTail e)
+       else e) := by
+  rw [iadd_ocOadd]
+  by_cases he : e = 0
+  · simp [he]
+  · rw [if_neg he, if_neg he]
+    by_cases hee : ocExp e = 0
+    · have h2 : icmp 0 (ocExp e) = 1 := by rw [hee]; exact icmp_zero_zero
+      rw [if_neg (by rw [h2]; exact _root_.one_ne_zero), if_pos h2, if_pos hee]
+    · have h0 : icmp 0 (ocExp e) = 0 := (ocOadd_destruct hee) ▸ icmp_zero_ocOadd _ _ _
+      rw [if_pos h0, if_neg hee]
+
+@[simp] lemma ocExp_zero : ocExp (0 : V) = 0 := by
+  have h : π₁ (0 : V) = 0 := by have := pi₁_pair (0 : V) 0; rwa [pair_zero_zero] at this
+  simp [ocExp, fstIdx, h]
+
+@[simp] lemma iadd_one_zero : iadd (ocOadd 0 1 0) (0 : V) = ocOadd 0 1 0 := by
+  rw [iadd_one_eq]; simp
+
+lemma iadd_one_fin {e : V} (he : e ≠ 0) (hf : ocExp e = 0) :
+    iadd (ocOadd 0 1 0) e = ocOadd 0 (1 + ocCoeff e) (ocTail e) := by
+  rw [iadd_one_eq, if_neg he, if_pos hf]
+
+lemma iadd_one_inf {e : V} (hf : ocExp e ≠ 0) : iadd (ocOadd 0 1 0) e = e := by
+  have he : e ≠ 0 := by rintro rfl; exact hf ocExp_zero
+  rw [iadd_one_eq, if_neg he, if_neg hf]
+
+/-- `cmpV (1+c₁) (1+c₂) = cmpV c₁ c₂` — left-adding `1` is order- and equality-preserving. -/
+@[simp] lemma cmpV_one_add (c1 c2 : V) : cmpV (1 + c1) (1 + c2) = cmpV c1 c2 := by
+  simp only [cmpV, add_lt_add_iff_left, add_right_inj]
+
+lemma icmp_zero_pos {c : V} (hc : c ≠ 0) : icmp 0 c = 0 := by
+  obtain ⟨e, n, r, rfl⟩ : ∃ e n r, c = ocOadd e n r := ⟨_, _, _, (ocOadd_destruct hc).symm⟩
+  exact icmp_zero_ocOadd e n r
+
+lemma icmp_pos_zero {c : V} (hc : c ≠ 0) : icmp c 0 = 2 := by
+  obtain ⟨e, n, r, rfl⟩ : ∃ e n r, c = ocOadd e n r := ⟨_, _, _, (ocOadd_destruct hc).symm⟩
+  exact icmp_ocOadd_zero e n r
+
+/-- `icmp` of two positive codes, with the head pieces exposed (`icmp_ocOadd` + destructuring). -/
+lemma icmp_pos_pos {a b : V} (ha : a ≠ 0) (hb : b ≠ 0) :
+    icmp a b = thenV (icmp (ocExp a) (ocExp b))
+      (thenV (cmpV (ocCoeff a) (ocCoeff b)) (icmp (ocTail a) (ocTail b))) := by
+  obtain ⟨ea, ca, ta, rfl⟩ : ∃ x y z, a = ocOadd x y z := ⟨_, _, _, (ocOadd_destruct ha).symm⟩
+  obtain ⟨eb, cb, tb, rfl⟩ : ∃ x y z, b = ocOadd x y z := ⟨_, _, _, (ocOadd_destruct hb).symm⟩
+  rw [icmp_ocOadd]; simp only [ocExp_ocOadd, ocCoeff_ocOadd, ocTail_ocOadd]
+
+/-- A finite-head code (`ocExp a = 0`) is `≺` an infinite-head code (`ocExp b ≠ 0`). -/
+lemma icmp_finHead_infHead {a b : V} (ha : a ≠ 0) (hb : b ≠ 0)
+    (hfa : ocExp a = 0) (hfb : ocExp b ≠ 0) : icmp a b = 0 := by
+  obtain ⟨ea, ca, ta, rfl⟩ : ∃ x y z, a = ocOadd x y z := ⟨_, _, _, (ocOadd_destruct ha).symm⟩
+  obtain ⟨eb, cb, tb, rfl⟩ : ∃ x y z, b = ocOadd x y z := ⟨_, _, _, (ocOadd_destruct hb).symm⟩
+  rw [ocExp_ocOadd] at hfa hfb
+  subst hfa
+  rw [icmp_ocOadd, icmp_zero_pos hfb]; simp [thenV]
+
+/-- An infinite-head code (`ocExp a ≠ 0`) is `≻` a finite-head code (`ocExp b = 0`). -/
+lemma icmp_infHead_finHead {a b : V} (ha : a ≠ 0) (hb : b ≠ 0)
+    (hfa : ocExp a ≠ 0) (hfb : ocExp b = 0) : icmp a b = 2 := by
+  obtain ⟨ea, ca, ta, rfl⟩ : ∃ x y z, a = ocOadd x y z := ⟨_, _, _, (ocOadd_destruct ha).symm⟩
+  obtain ⟨eb, cb, tb, rfl⟩ : ∃ x y z, b = ocOadd x y z := ⟨_, _, _, (ocOadd_destruct hb).symm⟩
+  rw [ocExp_ocOadd] at hfa hfb
+  subst hfb
+  rw [icmp_ocOadd, icmp_pos_zero hfa]; simp [thenV]
+
+/-- **`1 + ·` preserves the code comparison** for NF exponents: `icmp (1+e₁) (1+e₂) = icmp e₁ e₂`.
+The crux of `icmp_iomul`. NF is needed: with a zero coefficient the finite-head bump could spuriously
+tie. Nine-way case split on the head kinds (zero / finite-head / infinite-head) of `e₁`, `e₂`. -/
+lemma icmp_one_add {e1 e2 : V} (h1 : isNF e1) (h2 : isNF e2) :
+    icmp (iadd (ocOadd 0 1 0) e1) (iadd (ocOadd 0 1 0) e2) = icmp e1 e2 := by
+  have hbump : ∀ {e : V}, isNF e → e ≠ 0 → ocExp e = 0 → (1 : V) < 1 + ocCoeff e := by
+    intro e he hne _
+    exact lt_add_of_pos_right 1 (pos_iff_ne_zero.mpr (coeff_ne_zero he hne))
+  by_cases hz1 : e1 = 0 <;> by_cases hz2 : e2 = 0
+  · subst hz1; subst hz2
+    simp only [iadd_one_zero, icmp_zero_zero]; exact icmp_self _ _ le_rfl
+  · subst hz1
+    by_cases hf2 : ocExp e2 = 0
+    · rw [iadd_one_zero, iadd_one_fin hz2 hf2,
+        icmp_ocOadd 0 1 0 0 (1 + ocCoeff e2) (ocTail e2), icmp_zero_zero, icmp_zero_pos hz2]
+      have hlt := hbump h2 hz2 hf2
+      have : cmpV 1 (1 + ocCoeff e2) = 0 := by simp [cmpV, hlt]
+      rw [this]; simp [thenV]
+    · rw [iadd_one_zero, iadd_one_inf hf2, icmp_zero_pos hz2,
+        icmp_finHead_infHead (ocOadd_pos 0 1 0).ne' hz2 (ocExp_ocOadd 0 1 0) hf2]
+  · subst hz2
+    by_cases hf1 : ocExp e1 = 0
+    · rw [iadd_one_zero, iadd_one_fin hz1 hf1,
+        icmp_ocOadd 0 (1 + ocCoeff e1) (ocTail e1) 0 1 0, icmp_zero_zero, icmp_pos_zero hz1]
+      have hlt := hbump h1 hz1 hf1
+      have : cmpV (1 + ocCoeff e1) 1 = 2 := by
+        simp [cmpV, not_lt.mpr (le_of_lt hlt), (ne_of_lt hlt).symm]
+      rw [this]; simp [thenV]
+    · rw [iadd_one_zero, iadd_one_inf hf1, icmp_pos_zero hz1,
+        icmp_infHead_finHead hz1 (ocOadd_pos 0 1 0).ne' hf1 (ocExp_ocOadd 0 1 0)]
+  · by_cases hf1 : ocExp e1 = 0 <;> by_cases hf2 : ocExp e2 = 0
+    · rw [iadd_one_fin hz1 hf1, iadd_one_fin hz2 hf2,
+        icmp_ocOadd 0 (1 + ocCoeff e1) (ocTail e1) 0 (1 + ocCoeff e2) (ocTail e2), cmpV_one_add,
+        icmp_pos_pos hz1 hz2, hf1, hf2]
+    · rw [iadd_one_fin hz1 hf1, iadd_one_inf hf2,
+        icmp_finHead_infHead (ocOadd_pos _ _ _).ne' hz2 (ocExp_ocOadd 0 _ _) hf2,
+        icmp_finHead_infHead hz1 hz2 hf1 hf2]
+    · rw [iadd_one_inf hf1, iadd_one_fin hz2 hf2,
+        icmp_infHead_finHead hz1 (ocOadd_pos _ _ _).ne' hf1 (ocExp_ocOadd 0 _ _),
+        icmp_infHead_finHead hz1 hz2 hf1 hf2]
+    · rw [iadd_one_inf hf1, iadd_one_inf hf2]
+
 end GoodsteinPA.InternalONote
