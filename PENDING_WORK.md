@@ -1,5 +1,47 @@
 # Pending work — open obligations & attack paths
 
+## 🎯 LAP-30 (2026-06-23) — STRATEGIC REDIRECT: the E wall = ONE semantic lemma via completeness. Read FIRST.
+
+**The whole headline now reduces to a single model-theoretic statement.** Fresh-mind review found the
+lap-27 plan ("Route B = hand-build the `paLX` sequent derivation of `TI_≺(X)`", literature-gated) is not
+the cleanest path. Foundation's **first-order completeness** (`Derivation.completeness_of_encodable`,
+general FO, on disk) produces `paLX ⟹ [TI prec]` from the semantic premise "every `M ⊧ paLX` models
+`TI prec`". So `Thm56.DescentE` is now **PROVED** (`src/GoodsteinPA/DescentSemantic.lean`, NEW, green 1302
+jobs) modulo ONE disclosed `sorry`:
+
+```
+paLX_models_TI_of_PA_provable (h : 𝗣𝗔 ⊢ ↑goodsteinSentence)
+    {M} [Nonempty M] [Structure LX M] (hM : M ⊧ₘ* paLX) (f : ℕ → M) : Evalfm M f (TI prec)
+```
+
+`#print axioms descentE` = `#print axioms peano_not_proves_goodstein_modulo_semantic` =
+`[propext, sorryAx, choice, Quot.sound, ONoteComp…native_decide.ax_1_5]` — **NO `PA_delta1Definable`, NO
+custom axiom**. Discharge the one `sorry` ⟹ the headline is axiom-clean. (Built `LX.Encodable`: 4 small
+instances, only `Encodable (XRel k)` was missing.) `Statement.lean` headline `sorry` UNTOUCHED (anti-fraud).
+
+**Why it's correct (vs the superseded sequent plan):** (i) **resolves the free-`X` obstruction** — work in
+models of `paLX` (where `X` is `M`'s relation), not `V ⊧ 𝗜𝚺₁`; completeness lifts to a derivation for free;
+(ii) **no literature gate** — standard model theory, `ON-LINE-REQUEST.md` question is moot; (iii) **reuses
+the lap-26 substrate** — `igoodstein`/`ibump` run in `M`'s `ℒₒᵣ`-reduct, `DescentCore.ineq6_step` is the
+kernel. Full map in **`DESCENT-PLAN.md §5`**.
+
+**NEXT (hardest-first), decomposing `paLX_models_TI_of_PA_provable` model-internally:**
+1. **(easy, do next) `M ⊧ lMap goodsteinSentence`.** From `h`: E-lift (`paLX_derivable2_lMap_of_PA_provable`)
+   ⟹ `paLX ⊢ lMap γ`; **soundness** for `Derivation2`/`Schema` ⟹ `M ⊧ lMap γ`; `Semiformula.eval_lMap` ⟹
+   `M`'s `ℒₒᵣ`-reduct ⊧ `γ`. *Find Foundation's soundness lemma* (`sound!`, used in `complete_iff`; check it
+   applies to `Schema`/`Derivation2`). This carves the easy front off the lemma, isolating the deep core.
+2. **X-descent from `¬TI prec`.** `M ⊧ Prog(X) ∧ ¬X a₀` ⟹ X-definable `≺`-descent via `M`'s LX least-number
+   principle (`M ⊧ InductionScheme LX`). Need: the LNP as a usable fact about `M` (derive from the scheme,
+   or find a Foundation `leastNumber`/`order_induction` semantic lemma).
+3. **(deep core) Slow-down + inequality (6) in `M`.** Rathjen §3: slow `(aₖ)` ⟹ `(βₖ)` (`C(βₖ) ≤ k+1`);
+   run special Goodstein from `m₀ = T̂²(β₀)` (lap-26 `igoodstein` in `M`'s reduct); iterate `ineq6_step` by
+   `M`'s LX-induction ⟹ `M ⊧ ∀k mₖ > 0`; contradict step 1. The genuine content; multi-lap.
+
+**Banked/superseded (true + green, keep in `src/`):** `DescentInternal.igoodstein_nonterminating_of_dominating`
+and the `DescentArith`/`sigma1_pos_succ_induction` scaffold are the X-free `V ⊧ 𝗜𝚺₁` framing — their
+arithmetic content transfers to step 3, but re-targeted to `M ⊧ paLX`. The internal-bump bricks
+(`ibump_pos`, `le_ibump`, `ibump_gt`, + a still-needed `ibump_mono`) are reusable in `M`'s reduct.
+
 ## 🎯 LAP-29 (2026-06-23) — `InternalBridge` FINISHED: substrate faithfulness machine-checked. Read FIRST.
 
 **Done this lap (green, 1300 jobs, axiom-clean `[propext, choice, Quot.sound]`):** the lap-28 parked

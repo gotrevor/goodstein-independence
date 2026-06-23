@@ -1,5 +1,13 @@
 # ON-LINE-REQUEST — 2026-06-23 (lap 27)
 
+> **⚠️ LAP-30 — THE ONE OPEN REQUEST BELOW IS NOW MOOT (no action needed).** The descent bridge no
+> longer needs a hand-built calculus-internal `paLX ⊢ TI_≺(X)` sequent shape. Foundation's first-order
+> **completeness theorem** (`Derivation.completeness_of_encodable`) delivers `Derivation2 paLX {TI prec}`
+> from the *semantic* premise "every model `M ⊧ paLX` satisfies `TI prec`" — so the E wall is a standard
+> **model-theoretic** argument (Rathjen §3 inside a model `M`), not a bespoke sequent skeleton. See
+> `DESCENT-PLAN §5` + `src/GoodsteinPA/DescentSemantic.lean`. The §-below is retained as historical
+> context; a fulfiller may delete this whole file (no literature request is open this lap).
+
 > **F-φ (the lap-19 `ONote.cmp` computability request) is RESOLVED** — Aristotle proved
 > `rePred_ltPull_natCode` (verified-faithful, in `wip/aristotle-fphi/ONoteComp.lean`). No literature
 > needed; only a mechanical `v4.28→v4.31` port remains. Item removed.

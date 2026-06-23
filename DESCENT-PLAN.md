@@ -194,7 +194,62 @@ remaining deep work.
 
 ---
 
-## 4. Priority for next laps
+## 5. ⭐ LAP-30 REDIRECT — the E wall via first-order COMPLETENESS (supersedes the §3 sequent plan)
+
+**The finding.** `Thm56.DescentE` does **not** require hand-building a `paLX` sequent-calculus derivation
+of `TI_≺(X)` (the §3b "integrated paLX construction", literature-gated). Foundation has the **general
+first-order completeness theorem** `Derivation.completeness_of_encodable`
+(`Completeness/Completeness.lean:20`):
+
+```
+(h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, ∀ f, Evalfm M f φ) : (T : Schema L) ⟹ Γ
+```
+
+For `T = paLX`, `Γ = [TI prec]`, this turns the single semantic premise "every model `M ⊧ paLX` satisfies
+`TI prec`" into `paLX ⟹ [TI prec]`, which `toDerivation2` packages as `Derivation2 paLX {TI prec}` —
+**exactly `DescentE`'s codomain**. (Needs `[LX.Encodable]`, built lap 30 in `DescentSemantic.lean` — 4
+small instances; `LX = add ℒₒᵣ Xpred`, only `Encodable (XRel k)` was missing.)
+
+**So `descentE : Thm56.DescentE` is PROVED** (`src/DescentSemantic.lean`, lap 30), modulo ONE disclosed
+`sorry`: the semantic lemma
+
+```
+paLX_models_TI_of_PA_provable (h : 𝗣𝗔 ⊢ ↑goodsteinSentence)
+    {M} [Nonempty M] [Structure LX M] (hM : M ⊧ₘ* paLX) (f : ℕ → M) :
+    Evalfm M f (TI prec)
+```
+
+`#print axioms` on `descentE` and on `peano_not_proves_goodstein_modulo_semantic` (= `…_of_descent
+descentE`) = `[propext, sorryAx, choice, Quot.sound, ONoteComp…native_decide.ax_1_5]`. **No
+`PA_delta1Definable`, no custom axiom** — discharging the one `sorry` makes the headline axiom-clean.
+
+**Why this is the right route (vs the §3b sequent plan):**
+- **Resolves the free-`X` obstruction** (the §1 lap-24 correction). The killer was: working in `V ⊧ 𝗜𝚺₁`
+  (no `X`) lands an X-free `𝗣𝗔 ⊢ PRWO`, which can't refute the free-`X` `TI prec`. Here we work in models
+  `M ⊧ paLX` — `X` is `M`'s own relation, present throughout — and **completeness does the syntactic lift
+  for free**. No `InductionScheme LX` sequent bookkeeping; `M ⊧ InductionScheme LX` is a *semantic* fact.
+- **No literature gate.** The `ON-LINE-REQUEST.md` question ("precise calculus-internal sequent shape")
+  is **moot** — the argument is standard model theory, not a bespoke derivation skeleton.
+- **Reuses the lap-26 substrate.** `igoodstein`/`ibump` (bridged faithful to `Defs`) run in `M`'s
+  `ℒₒᵣ`-reduct; `DescentCore.ineq6_step` is the route-neutral kernel.
+
+**The remaining wall = `paLX_models_TI_of_PA_provable`, decomposed model-internally** (Rathjen §3 in `M`):
+1. **(easy) `M ⊧ lMap goodsteinSentence`.** E-lift (`paLX_derivable2_lMap_of_PA_provable`) gives `paLX ⊢
+   lMap γ`; soundness ⟹ `M ⊧ lMap γ`; `eval_lMap` ⟹ `M`'s reduct models `γ` (every internal Goodstein run
+   terminates in `M`). *Next concrete step* — find Foundation's soundness for `Derivation2`/`Schema`.
+2. **X-descent.** `M ⊧ ¬TI prec` = `M ⊧ Prog(X) ∧ ¬X a₀`. Build the `X`-definable `≺`-descent `(aₖ)` via
+   `M`'s LX least-number principle (from `M ⊧ InductionScheme LX`).
+3. **(deep core) Slow-down + inequality (6) in `M`.** Slow `(aₖ)` to `(βₖ)`, `C(βₖ) ≤ k+1` (Rathjen
+   3.3/3.4/Thm 3.5); run the special Goodstein seq from `m₀ = T̂²(β₀)`; iterate `ineq6_step` by `M`'s
+   LX-induction over the X-definable predicate ⟹ `M ⊧ ∀k mₖ > 0`. **Contradiction** with step 1.
+   Hence `M ⊧ ∀a X a` = `M ⊧ TI prec`.
+
+The genuine remaining mathematical content is steps 2–3, the SAME Rathjen §3 substance as before — but now
+with a tractable Lean home (reasoning about a single model `M` with Foundation's `Eval` API) and zero
+literature dependency. The `DescentInternal`/`sigma1_pos_succ_induction` lemmas (`V ⊧ 𝗜𝚺₁`, X-free) are
+green-but-superseded: reuse their arithmetic *content*, re-target to `M ⊧ paLX`.
+
+## 4. Priority for next laps (HISTORICAL — superseded by §5; kept for the §2 bricks)
 
 1. **`wip/DescentLift.lean`**: operator-`lMap` tower → `succInd`/`univCl` lMap-commutation → schema
    inclusion → the **X-free lift lemma**. Promote to `src/` when green + axiom-clean. (Mechanical, ~1–2 laps.)
