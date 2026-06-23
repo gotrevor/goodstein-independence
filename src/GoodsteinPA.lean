@@ -41,3 +41,4 @@ import GoodsteinPA.InternalPow
 import GoodsteinPA.InternalDigits
 import GoodsteinPA.InternalLog
 import GoodsteinPA.InternalBump
+import GoodsteinPA.InternalGoodstein
