@@ -44,6 +44,20 @@ internal-Grzegorczyk tail into the Thm-3.5 sequence (both axiom-clean `[propext,
   → Thm 3.5 girder is now built from a single width code `wseq` + **just two deep inputs**: the input
   ≺-descending NF `β` and the domination `hdom` (`∀ j, blk(j+1)=blk j → off j + 1 < iF l₀ (blk j)`).
 
+**`crux1_internal_run` — WHOLE girder chained to the non-terminating run (axiom-clean):** added the
+seam to the Lemma-3.6 consumer. `nonterminating_of_bbeta_facts` repackages the `bbeta` triple as
+`DescentSlowdown.nonterminating_of_slowdown`'s input (`iCanon (r+1) = iC ≤ r+1`, definitional).
+`crux1_internal_run l₀ (0<l₀) wseq …` chains `igtTot → salpha → bbeta → Lemma 3.6` to
+`∃ m₀, ∀ k, 0 < igoodstein m₀ k` (internal Goodstein run never terminates — the contradiction).
+The ENTIRE internal-Grzegorczyk crux-1 girder is now machine-checked end-to-end, with the remaining gaps
+isolated to exactly **three named hypotheses**:
+1. **input `β`** (`hβNF`/`hβ0`/`hβdesc`/`hβC`) — the gentzen ε₀-descent as a ≺-descending NF V-sequence;
+2. **`hdom`** — domination (Lemma 3.2): `off j + 1 < iF l₀ (blk j)`;
+3. **`hdef`** — `𝚺₁`-definability of `bbeta K s (salpha (↑l₀) β (BlkRec.blk wseq) (BlkRec.off wseq)
+   (igtTot l₀))` (∀ K s; uniform construction). The next mechanical-ish brick: build the definability
+   chain `igtTot`/`ig` definable → `salpha` definable → `bbeta` definable (watch the aesop-depth blowup
+   per memory `definability-aesop-depth-blowup`; write explicit `Definable.comp` terms).
+
 **REMAINING crux-1 frontier (hardest-first), all now isolated as named hypotheses of `bbeta_of_igtTot`:**
 1. **`hdom` = domination (Rathjen Lemma 3.2)**: `off j + 1 < iF l₀ (blk j)` — the within-block offset
    stays below the Grzegorczyk width. THE deep arithmetic brick; needs the specific input `β`/level `l₀`.

@@ -34,11 +34,13 @@ internal Cor 3.4, feeding `bbeta` → `DescentArith.nonterminating_internal` (Le
 import GoodsteinPA.InternalCor34
 import GoodsteinPA.InternalThm35
 import GoodsteinPA.InternalIg
+import GoodsteinPA.DescentSlowdown
 
 namespace GoodsteinPA.StdCor34
 
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
 open GoodsteinPA GoodsteinPA.InternalONote GoodsteinPA.IIter GoodsteinPA.InternalIg
+open GoodsteinPA.InternalPow
 
 set_option maxHeartbeats 400000
 
@@ -233,5 +235,42 @@ theorem bbeta_of_igtTot_blkRec (l₀ : ℕ) (hl₀ : 0 < l₀) (wseq : V)
               (salpha (l₀ : V) β (BlkRec.blk wseq) (BlkRec.off wseq) (igtTot l₀)) r) = 0) :=
   bbeta_of_igtTot l₀ hl₀ hβNF hβ0 hβdesc hβC
     (BlkRec.blk_succ_dich wseq) (BlkRec.off_succ_of_blk_eq wseq) (BlkRec.blk_add_off_le wseq) hdom
+
+/-! ## Bridge to the non-terminating Goodstein run (Lemma 3.6 consumer seam)
+
+The Thm-3.5 output `β'` (`isNF` + `iC(β'ᵣ) ≤ r+1` + ≺-descent) is *exactly* the data
+`DescentSlowdown.nonterminating_of_slowdown` consumes (modulo `𝚺₁`-definability of `β'`): `iCanon (r+1)
+(β'ᵣ)` is definitionally `iC(β'ᵣ) ≤ r+1`. So feeding `β'` through the Lemma-3.6 engine gives a seed `m₀`
+whose internal Goodstein run never terminates — the contradiction with the lifted `goodsteinSentence`. -/
+
+/-- **Thm 3.5 facts → non-terminating internal Goodstein run.** Pure seam: repackage the `bbeta`
+output triple as `nonterminating_of_slowdown`'s input (`iCanon` from the `iC`-bound). -/
+theorem nonterminating_of_bbeta_facts {β' : V → V}
+    (hdef : 𝚺₁-Function₁ β')
+    (hNF : ∀ r, isNF (β' r))
+    (hC : ∀ r, iC (β' r) ≤ r + 1)
+    (hdesc : ∀ r, icmp (β' (r + 1)) (β' r) = 0) :
+    ∃ m₀ : V, ∀ k : V, 0 < igoodstein m₀ k :=
+  DescentSlowdown.nonterminating_of_slowdown hdef hNF
+    (fun r => (iCanon_def (r + 1) (β' r)).mpr (hC r)) hdesc
+
+/-- **Crux-1 internal run, end-to-end (modulo input `β`, domination, definability).** Chains the whole
+internal-Grzegorczyk girder — `igtTot` tail → `salpha` (Cor 3.4) → `bbeta` (Thm 3.5) → the Lemma-3.6
+engine — into a non-terminating internal Goodstein run. The three remaining gaps are exactly the named
+hypotheses: the input ≺-descending NF `β` (gentzen ε₀-descent), the domination `hdom` (Lemma 3.2), and
+the `𝚺₁`-definability of the slowed sequence (a uniform construction, so quantified over `K`,`s`). -/
+theorem crux1_internal_run (l₀ : ℕ) (hl₀ : 0 < l₀) (wseq : V)
+    {β : V → V} {Cβ : V}
+    (hβNF : ∀ n, isNF (β n)) (hβ0 : ∀ n, β n ≠ 0)
+    (hβdesc : ∀ n, icmp (β (n + 1)) (β n) = 0)
+    (hβC : ∀ j, iC (β (BlkRec.blk wseq j)) ≤ Cβ + j)
+    (hdom : ∀ j, BlkRec.blk wseq (j + 1) = BlkRec.blk wseq j →
+        BlkRec.off wseq j + 1 < iF l₀ (BlkRec.blk wseq j))
+    (hdef : ∀ K s : V, 𝚺₁-Function₁
+        (bbeta K s (salpha (l₀ : V) β (BlkRec.blk wseq) (BlkRec.off wseq) (igtTot l₀)))) :
+    ∃ m₀ : V, ∀ k : V, 0 < igoodstein m₀ k := by
+  obtain ⟨K, s, _, hNF, hC, hdesc⟩ :=
+    bbeta_of_igtTot_blkRec l₀ hl₀ wseq hβNF hβ0 hβdesc hβC hdom
+  exact nonterminating_of_bbeta_facts (hdef K s) hNF hC hdesc
 
 end GoodsteinPA.StdCor34
