@@ -33,7 +33,7 @@ import GoodsteinPA.Reduction
 namespace GoodsteinPA.GentzenCon
 
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
-open GoodsteinPA GoodsteinPA.SeamDefinability GoodsteinPA.Epsilon0Complete
+open GoodsteinPA GoodsteinPA.SeamDefinability GoodsteinPA.Epsilon0Complete GoodsteinPA.InternalPow
 
 /-! ## Step 1 — the PRWO formulation (the shared hinge) -/
 
@@ -131,19 +131,65 @@ theorem gentzen_prwo_implies_consistency :
     𝗣𝗔 ⊢ prwoInstance gentzenDescentφ → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := by
   sorry
 
-/-- **Per-model crux-1 obligation (the deep content, isolated).** In every model `M ⊧ₘ* 𝗣𝗔` in which
-`γ` holds, the PRWO instance for `seq` holds. By contradiction: `M ⊭ prwoInstance seq` unfolds to an
-internal everywhere-≺-descending `seq`-graph; from it one constructs the NF descending `β` plus a
-standard-`l₀` width-domination and feeds `StdCor34.crux1_internal_run_of_width_dom`, producing an
-internal non-terminating Goodstein run — i.e. `M ⊭ γ`, contradiction. The whole internal-Grzegorczyk
-girder (`igtTot → salpha → bbeta → Lemma 3.6`) is built and axiom-clean (lap 54–55); what remains here
-is the *descent → (β, width-domination)* construction, which for the headline is needed only at the
-concrete `seq = gentzenDescentφ` (standard-`l₀` dominated by Rathjen Lemma 3.2, see
-`crux1-headline-needs-only-standard-level`). Held at `sorry`. -/
-theorem prwoInstance_models_of_goodstein (seq : Semisentence ℒₒᵣ 2)
-    (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗣𝗔] (_hγ : M ⊧ₘ goodsteinSentence) :
-    M ⊧ₘ prwoInstance seq := by
+/-- **General-model unfolding of `prwoInstance`** (the model-internal analog of the ℕ-only
+`prwoInstance_faithful`). In any arithmetic structure `M`, `prwoInstance seq` holds iff the `seq`-graph
+does *not* ≺-descend (via `precφ`) at every step — the clean ∀/∃ statement the per-model crux-1
+obligation reasons with, stripped of the syntactic layer. -/
+theorem prwoInstance_models_iff (seq : Semisentence ℒₒᵣ 2)
+    (M : Type*) [ORingStructure M] [Nonempty M] :
+    (M ⊧ₘ prwoInstance seq) ↔
+      ¬ (∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → (M ⊧/![z, y] precφ)) := by
+  unfold prwoInstance
+  rw [models_iff]
+  simp only [Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
+    Semiformula.eval_substs, LogicalConnective.HomClass.map_neg,
+    LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_and,
+    LogicalConnective.Prop.neg_eq, LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq,
+    Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one,
+    Matrix.constant_eq_singleton, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
+    Semiterm.val_bvar, Semiterm.val_operator₂, Semiterm.val_operator₀, Structure.Add.add,
+    Structure.numeral_eq_numeral, ORingStructure.one_eq_one]
+  constructor
+  · intro h hall; exact h (fun a b c hconj => hall a b c hconj.1 hconj.2)
+  · intro h hall; exact h (fun n y z hYN hZN => hall n y z ⟨hYN, hZN⟩)
+
+/-- **The deep crux-1 bridge (isolated).** From a model-internal everywhere-≺-descending `seq`-graph,
+construct the internal-Grzegorczyk inputs (NF descending `β` + width-domination) and run the lap-54/55
+girder `StdCor34.crux1_internal_run_of_width_dom` to produce a non-terminating internal Goodstein run.
+This is the genuine remaining content: the `seq`-descent → (`β`, `wseq`, standard-`l₀` width-domination)
+construction (Rathjen Cor 3.4 inputs), needed for the headline only at `seq = gentzenDescentφ`. Held at
+`sorry`. -/
+theorem nonterminating_of_seq_descent (seq : Semisentence ℒₒᵣ 2)
+    (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
+    (_hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → (M ⊧/![z, y] precφ)) :
+    ∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k := by
   sorry
+
+/-- **Per-model crux-1 obligation.** In every model `M ⊧ₘ* 𝗣𝗔` in which `γ` holds, the PRWO instance
+for `seq` holds. By contradiction: `M ⊭ prwoInstance seq` is an internal everywhere-≺-descending
+`seq`-graph; `nonterminating_of_seq_descent` turns it into an internal non-terminating Goodstein run
+(`∃ m₀, ∀ k, 0 < igoodstein m₀ k`), which directly contradicts `M ⊧ γ` (`∀ m, ∃ N, igoodstein m N = 0`)
+at `m₀`. The deep content is fully isolated in `nonterminating_of_seq_descent`. -/
+theorem prwoInstance_models_of_goodstein (seq : Semisentence ℒₒᵣ 2)
+    (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗣𝗔] (hγ : M ⊧ₘ goodsteinSentence) :
+    M ⊧ₘ prwoInstance seq := by
+  haveI : M ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory' M 𝗜𝚺₁ 𝗣𝗔
+  -- `γ` in `M`: every internal Goodstein run reaches `0` (the general-model analog of the ℕ-only
+  -- `Bridge.goodsteinSentence_faithful` universal-closure eval).
+  have hγ' : ∀ m : M, ∃ N : M, igoodstein m N = 0 := by
+    have h := hγ
+    simp only [goodsteinSentence, models_iff, Nat.reduceAdd, Nat.succ_eq_add_one, Fin.isValue,
+      Semiformula.eval_all, Semiformula.eval_ex, Semiformula.eval_substs,
+      InternalPow.igoodstein_defined.iff, Matrix.cons_val_zero, Semiterm.val_operator₀,
+      Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, Fin.succ_zero_eq_one,
+      Matrix.cons_val_one, Semiterm.val_bvar, Fin.Fin1.eq_one, Matrix.cons_val_fin_one,
+      Fin.succ_one_eq_two, Matrix.cons_app_two] at h
+    exact fun m => (h m).imp fun N h0 => h0.symm
+  rw [prwoInstance_models_iff]
+  intro hdesc
+  obtain ⟨m₀, hm₀⟩ := nonterminating_of_seq_descent seq M hdesc
+  obtain ⟨N, hN⟩ := hγ' m₀
+  exact absurd hN (hm₀ N).ne'
 
 /-- **Crux 1 — Rathjen §3: `γ → PRWO(ε₀)` (every primrec instance), model-theoretic route.** From
 `𝗣𝗔 ⊢ γ` (soundness, `models_of_provable`) `γ` holds in every arithmetic model of `𝗣𝗔`; the per-model
