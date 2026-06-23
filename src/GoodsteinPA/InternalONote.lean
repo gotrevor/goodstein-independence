@@ -2063,4 +2063,98 @@ lemma icmp_betaTail_boundary {a b : V} (ha : isNF a) (hb : isNF b)
   icmp_iadd_finite_mono s t (max a b) a (le_max_left _ _) b (le_max_right _ _) ha hb
     (by rw [icmp_iomul ha hb]; exact hab)
 
+/-! ### `isNF` preservation for the slow-down (`ω·α` and `ω·α + finite`) -/
+
+/-- `icmp y 0 ∈ {1, 2}`: nothing is `≺ 0`. -/
+lemma icmp_right_zero_ne_zero (y : V) : icmp y 0 ≠ 0 := by
+  rcases eq_or_ne y 0 with rfl | hy
+  · rw [icmp_zero_zero]; exact _root_.one_ne_zero
+  · rw [icmp_pos_zero hy]; exact _root_.two_ne_zero
+
+/-- An NF code with a *finite* head (`ocExp e = 0`) has an empty tail: the NF tail-condition
+`icmp (ocExp (ocTail e)) (ocExp e) = 0` is unsatisfiable when `ocExp e = 0` (nothing is `≺ 0`). -/
+private lemma finHead_NF_tail_zero {e : V} (he : isNF e) (hne : e ≠ 0) (hf : ocExp e = 0) :
+    ocTail e = 0 := by
+  have h := (isNF_ocOadd (ocExp e) (ocCoeff e) (ocTail e)).1 (by rw [ocOadd_destruct hne]; exact he)
+  rcases h.2.2.2 with h0 | h0
+  · exact h0
+  · rw [hf] at h0; exact absurd h0 (icmp_right_zero_ne_zero _)
+
+/-- **`1 + e` is NF when `e` is** — the exponent bump of the slow-down preserves normal form. (For a
+finite-head `e` the tail is empty, so the bump just raises the lone coefficient; for an infinite head
+the `1` is absorbed.) -/
+lemma isNF_iadd_one {e : V} (he : isNF e) : isNF (iadd (ocOadd 0 1 0) e) := by
+  rcases eq_or_ne e 0 with rfl | hne
+  · rw [iadd_one_zero]
+    exact (isNF_ocOadd 0 1 0).2 ⟨_root_.one_ne_zero, isNF_zero, isNF_zero, Or.inl rfl⟩
+  · by_cases hf : ocExp e = 0
+    · rw [iadd_one_fin hne hf]
+      have htail0 : ocTail e = 0 := finHead_NF_tail_zero he hne hf
+      refine (isNF_ocOadd 0 _ _).2 ⟨(lt_of_lt_of_le one_pos le_self_add).ne', isNF_zero, ?_, ?_⟩
+      · rw [htail0]; exact isNF_zero
+      · rw [htail0]; exact Or.inl rfl
+    · rw [iadd_one_inf hf]; exact he
+
+/-- **`ω·c` is NF when `c` is** (auxiliary, bounded). Every leading exponent `e ↦ 1+e` stays NF
+(`isNF_iadd_one`) and strictly decreasing (`icmp_one_add` on the NF tail-condition of `c`). -/
+private lemma isNF_iomul_aux : ∀ w : V, ∀ c ≤ w, isNF c → isNF (iomul c) := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro c hcw hc
+    rcases eq_or_ne c 0 with rfl | hcne
+    · rw [iomul_zero]; exact isNF_zero
+    · obtain ⟨e, n, r, rfl⟩ : ∃ e n r, c = ocOadd e n r := ⟨_, _, _, (ocOadd_destruct hcne).symm⟩
+      obtain ⟨hn, hne, hnr, htc⟩ := (isNF_ocOadd e n r).1 hc
+      rw [iomul_ocOadd]
+      refine (isNF_ocOadd _ _ _).2 ⟨hn, isNF_iadd_one hne, ih r (code_lt_of_tail hcw) r le_rfl hnr, ?_⟩
+      rcases eq_or_ne r 0 with rfl | hrne
+      · left; exact iomul_zero
+      · right
+        have hexp : ocExp (iomul r) = iadd (ocOadd 0 1 0) (ocExp r) := by
+          obtain ⟨er, nr, rr, hrdef⟩ : ∃ x y z, r = ocOadd x y z :=
+            ⟨_, _, _, (ocOadd_destruct hrne).symm⟩
+          rw [hrdef, iomul_ocOadd, ocExp_ocOadd, ocExp_ocOadd]
+        rw [hexp, icmp_one_add (isNF_ocExp hnr hrne) hne]
+        exact htc.resolve_left hrne
+
+/-- **`ω·c` is NF when `c` is** (Rathjen §3 slow-down preserves normal form). -/
+lemma isNF_iomul {c : V} (hc : isNF c) : isNF (iomul c) :=
+  isNF_iomul_aux c c le_rfl hc
+
+/-- **`ω·α + m` is NF** for NF `α` and a positive finite `m` (auxiliary, bounded). The finite term
+`ocOadd 0 m 0` lands as a fresh bottom summand: its head exponent `0` is `≺` the non-zero head
+exponent `1 + ocExp r` of the block above it (`icmp_zero_pos`). -/
+private lemma isNF_iadd_finite_aux (m : V) (hm : m ≠ 0) :
+    ∀ w : V, ∀ α ≤ w, isNF α → isNF (iadd (iomul α) (ocOadd 0 m 0)) := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro α hαw hα
+    rcases eq_or_ne α 0 with rfl | hαne
+    · rw [iomul_zero, iadd_zero_left]
+      exact (isNF_ocOadd 0 m 0).2 ⟨hm, isNF_zero, isNF_zero, Or.inl rfl⟩
+    · obtain ⟨e, n, r, rfl⟩ : ∃ e n r, α = ocOadd e n r := ⟨_, _, _, (ocOadd_destruct hαne).symm⟩
+      obtain ⟨hn, hne, hnr, htc⟩ := (isNF_ocOadd e n r).1 hα
+      rw [iadd_iomul_ocOadd_finite]
+      refine (isNF_ocOadd _ _ _).2 ⟨hn, isNF_iadd_one hne, ih r (code_lt_of_tail hαw) r le_rfl hnr, ?_⟩
+      right
+      rcases eq_or_ne r 0 with rfl | hrne
+      · rw [iomul_zero, iadd_zero_left, ocExp_ocOadd]
+        exact icmp_zero_pos (iadd_one_ne_zero e)
+      · have hexp : ocExp (iadd (iomul r) (ocOadd 0 m 0)) = iadd (ocOadd 0 1 0) (ocExp r) := by
+          obtain ⟨er, nr, rr, hrdef⟩ : ∃ x y z, r = ocOadd x y z :=
+            ⟨_, _, _, (ocOadd_destruct hrne).symm⟩
+          rw [hrdef, iadd_iomul_ocOadd_finite, ocExp_ocOadd, ocExp_ocOadd]
+        rw [hexp, icmp_one_add (isNF_ocExp hnr hrne) hne]
+        exact htc.resolve_left hrne
+
+/-- **`ω·α + m` is NF** for NF `α` and positive finite `m` — the slow-down term `βₖ` is a valid
+notation. -/
+lemma isNF_iadd_finite {α m : V} (hα : isNF α) (hm : m ≠ 0) :
+    isNF (iadd (iomul α) (ocOadd 0 m 0)) :=
+  isNF_iadd_finite_aux m hm α α le_rfl hα
+
 end GoodsteinPA.InternalONote
