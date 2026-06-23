@@ -30,9 +30,13 @@
    - **Semantic backbone (Aristotle-eligible, mathlib/ℕ-only):** the slow-down constructions Rathjen
      Lemma 3.3 / Cor 3.4 / Thm 3.5 as plain ℕ/ONote facts (Lemma 3.2 = mathlib
      `exists_lt_ack_of_nat_primrec`). `ineq6_step` ✅ done.
-   - **E-lift X-induction instance:** `PRWO ⟹ TI prec` (the X-essential glue; X-free proof-translation
-     half already done lap 23 = `paLX_derivable2_lMap_of_PA_provable`). Pure logic: least-number
-     principle on the `X`-formula in `paLX` (paLX has the LX induction scheme via the schema inclusion).
+   - **⚠️ Back-end correction (lap 24, see `DESCENT-PLAN.md §1 CORRECTION` + `ON-LINE-REQUEST` lap 24):**
+     `PRWO ⟹ TI prec` is **NOT** "one X-instance" — Rathjen's `PRWO` is *primrec*, but a counterexample to
+     the free-X `TI prec` gives an *X-definable* (non-primrec) descent. The honest Route-B bridge carries
+     out §3 **inside paLX** with the free-X descent. **`Goodstein ⟹ PRWO(ε₀)` (Rathjen §3) is SHARED by
+     both back-ends** (Route A `PRWO ⟹ Con(PA)` + Gödel II via `Reduction.lean`, costs `PA_delta1Definable`;
+     Route B the integrated paLX construction). **Focus E-core on the shared §3; DEFER the back-end choice**
+     until §3 lands and the lit request returns.
    - **Arithmetization:** lift the ℕ-facts to `𝗣𝗔`; computational facts → Σ₁-completeness (free); the
      one real lift = inequality (6)'s `∀k` PA-induction. The dominant (multi-lap) wall.
 2. **F-φ** `rePred_ltPull_natCode` (`SeamDefinability.lean`). **ON ARISTOTLE** (`aris_onotecmp`, UUID
