@@ -133,6 +133,38 @@ lemma iF_natCast : ∀ (l : ℕ) (k : ℕ), iF l (k : V) = (Grz.F l k : V) := by
       intro k
       rw [iF_succ, Grz.F_succ, iIter_natCast, iter_agree]
 
+/-! ## Inflationary growth of `iF` (substrate for Grzegorczyk domination, Rathjen Lemma 3.2)
+
+Every internal Grzegorczyk level is inflationary (`n ≤ iF l n`) — the most basic growth fact the
+width-domination obligation `∀ n, znth wseq n ≤ iF l₀ n` is built on. -/
+
+section Infl
+open LO.FirstOrder.Arithmetic.HierarchySymbol
+variable {fDef : 𝚺₁.Semisentence 2} {f : V → V} {hf : 𝚺₁.DefinedFunction₁ f fDef}
+
+/-- If `f` is inflationary (`∀ x, x ≤ f x`) then so is each of its iterates: `x ≤ f^[c] x`.
+Internal induction on the count `c`. -/
+theorem self_le_iIter (hinfl : ∀ x, x ≤ f x) (x : V) :
+    ∀ c : V, x ≤ iIter fDef f hf x c := by
+  intro c
+  induction c using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (P := (· ≤ ·)) (DefinableFunction.const x)
+      (DefinableFunction₂.comp (F := iIter fDef f hf) (hF := iIter_definable' 𝚺)
+        (DefinableFunction.const x) (DefinableFunction.var 0))
+  case zero => simp
+  case succ c ih => rw [iIter_succ]; exact le_trans ih (hinfl _)
+
+end Infl
+
+/-- **`iF l` is inflationary**: `n ≤ iF l n` for every standard level `l`. Meta-induction on `l`: the
+base is `n ≤ n + 1`; the step uses that the level-`l` iterate started at `n` never drops below `n`
+(`self_le_iIter`, with the IH supplying `iF l`'s inflationarity). -/
+theorem self_le_iF : ∀ (l : ℕ) (n : V), n ≤ iF l n
+  | 0,     n => by rw [iF_zero]; exact le_self_add
+  | l + 1, n => by
+      rw [iF_succ]
+      exact self_le_iIter (fun x => self_le_iF l x) n n
+
 /-! ## Internal partial sum of iterates `ipsum` (substrate for the block decomposition)
 
 `ipsum f n i = Σ_{t=1}^{i} f^[t] n` (`Grz.psum`), the cumulative block-width function whose level sets
