@@ -422,6 +422,74 @@ theorem descentR_lxDef {M : Type} [Nonempty M] [Structure LX M] (f : ℕ → M) 
   -- conjoin with `Q` itself.
   exact lxDef_and (descentQ_lxDef f a) hmin
 
+/-! ### The M-internal descent iteration — `α k = descentR`-iterate of `a₀`, via a coded prefix -/
+
+/-- **A coded descent-prefix of length `k+1`.** `IterPrefix f a₀ k` says there is a coded sequence
+`s` (in `M`'s reduct) of length `k+1` starting at `a₀`, every adjacent pair related by `descentR`
+(the canonical `Mlt`-descent step), and every entry non-`MX`. This is the internal object the descent
+recursion builds by `lx_succ_induction`; `descentR_functional` makes the `k`-th entry a *function* of
+`k` (the iterate `α k`). -/
+def IterPrefix {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) (f : ℕ → M) (a₀ : M) (k : M) : Prop :=
+  letI : ORingStructure M := ReductModel.reductORing
+  letI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  ∃ s, Seq s ∧ lh s = k + 1 ∧ znth s 0 = a₀ ∧
+    (∀ i, i < k → descentR f (znth s i) (znth s (i + 1))) ∧
+    (∀ i, i ≤ k → ¬ MX (znth s i))
+
+/-- **The descent iteration exists at every stage.** By `lx_succ_induction` over `IterPrefix`: the
+base is the singleton `⟨a₀⟩`; the successor extends the prefix by the canonical `descentR`-step of its
+last entry (`descentR_exists`, available since that entry is non-`MX`), which is again non-`MX`
+(`descentR_descends`). The `LX`-definability of `IterPrefix` (`hPdef`) is the one remaining obligation
+— factored as a hypothesis here; it is the coded-iteration-graph definability (PENDING_WORK piece 1). -/
+theorem descent_iterate_seq_exists {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) (f : ℕ → M)
+    (no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y) {a₀ : M} (ha₀ : ¬ MX a₀)
+    (hPdef : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+      ∀ k, IterPrefix hM f a₀ k ↔ Semiformula.Evalm M ![k] e φ) :
+    letI : ORingStructure M := ReductModel.reductORing
+    ∀ k, IterPrefix hM f a₀ k := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  haveI hPAm : M ⊧ₘ* (𝗣𝗔⁻ : Theory ℒₒᵣ) := models_of_subtheory (ReductModel.reduct_models_PA hM)
+  refine lx_succ_induction hM hPdef ?base ?succ
+  case base =>
+    -- `s = ∅ ⁀' a₀` : length `0 + 1`, single entry `a₀`.
+    refine ⟨seqCons ∅ a₀, (seq_empty).seqCons a₀, ?_, ?_, ?_, ?_⟩
+    · rw [Seq.lh_seqCons a₀ seq_empty, lh_empty]
+    · have h := InternalONote.znth_seqCons_self seq_empty a₀; rwa [lh_empty] at h
+    · intro i hi; exact absurd hi (not_lt.mpr zero_le)
+    · intro i hi
+      have hi0 : i = 0 := nonpos_iff_eq_zero.mp hi
+      subst hi0
+      have h := InternalONote.znth_seqCons_self seq_empty a₀; rw [lh_empty] at h
+      rw [h]; exact ha₀
+  case succ =>
+    rintro k ⟨s, hs, hlh, h0, hstep, hmx⟩
+    have hlast : ¬ MX (znth s k) := hmx k le_rfl
+    obtain ⟨v, hv⟩ := descentR_exists hM f no_min hlast
+    have h0lt : (0 : M) < k + 1 := lt_of_le_of_lt zero_le (lt_add_one k)
+    have hklt : k < k + 1 := lt_add_one k
+    -- entries below the top index come from `s`; the top index `k+1` is the fresh `v`.
+    have hznth_lt : ∀ j, j < k + 1 → znth (seqCons s v) j = znth s j := fun j hj =>
+      InternalONote.znth_seqCons_of_lt hs v (by rw [hlh]; exact hj)
+    have hznth_top : znth (seqCons s v) (k + 1) = v := by
+      have h := InternalONote.znth_seqCons_self hs v; rwa [hlh] at h
+    refine ⟨seqCons s v, hs.seqCons v, ?_, ?_, ?_, ?_⟩
+    · rw [Seq.lh_seqCons v hs, hlh]
+    · rw [hznth_lt 0 h0lt]; exact h0
+    · intro i hi
+      rcases (lt_succ_iff_le.mp hi).lt_or_eq with hlt | rfl
+      · -- `i < k`: both entries come from `s`.
+        rw [hznth_lt i (lt_trans hlt hklt), hznth_lt (i + 1) (add_lt_add_of_lt_of_le hlt (le_refl 1))]
+        exact hstep i hlt
+      · -- `i = k`: the new `descentR`-step `descentR f (znth s k) v`.
+        rw [hznth_lt i hklt, hznth_top]; exact hv
+    · intro i hi
+      rcases (le_iff_lt_or_eq.mp hi) with hlt | rfl
+      · rw [hznth_lt i hlt]; exact hmx i (lt_succ_iff_le.mp hlt)
+      · rw [hznth_top]; exact (descentR_descends f hv).2
+
 /-! ### Wall C+D bridge — slowed code-descent ⟹ non-terminating run (the `hbound` payoff, X-essential) -/
 
 /-- **The seam payoff: a slowed `X`-definable code-descent gives a non-terminating internal run.**
