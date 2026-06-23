@@ -133,4 +133,51 @@ lemma iF_natCast : ∀ (l : ℕ) (k : ℕ), iF l (k : V) = (Grz.F l k : V) := by
       intro k
       rw [iF_succ, Grz.F_succ, iIter_natCast, iter_agree]
 
+/-! ## Internal partial sum of iterates `ipsum` (substrate for the block decomposition)
+
+`ipsum f n i = Σ_{t=1}^{i} f^[t] n` (`Grz.psum`), the cumulative block-width function whose level sets
+give Rathjen's `m ↦ (blockIdx, blockOff)` decomposition. Internal `𝚺₁` accumulator recursion on the
+block count `i : V`, reading each iterate via `iIter`. Generic over the fixed `𝚺₁`-function `f` (so it
+serves every meta-level `iF l`). -/
+
+/-- Blueprint for `ipsum` (1 parameter = the seed `n`): `zero ↦ 0`, `succ i ↦ ih + f^[i+1] n`. -/
+def ipsum.blueprint (fDef : 𝚺₁.Semisentence 2) : PR.Blueprint 1 where
+  zero := .mkSigma “y x. y = 0”
+  succ := .mkSigma “y ih i x. ∃ w, !(iIterDef fDef) w x (i + 1) ∧ y = ih + w”
+
+noncomputable def ipsum.construction (fDef : 𝚺₁.Semisentence 2) (f : V → V)
+    (hf : 𝚺₁.DefinedFunction₁ f fDef) : PR.Construction V (ipsum.blueprint fDef) where
+  zero := fun _ ↦ 0
+  succ := fun x i ih ↦ ih + iIter fDef f hf (x 0) (i + 1)
+  zero_defined := .mk fun v ↦ by simp [ipsum.blueprint]
+  succ_defined := .mk fun v ↦ by
+    simp [ipsum.blueprint, (iIter_defined (hf := hf)).iff]
+
+/-- `ipsum f n i = Σ_{t=1}^{i} f^[t] n` on internal `i : V`. -/
+noncomputable def ipsum (fDef : 𝚺₁.Semisentence 2) (f : V → V) (hf : 𝚺₁.DefinedFunction₁ f fDef)
+    (n i : V) : V := (ipsum.construction fDef f hf).result ![n] i
+
+@[simp] lemma ipsum_zero (n : V) : ipsum fDef f hf n 0 = 0 := by
+  simp [ipsum, ipsum.construction]
+
+@[simp] lemma ipsum_succ (n i : V) :
+    ipsum fDef f hf n (i + 1) = ipsum fDef f hf n i + iIter fDef f hf n (i + 1) := by
+  simp [ipsum, ipsum.construction]
+
+/-- The `𝚺₁` graph of `(n, i) ↦ ipsum f n i`. -/
+def ipsumDef (fDef : 𝚺₁.Semisentence 2) : 𝚺₁.Semisentence 3 :=
+  (ipsum.blueprint fDef).resultDef.rew (Rew.subst ![#0, #2, #1])
+
+lemma ipsum_defined : 𝚺₁-Function₂ (ipsum fDef f hf : V → V → V) via ipsumDef fDef := .mk
+  fun v ↦ by simp [(ipsum.construction fDef f hf).result_defined_iff, ipsumDef, ipsum]; rfl
+
+lemma ipsum_definable : 𝚺₁-Function₂ (ipsum fDef f hf : V → V → V) :=
+  (ipsum_defined (hf := hf)).to_definable
+lemma ipsum_definable' (Γ) : Γ-[m + 1]-Function₂ (ipsum fDef f hf : V → V → V) :=
+  (ipsum_definable (hf := hf)).of_sigmaOne
+
+/-- **`ipsum` is monotone in the block count** (each block has nonneg width). -/
+lemma ipsum_le_succ (n i : V) : ipsum fDef f hf n i ≤ ipsum fDef f hf n (i + 1) := by
+  rw [ipsum_succ]; exact le_self_add
+
 end GoodsteinPA.IIter
