@@ -196,4 +196,73 @@ theorem psum_add_blockOff (f : ℕ → ℕ) (n m : ℕ) :
     psum f n (blockIdx f n m) + blockOff f n m = m := by
   have := psum_blockIdx_le f n m; simp only [blockOff]; omega
 
+/-! ## The Lemma 3.3 function `g` and its structural invariants
+
+`g 0 = g₀` (base); `g (l+1) n m = ω^(l+1)·(n-i) + g l (F_l^i(n)) j` for `m < F(l+1)(n)` (block `i,j`
+from the decomposition), else `0`. We first establish the two structural invariants — `g l n m` is
+`NF`, and `repr (g l n m) < ω^(l+1)` (values stay below `ω^(l+1)`, the fact that lets each block term
+nest as an `oadd` with leading exponent `l+1`). The two Lemma-3.3 *properties* (descent + the
+`C ≤ K·(n+m+1)` bound) build on these next. -/
+
+/-- Rathjen's `g` for the hierarchy `F`. -/
+def g : ℕ → ℕ → ℕ → ONote
+  | 0,     n, m => g0 n m
+  | l + 1, n, m =>
+      if m < F (l + 1) n then
+        blk (l + 1) (n - blockIdx (F l) n m).toPNat'
+          (g l ((F l)^[blockIdx (F l) n m] n) (blockOff (F l) n m))
+      else 0
+
+@[simp] theorem g_zero (n m : ℕ) : g 0 n m = g0 n m := rfl
+
+theorem g_succ_of_lt {l n m : ℕ} (h : m < F (l + 1) n) :
+    g (l + 1) n m = blk (l + 1) (n - blockIdx (F l) n m).toPNat'
+      (g l ((F l)^[blockIdx (F l) n m] n) (blockOff (F l) n m)) := by
+  simp only [g, if_pos h]
+
+theorem g_succ_of_ge {l n m : ℕ} (h : ¬ m < F (l + 1) n) : g (l + 1) n m = 0 := by
+  simp only [g, if_neg h]
+
+/-- **Value bound invariant**: `repr (g l n m) < ω^(l+1)`. Base: `g₀` is a finite ordinal `< ω`.
+Step: `ω^(l+1)·c + (tail < ω^(l+1)) < ω^(l+1)·(c+1) < ω^(l+1)·ω = ω^(l+2)`. -/
+theorem g_lt : ∀ (l n m : ℕ), (g l n m).repr < (ω : Ordinal) ^ (l + 1) := by
+  intro l
+  induction l with
+  | zero =>
+    intro n m
+    rw [g_zero, g0, ONote.repr_ofNat, pow_one]
+    exact_mod_cast Ordinal.natCast_lt_omega0 _
+  | succ l ih =>
+    intro n m
+    by_cases h : m < F (l + 1) n
+    · rw [g_succ_of_lt h, repr_blk]
+      set c : ℕ := ((n - blockIdx (F l) n m).toPNat' : ℕ) with hc
+      set r : Ordinal := (g l ((F l)^[blockIdx (F l) n m] n) (blockOff (F l) n m)).repr with hr
+      have hrlt : r < (ω : Ordinal) ^ (l + 1) := ih _ _
+      calc (ω : Ordinal) ^ (l + 1) * (c : ℕ) + r
+          < (ω : Ordinal) ^ (l + 1) * (c : ℕ) + (ω : Ordinal) ^ (l + 1) :=
+            (add_lt_add_iff_left _).2 hrlt
+        _ = (ω : Ordinal) ^ (l + 1) * ((c : ℕ) + 1) := by rw [mul_add, mul_one]
+        _ < (ω : Ordinal) ^ (l + 1) * ω :=
+            (mul_lt_mul_iff_of_pos_left (pow_pos Ordinal.omega0_pos _)).2
+              (by exact_mod_cast Ordinal.natCast_lt_omega0 ((c : ℕ) + 1))
+        _ = (ω : Ordinal) ^ (l + 1 + 1) := (pow_succ _ _).symm
+    · rw [g_succ_of_ge h, ONote.repr_zero]
+      exact pow_pos Ordinal.omega0_pos _
+
+/-- **`NF` invariant**: every `g l n m` is in normal form. Uses `g_lt` to show the tail nests
+below the leading exponent `ofNat (l+1)`. -/
+theorem g_NF : ∀ (l n m : ℕ), (g l n m).NF := by
+  intro l
+  induction l with
+  | zero => intro n m; rw [g_zero]; exact g0_NF n m
+  | succ l ih =>
+    intro n m
+    by_cases h : m < F (l + 1) n
+    · rw [g_succ_of_lt h]
+      refine ONote.NF.oadd inferInstance _ (ONote.NF.below_of_lt' ?_ (ih _ _))
+      rw [ONote.repr_ofNat]
+      exact_mod_cast g_lt l _ _
+    · rw [g_succ_of_ge h]; exact ONote.NF.zero
+
 end GoodsteinPA.Grz
