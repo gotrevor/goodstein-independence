@@ -23,23 +23,34 @@ Durable overview = **`STATUS.md`** (refreshed this lap). The lone deep wall is u
    `complete` ⟹ `paLX ⊢ tiSent`; `provable_def` + `provable_iff_derivable2` + `Semiformula.emb_toEmpty`
    (`↑tiSent = TI prec`) to land `Derivation2 (paLX:Schema) {TI prec}`. **INVARIANT HELD** — `#print
    axioms` byte-identical to before; no new math axiom.
+3. **`e9576cb` — decompose the wall into B + C+D.** Restructured `no_min_descent_absurd_of_goodstein`
+   from a monolithic `sorry` into the genuine contradiction skeleton: `letI oM := reductORing` +
+   `haveI := reduct_models_isigma1 hM` (installs `[M ⊧ₘ* 𝗜𝚺₁]` on the reduct — the lap-33 Eq payoff),
+   then two narrower disclosed `have`-sorries `hCD : ∃ m₀, ∀ k, 0 < igoodstein m₀ k` (C+D) and
+   `hB : ∃ k, igoodstein m₀ k = 0` (B), assembled by `exact absurd hk (hpos k).ne'`. Imports +
+   `ReductModel`/`DescentInternal`. **KEY:** C+D's run side is ALREADY axiom-clean
+   (`DescentArith.igoodstein_nonterminating_of_dominating`: `(base, step, hpos) ⟹ ∀k 0<igoodstein m₀ k`).
+4. **Wall-B finding + `ON-LINE-REQUEST.md` filed.** Wall B is the `PA_delta1Definable`-flavoured gap:
+   `codeOfREPred goodsteinTerminates` is opaque (`Classical.epsilon` Kleene code, only an ℕ-spec), so
+   bridging it to `igoodstein` *inside a nonstandard `M ⊧ 𝗜𝚺₁`* needs provable code-correctness Foundation
+   doesn't expose. Anti-fraud forbids axiomatizing it. Filed a sharp request (Foundation `Arithmetization`
+   API? Hájek–Pudlák Σ₁-definitional-equivalence technique? non-epsilon `codeOf…` variant?).
 
-## NEXT — the deep content (walls B/C/D), now with `[Structure.Eq LX M]` in hand
-Prove `no_min_descent_absurd_of_goodstein` (`DescentSemantic.lean:140`). Substrate is built (laps 26–32):
-- **Wall B — connect the opaque blob to `igoodstein`.** `hgood : M ⊧ lMap Φ goodsteinSentence` mentions
-  `codeOfREPred goodsteinTerminates`; bridge it IΣ₁-internally (in `M`'s reduct, installed via
-  `ReductModel.reduct_models_isigma1` — now usable since `[Structure.Eq LX M]` is present) to the
-  transparent `∃N, igoodstein m N = 0` (lap-26 `InternalGoodstein`/`InternalBridge`). **Good Aristotle
-  candidate** once isolated as a self-contained IΣ₁ lemma.
-- **Wall C — M-internal `Mlt`-descent.** From `no_min` + `ha₀`, build a *definable* descending `G : M → M`
-  via `M`'s LX least-number principle (`reduct_models_isigma1`/`InductionScheme LX`). Must be M-internal
-  (definable + M-recursion), NOT metatheoretic `choice` — see `PENDING_WORK.md` ⚠.
-- **Wall D — slow-down + inequality (6).** Slow `(G k)` ⟹ `(βₖ)` with `C(βₖ) ≤ k+1`; run the special
-  Goodstein seq from `m₀ = T̂²(β₀)`; iterate `DescentCore.ineq6_step` by `M`'s LX-induction ⟹ `M ⊧ ∀k mₖ>0`;
-  contradict B. `DescentCore.lemma36_nonterminating`/`lemma36_ineq6` is the route-neutral ONote/ℕ kernel.
+## NEXT — attack wall C+D (independent of the B literature gate)
+Prove `no_min_descent_absurd_of_goodstein`'s `hCD` (`DescentSemantic.lean`), i.e.
+`∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k`, from `no_min`/`ha₀`. This is independent of wall B and not
+literature-gated. Sub-pieces (substrate built laps 26–32):
+- **C — M-internal `Mlt`-descent.** From `no_min` + `ha₀`, build a *definable* descending `G : M → M` (or
+  the `β`-sequence directly) via `M`'s LX least-number principle (`reduct_models_isigma1`/`InductionScheme
+  LX`; `MX`/`¬MX` is the LX-atomic `Xsym`, so least-number applies). M-internal, NOT `choice` — see
+  `PENDING_WORK.md` ⚠.
+- **D — slow-down + dominating bound.** Slow `(G k)` ⟹ `(βₖ)`, `C(βₖ) ≤ k+1`; set `b k = T̂^{k+2}(βₖ)` as a
+  `𝚺₁`-function in `M`; discharge `(base, step, hpos)` for `igoodstein_nonterminating_of_dominating`
+  (`step` = internal `DescentCore.ineq6_step`). Kernel: `DescentCore.lemma36_nonterminating`/`lemma36_ineq6`
+  (route-neutral ONote/ℕ) — port to internal-M.
 
-Start with **B** (most self-contained; Aristotle-feedable) or **C** (the M-recursion skeleton). Read
-`DESCENT-PLAN.md §5` + `ReductModel.lean` (`reductORing`, `reduct_models_isigma1`) first.
+Meanwhile **probe Foundation's `Arithmetization`/`ISigma1.Metamath` library** for any model-internal
+`codeOfREPred` correctness (wall B), in case the offline-request answer is already on disk.
 
 ## LOCKED untouched (anti-fraud)
 `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `Statement.lean` `sorry`.
