@@ -24,11 +24,14 @@ axiom-clean). **Focus E-core on the shared §3; defer the back-end choice.** Lit
 
 **✅ Landed lap 25 (`DescentCore.lean`, axiom-clean):** Rathjen's tower `ωₙ` (`omegaStack`: `ω₀=1`,
 `ωₙ₊₁=ω^{ωₙ}`) + `omegaStack_NF`, `C_omegaStack : C(ωₙ)=1`, `repr_omegaStack_succ`,
-`repr_omegaStack_strictMono` (the Thm 3.5 head-term scaffold). **Next §3 brick = the C-arithmetic for the
-tail terms `β_{K(n+1)+i} = ω·αₙ + (K-i)`:** `C(1+e) ≤ C(e)+1` (needs `ONote.add`/`addAux` internals) →
-`C(ω*α) ≤ C(α)+1` (induction on `ONote.mul` recursion; "mul by ω bumps coeffs by ≤1") → then the explicit
-`βᵣ` construction + pointwise `C(βᵣ)≤r+1` and single-step descent (NON-vacuous — state pointwise, not as
-"∀ infinite descending seq", to avoid the vacuity trap that `lemma36_*` flagged).
+`repr_omegaStack_strictMono` (the Thm 3.5 head-term scaffold). **✅ Also landed lap 25 (`DescentCore.lean`, axiom-clean):** the C-arithmetic for the tail terms —
+`one_add_oadd` (`1 + oadd e' n' a'` evaluation), `C_one_add_le : C(1+e) ≤ C(e)+1`, and the headline
+`C_omega_mul_le : C(ω·α) ≤ C(α)+1` (= Rathjen's "multiplying by ω bumps coeffs by ≤1"; `omegaO := oadd 1 1 0`,
+induction on the `ONote.mul` recursion). **Next §3 brick = the explicit `βᵣ` construction** (Thm 3.5):
+`β_{K(n+1)+i} := ω·αₙ + (K-i)` and `βⱼ := Σ_{i<K-j} ω_{s-i}` (head), with pointwise `C(βᵣ)≤r+1` (from
+`C_omega_mul_le` + `C_omegaStack`) and single-step descent `βᵣ₊₁ < βᵣ` — NON-vacuous (state pointwise, not
+as "∀ infinite descending seq", to avoid the vacuity trap that `lemma36_*` flagged). Needs `ω·αₙ + finite`
+= `omegaO * αₙ + (k:ONote)` and `repr`/`<` facts for the descent (mathlib `repr_add`/`repr_mul`).
 
 **Next concrete bricks (route-independent §3):** (1) the slow-down constructions Rathjen Lemma 3.3 / Cor
 3.4 / Thm 3.5 — the explicit padding function `g : ℕ² → ω^ω` and the bounded-coefficient sequence `βⱼ`,

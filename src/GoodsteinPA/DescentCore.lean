@@ -64,6 +64,8 @@ def C : ONote → ℕ
 
 @[simp] theorem C_zero : C 0 = 0 := rfl
 
+@[simp] theorem C_one : C 1 = 1 := rfl
+
 @[simp] theorem C_oadd (e : ONote) (n : ℕ+) (r : ONote) :
     C (ONote.oadd e n r) = max (max (C e) (n : ℕ)) (C r) := rfl
 
@@ -131,6 +133,59 @@ theorem repr_omegaStack_strictMono : ∀ n, (omegaStack n).repr < (omegaStack (n
     have ih := repr_omegaStack_strictMono n
     rw [repr_omegaStack_succ, repr_omegaStack_succ]
     exact (Ordinal.opow_lt_opow_iff_right Ordinal.one_lt_omega0).2 ih
+
+/-! ## `C`-arithmetic for the Thm 3.5 tail terms `β_{K(n+1)+i} = ω·αₙ + (K-i)`
+
+Thm 3.5's coefficient bound `C(βᵣ) ≤ r+1` rests on the fact that **multiplying by `ω` raises the
+max-coefficient by at most 1** (Rathjen: "since multiplying by ω increases the coefficients by at most
+one"). The mechanism is `1 + e` (the exponent shift `ω·ω^e = ω^{1+e}`) only bumping `C` by ≤ 1. Both
+are clean structural `ONote` facts (no `NF`, no well-foundedness). -/
+
+/-- Evaluate `1 + oadd e' n' a'`: if the leading exponent `e'` is `0` (a finite head) the head
+coefficient grows by `1`; otherwise `1` is absorbed. (From `ONote.addAux`/`cmp`.) -/
+theorem one_add_oadd (e' : ONote) (n' : ℕ+) (a' : ONote) :
+    (1 : ONote) + ONote.oadd e' n' a' =
+      if e' = 0 then ONote.oadd 0 (1 + n') a' else ONote.oadd e' n' a' := by
+  rw [show (1 : ONote) = ONote.oadd 0 1 0 from rfl, ONote.oadd_add, ONote.zero_add]
+  cases e' with
+  | zero => simp [ONote.addAux, ONote.cmp]
+  | oadd => simp [ONote.addAux, ONote.cmp]
+
+/-- **`C(1 + e) ≤ C(e) + 1`** — adding `1` raises the max-coefficient by at most 1. -/
+theorem C_one_add_le (e : ONote) : C (1 + e) ≤ C e + 1 := by
+  cases e with
+  | zero => decide
+  | oadd e' n' a' =>
+    rw [one_add_oadd]
+    split
+    · next h => subst h; simp only [C_oadd, C_zero, PNat.add_coe, PNat.one_coe]; omega
+    · simp only [C_oadd]; omega
+
+/-- `ω` as an `ONote` (`= ω^1·1 = oadd 1 1 0`). -/
+def omegaO : ONote := ONote.oadd 1 1 0
+
+/-- **`C(ω·α) ≤ C(α) + 1`** (Rathjen Thm 3.5: multiplying by `ω` bumps coefficients by ≤ 1). Induction
+on the `ONote.mul` recursion: the `e₂=0` head case keeps `C` (coefficient `1·n₂`, head exponent `ω¹`);
+the `e₂≠0` case shifts the exponent to `1+e₂` (bounded by `C_one_add_le`) and recurses into the tail
+(bounded by the IH). -/
+theorem C_omega_mul_le : ∀ α : ONote, C (omegaO * α) ≤ C α + 1
+  | 0 => by simp [omegaO]
+  | ONote.oadd e₂ n₂ a₂ => by
+    have ih := C_omega_mul_le a₂
+    rw [omegaO] at ih ⊢
+    rw [ONote.oadd_mul]
+    by_cases h : e₂ = 0
+    · subst h
+      simp only [↓reduceIte, C_oadd, C_zero, C_one, PNat.mul_coe, PNat.one_coe, one_mul]
+      have hn : (1 : ℕ) ≤ (n₂ : ℕ) := n₂.one_le
+      omega
+    · rw [if_neg h]
+      simp only [C_oadd] at ih ⊢
+      have h1 := C_one_add_le e₂
+      have e1 : C e₂ ≤ max (max (C e₂) (n₂ : ℕ)) (C a₂) := le_max_of_le_left (le_max_left _ _)
+      have e2 : (n₂ : ℕ) ≤ max (max (C e₂) (n₂ : ℕ)) (C a₂) := le_max_of_le_left (le_max_right _ _)
+      have e3 : C a₂ ≤ max (max (C e₂) (n₂ : ℕ)) (C a₂) := le_max_right _ _
+      refine Nat.max_le.mpr ⟨Nat.max_le.mpr ⟨?_, ?_⟩, ?_⟩ <;> omega
 
 /-! ## Rathjen Lemma 3.6 — the special Goodstein run from `T̂²_ω(β₀)` does not terminate
 
