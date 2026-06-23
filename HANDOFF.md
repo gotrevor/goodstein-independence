@@ -27,12 +27,15 @@ free), drops the literature gate (standard model theory), reuses the lap-26 subs
 in `M`'s `ℒₒᵣ`-reduct).
 
 ## Next actions (priority; `PENDING_WORK.md` lap-30 + `DESCENT-PLAN §5` have detail)
-1. **(easy, do next) `M ⊧ lMap goodsteinSentence`.** E-lift + Foundation **soundness** for
-   `Derivation2`/`Schema` + `eval_lMap`. Carves the easy front off `paLX_models_TI_of_PA_provable`,
-   isolating the deep core. Find `sound!`/`Derivation`-soundness; confirm it applies to the `Schema`.
-2. **X-descent from `¬TI prec`** via `M`'s LX least-number principle (`M ⊧ InductionScheme LX`).
-3. **(deep core) Slow-down + inequality (6) in `M`** (Rathjen §3): lap-26 `igoodstein` run + `ineq6_step`
-   iterated by `M`'s LX-induction ⟹ `M ⊧ ∀k mₖ>0` ⟹ ⊥ with (1). The genuine multi-lap content.
+1. **✅ DONE (step 1): `M ⊧ lMap goodsteinSentence`.** `models_lMap_goodstein` / `reduct_models_goodstein`
+   (`DescentSemantic.lean`, axiom-clean) — E-lift + `models_of_provable` soundness + `models_lMap`. The
+   main lemma now consumes this; the `sorry` is isolated to the deep core (steps 2–3).
+2. **(next) X-descent from `¬TI prec`** via `M`'s LX least-number principle (`M ⊧ InductionScheme LX`).
+   First sub-step: unfold `Evalfm M f (TI prec)` to `M ⊧ Prog(X) → ∀a, X a`; intro `Prog`, contradiction
+   setup; find how `M ⊧ₘ* paLX` yields a usable least-number / `InductionScheme LX` instance in `M`.
+3. **(deep core) Slow-down + inequality (6) in `M`** (Rathjen §3): lap-26 `igoodstein` run (needs
+   `M`'s `ℒₒᵣ`-reduct as an `ORingStructure`/`𝗜𝚺₁` model — a bridge to build) + `ineq6_step` iterated by
+   `M`'s LX-induction ⟹ `M ⊧ ∀k mₖ>0` ⟹ ⊥ with step 1. The genuine multi-lap content.
 
 ## LOCKED untouched (anti-fraud)
 `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `Statement.lean:22` `sorry`.

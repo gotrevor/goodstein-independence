@@ -63,6 +63,34 @@ instance instEncodableLXRel (k : ℕ) : Encodable (LX.Rel k) :=
 noncomputable instance instEncodableLX : Language.Encodable LX :=
   ⟨fun _ => inferInstance, fun _ => inferInstance⟩
 
+/-! ### Step 1 (PROVED): import Goodstein into the model
+
+The easy front of the semantic obligation: under `𝗣𝗔 ⊢ goodsteinSentence`, the lifted Goodstein sentence
+holds in every model `M ⊧ paLX`. Pure proof-translation + soundness, no Rathjen content. -/
+
+open GoodsteinPA.DescentLift in
+/-- **`M` models the lifted Goodstein sentence.** From `𝗣𝗔 ⊢ goodsteinSentence`, E-lift
+(`paLX_derivable2_lMap_of_PA_provable`) gives `paLX ⊢ lMap Φ goodsteinSentence` (as an `LX`-sentence, via
+`provable_def` + `Semiformula.lMap_emb`); soundness (`models_of_provable`) then transports it into any
+model `M ⊧ paLX`. -/
+theorem models_lMap_goodstein (h : 𝗣𝗔 ⊢ ↑goodsteinSentence)
+    {M : Type} [Nonempty M] [Structure LX M] (hM : M ⊧ₘ* (paLX : Theory LX)) :
+    M ⊧ₘ (Semiformula.lMap Φ goodsteinSentence : Sentence LX) := by
+  obtain ⟨d⟩ := paLX_derivable2_lMap_of_PA_provable goodsteinSentence h
+  refine models_of_provable hM ?_
+  rw [provable_def, show (↑(Semiformula.lMap Φ goodsteinSentence) : SyntacticFormula LX)
+        = Semiformula.lMap Φ (↑goodsteinSentence : SyntacticFormula ℒₒᵣ) from
+      (Semiformula.lMap_emb goodsteinSentence).symm]
+  exact provable_iff_derivable2.mpr ⟨d⟩
+
+open GoodsteinPA.DescentLift in
+/-- **The `ℒₒᵣ`-reduct of `M` models `goodsteinSentence`** (the directly-usable arithmetic form of
+`models_lMap_goodstein`, via `Semiformula.models_lMap`): every internal Goodstein run terminates in `M`. -/
+theorem reduct_models_goodstein (h : 𝗣𝗔 ⊢ ↑goodsteinSentence)
+    {M : Type} [Nonempty M] [inst : Structure LX M] (hM : M ⊧ₘ* (paLX : Theory LX)) :
+    (inst.lMap Φ).toStruc ⊧ goodsteinSentence :=
+  Semiformula.models_lMap.mp (models_lMap_goodstein h hM)
+
 /-! ### The single semantic obligation (Rathjen §3, model-internal) -/
 
 /-- **The E wall, reduced to one model-theoretic statement (DISCLOSED `sorry`).**
@@ -90,6 +118,11 @@ remaining genuine content is steps 2–3 carried out in `M`. -/
 theorem paLX_models_TI_of_PA_provable (h : 𝗣𝗔 ⊢ ↑goodsteinSentence)
     {M : Type} [Nonempty M] [Structure LX M] (hM : M ⊧ₘ* (paLX : Theory LX)) (f : ℕ → M) :
     Semiformula.Evalfm M f (Boundedness.TI Thm56.prec) := by
+  -- Step 1 (PROVED): the lifted Goodstein sentence holds in `M`.
+  have _hgood : M ⊧ₘ (Semiformula.lMap GoodsteinPA.DescentLift.Φ goodsteinSentence : Sentence LX) :=
+    models_lMap_goodstein h hM
+  -- Steps 2–3 (the deep core, DISCLOSED): from `_hgood` + `hM` (⊧ paLX, so `Prog`/`InductionScheme LX`),
+  -- build the X-definable `≺`-descent, slow it down, run inequality (6), contradict `_hgood` ⟹ `TI prec`.
   sorry
 
 /-! ### `DescentE` via first-order completeness -/
