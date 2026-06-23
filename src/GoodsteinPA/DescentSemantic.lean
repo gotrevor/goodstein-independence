@@ -243,6 +243,40 @@ theorem lx_least_number {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq L
     exact IH y hy hPy)
   exact hall a ha
 
+/-! ### Tool for wall D — `X`-essential non-termination of the dominated internal Goodstein run
+
+The lap-29 `DescentArith.igoodstein_nonterminating_of_dominating` consumes an `ℒₒᵣ`-`𝚺₁` bound `b`. But
+the Rathjen §3 dominating bound `b k = T̂^{k+2}(βₖ)` is extracted from the **`X`-descent** (wall C), hence
+`X`-dependent — it is an `LX`-formula, *not* an `ℒₒᵣ`-`𝚺₁` function — so the inequality-(6) iteration must
+run by `lx_succ_induction` (the `X`-essential succ-induction), not `sigma1_pos_succ_induction`. This is the
+`LX` analog of the run side, which wall C feeds once it supplies `(b, m₀)`. Axiom-clean. -/
+
+/-- **Wall-D substrate (`X`-essential).** Given an `LX`-definable bound predicate `P k := b k ≤
+igoodstein m₀ k` (`hPdef`), the seed domination (`base`), the internalized inequality-(6) step (`step`),
+and bound positivity (`hpos`), the internal Goodstein run from `m₀` never reaches `0` in `M`. The
+iteration is `lx_succ_induction` over `P` (which mentions `X` through `b`), and positivity transfers
+`0 < b k ≤ igoodstein m₀ k`. -/
+theorem lx_nonterminating {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) :
+    letI : ORingStructure M := ReductModel.reductORing
+    letI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+    ∀ {b : M → M} (m₀ : M),
+      (∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+        ∀ k, (b k ≤ InternalPow.igoodstein m₀ k) ↔ Semiformula.Evalm M ![k] e φ) →
+      b 0 ≤ m₀ →
+      (∀ k, b k ≤ InternalPow.igoodstein m₀ k →
+        b (k + 1) ≤ InternalPow.igoodstein m₀ (k + 1)) →
+      (∀ k, 0 < b k) →
+      ∀ k, 0 < InternalPow.igoodstein m₀ k := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  intro b m₀ hPdef base step hpos
+  have hineq : ∀ k, b k ≤ InternalPow.igoodstein m₀ k := by
+    refine lx_succ_induction hM hPdef ?_ step
+    simpa using base
+  intro k
+  exact lt_of_lt_of_le (hpos k) (hineq k)
+
 /-! ### Step 3 — the genuine remaining obligation (Rathjen §3 in `M`), as ONE named `sorry` -/
 
 /-- **The lone remaining wall: a non-`MX`-minimal seed yields a contradiction with Goodstein-in-`M`

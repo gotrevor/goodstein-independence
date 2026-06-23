@@ -1,5 +1,39 @@
 # Pending work — open obligations & attack paths
 
+## 🎯 LAP-34 (2026-06-23) — wall-C/D model-internal induction TOOLKIT landed. Read FIRST.
+
+**Done this lap (green 1304 jobs, all `[propext, choice, Quot.sound]`, in `DescentSemantic.lean`):** the
+`X`-essential induction toolkit `no_min_descent_absurd_of_goodstein`'s `hCD` (wall C+D) needs, all derived
+from lap-33's `lx_succ_induction`:
+- `lxDef_ballLT` — `fun x ↦ ∀ y<x, P y` is `LX`-definable when `P` is (installs `Structure.LT LX M` off
+  `reductORing`; formula `(φ ⇜ ![#0]).ballLT #0`). The closure step order-induction needs.
+- `lx_order_induction` — `<`-below progressivity ⟹ totality for `LX`-definable `P` over `M`'s reduct
+  arithmetic `<`. Mirrors Foundation's `InductionOnHierarchy.order_induction`.
+- `lx_least_number` — every nonempty `LX`-definable `P` has a `<`-least witness. **The choice-free,
+  M-internal selector wall C's `Mlt`-descent recursion picks the canonical `Mlt`-smaller ¬MX element
+  with** (resolves the ⚠ "must be definable, not metatheoretic `choice`" subtlety).
+- `lx_nonterminating` — **wall-D run side, `X`-essential form.** Given an `LX`-definable bound predicate
+  `P k := b k ≤ igoodstein m₀ k`, seed domination `b 0 ≤ m₀`, the internalized ineq-(6) `step`, and
+  `0 < b k`, the run never reaches `0`. Iteration is `lx_succ_induction` (NOT the lap-29
+  `igoodstein_nonterminating_of_dominating`, which wants an `ℒₒᵣ`-`𝚺₁` bound — but the Rathjen §3 bound
+  `b k = T̂^{k+2}(βₖ)` is `X`-dependent, so that ℒₒᵣ tool is the wrong one; this is the corrected substrate).
+
+**NEXT (wall C — the genuine remaining construction), hardest-first:**
+1. **Build the `X`-descent `a : M → M`** from `no_min`/`ha₀`: `a 0 = a₀`, `a (k+1) =` `lx_least_number`
+   applied to the `LX`-predicate `Q y := Mlt f y (a k) ∧ ¬MX y` (nonempty by `no_min`). This needs
+   **M-internal recursion** so `a` is `LX`-definable as a function of `k` (Foundation `PR.Construction`,
+   the way `igoodstein` was built — but the step is `X`-dependent, so it's an `LX`-recursion, not
+   `ℒₒᵣ`-`𝚺₁`; check whether `PR.Construction` admits `LX`-formula steps or needs a bespoke
+   sequence-coding (HFS `Seq`) argument). The `Mlt`-strict-descent + `¬MX`-along-`a` are then immediate.
+2. **Slow-down `βₖ`** (Rathjen 3.3/3.4/Thm 3.5): from the `Mlt`-descent `(a k)` build `(βₖ)` with
+   `C(βₖ) ≤ k+1`, as an `LX`-definable function. The ONote/`C` machinery is in `DescentCore`/`Domination`
+   (route-neutral) — port the value facts to internal-`M`.
+3. **Define `b k = T̂^{k+2}(βₖ)`, `m₀ = T̂²(β₀)`; prove `(hPdef, base, step, hpos)`** and feed
+   `lx_nonterminating` ⟹ `hCD`. `step` is the internalized `DescentCore.ineq6_step`.
+
+Wall B (the opaque `codeOfREPred` ↔ `igoodstein` bridge) is unchanged + literature-gated
+(`ON-LINE-REQUEST.md`); independent of wall C/D.
+
 ## 🎯 LAP-31 (2026-06-23) — reduct→𝗜𝚺₁ bridge DONE + architecture correction (equality). Read FIRST.
 
 **Verified this lap (green 1303 jobs, axiom-clean `[propext, choice, Quot.sound]`):**
