@@ -93,6 +93,27 @@ order-reflection. The base-change/run side is now substrate-direct. NEXT cold-st
 `isONoteCode` predicate (Fixpoint/Δ₁), `iC`/`ievalNat` via course-of-values table (à la `ibumpTable`),
 internal `evalNat_lt_iff`. Multi-lap.
 
+**⭐ STRATEGIC FINDING lap 37 (read `ANALYSIS-2026-06-23-lap37-order-reflection-opacity.md`).**
+Grounded the order-reflection wall in Rathjen 2014 §3 (paper on disk). The descent is `Mlt f y x =
+M ⊧ precφ(y,x)` with `precφ = codeOfREPred₂(natCode a < natCode b)` — the **opaque r.e. blob**, the
+SAME opacity that was wall B; `natCode = (Denumerable.eqv NONote).symm` is arbitrary. Rathjen's βₖ
+construction (Cor 3.4 / Thm 3.5) manipulates the **CNF** of descent elements, so the descent must be
+decodable to CNF in `M`. **Route decision = (b): transparent HFS-CNF coding.** Build internal ONote
+codes (a code IS its CNF), define `natCodeT : ℕ ≃ NONote` + transparent `precT`, re-wire seam + F
+(`epsilon0_le_orderType_ltPull` holds for ANY `e : ℕ ≃ NONote`, so the order-type half transfers;
+F-φ computability is easier for transparent CNF compare). Multi-lap girder refactor of the (axiom-
+clean) order argument — re-validate `peano_not_proves_TI` with `#print axioms` at every step.
+
+**✅ FOUNDATION STARTED lap 37 (green, sorry-free, `src/GoodsteinPA/InternalONote.lean`).** Internal
+ONote CNF codes as nested HFS pairs: `ocOadd ec n rc := ⟪⟪ec,n⟫,rc⟫+1` (0 ↦ 0), decode projections
+`ocExp`/`ocCoeff`/`ocTail` with round-trip simp lemmas, and the **subterm-bound lemmas** `ocExp_lt`/
+`ocCoeff_lt`/`ocTail_lt` (+ `_of_pos` forms) — the course-of-values strict-decrease facts the next
+recursions need. NEXT bricks on top (hardest-first): (1) `isONoteCode` predicate (Fixpoint or bounded
+strong-rec over the code value, using the subterm bounds); (2) `iC : V → V` (max coeff) via a CofV
+table; (3) `ievalNat : V → V → V` matching `evalNat_succ_base`'s `ibump` base-bump; (4) `icmp` CNF
+comparison `𝚫₁` + internal `evalNat_lt_iff` (the order-reflection the descent consumes); then the
+seam/F re-wire to `natCodeT` and the slow-down `βₖ`.
+
 ---
 
 ## 🎯 LAP-34 (2026-06-23) — wall-C/D model-internal induction TOOLKIT landed. Read FIRST.
