@@ -202,6 +202,21 @@ theorem iF_mono_level {l l' : ℕ} (h : l ≤ l') {n : V} (hn : 1 ≤ n) : iF l 
   | base => exact le_refl _
   | succ l' hl' ih => exact le_trans ih (iF_le_succ_level l' hn)
 
+open LO.FirstOrder.Arithmetic.HierarchySymbol in
+/-- **Level 1 is doubling**: `iF 1 n = n + n`. `iF 1 = (·+1)^[n]` applied to `n`, and `(·+1)^[c] x = x+c`.
+The first concrete value in the hierarchy — the anchor for "a linear width is dominated by a low level". -/
+theorem iF_one (n : V) : iF 1 n = n + n := by
+  have h : ∀ c : V, iIter (iFDef 0) (iF 0) (iF_defined 0) n c = n + c := by
+    intro c
+    induction c using ISigma1.sigma1_succ_induction
+    · exact Definable.comp₂ (P := (· = ·))
+        (DefinableFunction₂.comp (F := iIter (iFDef 0) (iF 0) (iF_defined 0))
+          (hF := iIter_definable' 𝚺) (DefinableFunction.const n) (DefinableFunction.var 0))
+        (DefinableFunction₂.comp (F := (· + ·)) (DefinableFunction.const n) (DefinableFunction.var 0))
+    case zero => simp
+    case succ c ih => rw [iIter_succ, ih, iF_zero, add_assoc]
+  rw [iF_succ]; exact h n
+
 /-! ## Internal partial sum of iterates `ipsum` (substrate for the block decomposition)
 
 `ipsum f n i = Σ_{t=1}^{i} f^[t] n` (`Grz.psum`), the cumulative block-width function whose level sets

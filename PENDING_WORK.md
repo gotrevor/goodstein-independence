@@ -1,5 +1,40 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Lap 55 — crux-1 frontier collapsed to TWO clean inputs + the model-theoretic route for `goodstein_implies_prwo`
+
+**Done this lap (all axiom-clean `[propext, choice, Quot.sound]`, src build green 1315):**
+- **`hdef` (definability) FULLY DISCHARGED.** `src/InternalIg`: `ig0_definable`, `ig_definable`
+  (meta-induction on level, proved at `𝚺₁`), `igtTot_definable`. `wip/StdCor34`: `bbtail_definable`,
+  `bbeta_definable`, `salpha_definable`, then **`hdef_of_beta_definable`** (the whole `bbeta∘salpha`
+  tower is `𝚺₁`-definable from a single `𝚺₁-Function₁ β` premise) and **`crux1_internal_run_of_beta_def`**.
+- **`hdom` reduced to clean WIDTH-domination.** `BlkRec.off_succ_lt_width_of_blk_eq` (within a block the
+  offset is strictly below the width) + `StdCor34.hdom_of_width_dom` + **`crux1_internal_run_of_width_dom`**:
+  the domination premise is now just `∀ n, znth wseq n ≤ iF l₀ n` (the concrete instance of Rathjen
+  Lemma 3.2).
+- **iF growth bricks (Lemma 3.2 substrate), `src/IIter`:** `self_le_iIter`/`self_le_iF` (inflationary
+  `n ≤ iF l n`), `le_iIter_add` (iterate monotone in count), `iF_le_succ_level`/`iF_mono_level`
+  (`l ≤ l' ⟹ iF l n ≤ iF l' n`, n≥1), `iF_one` (`iF 1 n = n + n`).
+
+**Crux-1 frontier is now EXACTLY two inputs to `crux1_internal_run_of_width_dom`:**
+  (a) a **definable ≺-descending NF `β`** and (b) **width-domination** `∀ n, znth wseq n ≤ iF l₀ n`.
+
+**THE ROUTE for `goodstein_implies_prwo` (model-theoretic — ungates it from arithmetizing ord/R):**
+Foundation has `LO.FirstOrder.complete_iff : T ⊨ φ ↔ T ⊢ φ` (`Completeness/Completeness.lean:69`). So
+`𝗣𝗔 ⊢ prwoInstance seq` ⟺ `prwoInstance seq` holds in **every** model `V ⊧ 𝗣𝗔`. Proof of
+`goodstein_implies_prwo`: from `𝗣𝗔 ⊢ γ` get (soundness) `𝗣𝗔 ⊨ γ`; for any `V ⊧ 𝗣𝗔`, `V ⊧ γ`; if
+`V ⊭ prwoInstance seq` there is an internal infinite `seq`-descent ⟹ build `β` (NF ordinal codes from
+the descent) + width-domination ⟹ `crux1_internal_run_of_width_dom` gives an internal non-terminating
+Goodstein run = `V ⊭ γ`, contradiction. Hence `V ⊧ prwoInstance seq` ∀V ⟹ `𝗣𝗔 ⊢ prwoInstance seq` by
+`complete_iff`. **No ord/R arithmetization needed for this skeleton** — the deep content moves into the
+single per-model obligation "internal `seq`-descent ⟹ (NF `β` + standard-`l₀` width-domination)".
+- The **width-domination is where the primrec-only restriction bites** (an arbitrary `seq`-descent may be
+  diagonal-fast, undominable — `Grz.F_diag_not_dominated`). For the headline we only need the ONE concrete
+  instance `seq = gentzenDescentφ`, whose width `C(ord(Rⁿd₀))` IS standard-`l₀` dominated by Lemma 3.2
+  (see [[crux1-headline-needs-only-standard-level]]). So either (i) thread a standard-`l₀` domination
+  hypothesis through `goodstein_implies_prwo`, or (ii) specialize it to descents with a domination
+  certificate. NEXT LAP: set up the `complete_iff` skeleton in `wip/GentzenCon.lean`, isolating the
+  per-model descent→β+domination obligation as the lone sorry.
+
 ## Reflection — 2026-06-23 (lap 53, DEEP) — direction KEEP; honest endpoint named
 Full synthesis: `REFLECTION-2026-06-23-lap53.md`. Kernel re-verified (headline 0 math axioms, faithful
 bridge clean, build green 1313). Route A **re-derived from the mathematics and KEPT** (Goodstein⟹PRWO,
