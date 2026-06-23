@@ -2,8 +2,22 @@
 
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Gentzen/Buchholz ordinal analysis — witness-FREE `Z_∞` (embedding
 [M4 `embedC`, done] + ε₀ cut-elim [M5, done]) + **Boundedness** (Thm 5.4, DONE lap 14, axiom-clean) ⟹
-`𝗣𝗔 ⊬ TI(ε₀)`, then Goodstein⟹TI(ε₀).** · **Build**: 🟢 green (1270 jobs, `lake build GoodsteinPA`)
-· **Updated**: lap 21 · 2026-06-22 · `43bfd6c`+Thm56
+`𝗣𝗔 ⊬ TI(ε₀)` (= `peano_not_proves_TI`, axiom-clean modulo F-φ), then Goodstein⟹TI(ε₀) [= E, the
+last wall].** · **Build**: 🟢 green (1271 jobs, `lake build GoodsteinPA`) · **Updated**: lap 24
+(review) · 2026-06-23 · `dc534da`
+
+## ✅ Lap-24 (review) — direction re-validated against the real kernel; **two walls left: E-core + F-φ**
+Fresh-mind pass. Confirmed via real `#print axioms` (not the stale lap-21 ledger): **D' is fully
+discharged** (lap 22, `embed_TI_bounded` now chains `EmbeddingBound.embedC_LX_bdd`, no `sorryAx`), and
+**`peano_not_proves_TI` carries exactly `[propext, choice, Quot.sound, rePred_ltPull_natCode]`** — the
+ONE remaining math axiom on the entire Thm 5.6 route is **F-φ** (on Aristotle, `aris_onotecmp`,
+RUNNING). The X-free **E-lift** is done (lap 23, axiom-clean) and the first **E-core** semantic brick
+(`evalNat` order-reflection, Rathjen 2.3(iii)) is clean. The single remaining girder to the headline
+is **E** = `DescentE` (Goodstein ⟹ `TI(ε₀)` inside PA); its deep content is **E-core** (Rathjen §3
+"slowing-down" + arithmetization), since E-lift alone does not reach the X-mentioning `TI prec`. Walls
+are now **E-core + F-φ** (was E + F-φ + D'). Direction (Buchholz Boundedness route, attack E-core)
+**reaffirmed**. `aris_emcong` job was CANCELED (its target `provable_em_cong_gen` is already proved —
+nothing to harvest). Headline `peano_not_proves_goodstein` still an honest `sorry` (anti-fraud intact).
 
 ## ✅ Lap-21 (review) — Thm 5.6 ASSEMBLED into one theorem + a hidden gap (D') surfaced
 `src/GoodsteinPA/Thm56.lean` (NEW) **assembles the entire Buchholz §5 girder** into the single
@@ -52,8 +66,19 @@ pure mathlib ordinal arithmetic it is **Aristotle-eligible** (the one piece with
 E **pins which `≺` F may use** (co-design). See newest `HANDOFF`.
 
 ## Where it stands
-**The whole Buchholz §5 analysis from D back is machine-checked and `#print axioms`-clean** (real output,
-lap 18): the **embedding** M4 `embedC` (Thm 5.5, `src/Embedding.lean`), the **ε₀ cut-elimination** M5
+**(lap-24 current read.)** `peano_not_proves_TI` (Buchholz Thm 5.6, `𝗣𝗔 ⊬ TI_≺(X)`) is **assembled and
+axiom-clean modulo the single F-φ axiom** `rePred_ltPull_natCode` (on Aristotle): the full §5 chain
+C₂→C₁→D→F + D' (`embed_TI_bounded`, discharged lap 22 via `EmbeddingBound.embedC_LX_bdd`). The headline
+reduces to it through `peano_not_proves_goodstein_of_descent` modulo **E** = `DescentE`
+(`𝗣𝗔 ⊢ goodsteinSentence → Nonempty (Derivation2 paLX {TI prec})`). E factors as **E-lift** (proof
+translation, X-free, DONE lap 23: `paLX_derivable2_lMap_of_PA_provable`) **∘ E-core** (Rathjen §3
+"slowing-down" inside PA: `𝗣𝗔 ⊢ goodstein → 𝗣𝗔 ⊢ PRWO(ε₀)`, plus the `PRWO ⟹ TI prec` X-induction
+instance). E-core is the **last deep wall**; lap 23 landed its first semantic brick (`evalNat`
+order-reflection, `src/DescentCore.lean`). Below the headline only **2 honest `sorry`s** remain in
+`src/`: the locked headline (`Statement.lean:22`) and off-path Route-A (`Reduction.lean:52`).
+
+**Historical (the machine from D back, machine-checked + `#print axioms`-clean, lap 18):** the
+**embedding** M4 `embedC` (Thm 5.5, `src/Embedding.lean`), the **ε₀ cut-elimination** M5
 `cutElim` (Thms 5.1–5.3, `src/Zinfty.lean` + generic `src/ZinftyGen.lean`), **lap 14's Boundedness** Thm
 5.4 + corollary `Z∞⊢^β_1 TI ⟹ ‖≺‖≤2^β` (`src/Boundedness.lean`), **lap 15/17's C₁** `PXFc.cutElim`→cr0 +
 **D** `orderType_le_of_TIprovable` (`src/XFreeCutElim.lean`, made axiom-clean lap 17 via `nrel_value_subst`),
@@ -222,58 +247,6 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
   the CUT-FREE result (**= M6, DONE**). **The remaining critical-path work is the BRIDGE** (cut-free
   `Z∞ {gAll}` → `B`-derivation via subformula property + a Hardy bounding lemma → contradiction), NOT the
   witness-bounded cut-elim. `Zekd`/`SplitZinfty` are now banked alternatives. See `PENDING_WORK.md` top.
-- **2026-06-22 (lap 7, cont. — §19.6 norm ingredient PROVED; commuting-case frontier mapped):**
-  Proved `norm_addAux_le` and `norm_add_le {α γ NF} : norm(α+γ) ≤ norm α + norm γ` (axiom-clean; the
-  `τ(α#β)≤τα+τβ` budget fact; NF essential — NF-free version machine-checked FALSE, eq-merge killed by
-  additive-principality absorption). `wip/BoundedZinfty.lean` now **sorry-free**. Then, starting
-  `cutReduceAll`, **uncovered a genuine §19.6 obstruction**: the `allω`-commuting case cannot preserve
-  the ω-rule's `max{k,n}` norm budget after adding `α` to the bound (`norm(α+βₙ)~norm α+n > max K n` for
-  large `n`). Towsner's "follows from IH" glosses this; the fix needs Buchholz operator-control or a
-  controlled `Zk.allω` index. Precisely characterized + 3 attack options in
-  `ANALYSIS-2026-06-22-cutelim-k-threading.md` ADDENDUM; `ON-LINE-REQUEST` re-filed (one layer down).
-  Then proved two Hardy domination lemmas (`hardy_add_ofNat`, `hardy_shift_lt_goodsteinLength`, banked in
-  `src/`, axiom-clean, build green 1257). **Tried + ELIMINATED option 2** (global index swap `max k n →
-  k + n`): fixes §19.6-commuting but breaks `allInv` (needs `max`'s idempotence; `+` ⟹ slope-2 index ⟹
-  lower bound needs multiplicative rescaling). Derived + **IMPLEMENTED** the split-index
-  `(k,d)` design (`wip/SplitZinfty.lean`, 665 lines, sorry-free): calculus `Zkd` + `mono_k/d/c` + full
-  inversion suite + §19.5 cut-reductions + all §19.6/19.7 ordinal/norm/descent helpers. `allInv`'s
-  principal case compiling validates the split end-to-end for the inversion layer. **BUT — ADDENDUM 4 —
-  `(k,d)` is insufficient for §19.6 `cutReduceAll`**: it closes the norm-budget obstruction (the
-  `d`-bump) but NOT the *witness-index* one (the principal cut's witness `hardy γ(·)` makes the k-part
-  grow super-linearly through commuting ω-rules; `max k n` can't absorb it). **Next: the full Buchholz
-  operator calculus** (`hardy`-closed witness-index `H` + the additive `d`); §19.2–19.5 port mechanically
-  from `SplitZinfty`. See `ANALYSIS-…-cutelim-k-threading.md` ADDENDA 1–4.
-- **2026-06-22 (lap 7 — cut-elim `k`/`τ` crux RESOLVED, offline):** Read Towsner §15–§20 on disk and
-  answered the open `ON-LINE-REQUEST` directly. **Finding:** the lap-6 "norm grows under addition so
-  cut-elim might break `norm<k`" worry was a misframing. (a) `k` is **not** fixed — it grows (§19.5
-  `k↦2k`; §19.6 `k↦h_{β#ω}(k)`; §19.7 `k↦h_{ω^α}(k)`), engineered to absorb `τ(α#β)≤τ(α)+τ(β)`.
-  (b) The lower bound `lowerBound_hardy_selfcontained` is already `∀k`, so growth is harmless.
-  (c) Every `ONote` is `<ε₀` by construction, so the ε₀ side-condition is **free**. ⟹ state the whole
-  cut-elim chain **existentially in `k`** (`CutFree α Γ := ∃k, Zk α k 0 Γ`); ordinary `+` with slack
-  suffices (no `nadd` needed). `ON-LINE-REQUEST` closed; route chosen (B). See
-  `ANALYSIS-2026-06-22-cutelim-k-threading.md`. **§19.6/§19.7 port now unblocked.**
-- **2026-06-22 (lap 6 — review + build-out):** **M6 lower-bound half DONE** — promoted
-  `wip/LowerBoundHardy.lean → src/GoodsteinPA/LowerBound.lean`; `lowerBound_hardy_selfcontained` =
-  full Towsner Thm 17.1, only `α.NF` (axioms = trust base + 🟢 `native_decide` base cases). Then
-  **built the step-1 keystone** `wip/BoundedZinfty.lean`: the **witness-bounded calculus `Zᵏ` over real
-  `SyntacticFormula ℒₒᵣ`** (ONote-indexed, B-style, with the truth rule `τ α<k` + `∃`-witness bound
-  `v≤h_α(k)` + cut) and its whole §19.2–19.5 cut-elim front: `mono_k`/`mono_c`/`wk`/`weakening`, the
-  **full inversion suite** (∨, ∧-L/R, ∀ — all axiom-clean), and the **§19.5 ∧/∨ cut-reductions**
-  (`cutReduceConj`/`Disj`, axiom-clean). **Finding:** the `ω^α` blow-up preserves the `norm<k` budget
-  (`norm(ω^α)=max(norm α,1)`, machine-checked) but ordinal *addition* bumps it (`norm(ω+ω)=2`) — so
-  §19.6's bound bookkeeping needs care (filed `ON-LINE-REQUEST.md` for Towsner's precise `τ`/`k`
-  threading). Remaining: §19.6 (∀/∃ reduction) + `cutElimStep`/`cutElim`, then M4 + M7.
-- **2026-06-22 (lap 5):** RESOLVED the gAll/I∀ lower-bound frontier (the lap-4 wall), machine-checked.
-  Ported the Hardy hierarchy → `src/Hardy.lean` (`hardy`/`norm` = Towsner `h_α`/`τ`); built the
-  witness-bounded calculus `B` over `ONote` with the **concrete** Hardy data; proved
-  `lowerBound_existential_hardy` (∀-free, zero abstract hyps), `B.allInv` (∀-inversion), and
-  `lowerBound_hardy` (full Thm 17.1 mod `Hdom`). Resolution = **invert `gAll` away, don't accumulate**
-  (a set-sequent `gAll` lets the ω-rule re-expand at a reachable index & `trueR`-close). Ported the
-  Goodstein-dominates-fastGrowing chain → `src/Domination.lean`. (`ANALYSIS-2026-06-22-bounding-resolution.md`.)
-- **2026-06-22 (lap 4):** Ground-truthed Towsner §10–§19 vs the Lean. Found + machine-checked
-  (`wip/WitnessBound.lean`) the **witness-bound gap**: the M5 `(α,c)` cut-elim is OFF the headline path
-  (unbounded `∃` ⇒ lower bound false for it). Built the corrected witness-bounded calculus, proved the
-  ∃-fragment lower bound, proved the unbounded calculus collapses (`unbounded_proves_goodstein`).
 - **2026-06-22 (lap 3):** Proved the ENTIRE Z_∞ cut-elimination (Towsner §19), zero sorries,
   axiom-clean: inversions + cut reductions §19.5 (∧/∨) & §19.6 (∀/∃) + `cutElimStep` §19.7 + `cutElim`
   §19.9. `Ordinal.nadd` ABSENT in mathlib v4.31.0 → ordinary `+` with `+1` slack (additive principality
@@ -285,22 +258,21 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 5.1/5.2/5.3) are **done & axiom-clean** and ARE the two hard pieces. Remaining = Boundedness + the
 Goodstein⟹TI bridge. Priorities (see `ANALYSIS-2026-06-22-lap12-buchholz-pivot.md`):
 
-### Short-term — three walls remain; Thm 5.6 is assembled
-1. **D' — `embed_TI_bounded` (`src/Thm56.lean`).** The embedded ordinal `< ε₀`. **Tractable, no
-   literature, the recommended next chip.** Strengthen `embedC_LX_gen` (and `hax_paLX`'s sub-engines
-   `provable_em_x`, `metaInduction`) to the *uniform* conclusion `∃ c, ∃ B<ε₀, ∀ e, ∃ α≤B, PXFc α c (…)`.
-   Every `PXFc` builder bumps the bound by `+1`/`max+1`/`(⨆ ·)+1`, all of which preserve `<ε₀` (ε₀ a
-   limit). The ω-rule (`allω`) case closes *because the IH's `B` is outside `∀ e`* ⟹ the family `{α(n)}` is
-   uniformly `≤ B` ⟹ `⨆ₙ α(n)+1 ≤ B+1 < ε₀`. `provable_em_x`'s ordinal is `<ω·(complexity)`; `metaInduction`'s
-   chain-of-`n`-cuts is `<ω²`. Discharging D' makes **Thm 5.6 axiom-clean modulo only F-φ**.
+### Short-term — TWO walls remain (D' DONE lap 22, E-lift DONE lap 23); see `DESCENT-PLAN.md`
+1. **E-core — the deep wall (`DescentCore.lean`, Rathjen §3).** `𝗣𝗔 ⊢ goodsteinSentence →
+   𝗣𝗔 ⊢ PRWO(ε₀)` (then `PRWO ⟹ TI prec` X-induction instance ∘ E-lift = `DescentE`). Two layers:
+   **(a) semantic backbone** (mathlib/ONote, Aristotle-eligible): Rathjen §3 slowing-down — Lemma 3.6
+   inequality (6) `mₖ ≥ T̂^{k+2}_ω(βₖ)` on the now-built `evalNat`/`Canon` order-reflection backbone,
+   then Cor 3.4/Thm 3.5 slow-sequence constructions (Lemma 3.2 = mathlib `exists_lt_ack_of_nat_primrec`);
+   **(b) arithmetization** (Foundation, the dominant wall): re-express (a) as `𝗣𝗔`-derivations using the
+   seam's `precφ : Semisentence ℒₒᵣ 2`, then the `PRWO ⟹ TI prec` X-induction instance in `paLX` (least-
+   number principle on the `X`-formula; paLX has the LX induction scheme via E-lift's schema inclusion).
 2. **F-φ — `rePred_ltPull_natCode` (`src/SeamDefinability.lean`).** The CNF order is r.e. **ON ARISTOTLE**
-   (`aris_onotecmp`, UUID `16c9fc79-…`). On return: verify in-kernel + `#print axioms`, port. Crux =
-   `Primcodable ONote` (structural) + `Primrec₂ ONote.cmp`. Discharging it makes **F entirely axiom-clean**.
-3. **E — `DescentE` (interface pinned in `src/Thm56.lean`).** `𝗣𝗔 ⊢ γ → Nonempty (Derivation2 paLX {TI
-   prec})`: the Goodstein-to-`TI(ε₀)` descent in PA — the deep crux, **needs `papers/` reading**
-   (Cichoń/Rathjen-2014/Agboola/Towsner). Map the wall, state the per-step lemmas, formalize the first
-   prerequisite. ~2–4 laps.
-4. **G — done** (`peano_not_proves_goodstein_of_descent`): `DescentE ⟹ headline`. Discharge the headline
+   (`aris_onotecmp`, UUID `16c9fc79-…`, RUNNING). On return: verify in-kernel + `#print axioms`, port.
+   Crux = `Primcodable ONote` (structural) + `Primrec₂ ONote.cmp`. Discharging it makes **Thm 5.6 = F
+   entirely axiom-clean**. (Local fallback if Aristotle stalls: `Primcodable.ofDenumerable` route, see
+   `ON-LINE-REQUEST.md`.)
+3. **G — done** (`peano_not_proves_goodstein_of_descent`): `DescentE ⟹ headline`. Discharge the headline
    `sorry` ONLY when E is real AND `#print axioms peano_not_proves_goodstein` is clean.
 
 ### Long-term / banked
@@ -322,9 +294,11 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 ## Axiom ledger (per headline / landmark theorem — the fidelity spine)
 | theorem | paper claim | `#print axioms` shows | status |
 |---|---|---|---|
-| `peano_not_proves_goodstein` (headline) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` | 🔓 open `sorry` — **Thm 5.6 ASSEMBLED (lap 21)**; reduced to ONE wall E via `…_of_descent`. Remaining: E (Goodstein⟹TI) + F-φ (`rePred_ltPull_natCode`) + D' (`embed_TI_bounded`); **0** real math axioms |
-| `peano_not_proves_TI` (Thm 5.6, **lap 21**, `src/Thm56`) | Gentzen 1943: `𝗣𝗔 ⊬ TI_≺(X)` | `propext, choice, Quot.sound, sorryAx, rePred_ltPull_natCode` | 🟢 **ASSEMBLED** — full §5 chain C₂→C₁→D→F. The 2 disclosed deps: 🟡 F-φ `rePred_ltPull_natCode` (Aristotle) + D' `embed_TI_bounded` (`sorryAx`). |
-| `embed_TI_bounded` (D', **lap 21**, `src/Thm56`) | finite PA-proof ⟹ `Z∞`-proof height `<ε₀` | `…, sorryAx` | 🔓 disclosed `sorry` — the embedded ordinal `<ε₀` (Gentzen content `embedC_LX` forgets). Tractable, Foundation-light, no literature: re-run `embedC_LX_gen`/`hax_paLX` with uniform `∃B<ε₀,∀e,∃α≤B` bound. **Next chip.** |
+| `peano_not_proves_goodstein` (headline) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` | 🔓 open `sorry` — reduced to ONE wall **E** via `…_of_descent`. Remaining: **E-core** (Goodstein⟹PRWO(ε₀) inside PA, Rathjen §3) + **F-φ** (`rePred_ltPull_natCode`, Aristotle). **0** real math axioms; D' + E-lift discharged. |
+| `peano_not_proves_TI` (Thm 5.6, lap 21, **clean-mod-F-φ lap 22**, `src/Thm56`) | Gentzen 1943: `𝗣𝗔 ⊬ TI_≺(X)` | `propext, choice, Quot.sound, rePred_ltPull_natCode` | 🟢 **ASSEMBLED + D' discharged** — full §5 chain C₂→C₁→D→F + D'. Sole dep: 🟡 F-φ `rePred_ltPull_natCode` (Aristotle). No `sorryAx`. |
+| `embed_TI_bounded` (D', **discharged lap 22**, `src/Thm56`) | finite PA-proof ⟹ `Z∞`-proof height `<ε₀` | `propext, choice, Quot.sound, rePred_ltPull_natCode` | 🟢 **CLEAN** — chains `EmbeddingBound.embedC_LX_bdd` (the uniform `∃B<ε₀,∀e,∃α≤B` bound). The lap-21 disclosed `sorry` is gone. |
+| `paLX_derivable2_lMap_of_PA_provable` (E-lift, **lap 23**, `src/DescentLift`) | `𝗣𝗔 ⊢ σ ⟹ Derivation2 paLX {lMap σ}` | `propext, choice, Quot.sound` | 🟢 clean — X-free proof translation (`lMap` commutes with `succInd`/`univCl`; schema inclusion `(𝗣𝗔:Schema).lMap Φ ⊆ paLX`). Does NOT reach `TI prec` (X-essential); feeds E-core's X-induction instance. |
+| `evalNat_lt_iff`/`evalNat_lt_of_lt` (E-core brick, **lap 23**, `src/DescentCore`) | Rathjen 2.3(iii): `T̂^b_ω` order-reflects on `Canon` | `propext, choice, Quot.sound` | 🟢 clean — `evalNat b o < evalNat b p ↔ o.repr < p.repr` on the `Canon`/`NF` domain, from `canon_repr` + `toOrdinal` strict mono. The workhorse Lemma 3.6 inequality (6) runs on. |
 | `peano_not_proves_goodstein_of_descent` (G, **lap 21**, `src/Thm56`) | `DescentE ⟹ 𝗣𝗔 ⊬ γ` | same as Thm 5.6 | 🟢 reduction — pins E's interface (`𝗣𝗔 ⊢ γ → Nonempty (Derivation2 paLX {TI prec})`); headline `sorry` stays until E real |
 | `hax_paLX` (C₂ glue, `src/EmbeddingX`) | `paLX`-image axioms embed to `PXFc` | `propext, choice, Quot.sound` | 🟢 **CLEAN (lap 20)** — X-induction assembly discharged via `PXFc_allClosure` + new `rew_succInd`/`rew_subst1_comm_q`/`subst1_comp_bShift` + `metaInduction_cong`. ⟹ `embedC_LX` clean. |
 | `goodsteinSentence_faithful` (bridge) | encoding correctness | `propext, choice, Quot.sound` | 🟢 clean (trust base) |
@@ -350,9 +324,11 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 | `hardy_comp_lt_goodsteinLength` (lap 8, `src/LowerBound`) | `H_α(H_e(m)) < G(m)` eventually | `propext, choice, Quot.sound` + the M6 `native_decide` base-cases | 🟢 clean — banked nested-index domination (reusable if a bridge ever needs a nested control index) |
 | `not_proves_of_implies_consistency` (Route A) | meta-reduction | `…, PA_delta1Definable` | 🟡 Foundation axiom; **Route A only** — Route B avoids it |
 
-Math-axiom count on the (eventual) Route-B headline target: **0** beyond the trust base + the 🟢
-`native_decide` Goodstein base-case witnesses on the domination path. The `sorryAx` on the headline is
-the honest open marker. `PA_delta1Definable` (🟡) sits only under the unused Route-A hook.
+Math-axiom count: **`peano_not_proves_TI`** (Thm 5.6) carries exactly **1** math axiom — 🟡 F-φ
+`rePred_ltPull_natCode` (proven r.e., project-scale; on Aristotle; discharge ⟹ Thm 5.6 fully clean).
+The **headline** target is still `sorry` (E-core unbuilt); on discharge its `#print axioms` must be
+`[propext, Classical.choice, Quot.sound]` (+ documented 🟢 `native_decide` Goodstein base-cases on the
+domination path) with no `PA_delta1Definable` (that 🟡 sits only under the unused Route-A hook).
 
 ## Pointers
 ROADMAP/plan: `EXPEDITION-PLAN.md`, `PHASE2-DECOMPOSITION.md` · **lap-9 reflection (course change):
