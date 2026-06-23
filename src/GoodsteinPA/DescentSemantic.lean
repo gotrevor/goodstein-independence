@@ -34,10 +34,12 @@ stays put until the semantic lemma is real and `#print axioms` is clean (`DIRECT
 -/
 import GoodsteinPA.Thm56
 import GoodsteinPA.DescentLift
+import GoodsteinPA.ReductModel
+import GoodsteinPA.DescentInternal
 
 namespace GoodsteinPA.DescentSemantic
 
-open LO LO.FirstOrder
+open LO LO.FirstOrder LO.FirstOrder.Arithmetic
 open GoodsteinPA GoodsteinPA.LangX GoodsteinPA.EmbeddingX
 
 /-! ### `LX` is an encodable language
@@ -142,7 +144,31 @@ theorem no_min_descent_absurd_of_goodstein {M : Type} [Nonempty M] [Structure LX
     (hgood : M ⊧ₘ (Semiformula.lMap GoodsteinPA.DescentLift.Φ goodsteinSentence : Sentence LX))
     (hM : M ⊧ₘ* (paLX : Theory LX)) {f : ℕ → M} {a₀ : M} (ha₀ : ¬ MX a₀)
     (no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y) : False := by
-  sorry
+  -- Install `M`'s `ℒₒᵣ`-reduct as a genuine model of `𝗜𝚺₁`. This is the payoff of the lap-33
+  -- `[Structure.Eq LX M]` plumbing: the internal Goodstein substrate (`InternalPow.igoodstein`,
+  -- `DescentArith.*`) runs over `[ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]`.
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
+  -- ───────────────────────────────────────────────────────────────────────────────────────────
+  -- WALL C+D (disclosed). The `X`-definable `Mlt`-descent extracted from `no_min`/`ha₀`, slowed
+  -- down (Rathjen §3, so `C(βₖ) ≤ k+1`), seeds a special internal Goodstein run `igoodstein m₀`
+  -- whose dominating `𝚺₁`-bound `b k = T̂^{k+2}(βₖ)` keeps it `> 0` forever. The run side is ALREADY
+  -- axiom-clean (`DescentArith.igoodstein_nonterminating_of_dominating`: given `(base, step, hpos)`
+  -- it yields `∀ k, 0 < igoodstein m₀ k`); the open content is the seed/bound construction from the
+  -- descent + the internalized `ineq6_step` (`DescentCore.ineq6_step`, route-neutral kernel).
+  have hCD : ∃ m₀ : M, ∀ k : M, 0 < InternalPow.igoodstein m₀ k := by
+    sorry
+  obtain ⟨m₀, hpos⟩ := hCD
+  -- ───────────────────────────────────────────────────────────────────────────────────────────
+  -- WALL B (disclosed). `hgood` says `M`'s `ℒₒᵣ`-reduct models `goodsteinSentence`
+  -- (`= ∀⁰ codeOfREPred goodsteinTerminates`, the *opaque* r.e.-blob). Bridge the blob to the
+  -- *transparent* internal run inside `M ⊧ 𝗜𝚺₁`: the `igoodstein`-run from `m₀` reaches `0`. This is
+  -- the Σ₁-definitional agreement of `codeOfREPred goodsteinTerminates` with `∃ k, igoodstein · k = 0`
+  -- (`reduct_models_goodstein` supplies the blob; the gap is the code↔run equivalence in `M`).
+  have hB : ∃ k : M, InternalPow.igoodstein m₀ k = 0 := by
+    sorry
+  obtain ⟨k, hk⟩ := hB
+  exact absurd hk (hpos k).ne'
 
 /-! ### The single semantic obligation, assembled (Rathjen §3, model-internal) -/
 
