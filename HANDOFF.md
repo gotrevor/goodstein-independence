@@ -1,63 +1,47 @@
-# HANDOFF — 2026-06-23 (lap 23, **X-free E-lift COMPLETE** + E-core started)
+# HANDOFF — 2026-06-23 (lap 24, REVIEW + **E-core kernel landed**)
 
-> **Branch** `plan` · HEAD `0099cf9` · build **green** (`lake build GoodsteinPA`, **1271 jobs**) ·
-> headline `Statement.peano_not_proves_goodstein` = honest `sorry` (anti-fraud intact). Tree clean.
+> **Branch** `plan` · HEAD `b1f5260` · build **green** (`lake build GoodsteinPA`, **1271 jobs**) ·
+> headline `GoodsteinPA.peano_not_proves_goodstein` = honest `sorry` (anti-fraud intact). Tree clean.
 
-## ✅ Lap-23 deliverables (3 green commits)
+**Thin pointer (durable overview lives in `STATUS.md`):** read **`STATUS.md`** (refreshed this lap) +
+**`DESCENT-PLAN.md`** (now has §3a, the Σ₁-completeness reframe) + **`PENDING_WORK.md`** (attack paths).
 
-The wall this lap was **E** (`Thm56.DescentE : 𝗣𝗔 ⊢ ↑goodsteinSentence → Nonempty (Derivation2 paLX
-{TI prec})`). Read **`DESCENT-PLAN.md`** (new) first — it grounds E in Rathjen 2014 §2–3, maps the §3
-"slowing-down" chain to repo defs, lists the verified Foundation E-lift bricks, and spells out the
-**X-essential subtlety** (`TI prec` mentions the set variable `X`, so it is NOT the `lMap` of any
-`ℒₒᵣ` sentence — E genuinely needs the X-induction instance, not just proof-translation).
+## ✅ Lap-24 deliverables (2 green commits)
 
-1. `47527d1` — `DESCENT-PLAN.md` + first E-lift bricks (`lMap_succInd`).
-2. `83e6a76` — **X-free E-lift COMPLETE** (`src/GoodsteinPA/DescentLift.lean`, axiom-clean):
-   **`paLX_derivable2_lMap_of_PA_provable : 𝗣𝗔 ⊢ σ → Nonempty (Derivation2 paLX {lMap Φ ↑σ})`**.
-   Full chain landed: `lMap` commutes with `succInd` (operator-`lMap` leaves, no
-   `Semiterm.lMap_operator` lemma exists; **`fin_cases` is NOT available** in this build — use
-   `Fin.cases`/`.elim0`) and with `univCl` (`fvSup_lMap`, `lMap_fixitr`, `lMap_univCl'`,
-   `lMap_univCl`); `lMap_inductionScheme_subset`; `lMap_PA_subset` + `coe_schema_lMap` +
-   `schema_lMap_PA_subset` (= `(𝗣𝗔:Schema).lMap Φ ⊆ paLX`); lift via `provable_def` → `Derivation.lMap`
-   → schema-weaken (`Axiomatized.weakerThanOfSubset … .pbl`) → `provable_iff_derivable2`.
-3. `0099cf9` — first E-core brick (`src/GoodsteinPA/DescentCore.lean`, axiom-clean):
-   `evalNat_lt_iff`/`le_iff`/`lt_of_lt` (Rathjen Lemma 2.3(iii): `evalNat` = `T̂^b_ω` order-reflects on
-   the `Canon`/`NF` domain) + `toOrdinal_lt_iff`/`le_iff`. Trivial from the **already-present**
-   `Domination.canon_repr` round-trip + `toOrdinal` strict monotonicity.
-
-All three new lemmas `#print axioms = [propext, Classical.choice, Quot.sound]` (no `sorryAx`).
-
-## ⚠️ Key discovery — `Domination.lean` is huge and already-built
-It already has `Canon`/`Good`/`canon_repr`/`canon_round_trip` (the full Rathjen 2.3(i)(ii) T̂↔T
-round-trip) **and** the entire `goodsteinLength ~ fastGrowingε₀` growth analysis (`canon_repr` at
-~L1040, `goodsteinLength_grows_like_fastGrowingε₀` at ~L4053). **GREP `Domination.lean` before
-building any semantic ONote/Goodstein lemma** — I nearly re-derived `canon_repr` from scratch.
+1. `afc145c` — **STATUS review refresh.** Re-validated direction against the real kernel: **D' is
+   discharged** (lap 22; `peano_not_proves_TI` carries exactly `[propext, choice, Quot.sound,
+   rePred_ltPull_natCode]`, no `sorryAx`). The ONE remaining math axiom on the entire Thm 5.6 route is
+   **F-φ** (on Aristotle). Walls reduced to **E-core + F-φ** (D' + E-lift done). `aris_emcong` was
+   CANCELED (its target already proved — nothing to harvest).
+2. `b1f5260` — **E-core kernel: Rathjen inequality (6) step** (`src/GoodsteinPA/DescentCore.lean`,
+   axiom-clean). `ineq6_step` = the non-vacuous Π₁ heart of Lemma 3.6 (one Goodstein step from
+   `m ≥ T̂^{k+2}_ω(βₖ)` lands `≥ T̂^{k+3}_ω(β_{k+1})`), on the lap-23 `evalNat` order-reflection backbone.
+   Plus `lemma36_ineq6`/`lemma36_nonterminating` (the `∀k` iteration + non-termination — **semantic
+   shadow**, vacuous hypotheses, zero independence force alone; documents the induction the
+   arithmetization encodes). Weakened `Domination.canon_repr` `2≤b → 1≤b` (base-2 `T̂²_ω` needs
+   `evalNat 1`). DESCENT-PLAN §3a: the Σ₁-completeness reframe.
 
 ## 🎯 Open obligations (priority order) — TWO walls left
-1. **F-φ** `rePred_ltPull_natCode` (`SeamDefinability.lean`). **ON ARISTOTLE** (`aris_onotecmp`, UUID
-   `16c9fc79-ae8b-4b04-8b83-2e8e9e5f38db`). On return: VERIFY in-kernel + `#print axioms`, port. If
-   still running and blocked, attempt the `Primcodable.ofDenumerable` route locally (see
-   `ON-LINE-REQUEST.md`). Discharging it makes the **entire F girder** axiom-clean.
-2. **E-core** — the genuine remaining content of E. The X-free lift (done) does NOT produce `TI prec`
-   (X-essential). Two layers, per `DESCENT-PLAN.md §3`:
-   - **(semantic, mathlib/ONote, Aristotle-eligible):** Rathjen §3 — Lemma 3.6 inequality (6)
-     (`mₖ ≥ T̂^{k+2}_ω(βₖ)`) on the `evalNat`/`canon_repr` backbone now in place; then Cor 3.4 / Thm 3.5
-     slow-sequence constructions (Lemma 3.2 = mathlib `exists_lt_ack_of_nat_primrec`).
-   - **(arithmetization, Foundation — the dominant wall):** re-express the above as `𝗣𝗔`-derivations:
-     `𝗣𝗔 ⊢ goodsteinSentence → 𝗣𝗔 ⊢ ⌜PRWO(ε₀)⌝` (use the seam's `precφ : Semisentence ℒₒᵣ 2` for the
-     order), then the X-induction instance `PRWO ⟹ TI prec` in `paLX` (the lift's schema inclusion
-     already gives `paLX` the X-induction axioms). Compose with the X-free lift to land `DescentE`.
-   - **ALT (Route A):** `Reduction.goodstein_implies_consistency` via Rathjen Thm 2.8 + Gödel II —
-     reintroduces the `PA_delta1Definable` Foundation axiom; keep B primary.
-3. **G — done** (`peano_not_proves_goodstein_of_descent`). Discharge the headline `sorry` ONLY when E
-   is real AND `#print axioms peano_not_proves_goodstein` is clean.
+
+1. **E-core — the deep wall** (`DescentCore.lean`/new files, Rathjen §3; see `DESCENT-PLAN.md §3/§3a`).
+   `𝗣𝗔 ⊢ goodsteinSentence → 𝗣𝗔 ⊢ PRWO(ε₀)`. **Σ₁-completeness reframe (key):** most of the
+   arithmetization is FREE via `sigma_one_completeness`; the irreducible content is **inequality (6)'s
+   `∀k` as a genuine PA-induction** (mirror of Boundedness). Next concrete bricks:
+   - **Semantic backbone (Aristotle-eligible, mathlib/ℕ-only):** the slow-down constructions Rathjen
+     Lemma 3.3 / Cor 3.4 / Thm 3.5 as plain ℕ/ONote facts (Lemma 3.2 = mathlib
+     `exists_lt_ack_of_nat_primrec`). `ineq6_step` ✅ done.
+   - **E-lift X-induction instance:** `PRWO ⟹ TI prec` (the X-essential glue; X-free proof-translation
+     half already done lap 23 = `paLX_derivable2_lMap_of_PA_provable`). Pure logic: least-number
+     principle on the `X`-formula in `paLX` (paLX has the LX induction scheme via the schema inclusion).
+   - **Arithmetization:** lift the ℕ-facts to `𝗣𝗔`; computational facts → Σ₁-completeness (free); the
+     one real lift = inequality (6)'s `∀k` PA-induction. The dominant (multi-lap) wall.
+2. **F-φ** `rePred_ltPull_natCode` (`SeamDefinability.lean`). **ON ARISTOTLE** (`aris_onotecmp`, UUID
+   `16c9fc79-ae8b-4b04-8b83-2e8e9e5f38db`, RUNNING). On return: VERIFY in-kernel + `#print axioms`,
+   port. Discharging it makes **Thm 5.6 entirely axiom-clean**. Local fallback: `Primcodable.ofDenumerable`.
 
 ## ⚠️ Locked / notes
 - **LOCKED untouched:** `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `sorry`.
 - **src/ sorries (2):** `Statement.lean:22` (headline, locked), `Reduction.lean:52` (Route-A, off-path).
-  `DescentLift.lean` + `DescentCore.lean` + `EmbeddingBound.lean` + `Thm56.lean` are sorry-free.
-
-## 📊 Lap estimate to headline
-F-φ ~0–1 (Aristotle) · E-core: semantic §3 ~2–3 laps (tractable, Aristotle-eligible) + arithmetization
-~several (the dominant wall) · G done. The §5 girder back through D' + C₂ + F (order-type) is
-machine-checked + `sorryAx`-free; the X-free E-lift is now machine-checked too.
+- **GREP `Domination.lean` before building any semantic ONote/Goodstein lemma** — it already has
+  `Canon`/`evalNat`/`canon_repr`/`toONote`/`seqOrd_step` + the full growth analysis (~4000 lines).
+- Discharge the headline `sorry` ONLY when E is real AND `#print axioms peano_not_proves_goodstein` is clean.
