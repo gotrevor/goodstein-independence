@@ -2,9 +2,25 @@
 
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Gentzen/Buchholz ordinal analysis — witness-FREE `Z_∞` (embedding
 [M4 `embedC`, done] + ε₀ cut-elim [M5, done]) + **Boundedness** (Thm 5.4, DONE lap 14, axiom-clean) ⟹
-`𝗣𝗔 ⊬ TI(ε₀)` (= `peano_not_proves_TI`, axiom-clean modulo F-φ), then Goodstein⟹TI(ε₀) [= E, the
-last wall].** · **Build**: 🟢 green (1280 jobs, `lake build GoodsteinPA`) · **Updated**: lap 27
-(DEEP REFLECTION) · 2026-06-23 · `6bf9e9d`
+`𝗣𝗔 ⊬ TI(ε₀)` (= `peano_not_proves_TI`, **now FULLY axiom-clean — F-φ DISCHARGED lap 28**), then
+Goodstein⟹TI(ε₀) [= E-core, the last wall].** · **Build**: 🟢 green (1300 jobs, `lake build
+GoodsteinPA`) · **Updated**: lap 28 (F-φ DISCHARGED) · 2026-06-23 · `582123e`
+
+## ✅ Lap-28 — F-φ DISCHARGED: Thm 5.6 is now FULLY axiom-clean; ONE wall left (E-core)
+Completed the v4.28→v4.31 port of Aristotle's `rePred_ltPull_natCode` (CNF comparison is r.e./computable)
+and **wired it into the headline route**, turning the lone F-φ math axiom into a machine-checked theorem.
+`src/GoodsteinPA/ONoteComp.lean` (promoted from `wip/`, green, sorry-free) supplies the `Computable`
+proof of CNF comparison via a structural strong recursion. `SeamDefinability.rePred_ltPull_natCode` is
+now a `theorem` (chains ONoteComp), not an `axiom`. **Real `#print axioms peano_not_proves_TI` =
+`[propext, Classical.choice, Quot.sound, ONoteComp.cmpStep_spec._native.native_decide.ax_1_5]`** — the
+F-φ math axiom is GONE; only one 🟢 `native_decide` finite base-case witness remains (acceptable per
+doctrine). Port fixes over the lap-27 wip: rewrote the convert-heavy `Computable` proofs
+(`computable_cmpStep`/`_nfTB`/`_nthNF`) as direct combinator terms (added `primrec_thenNat`/`_cmpNat`/
+`_cmpNV`); reproved `enc_strictMono` structurally via the `Nat.Subtype.ofNat` enumeration + `ofEquiv_ofNat`
+(the v4.31-drift item); replaced the slow `nlinarith` index bound in `cmpStep_spec` with `pair_lt_pair`+
+`omega`; `import Mathlib.Tactic.Linarith`. **The project now has exactly ONE wall: E-core (Route-B
+form).** Headline `peano_not_proves_goodstein` still an honest `sorry` (anti-fraud intact). Port detail:
+`wip/aristotle-fphi/PORT-STATUS.md`.
 
 ## ✅ Lap-27 (DEEP REFLECTION) — F-φ SOLVED on Aristotle; back-end choice DECIDED (Route B); one wall left
 Altitude pass. **Two state changes.** (1) **F-φ is SOLVED:** the Aristotle job `aris_onotecmp` returned
