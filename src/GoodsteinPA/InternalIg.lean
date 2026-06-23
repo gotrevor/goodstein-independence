@@ -1,7 +1,9 @@
 /-
-# `wip/InternalIg.lean` — Crux 1: the internal Grzegorczyk `g` recursion `ig` (Rathjen Lemma 3.3)
+# `InternalIg.lean` — Crux 1: the internal Grzegorczyk `g` recursion `ig` (Rathjen Lemma 3.3)
 
-**Status: building the standard-level internal `g`-padding `ig` (wip, off the build target).**
+**Status: COMPLETE (sorry-free, axiom-clean); promoted to `src/` (lap 54), in the build.** The full
+`StdCor34.igt`-interface (NF, `≠0`, within-block descent `= Grz.g_desc`, `iC`-bound, top-exponent shape)
+plus the totalized `igtTot` (unconditional props) are built here.
 
 `ig : ℕ → V → V → V` is the internal mirror of `Grz.g` (`Grzegorczyk.lean:343`), built by
 **meta-recursion on the standard level `l : ℕ`** (lap-50 insight: the headline needs only a
