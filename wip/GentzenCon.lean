@@ -201,31 +201,62 @@ This is the precise honest content of "primitive-recursive" for the descent: for
 def SeqStdBounded (seq : Semisentence ℒₒᵣ 2) (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁] : Prop :=
   ∃ l₀ : ℕ, ∀ n y : M, (M ⊧/![y, n] seq) → iC y ≤ iF l₀ n
 
-/-- **Crux-1 certificate construction — the sharpened remaining obligation (lap-56).** From a
-model-internal everywhere-`icmp`-descending `seq`-graph (`hdesc`) that is **standard-width-bounded**
-(`hstdom : SeqStdBounded seq M`, = Rathjen Lemma 3.2), build the Cor-3.4 slowdown inputs (`SeqDominated M`):
-take `β` = a descending NF branch of `seq`, run the standard-level Cor 3.4 slowdown to get `wseq`/`Cβ`/`l₀`
-with `iC (β (blk wseq j)) ≤ Cβ + j` and the **standard** width domination `∀ n, znth wseq n ≤ iF l₀ n`
-(which now genuinely holds, *because* of `hstdom`). **This is now the ENTIRE remaining crux-1 content**
-(the girder bridge `nonterminating_of_dominated` is PROVED; the statement is TRUE, not the old
-false-for-arbitrary-seq form). **Attack:** `InternalCor34.ibigMul`-standard lead + the sorry-free
-ℕ-template `Grzegorczyk.lean` blueprint (Cor 3.4) internalized over `M`; see `PENDING_WORK` B/C +
-memory `crux1-headline-needs-only-standard-level`. Held at `sorry`. -/
+/-- **The seq is realized by a total, `𝚺₁`-definable, NF-nonzero-valued branch** (lap-57). For the
+construction to produce a genuine internal infinite descent, the graph `seq(y,n)` must actually be
+*total functional* with normal-form, nonzero ε₀-code values — packaged as the existence of a single
+function `β : M → M` realizing the graph at every position, definable in `M`. This is the honest content
+of "`seq` is the graph of a primitive-recursive ε₀-valued function": for `seq = gentzenDescentφ`
+(= `n ↦ ord(Rⁿd₀)`) it holds because `ord`/`R` are primrec and `ord` lands in NF codes. **Without it the
+old `seqDescent_dominated` was FALSE** (a vacuous/partial `seq` satisfies `hdesc`/`hstdom` trivially, yet
+`SeqDominated M` asserts the existence of an infinite ε₀-descent — impossible in `ℕ`). Supplying `β`
+ties that existence to `seq` genuinely having a descending NF branch, so the hypotheses become jointly
+unsatisfiable in `ℕ` (vacuously true there, like `StdCor34.crux1_internal_run_of_width_dom`) and
+substantive only in nonstandard `M`. -/
+def SeqRealized (seq : Semisentence ℒₒᵣ 2) (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁] : Prop :=
+  ∃ β : M → M, (∀ n : M, M ⊧/![β n, n] seq) ∧ (∀ n, isNF (β n)) ∧ (∀ n, β n ≠ 0) ∧
+    (𝚺₁-Function₁ β)
+
+/-- **Crux-1 certificate construction — the sharpened remaining obligation (lap-57).** From a
+model-internal everywhere-`icmp`-descending `seq`-graph (`hdesc`) that is **realized by a total NF branch**
+(`hreal`) and **standard-width-bounded** (`hstdom : SeqStdBounded seq M`, = Rathjen Lemma 3.2), build the
+Cor-3.4 slowdown inputs (`SeqDominated M`). With the realizer `β` supplied, the `β`-parts of
+`SeqDominated` (NF, `≠0`, `icmp`-descent, `𝚺₁`-definability) are **DISCHARGED directly** here — the
+descent `icmp (β (n+1)) (β n) = 0` is exactly `hdesc` applied to the graph-realizations of `β`. **The
+ENTIRE remaining crux-1 content is now the width bookkeeping**: a `𝚺₁` width code `wseq` and constant
+`Cβ` with the C-bound `iC (β (blk wseq j)) ≤ Cβ + j` (Cor-3.4 block spacing) and the **standard** width
+domination `∀ n, znth wseq n ≤ iF l₀ n` (Rathjen Lemma 3.2, from `hstdom`). **Attack:** the BlkRec
+width-code construction over `t ↦ iC (β (t+1))` (cumulative widths absorb the complexity jumps, giving
+the linear `Cβ + j` bound via `BlkRec.wsumc_blk_le`); see memory `crux1-headline-needs-only-standard-level`.
+Held at `sorry` on the width construction. -/
 theorem seqDescent_dominated (seq : Semisentence ℒₒᵣ 2)
     (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
-    (_hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0)
-    (_hstdom : SeqStdBounded seq M) :
+    (hreal : SeqRealized seq M)
+    (hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0)
+    (hstdom : SeqStdBounded seq M) :
     SeqDominated M := by
-  sorry
+  obtain ⟨β, hgraph, hNF, h0, hdef⟩ := hreal
+  -- the realizer descends: apply `hdesc` to the graph-realizations of `β` at `n` and `n+1`
+  have hβdesc : ∀ n, icmp (β (n + 1)) (β n) = 0 := fun n =>
+    hdesc n (β n) (β (n + 1)) (hgraph n) (hgraph (n + 1))
+  -- `hstdom` bounds the realizer's complexity by a STANDARD Grzegorczyk level
+  obtain ⟨l₀, hl₀bound⟩ := hstdom
+  have hβbound : ∀ n, iC (β n) ≤ iF l₀ n := fun n => hl₀bound n (β n) (hgraph n)
+  -- REMAINING GAP: the Cor-3.4 width bookkeeping. Build `wseq`/`Cβ`/(a positive standard `l₀'`) with
+  --   (a) `iC (β (blk wseq j)) ≤ Cβ + j`   — block spacing absorbs the complexity jumps
+  --   (b) `znth wseq n ≤ iF l₀' n`          — width domination from `hβbound` (Lemma 3.2)
+  -- Everything else (`0 < l₀'`, NF, `≠0`, descent, definability of `β`) is supplied above.
+  -- TODO(width-construction): `BlkRec` width code over `t ↦ iC (β (t+1))`, `Cβ := iC (β 0)`.
+  refine ⟨?_, ?_, ?_, β, ?_, hNF, h0, hβdesc, ?_, hdef, ?_⟩ <;> sorry
 
 /-- **The deep crux-1 bridge** — PROVED modulo the sharpened `seqDescent_dominated` obligation
 (was a bare `sorry` through lap 55). Chains the certificate construction into the girder. -/
 theorem nonterminating_of_seq_descent (seq : Semisentence ℒₒᵣ 2)
     (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
+    (hreal : SeqRealized seq M)
     (hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0)
     (hstdom : SeqStdBounded seq M) :
     ∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k :=
-  nonterminating_of_dominated M (seqDescent_dominated seq M hdesc hstdom)
+  nonterminating_of_dominated M (seqDescent_dominated seq M hreal hdesc hstdom)
 
 /-- **Per-model crux-1 obligation.** In every model `M ⊧ₘ* 𝗜𝚺₁` in which `γ` holds AND `seq` is
 standard-width-bounded (`hstdom`), the PRWO instance for `seq` holds. By contradiction: `M ⊭ prwoInstance
@@ -234,6 +265,7 @@ turns it into an internal non-terminating Goodstein run, which directly contradi
 (`∀ m, ∃ N, igoodstein m N = 0`) at `m₀`. The deep content is isolated in `seqDescent_dominated`. -/
 theorem prwoInstance_models_of_goodstein (seq : Semisentence ℒₒᵣ 2)
     (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁] (hγ : M ⊧ₘ goodsteinSentence)
+    (hreal : SeqRealized seq M)
     (hstdom : SeqStdBounded seq M) :
     M ⊧ₘ prwoInstance seq := by
   -- `γ` in `M`: every internal Goodstein run reaches `0` (the general-model analog of the ℕ-only
@@ -249,7 +281,7 @@ theorem prwoInstance_models_of_goodstein (seq : Semisentence ℒₒᵣ 2)
     exact fun m => (h m).imp fun N h0 => h0.symm
   rw [prwoInstance_models_iff]
   intro hdesc
-  obtain ⟨m₀, hm₀⟩ := nonterminating_of_seq_descent seq M hdesc hstdom
+  obtain ⟨m₀, hm₀⟩ := nonterminating_of_seq_descent seq M hreal hdesc hstdom
   obtain ⟨N, hN⟩ := hγ' m₀
   exact absurd hN (hm₀ N).ne'
 
@@ -262,6 +294,7 @@ not a theorem: `goodstein_implies_prwo` is honest for the standard-bounded desce
 (NOT the false "for arbitrary seq" form — `Grz.F_diag_not_dominated`); it is supplied at
 `seq = gentzenDescentφ` by `gentzenDescentφ_dominated`. -/
 theorem goodstein_implies_prwo (seq : Semisentence ℒₒᵣ 2)
+    (hreal : ∀ (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁], SeqRealized seq M)
     (hstdom : ∀ (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁], SeqStdBounded seq M) :
     𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ prwoInstance seq := by
   intro hγ
@@ -269,7 +302,7 @@ theorem goodstein_implies_prwo (seq : Semisentence ℒₒᵣ 2)
   intro M _ _
   haveI : M ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory' M 𝗜𝚺₁ 𝗣𝗔
   have hγM : M ⊧ₘ goodsteinSentence := models_of_provable inferInstance hγ
-  exact prwoInstance_models_of_goodstein seq M hγM (hstdom M)
+  exact prwoInstance_models_of_goodstein seq M hγM (hreal M) (hstdom M)
 
 /-- **Rathjen Lemma 3.2 for the Gentzen descent (disclosed axiom).** `gentzenDescentφ = n ↦ ord(Rⁿd₀)`
 is standard-width-bounded in every model: the complexity `iC` of its `n`-th value is `≤ iF l₀ n` for a
@@ -280,13 +313,23 @@ placeholders, NOT on the headline `#print axioms` path (`Statement.lean` `sorry`
 axiom gentzenDescentφ_dominated :
     ∀ (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁], SeqStdBounded gentzenDescentφ M
 
+/-- **The Gentzen descent is a total NF-valued `𝚺₁` branch (disclosed axiom).** `gentzenDescentφ`
+(= `n ↦ ord(Rⁿd₀)`) is realized in every model by the total function `n ↦ ord(Rⁿd₀)`: `ord`/`R` are
+primitive recursive (hence `𝚺₁`-definable internal functions) and `ord` lands in nonzero normal-form
+ε₀-codes. This is the honest "primitive-recursive ε₀-valued graph" content for the Gentzen instance —
+the precise totality/NF data the realizer-based crux-1 needs. Disclosed pending the `ord`/`R`
+arithmetization (crux 2), alongside `gentzenDescentφ`/`gentzenDescentφ_dominated`; NOT on the headline
+`#print axioms` path (`Statement.lean` `sorry` untouched). -/
+axiom gentzenDescentφ_realized :
+    ∀ (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁], SeqRealized gentzenDescentφ M
+
 /-- **The assembly.** Crux 1 (at the Gentzen-descent instance, with its Lemma-3.2 certificate) ∘ crux 2 =
 exactly the girder `Reduction.goodstein_implies_consistency`. This `wip` theorem REFINES that single
 `sorry` into the two-girder chain; it is **not** promoted to `src/` until both cruxes are real (anti-fraud). -/
 theorem goodstein_implies_consistency_via_gentzen :
     𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := fun hγ =>
   gentzen_prwo_implies_consistency
-    (goodstein_implies_prwo gentzenDescentφ gentzenDescentφ_dominated hγ)
+    (goodstein_implies_prwo gentzenDescentφ gentzenDescentφ_realized gentzenDescentφ_dominated hγ)
 
 /-! ## Seam checks (machine-checked integration guards)
 
@@ -300,7 +343,7 @@ Lean def** (same ε₀-order `precφ`, same descent encoding). Two faithful-but-
 would fail here. -/
 example (hγ : 𝗣𝗔 ⊢ ↑goodsteinSentence) : 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent :=
   gentzen_prwo_implies_consistency
-    (goodstein_implies_prwo gentzenDescentφ gentzenDescentφ_dominated hγ)
+    (goodstein_implies_prwo gentzenDescentφ gentzenDescentφ_realized gentzenDescentφ_dominated hγ)
 
 /-- **SEAM 2 — crux 2's `Con(𝗣𝗔)` is Foundation's `Con[𝗣𝗔]`.** The whole route ends at Gödel II
 (`peano_not_proves_consistency = consistent_unprovable 𝗣𝗔`, proven about `↑𝗣𝗔.consistent`). This
