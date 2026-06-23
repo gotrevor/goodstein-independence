@@ -772,4 +772,29 @@ lemma iAbove_finCode_iVbigMul {β : V} (hβNF : isNF β) (hβ0 : β ≠ 0) :
     have h := iAbove_iomul hNF (iVbigMul β (l + 1 + 1)) (isNF_iVbigMul hβNF _) ih
     rwa [iadd_one_finCode l] at h
 
+/-- **Cor 3.4 lead is clean above the finite code `l`** (for `l ≥ 1`): reindexed
+`iAbove_finCode_iVbigMul`, the generic lead `ω^(l+1)·β` has every leading exponent strictly above
+`ocOadd 0 l 0`. -/
+lemma iAbove_code_iVbigMul {β : V} (hβNF : isNF β) (hβ0 : β ≠ 0) {l : V} (hl : 0 < l) :
+    iAbove (ocOadd 0 l 0) (iVbigMul β (l + 1)) := by
+  obtain ⟨p, rfl⟩ : ∃ p, l = p + 1 :=
+    ⟨l - 1, (sub_add_self_of_le (pos_iff_one_le.mp hl)).symm⟩
+  exact iAbove_finCode_iVbigMul hβNF hβ0 p
+
+/-- **Clean-append discharge, finite `g`-tail.** If `g`'s top exponent is `0` (`g` a finite code `< ω`),
+it sits below the lead `ω^(l+1)·β`'s spine for any level. (`Grz.AllExpAbove_bigMul` base.) -/
+lemma iAbove_ocExp_iVbigMul_fin {β g : V} (hβ0 : β ≠ 0) (l : V) (hexp : ocExp g = 0) :
+    iAbove (ocExp g) (iVbigMul β (l + 1)) := by
+  rw [hexp]; exact iAbove_zero_iVbigMul hβ0 l
+
+/-- **Clean-append discharge, infinite `g`-tail.** If `g`'s top exponent is the finite code `j ≤ l`
+(`g < ω^(l+1)` with a genuine `ω`-power leading term, forcing `l ≥ 1`), it sits below the lead
+`ω^(l+1)·β`'s spine: `iAbove (ocExp g) (ω^(l+1)·β)` by `iAbove_code_iVbigMul` + threshold weakening.
+This is the internal `Grz.AllExpAbove_bigMul` (the Cor 3.4 slowness clean-append side condition). -/
+lemma iAbove_ocExp_iVbigMul_inf {β g : V} (hβNF : isNF β) (hβ0 : β ≠ 0) {l j : V}
+    (hl : 0 < l) (hjl : j ≤ l) (hexp : ocExp g = ocOadd 0 j 0) :
+    iAbove (ocExp g) (iVbigMul β (l + 1)) := by
+  rw [hexp]
+  exact iAbove_finThresh_mono hjl _ (iAbove_code_iVbigMul hβNF hβ0 hl)
+
 end GoodsteinPA.InternalONote
