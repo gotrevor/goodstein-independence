@@ -45,6 +45,40 @@ def F : ℕ → ℕ → ℕ
 
 @[simp] theorem F_succ (l n : ℕ) : F (l + 1) n = (F l)^[n] n := rfl
 
+/-! ### Why the §3 slow-down does NOT run on an arbitrary `X`-definable descent (Lemma 3.2 is
+primrec-only) — machine-checked obstruction
+
+Rathjen's **Lemma 3.2** (the Grzegorczyk domination theorem) gives, *for every primitive recursive*
+`h`, a level `l` with `h ≤ f_l`. It is **false for non-primitive-recursive `h`**: the hierarchy is
+level-bounded, so its own diagonal `n ↦ F n n` escapes *every* fixed level. The lap-27+ E-reduction
+tried to run Cor 3.4 on the **`X`-definable** descent, whose block-width / coefficient-growth function
+`w n = C(β (n+1))` is an arbitrary `X`-definable (oracle) function, not primitive recursive. Its
+domination obligation has exactly the shape `∃ l, ∀ n, w n ≤ F l n` — and the lemmas below certify, in
+the kernel, that this **cannot hold once `w` is diagonal-fast** (`w n ≥ F n n + 1`). This is the precise,
+machine-checked sense in which the X-definable slow-down is *blocked*, not merely hard (the structural
+reason Rathjen restricts §3 to primitive-recursive sequences, and Route A — `Goodstein → primrec-PRWO(ε₀)
+→ Con(PA)` via Gödel II — is his actual proof). See `E-ARCHITECTURE-REVIEW-2026-06-23.md`.
+
+NB: realizing a *specific* `X`-definable descent with diagonal-fast `C`-growth is model-theoretic
+(a nonstandard `M ⊧ paLX` + an oracle `X`) and is NOT claimed here; what is certified is the hierarchy
+fact that makes the domination obligation unsatisfiable for any such descent. -/
+
+/-- **Grzegorczyk domination is level-bounded** (the formal core of "Lemma 3.2 is primrec-only"):
+any function `w` that dominates the diagonal `n ↦ F n n` is itself dominated by **no** fixed level
+`F l`. Witness: at `n = l`, `F l l < F l l + 1 ≤ w l ≤ F l l` is a contradiction. -/
+theorem not_dominated_of_diag_le {w : ℕ → ℕ} (hw : ∀ n, F n n + 1 ≤ w n) :
+    ¬ ∃ l, ∀ n, w n ≤ F l n := by
+  rintro ⟨l, h⟩
+  have h1 := hw l
+  have h2 := h l
+  omega
+
+/-- **The Grzegorczyk diagonal escapes every level**: `n ↦ F n n + 1` is dominated by no `F l`. The
+specialization of `not_dominated_of_diag_le` at `w = F n n + 1`. This is exactly the negation of the
+`xDescent_domination`-shaped obligation `∃ l, ∀ n, w n ≤ F l n` for a diagonal-fast width function. -/
+theorem F_diag_not_dominated : ¬ ∃ l, ∀ n, F n n + 1 ≤ F l n :=
+  not_dominated_of_diag_le (fun _ => le_refl _)
+
 /-! ## Base case `g₀` of Lemma 3.3 (for `f = F 0 = (·+1)`)
 
 Rathjen: `g(n,m) = (n+2) -· m` (truncated subtraction), a finite ordinal. Descends for `m < n+1`
