@@ -383,4 +383,32 @@ theorem crux1_internal_run_of_beta_def (l₀ : ℕ) (hl₀ : 0 < l₀) (wseq : V
   crux1_internal_run l₀ hl₀ wseq hβNF hβ0 hβdesc hβC hdom
     (fun K s => hdef_of_beta_definable l₀ wseq hβdef K s)
 
+/-- **Domination `hdom` reduces to *width* domination.** The `hdom` hypothesis (within a block the
+offset stays below `iF l₀ (blk j)`) follows from the single Rathjen-Lemma-3.2 input that every block
+*width* is bounded by the standard Grzegorczyk level: `∀ n, znth wseq n ≤ iF l₀ n`. Within-block, the
+offset already sits strictly below the width (`BlkRec.off_succ_lt_width_of_blk_eq`); transitivity with
+the width bound gives the offset bound. This isolates the crux-1 domination wall to *exactly* the
+Grzegorczyk-domination of the width sequence — the concrete instance of Rathjen 2014 Lemma 3.2. -/
+theorem hdom_of_width_dom (l₀ : ℕ) (wseq : V)
+    (hwdom : ∀ n, znth wseq n ≤ iF l₀ n) :
+    ∀ j, BlkRec.blk wseq (j + 1) = BlkRec.blk wseq j →
+        BlkRec.off wseq j + 1 < iF l₀ (BlkRec.blk wseq j) :=
+  fun j hb => lt_of_lt_of_le
+    (BlkRec.off_succ_lt_width_of_blk_eq wseq j hb) (hwdom (BlkRec.blk wseq j))
+
+/-- **Crux-1 internal run, domination reduced to width domination.** Same as
+`crux1_internal_run_of_beta_def` but the domination premise is the clean *width-domination* statement
+`∀ n, znth wseq n ≤ iF l₀ n` (Rathjen 2014 Lemma 3.2 at the concrete width sequence). The crux-1
+frontier is now: **(input ≺-descending NF `β`, definable) + (the block widths are Grzegorczyk-bounded)**. -/
+theorem crux1_internal_run_of_width_dom (l₀ : ℕ) (hl₀ : 0 < l₀) (wseq : V)
+    {β : V → V} {Cβ : V}
+    (hβNF : ∀ n, isNF (β n)) (hβ0 : ∀ n, β n ≠ 0)
+    (hβdesc : ∀ n, icmp (β (n + 1)) (β n) = 0)
+    (hβC : ∀ j, iC (β (BlkRec.blk wseq j)) ≤ Cβ + j)
+    (hβdef : 𝚺₁-Function₁ β)
+    (hwdom : ∀ n, znth wseq n ≤ iF l₀ n) :
+    ∃ m₀ : V, ∀ k : V, 0 < igoodstein m₀ k :=
+  crux1_internal_run_of_beta_def l₀ hl₀ wseq hβNF hβ0 hβdesc hβC hβdef
+    (hdom_of_width_dom l₀ wseq hwdom)
+
 end GoodsteinPA.StdCor34

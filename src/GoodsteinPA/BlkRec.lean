@@ -135,6 +135,18 @@ theorem off_succ_of_blk_eq (wseq j : V) (hb : blk wseq (j + 1) = blk wseq j) :
     have : blk wseq j + 1 = blk wseq j := by rw [← hbd.1]; exact hb
     exact absurd this (lt_add_one _).ne'
 
+/-- **Within-block ⟹ strict offset headroom.** If the block index is fixed across a step
+(`blk (j+1) = blk j`), the step must have taken the *advance* branch, so `off j + 1` is still
+strictly below the current block width. The exact fact `StdCor34`'s domination hypothesis `hdom`
+needs: it then only remains to dominate the *width* by `iF l₀ (blk j)`. -/
+theorem off_succ_lt_width_of_blk_eq (wseq j : V) (hb : blk wseq (j + 1) = blk wseq j) :
+    off wseq j + 1 < znth wseq (blk wseq j) := by
+  by_cases h : off wseq j + 1 < znth wseq (blk wseq j)
+  · exact h
+  · have hbd := blk_off_boundary wseq j (not_lt.mp h)
+    have : blk wseq j + 1 = blk wseq j := by rw [← hbd.1]; exact hb
+    exact absurd this (lt_add_one _).ne'
+
 /-! ## The C-bookkeeping `blk j + off j ≤ j` -/
 
 /-- **`blk j + off j ≤ j`** — the slowness bookkeeping consumed by `StdCor34.salpha_C_le`'s `hnm`.
