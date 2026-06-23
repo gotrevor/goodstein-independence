@@ -155,4 +155,44 @@ lemma znth_ibumpTable_eq_ibump (b : V) : ∀ N, ∀ k ≤ N, znth (ibumpTable b 
     · rw [znth_ibumpTable_succ hlt]
       exact ih k (le_iff_lt_succ.mpr hlt)
 
+/-! ### The `bump` recursion equation -/
+
+/-- `x < b^x` for `2 ≤ b`: makes the top exponent of `n+1` land `≤ n`. -/
+lemma self_lt_ipow {b : V} (hb : 2 ≤ b) (x : V) : x < ipow b x := by
+  have hb0 : (0 : V) < b := lt_of_lt_of_le (by simp) hb
+  induction x using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using ipow_pos hb0 0
+  case succ x ih =>
+    rw [ipow_succ]
+    calc x + 1 ≤ ipow b x := lt_iff_succ_le.mp ih
+      _ < ipow b x + ipow b x := lt_add_of_pos_right _ (ipow_pos hb0 x)
+      _ = ipow b x * 2 := (mul_two _).symm
+      _ ≤ ipow b x * b := mul_le_mul_left' hb _
+
+lemma znth_seqCons_self {s : V} (h : Seq s) (x : V) : znth (seqCons s x) (lh s) = x :=
+  (h.seqCons x).znth_eq_of_mem (lh_mem_seqCons s x)
+
+/-- **The internal `bump` recursion** — `ibump` satisfies the peel recursion of `Defs.bump`:
+`bump b (n+1) = (n+1)/b^e · (b+1)^(bump b e) + bump b r`, with `e = ilog b (n+1)`, `r = (n+1) mod b^e`.
+This is the machine-checked statement that the table truly computes the hereditary base-change. -/
+lemma ibump_succ {b : V} (hb : 2 ≤ b) (n : V) :
+    ibump b (n + 1)
+      = (n + 1) / ipow b (ilog b (n + 1)) * ipow (b + 1) (ibump b (ilog b (n + 1)))
+        + ibump b ((n + 1) % ipow b (ilog b (n + 1))) := by
+  have hb0 : (0 : V) < b := lt_of_lt_of_le (by simp) hb
+  have hpos : (0 : V) < n + 1 := by simp
+  have hpe : 0 < ipow b (ilog b (n + 1)) := ipow_pos hb0 _
+  have hen : ilog b (n + 1) ≤ n :=
+    le_iff_lt_succ.mpr (lt_of_lt_of_le (self_lt_ipow hb _) (ipow_ilog_le hb hpos))
+  have hrn : (n + 1) % ipow b (ilog b (n + 1)) ≤ n :=
+    le_iff_lt_succ.mpr (lt_of_lt_of_le (mod_lt _ hpe) (ipow_ilog_le hb hpos))
+  have key : znth (ibumpTable b (n + 1)) (n + 1) = bumpNext b (n + 1) (ibumpTable b n) := by
+    rw [ibumpTable_succ]
+    have := znth_seqCons_self (ibumpTable_seq b n) (bumpNext b (n + 1) (ibumpTable b n))
+    rwa [ibumpTable_lh] at this
+  rw [ibump, key, bumpNext,
+    znth_ibumpTable_eq_ibump b n (ilog b (n + 1)) hen,
+    znth_ibumpTable_eq_ibump b n ((n + 1) % ipow b (ilog b (n + 1))) hrn]
+
 end GoodsteinPA.InternalPow
