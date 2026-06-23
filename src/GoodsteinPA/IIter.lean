@@ -154,6 +154,22 @@ theorem self_le_iIter (hinfl : ∀ x, x ≤ f x) (x : V) :
   case zero => simp
   case succ c ih => rw [iIter_succ]; exact le_trans ih (hinfl _)
 
+/-- For an inflationary `f`, the iterate is **monotone in the count**: more iterations never decrease
+the value, `f^[c] x ≤ f^[c+d] x`. Internal induction on the extra count `d`. -/
+theorem le_iIter_add (hinfl : ∀ x, x ≤ f x) (x c : V) :
+    ∀ d : V, iIter fDef f hf x c ≤ iIter fDef f hf x (c + d) := by
+  intro d
+  induction d using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (P := (· ≤ ·))
+      (DefinableFunction₂.comp (F := iIter fDef f hf) (hF := iIter_definable' 𝚺)
+        (DefinableFunction.const x) (DefinableFunction.const c))
+      (DefinableFunction₂.comp (F := iIter fDef f hf) (hF := iIter_definable' 𝚺)
+        (DefinableFunction.const x)
+        (DefinableFunction₂.comp (F := (· + ·)) (DefinableFunction.const c)
+          (DefinableFunction.var 0)))
+  case zero => simp
+  case succ d ih => rw [← add_assoc, iIter_succ]; exact le_trans ih (hinfl _)
+
 end Infl
 
 /-- **`iF l` is inflationary**: `n ≤ iF l n` for every standard level `l`. Meta-induction on `l`: the
@@ -164,6 +180,27 @@ theorem self_le_iF : ∀ (l : ℕ) (n : V), n ≤ iF l n
   | l + 1, n => by
       rw [iF_succ]
       exact self_le_iIter (fun x => self_le_iF l x) n n
+
+/-- **`iF` is monotone in the level** (on positive inputs): `iF l n ≤ iF (l+1) n` for `n ≥ 1`.
+`iF (l+1) n = (iF l)^[n] n`, and since `iF l` is inflationary the iterate is monotone in its count,
+so `n ≥ 1` iterations dominate the single iteration `(iF l)^[1] n = iF l n`. -/
+theorem iF_le_succ_level (l : ℕ) {n : V} (hn : 1 ≤ n) : iF l n ≤ iF (l + 1) n := by
+  rw [iF_succ]
+  have hstep : iIter (iFDef l) (iF l) (iF_defined l) n 1 = iF l n := by
+    rw [show (1 : V) = 0 + 1 by rw [zero_add], iIter_succ, iIter_zero]
+  have hd : iIter (iFDef l) (iF l) (iF_defined l) n 1
+      ≤ iIter (iFDef l) (iF l) (iF_defined l) n (1 + (n - 1)) :=
+    le_iIter_add (fun x => self_le_iF l x) n 1 (n - 1)
+  rw [hstep] at hd
+  rwa [show (1 : V) + (n - 1) = n by
+    rw [add_comm]; exact Arithmetic.sub_add_self_of_le hn] at hd
+
+/-- **`iF` is monotone in the level** (on positive inputs), general form: `l ≤ l' → iF l n ≤ iF l' n`
+for `n ≥ 1`. The form Rathjen's Lemma 3.2 consumes (a dominating level can always be raised). -/
+theorem iF_mono_level {l l' : ℕ} (h : l ≤ l') {n : V} (hn : 1 ≤ n) : iF l n ≤ iF l' n := by
+  induction l', h using Nat.le_induction with
+  | base => exact le_refl _
+  | succ l' hl' ih => exact le_trans ih (iF_le_succ_level l' hn)
 
 /-! ## Internal partial sum of iterates `ipsum` (substrate for the block decomposition)
 
