@@ -558,22 +558,29 @@ theorem no_min_descent_absurd_of_goodstein {M : Type} [Nonempty M] [Structure LX
   letI oM : ORingStructure M := ReductModel.reductORing
   haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
   -- ───────────────────────────────────────────────────────────────────────────────────────────
-  -- WALL C+D (disclosed, NARROWED lap 36). The `X`-definable `Mlt`-descent extracted from
-  -- `no_min`/`ha₀` is slowed down (Rathjen §3 Thm 3.5, so `C(βₖ) ≤ k+1`) and seeds a special internal
-  -- Goodstein run `igoodstein m₀` with a dominating `𝚺₁`-bound `b k = T̂^{k+2}(βₖ)`. The **run side is
-  -- baked in here** (`DescentArith.nonterminating_internal` + the run's `𝚺₁`-definability, both proved):
-  -- the ONLY remaining content is the **bound existence** `hbound` — the Rathjen §3 slow-down `βₖ` and
-  -- `b k = T̂^{k+2}(βₖ)` internalized in `M`'s reduct as a `𝚺₁`-function, with `base`/`step`/`hpos`,
-  -- where `step` is the internalized `DescentCore.ineq6_step` (Lemma 3.6, inequality (6)).
+  -- WALL C+D (disclosed, REWIRED lap 44 to the X-essential consumer). The bound `b k = T̂^{k+2}(βₖ)`
+  -- is built from the `X`-definable `Mlt`-descent, so it is genuinely `X`-DEPENDENT — the old
+  -- `𝚺₁-Function₁ b` shape (`DescentArith.nonterminating_internal`) was UNACHIEVABLE in a general
+  -- model (lap-44 reflection finding A). The correct consumer is `nonterminating_of_xDescent` (lap 41,
+  -- `lx_succ_induction` over the `X`-mentioning bound predicate). It reduces `hCD` to the single honest
+  -- obligation: **produce the slowed code-descent `β : M → M`** (Rathjen §3 Cor 3.4 + Thm 3.5,
+  -- internalized on `InternalONote` codes, from the `X`-definable descent of `no_min`/`ha₀`) — NF,
+  -- `iCanon (k+1)` (`C(βₖ) ≤ k+1`), `icmp`-descent, and the `LX`-definable run comparison (`hPdef`).
+  -- The run/consumer side is DONE (`slowdown_run_facts`, `ineq6_step_internal`, `lemma36_*`, Thm 3.5
+  -- reindex). The 𝚺₁ engine (`DescentArith.nonterminating_internal`, `DescentSlowdown.*`) is kept as a
+  -- banked sorry-free asset, off the live path. See `REFLECTION-2026-06-23-lap44.md`, `PENDING_WORK` lap-44.
   have hCD : ∃ m₀ : M, ∀ k : M, 0 < InternalPow.igoodstein m₀ k := by
-    have hbound : ∃ (m₀ : M) (b : M → M), (𝚺₁-Function₁ b) ∧
-        b 0 ≤ InternalPow.igoodstein m₀ 0 ∧
-        (∀ k, b k ≤ InternalPow.igoodstein m₀ k →
-          b (k + 1) ≤ InternalPow.igoodstein m₀ (k + 1)) ∧
-        (∀ k, 0 < b k) := by
+    obtain ⟨β, hNF, hCanon, hdesc, hPdef⟩ :
+        ∃ β : M → M,
+          (∀ k, InternalONote.isNF (β k)) ∧
+          (∀ k, InternalONote.iCanon (k + 1) (β k)) ∧
+          (∀ k, InternalONote.icmp (β (k + 1)) (β k) = 0) ∧
+          (∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+            ∀ k, (InternalONote.ievalNat (k + 1) (β k) ≤
+                InternalPow.igoodstein (InternalONote.ievalNat 1 (β 0)) k)
+              ↔ Semiformula.Evalm M ![k] e φ) := by
       sorry
-    obtain ⟨m₀, b, hb, base, step, hpos⟩ := hbound
-    exact ⟨m₀, DescentArith.nonterminating_internal (by definability) hb base step hpos⟩
+    exact nonterminating_of_xDescent hM hNF hCanon hdesc hPdef
   obtain ⟨m₀, hpos⟩ := hCD
   -- ───────────────────────────────────────────────────────────────────────────────────────────
   -- WALL B (disclosed). `hgood` says `M`'s `ℒₒᵣ`-reduct models `goodsteinSentence`
