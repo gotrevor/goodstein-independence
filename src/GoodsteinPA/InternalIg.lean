@@ -483,4 +483,102 @@ instance iblockOff_definable (l : ℕ) (Γ) :
       (DefinableFunction₂.comp (F := (· + ·)) (DefinableFunction.var 1) (DefinableFunction.const 1)))
     (DefinableFunction.var 1)
 
+open LO.FirstOrder.Arithmetic.HierarchySymbol in
+/-- `ig0 n m = if m < n+2 then ω^0·(n+2-m) else 0` is `𝚺₁`-definable in `(n, m)`.
+Via `definableFunction_ite`: the guard `m < n+2` is `Δ₀`, the then-branch is an `ocOadd`-comp
+(with a `(n+2-m)` sub/add leaf), the else-branch is the constant `0`. -/
+instance ig0_definable (Γ) : Γ-[m + 1]-Function₂ (ig0 : V → V → V) := by
+  have h : (fun v : Fin 2 → V => ig0 (v 0) (v 1))
+      = (fun v : Fin 2 → V => if v 1 < v 0 + 2 then ocOadd 0 (v 0 + 2 - v 1) 0 else 0) := by
+    funext v; simp only [ig0]
+  show Γ-[m + 1].DefinableFunction (fun v : Fin 2 → V => ig0 (v 0) (v 1))
+  rw [h]
+  apply definableFunction_ite
+  · definability
+  · definability
+  · exact DefinableFunction₃.comp (F := ocOadd) (hF := ocOadd_definable.of_sigmaOne)
+      (DefinableFunction.const 0)
+      (DefinableFunction₂.comp (F := (· - ·))
+        (DefinableFunction₂.comp (F := (· + ·)) (DefinableFunction.var 0) (DefinableFunction.const 2))
+        (DefinableFunction.var 1))
+      (DefinableFunction.const 0)
+  · exact DefinableFunction.const 0
+
+open LO.FirstOrder.Arithmetic.HierarchySymbol in
+/-- **`ig l` is `𝚺₁`-definable in `(n, m)`, for every standard level `l`.** Meta-induction on `l`
+(NOT internal): base `ig 0 = ig0` (`ig0_definable`); step `ig (l+1) = if m < iF(l+1)n then
+iblk(l+1) (max 1 (n - iblockIdx)) (ig l (iIter n iblockIdx) iblockOff) else 0` via
+`definableFunction_ite`, the recursive `ig l` discharged by the IH. Proved at the `𝚺₁` level so the
+IH and all sub-arguments live on the `𝚺` side that `DefinableFunction₂.comp` expects. -/
+lemma ig_definable_aux : ∀ l : ℕ, 𝚺₁-Function₂ (ig l : V → V → V)
+  | 0 => by
+      show 𝚺₁.DefinableFunction (fun v : Fin 2 → V => ig 0 (v 0) (v 1))
+      simp only [ig_zero]; exact ig0_definable 𝚺
+  | l + 1 => by
+      have ih := ig_definable_aux l
+      have h : (fun v : Fin 2 → V => ig (l + 1) (v 0) (v 1))
+          = (fun v : Fin 2 → V => if v 1 < iF (l + 1) (v 0) then
+              iblk (l + 1)
+                (max 1 (v 0 - iblockIdx (iFDef l) (iF l) (iF_defined l) (v 0) (v 1)))
+                (ig l (iIter (iFDef l) (iF l) (iF_defined l) (v 0)
+                        (iblockIdx (iFDef l) (iF l) (iF_defined l) (v 0) (v 1)))
+                      (iblockOff (iFDef l) (iF l) (iF_defined l) (v 0) (v 1)))
+            else 0) := by
+        funext v; simp only [ig]
+      show 𝚺₁.DefinableFunction (fun v : Fin 2 → V => ig (l + 1) (v 0) (v 1))
+      rw [h]
+      apply definableFunction_ite
+      · -- guard `v 1 < iF (l+1) (v 0)`
+        have hiF : 𝚺-[(0:ℕ) + 1].DefinableFunction₁ (iF (l + 1) : V → V) :=
+          iF_definable' (l + 1) 𝚺
+        exact Definable.comp₂ (P := (· < ·)) (DefinableFunction.var 1)
+          (DefinableFunction₁.comp (hF := hiF) (DefinableFunction.var 0))
+      · have hiF : 𝚺-[(0:ℕ) + 1].DefinableFunction₁ (iF (l + 1) : V → V) :=
+          iF_definable' (l + 1) 𝚺
+        exact Definable.not (Definable.comp₂ (P := (· < ·)) (DefinableFunction.var 1)
+          (DefinableFunction₁.comp (hF := hiF) (DefinableFunction.var 0)))
+      · -- then-branch: the `iblk`-comp
+        refine DefinableFunction₂.comp (F := iblk (l + 1)) (hF := iblk_definable (l + 1) 𝚺)
+          ?_ ?_
+        · -- `max 1 (v0 - iblockIdx … v0 v1)`
+          exact DefinableFunction₂.comp (F := max) (hF := max_definable 𝚺₁)
+            (DefinableFunction.const 1)
+            (DefinableFunction₂.comp (F := (· - ·))
+              (DefinableFunction.var 0)
+              (DefinableFunction₂.comp (F := iblockIdx (iFDef l) (iF l) (iF_defined l))
+                (DefinableFunction.var 0) (DefinableFunction.var 1)))
+        · -- `ig l (iIter … v0 iblockIdx) (iblockOff … v0 v1)`
+          refine DefinableFunction₂.comp (F := ig l) (hF := ih) ?_ ?_
+          · exact DefinableFunction₂.comp (F := iIter (iFDef l) (iF l) (iF_defined l))
+              (DefinableFunction.var 0)
+              (DefinableFunction₂.comp (F := iblockIdx (iFDef l) (iF l) (iF_defined l))
+                (DefinableFunction.var 0) (DefinableFunction.var 1))
+          · exact DefinableFunction₂.comp (F := iblockOff (iFDef l) (iF l) (iF_defined l))
+              (DefinableFunction.var 0) (DefinableFunction.var 1)
+      · exact DefinableFunction.const 0
+
+open LO.FirstOrder.Arithmetic.HierarchySymbol in
+/-- `ig l` definable at every hierarchy level (the form the `salpha`/`bbeta` definability chain wants). -/
+instance ig_definable (l : ℕ) (Γ) : Γ-[m + 1]-Function₂ (ig l : V → V → V) :=
+  (ig_definable_aux l).of_sigmaOne
+
+open LO.FirstOrder.Arithmetic.HierarchySymbol in
+/-- `igtTot l n m = if m < iF l n then ig l n m else ig0 0 0` is `𝚺₁`-definable in `(n, m)`. -/
+instance igtTot_definable (l : ℕ) (Γ) : Γ-[m + 1]-Function₂ (igtTot l : V → V → V) := by
+  have h : (fun v : Fin 2 → V => igtTot l (v 0) (v 1))
+      = (fun v : Fin 2 → V => if v 1 < iF l (v 0) then ig l (v 0) (v 1) else ig0 0 0) := by
+    funext v; simp only [igtTot]
+  show Γ-[m + 1].DefinableFunction (fun v : Fin 2 → V => igtTot l (v 0) (v 1))
+  rw [h]
+  apply definableFunction_ite
+  · have hiF : 𝚺-[m + 1].DefinableFunction₁ (iF l : V → V) := iF_definable' l 𝚺
+    exact Definable.comp₂ (P := (· < ·)) (DefinableFunction.var 1)
+      (DefinableFunction₁.comp (hF := hiF) (DefinableFunction.var 0))
+  · have hiF : 𝚺-[m + 1].DefinableFunction₁ (iF l : V → V) := iF_definable' l 𝚺
+    exact Definable.not (Definable.comp₂ (P := (· < ·)) (DefinableFunction.var 1)
+      (DefinableFunction₁.comp (hF := hiF) (DefinableFunction.var 0)))
+  · exact DefinableFunction₂.comp (F := ig l) (hF := ig_definable l Γ)
+      (DefinableFunction.var 0) (DefinableFunction.var 1)
+  · exact DefinableFunction.const (ig0 0 0)
+
 end GoodsteinPA.InternalIg
