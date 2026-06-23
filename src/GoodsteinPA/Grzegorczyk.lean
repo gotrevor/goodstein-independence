@@ -623,4 +623,90 @@ theorem g_desc : ∀ (l n m : ℕ), m < F l n → (g l n (m + 1)).repr < (g l n 
         Left.mul_pos (pow_pos Ordinal.omega0_pos _) hcpos
       exact lt_of_lt_of_le hc le_self_add
 
+/-! ## Corollary 3.4 — the slowed sequence `α` (C-based, repo variant) and its slowness bound
+
+Rathjen sets `αⱼ = ω^ω·βₙ + g(n,m)` over blocks of width `|β_{n+1}|`. Since at level `l` we have
+`g l n m < ω^(l+1)` (`g_lt`), the lead lift `ω^(l+1)·βₙ` (= `bigMul (l+1) (β n)`) suffices, and the repo
+variant carves the index `j` into blocks of **C-based** width `W n = C(β_{n+1})` (the lap-44-flagged
+collapse of Rathjen's length `|·|` onto `C`). The block of `j` is `n = widx W (j+1) j`, the within-block
+offset `m = woff W (j+1) j`.
+
+The **slowness bound** `C(αⱼ) ≤ K·(j+1)` (this section) is the de-risking-critical piece: it is exactly
+where the C-collapse must close, and it is **domination-free and prefix-free**, so it verifies the C
+arithmetic of Cor 3.4 outright. (The descent property — which DOES need the domination `C(β_{n+1}) ≤ F l n`
+and Rathjen's finite prefix at `n=0` — is the next brick.) -/
+
+/-- C-based block width for the descent side: `W n = C (β_{n+1})`. -/
+def corW (β : ℕ → ONote) (t : ℕ) : ℕ := C (β (t + 1))
+
+/-- The block index of `j` (largest `n` with `Σ_{t<n} C(β_{t+1}) ≤ j`). -/
+def corBlk (β : ℕ → ONote) (j : ℕ) : ℕ := widx (corW β) (j + 1) j
+
+/-- The within-block offset of `j`. -/
+def corOff (β : ℕ → ONote) (j : ℕ) : ℕ := woff (corW β) (j + 1) j
+
+/-- **Cor 3.4 slowed sequence (within-block term).** `αⱼ = ω^(l+1)·β_n + g l n m`. -/
+def corAlpha (l : ℕ) (β : ℕ → ONote) (j : ℕ) : ONote :=
+  bigMul (l + 1) (β (corBlk β j)) + g l (corBlk β j) (corOff β j)
+
+theorem wsum_corBlk_le (β : ℕ → ONote) (j : ℕ) :
+    wsum (corW β) (corBlk β j) ≤ j := wsum_widx_le (corW β) (j + 1) j
+
+theorem wsum_add_corOff (β : ℕ → ONote) (j : ℕ) :
+    wsum (corW β) (corBlk β j) + corOff β j = j := wsum_add_woff (corW β) (j + 1) j
+
+/-- `C(β n) ≤ Σ_{t<n} C(β_{t+1})` for `n ≥ 1`: `C(β n) = W(n-1)` is one summand of `wsum`. -/
+theorem C_le_wsum_corW (β : ℕ → ONote) {n : ℕ} (hn : 1 ≤ n) :
+    C (β n) ≤ wsum (corW β) n := by
+  obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
+  rw [wsum_succ]
+  have hcorW : corW β n' = C (β (n' + 1)) := rfl
+  omega
+
+/-- `A + j ≤ A·(j+1)` for `A ≥ 1` (absorbing a constant `A` into the linear bound). -/
+theorem const_add_le_mul {A j : ℕ} (hA : 1 ≤ A) : A + j ≤ A * (j + 1) := by
+  have h1 : j ≤ A * j := Nat.le_mul_of_pos_left j hA
+  have h2 : A * (j + 1) = A * j + A := by ring
+  omega
+
+/-- **Cor 3.4 — slowness.** `C(αⱼ) ≤ K·(j+1)`, with `K = max (C(β 0)+(l+1)) K_g`. Domination-free,
+prefix-free: the clean-append `C_add_clean` (every exponent of `ω^(l+1)·β_n` dominates `g l n m < ω^(l+1)`)
+splits `C` into `max (C(ω^(l+1)·β_n)) (C(g l n m))`; the lead is `≤ C(β_n)+(l+1)` (`C_bigMul_le`) with
+`C(β_n) ≤ wsum ≤ j` for `n ≥ 1` (else the `C(β 0)` constant is absorbed into `K`); the tail is
+`≤ K_g·(n+m+1) ≤ K_g·(j+1)` since `n+m ≤ j`. This is the C-collapse, machine-verified. -/
+theorem corAlpha_C_bound (l : ℕ) {β : ℕ → ONote} (hβNF : ∀ n, (β n).NF)
+    (hWpos : ∀ t, 1 ≤ corW β t) :
+    ∃ K, ∀ j, C (corAlpha l β j) ≤ K * (j + 1) := by
+  obtain ⟨Kg, hKg⟩ := g_C_bound l
+  refine ⟨max (C (β 0) + (l + 1)) Kg, fun j => ?_⟩
+  set n := corBlk β j with hn
+  set m := corOff β j with hm
+  set K := max (C (β 0) + (l + 1)) Kg with hKdef
+  -- block bookkeeping
+  have hwle : wsum (corW β) n ≤ j := wsum_corBlk_le β j
+  have hadd : wsum (corW β) n + m = j := wsum_add_corOff β j
+  have hnwsum : n ≤ wsum (corW β) n := le_wsum (corW β) hWpos n
+  have hnmj : n + m ≤ j := by omega
+  -- clean-append split of `C`
+  have hclean : C (corAlpha l β j) ≤ max (C (bigMul (l + 1) (β n))) (C (g l n m)) :=
+    C_add_clean (NF_bigMul (l + 1) (hβNF n)) (g_NF l n m)
+      (AllExpAbove_bigMul (hβNF n) (g_lt l n m))
+  refine le_trans hclean (max_le ?_ ?_)
+  · -- lead: `C(ω^(l+1)·β_n) ≤ C(β_n)+(l+1) ≤ (C(β 0)+(l+1)) + j ≤ K·(j+1)`
+    have h1 : C (bigMul (l + 1) (β n)) ≤ C (β n) + (l + 1) := C_bigMul_le (l + 1) (β n)
+    have h2 : C (β n) ≤ C (β 0) + j := by
+      rcases Nat.eq_zero_or_pos n with h0 | h0
+      · rw [h0]; omega
+      · exact le_trans (C_le_wsum_corW β h0) (by omega)
+    have hKge : C (β 0) + (l + 1) ≤ K := le_max_left _ _
+    have hK1 : 1 ≤ K := by omega
+    calc C (bigMul (l + 1) (β n)) ≤ C (β n) + (l + 1) := h1
+      _ ≤ (C (β 0) + (l + 1)) + j := by omega
+      _ ≤ K + j := by omega
+      _ ≤ K * (j + 1) := const_add_le_mul hK1
+  · -- tail: `C(g l n m) ≤ K_g·(n+m+1) ≤ K_g·(j+1) ≤ K·(j+1)`
+    calc C (g l n m) ≤ Kg * (n + m + 1) := hKg n m
+      _ ≤ Kg * (j + 1) := Nat.mul_le_mul_left Kg (by omega)
+      _ ≤ K * (j + 1) := Nat.mul_le_mul_right (j + 1) (le_max_right _ _)
+
 end GoodsteinPA.Grz
