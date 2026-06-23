@@ -1,10 +1,17 @@
 # HANDOFF — 2026-06-23 (lap 28, **F-φ DISCHARGED — Thm 5.6 fully axiom-clean; ONE wall left**)
 
-> **Branch** `plan` · HEAD = `582123e` · build **green** (`lake build GoodsteinPA`, **1300 jobs**) ·
-> headline `GoodsteinPA.peano_not_proves_goodstein` = honest `sorry` (anti-fraud intact). Tree clean.
+> **Branch** `plan` · HEAD = `c561559` · build **green** (`lake build GoodsteinPA`, **1300 jobs**) ·
+> headline `GoodsteinPA.peano_not_proves_goodstein` = honest `sorry` (anti-fraud intact). Tree clean,
+> no uncommitted edits.
 
-Durable overview = **`STATUS.md`** (lap-28 top). Attack paths = **`PENDING_WORK.md`**. F-φ port detail =
+Durable overview = **`STATUS.md`** (lap-28 top). Attack paths = **`PENDING_WORK.md`** (lap-28 top has the
+`ibump_nat` Foundation-ℕ div/mod diamond blocker + `div_eq_of` fix path). F-φ port detail =
 **`wip/aristotle-fphi/PORT-STATUS.md`** (now marked COMPLETE).
+
+## Lap-28 commits (3, all green): `582123e` F-φ discharge · `af9293a` STATUS/HANDOFF · `c561559` PENDING note
+The headline deliverable is `582123e` (F-φ). Late-lap attempt at the route-neutral `ibump_nat`/
+`igoodstein_nat` bricks hit a Foundation-ℕ `/`,`%` instance diamond (noncomputable `Classical.choose`
+ops, not defeq to Nat's); reverted to keep `src/` green+sorry-free; fix path recorded in `PENDING_WORK.md`.
 
 ## What landed this lap (1 green commit)
 **`582123e` — F-φ DISCHARGED.** Completed the v4.28→v4.31 port of Aristotle's `rePred_ltPull_natCode`
