@@ -117,46 +117,58 @@ theorem evalfm_TI_unfold {M : Type} [Nonempty M] [Structure LX M] (f : ℕ → M
     Semiterm.val_bvar, Matrix.cons_val_zero]
   rfl
 
-/-! ### The single semantic obligation (Rathjen §3, model-internal) -/
+/-! ### Step 3 — the genuine remaining obligation (Rathjen §3 in `M`), as ONE named `sorry` -/
 
-/-- **The E wall, reduced to one model-theoretic statement (DISCLOSED `sorry`).**
+/-- **The lone remaining wall: a non-`MX`-minimal seed yields a contradiction with Goodstein-in-`M`
+(DISCLOSED `sorry`).** This is Rathjen "Goodstein revisited" §3 carried out *inside `M`*: given the
+"no `Mlt`-minimal non-`MX` element" fact `no_min` (so `MX`'s complement is `Mlt`-progressive-downward) and
+the Goodstein-termination fact `hgood`, derive `False`. Discharge plan:
 
-Under `𝗣𝗔 ⊢ goodsteinSentence`, *every* model `M ⊧ paLX` satisfies `TI prec`. Discharge plan
-(Rathjen "Goodstein revisited" §3, carried out **inside `M`**):
+1. **M-internal `Mlt`-descent.** From `no_min` + `ha₀`, build a *definable* descending sequence
+   `G : M → M`, `G 0 = a₀`, `G(k+1) =` `Mlt`-least `y` with `Mlt y (G k) ∧ ¬MX y`, via `M`'s LX
+   least-number principle (`hM ⊧ InductionScheme LX Set.univ`; `Arithmetic.succInd`/`leastNumber` are
+   generic over `[LX.ORing]`). **Must be M-internal** (definable + M-recursion), *not* metatheoretic
+   `choice`, so the run aligns with `M`'s internal termination statement (see `PENDING_WORK.md` ⚠).
+2. **`M`'s `ℒₒᵣ`-reduct as `𝗜𝚺₁`.** `hM ⊧ paLX ⊇ lMap 𝗣𝗔` ⟹ reduct `⊧ 𝗣𝗔 ⊇ 𝗜𝚺₁`; install it as the
+   substrate's `[ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]`.
+3. **Slow-down + inequality (6).** Slow `(G k)` ⟹ `(βₖ)` (`C(βₖ) ≤ k+1`); run the special Goodstein seq
+   from `m₀ = T̂²(β₀)` (lap-26 `igoodstein` in the reduct); iterate `DescentCore.ineq6_step` by `M`'s
+   LX-induction ⟹ `M ⊧ ∀k mₖ > 0`; contradict `hgood`.
 
-1. **Import Goodstein into `M`.** From `h : 𝗣𝗔 ⊢ goodsteinSentence`, E-lift
-   (`DescentLift.paLX_derivable2_lMap_of_PA_provable`) gives `paLX ⊢ lMap goodsteinSentence`; soundness
-   then gives `M ⊧ lMap goodsteinSentence`, i.e. (via `Semiformula.eval_lMap`) the `ℒₒᵣ`-reduct of `M`
-   models `goodsteinSentence` — every internal Goodstein run terminates in `M`.
-2. **Suppose `M ⊭ TI prec`.** Then `M ⊧ Prog(X) ∧ ¬X a₀` for some `a₀ ∈ M`. By `M`'s LX least-number
-   principle (an instance of `InductionScheme LX`, available since `M ⊧ paLX`), build the `X`-definable
-   `≺`-descent `a₀ ≻ a₁ ≻ …` (`aₖ₊₁ =` `≺`-least `b ≺ aₖ` with `¬X b`, nonempty by `Prog`-contrapositive).
-3. **Slow it down + run inequality (6).** Slow the descent (Rathjen 3.3/3.4/Thm 3.5) to `(βₖ)` with
-   `C(βₖ) ≤ k+1`, run the special Goodstein sequence from `m₀ = T̂²(β₀)`. Inequality (6)
-   (`DescentCore.ineq6_step`, iterated by `M`'s LX-induction over the X-definable predicate) gives
-   `M ⊧ ∀k, mₖ ≥ T̂^{k+2}(βₖ) > 0` — the run never reaches `0` in `M`.
-4. **Contradiction** with step 1 (`M ⊧ goodsteinSentence` says it does reach `0`). Hence `M ⊧ ∀a X a`,
-   i.e. `M ⊧ TI prec`.
+The free predicate `X` (`MX`) is present throughout (a model of `paLX`, not `𝗜𝚺₁`) — the lap-24 free-`X`
+obstruction does not apply. The lap-26 substrate supplies the run; this lemma is the genuine content. -/
+theorem no_min_descent_absurd_of_goodstein {M : Type} [Nonempty M] [Structure LX M]
+    (hgood : M ⊧ₘ (Semiformula.lMap GoodsteinPA.DescentLift.Φ goodsteinSentence : Sentence LX))
+    (hM : M ⊧ₘ* (paLX : Theory LX)) {f : ℕ → M} {a₀ : M} (ha₀ : ¬ MX a₀)
+    (no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y) : False := by
+  sorry
 
-The free predicate `X` is present throughout (we are in a model of `paLX`, not `𝗜𝚺₁`), so the lap-24
-free-`X` obstruction does not apply. The lap-26 internal-Goodstein substrate supplies the run; the
-remaining genuine content is steps 2–3 carried out in `M`. -/
+/-! ### The single semantic obligation, assembled (Rathjen §3, model-internal) -/
+
+/-- **The E wall, reduced to one model-theoretic statement.** Under `𝗣𝗔 ⊢ goodsteinSentence`, *every*
+model `M ⊧ paLX` satisfies `TI prec`. Steps 1–2 (`models_lMap_goodstein`, `evalfm_TI_unfold`) and the
+progressivity-contrapositive are PROVED here; the genuine remaining content is the single named
+`sorry` `no_min_descent_absurd_of_goodstein` (Rathjen §3 in `M`). -/
 theorem paLX_models_TI_of_PA_provable (h : 𝗣𝗔 ⊢ ↑goodsteinSentence)
     {M : Type} [Nonempty M] [Structure LX M] (hM : M ⊧ₘ* (paLX : Theory LX)) (f : ℕ → M) :
     Semiformula.Evalfm M f (Boundedness.TI Thm56.prec) := by
   -- Step 1 (PROVED): the lifted Goodstein sentence holds in `M`.
-  have _hgood : M ⊧ₘ (Semiformula.lMap GoodsteinPA.DescentLift.Φ goodsteinSentence : Sentence LX) :=
+  have hgood : M ⊧ₘ (Semiformula.lMap GoodsteinPA.DescentLift.Φ goodsteinSentence : Sentence LX) :=
     models_lMap_goodstein h hM
   -- Step 2 (PROVED): reduce to abstract transfinite induction for `(Mlt f, MX)`.
   rw [evalfm_TI_unfold]
   intro hProg
-  -- Step 3 (the deep core, DISCLOSED, Rathjen §3 in `M`): from `hProg` (progressivity of `MX` along
-  -- `Mlt`) and `_hgood` (Goodstein terminates in `M`), conclude `∀ x, MX x`. Suppose `¬MX a₀`; by `M`'s
-  -- LX least-number principle (`hM ⊧ InductionScheme LX`) build the M-internal `Mlt`-descent of non-`MX`
-  -- elements; slow it down + run inequality (6) (lap-26 `igoodstein` in `M`'s `ℒₒᵣ`-reduct) ⟹ a
-  -- non-terminating Goodstein run, contradicting `_hgood`. (The descent must be M-INTERNAL/definable —
-  -- not metatheoretic-choice-built — so its run aligns with `M`'s internal termination statement.)
-  sorry
+  -- Suppose `MX` is not total: `¬MX a₀` for some `a₀`.
+  by_contra hcon
+  rw [not_forall] at hcon
+  obtain ⟨a₀, ha₀⟩ := hcon
+  -- PROVED (progressivity-contrapositive): the non-`MX` set has no `Mlt`-minimal element.
+  have no_min : ∀ x : M, ¬ MX x → ∃ y, Mlt f y x ∧ ¬ MX y := fun x hx => by
+    by_contra hc
+    rw [not_exists] at hc
+    exact hx (hProg x (fun y hy => by by_contra hny; exact hc y ⟨hy, hny⟩))
+  -- Step 3 (the lone remaining obligation): the descent + Goodstein run contradiction.
+  exact no_min_descent_absurd_of_goodstein hgood hM ha₀ no_min
 
 /-! ### `DescentE` via first-order completeness -/
 

@@ -27,22 +27,28 @@ free), drops the literature gate (standard model theory), reuses the lap-26 subs
 in `M`'s `ℒₒᵣ`-reduct).
 
 ## Next actions (priority; `PENDING_WORK.md` lap-30 + `DESCENT-PLAN §5` have detail)
-1. **✅ DONE (step 1): `M ⊧ lMap goodsteinSentence`.** `models_lMap_goodstein` / `reduct_models_goodstein`
-   (`DescentSemantic.lean`, axiom-clean) — E-lift + `models_of_provable` soundness + `models_lMap`. The
-   main lemma now consumes this; the `sorry` is isolated to the deep core (steps 2–3).
-2. **(next) X-descent from `¬TI prec`** via `M`'s LX least-number principle (`M ⊧ InductionScheme LX`).
-   First sub-step: unfold `Evalfm M f (TI prec)` to `M ⊧ Prog(X) → ∀a, X a`; intro `Prog`, contradiction
-   setup; find how `M ⊧ₘ* paLX` yields a usable least-number / `InductionScheme LX` instance in `M`.
-3. **(deep core) Slow-down + inequality (6) in `M`** (Rathjen §3): lap-26 `igoodstein` run (needs
-   `M`'s `ℒₒᵣ`-reduct as an `ORingStructure`/`𝗜𝚺₁` model — a bridge to build) + `ineq6_step` iterated by
-   `M`'s LX-induction ⟹ `M ⊧ ∀k mₖ>0` ⟹ ⊥ with step 1. The genuine multi-lap content.
+The semantic lemma `paLX_models_TI_of_PA_provable` is now **sorry-free** — it chains three proven pieces
+and ONE named disclosed obligation `no_min_descent_absurd_of_goodstein` (`DescentSemantic.lean`, the lone
+`sorry`). PROVED this lap: step 1 (`models_lMap_goodstein`/`reduct_models_goodstein`: `M ⊧` lifted
+Goodstein), step 2 (`evalfm_TI_unfold`: `TI prec`-in-`M` = abstract TI for `(Mlt, MX)`), and the
+progressivity-contrapositive (`no_min`: non-`MX` set has no `Mlt`-minimal element).
+
+**Next — discharge `no_min_descent_absurd_of_goodstein`** (goal `False` from `hgood`, `hM ⊧ paLX`,
+`ha₀ : ¬MX a₀`, `no_min`), hardest-first sub-obligations:
+1. **M-internal `Mlt`-descent `G : M → M`** from `no_min` via `M`'s LX least-number principle. `succInd`/
+   `leastNumber`/`InductionScheme` are generic over `[LX.ORing]` (`Schemata.lean`) — replicate the
+   `InductionScheme.succ_induction` mechanism for LX/M. **Must be M-internal/definable, not `choice`.**
+2. **`M`'s `ℒₒᵣ`-reduct as `[ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]`** (from `hM ⊧ paLX ⊇ lMap 𝗣𝗔`). Instance
+   plumbing (a second structure on `M`'s carrier) — the finicky part; probe early.
+3. **Slow-down + inequality (6) in `M`**: lap-26 `igoodstein` run + `DescentCore.ineq6_step` iterated by
+   `M`'s LX-induction ⟹ `M ⊧ ∀k mₖ>0` ⟹ ⊥ with `hgood`. Genuine multi-lap content.
 
 ## LOCKED untouched (anti-fraud)
 `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `Statement.lean:22` `sorry`.
 
 ## src/ code sorries
 `Statement.lean:22` (headline, locked), `Reduction.lean:52` (Route-A hook, REJECTED — off path),
-`DescentSemantic.lean:90` (`paLX_models_TI_of_PA_provable`, **THE wall**, disclosed).
+`DescentSemantic.lean` `no_min_descent_absurd_of_goodstein` (**THE wall**, disclosed; `paLX_models_TI_of_PA_provable` is now sorry-free).
 
 ## Notes
 - **Aristotle:** all jobs IDLE/consumed; the remaining wall is a model-theoretic decomposition, no clean
