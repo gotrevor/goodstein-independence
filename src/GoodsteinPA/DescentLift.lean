@@ -77,4 +77,92 @@ theorem lMap_succInd (φ : Semiformula ℒₒᵣ ℕ 1) :
   · exact congrArg (fun t => (Semiformula.lMap Φ φ)/[t]) lMap_zero_const
   · exact congrArg (fun t => (Semiformula.lMap Φ φ)/[t]) lMap_succT
 
+/-! ## `lMap` commutes with `univCl`, and the induction-scheme inclusion -/
+
+/-- `fvSup` is preserved by `lMap` (it is a function of the free-variable set, which `lMap` fixes by
+`freeVariables_lMap`). Needed so the `allClosure` count in `univCl'` matches across the translation. -/
+theorem fvSup_lMap (ψ : SyntacticFormula ℒₒᵣ) : (Semiformula.lMap Φ ψ).fvSup = ψ.fvSup := by
+  unfold Semiformula.fvSup; rw [Semiformula.freeVariables_lMap]
+
+/-- `lMap` commutes with `Rew.fixitr 0 k` (the "fix all `< k` free variables" rewriting). `fixitr 0 k`
+is `k`-fold `Rew.fix` (`fixitr_succ`), and `lMap` commutes with each `Rew.fix` (`lMap_fix`). -/
+theorem lMap_fixitr (k : ℕ) (ψ : SyntacticSemiformula ℒₒᵣ 0) :
+    Semiformula.lMap Φ (Rew.fixitr 0 k ▹ ψ) = Rew.fixitr 0 k ▹ (Semiformula.lMap Φ ψ) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [Rew.fixitr_succ, TransitiveRewriting.comp_app, Semiformula.lMap_fix, ih,
+      Rew.fixitr_succ, TransitiveRewriting.comp_app]
+
+/-- `lMap` commutes with the syntactic universal closure `univCl'` (`∀⁰*` over `fixitr`-fixed
+variables): the closure count `fvSup` is `lMap`-invariant and `lMap` passes through both `∀⁰*`
+(`lMap_allClosure`) and `fixitr` (`lMap_fixitr`). -/
+theorem lMap_univCl' (ψ : SyntacticFormula ℒₒᵣ) :
+    Semiformula.lMap Φ ψ.univCl' = (Semiformula.lMap Φ ψ).univCl' := by
+  unfold Semiformula.univCl'
+  rw [Semiformula.lMap_allClosure, fvSup_lMap, lMap_fixitr]
+
+/-- `lMap` commutes with the sentence-level universal closure `univCl`. Via injectivity of the
+`Sentence ↪ SyntacticFormula` coercion (`coe_inj`): both sides coerce to `(lMap Φ ψ).univCl'`
+(`coe_univCl_eq_univCl'` + `lMap_emb` + `lMap_univCl'`). -/
+theorem lMap_univCl (χ : SyntacticFormula ℒₒᵣ) :
+    Semiformula.lMap Φ (Semiformula.univCl χ) = Semiformula.univCl (Semiformula.lMap Φ χ) := by
+  apply (Semiformula.coe_inj _ _).mp
+  rw [Semiformula.coe_univCl_eq_univCl', ← Semiformula.lMap_emb,
+    Semiformula.coe_univCl_eq_univCl', lMap_univCl']
+
+/-- **The induction-scheme inclusion.** `lMap (ORing.embedding LX)` carries every full
+`ℒₒᵣ`-induction axiom to a full `LX`-induction axiom: an instance `univCl (succInd φ)` maps to
+`univCl (succInd (lMap Φ φ))` (`lMap_univCl` + `lMap_succInd`), which is the `LX`-instance for the
+formula `lMap Φ φ` (the universe predicate accepts it). This is the binding step that lets a
+PA-derivation's induction axioms land inside `paLX`. -/
+theorem lMap_inductionScheme_subset :
+    Theory.lMap Φ (InductionScheme ℒₒᵣ Set.univ) ⊆ InductionScheme LX Set.univ := by
+  rintro σ' ⟨σ, hσ, rfl⟩
+  obtain ⟨φ, -, rfl⟩ := hσ
+  rw [lMap_univCl, lMap_succInd]
+  exact ⟨Semiformula.lMap Φ φ, trivial, rfl⟩
+
+/-! ## The X-free E-lift: a PA-derivation translates into a `paLX`-derivation -/
+
+/-- `Theory.lMap Φ 𝗣𝗔 ⊆ paLX`: `𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ univ`; its `𝗣𝗔⁻`-image is `paLX`'s
+first summand verbatim, and its induction-scheme image lands in `InductionScheme LX univ` (`paLX`'s
+second summand) by `lMap_inductionScheme_subset`. -/
+theorem lMap_PA_subset : Theory.lMap Φ 𝗣𝗔 ⊆ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
+  show Theory.lMap Φ (𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ) ⊆ _
+  rw [Theory.add_def, Theory.lMap, Set.image_union]
+  exact Set.union_subset (fun _ hx => Or.inl hx)
+    (fun _ hx => Or.inr (lMap_inductionScheme_subset hx))
+
+/-- The schema coercion commutes with `lMap`: `(T : Schema).lMap Φ = (Theory.lMap Φ T : Schema)`
+(both are `lMap`/`emb` images; they agree by `lMap_emb`). -/
+theorem coe_schema_lMap (T : Theory ℒₒᵣ) :
+    Schema.lMap Φ (T : Schema ℒₒᵣ) = ((Theory.lMap Φ T : Theory LX) : Schema LX) := by
+  unfold Schema.lMap Theory.toSchema Theory.lMap
+  rw [Set.image_image, Set.image_image]
+  exact Set.image_congr (fun σ _ => Semiformula.lMap_emb σ)
+
+/-- The schema-level form of `lMap_PA_subset`. -/
+theorem schema_lMap_PA_subset :
+    Schema.lMap Φ (𝗣𝗔 : Schema ℒₒᵣ) ⊆ ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Schema LX) := by
+  rw [coe_schema_lMap]; exact (Theory.coe_subset_coe).mpr lMap_PA_subset
+
+/-- **The X-free E-lift.** A `𝗣𝗔`-proof of any `ℒₒᵣ`-sentence `σ` translates into a `Derivation2`
+of its `LX`-image in the `paLX` calculus: take the Tait derivation (`provable_def`), `lMap` it
+(`Derivation.lMap`), weaken the schema along `schema_lMap_PA_subset`, and repackage as a `Derivation2`
+(`provable_iff_derivable2`). This is the proof-translation half of E-lift; the descent wall **E**
+remains because `TI prec` mentions the set variable `X` and is *not* such an `lMap`-image (see
+`DESCENT-PLAN.md §1`) — the X-induction instance is the missing E-core content. -/
+theorem paLX_derivable2_lMap_of_PA_provable (σ : Sentence ℒₒᵣ) (h : 𝗣𝗔 ⊢ σ) :
+    Nonempty (Derivation2 ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Schema LX)
+      {Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ)}) := by
+  have h1 : (𝗣𝗔 : Schema ℒₒᵣ) ⊢ (↑σ : SyntacticFormula ℒₒᵣ) := provable_def.mp h
+  have d := h1.get
+  have h3 : Schema.lMap Φ (𝗣𝗔 : Schema ℒₒᵣ) ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
+    ⟨Derivation.cast (Derivation.lMap Φ d) (by simp)⟩
+  have h4 : ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Schema LX)
+      ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
+    (Entailment.Axiomatized.weakerThanOfSubset schema_lMap_PA_subset).pbl h3
+  exact provable_iff_derivable2.mp h4
+
 end GoodsteinPA.DescentLift
