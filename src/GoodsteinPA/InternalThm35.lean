@@ -99,4 +99,85 @@ theorem bbtail_desc {K : V} (hK : 0 < K) {α : V → V} (hNF : ∀ n, isNF (α n
     rw [hquot, hmod, Arithmetic.sub_zero]
     exact icmp_betaTail_boundary (hNF (n + 1)) (hNF n) (hdesc n) K (K - i)
 
+/-! ## Internal ω-tower `ωₙ` on codes — toward the Thm 3.5 prefix (`r < K`)
+
+Rathjen's prefix `βⱼ = Σ_{i} ω_{s−i}` (indices `0..K−1`) needs the ε₀ ω-tower `ω₀ = 1`,
+`ω_{n+1} = ω^{ωₙ}` with an **internal** index (the slowness constant `K : V` is internal). On codes
+`ω^c = ocOadd c 1 0`, so the tower is the structural recursion `iwtower (n+1) = ocOadd (iwtower n) 1 0`
+— `𝚺₁`-definable and **IΣ₁-total** (the code has size linear in `n`, no Ackermann). Each tower is a
+valid NF code with the single coefficient `1` (`iC = 1`). -/
+
+/-- Blueprint for the ω-tower: `ω₀ = ocOadd 0 1 0 (= 1)`, `ω_{n+1} = ocOadd (ωₙ) 1 0 (= ω^{ωₙ})`. -/
+def iwtower.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !ocOaddDef y 0 1 0”
+  succ := .mkSigma “y ih n. !ocOaddDef y ih 1 0”
+
+noncomputable def iwtower.construction : PR.Construction V iwtower.blueprint where
+  zero := fun _ ↦ ocOadd 0 1 0
+  succ := fun _ _ ih ↦ ocOadd ih 1 0
+  zero_defined := .mk fun v ↦ by simp [iwtower.blueprint, ocOadd_defined.iff]
+  succ_defined := .mk fun v ↦ by simp [iwtower.blueprint, ocOadd_defined.iff]
+
+/-- **Internal ω-tower** `iwtower n = ωₙ` on codes inside `V ⊧ 𝗜𝚺₁`. -/
+noncomputable def iwtower (n : V) : V := iwtower.construction.result ![] n
+
+@[simp] lemma iwtower_zero : iwtower (0 : V) = ocOadd 0 1 0 := by
+  simp [iwtower, iwtower.construction]
+
+@[simp] lemma iwtower_succ (n : V) : iwtower (n + 1) = ocOadd (iwtower n) 1 0 := by
+  simp [iwtower, iwtower.construction]
+
+def _root_.LO.FirstOrder.Arithmetic.iwtowerDef : 𝚺₁.Semisentence 2 :=
+  iwtower.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance iwtower_defined : 𝚺₁-Function₁ (iwtower : V → V) via iwtowerDef := .mk
+  fun v ↦ by simp [iwtower.construction.result_defined_iff, iwtowerDef]; rfl
+
+instance iwtower_definable : 𝚺₁-Function₁ (iwtower : V → V) := iwtower_defined.to_definable
+
+instance iwtower_definable' (Γ) : Γ-[m + 1]-Function₁ (iwtower : V → V) :=
+  iwtower_definable.of_sigmaOne
+
+/-- **Every ω-tower is a valid NF code.** -/
+lemma isNF_iwtower (n : V) : isNF (iwtower n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero =>
+    rw [iwtower_zero, isNF_ocOadd]
+    exact ⟨_root_.one_ne_zero, isNF_zero, isNF_zero, Or.inl rfl⟩
+  case succ n ih =>
+    rw [iwtower_succ, isNF_ocOadd]
+    exact ⟨_root_.one_ne_zero, ih, isNF_zero, Or.inl rfl⟩
+
+/-- **Each ω-tower has coefficient bound `1`** (`C(ωₙ) = 1`). -/
+lemma iC_iwtower (n : V) : iC (iwtower n) = 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero =>
+    rw [iwtower_zero, iC_ocOadd, iC_zero]
+    simp
+  case succ n ih =>
+    rw [iwtower_succ, iC_ocOadd, iC_zero, ih]
+    simp
+
+/-- **A strictly smaller leading exponent decides `≺` outright** (CNF lexicographic head):
+`icmp e₁ e₂ = 0 ⟹ ocOadd e₁ n₁ r₁ ≺ ocOadd e₂ n₂ r₂`, since `thenV 0 _ = 0`. -/
+lemma icmp_ocOadd_lt_exp {e1 n1 r1 e2 n2 r2 : V} (h : icmp e1 e2 = 0) :
+    icmp (ocOadd e1 n1 r1) (ocOadd e2 n2 r2) = 0 := by
+  rw [icmp_ocOadd, h]; simp [thenV]
+
+/-- **The ω-tower strictly increases**: `ωₙ ≺ ω_{n+1}` (i.e. `icmp ωₙ ω_{n+1} = 0`). Each step is a
+head-exponent drop (`ωₙ` is the exponent of `ω_{n+1} = ω^{ωₙ}`), so `icmp_ocOadd_lt_exp` applies with
+the previous step's comparison. -/
+lemma icmp_iwtower_succ (n : V) : icmp (iwtower n) (iwtower (n + 1)) = 0 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero =>
+    rw [iwtower_succ, iwtower_zero]
+    exact icmp_ocOadd_lt_exp (icmp_zero_ocOadd 0 1 0)
+  case succ n ih =>
+    rw [iwtower_succ (n + 1)]
+    nth_rewrite 1 [iwtower_succ n]
+    exact icmp_ocOadd_lt_exp ih
+
 end GoodsteinPA.InternalONote
