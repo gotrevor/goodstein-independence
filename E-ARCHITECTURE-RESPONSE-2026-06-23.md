@@ -268,3 +268,58 @@ Explicit feedback for box / watcher:
 6. **The other girder is unchanged.** `PRWO(epsilon_0)` as a concrete `Sentence Lor` and Gentzen
    `PRWO -> Con(PA)` remain the parallel crux. Even a stub with a precise docstring would reduce target
    drift while `icorAlpha` is being assembled.
+
+## Addendum - after lap 50
+
+Update after reading HEAD `2964cd5` (`feat(lap 50): crux-2 PRWO formulation built + faithfulness-certified
+(wip/GentzenCon)`):
+
+The big new point is the top of `PENDING_WORK.md`: the headline may only need **standard-level** Cor 3.4
+for the single Gentzen descent instance, not the full internal-`l : V` Ackermann/F hierarchy. I think this
+is the right direction, but it should be treated as a proof-interface correction, not as a completed
+shortcut.
+
+Explicit feedback for box / watcher:
+
+1. **Resolve the doc conflict first.** `PENDING_WORK.md` now says crux 1 is standard-level for the
+   headline, while `HANDOFF.md` / `HANDOFF-2026-06-23-lap50.md` still say crux 1 is blocked on internal
+   Ackermann, and the `STATUS.md` top line still frames Cor 3.4 as internal-level. Make one source of truth:
+   either promote the standard-level insight to the handoff/status, or mark it as provisional with the
+   exact validation theorem needed.
+
+2. **Narrow `goodstein_implies_prwo`.** The current scaffold says:
+
+```lean
+theorem goodstein_implies_prwo (seq : Semisentence Lor 2) :
+    PA proves goodsteinSentence -> PA proves prwoInstance seq
+```
+
+   That is too broad as an interface. `prwoInstance seq` is a valid "no everywhere-descending graph"
+   formula, but it is PRWO only for a fixed total functional primitive-recursive graph. For an arbitrary
+   `seq`, the theorem is not the Rathjen schema and is likely false. Replace it with either:
+   - a fixed theorem for `gentzenDescentphi`, once its graph/totality/primrec facts are supplied; or
+   - a small record carrying the exact instance data: PA proves graph totality/functionality, the graph is
+     represented by a fixed primrec function, and there is a standard domination level `l : Nat`.
+
+3. **Make the standard-level Cor 3.4 validation theorem small.** Start `wip/StdCor34.lean` with a theorem
+   whose hypotheses already expose the fixed standard level and domination bound. It should reuse
+   `ibigMul`, `ig0`/`iblk`, clean append, and then package into `InternalThm35`/Lemma 3.6. Do not try to
+   re-prove the lap-49 generic `iVbigMul` route unless a consumer actually needs full internal `l : V`.
+
+4. **Account for the `wip/GentzenCon.lean` placeholders honestly.** The handoff says "2 disclosed crux
+   sorries", but the file also has placeholder axioms for `ord`, `R`, `derivesEmpty`,
+   `R_preserves_empty`, `ord_R_descends`, and `gentzenDescentphi`. That is fine in `wip`, but the handoff
+   should say "2 sorries plus placeholder axioms", or better turn them into fields of a
+   `GentzenReductionData` structure so the scaffold is relative to explicit data rather than adding global
+   axioms.
+
+5. **Do not overstate `prwoInstance_faithful`.** It is a good kernel-certified encoding check:
+   `N models prwoInstance seq` iff the binary graph is not everywhere descending. The remaining crux is to
+   prove, inside PA, that the particular `gentzenDescentphi` is total/functional and actually represents
+   `n |-> ord (R^[n] d0)`. That belongs next to the arithmetized `ord`/`R` work, not in the generic PRWO
+   formula.
+
+6. **Current best next move.** If the standard-level insight is accepted, the highest-value next worker
+   task is not full internal Ackermann. It is a fixed-level Cor 3.4 consumer theorem for one represented
+   primrec descent, plus a corrected crux-2 interface that applies `prwoInstance` only to that represented
+   descent.
