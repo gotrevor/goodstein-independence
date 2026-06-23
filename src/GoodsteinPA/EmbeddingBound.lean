@@ -53,6 +53,15 @@ theorem omega0_lt_epsilon0 : Ordinal.omega0 < ε₀ := Ordinal.omega0_lt_epsilon
 /-- Naturals are `< ε₀`. -/
 theorem natCast_lt_epsilon0 (n : ℕ) : (n : Ordinal.{0}) < ε₀ := Ordinal.natCast_lt_epsilon n 0
 
+/-- `ε₀` is additively principal (it is `ω ^ ε₀`). -/
+theorem isPrincipal_add_epsilon0 : Ordinal.IsPrincipal (· + ·) (ε₀ : Ordinal.{0}) := by
+  have h := Ordinal.isPrincipal_add_omega0_opow (ε₀ : Ordinal.{0})
+  rwa [Ordinal.omega0_opow_epsilon] at h
+
+/-- ε₀ is closed under addition. -/
+theorem add_lt_epsilon0 {a b : Ordinal.{0}} (ha : a < ε₀) (hb : b < ε₀) : a + b < ε₀ :=
+  isPrincipal_add_epsilon0 ha hb
+
 /-- `↑(max a b) = max ↑a ↑b` in `Ordinal`. -/
 private theorem natCast_max (a b : ℕ) : ((max a b : ℕ) : Ordinal.{0}) = max (a : Ordinal) b :=
   Nat.mono_cast.map_max
@@ -622,5 +631,85 @@ theorem PXFc_allClosure_omega : ∀ {n} (χ : Semiformula LX ℕ n) {c : ℕ} {�
       rw [add_assoc]; congr 1
       rw [← Nat.cast_one, ← Nat.cast_add]; congr 1; omega
     rwa [hcast] at hres
+
+/-! ## `hax_paLX_bdd` — the axiom discharge, with a uniform-over-`e` bound `< ε₀` -/
+
+open LO.FirstOrder.Arithmetic in
+set_option maxHeartbeats 1000000 in
+/-- Bounded `EmbeddingX.hax_paLX`: every `paLX`-axiom embeds to a `PXFc`-derivation whose ordinal is
+**uniformly** (over the closing assignment `e`) bounded by some `B < ε₀`. X-free axioms land at the
+finite height `↑complexity`; X-induction instances land at `(ω + 1 + 1 + 1) + ↑fvSup` (one ω-jump from
+the cut-tower, three `⋎`-bumps for the NNF, finite closure bumps). -/
+theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema LX)) (hΓ : φ ∈ Γ) :
+    ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
+      ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun ψ => asgX e ▹ ψ)) := by
+  obtain ⟨σ, hσ, rfl⟩ := hφ
+  rcases hσ with hbase | hind
+  · -- X-free base axiom: true closed X-free formula, height `↑complexity` (e-independent)
+    obtain ⟨τ, hτ, rfl⟩ := hbase
+    set χτ : SyntacticFormula LX :=
+      Rew.emb ▹ Semiformula.lMap (Language.ORing.embedding LX) τ with hχτ
+    refine ⟨0, (χτ.complexity : Ordinal), natCast_lt_epsilon0 _, fun e => ?_⟩
+    have hmod : ℕ ⊧ₘ τ := ModelsTheory.models ℕ hτ
+    have htrue := litTrue_lMap_axiom τ hmod e
+    have hxf : XFreeForm (asgX e ▹ χτ) := by
+      rw [hχτ, xfreeForm_rew, xfreeForm_rew]; exact xfreeForm_lMap τ
+    have hk : (asgX e ▹ χτ).complexity = χτ.complexity := by rw [Semiformula.complexity_rew]
+    exact provable_true_x_bdd χτ.complexity (asgX e ▹ χτ) (le_of_eq hk) hxf htrue
+      (Finset.mem_image_of_mem _ hΓ)
+  · -- X-induction instance: cut-tower (ω+1) + 3 `⋎`-bumps + finite closure bumps
+    obtain ⟨ψ, -, rfl⟩ := hind
+    set B : Ordinal.{0} := ((Ordinal.omega0 + 1 + 1 + 1) + ((0 + (succInd ψ).fvSup : ℕ) : Ordinal)) with hB
+    refine ⟨ψ.complexity + 1, B, ?_, fun e => ?_⟩
+    · -- `B = (ω+3) + finite < ε₀`
+      rw [hB]
+      exact add_lt_epsilon0
+        (add_one_lt_epsilon0 (add_one_lt_epsilon0 omega0_add_one_lt_epsilon0))
+        (natCast_lt_epsilon0 _)
+    · have hmem : asgX e ▹ (↑(Semiformula.univCl (succInd ψ)) : SyntacticFormula LX)
+          ∈ Finset.image (fun φ => asgX e ▹ φ) Γ := Finset.mem_image_of_mem _ hΓ
+      suffices h : PXFc B (ψ.complexity + 1)
+          (insert (asgX e ▹ (↑(Semiformula.univCl (succInd ψ)) : SyntacticFormula LX))
+            (Finset.image (fun φ => asgX e ▹ φ) Γ)) by
+        rwa [Finset.insert_eq_self.mpr hmem] at h
+      rw [show asgX e ▹ (↑(Semiformula.univCl (succInd ψ)) : SyntacticFormula LX)
+            = ∀⁰* (Rew.fixitr 0 (succInd ψ).fvSup ▹ (succInd ψ)) from by
+          rw [Semiformula.coe_univCl_eq_univCl', Semiformula.rew_univCl']; rfl]
+      rw [hB]
+      apply PXFc_allClosure_omega _ (Ordinal.omega0 + 1 + 1 + 1)
+      intro v
+      rw [← TransitiveRewriting.comp_app, rew_succInd]
+      set Δ : Seq LX := Finset.image (fun φ => asgX e ▹ φ) Γ with hΔ
+      set ψv : Semiformula LX ℕ 1 :=
+        (((Rew.subst fun i => nm (v i)).comp (Rew.fixitr 0 (succInd ψ).fvSup)).q ▹ ψ) with hψv
+      have hcx : ψv.complexity = ψ.complexity := by rw [hψv]; simp
+      set step : Semiformula LX ℕ 1 :=
+        (∼ψv/[(#0 : Semiterm LX ℕ 1)]) ⋎ ψv/[(‘(#0 + 1)’ : Semiterm LX ℕ 1)] with hstepdef
+      set succT : ℕ → SyntacticTerm LX :=
+        fun n => Rew.subst ![nm n] (‘(#0 + 1)’ : Semiterm LX ℕ 1) with hsuccT
+      have hsval : ∀ n, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1 := by
+        intro n
+        haveI hO : Structure.One LX ℕ := ⟨rfl⟩
+        haveI hA : Structure.Add LX ℕ := ⟨fun _ _ => rfl⟩
+        simp only [hsuccT, Semiterm.val_substs, Semiterm.val_operator₂, Semiterm.val_operator₀,
+          hA.add, valm_nm, Semiterm.val_bvar, Matrix.cons_val_zero]
+        congr 1
+      have hstep : ∀ n, (∼step)/[nm n] = (ψv/[nm n]) ⋏ ∼(ψv/[succT n]) := by
+        intro n
+        simp only [hstepdef, hsuccT]
+        simp [← TransitiveRewriting.comp_app, Rew.subst_comp_subst]
+      have ha := metaInduction_cong_bdd (Γ := Δ) ψv step succT hsval hstep
+      rw [hcx] at ha
+      rw [← hcx, succInd_nnf ψv]
+      have e0 : (↑(0:ℕ) : Semiterm LX ℕ 0) = nm 0 := by simp [nm]
+      have hb : ψv/[(#0 : Semiterm LX ℕ 1)] = ψv := by simp
+      rw [e0]
+      have h1 : PXFc (Ordinal.omega0 + 1) (ψv.complexity + 1)
+          (insert (∃⁰ ∼step) (insert (∀⁰ ψv/[(#0:Semiterm LX ℕ 1)]) (insert (∼ψv/[nm 0]) Δ))) := by
+        rw [hb, hcx]; exact ha.weakening (by intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto)
+      have h2 := PXFc.orI (∃⁰ ∼step) (∀⁰ ψv/[(#0:Semiterm LX ℕ 1)]) h1
+      have h3 := PXFc.orI (∼ψv/[nm 0]) ((∃⁰ ∼step) ⋎ (∀⁰ ψv/[(#0:Semiterm LX ℕ 1)]))
+        (h2.weakening (by intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto))
+      exact h3
 
 end GoodsteinPA.EmbeddingBound
