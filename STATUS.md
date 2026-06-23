@@ -352,6 +352,12 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
   + the assembly `goodstein_implies_consistency_via_gentzen` (crux1∘crux2 = the `Reduction.lean` interface,
   types validated). Deep cores left as cited sorries: `ord`/`R`/eq-(5) (Buchholz [6]) — Foundation's
   Hauptsatz is meta-level only, no shortcut. `src/` untouched (anti-fraud); build green 1311 jobs.
+  **⭐ KEY INSIGHT (post-commit):** the schema realization collapses **crux 1's internal-Ackermann wall**
+  (laps 45–49) — the headline composes crux 1 at the SINGLE concrete primrec instance `gentzenDescentφ`,
+  so Lemma 3.2 (`rathjen.txt:401`) gives a **STANDARD** Grzegorczyk level, NOT internal. ⟹ crux 1 is
+  downgraded from generational to tractable standard-level internalization (reuse the abandoned
+  `ibigMul` lead + ℕ-template `Grzegorczyk.lean`); **THE remaining hard wall is now crux-2 eq (5)**
+  `ord(R d)≺ord d`. Memory `crux1-headline-needs-only-standard-level`; unbuilt — validate before relabeling.
 - **2026-06-23 (lap 47 — REVIEW + internal Thm 3.5 COMPLETED):** Validated the lap-46 route resolution
   against the real kernel (headline honest `sorry`, 0 math axioms; `peano_not_proves_TI` clean; Gödel-II
   surface carries `PA_delta1Definable`). Direction **KEEP** (Route A = Rathjen Cor 3.7). Landed the one
@@ -453,15 +459,16 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 `Reduction.goodstein_implies_consistency : 𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)`, a disclosed `sorry` = two deep girders.
 
 ### Short-term (mirror PENDING_WORK top) — the two open §3/Gentzen cruxes, hardest-first
-1. **Internal Cor 3.4** (THE harder crux). Produce the *slow* internal descent `α : V → V`
-   (`iC(αₙ)≤K(n+1)`, `isNF`, `icmp`-descent) from a raw primrec ε₀-descent, via Grzegorczyk `g`-padding.
-   The level `l` is **internal (`l:V`) ⟹ `f_l` is Ackermann ⟹ NOT IΣ₁-provably total ⟹ needs the PA
-   substrate `ReductModel.reduct_models_PA`, NOT the IΣ₁ `PR.Construction` toolkit.** Recommended first
-   attack (PENDING_WORK lap-45 path #2): **parameterize over an abstract internal `f`** (take its recursion
-   eqns + Lemma-3.2 domination as hypotheses) so the genuine `g`-math lands green now; discharge `f`'s
-   existence separately. Blueprint = the sorry-free ℕ-template `Grzegorczyk.lean` (Lemma 3.3 complete + Cor
-   3.4 bricks `corAlpha_C_bound`/`corAlpha_within`/`corAlpha_boundary`). The existing meta-`l` `InternalCor34`
-   (`ig0`/`iblk`/`ibigMul`) is the **standard-`l` special case** — reusable bricks, not the generic route.
+1. **Internal Cor 3.4 — RE-FRAMED lap 50: the HEADLINE needs only STANDARD level** (memory
+   `crux1-headline-needs-only-standard-level`). The headline composes crux 1 at the **single** concrete
+   primrec instance `gentzenDescentφ` (= `ord∘Rⁿd₀`), so Lemma 3.2 gives a **STANDARD** Grzegorczyk level
+   `n₀` (not internal) — **no internal Ackermann**. The laps-45→49 internal-`l` wall was for FULL PRWO
+   (∀ internal-index descent), which the headline never needs. ⟹ Build the **standard-level** internal
+   Cor 3.4 (abstract over a descent with a STANDARD-`l` domination hyp `∃ l:ℕ, ∀n, C(β(n+1))≤f_l n`),
+   reusing the **abandoned** standard lead `InternalCor34.ibigMul (k:ℕ)`/`ig0`/`iblk` (the lap-49 generic-V
+   `iVbigMul`/`icorAlpha` tower was off-path effort — banked). Blueprint = sorry-free ℕ-template
+   `Grzegorczyk.lean` (`corAlpha_C_bound`/`_within`/`_boundary`). Downstream DONE (`InternalThm35` +
+   `nonterminating_internal`). ⚠️ unbuilt — validate type-check + clean axioms before relabeling done.
 2. **Gentzen Thm 2.8(i): `PRWO(ε₀) → Con(𝗣𝗔)`** — **PRWO formulation DONE (lap 50, `wip/GentzenCon.lean`):**
    it is a **per-formula schema** `prwoInstance seq` (Foundation has no universal evaluator ⟹ no single
    ∀-over-indices sentence) built on `precφ`, with `prwoInstance_faithful` PROVED (std-model ↔ meta-PRWO,

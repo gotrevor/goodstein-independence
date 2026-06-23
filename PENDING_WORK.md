@@ -1,5 +1,31 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐⭐ Lap 50 KEY INSIGHT — crux 1 for the HEADLINE needs only STANDARD level (internal-Ackermann wall is OFF-path)
+Re-derived + paper-validated (Rathjen `scratchpad/rathjen.txt:401`, Lemma 3.2). Memory
+`crux1-headline-needs-only-standard-level`. **This re-frames the project's hardest crux.**
+
+- `goodstein_implies_consistency = crux2 ∘ crux1` uses crux 1 at the **single instance**
+  `seq = gentzenDescentφ` (= graph of `n↦ord(Rⁿd₀)`), NOT for all primrec descents (PRWO is a schema).
+- `H(n,d)=ord(R^[n]d)` is a **concrete** primrec function ⟹ Lemma 3.2 gives a **STANDARD** Grzegorczyk
+  level `n₀` (PA-provable bound, independent of the internal arg `d₀`). `f_{n₀}` is then a fixed primrec
+  fn, IΣ₁-total, evaluable at internal `d₀`. **No internal Ackermann.** The laps-45→49 internal-`l`
+  conclusion was correct only for FULL PRWO (∀ internal-index descent) — the headline never needs that.
+- ⟹ **crux 1 downgraded from generational to tractable engineering.** Build STANDARD-level internal
+  Cor 3.4 (abstract over a descent with a STANDARD-l domination hyp `∃ l:ℕ, ∀n, C(β(n+1))≤f_l n`):
+  * Reuse the ABANDONED standard lead `InternalCor34.ibigMul (k:ℕ)` + `ig0`/`iblk` (the lap-49 generic-V
+    `iVbigMul`/`icorAlpha` tower was unneeded effort for the headline — keep banked, not on the path).
+  * Blueprint = sorry-free ℕ-template `Grzegorczyk.lean` (`corAlpha`/`corAlpha_C_bound`/`_within`/`_boundary`,
+    `g`/`g_desc`/`g_C_bound`, `F`).
+  * Downstream DONE: internal Thm 3.5 (`InternalThm35.bbeta_*`), Lemma 3.6 (`DescentArith.nonterminating_internal`).
+  * Discharge the standard-l domination for the gentzen descent via Lemma 3.2 once `ord`/`R` exist.
+- **THE remaining hard wall is now crux 2's eq (5)** `ord(R d) ≺ ord d` (Gentzen reduction, Buchholz [6];
+  Foundation Hauptsatz is meta-level only ⟹ from-scratch arithmetization). Crux 1 is no longer the bottleneck.
+- ⚠️ NOT yet built/verified — validate the standard-level internal Cor 3.4 type-checks + `#print axioms`
+  clean before relabeling crux 1 done.
+
+**NEXT-LAP first action:** start `wip/StdCor34.lean` (or extend `InternalCor34`) — the standard-level
+abstract Cor 3.4 over `ibigMul`, mirroring `Grz.corAlpha_*`. Then wire to `InternalThm35` + Lemma 3.6.
+
 ## ⭐⭐⭐ Lap 50 (2026-06-23) — REVIEW + crux-2 PRWO formulation BUILT & faithfulness-certified
 Fresh-mind review. **Direction KEEP** (Route A = Rathjen Cor 3.7). Crux-1 step-3 (internal `ig`
 f-recursion → internal Grzegorczyk `F`, Ackermann-level) is **blocked on infra Foundation lacks** —
