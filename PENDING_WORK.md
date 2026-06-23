@@ -1,5 +1,33 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 51 — standard-level Cor 3.4 global assembly BUILT (green); crux-1 reduced to 2 concrete bricks
+Followed the lap-50 designated next action. Two deliverables, both green:
+- **`isNF_iadd_clean` + `isNF_icorAlpha`** (`src/InternalCor34.lean`, axiom-clean, in the build) — the
+  missing NF sibling of `icmp_iadd_clean`/`iC_iadd_clean`. Completes the `icorAlpha` brick set: the
+  slowed term `ω^(l+1)·β + g` now has ALL FOUR Cor-3.4 properties (within/boundary/C-bound/NF).
+- **`wip/StdCor34.lean`** (type-checks at 400k heartbeats, off the build target) — the internal
+  **global** Cor-3.4 assembly: `salpha_isNF` / `salpha_desc` / `salpha_C_le` prove that the slowed
+  sequence `α j = ω^(l+1)·β_{blk j} + igt(blk j)(off j)` has `isNF` + global `icmp`-descent +
+  `iC(α j) ≤ K·(j+1)` — **exactly the input `InternalThm35.bbeta` (Thm 3.5) consumes** — by composing
+  the `icorAlpha_*` bricks. This is NEW non-vacuous content (the ℕ-template `Grz.corAlpha_*` only has
+  the per-step lemmas; the global ∀j descent is vacuous in ℕ but real inside `V ⊧ 𝗜𝚺₁`).
+  GOTCHA banked: `iadd`/`icorAlpha` are semireducible → `isDefEq` whnf-loops on variable-level args
+  even on identical terms; `attribute [local irreducible] iadd icorAlpha` makes defeq structural.
+  And `habove`'s 3rd arg feeds `β (blk a)`, so boundary leads `β(blk(j+1))`/`β(blk j)` need `a=j+1`/`a=j`
+  (NOT `blk j+1`), keeping `salpha(j+1)` un-`hb`-rewritten.
+
+**Crux 1 now reduces to discharging the `wip/StdCor34` interface hypotheses (2 concrete bricks):**
+1. **Block bookkeeping `blk`/`off`** = internal `iwsum`/`iwidx`/`iwoff` (partial sums + `findGreatest`
+   over the width fn `t ↦ iC(β(t+1))`), giving the dichotomy `blk(j+1) ∈ {blk j, blk j+1}`, the offset
+   relations, and `blk j + off j ≤ j`. MECHANICAL `𝚺₁` recursion (mirror `Grz.wsum`/`widx`/`woff` +
+   the PR.Construction idiom in `InternalCor34.iAboveTable`). Self-contained, axiom-clean-achievable.
+2. **The `ig`-tail recursion `igt n m`** = internal Grzegorczyk `g` (`Grz.g`) at STANDARD level: NF /
+   `≠0` / within-block descent / `iC ≤ Kg·(n+m+1)` / `iAbove(ocExp(igt n m)) (ω^(l+1)·…)`. Bottoms at
+   `ig0`/`iblk` (built); the deep part is the meta-l recursion over the F-block decomposition, needing
+   internal `iF_l` (standard l ⟹ fixed primrec, IΣ₁-total — NO internal Ackermann).
+Then wire `salpha` → `bbeta` → `DescentArith.nonterminating_internal` (Lemma 3.6) → contradicts γ =
+`goodstein_implies_prwo` (crux 1). **THE remaining hard wall stays crux-2 eq (5)** `ord(R d) ≺ ord d`.
+
 ## ⭐⭐⭐⭐ Lap 50 KEY INSIGHT — crux 1 for the HEADLINE needs only STANDARD level (internal-Ackermann wall is OFF-path)
 Re-derived + paper-validated (Rathjen `scratchpad/rathjen.txt:401`, Lemma 3.2). Memory
 `crux1-headline-needs-only-standard-level`. **This re-frames the project's hardest crux.**
