@@ -29,6 +29,39 @@ open GoodsteinPA.InternalONote GoodsteinPA.InternalPow
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
+/-- **The X-agnostic arithmetic core of the slow-down run.** From the slowed code sequence `β` with
+the three structural facts (NF, `iCanon (k+1)`, `icmp`-descent), the seed `m₀ = T̂²_ω(β₀)` and bound
+`b k = T̂^{k+2}_ω(βₖ) = ievalNat (k+1) (β k)` satisfy the base / inductive-step / positivity
+preconditions of the Lemma-3.6 run. These are pure code arithmetic — no definability, no `X` — so the
+SAME lemma feeds **both** `DescentArith.nonterminating_internal` (the `𝚺₁` path, via
+`hbound_of_slowdown`) and `DescentSemantic.lx_nonterminating` (the `X`-essential path, where `β` is the
+`X`-definable `Mlt`-descent). The caller supplies `b`, `m₀` and their defining equalities. -/
+theorem slowdown_run_facts {β : V → V}
+    (hNF : ∀ k, isNF (β k))
+    (hCanon : ∀ k, iCanon (k + 1) (β k))
+    (hdesc : ∀ k, icmp (β (k + 1)) (β k) = 0)
+    {m₀ : V} {b : V → V}
+    (hm₀ : m₀ = ievalNat 1 (β 0)) (hb : ∀ k, b k = ievalNat (k + 1) (β k)) :
+    (b 0 ≤ igoodstein m₀ 0) ∧
+    (∀ k, b k ≤ igoodstein m₀ k → b (k + 1) ≤ igoodstein m₀ (k + 1)) ∧
+    (∀ k, 0 < b k) := by
+  refine ⟨?_, ?_, ?_⟩
+  · -- base: `b 0 = ievalNat 1 (β 0) = m₀ = igoodstein m₀ 0`
+    rw [hb, hm₀, igoodstein_zero]; simp
+  · -- step: one Goodstein step preserves domination, via the internalized inequality (6)
+    intro k hk
+    rw [hb] at hk
+    have hk2 : k + 1 + 1 = k + 2 := by rw [add_assoc, one_add_one_eq_two]
+    rw [hb, igoodstein_succ]
+    have hck1 : iCanon (k + 2) (β (k + 1)) := by rw [← hk2]; exact hCanon (k + 1)
+    have hstep := ineq6_step_internal (hNF k) (hNF (k + 1)) (hCanon k) hck1 (hdesc k) hk
+    simpa only [hk2] using hstep
+  · -- hpos: a descending code is non-zero, so its value is positive
+    intro k
+    rw [hb]
+    have hβk0 : β k ≠ 0 := fun h => icmp_right_zero_ne_zero (β (k + 1)) (h ▸ hdesc k)
+    exact ievalNat_pos (hNF k) hβk0
+
 /-- **Slow-down → `hbound` data** (Rathjen Lemma 3.6, internalized, abstracted over `β`).
 Given the slowed-down code sequence `β` (`𝚺₁`-definable, NF + `C(β k) ≤ k+1`, `icmp`-descending), the
 internal Goodstein run seeded at `m₀ = T̂²_ω(β₀)` is dominated at every stage by the positive bound
@@ -45,21 +78,10 @@ theorem hbound_of_slowdown {β : V → V}
       (∀ k, 0 < b k) := by
   haveI := hβ
   have hb : 𝚺₁-Function₁ (fun k : V => ievalNat (k + 1) (β k)) := by definability
-  refine ⟨ievalNat (0 + 1) (β 0), fun k => ievalNat (k + 1) (β k), hb, ?_, ?_, ?_⟩
-  · -- base: `b 0 = igoodstein (b 0) 0`
-    simp [igoodstein_zero]
-  · -- step: one Goodstein step preserves domination, via the internalized inequality (6)
-    intro k hk
-    have hk2 : k + 1 + 1 = k + 2 := by rw [add_assoc, one_add_one_eq_two]
-    rw [igoodstein_succ]
-    -- `hCanon (k+1) : iCanon (k+1+1) (β (k+1))`; reindex to `iCanon (k+2)`.
-    have hck1 : iCanon (k + 2) (β (k + 1)) := by rw [← hk2]; exact hCanon (k + 1)
-    have hstep := ineq6_step_internal (hNF k) (hNF (k + 1)) (hCanon k) hck1 (hdesc k) hk
-    simpa only [hk2] using hstep
-  · -- hpos: a descending code is non-zero, so its value is positive
-    intro k
-    have hβk0 : β k ≠ 0 := fun h => icmp_right_zero_ne_zero (β (k + 1)) (h ▸ hdesc k)
-    exact ievalNat_pos (hNF k) hβk0
+  obtain ⟨base, step, hpos⟩ :=
+    slowdown_run_facts hNF hCanon hdesc (m₀ := ievalNat 1 (β 0))
+      (b := fun k => ievalNat (k + 1) (β k)) rfl (fun _ => rfl)
+  exact ⟨ievalNat 1 (β 0), fun k => ievalNat (k + 1) (β k), hb, base, step, hpos⟩
 
 /-- **Slow-down → non-terminating internal Goodstein run** (the contradiction `hbound` feeds the
 descent). Composes `hbound_of_slowdown` with `DescentArith.nonterminating_internal`: from the slowed
