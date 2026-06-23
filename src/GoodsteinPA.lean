@@ -44,6 +44,7 @@ import GoodsteinPA.InternalLog
 import GoodsteinPA.InternalBump
 import GoodsteinPA.InternalONote
 import GoodsteinPA.InternalGoodstein
+import GoodsteinPA.DescentSlowdown
 import GoodsteinPA.InternalBridge
 import GoodsteinPA.DescentInternal
 
