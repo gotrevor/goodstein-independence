@@ -1,43 +1,47 @@
-# HANDOFF — 2026-06-23 (lap 32, **Task A1 DONE: X-congruence wired into `paLX`, `peano_not_proves_TI` re-validated axiom-clean**)
+# HANDOFF — 2026-06-23 (lap 32, **Task A1 DONE + Task A2 part 1 DONE: X-congruence in `paLX`, `𝗘𝗤 ⪯ paLX` proved**)
 
-> **Branch** `plan` · build **green** (`lake build GoodsteinPA`, **1304 jobs**) ·
-> headline `GoodsteinPA.peano_not_proves_goodstein` = honest `sorry` (anti-fraud intact). **Tree clean after commit.**
+> **Branch** `plan` · HEAD = `32d0b0e` · build **green** (`lake build GoodsteinPA`, **1304 jobs**) ·
+> headline `GoodsteinPA.peano_not_proves_goodstein` = honest `sorry` (anti-fraud intact). **Tree clean.**
 
-Durable overview = **`STATUS.md`**. Attack map = **`PENDING_WORK.md`** + the lap-31 equality ANALYSIS.
-Lone deep wall unchanged: `DescentSemantic.no_min_descent_absurd_of_goodstein` (walls B/C/D).
+Durable overview = **`STATUS.md`**. Lone deep wall unchanged:
+`DescentSemantic.no_min_descent_absurd_of_goodstein` (walls B/C/D).
 
-## Lap-32 deliverable — Task A1 COMPLETE (the equality crux)
-**`paLX` now contains the X-congruence axiom** `Theory.Eq.relExt Xsym` (`∀x y, x=y → X(x) → X(y)`), the
-sole `𝗘𝗤(LX)` axiom not already covered by `lMap Φ 𝗣𝗔⁻ ⊆ paLX`. This is the prerequisite for `𝗘𝗤 ⪯ paLX`
-(Task A2 — needed so the completeness route `descentE` may restrict to `[Structure.Eq]`-models, where the
-`igoodstein` substrate's real `=` is available — see `ReductModel`).
-
-Wired + verified (all `#print axioms` = `[propext, choice, Quot.sound]`):
-1. **`EmbeddingX`** (integrated from lap-31 `XCongruence`): `litTrue_eq_iff`, `relExtBody`,
-   `relExt_Xsym_eq` (rfl), `relExtBody_subst_eq` (the DSL `subst ▹ ↑relExtBody = matrix` equation),
-   `pxfc_relExtMatrix` (cut-free `XFreeAx`-safe `PXFc` derivation at fixed finite ordinal), and the
-   unbounded discharge `pxfc_relExt_Xsym`.
-2. **`EmbeddingBound`**: `pxfc_relExt_Xsym_bdd` + `relExt_bound_lt_epsilon0` — the **bounded**
-   (`< ε₀`, uniform-over-`e`) discharge at the e-independent finite ordinal `(((0)+1)+1+1)+2`.
-3. **Both axiom discharges grew a `heq` branch**: `EmbeddingX.hax_paLX` (unbounded) and
-   `EmbeddingBound.hax_paLX_bdd` (bounded, the one on the `peano_not_proves_TI` path). `DescentLift.lMap_PA_subset`
-   re-proved for the 3-summand `paLX`.
-4. **`XCongruence.lean`** gutted to a design-record stub (lemmas promoted into the embedding files).
-
-**KEY INVARIANT HELD:** `#print axioms Thm56.peano_not_proves_TI` = `[propext, Classical.choice,
-Quot.sound, ONoteComp…native_decide.ax_1_5]` — UNCHANGED. Augmenting `paLX` did NOT introduce any
-sorry/math-axiom; the embedded ordinal only gained a finite contribution.
+## Lap-32 deliverables (2 green commits, both axiom-clean `[propext, choice, Quot.sound]`)
+1. **`a0c611f` — Task A1: X-congruence wired into `paLX`.** `paLX` now carries `Theory.Eq.relExt Xsym`
+   (`∀x y, x=y → X(x) → X(y)`). Integrated the lap-31 `XCongruence` lemmas into `EmbeddingX`
+   (`litTrue_eq_iff`, `relExtBody`, `relExt_Xsym_eq`, `relExtBody_subst_eq`, `pxfc_relExtMatrix`,
+   `pxfc_relExt_Xsym`) + `EmbeddingBound` (`pxfc_relExt_Xsym_bdd`, `relExt_bound_lt_epsilon0`); added the
+   `heq` branch to BOTH `hax_paLX` and `hax_paLX_bdd`; fixed `DescentLift.lMap_PA_subset` for the
+   3-summand `paLX`; `XCongruence.lean` → design-record stub.
+   **INVARIANT HELD:** `#print axioms Thm56.peano_not_proves_TI` UNCHANGED
+   (`[propext, choice, Quot.sound, ONoteComp…native_decide]`) — no sorry/math-axiom introduced.
+2. **`32d0b0e` — Task A2 part 1: `𝗘𝗤 ⪯ paLX`** (`DescentLift.lean`, new section). `eqLX_subset_paLX`
+   (`𝗘𝗤(LX) ⊆ paLX`: each axiom is an `lMap Φ`-image of an `𝗘𝗤(ℒₒᵣ)⊆𝗣𝗔⁻` axiom or `relExt Xsym`) ⟹
+   `instance eqAxiom_weakerThan_paLX : 𝗘𝗤 ⪯ paLX` via `WeakerThan.ofSubset`. Helpers: `phi_rel`,
+   `phi_func`, `lx_eq`, `lMap_eq_refl/symm/trans`, `lMap_relExt`, `lMap_funcExt`.
+   **GOTCHA recorded:** the general-`k` `lMap`-over-`Matrix.conj` rewrite is a higher-order swamp; prove
+   `relExt`/`funcExt` by **casing the concrete ℒₒᵣ symbol** (`cases r`/`cases f`) so `conj` over a fixed
+   `Fin n` unfolds — then `simp [..., Matrix.fun_eq_vec_two, cons_val_*, Semiterm.lMap_func/bvar]` closes.
 
 ## NEXT (resume here, hardest-first)
-**TASK A2 — `𝗘𝗤 ⪯ paLX` + re-route `descentE` via `[Structure.Eq]`:** now that `Eq.relExt Xsym ∈ paLX`,
-prove `𝗘𝗤 ⪯ paLX` (the ℒₒᵣ-`𝗘𝗤` axioms are paLX-provable via `lMap Φ 𝗘𝗤(ℒₒᵣ) ⊆ lMap Φ 𝗣𝗔⁻`; X-cong is
-literally in paLX). Then in `DescentSemantic`, route `descentE` through `EQ.provOf`
-(`Completeness/Corollaries.lean`) over `[Structure.Eq]`-models + `completeness_of_encodable` +
-`Semiformula.toEmpty`/`emb_toEmpty` of `TI prec` + `provable_iff_derivable2`. This lets the semantic
-lemma `paLX_models_TI_of_PA_provable` assume `[Structure.Eq LX M]` (which `ReductModel` already consumes).
-**Then the deep walls (route-neutral):** B (opaque `codeOfREPred goodsteinTerminates` ↔ `∃N, igoodstein
-m N=0`, IΣ₁-internal), C (M-internal `Mlt`-descent from `no_min` via LX least-number), D (slow-down `βₖ`
-+ internal `ineq6` iteration; `DescentCore.ineq6_step` is the kernel; `igoodstein` substrate ready).
+**TASK A2 part 2 — re-route `descentE` so the semantic lemma may assume `[Structure.Eq LX M]`:**
+`𝗘𝗤 ⪯ paLX` is now available, so use `Structure.consequence_iff_eq` (`Foundation .../Basic/Eq.lean:247`)
++ `complete : T ⊨ φ → T ⊢ φ` (`Completeness/Completeness.lean:42`) instead of
+`Derivation.completeness_of_encodable` directly. Steps in `DescentSemantic.descentE`:
+  1. `tiSent : Sentence LX := (Boundedness.TI Thm56.prec).toEmpty <freeVariables_TI = ∅>` (closed).
+  2. `have hsem : paLX ⊨ tiSent := by rw [consequence_iff_eq]; intro M _ _ _ hM; …` — now gets
+     `[Structure.Eq LX M]`, finish via `paLX_models_TI_of_PA_provable` (after `models_iff` +
+     `emb_toEmpty : ↑tiSent = TI prec`).
+  3. `complete hsem : paLX ⊢ tiSent`; convert to `Derivation2 (paLX:Schema) {TI prec}` (find the
+     `T ⊢ σ` → schema-`Derivation2` bridge — see `provable_iff_derivable2`/`provable_def` used in
+     `DescentLift.paLX_derivable2_lMap_of_PA_provable`, and `Theory`→`Schema` provability coercion).
+  4. **Add `[Structure.Eq LX M]`** to `paLX_models_TI_of_PA_provable` AND
+     `no_min_descent_absurd_of_goodstein` signatures (the consumers `ReductModel.reduct_models_*`
+     already require it).
+**Then the deep walls (route-neutral, the real content), with `[Structure.Eq LX M]` now in hand:**
+B (opaque `codeOfREPred goodsteinTerminates` ↔ `∃N, igoodstein m N=0`, IΣ₁-internal),
+C (M-internal `Mlt`-descent from `no_min` via LX least-number),
+D (slow-down `βₖ` + internal `ineq6` iteration; `DescentCore.ineq6_step` kernel; substrate ready).
 
 ## LOCKED untouched (anti-fraud)
 `Defs.lean`, `Bridge.lean` RHS, `goodsteinTerminates`, headline `Statement.lean` `sorry`.
@@ -47,6 +51,5 @@ m N=0`, IΣ₁-internal), C (M-internal `Mlt`-descent from `no_min` via LX least
 `DescentSemantic.no_min_descent_absurd_of_goodstein` (**THE wall**, disclosed).
 
 ## Aristotle
-Idle/correct. Task A2's `𝗘𝗤 ⪯ paLX` is pure Foundation plumbing (not Aristotle-shaped); wall B
-(IΣ₁-provable equivalence of the opaque r.e.-blob and the transparent `igoodstein`-Σ₁ form) is the
-next genuinely self-contained candidate once isolated.
+Idle/correct. Wall B (IΣ₁-provable equivalence of the opaque r.e.-blob and the transparent
+`igoodstein`-Σ₁ form) is the next self-contained candidate once isolated.
