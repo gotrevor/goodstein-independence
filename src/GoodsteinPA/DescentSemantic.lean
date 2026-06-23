@@ -171,6 +171,78 @@ theorem lx_succ_induction {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq
   intro x
   exact (hPφ x).mpr (key x)
 
+/-! ### Tools for wall C — `LX` order-induction and the least-number principle inside a model of `paLX`
+
+Wall C builds the `Mlt`-descent from `no_min` as an `M`-internal/definable object. The recursion makes
+canonical choices via `M`'s least-number principle over its *arithmetic* order `<` (the `reductORing`
+read-off), applied to an `LX`-definable predicate. Foundation's `Arithmetic.leastNumber`/`orderInd` are
+the `ℒₒᵣ`-only analogs; these port them to `LX`, deriving them (exactly as Foundation does) from the
+succ-induction `lx_succ_induction` already in hand. Axiom-clean. -/
+
+/-- The bounded-quantifier predicate `fun x ↦ ∀ y < x, P y` is `LX`-definable whenever `P` is: from an
+`LX`-formula `φ` for `P`, `(φ ⇜ ![#0]).ballLT #0` defines it (over `M`'s arithmetic `<`, the
+`reductORing` read-off). The lone closure step the order-induction needs. -/
+theorem lxDef_ballLT {M : Type} [Nonempty M] [Structure LX M] {P : M → Prop}
+    (hP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, P x ↔ Semiformula.Evalm M ![x] e φ) :
+    letI : ORingStructure M := ReductModel.reductORing
+    ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1,
+      ∀ x : M, (∀ y : M, y < x → P y) ↔ Semiformula.Evalm M ![x] e φ := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hSLT : Structure.LT LX M := ⟨fun a b => by
+    simp only [Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel₂]
+    rfl⟩
+  rcases hP with ⟨e, φ, hφ⟩
+  refine ⟨e, (φ ⇜ ![(#0 : Semiterm LX ℕ 2)]).ballLT (#0 : Semiterm LX ℕ 1), fun x => ?_⟩
+  simp only [Semiformula.eval_ballLT, Semiterm.val_bvar, Matrix.cons_val_zero,
+    Semiformula.eval_substs, Matrix.cons_val_fin_one, Matrix.constant_eq_singleton]
+  exact forall_congr' fun y => imp_congr_right fun _ => hφ y
+
+/-- **`LX` order-induction in a model of `paLX`** (the `X`-essential analog of
+`Arithmetic.InductionOnHierarchy.order_induction`, which is `ℒₒᵣ`-only). For any `LX`-definable `P`,
+`∀-below` progressivity yields totality. Derived from `lx_succ_induction` via the
+`fun x ↦ ∀ y < x, P y` reduction (`lxDef_ballLT`), exactly as Foundation derives the `ℒₒᵣ` version. -/
+theorem lx_order_induction {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) {P : M → Prop}
+    (hP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, P x ↔ Semiformula.Evalm M ![x] e φ) :
+    letI : ORingStructure M := ReductModel.reductORing
+    (∀ x, (∀ y, y < x → P y) → P x) → ∀ x, P x := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hPA : M ⊧ₘ* (𝗣𝗔⁻ : Theory ℒₒᵣ) := models_of_subtheory (ReductModel.reduct_models_PA hM)
+  intro ind
+  suffices h : ∀ x : M, ∀ y : M, y < x → P y by
+    intro x; exact h (x + 1) x (lt_add_one x)
+  intro x
+  refine lx_succ_induction hM (lxDef_ballLT hP) ?_ ?_ x
+  · intro y hy; exact absurd hy (not_lt.mpr (by simp))
+  · intro w IH y hy
+    rcases (lt_succ_iff_le.mp hy).lt_or_eq with hlt | rfl
+    · exact IH y hlt
+    · exact ind y IH
+
+/-- **`LX` least-number principle in a model of `paLX`** (the `X`-essential analog of
+`Arithmetic.leastNumber`). Any nonempty `LX`-definable `P` has a `<`-least witness (`<` = `M`'s
+arithmetic order, the `reductORing` read-off). This is the choice-free, `M`-internal selector wall C's
+descent recursion uses to pick the canonical `Mlt`-smaller non-`MX` element. -/
+theorem lx_least_number {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) {P : M → Prop}
+    (hP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, P x ↔ Semiformula.Evalm M ![x] e φ) :
+    letI : ORingStructure M := ReductModel.reductORing
+    (∃ x, P x) → ∃ z, P z ∧ ∀ y, y < z → ¬ P y := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  rintro ⟨a, ha⟩
+  by_contra hcon
+  push_neg at hcon
+  -- `hcon : ∀ z, P z → ∃ y, y < z ∧ P y` (no `<`-least witness). Then `¬P` everywhere (order-induction),
+  -- contradicting `ha`.
+  have hNP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, (¬ P x) ↔ Semiformula.Evalm M ![x] e φ := by
+    rcases hP with ⟨e, φ, hφ⟩
+    exact ⟨e, ∼φ, fun x => by
+      rw [LogicalConnective.HomClass.map_neg]; exact not_congr (hφ x)⟩
+  have hall : ∀ x, ¬ P x := lx_order_induction hM hNP (fun x IH hPx => by
+    obtain ⟨y, hy, hPy⟩ := hcon x hPx
+    exact IH y hy hPy)
+  exact hall a ha
+
 /-! ### Step 3 — the genuine remaining obligation (Rathjen §3 in `M`), as ONE named `sorry` -/
 
 /-- **The lone remaining wall: a non-`MX`-minimal seed yields a contradiction with Goodstein-in-`M`
