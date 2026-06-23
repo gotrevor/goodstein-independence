@@ -1541,4 +1541,143 @@ lemma iadd_ocOadd (ec n rc b : V) :
   rw [iadd, key, iaddNext, if_neg hcne]
   rw [znth_iaddTable_eq_iadd b M (ocTail c) htail, ocExp_ocOadd, ocCoeff_ocOadd, ocTail_ocOadd]
 
+/-! ### Internal ω-multiplication `iomul` (Rathjen Def 3.1: `ω·α` on codes)
+
+`iomul α = ω·α = ω^1·α`. On CNF, `ω·(ω^e·n + r) = ω^{1+e}·n + ω·r` (Rathjen Def 3.1's
+`ω^α·β = Σ ω^{α+βⱼ}·lⱼ`, specialized `α = 1`). So `iomul` maps each leading exponent `e` to `1+e`
+(`= iadd (ocOadd 0 1 0) e`, using the `iadd` just built) and recurses into the tail — a
+course-of-values recursion indexed by the code (no parameter), like `iC`. The exponent bump `1+e`
+raises the max-coefficient by at most one (Rathjen Thm 3.5), the engine of the slow-down's `C`-bound. -/
+
+/-- Table step of `iomul` at code index `c` (table `s` of `iomul · `). -/
+noncomputable def iomulNext (c s : V) : V :=
+  if c = 0 then 0
+  else ocOadd (iadd (ocOadd 0 1 0) (ocExp c)) (ocCoeff c) (znth s (ocTail c))
+
+def _root_.LO.FirstOrder.Arithmetic.iomulNextDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y c s.
+    (c = 0 ∧ y = 0)
+  ∨ (c ≠ 0 ∧ ∃ one, !ocOaddDef one 0 1 0 ∧ ∃ ex, !ocExpDef ex c ∧
+       ∃ se, !iaddDef se one ex ∧ ∃ co, !ocCoeffDef co c ∧ ∃ t, !sndIdxDef t c ∧
+       ∃ st, !znthDef st s t ∧ !ocOaddDef y se co st)”
+
+instance iomulNext_defined : 𝚺₁-Function₂ (iomulNext : V → V → V) via iomulNextDef := .mk
+  fun v ↦ by
+  simp [iomulNextDef, iomulNext, ocExp_defined.iff, ocCoeff_defined.iff, ocTail,
+    sndIdx_defined.iff, iadd_defined.iff, znth_defined.iff, ocOadd_defined.iff]
+  by_cases hc : v 1 = 0 <;> simp [hc]
+
+instance iomulNext_definable : 𝚺₁-Function₂ (iomulNext : V → V → V) := iomulNext_defined.to_definable
+
+/-- Blueprint for the `iomul` table. -/
+def iomulTable.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !mkSeq₁Def y 0”
+  succ := .mkSigma “y ih n. ∃ v, !iomulNextDef v (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def iomulTable.construction : PR.Construction V iomulTable.blueprint where
+  zero := fun _ ↦ !⟦0⟧
+  succ := fun _ n ih ↦ seqCons ih (iomulNext (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [iomulTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [iomulTable.blueprint, iomulNext_defined.iff, seqCons_defined.iff]
+
+noncomputable def iomulTable (n : V) : V := iomulTable.construction.result ![] n
+
+@[simp] lemma iomulTable_zero : iomulTable (0 : V) = !⟦0⟧ := by
+  simp [iomulTable, iomulTable.construction]
+
+@[simp] lemma iomulTable_succ (n : V) :
+    iomulTable (n + 1) = seqCons (iomulTable n) (iomulNext (n + 1) (iomulTable n)) := by
+  simp [iomulTable, iomulTable.construction]
+
+/-- **Internal ω-multiplication** `ω·c` inside `V`: the `c`-th entry of the table. -/
+noncomputable def iomul (c : V) : V := znth (iomulTable c) c
+
+def _root_.LO.FirstOrder.Arithmetic.iomulTableDef : 𝚺₁.Semisentence 2 :=
+  iomulTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance iomulTable_defined : 𝚺₁-Function₁ (iomulTable : V → V) via iomulTableDef := .mk
+  fun v ↦ by simp [iomulTable.construction.result_defined_iff, iomulTableDef]; rfl
+
+instance iomulTable_definable : 𝚺₁-Function₁ (iomulTable : V → V) := iomulTable_defined.to_definable
+instance iomulTable_definable' (Γ) : Γ-[m + 1]-Function₁ (iomulTable : V → V) :=
+  iomulTable_definable.of_sigmaOne
+
+def _root_.LO.FirstOrder.Arithmetic.iomulDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y c. ∃ t, !iomulTableDef t c ∧ !znthDef y t c”
+
+instance iomul_defined : 𝚺₁-Function₁ (iomul : V → V) via iomulDef := .mk fun v ↦ by
+  simp [iomulDef, iomul, iomulTable_defined.iff, znth_defined.iff]
+
+instance iomul_definable : 𝚺₁-Function₁ (iomul : V → V) := iomul_defined.to_definable
+instance iomul_definable' (Γ) : Γ-[m + 1]-Function₁ (iomul : V → V) := iomul_definable.of_sigmaOne
+
+/-! ### Structural correctness of `iomul` -/
+
+private lemma def_iomulTable {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ iomulTable (v i)) :=
+  DefinableFunction₁.comp (F := iomulTable) (DefinableFunction.var i)
+
+private lemma def_iomul {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ iomul (v i)) :=
+  DefinableFunction₁.comp (F := iomul) (DefinableFunction.var i)
+
+@[simp] lemma iomulTable_seq (n : V) : Seq (iomulTable n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_iomulTable 0)
+  case zero => simp
+  case succ n ih => rw [iomulTable_succ]; exact ih.seqCons _
+
+@[simp] lemma iomulTable_lh (n : V) : lh (iomulTable n) = n + 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_iomulTable 0)) (by definability)
+  case zero => simp
+  case succ n ih => rw [iomulTable_succ, Seq.lh_seqCons _ (iomulTable_seq n), ih]
+
+lemma znth_iomulTable_succ {n k : V} (hk : k < n + 1) :
+    znth (iomulTable (n + 1)) k = znth (iomulTable n) k := by
+  rw [iomulTable_succ]
+  exact znth_seqCons_of_lt (iomulTable_seq n) _ (by rw [iomulTable_lh]; exact hk)
+
+lemma znth_iomulTable_eq_iomul : ∀ N : V, ∀ k ≤ N, znth (iomulTable N) k = iomul k := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_le (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := znth) (def_iomulTable 1) (DefinableFunction.var 0))
+      (def_iomul 0)
+  case zero =>
+    intro k hk
+    rcases (nonpos_iff_eq_zero.mp hk) with rfl
+    rfl
+  case succ N ih =>
+    intro k hk
+    rcases eq_or_lt_of_le hk with rfl | hlt
+    · rfl
+    · rw [znth_iomulTable_succ hlt]
+      exact ih k (le_iff_lt_succ.mpr hlt)
+
+@[simp] lemma iomul_zero : iomul (0 : V) = 0 := by
+  simp only [iomul, iomulTable_zero]
+  exact (singleton_seq 0).znth_eq_of_mem ((mem_singleton_seq_iff 0 0).mpr rfl)
+
+/-- **The internal ω-multiplication recursion**: `ω·(oadd e n r) = oadd (1+e) n (ω·r)`
+(Rathjen Def 3.1, `α = 1`). The leading exponent is bumped `e ↦ 1+e = iadd (ocOadd 0 1 0) e`. -/
+lemma iomul_ocOadd (ec n rc : V) :
+    iomul (ocOadd ec n rc) = ocOadd (iadd (ocOadd 0 1 0) ec) n (iomul rc) := by
+  set c := ocOadd ec n rc with hc
+  have hpos : 0 < c := ocOadd_pos ec n rc
+  obtain ⟨M, hM⟩ : ∃ M, c = M + 1 :=
+    ⟨c - 1, (sub_add_self_of_le (pos_iff_one_le.mp hpos)).symm⟩
+  have key : znth (iomulTable c) c = iomulNext c (iomulTable M) := by
+    rw [hM, iomulTable_succ]
+    have := znth_seqCons_self (iomulTable_seq M) (iomulNext (M + 1) (iomulTable M))
+    rwa [iomulTable_lh] at this
+  have htail : ocTail c ≤ M := by
+    have := ocTail_lt ec n rc; rw [← hc] at this; exact le_iff_lt_succ.mpr (hM ▸ this)
+  have hcne : c ≠ 0 := hpos.ne'
+  rw [iomul, key, iomulNext, if_neg hcne,
+    znth_iomulTable_eq_iomul M (ocTail c) htail, ocExp_ocOadd, ocCoeff_ocOadd, ocTail_ocOadd]
+
 end GoodsteinPA.InternalONote
