@@ -30,6 +30,38 @@ descent → free-X `TI_≺(X)`) is **structurally blocked, not merely hard**:
 complete + the obstruction lemma), `InternalONote` code arithmetic, `InternalCor34.ig0` + general
 `ocOadd` descent lemmas (substrate-agnostic leaves).
 
+### SHARPENED (lap 45, end) — the crux is localized to Cor 3.4; Thm 3.5 + Lemma 3.6 are done/tractable
+Grounded the Route-A back-end against Rathjen pp.13–14 (Lemma 3.6, Cor 3.7, Thm 2.8). Precise map:
+- **Lemma 3.6** (the special-Goodstein run never terminates, given `C(βₙ) ≤ n+1`) = repo's **DONE**
+  `DescentArith.nonterminating_internal` / `DescentSlowdown.slowdown_run_facts` (axiom-clean).
+- **Thm 3.5** (slow `α` → `β`, `C(βᵣ) ≤ r+1`) is **level-agnostic, no Ackermann, IΣ₁-tractable**: finite
+  tails + `r = K(n+1)+i` *division* indexing. Internal C-bound `iC_betaTail_le` LANDED (lap 45); descent
+  = `icmp_betaTail_within/_boundary`, NF = `isNF_iadd_finite` (built). Remaining: the `β:V→V` assembly
+  (internal division reindex + the `j<K` ω-tower prefix) — mechanical, route-agnostic.
+- **Cor 3.4** (raw descent → slow `α`, the Grzegorczyk `g`-padding) = **THE deep crux, common to both
+  routes.** Needs the Grzegorczyk level `l`; for ANY *quantified/generic* descent (Route A's ∀-primrec
+  PRWO, or Route B's oracle X-descent) `l` is **internal (`l:V`)** ⟹ `f_l` is Ackermann ⟹ **NOT
+  IΣ₁-provably-total** ⟹ needs a **PA substrate** (`V ⊧ₘ* 𝗣𝗔`), not the IΣ₁ `PR.Construction` toolkit.
+  CORRECTION to the lap-45 mid-note: the meta-`l` `InternalCor34` design (`ig0`, `iblk`, `ibigMul`) is
+  NOT outright dead — it is the **standard-`l`** special case (correct when the descent's level is a
+  fixed standard natural), and `ig0` + the general `ocOadd` lemmas are reused by the internal-`l` version.
+  But the *generic* slow-down needs internal `l`.
+
+**3 attack paths for the Cor 3.4 crux (internal-`l` `g`-padding):**
+1. **Build internal Ackermann/Grzegorczyk `f : V→V→V` over `V ⊧ 𝗣𝗔`** (Σ₁-graph + PA-totality by
+   induction on the level), then `ig`/`icorAlpha` by PA-induction on `l:V`. Most direct, heaviest.
+2. **Parameterize over an abstract internal `f`** (take `f`'s recursion eqns + Lemma-3.2 domination as
+   hypotheses / a structure supplied by `M ⊧ 𝗣𝗔`), build `ig`/`icorAlpha`/descent+bound relative to it,
+   and discharge `f`'s existence separately (disclosed). Lets the genuine `g`-math land green now; most
+   tractable. ⟸ RECOMMENDED first.
+3. **Restructure `g` to avoid `f_l`**: define blocks by the descent's *actual* widths (incremental V
+   recursion) and prove the linear `C`-bound directly. Risk: the linear bound may genuinely need the
+   Grzegorczyk recursion (Rathjen's `g` is built that way precisely for the linear bound) — may be false.
+
+**Route decision still open** (Trevor): (A) Rathjen Con(PA)+Gödel II [carries `PA_delta1Definable`; reuses
+Cor 3.4 + Buchholz §5 for Thm 2.8] vs (B′) Kirby–Paris model-theoretic indicators [axiom-clean back-end;
+fresh technique]. Cor 3.4 (internal-`l`) is needed by (A); (B′) replaces §3 entirely with indicators.
+
 
 ## ⭐ Reflection — 2026-06-23 (lap 44, DEEP) — the wall `sorry` is framed on a DEAD path; rewire it FIRST
 
