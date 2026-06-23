@@ -1,5 +1,42 @@
 # Pending work — open obligations & attack paths
 
+## 🎯 LAP-22 (2026-06-23) — D' DISCHARGED + E (DescentE) MAPPED FROM RATHJEN. Read FIRST.
+
+**D' is closed.** `Thm56.embed_TI_bounded` is now machine-checked (the embedded ordinal `< ε₀`); the
+entire `EmbeddingBound.lean` chain is axiom-clean. `#print axioms peano_not_proves_TI` = `[propext,
+choice, Quot.sound, rePred_ltPull_natCode]` — `sorryAx` GONE. **Walls left: F-φ (Aristotle) + E.**
+
+### E = `DescentE` decomposition (grounded in Rathjen-2014 "Goodstein revisited" §2-3, read lap 22)
+
+`DescentE := 𝗣𝗔 ⊢ ↑goodsteinSentence → Nonempty (Derivation2 paLX {TI prec})`. The math (Rathjen):
+Goodstein's theorem is **PA-equivalent to PRWO(ε₀)** (no descending prim-rec sequences of ordinals `<ε₀`,
+= transfinite induction), and `𝗣𝗔 ⊬ PRWO(ε₀)` by Gentzen+Gödel-II. The two halves:
+
+1. **The SEMANTIC descent is ALREADY in the repo** (`Domination.lean`, axiom-clean):
+   - `toOrdinal b n` = Rathjen's `T^b_ω(m)` (base-`b` rep → CNF ordinal); `repr_toONote` ties it to `ONote`.
+   - `seqOrd m k := toOrdinal (k+2) (goodsteinSeq m k)`; **`seqOrd_step` = Rathjen eq. (4)** — the ordinal
+     strictly DECREASES along a Goodstein sequence (`goodsteinSeq m k ≠ 0 → seqOrd m (k+1) < seqOrd m k`).
+   - `goodstein_terminates` (the (ii)⟹(i) direction, semantic) is fully proven.
+   This is the **backbone**; E does NOT need to redo it.
+
+2. **The SYNTACTIC gap (E's real content):** realize "Goodstein ⟹ TI(≺)" as a `Derivation2 paLX`
+   proof-object, i.e. lift the semantic descent to a Z-proof of `TI prec`. Sub-lemmas (attack order):
+   - **E-lift:** a finitary `𝗣𝗔`(ℒₒᵣ)-proof of an arithmetic `TI`/`PRWO(ε₀)` statement maps to a
+     `Derivation2 paLX` of `TI prec` (proof-translation along `ℒₒᵣ ↪ LX`; `paLX ⊇ lMap 𝗣𝗔⁻ + induction`;
+     match the arithmetic well-ordering formula to Buchholz's `TI prec = Prog prec 🡒 ∀⁰ Xat #0`, the
+     set-variable `X` = the induction predicate). Mechanical-ish but needs the ℒₒᵣ `TI(ε₀)` formula DEFINED.
+   - **E-core (the deep part):** `𝗣𝗔 ⊢ Goodstein ⟹ 𝗣𝗔 ⊢ TI(ε₀)` (Rathjen Cor 2.7 (i)⟹(ii), the
+     reversal). Needs §3 "slowing down" (Lemma 3.2 Grzegorczyk bound, Lemma 3.3/Cor 3.4: convert arbitrary
+     descending prim-rec sequences to SLOW ones `|αᵢ| ≤ K·(i+1)`, since PA only expresses prim-rec sequences).
+   - **ALT (Route A escape hatch):** `Reduction.goodstein_implies_consistency : 𝗣𝗔 ⊢ γ → 𝗣𝗔 ⊢ Con(𝗣𝗔)`
+     (Rathjen Thm 2.8: PRA ⊢ PRWO(ε₀)→Con(PA)) then Gödel II. Reintroduces `PA_delta1Definable` (🟡).
+   - **First concrete prerequisite to formalize next lap:** the ℒₒᵣ-arithmetic statement of `PRWO(ε₀)` /
+     `TI(ε₀)` + Rathjen Lemma 2.3 (the `T^b_ω`/`T̂^ω_b` order-iso, mostly in `toOrdinal_mono_and_bound`).
+   - Scaffold (sorried statements) belongs in `wip/Descent.lean` (keeps `src/` sorry-free for the gate).
+
+### Earlier notes below ⤵
+
+
 ## ✅ LAP-19 (2026-06-22) — F ORDER-TYPE WALL CLOSED (axiom-clean). Read FIRST.
 
 The order-type half of **F** is **DONE + `#print axioms`-clean** in `src/GoodsteinPA/Epsilon0Complete.lean`
