@@ -1,5 +1,21 @@
 # Pending work — open obligations & attack paths
 
+## 🎯 LAP-26 (2026-06-23) — E-core(b) "THE WALL" CRACKED: internal `bump`/`goodsteinSeq` BUILT. Read FIRST.
+
+The lap-25 gating prereq ("make `bump`/`goodsteinSeq` `𝚺₁`-definable inside `V`") is **DONE + axiom-clean**.
+Five new files (`InternalPow`/`InternalDigits`/`InternalLog`/`InternalBump`/`InternalGoodstein`) build the
+internal Goodstein substrate via Foundation's `PR.Construction` (base-2-only `Exponential` forced a hand-built
+`ipow`). Highlights: `ilog_defined : 𝚺₁-Function₂`, `ibump` (table reduction of the course-of-values bump) with
+the **proven peel recursion `ibump_succ` = `Defs.bump`**, and `igoodstein` = the concrete `m : V → V` for
+`DescentArith.ineq6_internal`. Faithfulness bridge started (`InternalBridge`: `ipow_nat`, `ilog_nat`). Full
+details + resolved gotchas (aesop-can't-do-ibumpTable → explicit `comp` terms; LE diamond on ℕ → `le_def`) in
+**`HANDOFF-2026-06-23-lap26.md`**. Build green 1280 jobs; headline `sorry` intact.
+
+**NEXT (hardest-first):** (1) finish `InternalBridge` (`ibump_nat` by `Nat.strong_induction_on`,
+`igoodstein_nat`) — anti-fraud link to audited `Defs`. (2) **THE math content:** internal `ineq6_step`
+(Rathjen Lemma 3.6 slow-down) — build `b k = T̂^{k+2}∘βₖ` as `𝚺₁`-fn, prove base + step, plug `m=igoodstein`
+into `DescentArith.ineq6_internal`. (3) back-end (Route A/B, deferred). (4) F-φ on Aristotle.
+
 ## 🎯 LAP-24 (2026-06-23) — E-core kernel landed + back-end correction. Read FIRST.
 
 **Two walls left: E-core + F-φ** (D' discharged lap 22; E-lift X-free half done lap 23). Build green
