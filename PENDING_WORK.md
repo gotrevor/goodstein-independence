@@ -21,6 +21,15 @@ Discharged the two `wip/StdCor34` interface obligations' substrate (lap-51 desig
   `iF_zero`/`iF_succ`/`iF_defined` + `iF_natCast` (standard agreement `iF l ↑k = ↑(Grz.F l k)`).
 - ✅ `ipsum f n i = Σ_{t=1}^i f^[t] n` (`Grz.psum` internalized): `ipsum_zero`/`ipsum_succ`/`ipsum_defined`
   + monotonicity. Generic over the fixed `𝚺₁`-fn `f`, so it serves every `iF l`.
+- ✅ `wsumc` + `wsumc_blk_le` (`wip/BlkRec.lean`, codex review lap 52): the elapsed-WIDTH invariant
+  `wsumc (blk j) ≤ j` that `salpha_C_le`'s `hβC` actually needs — `blk_le` (block count) alone was an
+  OVERCLAIM. `wsumc_blk_add_off : wsumc(blk j) + off j = j` (exact, under positive widths).
+- ⚠️ **wseq SEAM (codex lap 52):** `BlkRec.blk/off` read the width from a finite sequence CODE `wseq`
+  (`znth wseq b`); the IIter substrate (`ipsum`) reads it from a definable width FUNCTION. For crux-1
+  integration these must meet. Two routes: (a) build a concrete definable global width `W t = iC(β(t+1))`
+  and thread its Def (couples `BlkRec` to β); (b) **prefix-invariance** — prove `blk wseq j` depends only
+  on `znth wseq b` for `b ≤ blk j` (≤ j), so a *long-enough prefix code* of the true widths gives the
+  correct `blk/off`. Route (b) keeps `BlkRec` abstract; add `blk_prefix_congr`/`off_prefix_congr` next.
 - ⏭ NEXT: `iblockIdx`/`iblockOff` over `iF l` (level sets of `ipsum (iF l) n`). Mirror `Grz.blockIdx`/
   `blockOff` but AVOID internal `findGreatest` — use the `BlkRec.boStep` state-machine idiom (a width
   recurrence whose width at block `i` is `iIter (iFDef l) (iF l) (iF_defined l) n (i+1)`), giving
