@@ -134,6 +134,85 @@ theorem lMap_PA_subset : Theory.lMap Φ 𝗣𝗔 ⊆ (GoodsteinPA.EmbeddingX.paL
   exact Set.union_subset (fun _ hx => Or.inl (Or.inl hx))
     (fun _ hx => Or.inl (Or.inr (lMap_inductionScheme_subset hx)))
 
+/-! ## `𝗘𝗤 ⪯ paLX` — the equality axioms hold in `paLX` (Task A2, lap-32)
+
+The completeness route needs `[Structure.Eq LX M]` for the substrate's real `=`; supplying it via
+`consequence_iff_eq`/`EQ.provOf` needs `𝗘𝗤 ⪯ paLX`. The ℒₒᵣ-part of `𝗘𝗤(LX)` is the `lMap Φ`-image of
+`𝗘𝗤(ℒₒᵣ) ⊆ 𝗣𝗔⁻ ⊆`-image-of-`paLX`; the lone non-ℒₒᵣ axiom `relExt Xsym` is the third summand of `paLX`.
+So `𝗘𝗤(LX) ⊆ paLX` as a set, hence `𝗘𝗤 ⪯ paLX` by `WeakerThan.ofSubset`. -/
+
+/-- `Φ` (`ORing.embedding`) sends an `ℒₒᵣ` relation symbol to its `Sum.inl` injection in `LX`. -/
+lemma phi_rel {k} (r : (ℒₒᵣ : Language).Rel k) : Φ.rel r = Sum.inl r := by cases r <;> rfl
+
+/-- `Φ` sends an `ℒₒᵣ` function symbol to its `Sum.inl` injection in `LX`. -/
+lemma phi_func {k} (f : (ℒₒᵣ : Language).Func k) : Φ.func f = Sum.inl f := by cases f <;> rfl
+
+/-- `LX`'s `=`-symbol is `Sum.inl` of `ℒₒᵣ`'s (the `Language.Eq LX` instance). -/
+lemma lx_eq : (Language.Eq.eq : LX.Rel 2) = Sum.inl Language.Eq.eq := rfl
+
+/-- `lMap Φ (Eq.refl) = Eq.refl` (over `LX`). -/
+lemma lMap_eq_refl : Semiformula.lMap Φ (Theory.Eq.refl ℒₒᵣ) = (Theory.Eq.refl LX) := by
+  simp [Theory.Eq.refl, Semiformula.Operator.eq_def, phi_rel, lx_eq]
+
+/-- `lMap Φ (Eq.symm) = Eq.symm` (over `LX`). -/
+lemma lMap_eq_symm : Semiformula.lMap Φ (Theory.Eq.symm ℒₒᵣ) = (Theory.Eq.symm LX) := by
+  simp [Theory.Eq.symm, Semiformula.Operator.eq_def, phi_rel, lx_eq]
+
+/-- `lMap Φ (Eq.trans) = Eq.trans` (over `LX`). -/
+lemma lMap_eq_trans : Semiformula.lMap Φ (Theory.Eq.trans ℒₒᵣ) = (Theory.Eq.trans LX) := by
+  simp [Theory.Eq.trans, Semiformula.Operator.eq_def, phi_rel, lx_eq]
+
+set_option maxHeartbeats 4000000 in
+/-- `lMap Φ (Eq.relExt r) = Eq.relExt (Φ.rel r)` — the equality-extensionality axiom translates to the
+extensionality axiom for the image relation symbol. -/
+lemma lMap_relExt {k} (r : (ℒₒᵣ : Language).Rel k) :
+    Semiformula.lMap Φ (Theory.Eq.relExt r) = Theory.Eq.relExt (Φ.rel r) := by
+  cases r <;>
+    simp [Theory.Eq.relExt, Semiformula.Operator.eq_def, Semiformula.lMap_rel, Semiterm.lMap_bvar,
+      Matrix.conj, Matrix.vecTail, Function.comp, lx_eq, phi_rel, Matrix.fun_eq_vec_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+set_option maxHeartbeats 4000000 in
+/-- `lMap Φ (Eq.funcExt f) = Eq.funcExt (Φ.func f)`. -/
+lemma lMap_funcExt {k} (f : (ℒₒᵣ : Language).Func k) :
+    Semiformula.lMap Φ (Theory.Eq.funcExt f) = Theory.Eq.funcExt (Φ.func f) := by
+  cases f <;>
+    simp [Theory.Eq.funcExt, Semiformula.Operator.eq_def, Semiformula.lMap_rel, Semiterm.lMap_func,
+      Semiterm.lMap_bvar, Matrix.conj, Matrix.vecTail, Function.comp, lx_eq, phi_rel, phi_func,
+      Matrix.fun_eq_vec_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+/-- **`𝗘𝗤(LX) ⊆ paLX`.** Each `𝗘𝗤(LX)` axiom is either the `lMap Φ`-image of an `𝗘𝗤(ℒₒᵣ) ⊆ 𝗣𝗔⁻`
+axiom (refl/symm/trans/funcExt/relExt over ℒₒᵣ symbols — `paLX`'s first summand) or `relExt Xsym`
+(`paLX`'s third summand). -/
+theorem eqLX_subset_paLX : (𝗘𝗤 : Theory LX) ⊆ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
+  have hbase : ∀ σ : Sentence ℒₒᵣ, σ ∈ (𝗘𝗤 : Theory ℒₒᵣ) →
+      Semiformula.lMap Φ σ ∈ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
+    intro σ hσ
+    exact Or.inl (Or.inl ⟨σ, PeanoMinus.equal σ hσ, rfl⟩)
+  intro σ hσ
+  cases hσ with
+  | refl => exact (lMap_eq_refl ▸ hbase _ Theory.eqAxiom.refl)
+  | symm => exact (lMap_eq_symm ▸ hbase _ Theory.eqAxiom.symm)
+  | trans => exact (lMap_eq_trans ▸ hbase _ Theory.eqAxiom.trans)
+  | funcExt f =>
+    cases f with
+    | inl f₀ =>
+      have := hbase _ (Theory.eqAxiom.funcExt f₀)
+      rwa [lMap_funcExt, phi_func] at this
+    | inr e => exact e.elim
+  | relExt r =>
+    cases r with
+    | inl r₀ =>
+      have := hbase _ (Theory.eqAxiom.relExt r₀)
+      rwa [lMap_relExt, phi_rel] at this
+    | inr xr =>
+      cases xr
+      exact Or.inr rfl
+
+/-- **`𝗘𝗤 ⪯ paLX`** — the instance the completeness route's `consequence_iff_eq`/`EQ.provOf` needs. -/
+instance eqAxiom_weakerThan_paLX : (𝗘𝗤 : Theory LX) ⪯ (GoodsteinPA.EmbeddingX.paLX : Theory LX) :=
+  Entailment.WeakerThan.ofSubset eqLX_subset_paLX
+
 /-- The schema coercion commutes with `lMap`: `(T : Schema).lMap Φ = (Theory.lMap Φ T : Schema)`
 (both are `lMap`/`emb` images; they agree by `lMap_emb`). -/
 theorem coe_schema_lMap (T : Theory ℒₒᵣ) :
