@@ -35,7 +35,28 @@ not wait on it.
    motive) rewrites the reduct to `standardModel oM`, then `have h : Evalbm (s := @standardModel M oM) … := this`
    coerces by defeq (`rw [models_iff]` does NOT fire on the `.toStruc ⊧` form).
 
-**Next: grind `hCD`** — the lone genuine wall (see the lap-34 toolkit section just below + `DESCENT-PLAN §5`).
+**`hCD` NARROWED lap 36 — run side baked in; the lone open obligation is `hbound`.** `hCD`
+(`DescentSemantic.lean:409`) now closes via `DescentArith.nonterminating_internal` + the run's
+`𝚺₁`-definability (both proved), so the **only** remaining `sorry` is:
+```
+hbound : ∃ (m₀ : M) (b : M → M), (𝚺₁-Function₁ b) ∧
+  b 0 ≤ igoodstein m₀ 0 ∧
+  (∀ k, b k ≤ igoodstein m₀ k → b (k+1) ≤ igoodstein m₀ (k+1)) ∧   -- internalized ineq6_step
+  (∀ k, 0 < b k)
+```
+This is the Rathjen §3 slow-down, internalized in `M`'s `𝗜𝚺₁`-reduct. Decomposition for the next laps
+(the deep infra; DescentCore has all of it at ONote/ℕ level, the gap is making it `𝚺₁`-definable in `M`):
+1. **Internal ordinal-notation codes + `C` (slow-down measure) in `M`.** Need CNF-coded ordinals as
+   `M`-elements with `C(β) ≤ k` (`DescentCore.C`/`Canon_iff_C_le`) as a `𝚺₁` predicate on `M`.
+2. **Internal `T̂_ω` evaluation** `ievalNat : M → M → M` (base, ordinal-code → value), `𝚺₁`-definable,
+   matching `DescentCore.evalNat` on standard inputs (the InternalPow `ipow`/`ilog` substrate feeds this).
+3. **Internal `βₖ` slow-down** from the descent `descent_seq_exists` (extract a coherent `a : M → M` or
+   reuse the coded `W`; build `βₖ` with `C(βₖ) ≤ k+1` per `DescentCore.C_betaTail_le`), then
+   `b k = ievalNat (k+2)^[k+2] (βₖ)`. `𝚺₁`-definable.
+4. **Internalized `ineq6_step`** (`step`): the `Δ₀` numeral form of `DescentCore.ineq6_step` (Lemma 3.6,
+   ineq (6)) — proved in `M` by its `𝗜𝚺₁` arithmetic. `base`/`hpos` fall out of the `βₖ` positivity.
+This is multi-lap infrastructure (internalizing ONote arithmetic into a nonstandard `M`); attack hardest-
+first = piece 2 (`ievalNat`) + piece 4 (`ineq6_step` internal), since pieces 1/3 are codings on top.
 
 ---
 

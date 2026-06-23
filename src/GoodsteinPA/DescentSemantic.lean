@@ -400,14 +400,22 @@ theorem no_min_descent_absurd_of_goodstein {M : Type} [Nonempty M] [Structure LX
   letI oM : ORingStructure M := ReductModel.reductORing
   haveI hI : M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := ReductModel.reduct_models_isigma1 hM
   -- ───────────────────────────────────────────────────────────────────────────────────────────
-  -- WALL C+D (disclosed). The `X`-definable `Mlt`-descent extracted from `no_min`/`ha₀`, slowed
-  -- down (Rathjen §3, so `C(βₖ) ≤ k+1`), seeds a special internal Goodstein run `igoodstein m₀`
-  -- whose dominating `𝚺₁`-bound `b k = T̂^{k+2}(βₖ)` keeps it `> 0` forever. The run side is ALREADY
-  -- axiom-clean (`DescentArith.igoodstein_nonterminating_of_dominating`: given `(base, step, hpos)`
-  -- it yields `∀ k, 0 < igoodstein m₀ k`); the open content is the seed/bound construction from the
-  -- descent + the internalized `ineq6_step` (`DescentCore.ineq6_step`, route-neutral kernel).
+  -- WALL C+D (disclosed, NARROWED lap 36). The `X`-definable `Mlt`-descent extracted from
+  -- `no_min`/`ha₀` is slowed down (Rathjen §3 Thm 3.5, so `C(βₖ) ≤ k+1`) and seeds a special internal
+  -- Goodstein run `igoodstein m₀` with a dominating `𝚺₁`-bound `b k = T̂^{k+2}(βₖ)`. The **run side is
+  -- baked in here** (`DescentArith.nonterminating_internal` + the run's `𝚺₁`-definability, both proved):
+  -- the ONLY remaining content is the **bound existence** `hbound` — the Rathjen §3 slow-down `βₖ` and
+  -- `b k = T̂^{k+2}(βₖ)` internalized in `M`'s reduct as a `𝚺₁`-function, with `base`/`step`/`hpos`,
+  -- where `step` is the internalized `DescentCore.ineq6_step` (Lemma 3.6, inequality (6)).
   have hCD : ∃ m₀ : M, ∀ k : M, 0 < InternalPow.igoodstein m₀ k := by
-    sorry
+    have hbound : ∃ (m₀ : M) (b : M → M), (𝚺₁-Function₁ b) ∧
+        b 0 ≤ InternalPow.igoodstein m₀ 0 ∧
+        (∀ k, b k ≤ InternalPow.igoodstein m₀ k →
+          b (k + 1) ≤ InternalPow.igoodstein m₀ (k + 1)) ∧
+        (∀ k, 0 < b k) := by
+      sorry
+    obtain ⟨m₀, b, hb, base, step, hpos⟩ := hbound
+    exact ⟨m₀, DescentArith.nonterminating_internal (by definability) hb base step hpos⟩
   obtain ⟨m₀, hpos⟩ := hCD
   -- ───────────────────────────────────────────────────────────────────────────────────────────
   -- WALL B (disclosed). `hgood` says `M`'s `ℒₒᵣ`-reduct models `goodsteinSentence`
