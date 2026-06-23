@@ -223,6 +223,74 @@ theorem noFin_omega_mul : ∀ α, NoFin (omegaO * α)
       refine NoFin_oadd (one_add_ne_zero e₂) ?_
       rw [← omegaO]; exact noFin_omega_mul a₂
 
+open Ordinal in
+/-- **`C(a + n) ≤ max (C a) n`** for a finite `n` added to a `NoFin` (no-finite-part) `a`. Because
+`a` has no exponent-`0` term, the finite `n` lands as a fresh bottom summand and never merges into an
+existing coefficient. Structural induction mirroring `ONote.add_nfBelow`: the head `(e,n')` is
+preserved (`addAux` takes its `gt` branch, since `a`'s tail `+ n` stays strictly below `repr e`) and
+`C` of the tail is bounded by the IH. -/
+theorem C_add_ofNat_le : ∀ {a : ONote}, a.NF → NoFin a → ∀ m : ℕ,
+    C (a + ONote.ofNat m) ≤ max (C a) m
+  | 0, _, _, m => by simp
+  | ONote.oadd e n tail, hNF, hnf, m => by
+    obtain ⟨he, htail⟩ := hnf
+    have hNFtail : tail.NF := hNF.snd
+    have ih := C_add_ofNat_le hNFtail htail m
+    rw [ONote.oadd_add]
+    -- `tail + ofNat m` is normal and strictly below `repr e`
+    have hrepr1 : (1 : Ordinal) ≤ ONote.repr e := by
+      cases e with
+      | zero => exact absurd rfl he
+      | oadd e'' n'' a'' =>
+        exact le_trans (Order.one_le_iff_ne_zero.2 (opow_pos _ omega0_pos).ne')
+          (ONote.omega0_le_oadd _ _ _)
+    have hbX : ONote.NFBelow (tail + ONote.ofNat m) (ONote.repr e) :=
+      ONote.add_nfBelow hNF.snd' ((ONote.nfBelow_ofNat m).mono hrepr1)
+    cases hX : tail + ONote.ofNat m with
+    | zero =>
+      rw [hX] at ih
+      simp only [ONote.addAux, C_oadd, C_zero] at ih ⊢
+      have e1 : C e ≤ max (max (C e) (n : ℕ)) (C tail) := le_max_of_le_left (le_max_left _ _)
+      have e2 : (n : ℕ) ≤ max (max (C e) (n : ℕ)) (C tail) := le_max_of_le_left (le_max_right _ _)
+      refine Nat.max_le.mpr ⟨?_, ?_⟩ <;> omega
+    | oadd e' n' a' =>
+      have hNFe : e.NF := hNF.fst
+      have hbXo := hX ▸ hbX
+      have hNFe' : e'.NF := hbXo.fst
+      have hlt : ONote.repr e' < ONote.repr e := hbXo.lt
+      have hcmp : ONote.cmp e e' = Ordering.gt := by
+        have hc := @ONote.cmp_compares e e' hNFe hNFe'
+        rcases hco : ONote.cmp e e' with _ | _ | _
+        · rw [hco] at hc; exact absurd (ONote.lt_def.1 hc) (not_lt.2 hlt.le)
+        · rw [hco] at hc; exact absurd (congrArg ONote.repr hc) (ne_of_gt hlt)
+        · rfl
+      rw [hX] at ih
+      simp only [ONote.addAux, hcmp, C_oadd] at ih ⊢
+      have e1 : C e ≤ max (max (C e) (n : ℕ)) (C tail) := le_max_of_le_left (le_max_left _ _)
+      have e2 : (n : ℕ) ≤ max (max (C e) (n : ℕ)) (C tail) := le_max_of_le_left (le_max_right _ _)
+      have e3 : C tail ≤ max (max (C e) (n : ℕ)) (C tail) := le_max_right _ _
+      refine Nat.max_le.mpr ⟨Nat.max_le.mpr ⟨?_, ?_⟩, ?_⟩ <;> omega
+
+/-- `NF` of `ω` as an `ONote`. -/
+instance NF_omegaO : (omegaO).NF := by rw [omegaO]; exact ONote.NF.oadd_zero 1 1
+
+/-- **Rathjen Thm 3.5 tail-term `C`-bound.** The tail block `β_{K(n+1)+i} = ω·αₙ + (K-i)` of the
+`C`-bounded sequence satisfies `C(βᵣ) ≤ r+1` (here `r = K(n+1)+i`), given the slow bound
+`C(αₙ) ≤ K(n+1)` (Rathjen `C(αₙ) ≤ |αₙ| ≤ K(n+1)`) and `i < K`. Combines `C_omega_mul_le`
+("·ω bumps `C` by ≤1") with `C_add_ofNat_le` (the finite `K-i` never merges, since `ω·αₙ` is
+`NoFin`): `C(ω·αₙ + (K-i)) ≤ max(C(αₙ)+1, K-i) ≤ K(n+1)+1 ≤ r+1`. -/
+theorem C_betaTail_le {α : ONote} (hα : α.NF) {K n i : ℕ} (hi : i < K)
+    (hCα : C α ≤ K * (n + 1)) :
+    C (omegaO * α + ONote.ofNat (K - i)) ≤ K * (n + 1) + i + 1 := by
+  have hNFmul : (omegaO * α).NF := ONote.mul_nf omegaO α
+  have h1 := C_add_ofNat_le hNFmul (noFin_omega_mul α) (K - i)
+  have h2 := C_omega_mul_le α
+  have hb1 : C (omegaO * α) ≤ K * (n + 1) + 1 := by omega
+  have hb2 : K - i ≤ K * (n + 1) := by
+    have : K ≤ K * (n + 1) := Nat.le_mul_of_pos_right K (Nat.succ_pos n)
+    omega
+  omega
+
 /-! ## Rathjen Lemma 3.6 — the special Goodstein run from `T̂²_ω(β₀)` does not terminate
 
 This is the **kernel of E-core** (see `DESCENT-PLAN.md`): from a descending ε₀-sequence with bounded

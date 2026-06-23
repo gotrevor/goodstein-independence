@@ -27,11 +27,16 @@ axiom-clean). **Focus E-core on the shared §3; defer the back-end choice.** Lit
 `repr_omegaStack_strictMono` (the Thm 3.5 head-term scaffold). **✅ Also landed lap 25 (`DescentCore.lean`, axiom-clean):** the C-arithmetic for the tail terms —
 `one_add_oadd` (`1 + oadd e' n' a'` evaluation), `C_one_add_le : C(1+e) ≤ C(e)+1`, and the headline
 `C_omega_mul_le : C(ω·α) ≤ C(α)+1` (= Rathjen's "multiplying by ω bumps coeffs by ≤1"; `omegaO := oadd 1 1 0`,
-induction on the `ONote.mul` recursion). **Next §3 brick = the explicit `βᵣ` construction** (Thm 3.5):
-`β_{K(n+1)+i} := ω·αₙ + (K-i)` and `βⱼ := Σ_{i<K-j} ω_{s-i}` (head), with pointwise `C(βᵣ)≤r+1` (from
-`C_omega_mul_le` + `C_omegaStack`) and single-step descent `βᵣ₊₁ < βᵣ` — NON-vacuous (state pointwise, not
-as "∀ infinite descending seq", to avoid the vacuity trap that `lemma36_*` flagged). Needs `ω·αₙ + finite`
-= `omegaO * αₙ + (k:ONote)` and `repr`/`<` facts for the descent (mathlib `repr_add`/`repr_mul`).
+induction on the `ONote.mul` recursion). **✅ Also landed lap 25 (`DescentCore.lean`, axiom-clean):** the Thm 3.5 tail-term `C`-bound, complete —
+`C_ofNat`, `one_add_ne_zero`, `NoFin`/`noFin_omega_mul` (ω·α has no finite part), `C_add_ofNat_le`
+(`C(a+finite) ≤ max(C a, finite)` for `NoFin` NF `a`; mirrors `add_nfBelow` with cmp-gt), `NF_omegaO`,
+and the headline **`C_betaTail_le : C(ω·αₙ + (K-i)) ≤ K(n+1)+i+1`** (= `C(βᵣ)≤r+1` for the tail block,
+given `C(αₙ)≤K(n+1)`, `i<K`). **Next §3 brick = the single-step DESCENT `βᵣ₊₁ < βᵣ`** (repr-based, cleaner
+than C): within-block (smaller finite tail) via `repr_add`; block-boundary `ω·αₙ+1 > ω·αₙ₊₁+K` via
+`αₙ₊₁<αₙ ⟹ ω·αₙ ≥ ω·αₙ₊₁+ω > ω·αₙ₊₁+K` (mathlib `repr_mul`, ordinal `mul`/`add` monotonicity). Then
+assemble `βᵣ` (head = `Σ ω_{s-i}` tower terms via `omegaStack`; head `C=1` from `C_omegaStack`) into one
+`β : ℕ → ONote` with both pointwise properties. After that: the **arithmetization** (the dominant wall) —
+re-express these as `𝗣𝗔`-internal facts (Σ₁ glue free; inequality (6)'s `∀k` the one real PA-induction).
 
 **Next concrete bricks (route-independent §3):** (1) the slow-down constructions Rathjen Lemma 3.3 / Cor
 3.4 / Thm 3.5 — the explicit padding function `g : ℕ² → ω^ω` and the bounded-coefficient sequence `βⱼ`,
