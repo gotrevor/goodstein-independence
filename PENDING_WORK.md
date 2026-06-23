@@ -1,5 +1,39 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Lap 41 — slow-down toolkit + run engine COMPLETE; `hbound` reduced to "build the X-definable β"
+
+The lone wall is still `hbound` (`DescentSemantic.lean`, now ~line 460). Lap 41 closed the ENTIRE
+code-level + run-level half (8 axiom-clean commits, green 1308):
+- ✅ `icmp_iomul`, `icmp_betaTail_boundary`, `isNF_iomul`, `isNF_iadd_finite` (`InternalONote.lean`) —
+  the slow-down's order/NF lemmas. Toolkit now complete: `iadd`/`iomul`, `iC_iomul`/`iC_iadd_finite`
+  (⟹ `C(βₖ)≤k+1`), within+boundary descent, NF preservation, `ineq6_step_internal` (the (6) step).
+- ✅ `DescentSlowdown.lean` (NEW): `slowdown_run_facts` (X-agnostic base/step/hpos core),
+  `hbound_of_slowdown` (𝚺₁ path), `nonterminating_of_slowdown`.
+- ✅ `DescentSemantic.nonterminating_of_xDescent` — **the reduction**: given `β:M→M` with the 3 arith
+  facts (NF/iCanon(k+1)/icmp-descent) AND `hPdef` (LX-definability of `T̂^{k+2}(βₖ)≤mₖ`), the run from
+  `T̂²(β₀)` never terminates. Via `slowdown_run_facts` + `lx_nonterminating` (X-essential). ⚠ The
+  descent is X-DEPENDENT so the run MUST go through `lx_nonterminating`, NOT the 𝚺₁ path.
+- ✅ `DescentSemantic.descentR` — the LX-definable functional descent-step relation to iterate:
+  `descentR_exists` (=descent_step), `descentR_descends`, `descentR_lxDef`.
+
+**REMAINING for `hbound` — three pieces, hardest-first:**
+1. **(HARD CORE) M-internal X-definable iteration `α : M → M`** — `α 0 = a₀`, `α (k+1) = descentR-image`,
+   for `k : M`. Build via an **LX recursion theorem**: `lx_succ_induction` over the LX-formula
+   `Pk := ∃ s, Seq s ∧ lh s = k+1 ∧ znth s 0 = a₀ ∧ ∀ i<k, descentR (znth s i)(znth s (i+1)) ∧ ∀ i≤k ¬MX(znth s i)`
+   (Seq/znth/lh are reduct-𝚺₁ → bridge via `lxDef_of_reduct`; `descentR` clause via `descentR_lxDef`).
+   Then `α k := znth (the s) k` extracted via uniqueness. PREREQ: `descentR_functional` (uniqueness —
+   needs reduct `<`-trichotomy; M⊧PA⁻ via `ReductModel.reduct_models_PA`, port `lt_trichotomy`).
+   Gives `α`: `Mlt`-descending, each `¬MX`, with `icmp (α(k+1))(α k)=0` (decode `Mlt`=`prec`→`icmp` on
+   codes — the route-(b) seam) + `isNF (α k)` + a coeff bound `iC(α k) ≤ K(k+1)` (Rathjen `|αₖ|≤K(k+1)`).
+2. **(ARITH) Rathjen reindexing `α → β`** — `βᵣ = ω·αₙ + (K−i)`, `r = K(n+1)+i`, `i<K` (block n via
+   `r/K`, offset `r%K`). Gives `iCanon(r+1) βᵣ` (`iC_iomul`+`iC_iadd_finite`, ℕ-template
+   `DescentCore.C_betaTail_le`), `icmp`-descent (within `icmp_betaTail_within` + boundary
+   `icmp_betaTail_boundary`), `isNF` (`isNF_iadd_finite`). Pure code arithmetic, 𝚺₁-definable in r.
+3. **`hPdef`** — `T̂^{k+2}(βₖ)≤mₖ` is LX-definable: `lxDef_of_reduct` on the 𝚺₁ `ievalNat`/`igoodstein`
+   graphs + the LX-formula for `β` (from 1+2). Then `nonterminating_of_xDescent` ⟹ `hCD` ⟹ close `hbound`.
+   ANTI-FRAUD: re-`#print axioms peano_not_proves_TI` (must stay clean) AND `peano_not_proves_goodstein`
+   (must stay `sorryAx` until the WHOLE chain is real) after any edit near the girder/headline.
+
 ## ⭐ Lap 40 — internal ordinal arithmetic for the slow-down STARTED (2 axiom-clean commits)
 
 Read Rathjen 2014 §3 ("Slowing down", Thm 2.6 proof + Def 3.1) on disk — confirmed the slow-down
