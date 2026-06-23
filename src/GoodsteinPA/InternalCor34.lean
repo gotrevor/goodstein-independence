@@ -126,6 +126,12 @@ lemma iC_iVbigMul_le (c : V) : ∀ l : V, iC (iVbigMul c l) ≤ iC c + l := by
       _ ≤ (iC c + l) + 1 := by gcongr
       _ = iC c + (l + 1) := (add_assoc _ _ _)
 
+-- The recursion `iVbigMul.construction.result ![β] l` never reduces definitionally on a variable `l`,
+-- so any `whnf`/`isDefEq` that meets `iVbigMul β (l+1)` loops to the heartbeat limit. All downstream
+-- use goes through the rewrite lemmas (`iVbigMul_zero`/`_succ`) and registered definability instance,
+-- so making it irreducible (after those are established) is free and kills the blow-up.
+attribute [irreducible] iVbigMul
+
 /-- `ω^l·β ≠ 0` whenever `β ≠ 0` (each `ω·` preserves non-zero-ness). -/
 lemma iVbigMul_ne_zero {β : V} (hβ0 : β ≠ 0) : ∀ l : V, iVbigMul β l ≠ 0 := by
   intro l
@@ -796,5 +802,49 @@ lemma iAbove_ocExp_iVbigMul_inf {β g : V} (hβNF : isNF β) (hβ0 : β ≠ 0) {
     iAbove (ocExp g) (iVbigMul β (l + 1)) := by
   rw [hexp]
   exact iAbove_finThresh_mono hjl _ (iAbove_code_iVbigMul hβNF hβ0 hl)
+
+/-! ## `icorAlpha` — the Cor 3.4 slowed term (generic level), per-step properties
+
+`αⱼ = ω^(l+1)·β + g` on codes (`Grz.corAlpha`), with the lead built from the V-indexed `iVbigMul`
+(so the level `l : V` may be non-standard) and the `g`-tail kept **abstract** (lap-45 path #2): its
+NF / value-bound / clean-append / descent facts are HYPOTHESES, to be discharged when the internal
+`ig` f-recursion (crux-1 step 3) lands. The three properties below are the portable mathematical
+content of Cor 3.4 (mirroring the sorry-free `Grz.corAlpha_within`/`_boundary`/`_C_bound`); the lead is
+concrete and the clean-append side conditions are dischargeable via `iAbove_ocExp_iVbigMul_fin/_inf`. -/
+
+/-- The Cor 3.4 slowed within-block term `ω^(l+1)·β + g` on codes (generic level `l : V`). -/
+noncomputable def icorAlpha (β g l : V) : V := iadd (iVbigMul β (l + 1)) g
+
+/-- **Within-block descent** (`Grz.corAlpha_within`): fixed lead `ω^(l+1)·β`, the `g`-tail descends
+(`icmp g₁ g₂ = 0`) ⟹ the slowed terms descend. Both tails are clean below the lead's spine. -/
+lemma icorAlpha_within {β g1 g2 l : V} (hg1 : g1 ≠ 0) (hg2 : g2 ≠ 0)
+    (hab1 : iAbove (ocExp g1) (iVbigMul β (l + 1)))
+    (hab2 : iAbove (ocExp g2) (iVbigMul β (l + 1)))
+    (hdesc : icmp g1 g2 = 0) :
+    icmp (icorAlpha β g1 l) (icorAlpha β g2 l) = 0 := by
+  rw [icorAlpha, icorAlpha,
+      icmp_iadd_clean_within hg1 hg2 (iVbigMul β (l + 1)) hab1 hab2, hdesc]
+
+/-- **Block-boundary descent** (`Grz.corAlpha_boundary`): the lead drops (`β₁ ≺ β₂` ⟹ `ω^(l+1)·β₁ ≺
+ω^(l+1)·β₂` by `icmp_iVbigMul`) ⟹ the slowed terms descend, for ANY clean tails. -/
+lemma icorAlpha_boundary {β1 β2 g1 g2 l : V} (hβ1NF : isNF β1) (hβ2NF : isNF β2)
+    (hg1 : g1 ≠ 0) (hg2 : g2 ≠ 0)
+    (hab1_1 : iAbove (ocExp g1) (iVbigMul β1 (l + 1)))
+    (hab1_2 : iAbove (ocExp g1) (iVbigMul β2 (l + 1)))
+    (hab2_1 : iAbove (ocExp g2) (iVbigMul β1 (l + 1)))
+    (hab2_2 : iAbove (ocExp g2) (iVbigMul β2 (l + 1)))
+    (hβdesc : icmp β1 β2 = 0) :
+    icmp (icorAlpha β1 g1 l) (icorAlpha β2 g2 l) = 0 := by
+  rw [icorAlpha, icorAlpha]
+  refine icmp_iadd_clean_boundary hg1 hg2 hab1_1 hab1_2 hab2_1 hab2_2 ?_
+  rw [icmp_iVbigMul hβ1NF hβ2NF]; exact hβdesc
+
+/-- **Slowness C-bound** (`Grz.corAlpha_C_bound` C-split): the clean append splits `C` between the lead
+`ω^(l+1)·β` (`≤ iC β + (l+1)`, `iC_iVbigMul_le`) and the `g`-tail, with no coefficient merge. -/
+lemma icorAlpha_C_le {β g l : V} (hg : g ≠ 0)
+    (hab : iAbove (ocExp g) (iVbigMul β (l + 1))) :
+    iC (icorAlpha β g l) ≤ max (iC β + (l + 1)) (iC g) := by
+  rw [icorAlpha]
+  exact le_trans (iC_iadd_clean hg _ hab) (max_le_max (iC_iVbigMul_le β (l + 1)) le_rfl)
 
 end GoodsteinPA.InternalONote
