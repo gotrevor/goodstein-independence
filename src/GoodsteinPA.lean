@@ -51,3 +51,4 @@ import GoodsteinPA.DescentInternal
 -- into `Statement.lean` (anti-fraud). See `DescentSemantic.lean` docstring + `DESCENT-PLAN.md §5`.
 import GoodsteinPA.DescentSemantic
 import GoodsteinPA.ReductModel
+import GoodsteinPA.XCongruence
