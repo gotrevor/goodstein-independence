@@ -291,6 +291,39 @@ theorem C_betaTail_le {α : ONote} (hα : α.NF) {K n i : ℕ} (hi : i < K)
     omega
   omega
 
+/-! ## Rathjen Thm 3.5 tail-term DESCENT `βᵣ₊₁ < βᵣ`
+
+The other half of Thm 3.5: the constructed sequence strictly descends. Two cases (repr-based, cleaner
+than the syntactic `C`): **within a block** (fixed `αₙ`, the finite part `K-i` shrinks as `r` grows) and
+**across a block boundary** (`ω·αₙ + 1 > ω·αₙ₊₁ + K`, from `αₙ₊₁ < αₙ` since `ω` absorbs the finite `K`). -/
+
+open Ordinal in
+@[simp] theorem repr_omegaO : ONote.repr omegaO = ω := by
+  rw [omegaO, ONote.repr]; simp
+
+open Ordinal in
+/-- **Within-block descent**: a larger finite tail gives a larger value (`ω·α + (p+1) > ω·α + p`). -/
+theorem repr_betaTail_within (α : ONote) (hα : α.NF) (p : ℕ) :
+    (omegaO * α + ONote.ofNat p).repr < (omegaO * α + ONote.ofNat (p + 1)).repr := by
+  haveI := hα
+  haveI : (omegaO * α).NF := ONote.mul_nf omegaO α
+  rw [ONote.repr_add, ONote.repr_add, ONote.repr_ofNat, ONote.repr_ofNat]
+  exact (add_lt_add_iff_left _).2 (show (↑p : Ordinal) < ↑(p + 1) by exact_mod_cast Nat.lt_succ_self p)
+
+open Ordinal in
+/-- **Block-boundary descent**: `ω·αₙ₊₁ + K < ω·αₙ` whenever `αₙ₊₁ ≺ αₙ`. The successor gap
+`αₙ₊₁ + 1 ≤ αₙ` scales to `ω·αₙ₊₁ + ω ≤ ω·αₙ`, and the finite `K < ω` is absorbed. -/
+theorem repr_betaTail_boundary {αNext α : ONote} (hαN : αNext.NF) (hα : α.NF)
+    (hlt : αNext.repr < α.repr) (K : ℕ) :
+    (omegaO * αNext + ONote.ofNat K).repr < (omegaO * α).repr := by
+  haveI := hαN; haveI := hα
+  rw [ONote.repr_add, ONote.repr_mul, ONote.repr_mul, ONote.repr_ofNat, repr_omegaO]
+  -- goal : ω * repr αNext + K < ω * repr α
+  have hsucc : ω * αNext.repr + ω ≤ ω * α.repr := by
+    calc ω * αNext.repr + ω = ω * (Order.succ αNext.repr) := (mul_succ _ _).symm
+      _ ≤ ω * α.repr := mul_le_mul_left' (Order.succ_le_of_lt hlt) _
+  exact lt_of_lt_of_le ((add_lt_add_iff_left _).2 (natCast_lt_omega0 K)) hsucc
+
 /-! ## Rathjen Lemma 3.6 — the special Goodstein run from `T̂²_ω(β₀)` does not terminate
 
 This is the **kernel of E-core** (see `DESCENT-PLAN.md`): from a descending ε₀-sequence with bounded
