@@ -1,5 +1,18 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Lap 38 — INTERNAL-ONOTE SUBSTRATE COMPLETE (read `HANDOFF-2026-06-23-lap38.md`)
+
+`InternalONote.lean` now has the full ε₀-notation arithmetic inside `IΣ₁`, all axiom-clean: codes,
+`iC`, `ievalNat`, `iCanon`, **`icmp`** (CNF comparison), **`isNF`** (well-formedness), and the **crux
+`ievalNat_lt_of_icmp_eq_zero`** (order-reflection, Rathjen 2.3(iii), digit-direct). Remaining road to
+`hbound` (`DescentSemantic.lean:392`), hardest-first:
+1. internal `evalNat_succ_base` (`ievalNat (b+1) c = ibump (b+1) (ievalNat b c)`) — extract the tail
+   bound `ievalNat_tail_lt` from order-reflection's `TB` first; needs `ilog` peel facts.
+2. internal `ineq6_step` (port `DescentCore.ineq6_step` onto codes, uses 1 + order-reflection).
+3. seam/F re-wire to transparent `natCodeT` (route (b); re-`#print axioms` girder after each change).
+4. `βₖ` slow-down (Rathjen Thm 3.5) + assemble `hbound`.
+Aristotle `ibump_mono` COMPLETE in `scratchpad/ibump_x/` (ℕ form), not yet ported to V.
+
 ## ⭐ Reflection — 2026-06-23 (lap 36, deep): NEW DIRECTION — refactor the sentence transparent. Read FIRST.
 
 Full synthesis: `REFLECTION-2026-06-23-lap36.md`. Headline state (real `#print axioms`): girder
