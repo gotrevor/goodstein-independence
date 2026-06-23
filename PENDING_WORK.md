@@ -1,5 +1,31 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Reflection — 2026-06-23 (lap 44, DEEP) — the wall `sorry` is framed on a DEAD path; rewire it FIRST
+
+Full synthesis in `REFLECTION-2026-06-23-lap44.md`. Two findings:
+
+- **(A) `DescentSemantic.no_min_descent_absurd_of_goodstein` (`:574`) routes through the DEAD 𝚺₁ path.**
+  The literal `sorry` lives inside `hCD`, which uses `hbound` (`∃ m₀ b, 𝚺₁-Function₁ b ∧ …`) +
+  `DescentArith.nonterminating_internal`. But the bound `b` is built from the **X-definable** descent, so
+  it is genuinely **X-dependent** ⟹ no 𝚺₁ `b` exists in a general model ⟹ the `hbound` 𝚺₁ shape is
+  **UNACHIEVABLE / FALSE**, not just hard. **Action (next lap, do first):** rewire `hCD` to the in-file
+  **`nonterminating_of_xDescent`** (lap 41, X-essential `lx_succ_induction`). It needs `β : M → M` with
+  `∀k isNF (β k)`, `∀k iCanon (k+1) (β k)`, `∀k icmp (β(k+1)) (β k)=0`, and the LX-definable run comparison
+  `hPdef`. The residual `sorry` then becomes the HONEST "produce `β`" obligation. The 𝚺₁ engine
+  (`nonterminating_internal`/`hbound_of_slowdown`/`nonterminating_of_slowdown` in `DescentSlowdown`) is
+  sorry-free + axiom-clean — KEEP as a banked asset (charter: never delete completed proofs), just stop
+  routing the live wall through it.
+
+- **(B) `Grzegorczyk.lean` collapses Rathjen's length `|·|` (Lemma 3.3(2)/Cor 3.4) onto C.** Self-consistent
+  on paper (`C ≤ |·|`; the absolute `C(βᵣ)≤r+1` is Thm 3.5, built in `DescentCore.C_betaTail_le` via
+  `C_omega_mul_le`) but UNVERIFIED until the ℕ Cor 3.4 assembly (item 1 below) typechecks. If the C-bound
+  won't close, define `len : ONote → ℕ` (the symbol-count `|·|`), prove `C ≤ len`, redo Lemma 3.3(2) on
+  `len`, and bound `C` via `C ≤ len` at the end.
+
+**Status of the run/consumer side (all DONE):** `nonterminating_of_xDescent`, `slowdown_run_facts`,
+`ineq6_step_internal`, `DescentCore` Thm 3.5 reindex + `lemma36_nonterminating`, the unconditional descent
+`descentR`/`descent_iterate_seq_total`. The ONLY remaining content = produce the M-internal `β`.
+
 ## ⭐ Lap 43 — **Rathjen Lemma 3.3 COMPLETE in the ℕ-template** (`Grzegorczyk.lean`, 6 axiom-clean commits, green 1309)
 
 The genuine combinatorial heart of the slow-down wall (Lemma 3.3, the Grzegorczyk `g`) is now fully

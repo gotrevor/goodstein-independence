@@ -3,8 +3,28 @@
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`, via Gentzen/Buchholz ordinal analysis — witness-FREE `Z_∞` (embedding
 [M4 `embedC`, done] + ε₀ cut-elim [M5, done]) + **Boundedness** (Thm 5.4, DONE lap 14, axiom-clean) ⟹
 `𝗣𝗔 ⊬ TI(ε₀)` (= `peano_not_proves_TI`, FULLY axiom-clean — F-φ DISCHARGED lap 28), then
-Goodstein⟹TI(ε₀) [= the E wall].** · **Build**: 🟢 green (1308 jobs, `lake build GoodsteinPA`) ·
-**Updated**: lap 42 (review — `IterPrefix_lxDef` DISCHARGED → descent exists unconditionally; crux now = Rathjen §3 SLOW-DOWN) · 2026-06-23 · `16552e3`
+Goodstein⟹TI(ε₀) [= the E wall].** · **Build**: 🟢 green (1309 jobs, `lake build GoodsteinPA`) ·
+**Updated**: lap 44 (DEEP REFLECTION — wall's literal `sorry` found framed on a DEAD/unachievable 𝚺₁ path; X-essential consumer `nonterminating_of_xDescent` built since lap 41; Rathjen §3 re-grounded vs PDF) · 2026-06-23 · `3310ad9`
+
+## ⭐ Lap-44 (DEEP REFLECTION) — kernel re-verified, slow-down re-grounded; the wall's `sorry` is framed on a DEAD path
+**Direction: KEEP** (Buchholz §5 girder DONE+axiom-clean; E = one semantic wall = Rathjen §3 slow-down in `M`).
+Real `#print axioms` reconfirmed: headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms);
+`peano_not_proves_TI` clean; whole `…_modulo_semantic` chain = trust-base + 1 🟢 native_decide + **1
+`sorryAx`** (the wall). **Two altitude findings the grind laps couldn't see** (`REFLECTION-2026-06-23-lap44.md`):
+- **(A) The literal wall `sorry` (`DescentSemantic.lean:574`) routes through the DEAD 𝚺₁ path** (`hbound` +
+  `DescentArith.nonterminating_internal`, demanding `𝚺₁-Function₁ b`). But `b` is built from the
+  **X-definable** descent, so it is genuinely **X-dependent** ⟹ the `hbound` 𝚺₁ shape is **unachievable
+  (FALSE in general)**, not merely hard. The fix is already in-file: **`nonterminating_of_xDescent`** (lap
+  41, `lx_succ_induction`) reduces the wall to the HONEST obligation *produce the slowed code sequence
+  `β : M → M`* (NF, `iCanon (k+1)`, `icmp`-descent, LX-definable run-comparison). **Highest-value next =
+  rewire the wall to it.**
+- **(B) Transcription caution (Rathjen uses LENGTH `|·|`; repo collapses onto `C`).** Per the PDF: Lemma
+  3.3(2)/Cor 3.4 bound `|g|`/`|αᵢ| ≤ K·(i+1)`; the absolute **`C(βᵣ) ≤ r+1` is a SEPARATE stage (Thm 3.5)**
+  (built faithfully in `DescentCore.C_betaTail_le` via `C_omega_mul_le`). `Grzegorczyk.lean` works with **C
+  throughout** (C-based widths) — self-consistent on paper but the repo's own variant, **UNVERIFIED until
+  the Cor 3.4 assembly typechecks** ⟹ finish the ℕ-template assembly (de-risk) before M-internalizing.
+**Trajectory verdict:** laps 30→43 are genuine forward motion (real, kernel-verified substrate toward the
+one deep wall), NOT circling. Endpoint is a COMPLETE axiom-clean Kirby–Paris — 🟡 project-scale, finishable.
 
 ## ⭐ Lap-42 (REVIEW) — the lap-41 "lone wall" `IterPrefix_lxDef` DISCHARGED; descent sequence is unconditional
 **Done:** `IterPrefix_lxDef` + `minClause_lxDef` (`DescentConstruction.lean`, axiom-clean, green 1308).
@@ -166,7 +186,24 @@ pure mathlib ordinal arithmetic it is **Aristotle-eligible** (the one piece with
 E **pins which `≺` F may use** (co-design). See newest `HANDOFF`.
 
 ## Where it stands
-**(lap-39 review — current read.)** The ordinal-analysis girder is **done and axiom-clean** (real `#print
+**(lap-44 reflection — current read.)** The ordinal-analysis girder is **done and axiom-clean** (real
+`#print axioms peano_not_proves_TI` = trust-base + 1 🟢 native_decide); the headline
+`peano_not_proves_goodstein` is an honest `sorry` (0 math axioms, anti-fraud intact);
+`goodsteinSentence_faithful` is clean. The ENTIRE project reduces to **one obligation** inside
+`no_min_descent_absurd_of_goodstein` (`DescentSemantic.lean`). **Crisp re-statement of that obligation:**
+the consumer side is DONE — `nonterminating_of_xDescent` (X-essential, `lx_succ_induction`),
+`slowdown_run_facts` + `ineq6_step_internal` (internal Lemma 3.6), and `DescentCore` Thm 3.5 reindex
+(`C_betaTail_le`/`repr_betaTail_*`, ℕ) + Lemma 3.6 (`lemma36_nonterminating`, ℕ) all built. **What
+remains is exactly: produce the M-internal X-definable slowed code sequence `β : M → M`** with
+`isNF`/`iCanon (k+1)` (`C(βₖ) ≤ k+1`)/`icmp`-descent + LX-definable run-comparison (`hPdef`), from the
+X-definable descent (`descentR`/`descent_iterate_seq_total`, done). I.e. Rathjen §3 Cor 3.4 + Thm 3.5
+internalized on codes. **⚠ lap-44 finding (A):** the literal `sorry` at `DescentSemantic.lean:574` still
+routes through the **DEAD 𝚺₁ path** (`hbound`+`nonterminating_internal`), whose `𝚺₁-Function₁ b` shape is
+**unachievable** (b is X-dependent) — rewire to `nonterminating_of_xDescent` first (next action). **⚠ (B):**
+`Grzegorczyk.lean` collapses Rathjen's length-`|·|` 3.3/3.4 onto **C** — finish the ℕ Cor 3.4 assembly to
+verify the C-collapse before M-internalizing. See `REFLECTION-2026-06-23-lap44.md`.
+
+**(lap-39 review — historical read.)** The ordinal-analysis girder is **done and axiom-clean** (real `#print
 axioms peano_not_proves_TI` = trust-base + 1 🟢 native_decide); the headline `peano_not_proves_goodstein` is
 an honest `sorry` (0 math axioms, anti-fraud intact); the faithfulness anchor `goodsteinSentence_faithful` is
 axiom-clean. The ENTIRE project now reduces to **one obligation**: `hbound` (`DescentSemantic.lean:416`),
@@ -276,6 +313,17 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-23 (lap 44 — DEEP REFLECTION):** Altitude pass on the stronger model. Re-verified kernel from
+  real `#print axioms` (headline 0 math axioms; `peano_not_proves_TI` clean; chain = trust-base + 🟢
+  native_decide + 1 `sorryAx`); re-grounded Rathjen §3 slow-down against the PDF (subagent). **Direction
+  KEEP.** Two findings (`REFLECTION-2026-06-23-lap44.md`): **(A)** the wall's literal `sorry`
+  (`DescentSemantic.lean:574`) routes through the **dead, unachievable 𝚺₁ path** (`hbound`+
+  `nonterminating_internal`; `b` is X-dependent so `𝚺₁-Function₁ b` is FALSE in general) — the X-essential
+  `nonterminating_of_xDescent` (built lap 41) is the correct consumer, **rewire to it** (reduces the wall to
+  the honest "produce `β : M→M`" obligation). **(B)** `Grzegorczyk.lean` collapses Rathjen's length-`|·|`
+  Lemma 3.3/Cor 3.4 onto **C** (C-based widths) — self-consistent on paper but UNVERIFIED until the ℕ Cor
+  3.4 assembly typechecks; finish it (de-risk) before M-internalizing. Trajectory (30→43) = genuine forward
+  motion, not circling. Build green 1309 jobs; STATUS + ledger refreshed; headline `sorry` intact.
 - **2026-06-23 (lap 39 — review):** Fresh-mind pass. Real `#print axioms` reconfirmed: headline =
   `[propext, sorryAx, choice, Quot.sound]` (0 math axioms), girder `peano_not_proves_TI` clean, faithful
   bridge clean; the lone `sorryAx` traces to `hbound` (`DescentSemantic:416`). Direction **re-validated**:
@@ -485,23 +533,29 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 5.1/5.2/5.3) are **done & axiom-clean** and ARE the two hard pieces. Remaining = Boundedness + the
 Goodstein⟹TI bridge. Priorities (see `ANALYSIS-2026-06-22-lap12-buchholz-pivot.md`):
 
-### Short-term — `hbound` is the LONE wall (laps 37–38: deep substrate COMPLETE)
-The headline bottoms out at `DescentSemantic.no_min_descent_absurd_of_goodstein`, now a single `sorry`
-`hbound` (`:416`) — `hB` discharged lap 36, `hCD` reduced to its sole input `hbound` (the run side
-`DescentArith.nonterminating_internal` is proved). `hbound` = `∃ m₀ b, 𝚺₁-Function₁ b ∧ b 0 ≤ igoodstein m₀ 0
-∧ (∀k, b k ≤ igoodstein m₀ k → b(k+1) ≤ igoodstein m₀ (k+1)) ∧ ∀k, 0<b k`. Decomposition (hardest-first):
-1. ✅ **Internal ε₀-notation substrate — DONE (laps 37–38).** `InternalONote.lean`: `ievalNat` (T̂), `icmp`,
-   `isNF`, `iCanon`, `iC`, and `ievalNat_lt_of_icmp_eq_zero` (Rathjen 2.3(iii) order-reflection) — all
-   sorry-free, axiom-clean, digit-direct.
-2. **Internal `evalNat_succ_base`** `ievalNat (b+1) c = ibump (b+1) (ievalNat b c)` (isNF/iCanon) — structural
-   induction; tail bound from `evalNat_reflect_combined`'s TB (extract `ievalNat_tail_lt`); 3 digit-peel
-   lemmas (`ilog`/`/`/`%` of `n·β^E+tail`); `ibump_pos` in hand. **← current target.**
-3. **Internal `ineq6_step`** — port `DescentCore.ineq6_step` digit-direct onto codes in `M`, consuming
-   order-reflection (1) + (2). This is `hbound`'s `step`.
-4. **Seam/F re-wire to transparent `natCodeT`** (route (b), the risky girder touch) — make `Mlt`/`precφ`
-   decode to `icmp` on codes. Re-`#print axioms peano_not_proves_TI` after EVERY change (must stay clean).
-5. **βₖ slow-down** (Rathjen Thm 3.5) from the descent + `iC` ⟹ assemble `hbound` and feed
-   `DescentArith.nonterminating_internal`. Several laps, fully offline. See `HANDOFF-2026-06-23-lap38.md`.
+### Short-term — produce the M-internal slowed code-descent `β` (lap-44 read; consumer side DONE)
+The headline bottoms out at `DescentSemantic.no_min_descent_absurd_of_goodstein` (`:574`). **What is already
+built (the entire consumer/run side):** `nonterminating_of_xDescent` (X-essential, `lx_succ_induction`),
+`slowdown_run_facts` + `ineq6_step_internal` (internal Lemma 3.6), `DescentCore` Thm 3.5 reindex
+(`C_betaTail_le` via `C_omega_mul_le`, `repr_betaTail_within/_boundary`) + Lemma 3.6
+(`lemma36_nonterminating`), all ℕ; `Grzegorczyk.lean` Lemma 3.3 (complete) + Cor 3.4 bricks; the
+X-definable descent `descentR`/`descent_iterate_seq_total` (unconditional). **The single remaining content
+is: produce `β : M → M` with `isNF`, `iCanon (k+1)` (`C(βₖ) ≤ k+1`), `icmp`-descent, + LX-definable run
+comparison `hPdef`.** Plan (hardest-first):
+1. **Rewire the wall (lap-44 finding A) — first.** Replace the dead 𝚺₁ `hbound` block (`:568–577`,
+   `nonterminating_internal`) with `nonterminating_of_xDescent`; the residual `sorry` becomes the honest
+   "produce `β`" obligation. (Keep `nonterminating_internal`/`hbound_of_slowdown` as banked sorry-free
+   assets — do NOT delete.) Re-`#print axioms` stays `[propext, sorryAx, choice, Quot.sound]`.
+2. **Finish ℕ Cor 3.4 assembly (`Grzegorczyk.lean`) — de-risk the C-collapse (finding B).** Define
+   `α j = ω^(l+1)·βₙ + g l n m` over `widx`/`woff` (widths `W n = C(β(n+1))`), prove descent (`mul_add_lt`
+   across blocks, `g_desc` within) + slowness `C(α j) ≤ K·(j+1)` (`C_add_clean`/`AllExpAbove_bigMul`). If
+   the C-bound won't close, fall back to Rathjen's length `|·|`.
+3. **M-internalize Cor 3.4 + Thm 3.5 reindex onto `InternalONote` codes** ⟹ `β : V → V` (`V ⊧ 𝗜𝚺₁`) with
+   the three structural facts, from the X-definable descent. The deepest layer; the internal Lemma 3.6
+   engine already consumes it.
+4. **Discharge `hPdef`** (LX-definability of `T̂^{k+2}(βₖ) ≤ mₖ` — `β` is X-definable + 𝚺₁ code arithmetic,
+   so LX-definable via the `lxDef_of_reduct`/`lxDef_and`/`MX_lxDef` toolkit), plug `β` into the rewired wall.
+Several laps, fully offline. See `REFLECTION-2026-06-23-lap44.md`, `HANDOFF-2026-06-23-lap43.md`.
 
 **(superseded gate, kept for record) A2 part 2 — Thread `[Structure.Eq LX M]`.** `𝗘𝗤 ⪯ paLX` is proved, so
 `descentE` routes through `Structure.consequence_iff_eq` + `complete` (already done in `descentE`/the wall's
@@ -538,7 +592,7 @@ finite witnesses; no `PA_delta1Definable` on this route). M6 (Hardy) is no longe
 | `peano_not_proves_goodstein` (headline, `Statement.lean`) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` (lap-30 real) | 🔓 open `sorry` (LOCKED, anti-fraud) — now reduced to **ONE semantic lemma** `paLX_models_TI_of_PA_provable` via `descentE`+completeness. **0** real math axioms; the would-be-headline chain (`…_modulo_semantic`) carries only `sorryAx`+native_decide. |
 | `…_modulo_semantic` (lap 30, `src/DescentSemantic`) | the headline, modulo the disclosed semantic `sorry` | `propext, sorryAx, choice, Quot.sound, ONoteComp…native_decide.ax_1_5` (lap-30 real) | 🔓 **= `peano_not_proves_goodstein_of_descent descentE`**. Proves the FULL chain is axiom-clean save `sorryAx` (one lemma) + 1 🟢 `native_decide` — **no `PA_delta1Definable`, no custom axiom**. NOT wired to `Statement.lean`. |
 | `descentE` (lap 30, `src/DescentSemantic`) | `Thm56.DescentE` (`𝗣𝗔⊢γ ⟹ Derivation2 paLX {TI prec}`) | `propext, sorryAx, choice, Quot.sound, native_decide.ax_1_5` | 🔓 **via FO completeness** (`Derivation.completeness_of_encodable`) — reduces `DescentE` to the one semantic premise `paLX_models_TI_of_PA_provable`. Built `LX.Encodable`. |
-| `no_min_descent_absurd_of_goodstein` (laps 30–38, `src/DescentSemantic`, **THE wall**) | Rathjen §3 in-model: `no_min` + Goodstein-in-`M` ⟹ ⊥ | `sorryAx` (disclosed, **1** sub-`sorry`: `hbound`@416) | 🔴→🎯 the **single open obligation**. `hB` **DISCHARGED lap 36**; `hCD` reduced to its sole input `hbound` (∃ `m₀,b` with `𝚺₁`-def, `base`/`step`/`hpos` — the run side `DescentArith.nonterminating_internal` is proved/baked-in). Laps 37–38 built the deep substrate (`InternalONote`: `ievalNat`/`icmp`/`isNF`/`iCanon`/order-reflection, all axiom-clean) that `hbound`'s `step` (internal `ineq6_step`) consumes. Remaining: internal `evalNat_succ_base` → `ineq6_step` → seam rewire → βₖ slow-down. |
+| `no_min_descent_absurd_of_goodstein` (laps 30–44, `src/DescentSemantic`, **THE wall**) | Rathjen §3 in-model: `no_min` + Goodstein-in-`M` ⟹ ⊥ | `sorryAx` (disclosed, **1** sub-`sorry`: `:574`) | 🎯 the **single open obligation** (🟡 project-scale formalization, not 🟠). `hB` **DISCHARGED lap 36**. ⚠ **lap-44:** the literal `:574` `sorry` still routes through the **DEAD 𝚺₁ path** (`hbound`+`nonterminating_internal`, `𝚺₁-Function₁ b`) which is **unachievable** (`b` X-dependent). Correct consumer **`nonterminating_of_xDescent` is built (lap 41)** — rewire to it. Remaining content = **produce the M-internal slowed code-descent `β`** (Rathjen Cor 3.4 + Thm 3.5 on `InternalONote` codes); the run side (`slowdown_run_facts`/`ineq6_step_internal`/`lemma36_nonterminating`/Thm 3.5 reindex) is DONE. |
 | `paLX_models_TI_of_PA_provable` (lap 30, `src/DescentSemantic`) | Rathjen §3 in-model: `𝗣𝗔⊢γ ⟹ ∀ M⊧paLX, M⊧TI prec` | `sorryAx` (via the wall) | 🟢 PROVED modulo the one named `sorry` above — steps 1–2 + progressivity-contrapositive machine-checked; bottoms out at `no_min_descent_absurd_of_goodstein`. |
 | `eqLX_subset_paLX` / `eqAxiom_weakerThan_paLX` (lap 32, `src/DescentLift`) | `𝗘𝗤(LX) ⊆ paLX`, hence `𝗘𝗤 ⪯ paLX` | `propext, choice, Quot.sound` | 🟢 clean — every `𝗘𝗤(LX)` axiom is an `lMap Φ`-image of a `𝗣𝗔⁻` axiom or `relExt Xsym`; gives models of `paLX` genuine equality (enables the A2-pt2 `consequence_iff_eq` route). |
 | `peano_not_proves_TI` (Thm 5.6, lap 21, **F-φ DISCHARGED lap 28**, `src/Thm56`) | Gentzen 1943: `𝗣𝗔 ⊬ TI_≺(X)` | `propext, choice, Quot.sound, ONoteComp…native_decide.ax_1_5` (lap-30 real) | 🟢 **CLEAN** — full §5 chain C₂→C₁→D→F + D'; F-φ now a theorem (`ONoteComp`). Only 1 🟢 `native_decide` finite artifact. No `sorryAx`, no math axiom. |
