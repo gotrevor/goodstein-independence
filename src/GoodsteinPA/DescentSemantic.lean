@@ -119,6 +119,58 @@ theorem evalfm_TI_unfold {M : Type} [Nonempty M] [Structure LX M] (f : ℕ → M
     Semiterm.val_bvar, Matrix.cons_val_zero]
   rfl
 
+/-! ### Tool for wall D — `LX`-induction inside a model of `paLX`
+
+The descent bound `b k = T̂^{k+2}(βₖ)` is `X`-definable (`βₖ` is extracted from the `X`-descent), so the
+non-termination induction (wall D) runs over an `LX`-formula, **not** an `ℒₒᵣ`-`𝚺₁` one — Foundation's
+`Arithmetic.InductionScheme.succ_induction` (ℒₒᵣ-only) does not reach it. These two lemmas supply the
+`X`-essential induction from `M ⊧ paLX ⊇ InductionScheme LX Set.univ`. Axiom-clean. -/
+
+/-- `paLX = (lMap Φ 𝗣𝗔⁻ + InductionScheme LX univ) + {relExt Xsym}` (lap-32 3-summand), so a model of
+`paLX` models `InductionScheme LX Set.univ`. -/
+theorem models_inductionScheme_LX {M : Type} [Nonempty M] [Structure LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) :
+    M ⊧ₘ* (Arithmetic.InductionScheme LX Set.univ : Theory LX) :=
+  ModelsTheory.of_ss hM (fun _ hψ => Or.inl (Or.inr hψ))
+
+/-- **`LX`-succ-induction in a model of `paLX`** (the `X`-essential analog of
+`Arithmetic.InductionScheme.succ_induction`, which is `ℒₒᵣ`-only). Any predicate `P` on `M` definable by
+an `LX`-formula (`hP`) admits ordinary `0`/`+1` induction over `M`'s ring operations read off its
+`LX`-reduct (`ReductModel.reductORing`). This is the induction wall D's `X`-definable descent bound runs
+on. Proof: `M ⊧ InductionScheme LX univ` gives `M ⊧ univCl (succInd φ)`; unfold to `0`/`+1` induction over
+`LX`-eval, matching `reductORing`'s ops via the `Structure.Zero/One/Add LX M` read-offs. -/
+theorem lx_succ_induction {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq LX M]
+    (hM : M ⊧ₘ* (paLX : Theory LX)) {P : M → Prop}
+    (hP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, P x ↔ Semiformula.Evalm M ![x] e φ) :
+    letI : ORingStructure M := ReductModel.reductORing
+    P 0 → (∀ x, P x → P (x + 1)) → ∀ x, P x := by
+  letI oM : ORingStructure M := ReductModel.reductORing
+  haveI hSZ : Structure.Zero LX M :=
+    ⟨by simp [Semiterm.Operator.val, Semiterm.Operator.Zero.term_eq]; rfl⟩
+  haveI hSO : Structure.One LX M :=
+    ⟨by simp [Semiterm.Operator.val, Semiterm.Operator.One.term_eq]; rfl⟩
+  haveI hSA : Structure.Add LX M :=
+    ⟨fun a b => by simp [Semiterm.Operator.val, Semiterm.Operator.Add.term_eq, Semiterm.val_func,
+        Matrix.fun_eq_vec_two]; rfl⟩
+  haveI hind : M ⊧ₘ* (Arithmetic.InductionScheme LX Set.univ : Theory LX) := models_inductionScheme_LX hM
+  rcases hP with ⟨e, φ, hPφ⟩
+  intro hzero hsucc
+  have hsucc' : M ⊧ₘ (.univCl (Arithmetic.succInd φ) : Sentence LX) :=
+    ModelsTheory.models (T := Arithmetic.InductionScheme LX Set.univ) M ⟨φ, trivial, rfl⟩
+  have key : ∀ x, Semiformula.Evalm M ![x] e φ := by
+    have h := hsucc'
+    simp only [models_iff, Semiformula.eval_univCl, Arithmetic.succInd,
+      LogicalConnective.HomClass.map_imply, Semiformula.eval_all, Semiformula.eval_substs,
+      Matrix.constant_eq_singleton, Semiterm.val_operator₂, Semiterm.val_bvar,
+      Matrix.cons_val_fin_one, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
+      ORingStructure.one_eq_one, Structure.Add.add, Function.const_apply, Matrix.cons_val_zero] at h
+    refine h e ?_ ?_
+    · exact (hPφ 0).mp hzero
+    · intro x hx
+      exact (hPφ (x + 1)).mp (hsucc x ((hPφ x).mpr hx))
+  intro x
+  exact (hPφ x).mpr (key x)
+
 /-! ### Step 3 — the genuine remaining obligation (Rathjen §3 in `M`), as ONE named `sorry` -/
 
 /-- **The lone remaining wall: a non-`MX`-minimal seed yields a contradiction with Goodstein-in-`M`
