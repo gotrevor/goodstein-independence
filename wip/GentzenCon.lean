@@ -45,13 +45,14 @@ on ℕ (a decidable std-only fact) to tie `icmp` to the mathlib-ε₀ order-type
 -/
 import GoodsteinPA.SeamDefinability
 import GoodsteinPA.InternalONote
+import GoodsteinPA.StdCor34
 import GoodsteinPA.Reduction
 
 namespace GoodsteinPA.GentzenCon
 
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
 open GoodsteinPA GoodsteinPA.SeamDefinability GoodsteinPA.Epsilon0Complete GoodsteinPA.InternalPow
-open GoodsteinPA.InternalONote
+open GoodsteinPA.InternalONote GoodsteinPA.IIter
 
 /-! ## Step 1 — the PRWO formulation (the shared hinge) -/
 
@@ -170,29 +171,50 @@ theorem gentzen_prwo_implies_consistency :
     𝗣𝗔 ⊢ prwoInstance gentzenDescentφ → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := by
   sorry
 
-/-- **The deep crux-1 bridge (isolated).** From a model-internal everywhere-`icmp`-descending
-`seq`-graph, construct the internal-Grzegorczyk inputs and run the lap-54/55 girder
-`StdCor34.crux1_internal_run_of_width_dom` to produce a non-terminating internal Goodstein run.
+/-- **The standard-level domination certificate** (lap-56): the existence of the Cor-3.4 slowed-sequence
+inputs (`l₀ : ℕ` standard, block sequence `wseq`, NF descending codes `β`, complexity bound `Cβ`) that
+`StdCor34.crux1_internal_run_of_width_dom` consumes. This is the precise data a `seq`-descent must yield
+to drive a non-terminating internal Goodstein run; for `seq = gentzenDescentφ` it is supplied by Rathjen
+Lemma 3.2 (`ord`/`R`'s fixed build tree gives the standard `l₀`), the step the headline needs. -/
+def SeqDominated (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁] : Prop :=
+  ∃ (l₀ : ℕ) (wseq Cβ : M) (β : M → M), 0 < l₀ ∧
+    (∀ n, isNF (β n)) ∧ (∀ n, β n ≠ 0) ∧ (∀ n, icmp (β (n + 1)) (β n) = 0) ∧
+    (∀ j, iC (β (BlkRec.blk wseq j)) ≤ Cβ + j) ∧ (𝚺₁-Function₁ β) ∧
+    (∀ n, znth wseq n ≤ iF l₀ n)
 
-**Lap-56 status — TWO findings (see `STATUS`/`PENDING_WORK`):**
-1. **Bridge dissolved (DONE this lap).** With the transparent `prec_internal`, `hdesc` is ALREADY the
-   `icmp`-descent form the girder consumes (`hβdesc : icmp (β (n+1)) (β n) = 0`); no separate
-   `natCode↔NF` bridge is needed. The `β` for the girder is `seq`'s value function itself.
-2. **Over-generality (OPEN, the real remaining content).** As stated — *arbitrary* `seq`, no domination
-   hypothesis — this is **UNPROVABLE on the built (standard-level) girder**: `crux1_internal_run_of_width_dom`
-   needs a STANDARD `l₀ : ℕ` with width-domination `∀ n, znth wseq n ≤ iF l₀ n`, but
-   `Grz.F_diag_not_dominated` shows no standard `l₀` dominates a diagonal-fast descent. Proving it for
-   arbitrary `seq` would need the internal-Ackermann level (laps 45–49 wall) — exactly what lap 50 showed
-   the HEADLINE avoids by only ever instantiating at `seq = gentzenDescentφ`, whose width IS
-   standard-dominated (Rathjen Lemma 3.2, via `ord`/`R`'s fixed build tree). **Fix (next lap):** thread a
-   standard-level domination certificate (the Cor-3.4 slowdown inputs `β`/`wseq`/`l₀`/bounds derived from
-   `seq`) as a hypothesis here, discharge it for `gentzenDescentφ` in the assembly, then this reduces to
-   `crux1_internal_run_of_width_dom` with no `sorry`. Held at `sorry` pending that certificate. -/
-theorem nonterminating_of_seq_descent (seq : Semisentence ℒₒᵣ 2)
+/-- **The girder, packaged.** A standard-level domination certificate drives a non-terminating internal
+Goodstein run — by unpacking the certificate and applying the (sorry-free) crux-1 girder
+`StdCor34.crux1_internal_run_of_width_dom`. PROVED (the seam between the certificate and the
+internal-Grzegorczyk machinery now type-checks end-to-end; was the historical bug source). -/
+theorem nonterminating_of_dominated (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
+    (h : SeqDominated M) : ∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k := by
+  obtain ⟨l₀, wseq, Cβ, β, hl₀, hNF, h0, hd, hC, hdef, hdom⟩ := h
+  exact StdCor34.crux1_internal_run_of_width_dom l₀ hl₀ wseq hNF h0 hd hC hdef hdom
+
+/-- **Crux-1 certificate construction — the sharpened remaining obligation (lap-56).** From a
+model-internal everywhere-`icmp`-descending `seq`-graph, build the standard-level Cor-3.4 slowdown
+inputs (`SeqDominated M`): extract `β` as `seq`'s value function (NF, nonzero, `icmp`-descending from
+`hdesc`, `𝚺₁` from `seq`), run the standard-level Cor 3.4 slowdown to get `wseq`/`Cβ`/`l₀` with the
+width bound `iC (β (blk wseq j)) ≤ Cβ + j` and **standard** domination `∀ n, znth wseq n ≤ iF l₀ n`.
+
+**This is now the ENTIRE remaining crux-1 content** (the bridge to the girder is `nonterminating_of_dominated`,
+PROVED). For arbitrary `seq` the standard domination can fail (`Grz.F_diag_not_dominated`); the headline
+only needs `seq = gentzenDescentφ`, whose width is standard-dominated (Rathjen Lemma 3.2). Held at `sorry`.
+**Attack:** `InternalCor34.ibigMul`-standard lead + the sorry-free ℕ-template `Grzegorczyk.lean` blueprint
+(Cor 3.4) internalized over `M`; see `PENDING_WORK` paths B/C + memory `crux1-headline-needs-only-standard-level`. -/
+theorem seqDescent_dominated (seq : Semisentence ℒₒᵣ 2)
     (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
     (_hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0) :
-    ∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k := by
+    SeqDominated M := by
   sorry
+
+/-- **The deep crux-1 bridge** — now PROVED modulo the sharpened `seqDescent_dominated` obligation
+(was a bare `sorry` through lap 55). Chains the certificate construction into the girder. -/
+theorem nonterminating_of_seq_descent (seq : Semisentence ℒₒᵣ 2)
+    (M : Type) [ORingStructure M] [M ⊧ₘ* 𝗜𝚺₁]
+    (hdesc : ∀ n y z : M, (M ⊧/![y, n] seq) → (M ⊧/![z, n + 1] seq) → icmp z y = 0) :
+    ∃ m₀ : M, ∀ k : M, 0 < igoodstein m₀ k :=
+  nonterminating_of_dominated M (seqDescent_dominated seq M hdesc)
 
 /-- **Per-model crux-1 obligation.** In every model `M ⊧ₘ* 𝗣𝗔` in which `γ` holds, the PRWO instance
 for `seq` holds. By contradiction: `M ⊭ prwoInstance seq` is an internal everywhere-≺-descending

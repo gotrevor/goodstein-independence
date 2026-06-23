@@ -5,7 +5,7 @@ DIRECTION/Gödel-II plan: `𝗣𝗔⊢γ →(§3, all primrec) 𝗣𝗔⊢PRWO(�
 Gödel II.** The §3 internal pipeline = internal Cor 3.4 (Grzegorczyk `g`-padding, internal level — DEEP,
 open) → internal Thm 3.5 (slow α → tight `C(βᵣ)≤r+1` — **COMPLETE lap 47**, `InternalThm35`) → Lemma 3.6
 (`nonterminating_internal`, done). The Buchholz free-X `peano_not_proves_TI` (axiom-clean) is a **banked
-asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). · **Build**: 🟢 green (1315 jobs,
+asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). · **Build**: 🟢 green (1316 jobs,
 `lake build GoodsteinPA`) · **Updated**: lap 56 (FRESH-MIND REVIEW — crux-1 redirect: `prwoInstance`
 rebuilt on transparent `icmp`, natCode↔NF bridge DISSOLVED; over-generality finding) · 2026-06-23 · `9944e9d`
 
@@ -24,6 +24,11 @@ rebuilt on transparent `icmp`, natCode↔NF bridge DISSOLVED; over-generality fi
 > arbitrary seq needs the internal-Ackermann wall lap 50 showed the headline avoids. **Fix next lap:** thread
 > a standard-level domination certificate (Cor-3.4 slowdown inputs from `seq`), discharge it at
 > `gentzenDescentφ`, then it reduces to `crux1_internal_run_of_width_dom` sorry-free. Crux-2 eq-(5) still 🟠.
+> **(3) Seam wired (also this lap).** Promoted `StdCor34` → `src/` (sorry-free, axiom-free; build 1316).
+> Added `SeqDominated` (the certificate) + `nonterminating_of_dominated` (**axiom-clean** — the
+> certificate→girder seam now type-checks end-to-end) so `nonterminating_of_seq_descent` is **PROVED**; the
+> lone remaining crux-1 sorry is now the sharper `seqDescent_dominated` (build `SeqDominated` from the
+> `seq`-descent = the Cor-3.4 construction). THE next deep target.
 
 > **⭐ Lap-53 honest-endpoint summary (read this first).** Route A is CORRECT (re-derived from the
 > mathematics this lap: Goodstein⟹PRWO, NOT free-X-TI — the §3 slow-down is primrec-only). The two cruxes

@@ -52,6 +52,10 @@ import GoodsteinPA.InternalIg
 import GoodsteinPA.InternalThm35
 import GoodsteinPA.InternalGoodstein
 import GoodsteinPA.DescentSlowdown
+-- Crux-1 STANDARD-level internal Cor 3.4 global assembly (promoted lap 56; sorry-free, axiom-free,
+-- conditional over the Cor-3.4 inputs). Supplies `crux1_internal_run_of_width_dom`, consumed by the
+-- (wip) crux-1 bridge in `wip/GentzenCon.lean`. Not yet wired to the headline.
+import GoodsteinPA.StdCor34
 import GoodsteinPA.InternalBridge
 import GoodsteinPA.DescentInternal
 
