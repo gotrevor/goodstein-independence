@@ -131,12 +131,33 @@ theorem gentzen_prwo_implies_consistency :
     𝗣𝗔 ⊢ prwoInstance gentzenDescentφ → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := by
   sorry
 
-/-- **Crux 1 — Rathjen §3: `γ → PRWO(ε₀)` (every primrec instance).** From `𝗣𝗔 ⊢ γ`, `𝗣𝗔` proves the
-PRWO instance for any primrec descent graph (the internal Cor 3.4 slow-down → Thm 3.5 → Lemma 3.6
-pipeline; `InternalThm35` done, internal Cor 3.4 = the internal-Grzegorczyk crux). Held at `sorry`. -/
+/-- **Per-model crux-1 obligation (the deep content, isolated).** In every model `M ⊧ₘ* 𝗣𝗔` in which
+`γ` holds, the PRWO instance for `seq` holds. By contradiction: `M ⊭ prwoInstance seq` unfolds to an
+internal everywhere-≺-descending `seq`-graph; from it one constructs the NF descending `β` plus a
+standard-`l₀` width-domination and feeds `StdCor34.crux1_internal_run_of_width_dom`, producing an
+internal non-terminating Goodstein run — i.e. `M ⊭ γ`, contradiction. The whole internal-Grzegorczyk
+girder (`igtTot → salpha → bbeta → Lemma 3.6`) is built and axiom-clean (lap 54–55); what remains here
+is the *descent → (β, width-domination)* construction, which for the headline is needed only at the
+concrete `seq = gentzenDescentφ` (standard-`l₀` dominated by Rathjen Lemma 3.2, see
+`crux1-headline-needs-only-standard-level`). Held at `sorry`. -/
+theorem prwoInstance_models_of_goodstein (seq : Semisentence ℒₒᵣ 2)
+    (M : Type) [Nonempty M] [Structure ℒₒᵣ M] [M ⊧ₘ* 𝗣𝗔] (_hγ : M ⊧ₘ goodsteinSentence) :
+    M ⊧ₘ prwoInstance seq := by
+  sorry
+
+/-- **Crux 1 — Rathjen §3: `γ → PRWO(ε₀)` (every primrec instance), model-theoretic route.** From
+`𝗣𝗔 ⊢ γ` (soundness) `γ` holds in every model of `𝗣𝗔`; the per-model obligation
+`prwoInstance_models_of_goodstein` then gives `prwoInstance seq` in every model, whence (Foundation's
+first-order completeness `complete_iff`) `𝗣𝗔 ⊢ prwoInstance seq`. This skeleton ungates crux 1 from any
+`ord`/`R` arithmetization — the deep content is concentrated in `prwoInstance_models_of_goodstein`. -/
 theorem goodstein_implies_prwo (seq : Semisentence ℒₒᵣ 2) :
     𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ prwoInstance seq := by
-  sorry
+  intro hγ
+  have hγ_sem : 𝗣𝗔 ⊨ ↑goodsteinSentence := sound! hγ
+  refine complete_iff.mp (consequence_iff'.mpr ?_)
+  intro M _ _ _
+  have hγM : M ⊧ₘ goodsteinSentence := consequence_iff'.mp hγ_sem M
+  exact prwoInstance_models_of_goodstein seq M hγM
 
 /-- **The assembly.** Crux 1 (at the Gentzen-descent instance) ∘ crux 2 = exactly the girder
 `Reduction.goodstein_implies_consistency`. This `wip` theorem REFINES that single `sorry` into the
