@@ -4203,4 +4203,87 @@ lemma iRedDescent_zAxReduct_iR2_of_tp_isymLk {d k A : V} (htp : tp d = isymLk k 
   · rw [iR2_zAxAll]; exact iRedDescent_zAxReduct_zAxAll hp
   · rw [iR2_zAxNeg]; exact iRedDescent_zAxReduct_zAxNeg hp
 
+/-! ### The tag-4 (K-rule) descent, conditional on chain validity
+
+`iord_descent_iR2_struct` covers I-rules/Ind (tags 1,2,3) unconditionally. The K-rule (tag 4) descent
+needs the Buchholz side conditions of a *valid* `K^r` inference — packaged here as `zKValid` — which
+the bare `ZPhi` `zK` disjunct (just `Seq ds ∧ ∀ i, premise ∈ ZDerivation`) does NOT yet carry. This
+lemma proves the tag-4 descent CONDITIONALLY on `zKValid`; wiring `zKValid` into the `ZPhi` `zK`
+disjunct (the Σ₁/Δ₁ Fixpoint cascade) is the next phase, after which the tag-4 case of
+`iord_descent_iR2_struct` falls out by feeding `zDerivation_zK_inv` + this lemma. -/
+
+/-- **Validity of a `K^r` chain inference** (Buchholz Def p.8 + Lemma 3.3) — exactly the deferred
+hypotheses `iord_descent_iRcrit_of_chain'` consumes beyond the premises being `ZDerivation`s:
+`isChainInf` (the chain-structure data `j0`/`A_{j0}`/threading/rank), the per-premise permissibility
+`tp(dᵢ) ◁ Γᵢ→Aᵢ` and criticality `tp(dᵢ) ⋪ Π`, and formula-hood of each premise's principal formula
+(which feeds `tp_isymR_pos`/`tp_isymLk_pos` to discharge the `hwfR`/`hwfL` rank conditions). -/
+def zKValid (s r ds : V) : Prop :=
+  isChainInf s r ds ∧
+  (∀ i < lh ds, iperm (tp (znth ds i)) (fstIdx (znth ds i))) ∧
+  (∀ i < lh ds, ¬ iperm (tp (znth ds i)) s) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 1 → IsUFormula ℒₒᵣ (zIallF (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 2 → IsUFormula ℒₒᵣ (zInegF (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 5 → IsUFormula ℒₒᵣ (zAxAllF (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 6 → IsUFormula ℒₒᵣ (zAxNegF (znth ds i)))
+
+/-- **THE K-case descent (tag 4), conditional on chain validity.** For a valid `K^r` chain `zK s r ds`
+whose premises are all `ZDerivation`s, the recursive reduct `iR2` strictly lowers the ordinal:
+`o(iR2 (zK s r ds)) ≺ o(zK s r ds)`. Assembled by feeding `iord_descent_iRcrit_of_chain'` at
+`Tr := False`, `Fa := (· = ⊥)`: the chain-structure data comes from `isChainInf`, the `hwfR`/`hwfL`
+rank conditions from `tp_isymR_pos`/`tp_isymLk_pos` + `zKValid`'s formula-hood, and the six redex
+`ρ`-facts (`ρ = zAxReduct ∘ iR2`) from `redexPair_tp` (reading the redex premises' `tp` off the
+finder's least-pair) + the i/j-side wrap helpers. -/
+lemma iord_descent_iR2_zK_of_valid {s r ds : V} (hds : Seq ds)
+    (hmem : ∀ i < lh ds, ZDerivation (znth ds i)) (hvalid : zKValid s r ds) :
+    icmp (iord (iR2 (zK s r ds))) (iord (zK s r ds)) = 0 := by
+  obtain ⟨hci, hperm0, hnperm0, hf1, hf2, hf5, hf6⟩ := hvalid
+  obtain ⟨j0, hj0, hAj0, hchain, hrank⟩ := hci
+  -- Tr/Fa = the ⊥-instances; the well-formedness obligations discharge as in `..._of_chain_tp`.
+  have hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ False :=
+    fun i hi A h => Or.inl (tp_isymR_pos h (hf1 i (lt_of_le_of_lt hi hj0))
+      (hf2 i (lt_of_le_of_lt hi hj0)))
+  have hwfL : ∀ i ≤ j0, ∀ k A, tp (znth ds i) = isymLk k A → 0 < irk A ∨ (A = (^⊥ : V)) :=
+    fun i hi k A h => Or.inl (tp_isymLk_pos h (hf5 i (lt_of_le_of_lt hi hj0))
+      (hf6 i (lt_of_le_of_lt hi hj0)))
+  have hperm : ∀ i ≤ j0, iperm (tp (znth ds i)) (fstIdx (znth ds i)) :=
+    fun i hi => hperm0 i (lt_of_le_of_lt hi hj0)
+  have hnperm : ∀ i ≤ j0, ¬ iperm (tp (znth ds i)) s :=
+    fun i hi => hnperm0 i (lt_of_le_of_lt hi hj0)
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun i hi => isNF_iotil_of_ZDerivation _ (hmem i hi))
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := by
+    intro n
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  -- Run the finder to certify a redex exists, then read off the least-pair's premise `tp`s.
+  obtain ⟨i0, j1, k0, hij, hjle, hRi, hLj, hrkpos, hrkr⟩ :=
+    inference_critical_pair_of_chain (Tr := fun _ => False) (Fa := fun A => A = (^⊥ : V))
+      hj0 hAj0 hchain hrank hwfR hwfL hperm hnperm (fun _ h => h.1)
+      (fun A h => by rw [h]; exact irk_falsum) rfl
+  have hjlt : j1 < lh ds := lt_of_le_of_lt hjle hj0
+  have hilt : i0 < lh ds := lt_trans hij hjlt
+  have hredex : isRedexPair ds (⟪i0, j1⟫ : V) := by
+    simp only [isRedexPair, pi₁_pair, pi₂_pair]
+    refine ⟨hij, hjlt, ?_, ?_, ?_⟩
+    · rw [hRi]; simp [isymR]
+    · rw [hLj]; simp [isymLk]
+    · rw [hRi, hLj]; simp [isymR, isymLk]
+  have hex : ∃ c < (⟪lh (zKseq (zK s r ds)), lh (zKseq (zK s r ds))⟫ : V),
+      isRedexPair (zKseq (zK s r ds)) c := by
+    simp only [zKseq_zK]; exact ⟨⟪i0, j1⟫, pair_lt_pair hilt hjlt, hredex⟩
+  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
+  simp only [zKseq_zK] at hrc
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hrc.1 hrc.2.1
+  have hJlt : redexJ (zK s r ds) < lh ds := hrc.2.1
+  obtain ⟨hRedI, hRedJ⟩ := redexPair_tp hrc
+  -- The two redex-side `iRedDescent` bundles for `ρ = zAxReduct ∘ iR2`.
+  have hbI := iRedDescent_zAxReduct_iR2_of_tp_isymR hRedI (hmem _ hIlt)
+  have hbJ := iRedDescent_zAxReduct_iR2_of_tp_isymLk hRedJ (hmem _ hJlt)
+  rw [iR2_zK_eq_iRcrit]
+  exact iord_descent_iRcrit_of_chain' (Tr := fun _ => False) (Fa := fun A => A = (^⊥ : V))
+    hds hnf hj0 hAj0 hchain hrank hwfR hwfL hperm hnperm (fun _ h => h.1)
+    (fun A h => by rw [h]; exact irk_falsum) rfl hNF
+    hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
+
 end GoodsteinPA.InternalZ
