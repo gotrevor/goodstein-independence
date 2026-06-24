@@ -33,6 +33,37 @@ induction-scheme Δ₁-definability). Independent of crux 2, mandatory for axiom
 **Deferred (after RedSound):** the C0.5 Foundation→Z bridge (`¬Con(PA)` ⟹ a Z ⊥-derivation); blueprint
 = Bryce–Goré `Peano.v` 3-layer shape in `archive/findings/ON-LINE-FINDINGS-2026-06-24-bryce-gore-gentzen.md`.
 
+## ⭐⭐⭐ Lap 74 (grind) — WELL-FORMEDNESS GAP (B) CLOSED + Δ₁-motive finding for `ZDerivation_zsubst`
+
+**Landed (green 1323, axiom-clean):** the lap-73 blocker (B) is discharged. Strengthened all three
+I-rule `…Wff` predicates with principal-formula formula-hood, via the lap-71 cascade recipe (body +
+`…WffDef` σ/π + `_defined` simp; the `isUFormula`/`isSemiformula` splice auto-discharges under
+`HierarchySymbol.Semiformula.val_sigma`, no extra `.iff` needed — confirmed by `zKValid` + Foundation's
+`IsFormulaSet` precedents):
+- `zInegWff p d0` += `IsUFormula ℒₒᵣ p` (σ: `!(isUFormula ℒₒᵣ).sigma p`).
+- `zIallWff s a p d0` += `IsSemiformula ℒₒᵣ 1 p` (σ: `!(isSemiformula ℒₒᵣ).sigma 1 p`).
+- `zIndWff d` += `IsSemiformula ℒₒᵣ 1 (zIndP d)` (same, on the bound matrix var `p` already in scope).
+The strengthened inversions (`zDerivation_zIneg_inv`/`_zIall_inv`/`_zInd_inv`) now surface this for free;
+no construction site existed, so zero ZPhi-cascade churn. These feed `fvSubst_inegF` (`IsUFormula`),
+`fvSubst_all` (`IsUFormula` via `.isUFormula`), `fvSubst_substs1_fvar` (`IsSemiformula 1`).
+
+**⚠ KEY FINDING for `ZDerivation_zsubst` (the motive must NOT carry unbounded ∀a/∀t).** The naive motive
+`P d := ∀ a, d ≤ a → ∀ t, IsSemiterm 0 t → ZDerivation (zsubst d a t)` is **Π₁, not Δ₁** — so it fails
+`zDerivation_induction`'s `𝚫₁-Predicate P` requirement. **FIX: fix `a t` OUTSIDE the induction.** State
+```
+theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
+    ∀ d, ZDerivation d → d ≤ a → ZDerivation (zsubst d a t)
+```
+with motive `P d := d ≤ a → ZDerivation (zsubst d a t)` — now Δ₁ (`d ≤ a` Δ₀ + `ZDerivation` Δ₁ ∘ `zsubst`
+Σ₁-function, params `a t` fixed). IH threads: child `d0 < d ≤ a ⟹ d0 ≤ a`; eigenvar `e < d ≤ a ⟹ e ≠ a`
+(zIall: `a_lt_zIall`; zInd: `e = π₁ at' ≤ at' < zInd` via `pi₁_le_self`+`at_lt_zInd`) discharges
+`fvSubst_substs1_fvar`'s `a'≠a`. Build per case via `zDerivation_iff.mpr` 7-tag (mirror
+`isNF_iotil_of_ZDerivation`'s rcases at `InternalZ.lean:3792`). Definability of `P`: `ZDerivation`'s
+fixpoint-definable instance ∘ `zsubst_definable` + `≤`/`→` combinators (try `definability`).
+zK case = the hard one (per-premise IH via `znth_zsubstTable_eq_zsubst` + `zKValid` transfer under subst,
+needs `tp`/`iperm` subst-invariance — CHECK). Caveat (lap 73): rung 2's `zsubst d1 at' j` may need a true
+`a∉eigenvars(d)` predicate, not just `d ≤ a` — prove the `d ≤ a` version first.
+
 ## ⭐⭐⭐ Lap 73 — RUNG 1 STEP 1 DONE + STEP 2 SUBSTRATE COMPLETE (`fstIdx_zsubst`, full subst-commutation)
 
 **Landed (green 1323, all axiom-clean `[propext, Classical.choice, Quot.sound]`):**

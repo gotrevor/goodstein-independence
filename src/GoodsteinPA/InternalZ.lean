@@ -1259,10 +1259,11 @@ are wired as conjuncts into the corresponding `ZPhi` disjunct so `ZDerivation` c
 validity-preserving reduct reads them off by inversion. They need only already-`𝚫₁` pieces
 (`fstIdx`/`seqAnt`/`seqSucc` projections, `^⊥`, `inAnt`, and — for I∀/Ind — the `𝚺₁` `substs1`). -/
 
-/-- **¬-introduction premise sequent**: `d0 ⊢ A,Γ→⊥` — succedent `⊥`, and the negated formula `A = p` in
-its antecedent. No substitution (Buchholz 14.23 reduct `d[0] := d0`). -/
+/-- **¬-introduction premise sequent**: `d0 ⊢ A,Γ→⊥` — succedent `⊥`, the negated formula `A = p` in
+its antecedent, and `p`'s formula-hood `IsUFormula ℒₒᵣ p` (lap 74: the `ZDerivation_zsubst`
+commutation `fvSubst_inegF` consumes it). No substitution (Buchholz 14.23 reduct `d[0] := d0`). -/
 def zInegWff (p d0 : V) : Prop :=
-  seqSucc (fstIdx d0) = (^⊥ : V) ∧ inAnt p (seqAnt (fstIdx d0))
+  seqSucc (fstIdx d0) = (^⊥ : V) ∧ inAnt p (seqAnt (fstIdx d0)) ∧ IsUFormula ℒₒᵣ p
 
 /-- **`𝚫₁`-definability of `zInegWff`** (all pieces `𝚺₀`: `fstIdx`/`seqSucc`/`seqAnt` projections, `^⊥`,
 `inAnt`). Mirrors `zKValidDef`. -/
@@ -1270,11 +1271,13 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zInegWffDef : 𝚫₁.Semisent
   (.mkSigma “p d0.
     ∃ f, !fstIdxDef f d0 ∧
       (∃ ss, !seqSuccDef ss f ∧ ∃ bot, !qqFalsumDef bot ∧ ss = bot) ∧
-      (∃ sa, !seqAntDef sa f ∧ !inAntDef p sa) ”)
+      (∃ sa, !seqAntDef sa f ∧ !inAntDef p sa) ∧
+      !(isUFormula ℒₒᵣ).sigma p ”)
   (.mkPi “p d0.
     ∀ f, !fstIdxDef f d0 →
       (∀ ss, !seqSuccDef ss f → ∀ bot, !qqFalsumDef bot → ss = bot) ∧
-      (∀ sa, !seqAntDef sa f → !inAntDef p sa) ”)
+      (∀ sa, !seqAntDef sa f → !inAntDef p sa) ∧
+      !(isUFormula ℒₒᵣ).pi p ”)
 
 instance zInegWff_defined : 𝚫₁-Relation (zInegWff : V → V → Prop) via zInegWffDef :=
   ⟨by intro v
@@ -1288,10 +1291,13 @@ instance zInegWff_definable : 𝚫₁-Relation (zInegWff : V → V → Prop) :=
   zInegWff_defined.to_definable
 
 /-- **∀-introduction premise sequent**: `d0 ⊢ Γ→F(a)` — same antecedent as the conclusion `s`, succedent
-`F(a) = substs1 (^&a) p` (matrix `p`'s bound variable replaced by the eigenvariable `a`). [Freshness
-`a ∉ s` is a separate global side condition.] The genuine I∀ reduct `d0(a/n) ⊢ Γ→F(n)` reads off this. -/
+`F(a) = substs1 (^&a) p` (matrix `p`'s bound variable replaced by the eigenvariable `a`), and the matrix's
+1-formula-hood `IsSemiformula ℒₒᵣ 1 p` (lap 74: the `ZDerivation_zsubst` commutations `fvSubst_all` /
+`fvSubst_substs1_fvar` consume it). [Freshness `a ∉ s` is a separate global side condition.] The genuine
+I∀ reduct `d0(a/n) ⊢ Γ→F(n)` reads off this. -/
 def zIallWff (s a p d0 : V) : Prop :=
-  seqAnt (fstIdx d0) = seqAnt s ∧ seqSucc (fstIdx d0) = substs1 ℒₒᵣ (qqFvar a) p
+  seqAnt (fstIdx d0) = seqAnt s ∧ seqSucc (fstIdx d0) = substs1 ℒₒᵣ (qqFvar a) p ∧
+    IsSemiformula ℒₒᵣ 1 p
 
 /-- **`𝚫₁`-definability of `zIallWff`.** `fstIdx`/`seqAnt`/`seqSucc`/`qqFvar` are `𝚺₀`; the only `𝚺₁`
 content is the substitution `substs1 ℒₒᵣ (^&a) p` (Foundation `substs1Graph`, single-valued ⟹ the σ
@@ -1301,12 +1307,14 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zIallWffDef : 𝚫₁.Semisent
     ∃ f, !fstIdxDef f d0 ∧
       (∃ sa0, !seqAntDef sa0 f ∧ ∃ sa1, !seqAntDef sa1 s ∧ sa0 = sa1) ∧
       (∃ ss, !seqSuccDef ss f ∧ ∃ fa, !qqFvarDef fa a ∧
-        ∃ sub, !(substs1Graph ℒₒᵣ) sub fa p ∧ ss = sub) ”)
+        ∃ sub, !(substs1Graph ℒₒᵣ) sub fa p ∧ ss = sub) ∧
+      !(isSemiformula ℒₒᵣ).sigma 1 p ”)
   (.mkPi “s a p d0.
     ∀ f, !fstIdxDef f d0 →
       (∀ sa0, !seqAntDef sa0 f → ∀ sa1, !seqAntDef sa1 s → sa0 = sa1) ∧
       (∀ ss, !seqSuccDef ss f → ∀ fa, !qqFvarDef fa a →
-        ∀ sub, !(substs1Graph ℒₒᵣ) sub fa p → ss = sub) ”)
+        ∀ sub, !(substs1Graph ℒₒᵣ) sub fa p → ss = sub) ∧
+      !(isSemiformula ℒₒᵣ).pi 1 p ”)
 
 instance zIallWff_defined : 𝚫₁-Relation₄ (zIallWff : V → V → V → V → Prop) via zIallWffDef :=
   ⟨by intro v
@@ -1356,7 +1364,8 @@ noncomputable def zIndWff (d : V) : Prop :=
     seqSucc (fstIdx (zIndPrem1 d)) =
       substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd (qqFvar (zIndEig d))
         (Bootstrapping.Arithmetic.numeral 1)) (zIndP d)) ∧
-  seqSucc (fstIdx d) = substs1 ℒₒᵣ (zIndTerm d) (zIndP d)
+  seqSucc (fstIdx d) = substs1 ℒₒᵣ (zIndTerm d) (zIndP d) ∧
+  IsSemiformula ℒₒᵣ 1 (zIndP d)
 
 /-- **`𝚫₁`-definability of `zIndWff`.** Projections (`fstIdx`/`zIndP`/`zIndPrem0/1`/`zIndEig`/`zIndTerm`/
 `seqAnt`/`seqSucc`/`inAnt`/`qqFvar`) are `𝚺₀`; the `𝚺₁` content is the term-codes `numeral`/`qqAdd` and the
@@ -1374,7 +1383,8 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zIndWffDef : 𝚫₁.Semisente
     (∃ ss1, !seqSuccDef ss1 f1 ∧ ∃ z1, !(Bootstrapping.Arithmetic.numeralGraph) z1 1 ∧
       ∃ sa, !(Bootstrapping.Arithmetic.qqAddGraph) sa fa z1 ∧
       ∃ subsa, !(substs1Graph ℒₒᵣ) subsa sa p ∧ ss1 = subsa) ∧
-    (∃ ss, !seqSuccDef ss s ∧ ∃ subt, !(substs1Graph ℒₒᵣ) subt t p ∧ ss = subt) ”)
+    (∃ ss, !seqSuccDef ss s ∧ ∃ subt, !(substs1Graph ℒₒᵣ) subt t p ∧ ss = subt) ∧
+    !(isSemiformula ℒₒᵣ).sigma 1 p ”)
   (.mkPi “d.
     ∀ s, !fstIdxDef s d → ∀ p, !zIndPDef p d → ∀ d0, !zIndPrem0Def d0 d → ∀ d1, !zIndPrem1Def d1 d →
     ∀ a, !zIndEigDef a d → ∀ t, !zIndTermDef t d →
@@ -1387,7 +1397,8 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zIndWffDef : 𝚫₁.Semisente
     (∀ ss1, !seqSuccDef ss1 f1 → ∀ z1, !(Bootstrapping.Arithmetic.numeralGraph) z1 1 →
       ∀ sa, !(Bootstrapping.Arithmetic.qqAddGraph) sa fa z1 →
       ∀ subsa, !(substs1Graph ℒₒᵣ) subsa sa p → ss1 = subsa) ∧
-    (∀ ss, !seqSuccDef ss s → ∀ subt, !(substs1Graph ℒₒᵣ) subt t p → ss = subt) ”)
+    (∀ ss, !seqSuccDef ss s → ∀ subt, !(substs1Graph ℒₒᵣ) subt t p → ss = subt) ∧
+    !(isSemiformula ℒₒᵣ).pi 1 p ”)
 
 instance zIndWff_defined : 𝚫₁-Predicate (zIndWff : V → Prop) via zIndWffDef :=
   ⟨by intro v
