@@ -45,8 +45,14 @@ by Buchholz-Z — re-point that footer next edit).
 
 **PARALLEL FRONT (when crux-2 blocks):** discharge `PA_delta1Definable` upstream (now mandatory) — check the
 Foundation pin first (still an `axiom` in `Incompleteness/Examples.lean`?). Also **C0.5 bridge** decomposes
-into B1 (PA axioms→Z) / B2 (PA rules→Z, induction via Z's `Ind`) / B3 (compose, M-internal) — Bryce–Goré
-`Peano.v` skeleton inbound from host; run in a worktree when the descent stalls (judge §5).
+into B1 (PA axioms→Z) / B2 (PA rules→Z, **induction via Z's native `Ind` rule — the key shortcut**) / B3
+(compose, M-internal). ⭐ Judge §5 (2026-06-24): the `Ind` shortcut SKIPS Bryce–Goré's induction→ω-rule
+sub-tower (~half their `Peano.v`) ⟹ **C0.5 is <1k lines**, not ~1215. Do NOT port their `cut_elim.v`
+(infinitary, not the primrec `R` PRWO needs); only `Peano.v` transfers. Run in a worktree when descent stalls.
+
+> **Lap-62 progress (this lap):** C0 Fixpoint `ZDerivation` ✅ DONE (structural skeleton + `case` +
+> `induction`, axiom-clean `wip/InternalZ.lean`); nut tower step `iotower_omega_pow` ✅ banked (`src/`).
+> NEXT = `iR` rule-by-rule skeleton → 5 low-hanging cases.
 
 **HYGIENE (low, non-blocking):** off-path `DescentSemantic.lean` free-X `sorry` + deps → `wip/` candidates.
 

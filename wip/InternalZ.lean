@@ -85,7 +85,24 @@ instance zK_defined : 𝚺₀-Function₃ (zK : V → V → V → V) via zKGraph
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_trans (by simp) <| le_pair_right _ _)
     <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
+@[simp] lemma a_lt_zIall (s a p d0 : V) : a < zIall s a p d0 :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma p_lt_zIall (s a p d0 : V) : p < zIall s a p d0 :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _)
+    <| le_pair_right _ _) <| le_pair_right _ _
+
+@[simp] lemma p_lt_zIneg (s p d0 : V) : p < zIneg s p d0 :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
+
+@[simp] lemma at_lt_zInd (s at' p d0 d1 : V) : at' < zInd s at' p d0 d1 :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma p_lt_zInd (s at' p d0 d1 : V) : p < zInd s at' p d0 d1 :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _)
+    <| le_pair_right _ _) <| le_pair_right _ _
+
 @[simp] lemma seq_lt_zK (s r ds : V) : s < zK s r ds := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma r_lt_zK (s r ds : V) : r < zK s r ds :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
 @[simp] lemma ds_lt_zK (s r ds : V) : ds < zK s r ds :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
@@ -985,6 +1002,88 @@ lemma zphi_strong_finite {C : Set V} {d : V} :
   · refine Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, fun i hi => ⟨hall i hi, ?_⟩⟩)))
     exact lt_trans (lt_of_mem_rng (hseq.znth hi)) (ds_lt_zK s r ds)
 
+/-- Bounded-quantifier form of `ZPhi` (every existential is `< d`), the shape the arithmetized
+`blueprint` core matches. Mirrors Foundation `Theory.Derivation.phi_iff`. -/
+private lemma zphi_iff (C d : V) :
+    ZPhi {x | x ∈ C} d ↔
+    ( (∃ s < d, d = zAtom s) ∨
+      (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d, d = zIall s a p d0 ∧ d0 ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ d0 < d, d = zIneg s p d0 ∧ d0 ∈ C) ∨
+      (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
+        d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
+      (∃ s < d, ∃ r < d, ∃ ds < d, d = zK s r ds ∧ Seq ds ∧ ∀ i < lh ds, znth ds i ∈ C) ) := by
+  constructor
+  · rintro (⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, h⟩ | ⟨s, p, d0, rfl, h⟩ |
+      ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩)
+    · exact Or.inl ⟨s, by simp, rfl⟩
+    · exact Or.inr (Or.inl ⟨s, by simp, a, by simp, p, by simp, d0, by simp, rfl, h⟩)
+    · exact Or.inr (Or.inr (Or.inl ⟨s, by simp, p, by simp, d0, by simp, rfl, h⟩))
+    · exact Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨s, by simp, at', by simp, p, by simp, d0, by simp, d1, by simp, rfl, h0, h1⟩)))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨s, by simp, r, by simp, ds, by simp, rfl, hseq, hall⟩)))
+  · rintro (⟨s, _, rfl⟩ | ⟨s, _, a, _, p, _, d0, _, rfl, h⟩ | ⟨s, _, p, _, d0, _, rfl, h⟩ |
+      ⟨s, _, at', _, p, _, d0, _, d1, _, rfl, h0, h1⟩ | ⟨s, _, r, _, ds, _, rfl, hseq, hall⟩)
+    · exact Or.inl ⟨s, rfl⟩
+    · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h⟩)
+    · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h⟩))
+    · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h0, h1⟩)))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, hall⟩)))
+
+open LO.FirstOrder.Arithmetic in
+/-- Arithmetized `𝚫₁` core for the Z-derivation `Fixpoint` (mirrors Foundation
+`Theory.Derivation.blueprint`). `d` = candidate code, `C` = the recursion set (premises so far). The
+K^r disjunct uses `seqDef`/`lhDef`/`znthDef` for the variadic premise-sequence membership. -/
+noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
+  (.mkSigma “d C.
+    ( (∃ s < d, !zAtomGraph d s) ∨
+      (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d, !zIallGraph d s a p d0 ∧ d0 ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ d0 < d, !zInegGraph d s p d0 ∧ d0 ∈ C) ∨
+      (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
+        !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
+      (∃ s < d, ∃ r < d, ∃ ds < d,
+        !zKGraph d s r ds ∧ !seqDef ds ∧
+          ∃ l, !lhDef l ds ∧ ∀ i < l, ∃ z, !znthDef z ds i ∧ z ∈ C) )”)
+  (.mkPi “d C.
+    ( (∃ s < d, !zAtomGraph d s) ∨
+      (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d, !zIallGraph d s a p d0 ∧ d0 ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ d0 < d, !zInegGraph d s p d0 ∧ d0 ∈ C) ∨
+      (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
+        !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
+      (∃ s < d, ∃ r < d, ∃ ds < d,
+        !zKGraph d s r ds ∧ !seqDef ds ∧
+          ∀ l, !lhDef l ds → ∀ i < l, ∀ z, !znthDef z ds i → z ∈ C) )”)⟩
+
+lemma zPhi_definable :
+    𝚫₁.Defined (fun v : Fin 2 → V ↦ ZPhi {x | x ∈ v 1} (v 0)) zblueprint.core := .mk <| by
+  constructor
+  · intro v; simp [zblueprint]
+  · intro v; simp [zphi_iff, zblueprint, zAtom_defined.iff, zIall_defined.iff, zIneg_defined.iff,
+      zInd_defined.iff, zK_defined.iff, seq_defined.iff, lh_defined.iff, znth_defined.iff]
+
+/-- The Z-derivation `Fixpoint.Construction` (`Φ = ZPhi`, with the proved monotonicity). -/
+noncomputable def zconstruction : Fixpoint.Construction V zblueprint where
+  Φ := fun _ ↦ ZPhi
+  defined := zPhi_definable
+  monotone := fun h _ _ hd ↦ zphi_monotone h hd
+
+instance : (zconstruction (V := V)).StrongFinite where
+  strong_finite := fun {_ _ _} h ↦ zphi_strong_finite h
+
+/-- **The system-Z derivation predicate** `ZDerivation : V → Prop` — the `Fixpoint` of `ZPhi`.
+`d` is a Z-derivation iff it is built by one Z-rule from premises that are themselves Z-derivations. -/
+def ZDerivation (d : V) : Prop := (zconstruction (V := V)).Fixpoint ![] d
+
+/-- **Recursion equation** for `ZDerivation` (the `Fixpoint.Construction.case`): a code is a
+Z-derivation iff `ZPhi` holds of it over the set of Z-derivations. -/
+lemma zDerivation_iff {d : V} : ZDerivation d ↔ ZPhi {z | ZDerivation z} d :=
+  (zconstruction (V := V)).case
+
+/-- **Structural induction** over `ZDerivation` (the `Fixpoint.Construction.induction`). -/
+lemma zDerivation_induction {P : V → Prop} (hP : 𝚫₁-Predicate P)
+    (H : ∀ C : Set V, (∀ x ∈ C, ZDerivation x ∧ P x) → ∀ d, ZPhi C d → P d) :
+    ∀ d, ZDerivation d → P d :=
+  (zconstruction (V := V)).induction (Γ := 𝚺) hP.of_deltaOne H
+
 /-! ## C0.5 — the Foundation→Z bridge (NEXT milestone, lap-62 reflection)
 
 **The missing seam** (judge `E-EQ5-ROUTE-FINDING-2026-06-23.md` Finding 3; lap-62 reflection
@@ -995,9 +1094,9 @@ by `¬ 𝗣𝗔.Consistent M` — i.e. `M` carries a coded **Foundation** (Tait-
 whole C1/C3 engine has no input. Scale: Bryce–Goré's analogue (`aarondroidbryce/Gentzen`,
 `theories/Logic/Peano.v`, `PA_closed_PA_omega`) is ~1,215 lines — a milestone, not a footnote.
 
-**The bridge lemma type (write it now, prove it after the Fixpoint lands).** Once
-`ZDerivation : V → Prop` (the C0 Fixpoint) and `ZDerivesEmpty d := ZDerivation d ∧ fstIdx d = ⌜∅⌝`
-exist, the bridge is the `Z ⊇ PA`-on-closed-sequents simulation, M-internal (`Σ₁` / per-model):
+**Bridge lemma type.** Now that `ZDerivation : V → Prop` (the C0 Fixpoint) is built (above), define
+`ZDerivesEmpty d := ZDerivation d ∧ fstIdx d = (∅ : sequent code)` and prove the `Z ⊇ PA`-on-closed-
+sequents simulation, M-internal (`Σ₁` / per-model):
 
 ```
 -- C0.5 — Foundation⊥ ⟹ Z-derivation of the empty sequent (M-internal).
@@ -1006,19 +1105,21 @@ theorem foundation_bot_to_Z_empty
     ∃ z : V, ZDerivesEmpty z
 ```
 
-Decomposes (Bryce–Goré `Peano.v` blueprint) into:
-* **(i) axioms:** every Foundation/PA axiom is a Z-theorem — `⊢_Z Γ, A` for each `A ∈ 𝗣𝗔` (incl. the
-  induction scheme, handled by Z's `Ind` rule directly — the reason system Z is the right vehicle).
-* **(ii) rules:** every Foundation inference rule is Z-admissible (`Z`-cut, weakening, the logical rules
-  map to Z's `I`-rules / `K^r` chain rule).
-* **(iii) assembly:** structural recursion on the Foundation derivation `d` (codes of sub-derivations are
-  `<`-smaller — `HFS` course-of-values) builds the Z code `z` with `fstIdx z = fstIdx d`.
+**⭐ CHEAPER than the ~1215-line flag (judge `E-CRUX2-DECOMPOSITION` §5, 2026-06-24).** Pattern: discharge
+each PA axiom in Z + simulate each rule (MP → Z-cut → `K^r` chain rule; generalization → Z `I^a_∀`). The
+key shortcut: **Z's native `Ind` rule maps PA-induction DIRECTLY**, so the bridge SKIPS Bryce–Goré's
+biggest sub-tower (their induction→ω-rule simulation, ~half of `Peano.v`) — **revise C0.5 to <1k lines.**
+This independently re-confirms the Z-over-PA_ω choice. **Do NOT port their `cut_elim.v`** (infinitary
+transfinite recursion / meta-Con via the "dangerous disjunct" — NOT the primrec `R` the PRWO route needs);
+only `Peano.v` transfers. Sub-obligations (judge §5): **B1** each PA axiom → short Z-derivation (§5 `Ax(Z)`);
+**B2** each Foundation rule → Z-admissible (induction `axm` absorbed by Z's `Ind`); **B3** compose,
+M-internally (structural recursion on `d`, sub-derivation codes `<`-smaller via `HFS` course-of-values).
 
 Then `derivesEmpty` (the `GentzenCon` stand-in) is genuinely **populated** from `¬ 𝗣𝗔.Consistent M`:
 `¬Con ⟹ ∃ d, 𝗣𝗔.DerivationOf d ⊥ ⟹ (C0.5) ∃ z, ZDerivesEmpty z ⟹` feed the Z-descent `n ↦ iord(iR^[n] z)`.
 
-**Prereqs (build first, in order):** C0 Fixpoint `ZDerivation` → `iR` (C2) → this bridge. See
-`HARVEST.md`, `PENDING_WORK.md` lap-62, and `GentzenCon.lean` footer (to be re-pointed from Foundation's
-`Theory.Derivation` onto Buchholz-Z + this bridge). -/
+**Prereqs:** C0 Fixpoint `ZDerivation` ✅ DONE (lap 62) → `iR` (C2) → this bridge (parallelizable in a
+worktree). See `HARVEST.md`, `PENDING_WORK.md` lap-62, `E-CRUX2-DECOMPOSITION-2026-06-24.md §5`, and
+`GentzenCon.lean` footer (to be re-pointed from Foundation's `Theory.Derivation` onto Buchholz-Z + bridge). -/
 
 end GoodsteinPA.InternalZ
