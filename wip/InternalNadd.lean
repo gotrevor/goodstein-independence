@@ -523,4 +523,16 @@ left-fold `ω^{õ d0} # (ω^{õ d1} # … )` repeatedly takes. -/
 lemma inadd_omega_pow (α b : V) : inadd (ocOadd α 1 0) b = insTerm α 1 b := by
   rw [inadd_ocOadd, inadd_zero_left]
 
+/-- **A single-term left summand collapses to `insTerm`**: `(ω^e·n) # b = insTerm e n b`. The
+general form of `inadd_omega_pow`; the bridge that recasts strict `#`-monotonicity (left-cancellation)
+as the single-term insertion embedding `icmp_insTerm_congr`. -/
+lemma inadd_single_term (e n b : V) : inadd (ocOadd e n 0) b = insTerm e n b := by
+  rw [inadd_ocOadd, inadd_zero_left]
+
+/-- **`cmpV` is invariant under a common left summand**: `cmpV (k+a) (k+b) = cmpV a b`. The
+coefficient-merge in `insTerm` adds the inserted `n` to both sides, so the comparison is unchanged —
+exactly what the `icmp_insTerm_congr` merge branch needs. -/
+@[simp] lemma cmpV_add_left (k a b : V) : cmpV (k + a) (k + b) = cmpV a b := by
+  simp only [cmpV, add_lt_add_iff_left, add_right_inj]
+
 end GoodsteinPA.InternalONote
