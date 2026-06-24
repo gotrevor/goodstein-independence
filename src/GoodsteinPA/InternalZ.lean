@@ -1250,6 +1250,43 @@ instance zKValid_defined : 𝚫₁-Relation₃ (zKValid : V → V → V → Prop
 instance zKValid_definable : 𝚫₁-Relation₃ (zKValid : V → V → V → Prop) :=
   zKValid_defined.to_definable
 
+/-! ### Rung-0.5 premise-sequent side conditions (for a rule-faithful `ZPhi`)
+
+The bare `ZPhi` I∀/I¬/Ind disjuncts pin only the *conclusion* succedent, not the premise sequents — so a
+genuine reduct's end-sequent (hence chain threading) is uncomputable. These `…Wff` predicates pin the
+Buchholz inference-rule premise sequents (rules read from `scratchpad/buchholz-gentzen.txt:140-152`); they
+are wired as conjuncts into the corresponding `ZPhi` disjunct so `ZDerivation` carries them, and a genuine
+validity-preserving reduct reads them off by inversion. They need only already-`𝚫₁` pieces
+(`fstIdx`/`seqAnt`/`seqSucc` projections, `^⊥`, `inAnt`, and — for I∀/Ind — the `𝚺₁` `substs1`). -/
+
+/-- **¬-introduction premise sequent**: `d0 ⊢ A,Γ→⊥` — succedent `⊥`, and the negated formula `A = p` in
+its antecedent. No substitution (Buchholz 14.23 reduct `d[0] := d0`). -/
+def zInegWff (p d0 : V) : Prop :=
+  seqSucc (fstIdx d0) = (^⊥ : V) ∧ inAnt p (seqAnt (fstIdx d0))
+
+/-- **`𝚫₁`-definability of `zInegWff`** (all pieces `𝚺₀`: `fstIdx`/`seqSucc`/`seqAnt` projections, `^⊥`,
+`inAnt`). Mirrors `zKValidDef`. -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zInegWffDef : 𝚫₁.Semisentence 2 := .mkDelta
+  (.mkSigma “p d0.
+    ∃ f, !fstIdxDef f d0 ∧
+      (∃ ss, !seqSuccDef ss f ∧ ∃ bot, !qqFalsumDef bot ∧ ss = bot) ∧
+      (∃ sa, !seqAntDef sa f ∧ !inAntDef p sa) ”)
+  (.mkPi “p d0.
+    ∀ f, !fstIdxDef f d0 →
+      (∀ ss, !seqSuccDef ss f → ∀ bot, !qqFalsumDef bot → ss = bot) ∧
+      (∀ sa, !seqAntDef sa f → !inAntDef p sa) ”)
+
+instance zInegWff_defined : 𝚫₁-Relation (zInegWff : V → V → Prop) via zInegWffDef :=
+  ⟨by intro v
+      simp [zInegWffDef, HierarchySymbol.Semiformula.val_sigma, fstIdx_defined.iff,
+        seqSucc_defined.iff, qqFalsum_defined.iff, seqAnt_defined.iff, inAnt_defined.iff],
+   by intro v
+      simp [zInegWffDef, zInegWff, HierarchySymbol.Semiformula.val_sigma, fstIdx_defined.iff,
+        seqSucc_defined.iff, qqFalsum_defined.iff, seqAnt_defined.iff, inAnt_defined.iff]⟩
+
+instance zInegWff_definable : 𝚫₁-Relation (zInegWff : V → V → Prop) :=
+  zInegWff_defined.to_definable
+
 /-- **L3.1 on a GENUINE chain** (E-CRUX2 §8.1, the lap-66 NEXT-item-1 bridge). For the chain `zK s r ds`
 with chain-inference data `j0` (from `isChainInf`: `hj0`/`hAj0`/`hchain`/`hrank` are exactly its three
 components), the coded symbol sequence `Iseq := tpSeq ds` (so `znth Iseq i = tp (znth ds i)`), and the
@@ -3456,7 +3493,7 @@ with its premise(s) in `C`. -/
 def ZPhi (C : Set V) (d : V) : Prop :=
   (∃ s, d = zAtom s ∧ inAnt (seqSucc s) (seqAnt s)) ∨
   (∃ s a p d0, d = zIall s a p d0 ∧ d0 ∈ C ∧ seqSucc s = (^∀ p : V)) ∨
-  (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V)) ∨
+  (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0) ∨
   (∃ s at' p d0 d1, d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
   (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValid s r ds) ∨
   (∃ s p k, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s)) ∨
@@ -3464,12 +3501,12 @@ def ZPhi (C : Set V) (d : V) : Prop :=
 
 /-- `ZPhi` is monotone in the premise set `C` (a `Fixpoint.Construction.monotone` field). -/
 lemma zphi_monotone {C C' : Set V} (h : C ⊆ C') {d : V} : ZPhi C d → ZPhi C' d := by
-  rintro (hd | ⟨s, a, p, d0, rfl, hd, hsc⟩ | ⟨s, p, d0, rfl, hd, hsc⟩ |
+  rintro (hd | ⟨s, a, p, d0, rfl, hd, hsc⟩ | ⟨s, p, d0, rfl, hd, hsc, hwff⟩ |
     ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall, hvalid⟩ |
     ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩)
   · exact Or.inl hd
   · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h hd, hsc⟩)
-  · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h hd, hsc⟩))
+  · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h hd, hsc, hwff⟩))
   · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h h0, h h1⟩)))
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, fun i hi => h (hall i hi), hvalid⟩))))
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp, hin⟩)))))
@@ -3480,12 +3517,12 @@ lemma zphi_monotone {C C' : Set V} (h : C ⊆ C') {d : V} : ZPhi C d → ZPhi C'
 `Seq.znth` + `lt_of_mem_rng` (`znth ds i < ds`) then `ds < zK s r ds`. -/
 lemma zphi_strong_finite {C : Set V} {d : V} :
     ZPhi C d → ZPhi {y | y ∈ C ∧ y < d} d := by
-  rintro (hd | ⟨s, a, p, d0, rfl, hd, hsc⟩ | ⟨s, p, d0, rfl, hd, hsc⟩ |
+  rintro (hd | ⟨s, a, p, d0, rfl, hd, hsc⟩ | ⟨s, p, d0, rfl, hd, hsc, hwff⟩ |
     ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall, hvalid⟩ |
     ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩)
   · exact Or.inl hd
   · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, ⟨hd, by simp⟩, hsc⟩)
-  · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, ⟨hd, by simp⟩, hsc⟩))
+  · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, ⟨hd, by simp⟩, hsc, hwff⟩))
   · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, ⟨h0, by simp⟩, ⟨h1, by simp⟩⟩)))
   · refine Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
       ⟨s, r, ds, rfl, hseq, fun i hi => ⟨hall i hi, ?_⟩, hvalid⟩))))
@@ -3500,7 +3537,8 @@ private lemma zphi_iff (C d : V) :
     ( (∃ s < d, d = zAtom s ∧ inAnt (seqSucc s) (seqAnt s)) ∨
       (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d,
         d = zIall s a p d0 ∧ d0 ∈ C ∧ seqSucc s = (^∀ p : V)) ∨
-      (∃ s < d, ∃ p < d, ∃ d0 < d, d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V)) ∨
+      (∃ s < d, ∃ p < d, ∃ d0 < d,
+        d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
@@ -3508,12 +3546,12 @@ private lemma zphi_iff (C d : V) :
       (∃ s < d, ∃ p < d, ∃ k < d, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s)) ∨
       (∃ s < d, ∃ p < d, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s)) ) := by
   constructor
-  · rintro (⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, h, hsc⟩ | ⟨s, p, d0, rfl, h, hsc⟩ |
+  · rintro (⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, h, hsc⟩ | ⟨s, p, d0, rfl, h, hsc, hwff⟩ |
       ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall, hvalid⟩ |
       ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩)
     · exact Or.inl ⟨s, by simp, rfl, hin⟩
     · exact Or.inr (Or.inl ⟨s, by simp, a, by simp, p, by simp, d0, by simp, rfl, h, hsc⟩)
-    · exact Or.inr (Or.inr (Or.inl ⟨s, by simp, p, by simp, d0, by simp, rfl, h, hsc⟩))
+    · exact Or.inr (Or.inr (Or.inl ⟨s, by simp, p, by simp, d0, by simp, rfl, h, hsc, hwff⟩))
     · exact Or.inr (Or.inr (Or.inr (Or.inl
         ⟨s, by simp, at', by simp, p, by simp, d0, by simp, d1, by simp, rfl, h0, h1⟩)))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
@@ -3522,12 +3560,13 @@ private lemma zphi_iff (C d : V) :
         ⟨s, by simp, p, by simp, k, by simp, rfl, hp, hin⟩)))))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
         ⟨s, by simp, p, by simp, rfl, hp, hin⟩)))))
-  · rintro (⟨s, _, rfl, hin⟩ | ⟨s, _, a, _, p, _, d0, _, rfl, h, hsc⟩ | ⟨s, _, p, _, d0, _, rfl, h, hsc⟩ |
+  · rintro (⟨s, _, rfl, hin⟩ | ⟨s, _, a, _, p, _, d0, _, rfl, h, hsc⟩ |
+      ⟨s, _, p, _, d0, _, rfl, h, hsc, hwff⟩ |
       ⟨s, _, at', _, p, _, d0, _, d1, _, rfl, h0, h1⟩ | ⟨s, _, r, _, ds, _, rfl, hseq, hall, hvalid⟩ |
       ⟨s, _, p, _, k, _, rfl, hp, hin⟩ | ⟨s, _, p, _, rfl, hp, hin⟩)
     · exact Or.inl ⟨s, rfl, hin⟩
     · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h, hsc⟩)
-    · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h, hsc⟩))
+    · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h, hsc, hwff⟩))
     · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h0, h1⟩)))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, hall, hvalid⟩))))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp, hin⟩)))))
@@ -3544,7 +3583,7 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d, !zIallGraph d s a p d0 ∧ d0 ∈ C ∧
         ∃ ss, !seqSuccDef ss s ∧ ∃ ap, !qqAllDef ap p ∧ ss = ap) ∨
       (∃ s < d, ∃ p < d, ∃ d0 < d, !zInegGraph d s p d0 ∧ d0 ∈ C ∧
-        ∃ ss, !seqSuccDef ss s ∧ ∃ nb, !inegFDef nb p ∧ ss = nb) ∨
+        (∃ ss, !seqSuccDef ss s ∧ ∃ nb, !inegFDef nb p ∧ ss = nb) ∧ !(zInegWffDef.sigma) p d0) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
@@ -3561,7 +3600,7 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d, !zIallGraph d s a p d0 ∧ d0 ∈ C ∧
         ∀ ss, !seqSuccDef ss s → ∀ ap, !qqAllDef ap p → ss = ap) ∨
       (∃ s < d, ∃ p < d, ∃ d0 < d, !zInegGraph d s p d0 ∧ d0 ∈ C ∧
-        ∀ ss, !seqSuccDef ss s → ∀ nb, !inegFDef nb p → ss = nb) ∨
+        (∀ ss, !seqSuccDef ss s → ∀ nb, !inegFDef nb p → ss = nb) ∧ !(zInegWffDef.pi) p d0) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
@@ -3581,7 +3620,7 @@ lemma zPhi_definable :
       zInd_defined.iff, zK_defined.iff, zAxAll_defined.iff, zAxNeg_defined.iff,
       seq_defined.iff, lh_defined.iff, znth_defined.iff,
       seqSucc_defined.iff, seqAnt_defined.iff, inAnt_defined.iff,
-      qqForall_defined.iff, inegF_defined.iff]
+      qqForall_defined.iff, inegF_defined.iff, zInegWff_defined.iff]
 
 /-- The Z-derivation `Fixpoint.Construction` (`Φ = ZPhi`, with the proved monotonicity). -/
 noncomputable def zconstruction : Fixpoint.Construction V zblueprint where
@@ -4602,7 +4641,7 @@ exactly the two whose `iR2`-reduct is a chain `zK (fstIdx d) …`. -/
 lemma zTag_Ind_or_K_of_ZDerivesEmpty {d : V} (h : ZDerivesEmpty d) : zTag d = 3 ∨ zTag d = 4 := by
   obtain ⟨hZ, hant, hsucc⟩ := h
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, _, hsc⟩ |
-    ⟨s, p, d0, rfl, _, hsc⟩ | ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, hsc, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
     ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩
   · exfalso; rw [fstIdx_zAtom] at hant; rw [hant] at hin; simp [inAnt, lh_empty] at hin
   · rw [fstIdx_zIall] at hsucc
@@ -4675,11 +4714,13 @@ lemma zDerivation_zIall_inv {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0)) :
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
 
-/-- **I¬-rule inversion**: a `ZDerivation` of `zIneg s p d0` has premise `d0` a `ZDerivation` and
-end-sequent succedent `¬p` (`= inegF p`). Peels the R-redex premise when the cut formula is a negation. -/
+/-- **I¬-rule inversion**: a `ZDerivation` of `zIneg s p d0` has premise `d0` a `ZDerivation`, end-sequent
+succedent `¬p` (`= inegF p`), and the premise-sequent side condition `zInegWff p d0` (`d0 ⊢ p,Γ→⊥`). Peels
+the R-redex premise when the cut formula is a negation; the genuine I¬ reduct `d[0]:=d0` reads `zInegWff`. -/
 lemma zDerivation_zIneg_inv {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
-    ZDerivation d0 ∧ seqSucc s = (inegF p : V) := by
-  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, hd0, hsc⟩ |
+    ZDerivation d0 ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0 := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ |
+    ⟨s', p', d0', h, hd0, hsc, hwff⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
     ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
   · exact absurd (congrArg zTag h) (by simp)
@@ -4687,7 +4728,7 @@ lemma zDerivation_zIneg_inv {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
   · obtain rfl : s = s' := by simpa using congrArg fstIdx h
     obtain rfl : p = p' := by simpa using congrArg zInegF h
     obtain rfl : d0 = d0' := by simpa using congrArg zInegPrem h
-    exact ⟨hd0, hsc⟩
+    exact ⟨hd0, hsc, hwff⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -4811,11 +4852,6 @@ the Σ₁ `substs1`). The Ind analog additionally needs the `Sa = a+1` ℒₒᵣ
 `a ∉ s` is a separate global side condition.] The genuine I∀ reduct `d0(a/n) ⊢ Γ→F(n)` reads off this. -/
 def zIallWff (s a p d0 : V) : Prop :=
   seqAnt (fstIdx d0) = seqAnt s ∧ seqSucc (fstIdx d0) = substs1 ℒₒᵣ (qqFvar a) p
-
-/-- **¬-introduction premise sequent**: `d0 ⊢ A,Γ→⊥` — succedent `⊥`, and the negated formula `A = p` in
-its antecedent. No substitution (Buchholz 14.23 reduct `d[0] := d0`). -/
-def zInegWff (p d0 : V) : Prop :=
-  seqSucc (fstIdx d0) = (^⊥ : V) ∧ inAnt p (seqAnt (fstIdx d0))
 
 /-- Every premise of the Ind-reduct sequence `iIndReductSeq d0 d1 k = ⟨d1,…,d1,d0⟩` is a `ZDerivation`
 when `d0`,`d1` are. -/

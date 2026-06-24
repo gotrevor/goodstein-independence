@@ -1,5 +1,37 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 71 — FRESH-MIND REVIEW + rung-0.5 I¬ wired (cascade de-risked)
+
+**Review:** direction KEPT (Option A forced lap 70, kernel re-verified: headline 0 math axioms; lap-70
+landmarks clean; build green 1321). STATUS refreshed off stale lap-59/62 framing.
+
+**Landed (green 1321, axiom-clean):** the rung-0.5 cascade is now PROVEN OUT on the simplest disjunct.
+Moved `zInegWff` up before `ZPhi`, gave it `zInegWffDef : 𝚫₁.Semisentence 2` + `zInegWff_defined`
+(`𝚫₁-Relation`, mirrors `zKValidDef` — all 𝚺₀ pieces: `fstIdx`/`seqSucc`/`seqAnt`/`^⊥`/`inAnt`), and wired
+`∧ zInegWff p d0` into the I¬ disjunct across the WHOLE cascade: `ZPhi` def, `zphi_monotone`,
+`zphi_strong_finite`, `zphi_iff` (both directions), `zblueprint` σ-core (`!(zInegWffDef.sigma) p d0`) +
+π-core (`!(zInegWffDef.pi) p d0`), `zPhi_definable` simp (`+zInegWff_defined.iff`). **Only 2 inversion
+sites broke** (the rest use `_` tails) — fixed `zTag_Ind_or_K_of_ZDerivesEmpty` (`hsc → hsc,_`) and
+**STRENGTHENED `zDerivation_zIneg_inv`** to return `ZDerivation d0 ∧ seqSucc s = inegF p ∧ zInegWff p d0`
+(the payoff: I¬ inversion now hands the premise-sequent data the genuine reduct reads).
+
+**Cascade recipe (now battle-tested for I∀/Ind next):** (1) def the `…Wff` + `…WffDef : 𝚫₁.Semisentence n`
++ `_defined` instance ABOVE `ZPhi` (placed after `zKValid_definable`, ~line 1252); (2) add `∧ …Wff …` to
+the `ZPhi` disjunct; (3) propagate the binder through `zphi_monotone`/`_strong_finite`/`zphi_iff` (×4
+patterns); (4) `∧ !(…WffDef.sigma) …` into zblueprint σ-core, `∧ !(…WffDef.pi) …` into π-core; (5)
+`+…Wff_defined.iff` to `zPhi_definable`'s second simp; (6) `lake build`, fix the ≤2 inversion sites that
+name the disjunct's last conjunct — strengthen the corresponding `_inv` lemma to surface the `…Wff`.
+
+**NEXT (remaining rung 0.5):**
+- **I∀:** wire `zIallWff s a p d0` (already defined; needs MOVE-UP + a `𝚫₁-Relation₄` Def using
+  `substs1Graph ℒₒᵣ` for `seqSucc(fstIdx d0)=substs1 (^&a) p` + `qqFvarDef`; `substs1.defined` is upstream).
+  ⚠️ check `𝚫₁-Relation₄` notation exists; strengthen `zDerivation_zIall_inv` to surface `zIallWff`.
+- **Ind:** define `zIndWff` — needs the `at'=⟪a,t⟫` decode (accessors `zIndEig`/`zIndTerm`) + the `‘0’`
+  numeral term-code + the `S(^&a) = ^&a ⊹ 1` ℒₒᵣ term-code (no successor symbol; use `qqFunc`/`qqAdd` =
+  `addIndex`). Then `𝚫₁` Def + wire + strengthen `zDerivation_zInd_inv`.
+Then rung 1 (`zsubst`), rung 2 (genuine Ind reduct — most tractable), rung 3 (genuine K/cut reduct),
+rung 4 (`RedSound` tag-dispatch). See below for the full lap-70 ladder.
+
 ## ⭐⭐⭐ Lap 70 — Option B REFUTED in-kernel; Option A (genuine reduct) ladder
 
 **Finding (kernel-checked, `not_zKValid_iCritReduct`):** the ordinal-faithful `iR2` can NEVER preserve

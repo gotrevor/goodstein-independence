@@ -6,12 +6,31 @@ Gödel II.** The §3 internal pipeline = internal Cor 3.4 (Grzegorczyk `g`-paddi
 open) → internal Thm 3.5 (slow α → tight `C(βᵣ)≤r+1` — **COMPLETE lap 47**, `InternalThm35`) → Lemma 3.6
 (`nonterminating_internal`, done). The Buchholz free-X `peano_not_proves_TI` (axiom-clean) is a **banked
 asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). **Crux 1 (`γ→PRWO`) LANDED axiom-clean
-(lap 57); crux 2 (`PRWO→Con`, Buchholz-Z ordinal analysis arithmetized in PA) is the sole remaining math
-content — the 🟡 active frontier.** · **Build**: 🟢 green (1320 jobs, `lake build GoodsteinPA`) ·
-**Updated**: lap 62 (DEEP REFLECTION — endpoint hardened to axiom-free-or-abandoned; C0.5 Foundation→Z
-bridge surfaced; sequencing = build the OBJECTS before more assignment algebra) · 2026-06-24 · `3e40feb`
+(lap 57); crux 2 (`PRWO→Con`, Buchholz-Z ordinal analysis arithmetized in IΣ₁) is the sole remaining math
+content — the 🟡 active frontier, now sharply localized to `RedSound` (InternalZ.lean): the `iR2`-reduct of
+a contradiction derivation must itself be a genuine `ZDerivation` = real internalized cut-elimination.** ·
+**Build**: 🟢 green (1321 jobs, `lake build GoodsteinPA`) · **Updated**: lap 71 (FRESH-MIND REVIEW —
+direction KEPT; Option B refuted in-kernel lap 70, Option A genuine reduct forced) · 2026-06-24 · `e1a6147`
 
-> **⭐⭐ Lap-62 DEEP REFLECTION (read first).** See `REFLECTION-2026-06-24-lap62.md` (primary deliverable),
+> **⭐⭐⭐ Lap-71 FRESH-MIND REVIEW (read FIRST — current).** Re-verified the kernel from real `#print
+> axioms`: headline `peano_not_proves_goodstein` = `[propext, sorryAx, choice, Quot.sound]` (**0 math
+> axioms**, honest `sorry`, anti-fraud intact); `goodstein_implies_consistency` = that + `PA_delta1Definable`;
+> the lap-70 landmark lemmas (`not_zKValid_iCritReduct`, `ZDerivation_iR2_zIall`, `iord_descent_iR2_zK_of_valid`)
+> all clean `[propext, choice, Quot.sound]`; build green 1321 jobs. **Direction KEPT — validated, not stale.**
+> The crux-2 wall is now correctly localized to ONE obligation, `RedSound` (`InternalZ.lean:4703`): the
+> `iR2`-reduct of a `ZDerivesEmpty` derivation must be a genuine `ZDerivation`. Lap 70 **refuted Option B
+> in-kernel** (`not_zKValid_iCritReduct`: the ordinal-faithful `iR2` can never preserve `zKValid` — its
+> reduct premises are `Rep`-tagged chains, breaking criticality the L3.1 redex finder needs) and **forced
+> Option A** (a genuine validity-preserving, cut-formula-shape-dispatched reduct, cross-checked vs Bryce–Goré
+> `cut_elim.v`). The ladder (PENDING_WORK lap-70): rung 0.5 = strengthen `ZPhi`'s I∀/Ind disjuncts with the
+> premise-sequent + eigenvariable side conditions (so the reduct's threading is provable) → `zsubst`
+> (eigenvariable substitution on Z-derivations) → genuine Ind reduct (tag 3, the more tractable wall —
+> premises are genuine sub-derivations, not `Rep`) → genuine critical/K reduct (tag 4, the cut-elimination) →
+> `RedSound` tag-dispatch. **This lap drives rung 0.5** (`zIndWff` + Δ₁-definability + `ZPhi` wiring), the
+> immediate scoped prerequisite. Parallel residual: `PA_delta1Definable` (Foundation upstream axiom, mandatory
+> for axiom-free). See `HANDOFF-2026-06-24-lap70.md` + `ANALYSIS-2026-06-24-lap69-redsound-wall.md`.
+
+> **⭐⭐ Lap-62 DEEP REFLECTION (historical).** See `REFLECTION-2026-06-24-lap62.md` (primary deliverable),
 > `HARVEST.md` (new), `E-EQ5-ROUTE-FINDING-2026-06-23.md` (judge). **Direction KEEP — trajectory is genuine
 > forward motion, not circling** (crux 1 landed lap 57; 58–61 correctly built crux-2's axiom-clean ordinal
 > engine; no repeated failed attempts). Re-verified kernel: headline `[propext, sorryAx, choice, Quot.sound]`
@@ -266,7 +285,21 @@ pure mathlib ordinal arithmetic it is **Aristotle-eligible** (the one piece with
 E **pins which `≺` F may use** (co-design). See newest `HANDOFF`.
 
 ## Where it stands
-**(lap-56 FRESH-MIND REVIEW — CURRENT read.)** Build green 1315; headline honest `sorry` (real `#print
+**(lap-71 FRESH-MIND REVIEW — CURRENT read.)** Build green 1321; headline honest `sorry` (real `#print
+axioms` = `[propext, sorryAx, choice, Quot.sound]`, 0 math axioms, faithfulness anchor clean, anti-fraud
+intact — all re-verified). M1 + Phase 1 (Gödel II hook) long done; crux 1 (`γ→PRWO`) landed axiom-clean
+lap 57. The single open math girder `goodstein_implies_consistency` = crux 1 ∘ **crux 2** (`PRWO→Con`),
+and crux 2 is now sharply localized to the lone `InternalZ` obligation **`RedSound`**: the `iR2`-reduct of
+a contradiction derivation must be a genuine `ZDerivation`. This is real internalized cut-elimination for
+the V-internal infinitary system Z (a major multi-lap undertaking; Bryce–Goré's Coq `cut_elim_aux0` alone
+is ~420 lines at the *meta* level, the IΣ₁-internalization is harder). **Lap 70 settled the approach**:
+Option B (weaken the iterate class so the ordinal-faithful `iR2` preserves it) is REFUTED in-kernel
+(`not_zKValid_iCritReduct`); **Option A** (a genuine validity-preserving reduct, shape-dispatched on the
+cut formula, à la Bryce–Goré) is forced. Realistic cadence ≈ one genuine reduct rung per lap. Honest
+endpoint: best-case headline `[propext, choice, Quot.sound, PA_delta1Definable]`, with `PA_delta1Definable`
+the remaining Foundation upstream axiom to discharge for fully-clean.
+
+**(lap-56 FRESH-MIND REVIEW — historical read.)** Build green 1315; headline honest `sorry` (real `#print
 axioms` = `[propext, sorryAx, choice, Quot.sound]`, 0 math axioms, faithfulness anchor
 `goodsteinSentence_faithful` clean, anti-fraud intact — all re-verified). M1 (`goodsteinTerminates_re`) +
 Phase 1 (Gödel II hook) long done. The single open girder `goodstein_implies_consistency` = **crux 1 ∘
@@ -453,6 +486,22 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-24 (lap 71 — FRESH-MIND REVIEW):** Re-verified the kernel from real `#print axioms` (headline
+  0 math axioms, honest `sorry`; lap-70 landmarks clean; build green 1321). **Direction KEPT.** Crux 2 is
+  localized to the single `RedSound` obligation; lap 70 refuted Option B in-kernel (`not_zKValid_iCritReduct`)
+  and forced Option A (genuine cut-formula-shape-dispatched reduct, cross-checked vs Bryce–Goré). Refreshed
+  STATUS header / Where-it-stands / ledger off the stale lap-59/62 framing. Drove rung 0.5 (`ZPhi`
+  rule-faithfulness prereq for the genuine reduct). See `HANDOFF-2026-06-24-lap70.md`.
+- **2026-06-24 (laps 60–70 — crux-2 ordinal engine + RedSound localization):** Built the V-internal
+  Buchholz-Z apparatus in `src/InternalZ.lean` (promoted from `wip/` lap 66, green-gated): Fixpoint
+  `ZDerivation`, the `iR`/`iR2` reduction, the ordinal assignment `idg`/`iõ`/`iord`, and the **tag-4 K-case
+  descent `iord_descent_iR2_zK_of_valid`** (lap 67, axiom-clean — `o(iR2(zK …)) ≺ o(zK …)` for a valid `K^r`
+  chain). Lap 70 **refuted Option B in-kernel** (`not_zKValid_iCritReduct`: the ordinal-faithful `iR2` can't
+  preserve `zKValid`) and forced **Option A** (genuine validity-preserving reduct); banked the rule-inversion
+  peeling primitives (`zDerivation_zIall_inv`/`_zIneg_inv`/`_zAxAll_inv`/`_zAxNeg_inv`/`_zAtom_inv`), the clean
+  I-rule `RedSound` fragment (`ZDerivation_iR2_zIall`/`_zIneg`), `isChainInf_of_last`, and the rung-0.5 start
+  (`zIallWff`/`zInegWff` premise-sequent conditions). Lap 62 deep reflection hardened the endpoint to
+  axiom-free-or-abandoned and surfaced the C0.5 Foundation→Z bridge.
 - **2026-06-24 (lap 59 — FRESH-MIND REVIEW: natural-sum order foundations; ORDER>iC reprioritization):**
   Re-verified the kernel from real `#print axioms` (headline `[propext,sorryAx,choice,Quot.sound]`, 0 math
   axioms; `goodstein_implies_consistency` = +`PA_delta1Definable`; build green 1318). Continued the lap-58
@@ -611,33 +660,30 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 **Route A = Rathjen Cor 3.7 (resolved lap 45→46).** The headline reduces (axiom-clean) to
 `Reduction.goodstein_implies_consistency : 𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)`, a disclosed `sorry` = two deep girders.
 
-### Short-term (mirror PENDING_WORK top) — the two open §3/Gentzen cruxes, hardest-first
-0. **⭐ CRUX-1 BRIDGE `nonterminating_of_seq_descent` (lap-56 frontier).** Two sub-tasks:
-   (a) **natCode↔NF order bridge — DISSOLVED (lap 56).** `prwoInstance` rebuilt on transparent
-   `prec_internal`/`InternalONote.icmp`; the descent hyp IS already the girder's `icmp` form. Done +
-   verified (`wip/GentzenCon.lean`). (b) **Standard-level domination certificate — OPEN, the real content.**
-   `nonterminating_of_seq_descent` for arbitrary `seq` is unprovable on the standard girder
-   (`F_diag_not_dominated`); thread the Cor-3.4 slowdown inputs (β/wseq/l₀/bounds derived from `seq`) as a
-   certificate, discharge for `gentzenDescentφ` (Rathjen Lemma 3.2), then reduce to
-   `StdCor34.crux1_internal_run_of_width_dom` sorry-free. This is the concrete next-lap target.
-1. **Internal Cor 3.4 — RE-FRAMED lap 50: the HEADLINE needs only STANDARD level** (memory
-   `crux1-headline-needs-only-standard-level`). [Substrate for item 0(b): the `seq→β,wseq` construction.] The headline composes crux 1 at the **single** concrete
-   primrec instance `gentzenDescentφ` (= `ord∘Rⁿd₀`), so Lemma 3.2 gives a **STANDARD** Grzegorczyk level
-   `n₀` (not internal) — **no internal Ackermann**. The laps-45→49 internal-`l` wall was for FULL PRWO
-   (∀ internal-index descent), which the headline never needs. ⟹ Build the **standard-level** internal
-   Cor 3.4 (abstract over a descent with a STANDARD-`l` domination hyp `∃ l:ℕ, ∀n, C(β(n+1))≤f_l n`),
-   reusing the **abandoned** standard lead `InternalCor34.ibigMul (k:ℕ)`/`ig0`/`iblk` (the lap-49 generic-V
-   `iVbigMul`/`icorAlpha` tower was off-path effort — banked). Blueprint = sorry-free ℕ-template
-   `Grzegorczyk.lean` (`corAlpha_C_bound`/`_within`/`_boundary`). Downstream DONE (`InternalThm35` +
-   `nonterminating_internal`). ⚠️ unbuilt — validate type-check + clean axioms before relabeling done.
-2. **Gentzen Thm 2.8(i): `PRWO(ε₀) → Con(𝗣𝗔)`** — **PRWO formulation DONE (lap 50, `wip/GentzenCon.lean`):**
-   it is a **per-formula schema** `prwoInstance seq` (Foundation has no universal evaluator ⟹ no single
-   ∀-over-indices sentence) built on `precφ`, with `prwoInstance_faithful` PROVED (std-model ↔ meta-PRWO,
-   kernel-certified). The assembly `crux1∘crux2 = Reduction interface` type-checks. **Open deep cores:**
-   primrec ordinal assignment `ord` + reduction `R` on Foundation `Derivation`s with `ord(R D)≺ord D` (eq 5,
-   Buchholz [6]) — Foundation's Hauptsatz is meta-level only (no shortcut). Disclosed sorries in `wip/`.
-3. **Assemble `goodstein_implies_consistency`** from 1+2 (internal Thm 3.5 + Lemma 3.6 + PRWO formulation
-   are DONE), then — only if `#print axioms` is clean — discharge the headline `sorry`.
+### Short-term (mirror PENDING_WORK top) — crux 2 = `RedSound`, Option A genuine reduct ladder, hardest-first
+Crux 1 (`γ→PRWO`) DONE axiom-clean (lap 57). The single open math obligation is now **`RedSound`**
+(`InternalZ.lean:4703`): `∀ d, ZDerivesEmpty d → ZDerivation (iR2 d)`. Lap 70 refuted Option B in-kernel
+(`not_zKValid_iCritReduct`) and forced **Option A** (a genuine validity-preserving reduct, shape-dispatched
+on the cut formula, à la Bryce–Goré `cut_elim.v`). Ladder (≈ one rung/lap):
+0.5. **PREREQUISITE — strengthen `ZPhi`'s I∀/I¬/Ind disjuncts** with the Buchholz premise-sequent +
+   eigenvariable side conditions (so after substitution the reduct's threading `isChainInf` is provable). A
+   Σ₁/Δ₁ Fixpoint cascade (laps 66/69 pattern). Landed lap 70: `zIallWff`/`zInegWff` + `isChainInf_of_last`.
+   **THIS LAP:** `zIndWff` (decode `at' = ⟪a,t⟫`, build the `Sa` ℒₒᵣ term-code) + Δ₁ instances + wire all
+   three into `ZPhi` (def, `zphi_monotone`/`_strong_finite`/`_iff`, σ/π blueprint cores, `zPhi_definable`,
+   the `rcases zDerivation_iff` sites) → `zDerivation_zInd_inv` hands premise-sequent data.
+1. **`zsubst d a n`** — Σ₁ eigenvariable substitution on Z-derivations (numeral `n` for free var `a`),
+   `ZDerivation`-preserving + `iotil`-invariant + `fstIdx`-computing. Σ₁ recursion over the tree applying
+   Foundation's `substs1`/`Rew` per node. Multi-lap brick.
+2. **Genuine Ind reduct (tag 3) `iRInd'`** = `zK s (irk p) ⟨d0, zsubst d1 a 0, …, zsubst d1 a (k−1)⟩`,
+   `k = ⟦induction term⟧`. Premises are GENUINE sub-derivations (not `Rep`) — the more tractable wall. Prove
+   `zKValid` (the threading is the content) → `RedSound` for tag 3 + re-fit `iord` descent (survives via
+   `iotil_zsubst`).
+3. **Genuine critical/K reduct (tag 4)** = the cut-elimination proper, shape-dispatched
+   (`cut_elimination_atom`/`_neg`/`_lor`). Peel R-redex (`zDerivation_zIall_inv`→`d0`, then `zsubst`) +
+   L-redex (`zDerivation_zAxAll_inv`/`_zAxNeg_inv`), splice into a chain with genuine premises; prove
+   `zKValid` + re-fit `iord`. Hardest.
+4. **`RedSound`** = tag-dispatch on 2+3 ⟹ `iord_iR2_iterate_descends` (already assembled) closes the descent
+   → C0.5 bridge → `Reduction.lean:68`. Then, only if `#print axioms` is clean, discharge the headline.
 
 ### Long-term / banked
 - **Internal Thm 3.5 — COMPLETE (lap 47), route-independent.** `InternalThm35.bbeta_isNF`/`bbeta_C_le`/
@@ -661,8 +707,8 @@ DIRECTION anti-fraud rule #1, which a future call must reconcile against Route A
 ## Axiom ledger (per headline / landmark theorem — the fidelity spine)
 | theorem | paper claim | `#print axioms` shows | status |
 |---|---|---|---|
-| `peano_not_proves_goodstein` (headline, `Statement.lean`) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` (**lap-59 real, re-verified**) | 🔓 open `sorry` (LOCKED, anti-fraud) — **0** math axioms. Route A: reduces (axiom-clean) to `goodstein_implies_consistency` via `not_proves_of_implies_consistency` + Gödel II. |
-| `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` + `PA_delta1Definable` (disclosed; the one open girder, type already forces the upstream axiom) | 🎯 **THE single open obligation = crux 1 ∘ crux 2.** §3 `γ→PRWO(ε₀)` = **crux 1 — DONE, axiom-clean (lap 57)** via the width-FUNCTION refactor (`BlkRecF`/`StdCor34F`/`crux1_internal_run_F`); in `wip/GentzenCon.lean`. Gentzen Thm 2.8 `PRWO→Con(PA)` = **crux 2, 🟡 ACTIVE FRONTIER** (Buchholz-Z ordinal analysis arithmetized in PA; feasibility settled by Bryce–Goré Coq, Feb 2026; must be fully discharged — operator: axiom-free or abandoned). |
+| `peano_not_proves_goodstein` (headline, `Statement.lean`) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` (**lap-71 real, re-verified**) | 🔓 open `sorry` (LOCKED, anti-fraud) — **0** math axioms. Route A: reduces (axiom-clean) to `goodstein_implies_consistency` via `not_proves_of_implies_consistency` + Gödel II. |
+| `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` + `PA_delta1Definable` (disclosed; the one open girder, type already forces the upstream axiom) | 🎯 **THE single open obligation = crux 1 ∘ crux 2.** §3 `γ→PRWO(ε₀)` = **crux 1 — DONE, axiom-clean (lap 57)** via the width-FUNCTION refactor (`BlkRecF`/`StdCor34F`/`crux1_internal_run_F`); in `wip/GentzenCon.lean`. Gentzen Thm 2.8 `PRWO→Con(PA)` = **crux 2, 🟡 ACTIVE FRONTIER**, now localized to the lone `InternalZ` obligation **`RedSound`** (the `iR2`-reduct of a contradiction derivation is a genuine `ZDerivation` = real internalized cut-elimination); lap 70 forced **Option A** (genuine validity-preserving reduct). Feasibility settled by Bryce–Goré Coq, Feb 2026; must be fully discharged — operator: axiom-free or abandoned. |
 | `not_proves_of_implies_consistency` / `peano_not_proves_consistency` (Phase 1, `src/Reduction`) | meta-reduction + Gödel II for `𝗣𝗔` | `propext, choice, Quot.sound, PA_delta1Definable` (**lap-47 real**) | 🟡 the **Route-A Gödel-II hook** (NO LONGER "rejected" — Route A is the chosen route, lap 46). `PA_delta1Definable` = Δ₁-definability of `𝗣𝗔`, a true theorem held as a disclosed `axiom` in the Foundation pin; the headline inherits it on this route. Discharge = upstream burndown. |
 | `InternalThm35.bbeta_*` / `iwtower_cofinal` (internal Thm 3.5, **lap 47**, `src/InternalThm35`) | Rathjen Thm 3.5: slow α → `β` with tight `C(βᵣ)≤r+1` | `propext, choice, Quot.sound` | 🟢 **CLEAN + COMPLETE** — `bbeta_isNF`/`bbeta_C_le`/`bbeta_desc_exists`; ω-tower cofinality `iwtower_cofinal` discharges the seam. Route-independent; consumed by Lemma 3.6 (`nonterminating_internal`). |
 | `GentzenCon.prwoInstance_faithful` / `prwoInstance_models_iff` / `eval_prec_internal` (PRWO formulation, **lap 50, REBUILT lap 56**, `wip/GentzenCon`) | Rathjen Thm 2.8: PRWO(ε₀) is the `ℒₒᵣ`-sentence "no ε₀-descent" | `propext, choice, Quot.sound` (**lap-56 real** — SHED the F-φ `native_decide` artifact) | 🟢 **CLEAN** — **lap 56:** rebuilt on the TRANSPARENT `prec_internal`/`InternalONote.icmp` (was the opaque `precφ`=`codeOfREPred₂`, std-model-only spec → wall-B opacity in nonstandard `M`). `prwoInstance_models_iff` (`M⊧prwoInstance seq ↔ ¬∀n y z, seq[y,n]→seq[z,n+1]→icmp z y=0`, every `M⊧IΣ₁`) now holds identically in nonstandard models; `_faithful` is its `M=ℕ` corollary. **natCode↔NF bridge DISSOLVED.** **Crux-2 deep core (lap-58 reframe) = `gentzen_descent_of_inconsistent` (per-model semantic form: `¬𝗣𝗔.Consistent M → infinite ε₀-descent`) — 🟡 ACTIVE FRONTIER** (was 🟠 cited eq-5; reclassified lap 62 — feasibility settled by Bryce–Goré Coq, must be fully discharged). The lap-60/61 `wip/InternalZ.lean` engine (idg/iõ/iord + C3 descent templates, axiom-clean) discharges it once the C0 Fixpoint `ZDerivation`, `iR` (C2), and the **C0.5 Foundation→Z bridge** land. The 9 `GentzenCon` axioms: 5 ℕ-meta scaffold (`ord/R/derivesEmpty/...`, not consumed downstream) + 4 per-model (`gentzen_descent_of_inconsistent`/`gentzenDescentφ`/`_dominated`/`_realized` — the real targets). |
