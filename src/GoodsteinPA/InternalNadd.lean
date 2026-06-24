@@ -886,6 +886,75 @@ lemma icmp_term_lt_omega_succ (β k : V) :
     icmp (ocOadd β k 0) (ocOadd (iadd β (ocOadd 0 1 0)) 1 0) = 0 := by
   rw [icmp_ocOadd, self_lt_iadd_one β β le_rfl]; simp [thenV]
 
+/-! ### Right-successor normal form (`a + 1` stays NF) — for `õ`-NF of the I/Ind rules
+
+`iotil_zIall`/`iotil_zIneg`/`iotil_zInd` all raise an exponent to the ordinal successor
+`β + 1 = iadd β (ocOadd 0 1 0)`. To certify `isNF (iotil d)` on derivations (the `hnf` premise of the
+degree-drop and cut descents), we need that adding `1` on the right preserves NF. Adding `1` on the
+right either bumps the trailing finite coefficient or recurses into the tail; the leading exponent is
+untouched, so NF (a descending-exponent spine) is preserved. -/
+
+/-- **`ocExp` of a right-successor**: `ocExp (a + 1) = ocExp a` for `a ≠ 0`. -/
+lemma ocExp_iadd_self_one {a : V} (ha : a ≠ 0) :
+    ocExp (iadd a (ocOadd 0 1 0)) = ocExp a := by
+  obtain ⟨ec, n, rc, rfl⟩ : ∃ ec n rc, a = ocOadd ec n rc :=
+    ⟨_, _, _, (ocOadd_destruct ha).symm⟩
+  rw [iadd_ocOadd, if_neg (ocOadd_ne_zero 0 1 0)]
+  simp only [ocExp_ocOadd]
+  by_cases h0 : icmp ec 0 = 0
+  · exfalso
+    rcases eq_or_ne ec 0 with rfl | hec
+    · rw [icmp_zero_zero] at h0; exact absurd h0 (by simp)
+    · rw [icmp_pos_zero hec] at h0; exact absurd h0 (by simp)
+  · rw [if_neg h0]
+    by_cases h1 : icmp ec 0 = 1
+    · rw [if_pos h1, ocExp_ocOadd]
+    · rw [if_neg h1, ocExp_ocOadd]
+
+/-- **Right-successor NF (order-induction shell)**: `isNF a → isNF (a + 1)`, i.e.
+`isNF (iadd a (ocOadd 0 1 0))`. Structural induction down the spine of `a`: the finite-head case
+bumps the coefficient (`ocOadd ec (n+1) 0`), the infinite-head case recurses into the tail with the
+leading exponent preserved (`ocExp_iadd_self_one`), so the descending-spine side condition transports. -/
+lemma isNF_iadd_self_one : ∀ w : V, ∀ a ≤ w, isNF a → isNF (iadd a (ocOadd 0 1 0)) := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro a haw ha
+    rcases eq_or_ne a 0 with rfl | ha0
+    · rw [iadd_zero_left]
+      exact (isNF_ocOadd 0 1 0).2 ⟨by simp, isNF_zero, isNF_zero, Or.inl rfl⟩
+    · obtain ⟨ec, n, rc, rfl⟩ : ∃ ec n rc, a = ocOadd ec n rc :=
+        ⟨_, _, _, (ocOadd_destruct ha0).symm⟩
+      obtain ⟨hn, hec, hrc, hside⟩ := (isNF_ocOadd ec n rc).mp ha
+      have hrclt : rc < ocOadd ec n rc := by
+        have := ocTail_lt ec n rc; rwa [ocTail_ocOadd] at this
+      rw [iadd_ocOadd, if_neg (ocOadd_ne_zero 0 1 0), ocExp_ocOadd]
+      by_cases h0 : icmp ec 0 = 0
+      · exfalso
+        rcases eq_or_ne ec 0 with rfl | hecne
+        · rw [icmp_zero_zero] at h0; exact absurd h0 (by simp)
+        · rw [icmp_pos_zero hecne] at h0; exact absurd h0 (by simp)
+      · rw [if_neg h0]
+        by_cases h1 : icmp ec 0 = 1
+        · rw [if_pos h1, ocCoeff_ocOadd, ocTail_ocOadd]
+          exact (isNF_ocOadd ec (n + 1) 0).2 ⟨by simp, hec, isNF_zero, Or.inl rfl⟩
+        · rw [if_neg h1]
+          have hecne : ec ≠ 0 := fun h => h1 (by rw [h]; exact icmp_zero_zero)
+          refine (isNF_ocOadd ec n (iadd rc (ocOadd 0 1 0))).2 ⟨hn, hec, ?_, ?_⟩
+          · exact ih rc (lt_of_lt_of_le hrclt haw) rc le_rfl hrc
+          · right
+            rcases eq_or_ne rc 0 with rfl | hrc0
+            · rw [iadd_zero_left, ocExp_ocOadd]; exact icmp_zero_pos hecne
+            · rw [ocExp_iadd_self_one hrc0]
+              rcases hside with h | h
+              · exact absurd h hrc0
+              · exact h
+
+/-- **Right-successor NF** (the usable form): `isNF a → isNF (iadd a (ocOadd 0 1 0))`. -/
+lemma isNF_iadd_one_right {a : V} (ha : isNF a) : isNF (iadd a (ocOadd 0 1 0)) :=
+  isNF_iadd_self_one a a le_rfl ha
+
 /-! ## F2 — a two-power natural sum below a larger ω-power (`ω^{α0} # ω^{α1} ≺ ω^{α}` when `α0,α1 ≺ α`)
 
 The §4 `K^r`-rule assignment (`õ(d) = ω^{õ(d0)} # … # ω^{õ(dl)}`) reorganizes the immediate subderivation
