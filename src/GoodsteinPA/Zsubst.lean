@@ -717,6 +717,112 @@ lemma isChainInf_zsubst {a t s r ds ds' : V} (ht : IsUTerm ℒₒᵣ t)
     rw [hAsucc i hilt, irk_fvSubst ht (hcf i hilt)]
     exact hrank i hi
 
+/-- **Reflection of `inAnt` through `fvSubstSeq`** on an `a`-free formula sequence: if `A` occurs in the
+substituted antecedent `fvSubstSeq a t Γ` and every entry of `Γ ≤ a` is a genuine formula, then `A`
+already occurs in `Γ`. The reverse of `inAnt_fvSubstSeq` — its entries are `a`-free so `fvSubst` fixes
+them. The load-bearing step of the `zK`-criticality transfer's L-symbol case. -/
+lemma inAnt_fvSubstSeq_reflect {a t A Γ : V} (hΓ : Γ ≤ a)
+    (hfs : ∀ k < lh Γ, IsUFormula ℒₒᵣ (znth Γ k))
+    (h : inAnt A (fvSubstSeq a t Γ)) : inAnt A Γ := by
+  obtain ⟨i, hi, hA⟩ := h
+  rw [fvSubstSeq_lh] at hi
+  rw [znth_fvSubstSeq hi, fvSubst_eq_self_of_le (hfs i hi)
+    (le_trans (znth_le_self Γ i) hΓ)] at hA
+  exact ⟨i, hi, hA⟩
+
+/-- **`tp` is invariant under eigenvariable substitution on an `a`-free derivation** (`d ≤ a`): the
+principal formula is `≤ a` hence `^&a`-free, so `fvSubst` fixes it and the inference symbol is unchanged. -/
+lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDerivation d) (hda : d ≤ a) :
+    tp (zsubst d a t) = tp d := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
+    ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+  · simp only [zsubst_zAtom, tp_zAtom]
+  · rw [zsubst_zIall, tp_zIall, tp_zIall,
+      fvSubst_eq_self_of_le hwff.2.2.isUFormula (le_of_lt (lt_of_lt_of_le (p_lt_zIall s e p d0) hda))]
+  · rw [zsubst_zIneg, tp_zIneg, tp_zIneg,
+      fvSubst_eq_self_of_le hwff.2.2 (le_of_lt (lt_of_lt_of_le (p_lt_zIneg s p d0) hda))]
+  · rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm]
+    simp only [zsubst_zInd, tp_zInd]
+  · simp only [zsubst_zK, tp_zK]
+  · rw [zsubst_zAxAll, tp_zAxAll, tp_zAxAll,
+      fvSubst_eq_self_of_le hp (le_of_lt (lt_of_lt_of_le (p_lt_zAxAll s p k) hda))]
+  · rw [zsubst_zAxNeg, tp_zAxNeg, tp_zAxNeg,
+      fvSubst_eq_self_of_le hp (le_of_lt (lt_of_lt_of_le (p_lt_zAxNeg s p) hda))]
+
+/-- **Permissibility against an `a`-free well-formed conclusion reflects through substitution.** If the
+substituted symbol `I` permits the substituted conclusion `fvSubstSeqt a t s` and `s ≤ a` is a genuine
+sequent (succedent + antecedent formulas), then `I` already permits `s`. The conclusion is `^&a`-free so
+its succedent/antecedent are fixed by `fvSubst`; the L-symbol case uses `inAnt_fvSubstSeq_reflect`. This
+turns the `zKValid` criticality `¬iperm (tp dᵢ) s` into `¬iperm (tp (zsubst dᵢ)) (fvSubstSeqt s)`. -/
+lemma iperm_zsubst_conclusion {a t s I : V} (hsa : s ≤ a)
+    (hssf : IsUFormula ℒₒᵣ (seqSucc s))
+    (hsaf : ∀ k < lh (seqAnt s), IsUFormula ℒₒᵣ (znth (seqAnt s) k))
+    (h : iperm I (fvSubstSeqt a t s)) : iperm I s := by
+  rcases h with hR | ⟨k, A, rfl, hA⟩ | hrep
+  · refine Or.inl ?_
+    rw [hR, seqSucc_fvSubstSeqt, fvSubst_eq_self_of_le hssf (le_trans (pi₂_le_self s) hsa)]
+  · rw [seqAnt_fvSubstSeqt] at hA
+    exact Or.inr (Or.inl ⟨k, A, rfl,
+      inAnt_fvSubstSeq_reflect (le_trans (pi₁_le_self s) hsa) hsaf hA⟩)
+  · exact Or.inr (Or.inr hrep)
+
+/-- Principal-formula read-out under substitution (tag 1): `zIallF` commutes with `zsubst`. -/
+lemma zIallF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 1) :
+    zIallF (zsubst d a t) = fvSubst ℒₒᵣ a t (zIallF d) := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp at h
+  · rw [zsubst_zIall]; simp
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+
+/-- Principal-formula read-out under substitution (tag 2): `zInegF` commutes with `zsubst`. -/
+lemma zInegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 2) :
+    zInegF (zsubst d a t) = fvSubst ℒₒᵣ a t (zInegF d) := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp at h
+  · simp at h
+  · rw [zsubst_zIneg]; simp
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+
+/-- Principal-formula read-out under substitution (tag 5): `zAxAllF` commutes with `zsubst`. -/
+lemma zAxAllF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 5) :
+    zAxAllF (zsubst d a t) = fvSubst ℒₒᵣ a t (zAxAllF d) := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+  · rw [zsubst_zAxAll]; simp
+  · simp at h
+
+/-- Principal-formula read-out under substitution (tag 6): `zAxNegF` commutes with `zsubst`. -/
+lemma zAxNegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 6) :
+    zAxNegF (zsubst d a t) = fvSubst ℒₒᵣ a t (zAxNegF d) := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+  · simp at h
+  · rw [zsubst_zAxNeg]; simp
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d ≤ a` yields a
@@ -794,9 +900,73 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
         · rw [seqSucc_fvSubstSeqt, h3, fvSubst_substs1 ht h5 h4]
         · exact fvSubst_isSemiformula ht h4
         · exact IsSemitermVec.termFvSubst ht h5
-    -- zK (hard — deferred to rung-1 step C.zK, see PENDING_WORK)
+    -- zK: rebuild the chain on the substituted premises; validity transfers because `d ≤ a` makes
+    -- every premise/conclusion `^&a`-free, so `isChainInf`/`iperm`/criticality all carry over.
     · intro hda
-      sorry
+      obtain ⟨hci, hperm, hncrit, hf1, hf2, hf5, hf6, hcf, hssf, hsaf⟩ := hvalid
+      have hsa : s ≤ a := le_of_lt (lt_of_lt_of_le (seq_lt_zK s r ds) hda)
+      have hZpr : ∀ i < lh ds, ZDerivation (znth ds i) := fun i hi => (hC _ (hmem i hi)).1
+      have hprle : ∀ i < lh ds, znth ds i ≤ a := fun i hi =>
+        le_trans (znth_le_self ds i) (le_of_lt (lt_of_lt_of_le (ds_lt_zK s r ds) hda))
+      have hmap : ∀ i < lh ds,
+          znth (tblMapSeq (zsubstTable a t (zK s r ds - 1)) ds) i = zsubst (znth ds i) a t := by
+        intro i hi
+        rw [znth_tblMapSeq hi, znth_zsubstTable_eq_zsubst a t _ (znth ds i)
+          (le_pred_of_lt (lt_of_le_of_lt (znth_le_self ds i) (ds_lt_zK s r ds)))]
+      have hlh : lh (tblMapSeq (zsubstTable a t (zK s r ds - 1)) ds) = lh ds := tblMapSeq_lh _ _
+      rw [zsubst_zK]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, r, tblMapSeq (zsubstTable a t (zK s r ds - 1)) ds, rfl, ?_, ?_, ?_⟩)))))
+      · exact tblMapSeq_seq _ _
+      · intro i hi
+        rw [hlh] at hi
+        rw [hmap i hi]
+        exact (hC _ (hmem i hi)).2 (hprle i hi)
+      · refine ⟨isChainInf_zsubst ht.isUTerm hlh hZpr hmap hcf hci, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+        · intro i hi
+          rw [hlh] at hi
+          rw [hmap i hi, fstIdx_zsubst a t (hZpr i hi)]
+          exact iperm_tp_zsubst ht (hZpr i hi) (hperm i hi)
+        · intro i hi hcon
+          rw [hlh] at hi
+          rw [hmap i hi] at hcon
+          exact hncrit i hi (tp_zsubst_eq ht (hZpr i hi) (hprle i hi) ▸
+            iperm_zsubst_conclusion hsa hssf hsaf hcon)
+        · intro i hi htag
+          rw [hlh] at hi
+          rw [hmap i hi] at htag ⊢
+          rw [zTag_zsubst (hZpr i hi)] at htag
+          rw [zIallF_zsubst (hZpr i hi) htag]
+          exact IsUFormula.fvSubst ht.isUTerm (hf1 i hi htag)
+        · intro i hi htag
+          rw [hlh] at hi
+          rw [hmap i hi] at htag ⊢
+          rw [zTag_zsubst (hZpr i hi)] at htag
+          rw [zInegF_zsubst (hZpr i hi) htag]
+          exact IsUFormula.fvSubst ht.isUTerm (hf2 i hi htag)
+        · intro i hi htag
+          rw [hlh] at hi
+          rw [hmap i hi] at htag ⊢
+          rw [zTag_zsubst (hZpr i hi)] at htag
+          rw [zAxAllF_zsubst (hZpr i hi) htag]
+          exact IsUFormula.fvSubst ht.isUTerm (hf5 i hi htag)
+        · intro i hi htag
+          rw [hlh] at hi
+          rw [hmap i hi] at htag ⊢
+          rw [zTag_zsubst (hZpr i hi)] at htag
+          rw [zAxNegF_zsubst (hZpr i hi) htag]
+          exact IsUFormula.fvSubst ht.isUTerm (hf6 i hi htag)
+        · intro i hi
+          rw [hlh] at hi
+          simp only [chainAsucc, hmap i hi, fstIdx_zsubst a t (hZpr i hi), seqSucc_fvSubstSeqt]
+          exact IsUFormula.fvSubst ht.isUTerm (hcf i hi)
+        · rw [seqSucc_fvSubstSeqt]
+          exact IsUFormula.fvSubst ht.isUTerm hssf
+        · intro k hk
+          rw [seqAnt_fvSubstSeqt] at hk ⊢
+          rw [fvSubstSeq_lh] at hk
+          rw [znth_fvSubstSeq hk]
+          exact IsUFormula.fvSubst ht.isUTerm (hsaf k hk)
     -- zAxAll
     · intro _
       rw [zsubst_zAxAll]
