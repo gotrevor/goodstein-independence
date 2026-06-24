@@ -945,6 +945,56 @@ lemma iord_descent_cut {d e : V} (hnf : isNF (iotil d)) (hdeg : idg e + 1 ≤ id
       _ (le_trans (le_max_right _ _) (le_max_right _ _)) step1 hh
   · rw [← hh]; exact step1
 
+/-! ## `iR` — the one-step reduction `d ↦ d[0]` (Buchholz Def 3.2), rule-by-rule SKELETON
+
+`iR` dispatches on `zTag d`. This lap builds the **structural (LOW-HANGING) branches** — the `I_¬A`
+and `I^a_∀xF` rules, whose reduct is simply the premise `d₀` (Buchholz §3.2 cases 2,3; the `I∀`
+substitution `d₀(a/0)` is invariant for the ordinal assignment, judge §2 LH2, so the skeleton reads
+the bare premise). The `atom`/`Ind`/`K^r` branches are placeholders (`iR d := d`) pending: `Ind` →
+the `K^r`-chain reduct (LH4), `K^r` → the non-critical chain step (LH3/LH5) and the **critical
+branch** (the nut, §8.3 — builds `d{0}=K^r(i/dᵢ[k])`, `d{1}=K^r(j/d_j[0])`, `d[0]=K^{r-1}d{0}d{1}`).
+Flagged in `PENDING_WORK.md`. -/
+
+@[simp] lemma zTag_le_self (d : V) : zTag d ≤ d := le_trans (pi₁_le_self _) (sndIdx_le_self d)
+
+/-- One-step reduction `d ↦ d[0]` (structural-branch skeleton): `I^a_∀` and `I_¬` reduce to their
+premise; other tags are placeholders (identity) until their reducts are built. -/
+noncomputable def iR (d : V) : V :=
+  if zTag d = 1 then zIallPrem d
+  else if zTag d = 2 then zInegPrem d
+  else d
+
+def _root_.LO.FirstOrder.Arithmetic.iRDef : 𝚺₀.Semisentence 2 := .mkSigma
+  “y d. ∃ t <⁺ d, !zTagDef t d ∧
+    ( (t = 1 ∧ !zIallPremDef y d) ∨
+      (t ≠ 1 ∧ t = 2 ∧ !zInegPremDef y d) ∨
+      (t ≠ 1 ∧ t ≠ 2 ∧ y = d) )”
+
+instance iR_defined : 𝚺₀-Function₁ (iR : V → V) via iRDef := .mk fun v ↦ by
+  simp [iRDef, iR, zTag_defined.iff, zIallPrem_defined.iff, zInegPrem_defined.iff]
+  by_cases h1 : zTag (v 1) = 1 <;> by_cases h2 : zTag (v 1) = 2 <;> simp [h1, h2]
+
+instance iR_definable : 𝚺₀-Function₁ (iR : V → V) := iR_defined.to_definable
+
+-- Compute lemmas: `iR` on each constructor.
+@[simp] lemma iR_zIall (s a p d0 : V) : iR (zIall s a p d0) = d0 := by simp [iR]
+@[simp] lemma iR_zIneg (s p d0 : V) : iR (zIneg s p d0) = d0 := by simp [iR]
+@[simp] lemma iR_zAtom (s : V) : iR (zAtom s) = zAtom s := by simp [iR]
+@[simp] lemma iR_zInd (s at' p d0 d1 : V) : iR (zInd s at' p d0 d1) = zInd s at' p d0 d1 := by
+  simp [iR]
+@[simp] lemma iR_zK (s r ds : V) : iR (zK s r ds) = zK s r ds := by simp [iR]
+
+/-- **Descent through `iR`** for the structural rules: `o(iR d) ≺ o(d)` for `I_¬A`/`I^a_∀xF` codes.
+Composes the `iR`-compute lemma with the per-rule `iord_descent_z*`. The atom/Ind/K branches' descent
+arrives when their reducts are built. -/
+lemma iord_descent_iR_zIneg (s p d0 : V) :
+    icmp (iord (iR (zIneg s p d0))) (iord (zIneg s p d0)) = 0 := by
+  rw [iR_zIneg]; exact iord_descent_zIneg s p d0
+
+lemma iord_descent_iR_zIall (s a p d0 : V) :
+    icmp (iord (iR (zIall s a p d0))) (iord (zIall s a p d0)) = 0 := by
+  rw [iR_zIall]; exact iord_descent_zIall s a p d0
+
 /-! ## Structural NF building blocks for `õ` (toward `isNF (iotil d)` on derivations)
 
 `õ(d)` is a valid CNF code (`isNF`) for genuine derivations. The general fact needs structural
