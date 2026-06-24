@@ -26,13 +26,19 @@ This is hardest-first crux-1 work; the descent half is already general (works fo
 FUNCTION, sorry-free + axiom-free. **Step 2 DONE (`2f8f72e`):** `src/GoodsteinPA/StdCor34F.lean` —
 `crux1_internal_run_F` drives the internal run over the width function, C-bound + within-block
 domination discharged internally (`iC_le_wsumcF`, `one_le_iC_of_ne_zero`); no `hβC`/`Cβ`/`wseq`.
-**NEXT = step 3:** re-thread `wip/GentzenCon.lean` `seqDescent_dominated` onto `crux1_internal_run_F`:
-- `SeqRealized` carries explicit `βDef : 𝚺₁.Semisentence 2` + `DefinedFunction₁ β βDef` (NOT
-  `𝚺₁-Function₁ β` — that allows V-params, can't bake into the PR blueprint).
-- `SeqStdBounded` → width form `∀ n y, M⊧/![y, n+1] seq → iC y ≤ iF l₀ n` (honest Lemma-3.2, no
-  off-by-one); add `0 < l₀`.
-- Drop `SeqDominated`/`nonterminating_of_dominated` (dead finite-`wseq` girder); `nonterminating_of_seq_descent`
-  becomes a direct `crux1_internal_run_F` call. Closes the crux-1 width gap entirely.
+**Step 3 DONE (`2199982`) — CRUX 1 CLOSED.** `wip/GentzenCon.lean` `nonterminating_of_seq_descent` calls
+`StdCor34F.crux1_internal_run_F` directly (clean `[propext,choice,Quot.sound]`); dead finite-`wseq` girder
+gone. `SeqRealized` carries explicit `βDef`; `SeqStdBounded` width form. **The crux-1 sorry is gone.**
+
+## ⭐ NEXT TARGET = CRUX 2 (the only remaining sorry; 🟠 generational)
+`gentzen_prwo_implies_consistency : 𝗣𝗔 ⊢ prwoInstance gentzenDescentφ → 𝗣𝗔 ⊢ Con(𝗣𝗔)` (Gentzen). Needs
+the `𝗣𝗔`-arithmetization of the ordinal assignment `ord`, reduction `R`, and eq-(5) `ord(R d) ≺ ord d`
+(currently disclosed axioms `ord`/`R`/`derivesEmpty`/`R_preserves_empty`/`ord_R_descends`/`gentzenDescentφ`
+/`gentzenDescentφ_realized`/`gentzenDescentφ_dominated`). Sources: `papers/buchholz-on-gentzens-first-
+consistency-proof.pdf`, `papers/siders-*.pdf`; Foundation `Theory.Derivation` substrate
+(`Bootstrapping/Syntax/Proof/Basic.lean`). Attack paths: (a) read Buchholz, decompose eq-(5)
+lemma-by-lemma; (b) state `ord`/`R` as `ℒₒᵣ`-arithmetized primrec functions over coded derivations;
+(c) the `gentzenDescentφ_*` certificates then discharge from `ord`/`R`'s fixed build tree (Rathjen 3.2).
 
 ## Lap 56 — crux-1 redirect: natCode↔NF bridge DISSOLVED (transparent icmp); over-generality sharpened
 
