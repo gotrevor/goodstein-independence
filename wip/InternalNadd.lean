@@ -483,7 +483,7 @@ lemma insTerm_prepend {e n b : V} (h : b = 0 ∨ icmp (ocExp b) e = 0) :
 
 /-- **Right unit of `#`.** The natural sum of an NF code with `0` is itself: order-induction on `a`,
 each leading term re-prepended via `insTerm_prepend` (NF guarantees the strict-dominance side). -/
-lemma inadd_zero_right : ∀ a, isNF a → inadd a 0 = a := by
+lemma inadd_zero_right : ∀ a : V, isNF a → inadd a 0 = a := by
   intro a
   induction a using ISigma1.sigma1_order_induction
   · definability
@@ -904,5 +904,147 @@ lemma icmp_omega_pow_nadd_lt {α0 α1 α : V} (h0 : icmp α0 α = 0) (h1 : icmp 
   by_cases hc : icmp α0 α1 = 0
   · rw [if_pos hc]; exact h1
   · rw [if_neg hc]; exact h0
+
+/-! ## F4 — commutativity of the natural sum `#`
+
+`inadd a b = inadd b a` for NF `a, b`. The natural sum is order-independent: every leading term of `a`
+and `b` lands at its `≺`-sorted position regardless of insertion order, merging coefficients on equal
+exponents. This is the NF canonical-form fact Buchholz §4 needs to match `d[n]`'s reassembled ordinal
+to `d`'s when the `K^r`-rule permutes summands. The crux is **`insTerm_comm`** (single-term insertions
+commute); commutativity of the full fold then follows by `inadd_insTerm_comm` + `insTerm_prepend`. -/
+
+/-- `insTerm` on a `>`-head: prepend the new term. -/
+private lemma insTerm_gt {e n ec nc rc : V} (h : icmp e ec = 2) :
+    insTerm e n (ocOadd ec nc rc) = ocOadd e n (ocOadd ec nc rc) := by
+  rw [insTerm_ocOadd, if_pos h]
+
+/-- `insTerm` on an `=`-head: merge coefficients. -/
+private lemma insTerm_eq {e n ec nc rc : V} (h : icmp e ec = 1) :
+    insTerm e n (ocOadd ec nc rc) = ocOadd e (n + nc) rc := by
+  rw [insTerm_ocOadd, if_neg (by rw [h]; simp), if_pos h]
+
+/-- `insTerm` on a `<`-head: keep the head, recurse into the tail. -/
+private lemma insTerm_lt {e n ec nc rc : V} (h : icmp e ec = 0) :
+    insTerm e n (ocOadd ec nc rc) = ocOadd ec nc (insTerm e n rc) := by
+  rw [insTerm_ocOadd, if_neg (by rw [h]; simp), if_neg (by rw [h]; simp)]
+
+/-- **Single-term insertions commute** (NF `b`): `insTerm e1 n1 (insTerm e2 n2 b) =
+insTerm e2 n2 (insTerm e1 n1 b)`. Strong induction on `b`; a full 3×3 case split on
+`(icmp e1 (ocExp b), icmp e2 (ocExp b))` — both-prepend reduces to a two-singleton commute, mixed
+positions use `≺`-transitivity, both-recurse uses the IH on the tail, equal-exponent merges use
+`add`-commutativity. -/
+lemma insTerm_comm {e1 n1 e2 n2 : V} :
+    ∀ b, isNF b → insTerm e1 n1 (insTerm e2 n2 b) = insTerm e2 n2 (insTerm e1 n1 b) := by
+  have trans3 : ∀ x y z : V, icmp x y = 0 → icmp y z = 0 → icmp x z = 0 := fun x y z hxy hyz =>
+    icmp_trans (max x (max y z)) x (le_max_left _ _) y
+      (le_trans (le_max_left _ _) (le_max_right _ _)) z
+      (le_trans (le_max_right _ _) (le_max_right _ _)) hxy hyz
+  intro b
+  induction b using ISigma1.sigma1_order_induction
+  · definability
+  case ind b IH =>
+    intro hb
+    rcases eq_or_ne b 0 with rfl | hb0
+    · -- b = 0: two single terms.
+      rw [insTerm_zero, insTerm_zero]
+      rcases icmp_tri e1 e2 with h | h | h
+      · rw [insTerm_lt h, insTerm_zero, insTerm_gt (icmp_two_iff_swap_zero.mpr h)]
+      · have he : e1 = e2 :=
+          icmp_eq_imp_eq (max e1 e2) e1 (le_max_left _ _) e2 (le_max_right _ _) h
+        have h21 : icmp e2 e1 = 1 := by rw [he]; exact icmp_self e2 e2 le_rfl
+        rw [insTerm_eq h, insTerm_eq h21, he, add_comm n1 n2]
+      · rw [insTerm_gt h, insTerm_lt (icmp_two_iff_swap_zero.mp h), insTerm_zero]
+    · obtain ⟨eb, nb, rb, rfl⟩ : ∃ eb nb rb, b = ocOadd eb nb rb :=
+        ⟨_, _, _, (ocOadd_destruct hb0).symm⟩
+      obtain ⟨hnb, heb, hrb, hside⟩ := (isNF_ocOadd eb nb rb).mp hb
+      have hrblt : rb < ocOadd eb nb rb := by
+        have := ocTail_lt eb nb rb; rwa [ocTail_ocOadd] at this
+      rcases icmp_tri e1 eb with h1 | h1 | h1 <;> rcases icmp_tri e2 eb with h2 | h2 | h2
+      · -- (0,0): both recurse into the tail; IH on rb.
+        rw [insTerm_lt h2, insTerm_lt h1, insTerm_lt h1, insTerm_lt h2, IH rb hrblt hrb]
+      · -- (0,1): e2 = eb; e1 ≺ eb.
+        have he2 : e2 = eb :=
+          icmp_eq_imp_eq (max e2 eb) e2 (le_max_left _ _) eb (le_max_right _ _) h2
+        have h12 : icmp e1 e2 = 0 := by rw [he2]; exact h1
+        rw [insTerm_eq h2, insTerm_lt h12, insTerm_lt h1, insTerm_eq h2]
+      · -- (0,2): e1 ≺ eb ≺ e2.
+        have h12 : icmp e1 e2 = 0 := trans3 e1 eb e2 h1 (icmp_two_iff_swap_zero.mp h2)
+        rw [insTerm_gt h2, insTerm_lt h12, insTerm_lt h1, insTerm_gt h2]
+      · -- (1,0): e1 = eb; e2 ≺ eb.
+        have he1 : e1 = eb :=
+          icmp_eq_imp_eq (max e1 eb) e1 (le_max_left _ _) eb (le_max_right _ _) h1
+        have h21 : icmp e2 e1 = 0 := by rw [he1]; exact h2
+        rw [insTerm_lt h2, insTerm_eq h1, insTerm_eq h1, insTerm_lt h21]
+      · -- (1,1): e1 = eb = e2.
+        have he1 : e1 = eb :=
+          icmp_eq_imp_eq (max e1 eb) e1 (le_max_left _ _) eb (le_max_right _ _) h1
+        have he2 : e2 = eb :=
+          icmp_eq_imp_eq (max e2 eb) e2 (le_max_left _ _) eb (le_max_right _ _) h2
+        have h12 : icmp e1 e2 = 1 := by rw [he1, he2]; exact icmp_self eb eb le_rfl
+        have h21 : icmp e2 e1 = 1 := by rw [he1, he2]; exact icmp_self eb eb le_rfl
+        rw [insTerm_eq h2, insTerm_eq h1, insTerm_eq h12, insTerm_eq h21, he1, he2, add_left_comm]
+      · -- (1,2): e1 = eb ≺ e2.
+        have he1 : e1 = eb :=
+          icmp_eq_imp_eq (max e1 eb) e1 (le_max_left _ _) eb (le_max_right _ _) h1
+        have h12 : icmp e1 e2 = 0 := by rw [he1]; exact icmp_two_iff_swap_zero.mp h2
+        have h21 : icmp e2 e1 = 2 := by rw [he1]; exact h2
+        rw [insTerm_gt h2, insTerm_lt h12, insTerm_eq h1, insTerm_gt h21]
+      · -- (2,0): e2 ≺ eb ≺ e1.
+        have h21 : icmp e2 e1 = 0 := trans3 e2 eb e1 h2 (icmp_two_iff_swap_zero.mp h1)
+        rw [insTerm_lt h2, insTerm_gt h1, insTerm_gt h1, insTerm_lt h21, insTerm_lt h2]
+      · -- (2,1): e2 = eb ≺ e1.
+        have he2 : e2 = eb :=
+          icmp_eq_imp_eq (max e2 eb) e2 (le_max_left _ _) eb (le_max_right _ _) h2
+        have h12 : icmp e1 e2 = 2 := by rw [he2]; exact h1
+        have h21 : icmp e2 e1 = 0 := by rw [he2]; exact icmp_two_iff_swap_zero.mp h1
+        rw [insTerm_eq h2, insTerm_gt h12, insTerm_gt h1, insTerm_lt h21, insTerm_eq h2]
+      · -- (2,2): both prepend; two-singleton commute on tail b.
+        rw [insTerm_gt h2, insTerm_gt h1]
+        rcases icmp_tri e1 e2 with h | h | h
+        · rw [insTerm_lt h, insTerm_gt h1, insTerm_gt (icmp_two_iff_swap_zero.mpr h)]
+        · have he : e1 = e2 :=
+            icmp_eq_imp_eq (max e1 e2) e1 (le_max_left _ _) e2 (le_max_right _ _) h
+          have h21 : icmp e2 e1 = 1 := by rw [he]; exact icmp_self e2 e2 le_rfl
+          rw [insTerm_eq h, insTerm_eq h21, he, add_comm n1 n2]
+        · rw [insTerm_gt h, insTerm_lt (icmp_two_iff_swap_zero.mp h), insTerm_gt h2]
+
+/-- **Inserting commutes past the fold**: `inadd a (insTerm e n b) = insTerm e n (inadd a b)`
+(NF `a`, NF `b`). Induction on `a`'s spine (`b` fixed); each leading term commutes past the insertion
+via `insTerm_comm`. -/
+lemma inadd_insTerm_comm {e n : V} (b : V) (hb : isNF b) : ∀ a, isNF a →
+    inadd a (insTerm e n b) = insTerm e n (inadd a b) := by
+  intro a
+  induction a using ISigma1.sigma1_order_induction
+  · definability
+  case ind a IH =>
+    intro ha
+    rcases eq_or_ne a 0 with rfl | ha0
+    · rw [inadd_zero_left, inadd_zero_left]
+    · obtain ⟨ea, ca, ra, rfl⟩ : ∃ ea ca ra, a = ocOadd ea ca ra :=
+        ⟨_, _, _, (ocOadd_destruct ha0).symm⟩
+      obtain ⟨hca, hea, hra, hside⟩ := (isNF_ocOadd ea ca ra).mp ha
+      have hralt : ra < ocOadd ea ca ra := by
+        have := ocTail_lt ea ca ra; rwa [ocTail_ocOadd] at this
+      rw [inadd_ocOadd, inadd_ocOadd, IH ra hralt hra,
+        insTerm_comm _ (isNF_inadd hb ra hra)]
+
+/-- **F4 — commutativity of the natural sum `#`**: `inadd a b = inadd b a` for NF `a, b`. Induction on
+`a` (`b` fixed); the leading term of `a` commutes past the whole sum (`inadd_insTerm_comm`), and an NF
+head re-prepends as itself (`insTerm_prepend`). -/
+lemma inadd_comm (b : V) (hb : isNF b) : ∀ a, isNF a → inadd a b = inadd b a := by
+  intro a
+  induction a using ISigma1.sigma1_order_induction
+  · definability
+  case ind a IH =>
+    intro ha
+    rcases eq_or_ne a 0 with rfl | ha0
+    · rw [inadd_zero_left]; exact (inadd_zero_right b hb).symm
+    · obtain ⟨ea, ca, ra, rfl⟩ : ∃ ea ca ra, a = ocOadd ea ca ra :=
+        ⟨_, _, _, (ocOadd_destruct ha0).symm⟩
+      obtain ⟨hca, hea, hra, hside⟩ := (isNF_ocOadd ea ca ra).mp ha
+      have hralt : ra < ocOadd ea ca ra := by
+        have := ocTail_lt ea ca ra; rwa [ocTail_ocOadd] at this
+      rw [inadd_ocOadd, IH ra hralt hra, ← inadd_insTerm_comm ra hra b hb,
+        insTerm_prepend hside]
 
 end GoodsteinPA.InternalONote
