@@ -389,4 +389,80 @@ lemma ocExp_insTerm (e n b : V) :
         · rw [if_neg h2, if_pos h1, ocExp_ocOadd]
         · exact absurd (icmp_eq_zero_of_ne h1 h2) h0
 
+/-! ## NF preservation of `insTerm` -/
+
+/-- **`insTerm` preserves NF.** Inserting a single term `ω^e·n` (`isNF e`, `n ≠ 0`) into an NF code
+`b` yields an NF code: order-induction on `b`, mirroring the three `insTerm_ocOadd` branches. -/
+lemma isNF_insTerm {e n : V} (he : isNF e) (hn : n ≠ 0) :
+    ∀ b, isNF b → isNF (insTerm e n b) := by
+  intro b
+  induction b using ISigma1.sigma1_order_induction
+  · definability
+  case ind b IH =>
+    intro hb
+    rcases eq_or_ne b 0 with rfl | hb0
+    · rw [insTerm_zero, isNF_ocOadd]
+      exact ⟨hn, he, isNF_zero, Or.inl rfl⟩
+    · obtain ⟨ec, nc, rc, rfl⟩ : ∃ ec nc rc, b = ocOadd ec nc rc :=
+        ⟨_, _, _, (ocOadd_destruct hb0).symm⟩
+      rw [isNF_ocOadd] at hb
+      obtain ⟨hnc, hec, hrc, hside⟩ := hb
+      rw [insTerm_ocOadd]
+      by_cases h2 : icmp e ec = 2
+      · -- `e ≻ ec`: prepend the new term. New tail is the (NF) old code; its lead exp `ec ≺ e`.
+        rw [if_pos h2, isNF_ocOadd]
+        refine ⟨hn, he, ?_, Or.inr ?_⟩
+        · rw [isNF_ocOadd]; exact ⟨hnc, hec, hrc, hside⟩
+        · rw [ocExp_ocOadd]; exact icmp_two_iff_swap_zero.mp h2
+      · rw [if_neg h2]
+        by_cases h1 : icmp e ec = 1
+        · -- `e = ec`: merge coefficients. Side condition transports along `e = ec`.
+          rw [if_pos h1, isNF_ocOadd]
+          have hee : e = ec :=
+            icmp_eq_imp_eq (max e ec) e (le_max_left _ _) ec (le_max_right _ _) h1
+          have hnn : n + nc ≠ 0 :=
+            (lt_of_lt_of_le (pos_iff_ne_zero.mpr hn) (le_add_right (le_refl n))).ne'
+          refine ⟨hnn, he, hrc, ?_⟩
+          rcases hside with h | h
+          · exact Or.inl h
+          · exact Or.inr (by rw [hee]; exact h)
+        · -- `e ≺ ec`: recurse into the tail; keep head `ec`.
+          rw [if_neg h1]
+          have h0 : icmp e ec = 0 := icmp_eq_zero_of_ne h1 h2
+          have hrclt : rc < ocOadd ec nc rc := by
+            have := ocTail_lt ec nc rc; rwa [ocTail_ocOadd] at this
+          have hrec : isNF (insTerm e n rc) := IH rc hrclt hrc
+          rw [isNF_ocOadd]
+          refine ⟨hnc, hec, hrec, Or.inr ?_⟩
+          rw [ocExp_insTerm]
+          rcases eq_or_ne rc 0 with rfl | hrc0
+          · rw [if_pos rfl]; exact h0
+          · rw [if_neg hrc0]
+            by_cases hcmp : icmp e (ocExp rc) = 0
+            · rw [if_pos hcmp]
+              rcases hside with h | h
+              · exact absurd h hrc0
+              · exact h
+            · rw [if_neg hcmp]; exact h0
+
+/-- **`inadd` preserves NF.** The natural sum of two NF codes is NF: order-induction on the first
+summand `a`, folding the leading term of `a` into the (recursively NF) `inadd rc b` via
+`isNF_insTerm`. -/
+lemma isNF_inadd {b : V} (hb : isNF b) : ∀ a, isNF a → isNF (inadd a b) := by
+  intro a
+  induction a using ISigma1.sigma1_order_induction
+  · definability
+  case ind a IH =>
+    intro ha
+    rcases eq_or_ne a 0 with rfl | ha0
+    · rw [inadd_zero_left]; exact hb
+    · obtain ⟨ec, nc, rc, rfl⟩ : ∃ ec nc rc, a = ocOadd ec nc rc :=
+        ⟨_, _, _, (ocOadd_destruct ha0).symm⟩
+      rw [isNF_ocOadd] at ha
+      obtain ⟨hnc, hec, hrc, _⟩ := ha
+      rw [inadd_ocOadd]
+      have hrclt : rc < ocOadd ec nc rc := by
+        have := ocTail_lt ec nc rc; rwa [ocTail_ocOadd] at this
+      exact isNF_insTerm hec hnc _ (IH rc hrclt hrc)
+
 end GoodsteinPA.InternalONote
