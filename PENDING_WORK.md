@@ -1,5 +1,54 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 73 — RUNG 1 STEP 1 DONE + STEP 2 SUBSTRATE COMPLETE (`fstIdx_zsubst`, full subst-commutation)
+
+**Landed (green 1323, all axiom-clean `[propext, Classical.choice, Quot.sound]`):**
+- **Step 1 DONE** (`Zsubst.lean`): `zsubst` table structural correctness (`zsubstTable_seq/_lh`,
+  `znth_zsubstTable_eq_zsubst`, `zsubst_eq_zsubstNext`), the 7 per-rule recursion equations
+  (`zsubst_zAtom`…`zsubst_zAxNeg`), and **`fstIdx_zsubst : ZDerivation d → fstIdx (zsubst d a t) =
+  fvSubstSeqt a t (fstIdx d)`** (7-way `zDerivation_iff` case split).
+- **Step 2 SUBSTRATE COMPLETE** (`FvSubst.lean` general-`L`, + 2 lemmas in `Zsubst.lean`):
+  `IsUTerm.termFvSubst`/`IsUTermVec.termFvSubst` (UTerm preservation), `IsUFormula.fvSubst`,
+  `fvSubst_neg`, `inAnt_fvSubstSeq`, `fvSubst_inegF`, `termBShift_eq_self_of_closed`,
+  `termFvSubst_termBShift`, `termFvSubstVec_qVec`, **`termFvSubst_termSubst`** (term subst lemma),
+  **`fvSubst_subst`** (formula subst lemma, `pi1_structural_induction`, mirror `substs_substs`), and
+  **`fvSubst_substs1_fvar : a'≠a → fvSubst a t (substs1 ^&a' p) = substs1 ^&a' (fvSubst a t p)`**
+  (Buchholz regularity; the zIall/zInd succedent transfer). `t` always closed (`IsSemiterm ℒₒᵣ 0 t`).
+
+**NEXT — `ZDerivation_zsubst` assembly (rung-1 step 2 proper). Two findings (design RESOLVED):**
+
+**(A) Freshness = the `d ≤ a` code-bound (no tree predicate needed).** Every internal eigenvariable
+`e` of a node `n ≤ d` satisfies `e < n ≤ d` (zIall: `a_lt_zIall : a' < zIall…`; zInd: `e = π₁ at' ≤ at'
+< zInd…` via `pi₁_le_self` + `at_lt_zInd`). So state
+`ZDerivation_zsubst : ZDerivation d → d ≤ a → IsSemiterm ℒₒᵣ 0 t → ZDerivation (zsubst d a t)`
+with motive `P d := ∀ a, d ≤ a → ∀ t, IsSemiterm ℒₒᵣ 0 t → ZDerivation (zsubst d a t)` over
+`zDerivation_induction`. Children `< d ≤ a` ⟹ IH applies (`d0 < d ≤ a → d0 ≤ a`); eigenvariables
+`e < d ≤ a ⟹ e ≠ a` (`ne_of_lt`), discharging `fvSubst_substs1_fvar`'s `a'≠a`. Build via
+`zDerivation_iff.mpr` (one-step) → `ZPhi {ZDerivation} (zsubst d a t)`, 7-tag.
+⚠ CAVEAT: rung 2 invokes `zsubst d1 at' j` (eigenvariable `at'`, numeral `j`) — needs `d1 ≤ at'`,
+NOT guaranteed by `at' < zInd` alone. So `d ≤ a` may need generalizing to a genuine
+"a ∉ eigenvars(d)" tree predicate for the rung-2 USE (a fixpoint/cov predicate). Prove the `d ≤ a`
+version first (correct + provable), generalize only if rung 2 forces it.
+
+**(B) WELL-FORMEDNESS GAP — the real blocker.** The commutation lemmas need principal-formula
+formula-hood that `ZPhi` does NOT currently carry: `fvSubst_all` needs `IsUFormula p` (zIall/zInd
+succedent), `fvSubst_inegF` needs `IsUFormula p` (zIneg), `fvSubst_substs1_fvar` needs
+`IsSemiformula ℒₒᵣ 1 p` (zIall/zInd matrix). `zAxAll`/`zAxNeg` disjuncts ALREADY carry `IsUFormula p`;
+I∀/I¬/Ind do NOT. **Fix = lap-71 cascade**: add `IsSemiformula ℒₒᵣ 1 p` to `zIallWff`/`zIndWff` and
+`IsUFormula ℒₒᵣ p` to `zInegWff` (both `𝚫₁`: `isSemiformula L`/`isUFormula L` Defs exist). Blast radius
+is SMALL — the `ZPhi` plumbing (`zphi_monotone`/`_strong_finite`/`zphi_iff`/blueprint σ-π/`zPhi_definable`)
+threads `…Wff` OPAQUELY; only the `…WffDef` + `_defined` proof change, and the `_inv` lemmas return more
+(callers unaffected). Risk: the `_defined` 𝚫₁ proof (mirror how `zKValidDef` embeds `(isUFormula ℒₒᵣ).sigma/.pi`
+under `val_sigma`). Start with `zInegWff` (binary, fewest sites: def 1264, Def 1269, _defined 1279, σ-core
+3709, π-core 3727, definable 3747, inv 4853), validate the recipe, then zIall/zInd.
+
+**Assembly per-case sketch (after B):** atom→`inAnt_fvSubstSeq` (no fresh/IH); zIall→IH(d0)+`fvSubst_all`+
+`fvSubst_substs1_fvar`(a'≠a)+`seqAnt` via `fvSubstSeq`; zIneg→IH+`fvSubst_inegF`; zInd→2×IH+numeral/qqAdd
+commutation (`termFvSubst` of `numeral 0`/`qqAdd (^&a) (numeral 1)` — numerals closed so fixed; need
+`termFvSubst_numeral`/`_qqAdd` helpers); zK→per-premise IH via `znth_zsubstTable_eq_zsubst`+`zKValid`
+transfer (iperm/tp invariance under subst — likely needs `tp_fvSubst`/`iperm` subst-invariance, CHECK);
+zAxAll/zAxNeg→`IsUFormula.fvSubst`+`inAnt_fvSubstSeq`. Then step 3 `iotil_zsubst = iotil` (õ subst-inv).
+
 ## ⭐⭐⭐ Lap 72 — RUNG 1 `zsubst` DEFINED (eigenvariable substitution on Z-derivations)
 
 **Landed (green 1323, axiom-clean), see `HANDOFF-2026-06-24-lap72.md` for the full ledger:**
