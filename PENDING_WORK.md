@@ -1,5 +1,31 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 78 (FRESH-MIND REVIEW) — crux-2 rung-2 is ARCHITECTURE-BLOCKED; pivot to `PA_delta1Definable`
+
+**Read `ANALYSIS-2026-06-24-lap78-criticality-substitution-wall.md` FIRST.** The lap-77 plan ("front A:
+generalize `ZDerivation_zsubst` to `aNotEigen d` + `a ∉ FV(conclusion)`") is **insufficient** — proven by
+two explicit counterexamples:
+- **CE-1**: inner chain conclusion `s'` containing `^&a` ⟹ `aNotEigen`-only does NOT rule out the
+  criticality collapse (`^∀(^&a=^&a)` vs `^∀(0=^&a)` both → `^∀(0=0)` under `a↦0`).
+- **CE-2**: even with **full Buchholz regularity** (`^&a` only in `F(·)`-occurrences), a substituted
+  numeral `i` coinciding with a conclusion term `F(i)` collapses criticality. Rung 2 substitutes the
+  whole range `i=0…k-1`, so any inner chain concluding `F(j)`, `j<k`, is hit.
+
+⟹ `ZDerivation_zsubst` cannot be the exact-validity-preserving lemma rung 2 needs. **The chain-rule
+criticality design (formula-inequality `tp dᵢ ≠ seqSucc s`, `InternalZ.lean:1204`) is the problem.**
+Fork (a DEEP-REFLECTION decision, NOT a grind snap-pick): (1) re-reduction semantics; (2) **structural
+criticality** — track the principal premise by index/rank not syntactic inequality (most principled,
+matches Buchholz operator-control; largest rewrite); (3) restrict + discharge a side-condition (cheapest,
+likely false). **Recommend option 2 when this is next revisited at altitude.**
+
+**This lap pivots to the second front `PA_delta1Definable`** (mandatory for the axiom-free headline; the
+operator's literal instruction). Status: `𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`. Foundation has
+`Theory.Δ₁` combinators for `∅`/`{φ}`/`T+U`/`insert` (so FINITE theories are reachable) but **NO**
+`InductionScheme.Δ₁` (the infinite scheme — the real wall). `𝗣𝗔⁻` is finite (`= 𝗘𝗤 ∪ {17 axioms}`) but
+has no `Δ₁` instance yet either. Attack order: (a) `𝗣𝗔⁻.Δ₁` via the finite combinators (tractable brick);
+(b) `(InductionScheme ℒₒᵣ Set.univ).Δ₁` = build internal `succInd`/`univCl` recognizer (the multi-lap
+arithmetization). `ZDerivation_zsubst` (`d≤a` form) stays banked + axiom-clean.
+
 ## ⭐ Lap 76 — rung-1 `ZDerivation_zsubst` 6/7; zK case + a DESIGN OBSTRUCTION (read first)
 
 `ZDerivation_zsubst` (`Zsubst.lean`, end) is proven for atom/zIall/zIneg/zInd/zAxAll/zAxNeg; the **zK

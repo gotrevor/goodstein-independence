@@ -84,3 +84,8 @@ import GoodsteinPA.DescentSemantic
 import GoodsteinPA.DescentConstruction
 import GoodsteinPA.ReductModel
 import GoodsteinPA.XCongruence
+
+-- Second front to the axiom-free headline (lap 78): discharge Foundation's `PA_delta1Definable`
+-- axiom in-repo. `𝗣𝗔⁻.Δ₁` is axiom-clean; the full induction-scheme Δ₁ recognizer is the disclosed
+-- remaining obligation. Not yet wired into `Reduction.lean` (anti-fraud — see file docstring).
+import GoodsteinPA.PADelta1

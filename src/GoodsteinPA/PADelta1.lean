@@ -1,0 +1,73 @@
+/-
+# Discharging `PA_delta1Definable` — the second front to the axiom-free headline
+
+**Goal (operator directive, lap 78).** The headline `peano_not_proves_goodstein` must be
+`#print axioms`-clean (trust base only). Two blockers: crux 2 (the `RedSound` cut-elimination,
+architecture-blocked — see `ANALYSIS-2026-06-24-lap78-criticality-substitution-wall.md`) and
+**`PA_delta1Definable`** — Foundation's disclosed `axiom 𝗣𝗔.Δ₁` (`Incompleteness/Examples.lean:17`,
+the arithmetization of PA's Δ₁-definability, a standing TODO upstream). Gödel II for `𝗣𝗔`
+(`peano_not_proves_consistency`, `Reduction.lean`) routes through it, so the headline carries it.
+
+This file discharges that axiom **without editing the pinned Foundation package**: it rebuilds the
+`𝗣𝗔.Δ₁` instance in-repo as a `def`, so `Reduction.lean` can pass it explicitly to
+`consistent_unprovable` and drop `PA_delta1Definable` from `#print axioms`.
+
+## Status (lap 78)
+- ✅ `paMinusDelta1 : 𝗣𝗔⁻.Δ₁` — **axiom-clean.** `𝗣𝗔⁻` is finite (`PeanoMinus.finite`), so
+  `Theory.Δ₁.ofFinite` gives it directly (the `singleton`/`add`/`ofList` combinators enumerate the
+  17 axioms + the finite `𝗘𝗤` over `ℒₒᵣ`).
+- ⏳ `inductionSchemeUnivDelta1 : (InductionScheme ℒₒᵣ Set.univ).Δ₁` — **the genuine wall** (one
+  disclosed `sorry`). The infinite induction scheme has no finite enumeration; it needs an internal
+  Δ₁ recognizer for codes of `univCl (succInd φ)`. See the obligation note on that def.
+- ✅ `paDelta1 : 𝗣𝗔.Δ₁ := paMinusDelta1.add inductionSchemeUnivDelta1` — the assembly is `rfl`-valid
+  (`𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ`); ready to rewire `Reduction.lean` once the scheme is
+  sorry-free.
+
+ANTI-FRAUD: `paDelta1` carries `sorryAx` until `inductionSchemeUnivDelta1` is real. Do NOT rewire
+`Reduction.lean` to `paDelta1` while the `sorry` stands — that would merely swap `PA_delta1Definable`
+for `sorryAx` with no honesty gain. Rewire only when the scheme recognizer is machine-checked.
+-/
+import Foundation.FirstOrder.Incompleteness.Examples
+
+namespace GoodsteinPA
+
+open LO LO.FirstOrder LO.FirstOrder.Arithmetic
+
+/-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
+`𝗣𝗔⁻ = 𝗘𝗤 ∪ {17 axioms}`, all over the finite-symbol language `ℒₒᵣ`), so the finite-theory
+combinator `Theory.Δ₁.ofFinite` enumerates it into a `𝚫₁.Semisentence 1`. -/
+@[reducible] noncomputable def paMinusDelta1 : (𝗣𝗔⁻ : ArithmeticTheory).Δ₁ :=
+  Theory.Δ₁.ofFinite 𝗣𝗔⁻ PeanoMinus.finite
+
+/-- **The full induction scheme is Δ₁-definable** — the remaining obligation toward the axiom-free
+headline (one disclosed `sorry`).
+
+`InductionScheme ℒₒᵣ Set.univ = { ψ | ∃ φ : Semiformula ℒₒᵣ ℕ 1, ψ = univCl (succInd φ) }`
+where `succInd φ = “φ(0) → (∀x, φ(x) → φ(x+1)) → ∀x φ(x)”` and `univCl` closes the free parameters.
+
+**What `Theory.Δ₁` requires** (`ch : 𝚫₁.Semisentence 1`, `mem_iff`, `isDelta1 : ch.ProvablyProperOn 𝗜𝚺₁`):
+a Δ₁ formula `ch(y)` with `ℕ ⊧ ch(⌜ψ⌝) ↔ ∃φ, ψ = univCl (succInd φ)`, provably Σ↔Π in `𝗜𝚺₁`.
+
+**Construction plan** (all primitives exist in `Foundation/.../Bootstrapping/Syntax/`):
+1. Internal `succIndCode p` from a 1-free-var formula code `p`, via `qqAll`/`qqOr`/`neg`/`substs1`/
+   `numeral` (and the de Bruijn shift bookkeeping under the two `∀`s) — a `𝚺₁` function on codes.
+2. Internal `univClClose q` = iterate `qqAll` over the free `^&i` of `q` (count = max fvar + 1) — a
+   `𝚺₁` function; the closure makes the result a sentence.
+3. `ch(y) := ∃ p < y, IsSemiformula 1 p ∧ y = univClClose (succIndCode p)` — bounded `∃` (the
+   construction strictly grows the code), hence Δ₁ (Δ₀ over the Δ₁ pieces).
+4. `mem_iff`: bridge `⌜univCl (succInd φ)⌝ = univClClose (succIndCode ⌜φ⌝)` via the
+   quote/`substs`/`qqAll` coding lemmas (`typed_quote_substs`, the `qq*` quote computations).
+5. `isDelta1`: `ProvablyProperOn.ofProperOn` + properness of the bounded `∃` over already-proper pieces.
+
+This is a substantial but math-free arithmetization (Foundation's own `ISigma1_delta1Definable` is
+likewise still an axiom). It is the precise, resumable next step on this front. -/
+@[reducible] noncomputable def inductionSchemeUnivDelta1 : (InductionScheme ℒₒᵣ Set.univ).Δ₁ := sorry
+
+/-- **`𝗣𝗔` is Δ₁-definable**, assembled from the finite base and the scheme. The defeq
+`𝗣𝗔 = 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ` makes `Theory.Δ₁.add` land directly. Once
+`inductionSchemeUnivDelta1` is sorry-free, `Reduction.lean` rewires `peano_not_proves_consistency`
+to `@consistent_unprovable 𝗣𝗔 paDelta1 _ _`, dropping `PA_delta1Definable` from the headline. -/
+@[reducible] noncomputable def paDelta1 : (𝗣𝗔 : ArithmeticTheory).Δ₁ :=
+  paMinusDelta1.add inductionSchemeUnivDelta1
+
+end GoodsteinPA
