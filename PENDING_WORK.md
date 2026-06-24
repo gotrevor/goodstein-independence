@@ -29,12 +29,31 @@ must be pinned or instance synth fails), wired through the full cascade, and **S
 `zDerivation_zIall_inv`** to return `… ∧ zIallWff s a p d0` (recover the eigenvariable `a` via
 `congrArg (fun d => π₁ (zRest d)) h` — there is no `zIallEig` accessor; `zRest (zIall s a p d0)=⟪a,p,d0⟫`).
 
-**NEXT (remaining rung 0.5 — Ind only):**
-- **Ind:** define `zIndWff` — needs the `at'=⟪a,t⟫` decode (accessors `zIndEig`/`zIndTerm`) + the `‘0’`
-  numeral term-code + the `S(^&a) = ^&a ⊹ 1` ℒₒᵣ term-code (no successor symbol; use `qqFunc`/`qqAdd` =
-  `addIndex`). Then `𝚫₁` Def + wire + strengthen `zDerivation_zInd_inv`.
-Then rung 1 (`zsubst`), rung 2 (genuine Ind reduct — most tractable), rung 3 (genuine K/cut reduct),
-rung 4 (`RedSound` tag-dispatch). See below for the full lap-70 ladder.
+**Ind DONE (this lap too — RUNG 0.5 COMPLETE, green 1321, axiom-clean):** `zIndWff` built as a UNARY
+predicate on the whole node `d` (sidesteps the missing `𝚫₁-Relation₅` notation AND lets its body be
+strengthened later WITHOUT re-running the cascade). Added accessors `zIndEig`/`zIndTerm` (`= π₁/π₂ (π₁
+(zRest d))`, the `at'=⟪a,t⟫` decode) + their `𝚺₀` Defs; `zIndWffDef : 𝚫₁.Semisentence 1` +
+`zIndWff_defined : 𝚫₁-Predicate`. Term-codes from Foundation `Bootstrapping.Arithmetic`: `numeral`
+(`numeralGraph`; `numeral 0 = 𝟎`), `qqAdd` (`qqAddGraph`; `Sa = qqAdd (^&a) (numeral 1)`). Conditions:
+`d0 ⊢ Γ→F(0)` (`seqAnt(fstIdx d0)=seqAnt s`, `seqSucc(fstIdx d0)=substs1 (numeral 0) p`), `d1 ⊢
+F(a),Γ→F(Sa)` (`inAnt (substs1 (^&a) p) (seqAnt(fstIdx d1))`, `seqSucc(fstIdx d1)=substs1 (Sa) p`),
+conclusion `seqSucc s = substs1 t p`. Wired `∧ zIndWff d` into the Ind disjunct across the cascade;
+strengthened `zDerivation_zInd_inv` to return `… ∧ zIndWff (zInd s at' p d0 d1)` (recovering all 5
+components from `h`). Gotchas: `numeral`/`qqAdd`/`numeralGraph`/`qqAddGraph` live in
+`LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic` (not the bare `…Arithmetic`); the `𝚫₁-Predicate`
+instance simp needs `and_assoc` to reconcile the right-nested core with `zIndWff`'s grouping.
+
+⚠️ **`zIndWff` deliberately OMITS the `Γ ⊆ ant(d1)` threading** (the bounded-∀ `∀ i < lh(seqAnt s),
+inAnt (znth (seqAnt s) i) (seqAnt(fstIdx d1))`) the genuine Ind reduct's `isChainInf` will need. Because
+`zIndWff` is unary, ADDING that conjunct later only re-proves `zIndWffDef`/`zIndWff_defined` — it does NOT
+touch the ZPhi cascade. Add it when building rung 2.
+
+**NEXT — rung 1+ (the genuine reduct, the deep crux-2 core):**
+- **rung 1 `zsubst d a n`** — Σ₁ eigenvariable substitution on Z-derivations (numeral `n` for free var `a`),
+  `ZDerivation`-preserving + `iotil`-invariant + `fstIdx`-computing. Σ₁ recursion over the tree applying
+  `substs1`/`Rew` per node. Multi-lap brick. (See lap-70 LADDER below for the full plan + sub-bricks.)
+- **rung 2** genuine Ind reduct (most tractable — premises genuine, not `Rep`); **rung 3** genuine K/cut
+  reduct; **rung 4** `RedSound` tag-dispatch → closes the descent → `Reduction.lean:68`.
 
 ## ⭐⭐⭐ Lap 70 — Option B REFUTED in-kernel; Option A (genuine reduct) ladder
 
