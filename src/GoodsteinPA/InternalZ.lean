@@ -3952,4 +3952,33 @@ lemma iRedDescent_zAx1_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) :
     iRedDescent (zAx1 s p) (zAxNeg s p) :=
   ⟨by simp, icmp_iotil_zAx1_zAxNeg hp, isNF_iotil_zAx1 s p⟩
 
+/-- **The §5 atomic-reduct FUNCTION** `d ↦ d[0]` for an L-axiom premise (Buchholz §5, Lemma 5.2):
+`Ax^{∀p,k} ↦ Ax^1_{·→p}` (tag 5) and `Ax^{¬p,0} ↦ Ax^1_{·→p}` (tag 6) — the principal formula stripped
+to its rank-one-lower matrix. Identity off the atomic-axiom tags. This is the j-component the K-case
+critical reduction must install (`iCritReduct`'s `vj`) instead of the table lookup `iR2(premⱼ)`, which is
+the identity on axioms (`iR2_zAxAll`/`iR2_zAxNeg`) and so yields NO õ-drop on the j-side. Threading
+`zAxReduct` through `iRNext`/`iCritReduct` tag-4 (with its Σ₁ definability) is the next lap's plumbing. -/
+noncomputable def zAxReduct (d : V) : V :=
+  if zTag d = 5 then zAx1 (fstIdx d) (zAxAllF d)
+  else if zTag d = 6 then zAx1 (fstIdx d) (zAxNegF d)
+  else d
+
+@[simp] lemma zAxReduct_zAxAll (s p k : V) : zAxReduct (zAxAll s p k) = zAx1 s p := by
+  simp [zAxReduct]
+
+@[simp] lemma zAxReduct_zAxNeg (s p : V) : zAxReduct (zAxNeg s p) = zAx1 s p := by
+  rw [zAxReduct, if_neg (by simp [zTag_zAxNeg]), if_pos (by simp [zTag_zAxNeg])]
+  simp
+
+/-- **j-side bundle via `zAxReduct`, ∀-axiom case**: the reduct `zAxReduct (Ax^{∀p,k})` satisfies the
+`iRedDescent` bundle (the K-case nut's j-side fact, packaged on the genuine reduct function). -/
+lemma iRedDescent_zAxReduct_zAxAll {s p k : V} (hp : IsUFormula ℒₒᵣ p) :
+    iRedDescent (zAxReduct (zAxAll s p k)) (zAxAll s p k) := by
+  rw [zAxReduct_zAxAll]; exact iRedDescent_zAx1_zAxAll hp
+
+/-- **j-side bundle via `zAxReduct`, ¬-axiom case**. -/
+lemma iRedDescent_zAxReduct_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) :
+    iRedDescent (zAxReduct (zAxNeg s p)) (zAxNeg s p) := by
+  rw [zAxReduct_zAxNeg]; exact iRedDescent_zAx1_zAxNeg hp
+
 end GoodsteinPA.InternalZ

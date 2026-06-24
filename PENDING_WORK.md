@@ -25,20 +25,34 @@ about the two redex premises (`ρ = iR2(znth ds ·)`):
     (`iR2_zAxAll`/`iR2_zAxNeg` proven), so `ρ(redexJ)=znth ds j` and the required strict drop
     `icmp (iotil (ρ j)) (iotil (znth ds j)) = 0` is FALSE (irreflexive). The §5 reduct `zAx1`
     (strict drop, banked as `iRedDescent_zAx1_z*` this lap) cannot enter through the `iR2` table.
-**NEXT-LAP ATTACK (3 paths):**
-  1. **Revise `iCritReduct`/`iRNext` tag-4** so the j-component is the §5 reduct `zAx1 s p` of the
-     L-axiom premise (not the table lookup `vj = iR2(premⱼ)`). Then `iRedDescent_zAx1_z*` supplies the
-     j-side bundle directly. (Check `iCritReduct` def at ~line 2789 — does it already special-case the
-     axiom premise? If not, thread a `zAx1` substitution there.) Risk: definability re-proof of the
-     edited `iCritReductDef`.
-  2. **Weaken the nut's j-side hypothesis** from strict drop (`icmp = 0`) to `≤`, IF the K-case ordinal
-     descent actually comes from the cut-rank reduction (r → r−1, the `idg`/degree drop) rather than the
-     j-premise õ-drop. Re-read Buchholz 3.2 case 5.1 / §4 `o(d)=ω_{dg(d)}(õ(d))`: if `dg` strictly
-     drops on the whole zK reduct, the õ-side only needs `≤`. This may be the cleaner route — verify
-     which factor carries the descent.
-  3. **State a separate K-case descent lemma** taking the j-side `iRedDescent (zAx1 s p) (znth ds j)`
-     as an explicit hyp (not routed through `ρ=iR2`), and assemble `iord_descent_iR2_struct` for tag 4
-     by feeding `iRedDescent_zAx1_z*` + `iRedDescent_iR2_of_tp_isymR`.
+**Path 2 (weaken j-side to `≤`) RULED OUT** (lap 66, verified): the K-case descent
+`iord_descent_iCritReduct` proves `o(d[0]) ≺ o(d)` via `iord_descent_cut` = (degree drop N3a) ∧
+(õ-side N3b). N3b is `icmp_omega_pow_nadd_lt h0o h1o` = `ω^{õd{0}} # ω^{õd{1}} ≺ ω^{õ(d)}`, which
+genuinely needs BOTH `õ(d{ν}) ≺ õ(d)` STRICT (a `#` of two ω-powers is `≺ ω^c` only if both exponents
+`< c`). And `õ(d{1}) ≺ õ(d)` traces back (via `iotil_iCritAux_lt`) to strict drop on the replaced
+j-premise. With `vj = iR2(atom) = atom`, `õ(d{1}) = õ(d)` — descent FAILS. **So the current `iR2` does
+NOT achieve descent on tag-4; the §5 j-reduct is genuinely required, not optional.**
+
+**Done lap 66:** defined the §5 reduct FUNCTION `zAxReduct : V → V` (`zAxAll s p k ↦ zAx1 s p`,
+`zAxNeg s p ↦ zAx1 s p`, identity off tags 5/6) + rewrite lemmas `zAxReduct_zAxAll/_zAxNeg` + the
+j-side bundles `iRedDescent_zAxReduct_zAxAll/_zAxNeg` (axiom-clean). This is the function the critical
+reduct must install on the j-side.
+
+**NEXT-LAP ATTACK (path 1 = the live route):**
+  1. **Σ₁-definability of `zAxReduct`** (`zAxReductDef`): mirror `iRNextDef` (line 3734). Building
+     blocks: `zTagDef`, `fstIdxDef`, `zRestDef`, `pi₁Def`, `zAx1Graph` (graph form — `zAx1` is a
+     `𝚺₀-Function₂` via `zAx1Graph`, NOT a `*Def`). `zAxAllF d = π₁(zRest d)`, `zAxNegF d = zRest d`
+     have no standalone Def — inline them. (Deferred lap 66 to avoid risk on a clean checkpoint.)
+  2. **Revise `iRNext`/`iCritReduct` tag-4** (line 3729 / 2789) so the j-component reduct is
+     `zAxReduct (premⱼ)` instead of the table lookup `vj = znth s (...redexJ...)` (= `iR2(premⱼ)` = the
+     unchanged axiom). Keep the i-component as the table lookup (I-rule, `iRedDescent_iR2_of_tp_isymR`).
+     Re-prove the edited `iRNextDef`/`iCritReductDef` definability.
+  3. **Tag-5/6 inversion** (`zTag d = 5 → ∃ s p k, d = zAxAll s p k ∧ IsUFormula p`): needed to apply
+     `iRedDescent_zAxReduct_zAxAll` to a redexJ premise known only by `tp = isymLk k A`. Check whether
+     the L-axiom well-formedness (`IsUFormula p`) is carried by the chain's `hwfL`/`zKWff` data.
+  NOTE: atomic axioms (tags 5/6) are NOT standalone `ZDerivation` constructors (`zDerivation_iff` has
+  only zAtom/zIall/zIneg/zInd/zK) — they appear only as chain premises, so the j-side lemma keys off the
+  premise code being `zAxAll`/`zAxNeg`, not off `ZDerivation premⱼ`.
 Then assemble the UNCONDITIONAL `ZDerivation d → icmp (iord (iR2 d)) (iord d) = 0` (all tags), drive
 the no-infinite-descent → `ZDerivesEmpty d → False`, build C0.5 bridge, wire `Reduction.lean:68`.
 
