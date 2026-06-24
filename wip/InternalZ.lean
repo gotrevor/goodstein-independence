@@ -1277,6 +1277,91 @@ lemma icmp_iotil_iIndReduct {s at' p d0 d1 k : V}
     inadd_comm (ocOadd (iotil d0) 1 0) (isNF_omega_pow hd0) _ hNFblock]
   exact icmp_iotil_ind_reduct hd0 hd1 (pos_iff_ne_zero.mp hk)
 
+/-! ### Degree side of the Ind reduct (LH4) — `idg`-fold over the reduct sequence
+
+Mirrors the `õ`-fold machinery (`iseqNaddIdg…`) for the degree fold `iseqMaxIdg`. The capstone is
+`idg_zK_iIndReduct`: the reduct `K^{rk p}(d0, d1×k)` has the SAME degree as `Ind^{a,t}_F d0 d1` (because
+`max{rk p, max(dg d1, dg d0)∸1} = max{max(dg d0∸1, dg d1∸1), rk p}`, ∸ distributing over max). With
+degree preserved and `õ` strictly dropping (`icmp_iotil_iIndReduct`), `iord_descent_samedeg` lifts LH4
+to a full `iord` descent on the genuine reduct object — now with the REAL `irk`. -/
+
+/-- **idg-fold congruence**: agreeing entries ⟹ equal partial folds (mirror `iseqNaddIdgAux_congr`). -/
+lemma iseqMaxIdgAux_congr {ds ds' : V} :
+    ∀ j, (∀ i < j, znth ds i = znth ds' i) → iseqMaxIdgAux ds j = iseqMaxIdgAux ds' j := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (Definable.ball_lt (by definability) (by definability)) ?_
+    refine Definable.comp₂
+      (DefinableFunction₂.comp (F := iseqMaxIdgAux)
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction₂.comp (F := iseqMaxIdgAux)
+        (DefinableFunction.const ds') (DefinableFunction.var 0))
+  case zero => intro _; rw [iseqMaxIdgAux_zero, iseqMaxIdgAux_zero]
+  case succ j ih =>
+    intro h
+    rw [iseqMaxIdgAux_succ, iseqMaxIdgAux_succ, ih (fun i hi => h i (lt_trans hi (by simp))),
+      h j (by simp)]
+
+/-- **idg-fold over a `seqCons`**: `iseqMaxIdg (seqCons ds v) = max (iseqMaxIdg ds) (idg v)`. -/
+lemma iseqMaxIdg_seqCons {ds v : V} (hds : Seq ds) :
+    iseqMaxIdg (seqCons ds v) = max (iseqMaxIdg ds) (idg v) := by
+  rw [iseqMaxIdg, iseqMaxIdg, Seq.lh_seqCons v hds, iseqMaxIdgAux_succ,
+    iseqMaxIdgAux_congr (lh ds) (fun i hi => (znth_seqCons_of_lt hds v hi).symm),
+    znth_seqCons_self hds v]
+
+/-- **idg-fold over a constant-idg block**: if every entry's `idg` is `c`, the fold is `c` (for `0<j`). -/
+lemma iseqMaxIdgAux_const {ds c : V} (hconst : ∀ i < lh ds, idg (znth ds i) = c) :
+    ∀ j, 0 < j → j ≤ lh ds → iseqMaxIdgAux ds j = c := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (by definability) (Definable.imp (by definability) ?_)
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := iseqMaxIdgAux)
+        (DefinableFunction.const ds) (DefinableFunction.var 0)) (by definability)
+  case zero => intro h; exact absurd h (by simp)
+  case succ j ih =>
+    intro _ hj
+    rw [iseqMaxIdgAux_succ, hconst j (lt_of_lt_of_le (by simp) hj)]
+    rcases eq_or_ne j 0 with rfl | hj0
+    · rw [iseqMaxIdgAux_zero]; simp
+    · rw [ih (pos_iff_ne_zero.mpr hj0) (le_trans (by simp) hj), max_self]
+
+/-- **idg-fold of a constant block** `iRepeatSeq v k`: `= idg v` (for `0<k`). -/
+lemma iseqMaxIdg_iRepeatSeq {v k : V} (hk : 0 < k) : iseqMaxIdg (iRepeatSeq v k) = idg v := by
+  have hconst : ∀ i < lh (iRepeatSeq v k), idg (znth (iRepeatSeq v k) i) = idg v :=
+    fun i hi => by rw [znth_iRepeatSeq i (by rwa [iRepeatSeq_lh] at hi)]
+  rw [iseqMaxIdg,
+    iseqMaxIdgAux_const hconst (lh (iRepeatSeq v k)) (by rw [iRepeatSeq_lh]; exact hk) le_rfl]
+
+/-- **idg-fold of the Ind reduct sequence**: `max (idg d1) (idg d0)` (for `0<k`). -/
+lemma iseqMaxIdg_iIndReductSeq {d0 d1 k : V} (hk : 0 < k) :
+    iseqMaxIdg (iIndReductSeq d0 d1 k) = max (idg d1) (idg d0) := by
+  rw [iIndReductSeq, iseqMaxIdg_seqCons (iRepeatSeq_seq d1 k), iseqMaxIdg_iRepeatSeq hk]
+
+/-- `∸` distributes over `max` (linear order): `max a b ∸ 1 = max (a∸1) (b∸1)`. -/
+private lemma max_sub_one_distrib (a b : V) : max a b - 1 = max (a - 1) (b - 1) := by
+  rcases le_total a b with h | h
+  · rw [max_eq_right h, max_eq_right (tsub_le_tsub_right h 1)]
+  · rw [max_eq_left h, max_eq_left (tsub_le_tsub_right h 1)]
+
+/-- **Degree side of LH4**: the Ind reduct `K^{rk p}(d0, d1×k)` has the SAME degree as `Ind^{a,t}_F d0 d1`
+(real `irk`). The `K^r` degree `max{rk p, (max dg)∸1}` reshuffles into `Ind`'s `max{(dg∸1)s, rk p}`. -/
+lemma idg_zK_iIndReduct {s s' at' p d0 d1 k : V} (hk : 0 < k) :
+    idg (zK s' (irk p) (iIndReductSeq d0 d1 k)) = idg (zInd s at' p d0 d1) := by
+  rw [idg_zK _ _ _ (iIndReductSeq_seq d0 d1 k), iseqMaxIdg_iIndReductSeq hk, max_sub_one_distrib,
+    idg_zInd]
+  ac_rfl
+
+/-- **LH4 — full Ind-rule `iord` descent on the genuine reduct object** (real `irk`): with degree
+preserved (`idg_zK_iIndReduct`) and `õ` strictly dropping (`icmp_iotil_iIndReduct`),
+`iord_descent_samedeg` gives `o(d[0]) ≺ o(Ind^{a,t}_F d0 d1)`. -/
+lemma iord_descent_iIndReduct {s s' at' p d0 d1 k : V}
+    (hd0 : isNF (iotil d0)) (hd1 : isNF (iotil d1)) (hk : 0 < k) :
+    icmp (iord (zK s' (irk p) (iIndReductSeq d0 d1 k))) (iord (zInd s at' p d0 d1)) = 0 := by
+  refine iord_descent_samedeg (idg_zK_iIndReduct (s := s) (at' := at') hk) ?_
+  rw [iotil_zK _ _ _ (iIndReductSeq_seq d0 d1 k)]
+  exact icmp_iotil_iIndReduct hd0 hd1 hk
+
 /-! ## C0 Fixpoint — the system-Z derivation predicate `ZDerivation : V → Prop`
 
 The one-step rule `ZPhi C d` ("`d` is a Z-derivation given its premises lie in `C`"), mirroring
