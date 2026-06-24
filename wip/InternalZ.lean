@@ -937,6 +937,54 @@ lemma isNF_iseqNaddIdgAux {ds : V} (hall : ∀ i < lh ds, isNF (iotil (znth ds i
 lemma isNF_iseqNaddIdg {ds : V} (hall : ∀ i < lh ds, isNF (iotil (znth ds i))) :
     isNF (iseqNaddIdg ds) := isNF_iseqNaddIdgAux hall (lh ds) le_rfl
 
+/-! ## C0 Fixpoint — the system-Z derivation predicate `ZDerivation : V → Prop`
+
+The one-step rule `ZPhi C d` ("`d` is a Z-derivation given its premises lie in `C`"), mirroring
+Foundation's `Theory.Derivation.Phi` (`…/Proof/Basic.lean:280`) but over Z's five rules — the K^r
+rule being variadic (its premise *sequence* `ds`, each `znth ds i ∈ C`), with no Foundation precedent.
+
+**This brick is the STRUCTURAL skeleton** (premise-membership + the K^r `Seq` premise-sequence). The
+sequent well-formedness (`IsFormulaSet`), the eigenvariable/rank side conditions, and the §5 atomic
+axioms are refinements layered onto `ZPhi` later — they strengthen the predicate but do **not** change
+the Fixpoint machinery (`monotone`/`StrongFinite` re-prove mechanically). With `ZPhi`, the next bricks
+form `Fixpoint.Construction` → `ZDerivation := construction.Fixpoint ![]` + its `case`/`induction`
+corollaries, which unblock structural induction (`isNF (iotil d)`), `iR` well-definedness, and the
+⊥-characterization (`derivesEmpty`). `monotone` + `StrongFinite` are proved here as standalone lemmas
+(they ARE the `Construction` fields). -/
+
+/-- One-step system-Z derivation rule (structural skeleton): `d` is built by one of Z's five rules
+with its premise(s) in `C`. -/
+def ZPhi (C : Set V) (d : V) : Prop :=
+  (∃ s, d = zAtom s) ∨
+  (∃ s a p d0, d = zIall s a p d0 ∧ d0 ∈ C) ∨
+  (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C) ∨
+  (∃ s at' p d0 d1, d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
+  (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ ∀ i < lh ds, znth ds i ∈ C)
+
+/-- `ZPhi` is monotone in the premise set `C` (a `Fixpoint.Construction.monotone` field). -/
+lemma zphi_monotone {C C' : Set V} (h : C ⊆ C') {d : V} : ZPhi C d → ZPhi C' d := by
+  rintro (hd | ⟨s, a, p, d0, rfl, hd⟩ | ⟨s, p, d0, rfl, hd⟩ |
+    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩)
+  · exact Or.inl hd
+  · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h hd⟩)
+  · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h hd⟩))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h h0, h h1⟩)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, fun i hi => h (hall i hi)⟩)))
+
+/-- `ZPhi` is strongly finite: every premise of `d` is `< d`, so the rule fires already over
+`{y ∈ C | y < d}` (a `Fixpoint.Construction.StrongFinite` field). The K^r case uses
+`Seq.znth` + `lt_of_mem_rng` (`znth ds i < ds`) then `ds < zK s r ds`. -/
+lemma zphi_strong_finite {C : Set V} {d : V} :
+    ZPhi C d → ZPhi {y | y ∈ C ∧ y < d} d := by
+  rintro (hd | ⟨s, a, p, d0, rfl, hd⟩ | ⟨s, p, d0, rfl, hd⟩ |
+    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩)
+  · exact Or.inl hd
+  · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, hd, by simp⟩)
+  · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, hd, by simp⟩))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, ⟨h0, by simp⟩, ⟨h1, by simp⟩⟩)))
+  · refine Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, fun i hi => ⟨hall i hi, ?_⟩⟩)))
+    exact lt_trans (lt_of_mem_rng (hseq.znth hi)) (ds_lt_zK s r ds)
+
 /-! ## C0.5 — the Foundation→Z bridge (NEXT milestone, lap-62 reflection)
 
 **The missing seam** (judge `E-EQ5-ROUTE-FINDING-2026-06-23.md` Finding 3; lap-62 reflection
