@@ -821,6 +821,20 @@ instance inegF_defined : 𝚺₁-Function₁ (inegF : V → V) via inegFDef := .
   simp [inegFDef, inegF, (neg.defined (L := ℒₒᵣ)).iff, qqFalsum_defined.iff, qqOr_defined.iff]
 instance inegF_definable : 𝚺₁-Function₁ (inegF : V → V) := inegF_defined.to_definable
 
+/-- `zAxAllF d = π₁ (zRest d)` (same projection chain as `zInegF`). -/
+def _root_.LO.FirstOrder.Arithmetic.zAxAllFDef : 𝚺₀.Semisentence 2 := .mkSigma
+  “y d. ∃ r <⁺ d, !zRestDef r d ∧ !pi₁Def y r”
+instance zAxAllF_defined : 𝚺₀-Function₁ (zAxAllF : V → V) via zAxAllFDef := .mk fun v ↦ by
+  simp [zAxAllFDef, zAxAllF, zRest_defined.iff, pi₁_defined.iff]
+instance zAxAllF_definable : 𝚺₀-Function₁ (zAxAllF : V → V) := zAxAllF_defined.to_definable
+
+/-- `zAxNegF d = zRest d`. -/
+def _root_.LO.FirstOrder.Arithmetic.zAxNegFDef : 𝚺₀.Semisentence 2 := .mkSigma
+  “y d. !zRestDef y d”
+instance zAxNegF_defined : 𝚺₀-Function₁ (zAxNegF : V → V) via zAxNegFDef := .mk fun v ↦ by
+  simp [zAxNegFDef, zAxNegF, zRest_defined.iff]
+instance zAxNegF_definable : 𝚺₀-Function₁ (zAxNegF : V → V) := zAxNegF_defined.to_definable
+
 /-- `tp` definability blueprint: dispatch on `zTag d`. Tags 5/6 produce the L-symbols
 `L^{π₂(zRest d)}_{∀(π₁(zRest d))}` / `L⁰_{¬(zRest d)}` (`isymLk k A = ⟪1,k,A⟫`). -/
 noncomputable def _root_.LO.FirstOrder.Arithmetic.tpDef : 𝚺₁.Semisentence 2 := .mkSigma
@@ -1042,6 +1056,37 @@ def isChainInf (s r ds : V) : Prop :=
     (∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
       inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i') ∧
     (∀ i < j0, irk (chainAsucc ds i) ≤ r)
+
+/-! ### Σ₁-definability of the sequent layer (`seqAnt`/`seqSucc`/`chainAsucc`/`chainAnt`)
+
+The chain-validity ingredients toward `zKValid`'s arithmetization (the `ZPhi` `zK`-disjunct cascade).
+All projections/compositions of already-definable pieces (`pi₁`/`pi₂`/`fstIdx`/`znth`). -/
+
+/-- `seqAnt q = π₁ q`. -/
+def _root_.LO.FirstOrder.Arithmetic.seqAntDef : 𝚺₀.Semisentence 2 := .mkSigma “y q. !pi₁Def y q”
+instance seqAnt_defined : 𝚺₀-Function₁ (seqAnt : V → V) via seqAntDef := .mk fun v ↦ by
+  simp [seqAntDef, seqAnt, pi₁_defined.iff]
+instance seqAnt_definable : 𝚺₀-Function₁ (seqAnt : V → V) := seqAnt_defined.to_definable
+
+/-- `seqSucc q = π₂ q`. -/
+def _root_.LO.FirstOrder.Arithmetic.seqSuccDef : 𝚺₀.Semisentence 2 := .mkSigma “y q. !pi₂Def y q”
+instance seqSucc_defined : 𝚺₀-Function₁ (seqSucc : V → V) via seqSuccDef := .mk fun v ↦ by
+  simp [seqSuccDef, seqSucc, pi₂_defined.iff]
+instance seqSucc_definable : 𝚺₀-Function₁ (seqSucc : V → V) := seqSucc_defined.to_definable
+
+/-- `chainAsucc ds i = seqSucc (fstIdx (znth ds i))`. -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.chainAsuccDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y ds i. ∃ z, !znthDef z ds i ∧ ∃ f, !fstIdxDef f z ∧ !seqSuccDef y f”
+instance chainAsucc_defined : 𝚺₁-Function₂ (chainAsucc : V → V → V) via chainAsuccDef := .mk
+  fun v ↦ by simp [chainAsuccDef, chainAsucc, znth_defined.iff, fstIdx_defined.iff, seqSucc_defined.iff]
+instance chainAsucc_definable : 𝚺₁-Function₂ (chainAsucc : V → V → V) := chainAsucc_defined.to_definable
+
+/-- `chainAnt ds i = seqAnt (fstIdx (znth ds i))`. -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.chainAntDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y ds i. ∃ z, !znthDef z ds i ∧ ∃ f, !fstIdxDef f z ∧ !seqAntDef y f”
+instance chainAnt_defined : 𝚺₁-Function₂ (chainAnt : V → V → V) via chainAntDef := .mk
+  fun v ↦ by simp [chainAntDef, chainAnt, znth_defined.iff, fstIdx_defined.iff, seqAnt_defined.iff]
+instance chainAnt_definable : 𝚺₁-Function₂ (chainAnt : V → V → V) := chainAnt_defined.to_definable
 
 /-- **L3.1 on a GENUINE chain** (E-CRUX2 §8.1, the lap-66 NEXT-item-1 bridge). For the chain `zK s r ds`
 with chain-inference data `j0` (from `isChainInf`: `hj0`/`hAj0`/`hchain`/`hrank` are exactly its three
