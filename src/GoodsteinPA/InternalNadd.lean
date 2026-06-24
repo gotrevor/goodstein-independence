@@ -54,7 +54,7 @@ instance insTermNext_defined : 𝚺₁-Function₄ (insTermNext : V → V → V 
   · by_cases h2 : icmp (v 1) (ocExp (v 3)) = 2
     · simp [hc, h2]
     · by_cases h1 : icmp (v 1) (ocExp (v 3)) = 1
-      · simp [hc, h2, h1]
+      · simp [hc, h1]
       · simp [hc, h2, h1]
 
 instance insTermNext_definable : 𝚺₁-Function₄ (insTermNext : V → V → V → V → V) :=

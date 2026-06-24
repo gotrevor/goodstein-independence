@@ -44,6 +44,10 @@ import GoodsteinPA.InternalDigits
 import GoodsteinPA.InternalLog
 import GoodsteinPA.InternalBump
 import GoodsteinPA.InternalONote
+-- Natural (Hessenberg) sum `inadd`/`insTerm` on CNF codes — Buchholz §4 pre-ordinal `õ` infra
+-- (promoted lap 60; sorry-free, axiom-clean). Order facts F1–F4: strict left-monotonicity,
+-- `ω^α#ω^β ≺ ω^γ`, `ω^β·k ≺ ω^{β+1}`, commutativity. Consumed by the (wip) crux-2 descent.
+import GoodsteinPA.InternalNadd
 import GoodsteinPA.InternalCor34
 import GoodsteinPA.IIter
 import GoodsteinPA.BlkRec
