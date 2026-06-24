@@ -1,5 +1,36 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Lap 76 — rung-1 `ZDerivation_zsubst` 6/7; zK case + a DESIGN OBSTRUCTION (read first)
+
+`ZDerivation_zsubst` (`Zsubst.lean`, end) is proven for atom/zIall/zIneg/zInd/zAxAll/zAxNeg; the **zK
+case is a `sorry`** (the lone open hole in the file). Groundwork bricks landed this lap:
+- `irk_fvSubst` — `irk (fvSubst a t A) = irk A` (rank invariance; the `isChainInf` rank ingredient). ✅
+- `iperm_tp_zsubst` — the **positive** permissibility transfer (Lemma 3.3 conjunct of `zKValid`):
+  `iperm (tp d) q → iperm (tp (zsubst d a t)) (fvSubstSeqt a t q)` for `ZDerivation d`. ✅
+
+**⚠ OBSTRUCTION found while proving `iperm_tp_zsubst` (design-level, needs a decision):**
+The `zKValid` **criticality** conjunct `¬ iperm (tp di) s` does **NOT** transfer under `fvSubst` the way
+the positive `iperm` does. `iperm`'s R-case asks `principalFormula = seqSucc q`; `fvSubst` is *not*
+injective on formulas (it collapses `^&a`→`t`), so a chain that was critical (`^∀F(^&a) ≠ seqSucc s`) can
+become NON-critical after substitution if `seqSucc s = ^∀F(t)`. I.e. substitution can manufacture a
+spurious permissibility match against the conclusion `s`. So the `zK` case of `ZDerivation_zsubst` as
+*currently stated* (arbitrary `a`, only `d ≤ a`) is likely **not provable / not true** without an
+**eigenvariable-freshness hypothesis** `a ∉ FV(s)` (or `a ∉ FV` of every chain conclusion in `d`).
+Three resolutions to weigh next lap (likely needs a fresh-mind judgement, see how-to-get-unblocked):
+1. **Add a freshness hypothesis** to `ZDerivation_zsubst` (`a` not occurring free in `d`'s sequents).
+   Buchholz's actual reduct substitutes a numeral for the *eigenvariable*, which by the eigenvariable
+   side-condition is fresh for all surrounding sequents — so a freshness hypothesis is FAITHFUL, not a
+   cheat. Then criticality transfers (no spurious match: `^&a` absent from `s`). The cost: thread
+   freshness through the I∀/Ind premises (an inner eigenvariable may equal `a` — but those are
+   bound-and-renamed; `zIndWff`/`zIallWff` already pin `e`-freshness). **Recommended — matches the math.**
+2. Restrict `ZDerivation_zsubst` to derivations with **no `zK` nodes** (does rung 2's Ind reduct ever
+   substitute into a `d1` that contains chains? if chain-free this suffices — CHECK what rung 2 feeds).
+3. Define a Δ₁ freshness predicate `aFreshIn d` and carry it; heavier but fully general.
+
+Next lap: pick (1), add `(hfresh : ...)`, redo the zK case using `iperm_tp_zsubst` (positive) + a
+`¬iperm` transfer that now goes through because `^&a ∉ s`. The other 6 cases are freshness-agnostic
+(already proven) — only the statement gains a hypothesis they ignore.
+
 ## Reflection — 2026-06-24 (lap 74, DEEP) — direction KEPT; three sharpenings
 
 Full write-up: `REFLECTION-2026-06-24-lap74.md`. Synthesis for the grind:

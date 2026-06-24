@@ -622,6 +622,39 @@ lemma irk_fvSubst {a t : V} (ht : IsUTerm ℒₒᵣ t) {A : V} :
   · intro p hp ihp
     rw [fvSubst_ex hp, irk_ex (IsUFormula.fvSubst ht hp), irk_ex hp, ihp]
 
+/-- **Permissibility (`iperm`, Lemma 3.3) transfers under `fvSubst`.** For a genuine Z-derivation `d`,
+if its rule symbol `tp d` permits a sequent `q`, then the substituted symbol `tp (zsubst d a t)` permits
+the substituted sequent `fvSubstSeqt a t q`. The principal formula (R-symbol succedent / L-symbol cut
+formula) and the sequent's succedent/antecedent transform CONSISTENTLY by `fvSubst`, so the match is
+preserved. This is the **positive** (`iperm`) conjunct of the `zKValid` chain-validity transfer; the
+**criticality** (`¬iperm` vs the chain conclusion `s`) does NOT transfer this cleanly — `fvSubst` can
+collapse a previously-distinct principal-formula/conclusion pair (e.g. `^∀F(^&a)` vs `^∀F(t)`), so a
+spurious match can appear. Closing the `zK` case of `ZDerivation_zsubst` therefore needs an
+eigenvariable-freshness hypothesis (`a ∉ FV(s)`); see `PENDING_WORK`. -/
+lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : ZDerivation d)
+    (h : iperm (tp d) q) : iperm (tp (zsubst d a t)) (fvSubstSeqt a t q) := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
+    ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+  · rw [zsubst_zAtom, tp_zAtom]; exact iperm_isymRep _
+  · rw [zsubst_zIall, tp_zIall]; rw [tp_zIall] at h
+    refine iperm_isymR_iff.mpr ?_
+    rw [seqSucc_fvSubstSeqt, ← iperm_isymR_iff.mp h, fvSubst_all hwff.2.2.isUFormula]
+  · rw [zsubst_zIneg, tp_zIneg]; rw [tp_zIneg] at h
+    refine iperm_isymR_iff.mpr ?_
+    rw [seqSucc_fvSubstSeqt, ← iperm_isymR_iff.mp h, fvSubst_inegF ht.isUTerm hwff.2.2]
+  · rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd, tp_zInd]
+    exact iperm_isymRep _
+  · rw [zsubst_zK, tp_zK]; exact iperm_isymRep _
+  · rw [zsubst_zAxAll, tp_zAxAll]; rw [tp_zAxAll] at h
+    refine iperm_isymLk_iff.mpr ?_
+    rw [seqAnt_fvSubstSeqt, ← fvSubst_all hp]
+    exact inAnt_fvSubstSeq (iperm_isymLk_iff.mp h)
+  · rw [zsubst_zAxNeg, tp_zAxNeg]; rw [tp_zAxNeg] at h
+    refine iperm_isymLk_iff.mpr ?_
+    rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
+    exact inAnt_fvSubstSeq (iperm_isymLk_iff.mp h)
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d ≤ a` yields a
