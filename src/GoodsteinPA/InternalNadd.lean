@@ -1116,4 +1116,14 @@ lemma inadd_comm (b : V) (hb : isNF b) : ∀ a, isNF a → inadd a b = inadd b a
       rw [inadd_ocOadd, IH ra hralt hra, ← inadd_insTerm_comm ra hra b hb,
         insTerm_prepend hside]
 
+/-- **F1-mirror — strict right-monotonicity of the natural sum `#`.** `icmp X Y = 0 → icmp (X # g)
+(Y # g) = 0` for NF `X, Y, g`: replacing one summand by a strictly `≺`-smaller one strictly decreases
+the sum, even when that summand is *not* the leftmost (`#` is commutative — `inadd_comm`/F4 — so this
+follows from `inadd_left_mono`/F1). Needed in the chain (`K^r`) descent cases where the reduced premise
+sits at an arbitrary position in the `#`-fold (judge §8.3 N2). -/
+lemma inadd_right_mono {X Y : V} (hX : isNF X) (hY : isNF Y) (hXY : icmp X Y = 0)
+    (g : V) (hg : isNF g) : icmp (inadd X g) (inadd Y g) = 0 := by
+  rw [inadd_comm g hg X hX, inadd_comm g hg Y hY]
+  exact inadd_left_mono hX hY hXY g hg
+
 end GoodsteinPA.InternalONote
