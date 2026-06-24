@@ -141,6 +141,37 @@ lemma icmp_iotower_lt_succ_of_le {α β : V} (hβ : isNF β) (m : V)
       c (le_trans (le_max_right _ _) (le_max_right _ _)) hlt hstep
   · rw [heq]; exact hstep
 
+/-- **Tower height-monotonicity (strict, gap `k+1`)**: `ω_m(β) ≺ ω_{m+(k+1)}(β)` (NF `β`).
+The tower strictly increases as the height grows by any positive gap. Proven by induction on the
+gap `k`: base = the one-step `icmp_iotower_lt_succ`, step = transitivity through one more level. -/
+lemma icmp_iotower_lt_add_succ {β : V} (hβ : isNF β) (m k : V) :
+    icmp (iotower β m) (iotower β (m + (k + 1))) = 0 := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using icmp_iotower_lt_succ hβ m
+  case succ k ih =>
+    rw [show m + (k + 1 + 1) = (m + (k + 1)) + 1 from (add_assoc m (k + 1) 1).symm]
+    have hstep : icmp (iotower β (m + (k + 1))) (iotower β ((m + (k + 1)) + 1)) = 0 :=
+      icmp_iotower_lt_succ hβ (m + (k + 1))
+    exact icmp_trans
+      (max (iotower β m) (max (iotower β (m + (k + 1))) (iotower β ((m + (k + 1)) + 1))))
+      _ (le_max_left _ _)
+      _ (le_trans (le_max_left _ _) (le_max_right _ _))
+      _ (le_trans (le_max_right _ _) (le_max_right _ _)) ih hstep
+
+/-- **Tower height-monotonicity (non-strict)**: `ω_m(β) ≼ ω_{m'}(β)` for `m ≤ m'` (NF `β`).
+This is the general height-monotone step the cut-elimination nut (Buchholz Lemma 4.1(b)(ii) case 5.1,
+judge `E-CRUX2-DECOMPOSITION-2026-06-24.md` §8.3 N4(iii)) needs: there the degree can drop by an
+arbitrary gap `dg(d[0]) < dg(d)`, so the single-step `icmp_iotower_lt_succ_of_le` is not enough. -/
+lemma icmp_iotower_height_le {β : V} (hβ : isNF β) {m m' : V} (h : m ≤ m') :
+    icmp (iotower β m) (iotower β m') = 0 ∨ iotower β m = iotower β m' := by
+  obtain ⟨k, rfl⟩ := le_iff_exists_add.mp h
+  rcases eq_or_ne k 0 with rfl | hk
+  · right; rw [add_zero]
+  · obtain ⟨j, rfl⟩ := le_iff_exists_add.mp (pos_iff_one_le.mp (pos_iff_ne_zero.mpr hk))
+    rw [add_comm 1 j]
+    exact Or.inl (icmp_iotower_lt_add_succ hβ m j)
+
 /-- **Base-shift identity** `ω_m(ω^α) = ω_{m+1}(α)`: the height-`m` tower over base `ω^α` equals the
 height-`(m+1)` tower over `α`. Pure structural identity (`ω^· = ocOadd · 1 0`). **This is the exact
 tower step Thm 4.2's critical (cut-elimination) case needs** — the degree-drop nut combines
