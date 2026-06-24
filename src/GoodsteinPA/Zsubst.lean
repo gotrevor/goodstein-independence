@@ -593,4 +593,101 @@ lemma termFvSubst_succVar {a t e : V} (he : e ≠ a) :
   exact (IsSemiterm.func (L := ℒₒᵣ)).mpr ⟨hf,
     (IsSemitermVec.doubleton (L := ℒₒᵣ)).mpr ⟨IsSemiterm.fvar 0 e, by simp⟩⟩
 
+/-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
+
+Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d ≤ a` yields a
+Z-derivation of the substituted end-sequent. Proved by `zDerivation_induction` on `d`, dispatching the
+one-step `ZPhi` rule and rebuilding the same rule on the substituted data; each rule's well-formedness
+transfers through the `fvSubst` commutation lemmas (`fvSubst_all`/`fvSubst_substs1`/`fvSubst_substs1_fvar`/
+`fvSubst_inegF`/`inAnt_fvSubstSeq`) and the step-A term helpers. The bound `d ≤ a` makes every
+eigenvariable `e < d ≤ a` differ from `a`, so the freshness-gated substitutions apply. -/
+theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
+    ∀ d, ZDerivation d → d ≤ a → ZDerivation (zsubst d a t) := by
+  apply zDerivation_induction (P := fun d => d ≤ a → ZDerivation (zsubst d a t))
+  · definability
+  · intro C hC d hphi
+    rcases hphi with ⟨s, rfl, hatom⟩ | ⟨s, e, p, d0, rfl, hd0, hsc, hwff⟩ |
+      ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ |
+      ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩
+    -- atom
+    · intro _
+      rw [zsubst_zAtom]
+      refine zDerivation_iff.mpr (Or.inl ⟨fvSubstSeqt a t s, rfl, ?_⟩)
+      rw [seqSucc_fvSubstSeqt, seqAnt_fvSubstSeqt]
+      exact inAnt_fvSubstSeq hatom
+    -- zIall
+    · intro hda
+      have hd0Z : ZDerivation d0 := (hC d0 hd0).1
+      have hp1 : IsSemiformula ℒₒᵣ 1 p := hwff.2.2
+      have hea : e ≠ a := (lt_of_lt_of_le (a_lt_zIall s e p d0) hda).ne
+      rw [zsubst_zIall]
+      refine zDerivation_iff.mpr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, e, fvSubst ℒₒᵣ a t p, zsubst d0 a t, rfl, ?_, ?_, ?_, ?_, ?_⟩))
+      · exact (hC d0 hd0).2 (le_of_lt (lt_of_lt_of_le (d0_lt_zIall s e p d0) hda))
+      · rw [seqSucc_fvSubstSeqt, hsc, fvSubst_all hp1.isUFormula]
+      · rw [fstIdx_zsubst a t hd0Z, seqAnt_fvSubstSeqt, seqAnt_fvSubstSeqt, hwff.1]
+      · rw [fstIdx_zsubst a t hd0Z, seqSucc_fvSubstSeqt, hwff.2.1,
+          fvSubst_substs1_fvar ht hea hp1]
+      · exact fvSubst_isSemiformula ht hp1
+    -- zIneg
+    · intro hda
+      have hd0Z : ZDerivation d0 := (hC d0 hd0).1
+      have hpU : IsUFormula ℒₒᵣ p := hwff.2.2
+      rw [zsubst_zIneg]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, zsubst d0 a t, rfl, ?_, ?_, ?_, ?_, ?_⟩)))
+      · exact (hC d0 hd0).2 (le_of_lt (lt_of_lt_of_le (d0_lt_zIneg s p d0) hda))
+      · rw [seqSucc_fvSubstSeqt, hsc, fvSubst_inegF ht.isUTerm hpU]
+      · rw [fstIdx_zsubst a t hd0Z, seqSucc_fvSubstSeqt, hwff.1, fvSubst_falsum (L := ℒₒᵣ)]
+      · rw [fstIdx_zsubst a t hd0Z, seqAnt_fvSubstSeqt]
+        exact inAnt_fvSubstSeq hwff.2.1
+      · exact IsUFormula.fvSubst ht.isUTerm hpU
+    -- zInd
+    · intro hda
+      have hd0Z : ZDerivation d0 := (hC d0 hd0).1
+      have hd1Z : ZDerivation d1 := (hC d1 hd1).1
+      simp only [zIndWff, zIndEig_zInd, zIndTerm_zInd, zIndP_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
+        fstIdx_zInd] at hwff
+      obtain ⟨⟨h1a, h1b⟩, ⟨h2a, h2b⟩, h3, h4, h5⟩ := hwff
+      have hea : π₁ at' ≠ a :=
+        (lt_of_le_of_lt (pi₁_le_self at') (lt_of_lt_of_le (at_lt_zInd s at' p d0 d1) hda)).ne
+      rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, ⟪π₁ at', termFvSubst ℒₒᵣ a t (π₂ at')⟫, fvSubst ℒₒᵣ a t p,
+          zsubst d0 a t, zsubst d1 a t, rfl, ?_, ?_, ?_⟩))))
+      · exact (hC d0 hd0).2 (le_of_lt (lt_of_lt_of_le (d0_lt_zInd s at' p d0 d1) hda))
+      · exact (hC d1 hd1).2 (le_of_lt (lt_of_lt_of_le (d1_lt_zInd s at' p d0 d1) hda))
+      · simp only [zIndWff, zIndEig_zInd, zIndTerm_zInd, zIndP_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
+          fstIdx_zInd, pi₁_pair, pi₂_pair]
+        refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ?_, ?_, ?_⟩
+        · rw [fstIdx_zsubst a t hd0Z, seqAnt_fvSubstSeqt, seqAnt_fvSubstSeqt, h1a]
+        · rw [fstIdx_zsubst a t hd0Z, seqSucc_fvSubstSeqt, h1b,
+            fvSubst_substs1 ht (by simp) h4, termFvSubst_numeral]
+        · rw [fstIdx_zsubst a t hd1Z, seqAnt_fvSubstSeqt, ← fvSubst_substs1_fvar ht hea h4]
+          exact inAnt_fvSubstSeq h2a
+        · rw [fstIdx_zsubst a t hd1Z, seqSucc_fvSubstSeqt, h2b,
+            fvSubst_substs1 ht (isSemiterm_succVar _) h4, termFvSubst_succVar hea]
+        · rw [seqSucc_fvSubstSeqt, h3, fvSubst_substs1 ht h5 h4]
+        · exact fvSubst_isSemiformula ht h4
+        · exact IsSemitermVec.termFvSubst ht h5
+    -- zK (hard — deferred to rung-1 step C.zK, see PENDING_WORK)
+    · intro hda
+      sorry
+    -- zAxAll
+    · intro _
+      rw [zsubst_zAxAll]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, k, rfl, ?_, ?_⟩))))))
+      · exact IsUFormula.fvSubst ht.isUTerm hp
+      · rw [seqAnt_fvSubstSeqt, ← fvSubst_all hp]
+        exact inAnt_fvSubstSeq hin
+    -- zAxNeg
+    · intro _
+      rw [zsubst_zAxNeg]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, rfl, ?_, ?_⟩))))))
+      · exact IsUFormula.fvSubst ht.isUTerm hp
+      · rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
+        exact inAnt_fvSubstSeq hin
+
 end GoodsteinPA.InternalZ
