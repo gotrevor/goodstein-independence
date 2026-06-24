@@ -997,6 +997,14 @@ private lemma insTerm_lt {e n ec nc rc : V} (h : icmp e ec = 0) :
     insTerm e n (ocOadd ec nc rc) = ocOadd ec nc (insTerm e n rc) := by
   rw [insTerm_ocOadd, if_neg (by rw [h]; simp), if_neg (by rw [h]; simp)]
 
+/-- **Coefficient collection for equal ω-powers**: `ω^β·n # ω^β·m = ω^β·(n+m)`. The natural sum of two
+single terms with the *same* exponent merges their coefficients (`insTerm_eq`). This is the algebra
+behind "`k` copies of `ω^β` collect to `ω^β·k`" — the `Ind`-reduct `#`-fold (`õ(d[0]) = ω^{õ d0} #
+ω^{õ d1}·k`, judge §2 LH4) reduces to it. -/
+lemma inadd_omega_pow_collect (β n m : V) :
+    inadd (ocOadd β n 0) (ocOadd β m 0) = ocOadd β (n + m) 0 := by
+  rw [inadd_single_term, insTerm_eq (icmp_self β β le_rfl)]
+
 /-- **Single-term insertions commute** (NF `b`): `insTerm e1 n1 (insTerm e2 n2 b) =
 insTerm e2 n2 (insTerm e1 n1 b)`. Strong induction on `b`; a full 3×3 case split on
 `(icmp e1 (ocExp b), icmp e2 (ocExp b))` — both-prepend reduces to a two-singleton commute, mixed
