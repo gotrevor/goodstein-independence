@@ -4546,4 +4546,22 @@ lemma iord_descent_iR2_of_ZDerivesEmpty {d : V} (h : ZDerivesEmpty d) :
     icmp (iord (iR2 d)) (iord d) = 0 :=
   iord_descent_iR2_of_emptyAnt h.1 h.2.1
 
+/-- **`iR2` preserves the end-sequent on the `Rep`-tagged reducible rules (Ind, K).** Both reducts are
+chains `zK (fstIdx d) …` (`iRInd`/`iCritReduct` carry the conclusion sequent verbatim), so
+`fstIdx (iR2 d) = fstIdx d`. For the I-rules (tags 1,2) the reduct is the sub-derivation `d0`, whose
+end-sequent differs — but a ⊥-succedent derivation is never an I-rule (the R-symbol would put the
+principal formula, not `⊥`, in the succedent), so the Ind/K case is the only one the descent visits. -/
+lemma fstIdx_iR2_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3 ∨ zTag d = 4) :
+    fstIdx (iR2 d) = fstIdx d := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp [zTag_zAtom] at htag
+  · simp [zTag_zIall] at htag
+  · simp [zTag_zIneg] at htag
+  · rw [iR2_zInd, iRInd_zInd]; simp [fstIdx_zInd]
+  · simp only [iR2_zK, iCritReduct, fstIdx_zK]
+  · simp [zTag_zAxAll] at htag
+  · simp [zTag_zAxNeg] at htag
+
 end GoodsteinPA.InternalZ
