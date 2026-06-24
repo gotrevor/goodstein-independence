@@ -141,4 +141,17 @@ lemma icmp_iotower_lt_succ_of_le {α β : V} (hβ : isNF β) (m : V)
       c (le_trans (le_max_right _ _) (le_max_right _ _)) hlt hstep
   · rw [heq]; exact hstep
 
+/-- **Base-shift identity** `ω_m(ω^α) = ω_{m+1}(α)`: the height-`m` tower over base `ω^α` equals the
+height-`(m+1)` tower over `α`. Pure structural identity (`ω^· = ocOadd · 1 0`). **This is the exact
+tower step Thm 4.2's critical (cut-elimination) case needs** — the degree-drop nut combines
+`o(d[0]) = ω_{dg(d[0])}(õ(d[0])) ≺ ω_{dg(d[0])}(ω^{õ(d)}) = ω_{dg(d[0])+1}(õ(d)) ≼ ω_{dg(d)}(õ(d))`,
+and this lemma supplies the middle equality (judge `E-CRUX2-DECOMPOSITION-2026-06-24.md` §4, pt-7
+validation: `icmp_iotower_lt_succ_of_le` gives the height-monotone step, this gives the base shift). -/
+lemma iotower_omega_pow (α m : V) :
+    iotower (ocOadd α 1 0) m = iotower α (m + 1) := by
+  induction m using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => rw [iotower_zero, iotower_succ, iotower_zero]
+  case succ m ih => rw [iotower_succ, ih, ← iotower_succ]
+
 end GoodsteinPA.InternalONote

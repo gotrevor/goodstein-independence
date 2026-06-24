@@ -94,14 +94,33 @@ So even the nut is mostly the **object construction** `iR`-critical-branch, whic
 short ordinal tail.
 
 ## 5. C0.5 bridge — sub-decomposition (Foundation-PA-⊥ → Z-⊥), parallelizable
-`Z ⊇ PA` on closed sequents. Three sub-obligations (Bryce–Goré `Peano.v`, ~1215 lines, is the worked template
-— skeleton being extracted; will append):
-- **B1** each PA logical+equality+arithmetic axiom is a Z-axiom/short Z-derivation (Buchholz §5 `Ax(Z)`).
-- **B2** each Foundation inference rule (`axL`/`andIntro`/…/`cutRule`/`axm`) is Z-derivable from premises. The
-  **induction `axm` schema** is the only subtle one — Z's `Ind` rule absorbs it (this is why Buchholz-Z, not
-  finite cut-elim on Tait+cut: lap-58 finding, correct).
-- **B3** compose B1+B2: `𝗣𝗔.DerivationOf d ⊥ → ∃ z, ZDerivesEmpty z`, **M-internally** (Σ₁ / per-model).
-Independent of §§3–4 — run it in a worktree when the descent stalls.
+`Z ⊇ PA` on closed sequents: discharge each PA axiom in Z + simulate each Foundation rule, composing to
+`𝗣𝗔.DerivationOf d ⊥ → ∃ z, ZDerivesEmpty z` (M-internal). Independent of §§3–4 — run in a worktree.
+
+**Bryce–Goré `Peano.v` skeleton (the worked PA→infinitary analogue, extracted from the Coq source):** their
+bridge `PA_Base_closed_PA_omega` is `PA_Base → (annotate degree+ordinal) PA_Implication → (per-constructor)
+PA_ω`, where — logical/equality/arithmetic axioms → short target derivations (easy); **MP → a cut** (the
+cut-formula's complexity *becomes* the new cut-degree — this is *why* a reduction is then needed);
+**generalization → the quantifier/ω rule**; the bridge carries a structurally-computed `(degree, ordinal<ε₀)`,
+no closed-form bound.
+
+**⭐ JUDGE REFINEMENT — the bridge is CHEAPER for Buchholz-Z than my earlier ~1215-line flag.** Bryce–Goré's
+`Peano.v` is *dominated by one sub-tower: unfolding PA's induction axiom into the ω-rule* (`inductive_chain` →
+`induction_iterate_general` → `induction_terminate` → `induction_final` — roughly half the file). **You do not
+pay that.** Buchholz-Z has a *native* complete-induction rule (`Ind`, §2/§3), so PA's induction axiom maps to
+Z's `Ind` rule **directly** — the most expensive part of their bridge is *free* in yours. Net: revise C0.5
+**down to well under 1k lines.**
+- **B1** PA logical+equality+arithmetic axioms → Z atomic axioms `Ax(Z)` (Buchholz §5). Easy.
+- **B2** Foundation Tait+cut rules → Z: `cutRule` → Z chain rule `K^r`; `∀`/generalization → Z `I^a_∀`;
+  **the PA-induction `axm` schema → Z's native `Ind` rule (direct — NOT an ω-unfolding).** This is the whole
+  payoff of choosing Z over PA_ω (lap-58 call, now cost-quantified).
+- **B3** compose, M-internally (Σ₁ / per-model): `𝗣𝗔.DerivationOf d ⊥ → ∃ z, ZDerivesEmpty z`.
+
+**Do NOT port Bryce–Goré's `cut_elim.v`.** Their consistency core is *infinitary transfinite recursion* over
+ε₀ (`transfinite_induction` on `nf` ordinals) + a "dangerous-disjunct" argument → META-level Con(PA) — **not**
+the *primrec* reduction your PRWO route needs. Only `Peano.v` (the bridge) transfers; the descent stays
+Buchholz §§3–4 (this doc §§2–4), the finitary primrec `R`. (Independently re-confirms the lap-58 Z-over-PA_ω
+call: their core diverges exactly where the primrec requirement bites.)
 
 ## 6. Literature map (which paper in `papers/` decomposes each piece further)
 The box is offline but `papers/` is in-repo — point each hard node at its richest secondary source:

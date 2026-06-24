@@ -24,11 +24,29 @@ by Buchholz-Z — re-point that footer next edit).
 2. **`iR : V → V`** (C2 reduction `d ↦ d[0]`) — needed to state the per-rule descent on concrete reducts.
 3. **C0.5 Foundation→Z bridge** — `(𝗣𝗔).DerivationOf d ⊥ → ∃ z, ZDerivesEmpty z` (M-internal). Type written
    in `InternalZ.lean` footer; blueprint = Bryce–Goré `Peano.v` (filed `ON-LINE-REQUEST` for the source).
-4. **per-rule C3 arithmetic** (Ind/Kʳ `õ`-comparisons, using `src/InternalNadd` F1–F4) — now has objects to
-   attach to.
+4. **C3 descent — REORDERED per judge `E-CRUX2-DECOMPOSITION-2026-06-24.md` (2026-06-24).** The difficulty
+   is NOT spread across iR+C3; it is concentrated in **ONE case (5.1, critical/cut-elim)**, gated behind two
+   currently-unlisted prereqs. Plow in this order (most are low-hanging `#`-bookkeeping the algebra exists for):
+   - **iR skeleton** (rule-by-rule dispatch on `zTag`, Def 3.2) — minimal, enough for the easy rules.
+   - **LOW-HANGING descent cases first** (each ~1 lap; debugs the engine end-to-end before the nut):
+     LH1 I¬ (`self_lt_iadd_one`), LH2 I∀ (+ subst-invariance `õ(d(a/t))=õ(d)`), LH3 chain-non-crit (**F1**),
+     LH4 Ind (**F3** `ω^β·k≺ω^{β+1}`), LH5 chain-crit (**F1+F2**).
+   - **THEN two prereqs (build before the nut — without them C3-critical can't be STATED truthfully, only
+     smuggled as a `rk(A(d))<dg(d)` hypothesis = hidden gap):** **L3.1** Lemma 3.1 critical-pair existence
+     (pure Σ₁ combinatorics on premise list, NO ordinals); **T3.4** Theorem 3.4 `rk(A(d))<r` + the `d{0}`/`d{1}`
+     auxiliary derivations. ⚠️ CHECK FIRST (judge pt-7): if the box's rank encoding makes `rk<r` definitional,
+     T3.4 collapses to an unfolding — don't over-build it.
+   - **THE NUT (case 5.1, Lemma 4.1(b)(ii)):** mostly OBJECT construction (build `d{0}`/`d{1}` as ZDerivations
+     per 3.2(5.1)) + a 3-step ordinal tail: F2 (`õ(d[0])<ω^{õ(d)}`) + degree-drop (`dg(d[0])<dg(d)` via T3.4)
+     + the tower combine. ✅ **The tower step is BANKED:** `InternalTower.iotower_omega_pow`
+     (`ω_m(ω^α)=ω_{m+1}(α)`, proved lap 62) + `icmp_iotower_lt_succ_of_le` give exactly the §4 combine.
+   - **Thm 4.2** = ~3-line tower combine over LH-cases + nut.
+   - Lit map: nut → `papers/buchholz-beweistheorie-lecture-notes.pdf` + `buss-handbook-ch2`; L3.1/T3.4 → [6] pp.8–9.
 
 **PARALLEL FRONT (when crux-2 blocks):** discharge `PA_delta1Definable` upstream (now mandatory) — check the
-Foundation pin first (still an `axiom` in `Incompleteness/Examples.lean`?).
+Foundation pin first (still an `axiom` in `Incompleteness/Examples.lean`?). Also **C0.5 bridge** decomposes
+into B1 (PA axioms→Z) / B2 (PA rules→Z, induction via Z's `Ind`) / B3 (compose, M-internal) — Bryce–Goré
+`Peano.v` skeleton inbound from host; run in a worktree when the descent stalls (judge §5).
 
 **HYGIENE (low, non-blocking):** off-path `DescentSemantic.lean` free-X `sorry` + deps → `wip/` candidates.
 
