@@ -477,6 +477,22 @@ lemma isymIsL_iff {I : V} : isymIsL I ↔ ∃ k A, I = isymLk k A := by
   · intro h; exact ⟨_, _, h⟩
   · rintro ⟨k, A, rfl⟩; exact isymIsL_isymLk k A
 
+/-- `I ∈ R` — `I` is a right symbol `R_A` (`A = π₂ I`). Projection-free analogue of `isymIsL`. -/
+def isymIsR (I : V) : Prop := I = isymR (π₂ I)
+
+lemma isymIsR_isymR (A : V) : isymIsR (isymR A : V) := by simp [isymIsR, isymR]
+
+lemma isymIsR_iff {I : V} : isymIsR I ↔ ∃ A, I = isymR A := by
+  constructor
+  · intro h; exact ⟨_, h⟩
+  · rintro ⟨A, rfl⟩; exact isymIsR_isymR A
+
+/-- The discriminant `π₁` of the three inference symbols (`R`=0, `L`=1, `Rep`=2). -/
+@[simp] lemma pi₁_isymR (A : V) : π₁ (isymR A : V) = 0 := by simp [isymR]
+@[simp] lemma pi₂_isymR (A : V) : π₂ (isymR A : V) = A := by simp [isymR]
+@[simp] lemma pi₁_isymLk (k A : V) : π₁ (isymLk k A : V) = 1 := by simp [isymLk]
+@[simp] lemma pi₁_isymRep : π₁ (isymRep : V) = 2 := by simp [isymRep]
+
 section Lemma31
 
 variable (mem : V → V → Prop) (Tr Fa : V → Prop)
@@ -685,6 +701,35 @@ noncomputable def tp (d : V) : V :=
 @[simp] lemma tp_zAxNeg (s p : V) : tp (zAxNeg s p) = isymLk 0 (inegF p) := by simp [tp]
 @[simp] lemma tp_zAtom (s : V) : tp (zAtom s) = isymRep := by simp [tp]
 @[simp] lemma tp_zK (s r ds : V) : tp (zK s r ds) = isymRep := by simp [tp]
+
+/-- **`tp`-trichotomy**: every `tp d` is one of the three inference symbols `R_A`/`L^k_A`/`Rep`
+(it dispatches on `zTag d`). The structural source of the `π₁`-discriminant shape lemmas below. -/
+lemma tp_cases (d : V) :
+    (∃ A, tp d = isymR A) ∨ (∃ k A, tp d = isymLk k A) ∨ tp d = isymRep := by
+  unfold tp
+  by_cases h1 : zTag d = 1
+  · rw [if_pos h1]; exact Or.inl ⟨_, rfl⟩
+  rw [if_neg h1]
+  by_cases h2 : zTag d = 2
+  · rw [if_pos h2]; exact Or.inl ⟨_, rfl⟩
+  rw [if_neg h2]
+  by_cases h5 : zTag d = 5
+  · rw [if_pos h5]; exact Or.inr (Or.inl ⟨_, _, rfl⟩)
+  rw [if_neg h5]
+  by_cases h6 : zTag d = 6
+  · rw [if_pos h6]; exact Or.inr (Or.inl ⟨_, _, rfl⟩)
+  rw [if_neg h6]; exact Or.inr (Or.inr rfl)
+
+/-- **`tp` is a right symbol when its `π₁`-discriminant is 0** (`isRedexPair`'s `i`-end condition):
+`tp d = R_{π₂(tp d)}`. The shape-recovery the redex→`tp` bridge needs from the bare pair test. -/
+lemma tp_eq_isymR_of_pi₁_zero {d : V} (h : π₁ (tp d) = 0) : tp d = isymR (π₂ (tp d)) := by
+  rcases tp_cases d with ⟨A, hA⟩ | ⟨k, A, hA⟩ | hA <;> rw [hA] at h ⊢ <;> simp_all
+
+/-- **`tp` is a left symbol when its `π₁`-discriminant is 1** (`isRedexPair`'s `j`-end condition):
+`tp d = L^{π₁(π₂(tp d))}_{π₂(π₂(tp d))}` (i.e. `isymIsL (tp d)`). -/
+lemma tp_eq_isymLk_of_pi₁_one {d : V} (h : π₁ (tp d) = 1) :
+    tp d = isymLk (π₁ (π₂ (tp d))) (π₂ (π₂ (tp d))) := by
+  rcases tp_cases d with ⟨A, hA⟩ | ⟨k, A, hA⟩ | hA <;> rw [hA] at h ⊢ <;> simp_all [isymLk]
 
 /-- Dual of `tp_isymR_pos` for the §5 L-symbol axioms: `tp d = L^k_A` forces `0 < rk A` once the
 principal formula is a genuine formula. `Ax^{∀xF,k}` (tag 5) gives `A = ∀xF` (`rk = rk F + 1`);
@@ -2884,6 +2929,22 @@ def isRedexPair (ds c : V) : Prop :=
   π₁ c < π₂ c ∧ π₂ c < lh ds ∧
   π₁ (tp (znth ds (π₁ c))) = 0 ∧ π₁ (tp (znth ds (π₂ c))) = 1 ∧
   π₂ (π₂ (tp (znth ds (π₂ c)))) = π₂ (tp (znth ds (π₁ c)))
+
+/-- **Redex-pair → `tp`-symbol shape bridge.** From the bare `π₁`-discriminant pair test
+`isRedexPair ds c` recover the genuine inference symbols on the two redex premises: the `i`-end
+(`i = π₁ c`) is a right symbol `R_{Aᵢ}` and the `j`-end (`j = π₂ c`) is a left symbol `L^k_{Aᵢ}`
+on the **same** cut formula `Aᵢ = π₂ (tp (znth ds i))` (from the shared-cut-formula conjunct). This
+is what lets a caller of `iord_descent_iRcrit_of_chain'` read off the redex premises' `tp` from the
+finder's least-pair `redexCode` (rather than from the existential redex). -/
+lemma redexPair_tp {ds c : V} (h : isRedexPair ds c) :
+    tp (znth ds (π₁ c)) = isymR (π₂ (tp (znth ds (π₁ c)))) ∧
+    tp (znth ds (π₂ c)) = isymLk (π₁ (π₂ (tp (znth ds (π₂ c)))))
+      (π₂ (tp (znth ds (π₁ c)))) := by
+  obtain ⟨_, _, hi, hj, hcut⟩ := h
+  refine ⟨tp_eq_isymR_of_pi₁_zero hi, ?_⟩
+  have hL := tp_eq_isymLk_of_pi₁_one hj
+  rw [hcut] at hL
+  exact hL
 
 /-- First-hit search step: keep the prior hit if one was found (`ih < n`), else take `n` if it is a
 valid redex pair, else advance the sentinel to `n+1`. -/
