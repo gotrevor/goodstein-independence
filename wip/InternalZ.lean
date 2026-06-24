@@ -1184,6 +1184,39 @@ lemma iseqNaddIdg_seqCons {ds v : V} (hds : Seq ds) :
     iseqNaddIdgAux_congr (lh ds) (fun i hi => (znth_seqCons_of_lt hds v hi).symm),
     znth_seqCons_self hds v]
 
+/-! ## The Ind-rule reduct object `d[0] = K^r(d0, d1(0),…,d1(k−1))` — ordinal side (LH4)
+
+`iIndReductSeq d0 d1 k = ⟨d1,…,d1 (k copies), d0⟩` is the reduct's premise sequence (ordinal-faithful:
+the `k` substituted copies all carry `õ = õ d1`, and `#` is commutative so `d0`'s position is immaterial).
+Its `õ`-fold is `ω^{õ d1}·k # ω^{õ d0}`, and the LH4 descent `õ(d[0]) ≺ õ(Ind…)` follows from
+`icmp_iotil_ind_reduct` (F1+F3). This is the **full Ind-rule ordinal descent on a genuine reduct object**;
+only the degree side (`idg`, awaiting the real `irk`) and derivation-validity (eigenvariable substitution)
+remain to lift it to a full `iord` descent. -/
+
+/-- The Ind-reduct premise sequence `⟨d1,…,d1 (k copies), d0⟩`. -/
+noncomputable def iIndReductSeq (d0 d1 k : V) : V := seqCons (iRepeatSeq d1 k) d0
+
+@[simp] lemma iIndReductSeq_seq (d0 d1 k : V) : Seq (iIndReductSeq d0 d1 k) :=
+  (iRepeatSeq_seq d1 k).seqCons d0
+
+/-- `õ`-fold of the Ind reduct's premise sequence: `ω^{õ d1}·k # ω^{õ d0}` (for `k > 0`). -/
+lemma iseqNaddIdg_iIndReductSeq {d0 d1 k : V} (hk : 0 < k) :
+    iseqNaddIdg (iIndReductSeq d0 d1 k) =
+      inadd (ocOadd (iotil d1) k 0) (ocOadd (iotil d0) 1 0) := by
+  rw [iIndReductSeq, iseqNaddIdg_seqCons (iRepeatSeq_seq d1 k), iseqNaddIdg_iRepeatSeq hk]
+
+/-- **LH4 — full Ind-rule `õ`-descent on the genuine reduct**: `õ(d[0]) ≺ õ(Ind^{a,t}_F d0 d1)`, where
+`õ(d[0]) = #` of the reduct premise sequence. The reduct's fold commutes (`inadd_comm`) into the
+`ω^{õ d0} # ω^{õ d1}·k` shape, then `icmp_iotil_ind_reduct` (F1+F3) closes it. -/
+lemma icmp_iotil_iIndReduct {s at' p d0 d1 k : V}
+    (hd0 : isNF (iotil d0)) (hd1 : isNF (iotil d1)) (hk : 0 < k) :
+    icmp (iseqNaddIdg (iIndReductSeq d0 d1 k)) (iotil (zInd s at' p d0 d1)) = 0 := by
+  have hNFblock : isNF (ocOadd (iotil d1) k 0) :=
+    (isNF_ocOadd (iotil d1) k 0).2 ⟨pos_iff_ne_zero.mp hk, hd1, isNF_zero, Or.inl rfl⟩
+  rw [iseqNaddIdg_iIndReductSeq hk, iotil_zInd,
+    inadd_comm (ocOadd (iotil d0) 1 0) (isNF_omega_pow hd0) _ hNFblock]
+  exact icmp_iotil_ind_reduct hd0 hd1 (pos_iff_ne_zero.mp hk)
+
 /-! ## C0 Fixpoint — the system-Z derivation predicate `ZDerivation : V → Prop`
 
 The one-step rule `ZPhi C d` ("`d` is a Z-derivation given its premises lie in `C`"), mirroring
