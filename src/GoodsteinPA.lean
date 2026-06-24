@@ -47,6 +47,7 @@ import GoodsteinPA.InternalONote
 import GoodsteinPA.InternalCor34
 import GoodsteinPA.IIter
 import GoodsteinPA.BlkRec
+import GoodsteinPA.BlkRecF
 import GoodsteinPA.InternalGrz
 import GoodsteinPA.InternalIg
 import GoodsteinPA.InternalThm35
