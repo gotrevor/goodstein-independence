@@ -1057,6 +1057,28 @@ lemma isNF_iseqNaddIdgAux {ds : V} (hall : ∀ i < lh ds, isNF (iotil (znth ds i
 lemma isNF_iseqNaddIdg {ds : V} (hall : ∀ i < lh ds, isNF (iotil (znth ds i))) :
     isNF (iseqNaddIdg ds) := isNF_iseqNaddIdgAux hall (lh ds) le_rfl
 
+/-- **`#`-fold over a constant-õ block collapses to one term**: if every entry of `ds` (in range) has
+`õ = β`, then `#_{i<j+1} ω^{õ(znth ds i)} = ω^β·(j+1)` for `j+1 ≤ lh ds`. The Ind-reduct's substituted
+premises `d1(0),…,d1(k−1)` all share `õ = õ d1` (substitution-invariance, Buchholz Remark p.10), so their
+`#`-fold is `ω^{õ d1}·k` — the left factor of `icmp_iotil_ind_reduct` (LH4). -/
+lemma iseqNaddIdgAux_const {ds β : V} (hconst : ∀ i < lh ds, iotil (znth ds i) = β) :
+    ∀ j, 0 < j → j ≤ lh ds → iseqNaddIdgAux ds j = ocOadd β j 0 := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (by definability) (Definable.imp (by definability) ?_)
+    refine Definable.comp₂
+      (DefinableFunction₂.comp (F := iseqNaddIdgAux)
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction₃.comp (F := ocOadd) (hF := ocOadd_definable.of_sigmaOne)
+        (DefinableFunction.const β) (DefinableFunction.var 0) (DefinableFunction.const 0))
+  case zero => intro h; exact absurd h (by simp)
+  case succ j ih =>
+    intro _ hj
+    rw [iseqNaddIdgAux_succ, hconst j (lt_of_lt_of_le (by simp) hj)]
+    rcases eq_or_ne j 0 with rfl | hj0
+    · rw [iseqNaddIdgAux_zero, inadd_zero_left, zero_add]
+    · rw [ih (pos_iff_ne_zero.mpr hj0) (le_trans (by simp) hj), inadd_omega_pow_collect]
+
 /-! ## C0 Fixpoint — the system-Z derivation predicate `ZDerivation : V → Prop`
 
 The one-step rule `ZPhi C d` ("`d` is a Z-derivation given its premises lie in `C`"), mirroring
