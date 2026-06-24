@@ -4601,4 +4601,36 @@ lemma ZDerivesEmpty_iR2 {d : V} (h : ZDerivesEmpty d) (hsound : ZDerivation (iR2
     fstIdx_iR2_of_tag_Ind_or_K h.1 (zTag_Ind_or_K_of_ZDerivesEmpty h)
   exact ⟨hsound, by rw [hfst]; exact h.2.1, by rw [hfst]; exact h.2.2⟩
 
+/-! ## The iterated descent — `n ↦ iord (iR2^[n] z)` is an infinite `≺`-descent
+
+This is the V-internal analog of `GentzenCon.gentzenDescent_descends`, on the genuine objects
+(`ZDerivesEmpty`/`iR2`/`iord` in place of the abstract `derivesEmpty`/`R`/`ord` axioms). It is stated
+against the one remaining InternalZ obligation, **reduction-soundness** `RedSound` (that the reduct of a
+contradiction derivation is again a genuine `ZDerivation` — `iCritReduct`/`iRInd` outputs satisfy
+`ZPhi`), supplied as an explicit hypothesis so nothing is axiomatized. Closing `RedSound` and
+internalizing the (here external-ℕ) iteration as a `𝚺₁` graph `gentzenDescentφ` is what discharges the
+crux-2 deep axiom `gentzen_descent_of_inconsistent`. -/
+
+/-- **Reduction-soundness** (the sole remaining InternalZ obligation): the `iR2`-reduct of a
+contradiction derivation is again a genuine Z-derivation. -/
+def RedSound : Prop := ∀ d : V, ZDerivesEmpty d → ZDerivation (iR2 d)
+
+/-- **`ZDerivesEmpty` is closed under the whole `iR2`-orbit** (external ℕ-iteration), given
+reduction-soundness. -/
+lemma ZDerivesEmpty_iterate (hRS : RedSound (V := V)) {z : V} (hz : ZDerivesEmpty z) :
+    ∀ n : ℕ, ZDerivesEmpty (iR2^[n] z)
+  | 0 => by simpa using hz
+  | n + 1 => by
+      rw [Function.iterate_succ_apply']
+      exact ZDerivesEmpty_iR2 (ZDerivesEmpty_iterate hRS hz n) (hRS _ (ZDerivesEmpty_iterate hRS hz n))
+
+/-- **THE infinite ε₀-descent of crux-2.** For a contradiction derivation `z` (`ZDerivesEmpty z`), under
+reduction-soundness the ordinals `n ↦ iord (iR2^[n] z)` strictly `≺`-descend at every step
+(`icmp (·(n+1)) (·n) = 0`). An infinite primitive-recursive `ε₀`-descent — exactly what `PRWO(ε₀)`
+forbids, giving the Gentzen contradiction `¬Con(𝗣𝗔) → False` once `z` is produced by the C0.5 bridge. -/
+lemma iord_iR2_iterate_descends (hRS : RedSound (V := V)) {z : V} (hz : ZDerivesEmpty z) (n : ℕ) :
+    icmp (iord (iR2^[n+1] z)) (iord (iR2^[n] z)) = 0 := by
+  rw [Function.iterate_succ_apply']
+  exact iord_descent_iR2_of_ZDerivesEmpty (ZDerivesEmpty_iterate hRS hz n)
+
 end GoodsteinPA.InternalZ
