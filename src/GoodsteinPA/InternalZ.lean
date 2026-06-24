@@ -1108,6 +1108,19 @@ instance inAnt_defined : 𝚺₀-Relation (inAnt : V → V → Prop) via inAntDe
   simp [inAntDef, inAnt, lh_defined.iff, znth_defined.iff, eq_comm, lh_bound]
 instance inAnt_definable : 𝚺₀-Relation (inAnt : V → V → Prop) := inAnt_defined.to_definable
 
+/-- `iperm I q` via `iperm_iff_proj`: `I = ⟪0,π₂ q⟫` (R) ∨ (`I = ⟪1,π₁(π₂ I),π₂(π₂ I)⟫` with
+`π₂(π₂ I) ∈ π₁ q`) (L) ∨ `I = ⟪2,0⟫` (Rep). All existentials bounded (`pi₁/pi₂_le_self`) ⟹ `𝚺₀`. -/
+def _root_.LO.FirstOrder.Arithmetic.ipermDef : 𝚺₀.Semisentence 2 := .mkSigma
+  “I q. (∃ c <⁺ q, !seqSuccDef c q ∧ !pairDef I 0 c)
+    ∨ (∃ p2 <⁺ I, !pi₂Def p2 I ∧ ∃ k <⁺ p2, !pi₁Def k p2 ∧ ∃ A <⁺ p2, !pi₂Def A p2 ∧
+        !pair₃Def I 1 k A ∧ ∃ sa <⁺ q, !seqAntDef sa q ∧ !inAntDef A sa)
+    ∨ !pairDef I 2 0”
+instance iperm_defined : 𝚺₀-Relation (iperm : V → V → Prop) via ipermDef := .mk fun v ↦ by
+  simp [ipermDef, iperm_iff_proj, isymIsL, isymR, isymLk, isymRep, seqSucc_defined.iff,
+    seqAnt_defined.iff, pi₁_defined.iff, pi₂_defined.iff, inAnt_defined.iff,
+    seqSucc, seqAnt, pi₁_le_self, pi₂_le_self]
+instance iperm_definable : 𝚺₀-Relation (iperm : V → V → Prop) := iperm_defined.to_definable
+
 /-- **L3.1 on a GENUINE chain** (E-CRUX2 §8.1, the lap-66 NEXT-item-1 bridge). For the chain `zK s r ds`
 with chain-inference data `j0` (from `isChainInf`: `hj0`/`hAj0`/`hchain`/`hrank` are exactly its three
 components), the coded symbol sequence `Iseq := tpSeq ds` (so `znth Iseq i = tp (znth ds i)`), and the
