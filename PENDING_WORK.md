@@ -21,7 +21,14 @@ a `𝚺₁` FUNCTION `W := fun t => iC(β(t+1))` (mirrors `Grz.corW`). Refactor 
 3. `wip/GentzenCon.lean` `SeqDominated`: `wseq Cβ : M` → `W : M→M`; `seqDescent_dominated` then discharges
    fully (`Cβ:=iC(β 0)`, `l₀':=l₀+1`, width-dom from `hβbound`). No remaining width gap.
 
-This is hardest-first crux-1 work; the descent half is already general (works for any width). Start at (1).
+This is hardest-first crux-1 work; the descent half is already general (works for any width).
+**Step 1 DONE (`21d1856`):** `src/GoodsteinPA/BlkRecF.lean` — `blkF`/`offF`/`wsumcF` over a width
+FUNCTION, sorry-free + axiom-free, in the build (1317 jobs). All 4 bookkeeping facts + elapsed-width
+invariant (`wsumcF_blkF_add_offF`/`wsumcF_blkF_le`, global positive widths) ported. **NEXT = step 2:**
+re-thread `src/StdCor34.lean` (`crux1_internal_run_of_width_dom` etc.) from `BlkRec.blk wseq` onto
+`BlkRecF.blkF WDef W hW`; the C-bound uses `wsumcF_blkF_le` + an internal `iC(β n) ≤ wsumcF (n)` lemma
+(= `Grz.C_le_wsum_corW`, the one genuinely new arithmetic fact to port); width-dom hyp becomes
+`∀ n, W n ≤ iF l₀ n`. Then step 3 (`SeqDominated` → `W := fun t => iC(β(t+1))`).
 
 ## Lap 56 — crux-1 redirect: natCode↔NF bridge DISSOLVED (transparent icmp); over-generality sharpened
 
