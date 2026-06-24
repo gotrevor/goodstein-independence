@@ -1088,6 +1088,20 @@ lemma isChainInf_iff_idx {s r ds : V} : isChainInf s r ds ↔
   · rintro ⟨j0, hj0, hA, hB, hC⟩
     exact ⟨j0, hj0, hA, fun i hi Bv ⟨k, hk, hBv⟩ => hBv ▸ hB i hi k hk, hC⟩
 
+/-- **Chain-validity from premise-local threading** — package `isChainInf` by taking the **last** premise
+as the distinguished `j0 = lh ds − 1`. A genuine reduct (the Ind unfolding `⟨d0, d1(0),…,d1(k−1)⟩` and the
+critical-cut reduct) establishes chain-validity exactly this way: the last premise carries the
+conclusion's succedent, and each premise's antecedent threads back to the conclusion or a *prior*
+premise's succedent. This lemma is the reusable reduction of `isChainInf` to those local facts (it just
+discharges `j0 < lh ds` from `0 < lh ds`). -/
+lemma isChainInf_of_last {s r ds : V} (hlen : 0 < lh ds)
+    (hlast : chainAsucc ds (lh ds - 1) = seqSucc s ∨ chainAsucc ds (lh ds - 1) = (^⊥ : V))
+    (hthread : ∀ i ≤ lh ds - 1, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank : ∀ i < lh ds - 1, irk (chainAsucc ds i) ≤ r) :
+    isChainInf s r ds :=
+  ⟨lh ds - 1, tsub_lt_self hlen one_pos, hlast, hthread, hrank⟩
+
 /-! ### Σ₁-definability of the sequent layer (`seqAnt`/`seqSucc`/`chainAsucc`/`chainAnt`)
 
 The chain-validity ingredients toward `zKValid`'s arithmetization (the `ZPhi` `zK`-disjunct cascade).

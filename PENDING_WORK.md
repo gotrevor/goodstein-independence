@@ -27,6 +27,16 @@ recursions. Multi-lap; build incrementally.
 
 **LADDER (hardest-first within Option A; the Ind case is the more tractable wall — its reduct premises are
 genuine sub-derivations, NOT `Rep`, so not definitionally blocked like the K-case):**
+0.5. **PREREQUISITE — strengthen `ZPhi`'s I∀/Ind disjuncts with the premise-sequent + eigenvariable side
+   conditions** (a Σ₁/Δ₁ Fixpoint cascade, exactly like laps 66/69's leaf + K cascades). The CURRENT
+   `ZPhi` zIall disjunct is `d = zIall s a p d0 ∧ d0 ∈ C ∧ seqSucc s = ^∀ p` — it does NOT say `d0` derives
+   `Γ→F(a)` (Buchholz I∀ requires `fstIdx d0 = mkSeqt (seqAnt s) (substs1 (^&a) p)` + `a ∉ conclusion`).
+   Likewise the Ind disjunct omits `fstIdx d0 = Γ→F(0)` / `fstIdx d1 = F(a),Γ→F(Sa)`. **Without these the
+   genuine reduct's THREADING (isChainInf) is unprovable** — after substitution `σi = zsubst d1 a i` you
+   can't compute its sequent `F(i),Γ→F(i+1)`. (This under-constraining does NOT break the descent
+   direction — the C0.5 bridge produces a genuine derivation that still satisfies the weaker `ZPhi`, and
+   the ordinal descent uses only NF facts — but it DOES block `RedSound`.) Building block landed lap 70:
+   `isChainInf_of_last` (reduces chain-validity to premise-local threading).
 1. **`zsubst d a n`** — Σ₁ derivation substitution. Sub-bricks: per-node sequent substitution (apply
    `substs1`/`Rew` to `fstIdx`), recurse on `zIallPrem`/`zInegPrem`/`zIndPrem0/1`/`zKseq`. Prove
    `ZDerivation_zsubst` (preserves validity) + `iotil_zsubst = iotil` (õ substitution-invariance — the
@@ -46,8 +56,13 @@ genuine sub-derivations, NOT `Rep`, so not definitionally blocked like the K-cas
 
 **Banked lap 70 (all axiom-clean, green 1321):** `zDerivation_zIall_inv`/`_zIneg_inv`/`_zAxAll_inv`/
 `_zAxNeg_inv`/`_zAtom_inv` (peeling), `not_zKValid_of_zK_premise`/`not_zKValid_iCritReduct` (obstruction),
-`ZDerivation_iR2_zIall`/`_zIneg` (clean I-rule `RedSound` fragment), `iCritReductSeq_lh`/
-`znth_iCritReductSeq_zero`.
+`ZDerivation_iR2_zIall`/`_zIneg` (clean I-rule `RedSound` fragment), `isChainInf_of_last` (chain-validity
+from premise-local threading), `iCritReductSeq_lh`/`znth_iCritReductSeq_zero`.
+
+**Foundation substitution API (for `zsubst`):** `subst L w p` (vector subst, `Functions.lean:429`),
+`substs1 L t p := subst L ?[t] p` (`:759`), `shift L p` (`:276`), `free p := substs1 L ^&0 (shift L p)`
+(`:784`); free vars are `^&i` (`qqFvar`). Eigenvariable subst (free var `a` → numeral) is NOT `substs1`
+(that's for bound var 0); needs a free-var replacement built from `subst`/`shift` — investigate next.
 
 ## ⭐⭐ Lap 67 — THE tag-4 K-case descent ASSEMBLED (`iord_descent_iR2_zK_of_valid`, axiom-clean)
 
