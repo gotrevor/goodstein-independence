@@ -137,6 +137,10 @@ lemma termFvSubstVec_cons {kk u us : V} (hu : IsUTerm L u) (hus : IsUTermVec L k
   ⟨by simp [hv.isUTerm], fun i hi ↦ by
     rw [nth_termFvSubstVec hv.isUTerm hi]; exact IsSemitermVec.termFvSubst ht (hv.nth hi)⟩
 
+/-- Bound-variable-depth weakening: a semiterm in context `n` is a semiterm in any wider context. -/
+lemma isSemiterm_weaken {n m u : V} (h : IsSemiterm L n u) (hnm : n ≤ m) : IsSemiterm L m u :=
+  IsSemiterm.def.mpr ⟨(IsSemiterm.def.mp h).1, le_trans (IsSemiterm.def.mp h).2 hnm⟩
+
 end termFvSubst
 
 /-! ## Formula-level free-variable substitution `^&a ↦ t`
@@ -242,6 +246,40 @@ instance fvSubst.definable' : Γ-[m + 1]-Function₃[V] (fvSubst L) := fvSubst.d
 @[simp] lemma fvSubst_ex {p} (hp : IsUFormula L p) :
     fvSubst L a t (^∃ p) = ^∃ (fvSubst L a t p) := by
   simp [fvSubst, construction, hp]
+
+/-- **`fvSubst` preserves `IsSemiformula`** (for a closed replacement `t`). Order-induction over the
+formula, mirroring Foundation's `IsSemiformula.subst`; under a quantifier the bound-var context grows
+`n → n+1`, harmless since `t` is closed so `IsSemiterm L 0 t` weakens to every level. -/
+lemma fvSubst_isSemiformula (ht : IsSemiterm L 0 t) {n p : V} (hp : IsSemiformula L n p) :
+    IsSemiformula L n (fvSubst L a t p) := by
+  let f : V → V → V := fun _ n ↦ n + 1
+  have hf : 𝚺₁-Function₂ f := by definability
+  revert hp
+  apply bounded_all_sigma1_order_induction hf
+    (P := fun p n ↦ IsSemiformula L n p → IsSemiformula L n (fvSubst L a t p)) ?_ ?_ p n
+  · definability
+  intro p n ih hp
+  rcases IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
+      ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · have : IsSemitermVec L k n (termFvSubstVec L a t k v) :=
+      IsSemitermVec.termFvSubstVec (isSemiterm_weaken ht (by simp)) hv
+    simp [hR, hv.isUTerm, this]
+  · have : IsSemitermVec L k n (termFvSubstVec L a t k v) :=
+      IsSemitermVec.termFvSubstVec (isSemiterm_weaken ht (by simp)) hv
+    simp [hR, hv.isUTerm, this]
+  · simp
+  · simp
+  · have ih₁ : IsSemiformula L n (fvSubst L a t p₁) := ih p₁ (by simp) n (by simp [f]) h₁
+    have ih₂ : IsSemiformula L n (fvSubst L a t p₂) := ih p₂ (by simp) n (by simp [f]) h₂
+    simp [h₁.isUFormula, h₂.isUFormula, ih₁, ih₂]
+  · have ih₁ : IsSemiformula L n (fvSubst L a t p₁) := ih p₁ (by simp) n (by simp [f]) h₁
+    have ih₂ : IsSemiformula L n (fvSubst L a t p₂) := ih p₂ (by simp) n (by simp [f]) h₂
+    simp [h₁.isUFormula, h₂.isUFormula, ih₁, ih₂]
+  · have ih₁ : IsSemiformula L (n + 1) (fvSubst L a t p₁) := ih p₁ (by simp) (n + 1) (by simp [f]) h₁
+    simpa [h₁.isUFormula] using ih₁
+  · have ih₁ : IsSemiformula L (n + 1) (fvSubst L a t p₁) := ih p₁ (by simp) (n + 1) (by simp [f]) h₁
+    simpa [h₁.isUFormula] using ih₁
 
 end fvSubst
 
