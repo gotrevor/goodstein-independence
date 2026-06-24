@@ -870,14 +870,31 @@ operator `iR` (Def 3.2) is downstream plumbing.
 
 `icmp a b = 0` reads `a ≺ b`. -/
 
+/-- **Same-degree descent template** (Thm 4.2, degree unchanged): if `dg(e)=dg(d)` and
+`õ(e) ≺ õ(d)`, then `o(e) ≺ o(d)`. The tower height is fixed and `ω_n` is base-monotone
+(`icmp_iotower_mono`). -/
+lemma iord_descent_samedeg {d e : V} (hg : idg e = idg d) (ho : icmp (iotil e) (iotil d) = 0) :
+    icmp (iord e) (iord d) = 0 := by
+  rw [iord, iord, hg]; exact icmp_iotower_mono ho (idg d)
+
+/-- **Degree-drop descent template** (Thm 4.2, `dg(d)=dg(e)+1`): if `õ(e) ≼ õ(d)` (`≺` or `=`) and
+`õ(d)` is in normal form, then `o(e) ≺ o(d)`. One extra tower level strictly dominates
+(`icmp_iotower_lt_succ_of_le`). The `isNF (iotil d)` premise is discharged later via
+`ZDerivation` (`õ` of a genuine derivation is a valid CNF code). -/
+lemma iord_descent_dgdrop {d e : V} (hg : idg d = idg e + 1) (hnf : isNF (iotil d))
+    (ho : icmp (iotil e) (iotil d) = 0 ∨ iotil e = iotil d) : icmp (iord e) (iord d) = 0 := by
+  rw [iord, iord, hg]
+  refine icmp_iotower_lt_succ_of_le hnf (idg e) ?_
+  rcases ho with h | h
+  · exact Or.inl (icmp_iotower_mono h (idg e))
+  · exact Or.inr (by rw [h])
+
 /-- **I-rule descent** (same degree, `õ` drops by one successor): if `dg(e)=dg(d)` and
-`õ(d)=õ(e)+1`, then `o(e) ≺ o(d)`. The tower height is unchanged and the base strictly
-increases (`self_lt_iadd_one`), so `icmp_iotower_mono` gives the descent. This covers Buchholz's
-`I^a_∀xF`/`I_¬A` cases (`d[n]` has the same `dg`/`õ`-predecessor as the premise). -/
+`õ(d)=õ(e)+1`, then `o(e) ≺ o(d)`. Instance of `iord_descent_samedeg` via `self_lt_iadd_one`
+(`õ(e) ≺ õ(e)+1`). Covers Buchholz's `I^a_∀xF`/`I_¬A` cases. -/
 lemma iord_descent_I {d e : V} (hg : idg e = idg d)
-    (ho : iotil d = iadd (iotil e) (ocOadd 0 1 0)) : icmp (iord e) (iord d) = 0 := by
-  rw [iord, iord, hg, ho]
-  exact icmp_iotower_mono (self_lt_iadd_one (iotil e) (iotil e) le_rfl) (idg d)
+    (ho : iotil d = iadd (iotil e) (ocOadd 0 1 0)) : icmp (iord e) (iord d) = 0 :=
+  iord_descent_samedeg hg (ho ▸ self_lt_iadd_one (iotil e) (iotil e) le_rfl)
 
 /-- `o(d0) ≺ o(I_¬A d0)` — the `I_¬A` reduction `d[0] = d0` strictly lowers `o`. -/
 lemma iord_descent_zIneg (s p d0 : V) : icmp (iord d0) (iord (zIneg s p d0)) = 0 :=
