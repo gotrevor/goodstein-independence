@@ -30,15 +30,18 @@ domination discharged internally (`iC_le_wsumcF`, `one_le_iC_of_ne_zero`); no `h
 `StdCor34F.crux1_internal_run_F` directly (clean `[propext,choice,Quot.sound]`); dead finite-`wseq` girder
 gone. `SeqRealized` carries explicit `βDef`; `SeqStdBounded` width form. **The crux-1 sorry is gone.**
 
-## ⭐ NEXT TARGET = CRUX 2 (the only remaining sorry; 🟠 generational)
-`gentzen_prwo_implies_consistency : 𝗣𝗔 ⊢ prwoInstance gentzenDescentφ → 𝗣𝗔 ⊢ Con(𝗣𝗔)` (Gentzen). Needs
-the `𝗣𝗔`-arithmetization of the ordinal assignment `ord`, reduction `R`, and eq-(5) `ord(R d) ≺ ord d`
-(currently disclosed axioms `ord`/`R`/`derivesEmpty`/`R_preserves_empty`/`ord_R_descends`/`gentzenDescentφ`
-/`gentzenDescentφ_realized`/`gentzenDescentφ_dominated`). Sources: `papers/buchholz-on-gentzens-first-
-consistency-proof.pdf`, `papers/siders-*.pdf`; Foundation `Theory.Derivation` substrate
-(`Bootstrapping/Syntax/Proof/Basic.lean`). Attack paths: (a) read Buchholz, decompose eq-(5)
-lemma-by-lemma; (b) state `ord`/`R` as `ℒₒᵣ`-arithmetized primrec functions over coded derivations;
-(c) the `gentzenDescentφ_*` certificates then discharge from `ord`/`R`'s fixed build tree (Rathjen 3.2).
+## ⭐⭐ WHOLE Gentzen chain now SORRY-FREE (`abece0f`). NEXT = crux 2 = 4 disclosed axioms (🟠 generational)
+`wip/GentzenCon.lean` sorry-free; `goodstein_implies_consistency_via_gentzen` `#print axioms` =
+`[propext, choice, Quot.sound, PA_delta1Definable]` + 4 crux-2 axioms. Crux 1 axiom-clean. The remaining
+4 (all the Gentzen ordinal-analysis arithmetization, interlocked):
+- `gentzenDescentφ` (ℒₒᵣ graph of `n↦ord(Rⁿd₀)`), `gentzenDescentφ_realized` (total 𝚺₁ NF branch +
+  explicit `βDef`), `gentzenDescentφ_dominated` (Rathjen 3.2 width bound) — discharge once `ord`/`R` exist.
+- `gentzen_reduction_internalized : 𝗣𝗔 ⊢ (prwoInstance gentzenDescentφ 🡒 Con(𝗣𝗔))` — Gentzen's
+  `PRWO(ε₀) → Con(𝗣𝗔)` internalized; the deep `TI(ε₀) ⊢ Con(PA)` content.
+Attack: (a) read Buchholz (`papers/buchholz-on-gentzens-first-consistency-proof.pdf`) + `papers/siders-*`,
+decompose eq-(5) `ord(R d) ≺ ord d` lemma-by-lemma; (b) state `ord`/`R` as `ℒₒᵣ` primrec functions over
+Foundation's `Theory.Derivation` (`Bootstrapping/Syntax/Proof/Basic.lean`); (c) certificates then
+discharge from `ord`/`R`'s fixed build tree. Multi-lap. Headline stays `sorry` until all 4 real.
 
 ## Lap 56 — crux-1 redirect: natCode↔NF bridge DISSOLVED (transparent icmp); over-generality sharpened
 
