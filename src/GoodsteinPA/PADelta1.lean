@@ -63,6 +63,30 @@ unfolding both and discharging via the `typed_quote_*` coding simp set. -/
   unfold succIndCodeT succInd
   simp [Matrix.constant_eq_singleton]
 
+/-- **Raw-V `succInd` builder** (the `𝚺₁`-definable function the recognizer formula needs). In
+simp-normal form: the two identity substitutions `p/[#0]` are `= p`. -/
+noncomputable def succIndCodeRaw (p : V) : V :=
+  imp ℒₒᵣ (substs1 ℒₒᵣ (numeral 0) p)
+    (imp ℒₒᵣ
+      (qqAll (imp ℒₒᵣ p (substs1 ℒₒᵣ (qqAdd (^#0) (numeral 1)) p)))
+      (qqAll p))
+
+/-- The typed builder's underlying code is the raw builder. -/
+@[simp] lemma succIndCodeT_val (p : Semiformula V ℒₒᵣ 1) :
+    (succIndCodeT p).val = succIndCodeRaw p.val := by
+  unfold succIndCodeT succIndCodeRaw; simp [substs1]
+
+/-- **Raw quote-correctness:** `succIndCodeRaw ⌜φ⌝ = ⌜succInd φ⌝` over `V`. -/
+@[simp] lemma succIndCodeRaw_quote (φ : Semiformula ℒₒᵣ ℕ 1) :
+    succIndCodeRaw (⌜φ⌝ : V) = (⌜succInd φ⌝ : V) := by
+  show succIndCodeRaw (⌜φ⌝ : Semiformula V ℒₒᵣ 1).val = (⌜succInd φ⌝ : Semiformula V ℒₒᵣ 0).val
+  rw [← succIndCodeT_val, succIndCodeT_quote]
+
+/-- `succIndCodeRaw` is a `𝚺₁` function (composition of the `imp`/`qqAll`/`substs1`/`numeral`/`qqAdd`
+defined functions). -/
+instance succIndCodeRaw_definable : 𝚺₁-Function₁ (succIndCodeRaw : V → V) := by
+  unfold succIndCodeRaw; definability
+
 end SuccIndCode
 
 /-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
