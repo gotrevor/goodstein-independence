@@ -1079,6 +1079,85 @@ lemma iseqNaddIdgAux_const {ds β : V} (hconst : ∀ i < lh ds, iotil (znth ds i
     · rw [iseqNaddIdgAux_zero, inadd_zero_left, zero_add]
     · rw [ih (pos_iff_ne_zero.mpr hj0) (le_trans (by simp) hj), inadd_omega_pow_collect]
 
+/-! ## `iRepeatSeq` — the constant premise block `[v, v, …, v]` (length `k`)
+
+The Ind-reduct `d[0] = K^r(d0, d1(0),…,d1(k−1))` (Buchholz §3.2 case 4) needs a coded premise sequence.
+Ordinally, every `d1(j)` shares `õ = õ d1` (substitution-invariance), so the `#`-fold over the
+substituted block equals the `#`-fold over `k` *unsubstituted* copies of `d1` (`iseqNaddIdgAux_const`).
+`iRepeatSeq` is that constant block — a length-`k` sequence builder mirroring `iwseq`/`iCTable`. (The
+genuine substituted reduct, needed for derivation *validity* / `derivesEmpty`-preservation, layers the
+eigenvariable substitution on top; this scaffold pins the ordinal side.) -/
+
+def iRepeatSeq.blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y v. y = 0”
+  succ := .mkSigma “y ih i v. !seqConsDef y ih v”
+
+noncomputable def iRepeatSeq.construction : PR.Construction V iRepeatSeq.blueprint where
+  zero := fun _ ↦ ∅
+  succ := fun x _ ih ↦ seqCons ih (x 0)
+  zero_defined := .mk fun v ↦ by simp [iRepeatSeq.blueprint, emptyset_def]
+  succ_defined := .mk fun v ↦ by simp [iRepeatSeq.blueprint, seqCons_defined.iff]
+
+/-- `iRepeatSeq v k = ⟨v, v, …, v⟩` (length `k`). -/
+noncomputable def iRepeatSeq (v k : V) : V := iRepeatSeq.construction.result ![v] k
+
+@[simp] lemma iRepeatSeq_zero (v : V) : iRepeatSeq v 0 = ∅ := by
+  simp [iRepeatSeq, iRepeatSeq.construction]
+
+@[simp] lemma iRepeatSeq_succ (v k : V) : iRepeatSeq v (k + 1) = seqCons (iRepeatSeq v k) v := by
+  simp [iRepeatSeq, iRepeatSeq.construction]
+
+def _root_.LO.FirstOrder.Arithmetic.iRepeatSeqDef : 𝚺₁.Semisentence 3 :=
+  iRepeatSeq.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
+
+instance iRepeatSeq_defined : 𝚺₁-Function₂ (iRepeatSeq : V → V → V) via iRepeatSeqDef := .mk
+  fun v ↦ by simp [iRepeatSeq.construction.result_defined_iff, iRepeatSeqDef, iRepeatSeq]; rfl
+
+instance iRepeatSeq_definable : 𝚺₁-Function₂ (iRepeatSeq : V → V → V) := iRepeatSeq_defined.to_definable
+instance iRepeatSeq_definable' (Γ) : Γ-[m + 1]-Function₂ (iRepeatSeq : V → V → V) :=
+  iRepeatSeq_definable.of_sigmaOne
+
+private lemma def_iRepeatSeq {k} (v : V) (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun w : Fin k → V ↦ iRepeatSeq v (w i)) :=
+  DefinableFunction₂.comp (F := iRepeatSeq) (DefinableFunction.const v) (DefinableFunction.var i)
+
+@[simp] lemma iRepeatSeq_seq (v k : V) : Seq (iRepeatSeq v k) := by
+  induction k using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_iRepeatSeq v 0)
+  case zero => simpa using seq_empty
+  case succ k ih => rw [iRepeatSeq_succ]; exact ih.seqCons _
+
+@[simp] lemma iRepeatSeq_lh (v k : V) : lh (iRepeatSeq v k) = k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_iRepeatSeq v 0)) (by definability)
+  case zero => simpa using lh_empty
+  case succ k ih => rw [iRepeatSeq_succ, Seq.lh_seqCons _ (iRepeatSeq_seq v k), ih]
+
+/-- Every in-range entry of `iRepeatSeq v k` is `v`. -/
+lemma znth_iRepeatSeq {v k : V} : ∀ i < k, znth (iRepeatSeq v k) i = v := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro i hi; exact absurd hi (by simp)
+  case succ k ih =>
+    intro i hi
+    rw [iRepeatSeq_succ]
+    rcases eq_or_ne i k with rfl | hik
+    · have := znth_seqCons_self (iRepeatSeq_seq v i) v; rwa [iRepeatSeq_lh] at this
+    · have hik' : i < k := lt_of_le_of_ne (le_iff_lt_succ.mpr hi) hik
+      rw [znth_seqCons_of_lt (iRepeatSeq_seq v k) v (by rw [iRepeatSeq_lh]; exact hik')]
+      exact ih i hik'
+
+/-- **The constant block's `#`-fold**: `#_{i<k} ω^{õ v} = ω^{õ v}·k` (for `k > 0`). The capstone
+combining `iRepeatSeq` with `iseqNaddIdgAux_const`: this is `õ` of the Ind-reduct's substituted
+premise block, the right factor of `icmp_iotil_ind_reduct` (LH4). -/
+lemma iseqNaddIdg_iRepeatSeq {v k : V} (hk : 0 < k) :
+    iseqNaddIdg (iRepeatSeq v k) = ocOadd (iotil v) k 0 := by
+  have hconst : ∀ i < lh (iRepeatSeq v k), iotil (znth (iRepeatSeq v k) i) = iotil v :=
+    fun i hi => by rw [znth_iRepeatSeq i (by rwa [iRepeatSeq_lh] at hi)]
+  rw [iseqNaddIdg,
+    iseqNaddIdgAux_const hconst (lh (iRepeatSeq v k)) (by rw [iRepeatSeq_lh]; exact hk) le_rfl,
+    iRepeatSeq_lh]
+
 /-! ## C0 Fixpoint — the system-Z derivation predicate `ZDerivation : V → Prop`
 
 The one-step rule `ZPhi C d` ("`d` is a Z-derivation given its premises lie in `C`"), mirroring
