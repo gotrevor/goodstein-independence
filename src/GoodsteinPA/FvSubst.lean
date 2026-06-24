@@ -260,6 +260,41 @@ lemma termFvSubstVec_qVec (ht : IsSemiterm L 0 t) {n m w : V} (hw : IsSemitermVe
     rw [nth_termBShiftVec hw.isUTerm hj, nth_termBShiftVec hfw.isUTerm hj,
       nth_termFvSubstVec hw.isUTerm hj, termFvSubst_termBShift ht (hw.nth hj)]
 
+/-! ### Freshness: `^&a ↦ t` is the identity on codes bounded by `a`
+
+A free-variable code dominates its index (`x < ^&x`, `var_lt_qqFvar`), so a term/term-vector whose
+code is `≤ a` cannot contain `^&a` and is fixed by the substitution. This is the structural reason the
+`d ≤ a` bound in `ZDerivation_zsubst` makes the substitution vacuous: every component of `d ≤ a` is
+`< a`, hence `a`-free. -/
+
+/-- **`termFvSubst` is the identity on terms bounded by `a`.** If `u ≤ a` then `^&a` cannot occur in
+`u` (its code `^&a > a ≥ u`), so the substitution `^&a ↦ t` fixes `u`. -/
+lemma termFvSubst_eq_self_of_le {a u : V} (hu : IsUTerm L u) (hua : u ≤ a) :
+    termFvSubst L a t u = u := by
+  revert hua
+  apply IsUTerm.induction (P := fun u ↦ u ≤ a → termFvSubst L a t u = u) 𝚺 ?_ ?_ ?_ ?_ u hu
+  · definability
+  · intro z _; simp
+  · intro x hx
+    have hne : x ≠ a := by rintro rfl; exact absurd hx (not_le.mpr (var_lt_qqFvar x))
+    simp [termFvSubst_fvar_ne hne]
+  · intro k f v hkf hv ih hle
+    rw [termFvSubst_func hkf hv]
+    simp only [qqFunc_inj, true_and]
+    apply nth_ext' k (len_termFvSubstVec hv) hv.left.symm
+    intro i hi
+    rw [nth_termFvSubstVec hv hi]
+    exact ih i hi (le_trans (le_of_lt (nth_lt_qqFunc_of_lt (lt_of_lt_of_le hi (le_of_eq hv.left)))) hle)
+
+/-- **`termFvSubstVec` is the identity on term-vectors bounded by `a`.** -/
+lemma termFvSubstVec_eq_self_of_le {a k v : V} (hv : IsUTermVec L k v) (hva : v ≤ a) :
+    termFvSubstVec L a t k v = v := by
+  apply nth_ext' k (len_termFvSubstVec hv) hv.left.symm
+  intro i hi
+  rw [nth_termFvSubstVec hv hi]
+  exact termFvSubst_eq_self_of_le (hv.2 i hi)
+    (le_trans (le_of_lt (nth_lt_self (lt_of_lt_of_le hi (le_of_eq hv.left)))) hva)
+
 end termFvSubst
 
 /-! ## Formula-level free-variable substitution `^&a ↦ t`
@@ -399,6 +434,34 @@ lemma fvSubst_isSemiformula (ht : IsSemiterm L 0 t) {n p : V} (hp : IsSemiformul
     simpa [h₁.isUFormula] using ih₁
   · have ih₁ : IsSemiformula L (n + 1) (fvSubst L a t p₁) := ih p₁ (by simp) (n + 1) (by simp [f]) h₁
     simpa [h₁.isUFormula] using ih₁
+
+/-- **`fvSubst` is the identity on formulas bounded by `a`.** If `p ≤ a`, then `^&a` (code `> a`)
+cannot occur in `p`, so the substitution `^&a ↦ t` fixes `p`. Every atom term-vector and every
+subformula is `< p ≤ a`, so the term-level `termFvSubstVec_eq_self_of_le` applies at the leaves. -/
+lemma fvSubst_eq_self_of_le {a p : V} (hp : IsUFormula L p) (hpa : p ≤ a) :
+    fvSubst L a t p = p := by
+  revert hpa
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+    (P := fun p ↦ p ≤ a → fvSubst L a t p = p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
+  · definability
+  · intro k r v hr hv hle
+    rw [fvSubst_rel hr hv,
+      termFvSubstVec_eq_self_of_le hv (le_trans (le_of_lt (v_lt_rel k r v)) hle)]
+  · intro k r v hr hv hle
+    rw [fvSubst_nrel hr hv,
+      termFvSubstVec_eq_self_of_le hv (le_trans (le_of_lt (v_lt_nrel k r v)) hle)]
+  · intro _; simp
+  · intro _; simp
+  · intro p q hp hq ihp ihq hle
+    rw [fvSubst_and hp hq, ihp (le_trans (le_of_lt (lt_K!_left p q)) hle),
+      ihq (le_trans (le_of_lt (lt_K!_right p q)) hle)]
+  · intro p q hp hq ihp ihq hle
+    rw [fvSubst_or hp hq, ihp (le_trans (le_of_lt (lt_or_left p q)) hle),
+      ihq (le_trans (le_of_lt (lt_or_right p q)) hle)]
+  · intro p hp ihp hle
+    rw [fvSubst_all hp, ihp (le_trans (le_of_lt (lt_forall p)) hle)]
+  · intro p hp ihp hle
+    rw [fvSubst_ex hp, ihp (le_trans (le_of_lt (lt_exists p)) hle)]
 
 /-- **`fvSubst` preserves `IsUFormula`** (for an `IsUTerm` replacement `t`). Mirrors `IsUFormula.neg`. -/
 lemma IsUFormula.fvSubst (ht : IsUTerm L t) {p} (hp : IsUFormula L p) :
