@@ -976,6 +976,19 @@ def iperm (I q : V) : Prop :=
 
 @[simp] lemma iperm_isymRep (q : V) : iperm isymRep q := Or.inr (Or.inr rfl)
 
+/-- **Projection-free form of `iperm`** (the bounded-quantifier-free shape for arithmetization): the
+middle `∃ k A, I = L^k_A ∧ A ∈ Γ` disjunct is `isymIsL I ∧ (π₂(π₂ I)) ∈ Γ` (the L-symbol reconstructs
+from its own projections, `isymIsL`). This is the form `ipermDef` matches. -/
+lemma iperm_iff_proj {I q : V} : iperm I q ↔
+    I = isymR (seqSucc q) ∨ (isymIsL I ∧ inAnt (π₂ (π₂ I)) (seqAnt q)) ∨ I = isymRep := by
+  unfold iperm
+  refine or_congr_right (or_congr_left ?_)
+  constructor
+  · rintro ⟨k, A, rfl, hA⟩
+    exact ⟨isymIsL_isymLk k A, by simpa [isymLk] using hA⟩
+  · rintro ⟨hL, hA⟩
+    exact ⟨π₁ (π₂ I), π₂ (π₂ I), hL, hA⟩
+
 lemma iperm_isymR_iff {C q : V} : iperm (isymR C) q ↔ C = seqSucc q := by
   constructor
   · rintro (h | ⟨k, A, h, _⟩ | h)
@@ -1087,6 +1100,13 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.chainAntDef : 𝚺₁.Semisent
 instance chainAnt_defined : 𝚺₁-Function₂ (chainAnt : V → V → V) via chainAntDef := .mk
   fun v ↦ by simp [chainAntDef, chainAnt, znth_defined.iff, fstIdx_defined.iff, seqAnt_defined.iff]
 instance chainAnt_definable : 𝚺₁-Function₂ (chainAnt : V → V → V) := chainAnt_defined.to_definable
+
+/-- `inAnt A Γ = ∃ i < lh Γ, znth Γ i = A` (antecedent membership). -/
+def _root_.LO.FirstOrder.Arithmetic.inAntDef : 𝚺₀.Semisentence 2 := .mkSigma
+  “A Γ. ∃ l <⁺ 2 * Γ, !lhDef l Γ ∧ ∃ i < l, !znthDef A Γ i”
+instance inAnt_defined : 𝚺₀-Relation (inAnt : V → V → Prop) via inAntDef := .mk fun v ↦ by
+  simp [inAntDef, inAnt, lh_defined.iff, znth_defined.iff, eq_comm, lh_bound]
+instance inAnt_definable : 𝚺₀-Relation (inAnt : V → V → Prop) := inAnt_defined.to_definable
 
 /-- **L3.1 on a GENUINE chain** (E-CRUX2 §8.1, the lap-66 NEXT-item-1 bridge). For the chain `zK s r ds`
 with chain-inference data `j0` (from `isChainInf`: `hj0`/`hAj0`/`hchain`/`hrank` are exactly its three
