@@ -4601,6 +4601,62 @@ lemma ZDerivesEmpty_iR2 {d : V} (h : ZDerivesEmpty d) (hsound : ZDerivation (iR2
     fstIdx_iR2_of_tag_Ind_or_K h.1 (zTag_Ind_or_K_of_ZDerivesEmpty h)
   exact ⟨hsound, by rw [hfst]; exact h.2.1, by rw [hfst]; exact h.2.2⟩
 
+/-! ## Reduction-soundness decomposition — `RedSound` ⟸ chain-validity of the reducts
+
+The reduct of an `Ind`/`K` derivation is a chain `zK …` whose premises are already `ZDerivation`s and
+whose `Seq` structure is free; the only residual is that the produced chain is `zKValid` (the Buchholz
+reduction lemma). These lemmas peel off the tractable structure, isolating that residual. -/
+
+/-- **Ind-rule inversion**: a `ZDerivation` of `zInd s at' p d0 d1` has both Ind premises
+`ZDerivation`s. (The non-`Ind` `ZPhi` disjuncts are ruled out by `zTag`.) -/
+lemma zDerivation_zInd_inv {s at' p d0 d1 : V} (hZ : ZDerivation (zInd s at' p d0 d1)) :
+    ZDerivation d0 ∧ ZDerivation d1 := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a, p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, hd0, hd1⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · obtain rfl : d0 = d0' := by simpa using congrArg zIndPrem0 h
+    obtain rfl : d1 = d1' := by simpa using congrArg zIndPrem1 h
+    exact ⟨hd0, hd1⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+
+/-- Every premise of the Ind-reduct sequence `iIndReductSeq d0 d1 k = ⟨d1,…,d1,d0⟩` is a `ZDerivation`
+when `d0`,`d1` are. -/
+lemma znth_iIndReductSeq_ZDerivation {d0 d1 k : V} (h0 : ZDerivation d0) (h1 : ZDerivation d1) :
+    ∀ i < lh (iIndReductSeq d0 d1 k), ZDerivation (znth (iIndReductSeq d0 d1 k) i) := by
+  intro i hi
+  have hk : lh (iIndReductSeq d0 d1 k) = k + 1 := by
+    rw [iIndReductSeq, Seq.lh_seqCons _ (iRepeatSeq_seq d1 k), iRepeatSeq_lh]
+  rw [hk] at hi
+  rcases lt_or_ge i k with hlt | hge
+  · rw [iIndReductSeq,
+      znth_seqCons_of_lt (iRepeatSeq_seq d1 k) _ (by rw [iRepeatSeq_lh]; exact hlt),
+      znth_iRepeatSeq i hlt]
+    exact h1
+  · have hik : i = k := le_antisymm (le_iff_lt_succ.mpr hi) hge
+    have hself := znth_seqCons_self (iRepeatSeq_seq d1 k) d0
+    rw [iRepeatSeq_lh] at hself
+    rw [iIndReductSeq, hik, hself]
+    exact h0
+
+/-- **Reduction-soundness for the Ind rule, modulo chain-validity of the reduct.** `iR2 (zInd …)` is the
+chain `zK s (irk p) (iIndReductSeq d0 d1 1)`; its premises are `ZDerivation`s (the Ind premises) and its
+`Seq` structure is free, so it is a genuine `ZDerivation` exactly when the produced chain is `zKValid`
+(the Buchholz reduction lemma — the deep residual). -/
+lemma ZDerivation_iR2_zInd_of_zKValid {s at' p d0 d1 : V}
+    (hZ : ZDerivation (zInd s at' p d0 d1))
+    (hvalid : zKValid s (irk p) (iIndReductSeq d0 d1 1)) :
+    ZDerivation (iR2 (zInd s at' p d0 d1)) := by
+  obtain ⟨h0, h1⟩ := zDerivation_zInd_inv hZ
+  rw [iR2_zInd, iRInd_zInd, zDerivation_iff]
+  exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+    ⟨s, irk p, iIndReductSeq d0 d1 1, rfl, iIndReductSeq_seq d0 d1 1,
+      fun i hi => znth_iIndReductSeq_ZDerivation h0 h1 i hi, hvalid⟩))))
+
 /-! ## The iterated descent — `n ↦ iord (iR2^[n] z)` is an infinite `≺`-descent
 
 This is the V-internal analog of `GentzenCon.gentzenDescent_descends`, on the genuine objects
