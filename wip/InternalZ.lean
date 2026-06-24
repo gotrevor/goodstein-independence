@@ -495,4 +495,76 @@ lemma le_pred_of_lt {a c : V} (h : a < c) : a ≤ c - 1 := by
     znth_idgTable_eq_idg _ d0 (le_pred_of_lt (d0_lt_zInd s at' p d0 d1)),
     znth_idgTable_eq_idg _ d1 (le_pred_of_lt (d1_lt_zInd s at' p d0 d1))]
 
+/-! ### `idg`-fold over a premise sequence (for the variadic `K^r` equation)
+
+`iseqMaxIdg ds = max_{i < lh ds} idg(znth ds i)` — the genuine idg-fold (applies `idg` directly,
+independent of any value-table). The `K^r` step in `idgNext` reads the *table* form
+`iseqMaxTab (idgTable M) ds`; when `M` dominates every entry (which holds for `M = zK… - 1`), the two
+agree by table stability. This yields the clean `idg_zK` equation. -/
+
+def iseqMaxIdgAux.blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y ds. y = 0”
+  succ := .mkSigma “y ih n ds.
+    ∃ di, !znthDef di ds n ∧ ∃ v, !idgDef v di ∧ !max.dfn y ih v”
+
+noncomputable def iseqMaxIdgAux.construction : PR.Construction V iseqMaxIdgAux.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun x n ih ↦ max ih (idg (znth (x 0) n))
+  zero_defined := .mk fun v ↦ by simp [iseqMaxIdgAux.blueprint]
+  succ_defined := .mk fun v ↦ by
+    simp [iseqMaxIdgAux.blueprint, znth_defined.iff, idg_defined.iff, max_defined.iff]
+
+/-- Partial idg-fold: `iseqMaxIdgAux ds j = max_{i < j} idg(znth ds i)`. -/
+noncomputable def iseqMaxIdgAux (ds j : V) : V := iseqMaxIdgAux.construction.result ![ds] j
+
+@[simp] lemma iseqMaxIdgAux_zero (ds : V) : iseqMaxIdgAux ds 0 = 0 := by
+  simp [iseqMaxIdgAux, iseqMaxIdgAux.construction]
+
+@[simp] lemma iseqMaxIdgAux_succ (ds j : V) :
+    iseqMaxIdgAux ds (j + 1) = max (iseqMaxIdgAux ds j) (idg (znth ds j)) := by
+  simp [iseqMaxIdgAux, iseqMaxIdgAux.construction]
+
+def _root_.LO.FirstOrder.Arithmetic.iseqMaxIdgAuxDef : 𝚺₁.Semisentence 3 :=
+  iseqMaxIdgAux.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
+
+instance iseqMaxIdgAux_defined : 𝚺₁-Function₂ (iseqMaxIdgAux : V → V → V) via iseqMaxIdgAuxDef := .mk
+  fun v ↦ by simp [iseqMaxIdgAux.construction.result_defined_iff, iseqMaxIdgAuxDef]; rfl
+
+instance iseqMaxIdgAux_definable : 𝚺₁-Function₂ (iseqMaxIdgAux : V → V → V) :=
+  iseqMaxIdgAux_defined.to_definable
+instance iseqMaxIdgAux_definable' (Γ) : Γ-[m + 1]-Function₂ (iseqMaxIdgAux : V → V → V) :=
+  iseqMaxIdgAux_definable.of_sigmaOne
+
+/-- **idg-fold over a sequence**: `iseqMaxIdg ds = max_{i < lh ds} idg(znth ds i)`. -/
+noncomputable def iseqMaxIdg (ds : V) : V := iseqMaxIdgAux ds (lh ds)
+
+/-- **Table-fold = idg-fold under dominance.** If `M` is `≥` every in-range entry of `ds`,
+the value-table fold over `idgTable M` agrees with the direct idg-fold. -/
+lemma iseqMaxAux_idgTable_eq {M ds : V} (hdom : ∀ i < lh ds, znth ds i ≤ M) :
+    ∀ j ≤ lh ds, iseqMaxAux (idgTable M) ds j = iseqMaxIdgAux ds j := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (by definability) ?_
+    refine Definable.comp₂
+      (DefinableFunction₃.comp (F := iseqMaxAux)
+        (DefinableFunction₁.comp (F := idgTable) (DefinableFunction.const M))
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction₂.comp (F := iseqMaxIdgAux) (DefinableFunction.const ds)
+        (DefinableFunction.var 0))
+  case zero => intro _; simp
+  case succ j ih =>
+    intro hj
+    rw [iseqMaxAux_succ, iseqMaxIdgAux_succ, ih (le_trans (by simp) hj),
+      znth_idgTable_eq_idg M (znth ds j) (hdom j (lt_of_lt_of_le (by simp) hj))]
+
+/-- **The variadic `K^r` degree equation** (Buchholz §4): for a sequence of premises `ds`,
+`dg(K^r_Π d0…dl) = max{dg(d0)-1,…,dg(dl)-1, r} = max r ((max_j dg(dⱼ)) ∸ 1)`. -/
+lemma idg_zK (s r ds : V) (hds : Seq ds) :
+    idg (zK s r ds) = max r (iseqMaxIdg ds - 1) := by
+  have hdom : ∀ i < lh ds, znth ds i ≤ zK s r ds - 1 := fun i hi ↦
+    le_pred_of_lt (lt_trans (lt_of_mem_rng (hds.znth hi)) (ds_lt_zK s r ds))
+  rw [idg_eq_idgNext (by simp [zK]), idgNext, if_neg (by simp), if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zK s r ds), zKrank_zK, zKseq_zK, iseqMaxTab,
+    iseqMaxAux_idgTable_eq hdom (lh ds) (le_refl _), iseqMaxIdg]
+
 end GoodsteinPA.InternalZ
