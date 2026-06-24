@@ -738,4 +738,107 @@ lemma icmp_insTerm_left {e n ea ca ra eb cb rb : V} (hcb : cb ≠ 0) (h : icmp e
           rw [this] at h; exact absurd h (by simp)
         · rw [if_neg h2b, if_neg h1b, icmp_ocOadd, h]; simp [thenV]
 
+/-- **Strict `#`-monotonicity in the inserted-into argument (`≺`-preservation), pair-induction core.**
+`icmp A B = 0 → icmp (insTerm e n A) (insTerm e n B) = 0` for NF `A,B`. The `ea ≺ eb` case is
+`icmp_insTerm_left`; the `ea = eb` case drops to `(coeff, tail)` and recurses on the tails. -/
+lemma icmp_insTerm_mono_aux (e n : V) : ∀ m : V,
+    isNF (π₁ m) → isNF (π₂ m) → icmp (π₁ m) (π₂ m) = 0 →
+    icmp (insTerm e n (π₁ m)) (insTerm e n (π₂ m)) = 0 := by
+  intro m
+  induction m using ISigma1.sigma1_order_induction
+  · definability
+  case ind m IH =>
+    intro hA hB hAB
+    have hm : (⟪π₁ m, π₂ m⟫ : V) = m := pair_unpair m
+    rcases eq_or_ne (π₁ m) 0 with hA0 | hA0
+    · rw [hA0] at hAB ⊢
+      have hB0 : π₂ m ≠ 0 := by
+        rintro h0; rw [h0, icmp_zero_zero] at hAB; exact absurd hAB (by simp)
+      rw [insTerm_zero]; exact icmp_term_insTerm hB hB0
+    · rcases eq_or_ne (π₂ m) 0 with hB0 | hB0
+      · rw [hB0, icmp_pos_zero hA0] at hAB; exact absurd hAB (by simp)
+      · obtain ⟨ea, ca, ra, hAeq⟩ : ∃ ea ca ra, π₁ m = ocOadd ea ca ra :=
+          ⟨_, _, _, (ocOadd_destruct hA0).symm⟩
+        obtain ⟨eb, cb, rb, hBeq⟩ : ∃ eb cb rb, π₂ m = ocOadd eb cb rb :=
+          ⟨_, _, _, (ocOadd_destruct hB0).symm⟩
+        rw [hAeq] at hA; rw [hBeq] at hB
+        obtain ⟨hca, hea, hra, hsideA⟩ := (isNF_ocOadd ea ca ra).mp hA
+        obtain ⟨hcb, heb, hrb, hsideB⟩ := (isNF_ocOadd eb cb rb).mp hB
+        rw [hAeq, hBeq] at hAB ⊢
+        by_cases hLab : icmp ea eb = 0
+        · exact icmp_insTerm_left hcb hLab
+        · rw [icmp_ocOadd] at hAB
+          have hLab1 : icmp ea eb = 1 := by
+            rcases thenV_eq_zero.mp hAB with hh | ⟨hh, _⟩
+            · exact absurd hh hLab
+            · exact hh
+          have hP : thenV (cmpV ca cb) (icmp ra rb) = 0 := by
+            rcases thenV_eq_zero.mp hAB with hh | ⟨_, hh⟩
+            · exact absurd hh hLab
+            · exact hh
+          have heab : ea = eb :=
+            icmp_eq_imp_eq (max ea eb) ea (le_max_left _ _) eb (le_max_right _ _) hLab1
+          rw [insTerm_ocOadd, insTerm_ocOadd]
+          by_cases h2 : icmp e ea = 2
+          · have h2b : icmp e eb = 2 := by rw [← heab]; exact h2
+            rw [if_pos h2, if_pos h2b, icmp_ocOadd, icmp_self e e le_rfl, cmpV_self,
+              thenV_one_left, thenV_one_left, icmp_ocOadd, hLab1, thenV_one_left]
+            exact hP
+          · by_cases h1 : icmp e ea = 1
+            · have h1b : icmp e eb = 1 := by rw [← heab]; exact h1
+              rw [if_neg h2, if_pos h1, if_neg (by rw [← heab]; exact h2), if_pos h1b,
+                icmp_ocOadd, icmp_self e e le_rfl, cmpV_add_left, thenV_one_left]
+              exact hP
+            · have hcea0 : icmp e ea = 0 := icmp_eq_zero_of_ne h1 h2
+              rw [if_neg h2, if_neg h1, if_neg (by rw [← heab]; exact h2),
+                if_neg (by rw [← heab]; exact h1), icmp_ocOadd, hLab1, thenV_one_left]
+              by_cases hC : cmpV ca cb = 0
+              · rw [hC]; simp [thenV]
+              · have hC1 : cmpV ca cb = 1 := by
+                  rcases thenV_eq_zero.mp hP with hh | ⟨hh, _⟩
+                  · exact absurd hh hC
+                  · exact hh
+                have hRab : icmp ra rb = 0 := by
+                  rcases thenV_eq_zero.mp hP with hh | ⟨_, hh⟩
+                  · exact absurd hh hC
+                  · exact hh
+                rw [hC1, thenV_one_left]
+                have hlt : (⟪ra, rb⟫ : V) < m := by
+                  have hra_lt : ra < π₁ m := by rw [hAeq]; simpa using ocTail_lt ea ca ra
+                  have hrb_lt : rb < π₂ m := by rw [hBeq]; simpa using ocTail_lt eb cb rb
+                  have := pair_lt_pair hra_lt hrb_lt; rwa [hm] at this
+                have := IH ⟪ra, rb⟫ hlt (by simpa [pi₁_pair, pi₂_pair] using hra)
+                  (by simpa [pi₁_pair, pi₂_pair] using hrb) (by simpa [pi₁_pair, pi₂_pair] using hRab)
+                simpa [pi₁_pair, pi₂_pair] using this
+
+/-- **Strict `#`-monotonicity (single-term, `≺`-preservation).** `icmp A B = 0 → icmp (insTerm e n A)
+(insTerm e n B) = 0` for NF `A,B`. Recast via `inadd_single_term` this is the left-cancellation that
+the §4 descent (F1) uses to drop the natural sum when one summand drops. -/
+lemma icmp_insTerm_mono {e n A B : V} (hA : isNF A) (hB : isNF B) (hAB : icmp A B = 0) :
+    icmp (insTerm e n A) (insTerm e n B) = 0 := by
+  have := icmp_insTerm_mono_aux e n ⟪A, B⟫ (by simpa [pi₁_pair, pi₂_pair] using hA)
+    (by simpa [pi₁_pair, pi₂_pair] using hB) (by simpa [pi₁_pair, pi₂_pair] using hAB)
+  simpa [pi₁_pair, pi₂_pair] using this
+
+/-- **F1 — strict left-monotonicity of the natural sum `#`.** `icmp X Y = 0 → icmp (g # X) (g # Y) = 0`
+for NF `g, X, Y`: replacing one summand of a natural sum by a strictly `≺`-smaller one strictly
+decreases the sum. This is the order fact Buchholz §4 (Lemma 4.1 / Thm 4.2) consumes in every descent
+case. Proof: order-induction on `g`, each leading term folded via `icmp_insTerm_mono`. -/
+lemma inadd_left_mono {X Y : V} (hX : isNF X) (hY : isNF Y) (hXY : icmp X Y = 0) :
+    ∀ g, isNF g → icmp (inadd g X) (inadd g Y) = 0 := by
+  intro g
+  induction g using ISigma1.sigma1_order_induction
+  · definability
+  case ind g IH =>
+    intro hg
+    rcases eq_or_ne g 0 with rfl | hg0
+    · rw [inadd_zero_left, inadd_zero_left]; exact hXY
+    · obtain ⟨eg, cg, rg, rfl⟩ : ∃ eg cg rg, g = ocOadd eg cg rg :=
+        ⟨_, _, _, (ocOadd_destruct hg0).symm⟩
+      obtain ⟨hcg, heg, hrg, hside⟩ := (isNF_ocOadd eg cg rg).mp hg
+      rw [inadd_ocOadd, inadd_ocOadd]
+      have hrglt : rg < ocOadd eg cg rg := by
+        have := ocTail_lt eg cg rg; rwa [ocTail_ocOadd] at this
+      exact icmp_insTerm_mono (isNF_inadd hX rg hrg) (isNF_inadd hY rg hrg) (IH rg hrglt hrg)
+
 end GoodsteinPA.InternalONote
