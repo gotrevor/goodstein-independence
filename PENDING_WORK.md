@@ -37,6 +37,19 @@ genuine sub-derivations, NOT `Rep`, so not definitionally blocked like the K-cas
    direction — the C0.5 bridge produces a genuine derivation that still satisfies the weaker `ZPhi`, and
    the ordinal descent uses only NF facts — but it DOES block `RedSound`.) Building block landed lap 70:
    `isChainInf_of_last` (reduces chain-validity to premise-local threading).
+   ⚠️ **DESIGN DECISION needed first (lap-70 finding):** `at'` in `zInd s at' p d0 d1` is currently
+   **opaque/unused** (never decoded; the Ind semantics F(0)/F(Sa)/F(t)/eigenvar/term are entirely
+   unencoded). The cascade must DECODE it — recommend `at' = ⟪a, t⟫` (eigenvariable `a`, induction term
+   `t`), accessors `zIndEig := π₁ at'` / `zIndTerm := π₂ at'`. Exact Buchholz Ind conditions (rules read
+   lap 70, `scratchpad/buchholz-gentzen.txt:140-152`):
+   - `seqAnt (fstIdx d0) = seqAnt s ∧ seqSucc (fstIdx d0) = substs1 ℒₒᵣ ‘0’ p`  (d0 ⊢ Γ→F(0))
+   - `seqSucc (fstIdx d1) = substs1 ℒₒᵣ (S(^&a)) p ∧ inAnt (substs1 ℒₒᵣ (^&a) p) (seqAnt (fstIdx d1))`
+     ∧ Γ-threading of `seqAnt (fstIdx d1)`  (d1 ⊢ F(a),Γ→F(Sa))
+   - `seqSucc s = substs1 ℒₒᵣ t p`  (conclusion ⊢ Γ→F(t))
+   Verify the term constructors first: `^&a` = `qqFvar a`; the successor term `S(^&a)`; `‘0’` numeral
+   (used in `IRk.blueprint:312`). `substs1`/`inAnt` already Δ₁ — so the cascade is mechanical once the
+   conditions + at'-decode are pinned. I∀ analog: `seqSucc (fstIdx d0) = substs1 ℒₒᵣ (^&a) p` with
+   `at' → a` the eigenvariable (zIall already has the `a` slot).
 1. **`zsubst d a n`** — Σ₁ derivation substitution. Sub-bricks: per-node sequent substitution (apply
    `substs1`/`Rew` to `fstIdx`), recurse on `zIallPrem`/`zInegPrem`/`zIndPrem0/1`/`zKseq`. Prove
    `ZDerivation_zsubst` (preserves validity) + `iotil_zsubst = iotil` (õ substitution-invariance — the
