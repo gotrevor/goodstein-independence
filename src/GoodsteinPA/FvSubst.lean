@@ -161,6 +161,42 @@ lemma IsUTermVec.termFvSubst (ht : IsUTerm L t) {kk v} (hv : IsUTermVec L kk v) 
   ⟨(len_termFvSubstVec hv).symm, fun i hi ↦ by
     rw [nth_termFvSubstVec hv hi]; exact IsUTerm.termFvSubst ht (hv.2 i hi)⟩
 
+/-- **Term-level substitution lemma**: free-variable substitution `^&a ↦ t` (closed `t`) commutes with
+bound-variable substitution `termSubst w`. The bound-var substitution image of the renamed vector
+`termFvSubstVec a t n w` is applied to the renamed term. The freshness/closedness enters in the `fvar`
+case: substituting `^&a ↦ t` on a free var `x = a` yields the closed `t`, which `termSubst` then leaves
+fixed (`termSubst_eq_self`, valid because `t` is closed). -/
+lemma termFvSubst_termSubst (ht : IsSemiterm L 0 t) {n m w u : V}
+    (hw : IsSemitermVec L n m w) (hu : IsSemiterm L n u) :
+    termFvSubst L a t (termSubst L w u) =
+      termSubst L (termFvSubstVec L a t n w) (termFvSubst L a t u) := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ u hu
+  · definability
+  · intro z hz
+    rw [termSubst_bvar, termFvSubst_bvar, termSubst_bvar, nth_termFvSubstVec hw.isUTerm hz]
+  · intro x
+    rw [termSubst_fvar]
+    by_cases h : x = a
+    · subst h
+      rw [termFvSubst_fvar_self, termSubst_eq_self (n := 0) ht (by simp)]
+    · rw [termFvSubst_fvar_ne h, termSubst_fvar]
+  · intro k f ts hf hts ih
+    have htsf : IsSemitermVec L k n (termFvSubstVec L a t k ts) :=
+      IsSemitermVec.termFvSubstVec (isSemiterm_weaken ht (by simp)) hts
+    rw [termSubst_func hf hts.isUTerm,
+      termFvSubst_func hf (hw.termSubstVec hts).isUTerm,
+      termFvSubst_func hf hts.isUTerm,
+      termSubst_func hf htsf.isUTerm]
+    simp only [qqFunc_inj, true_and]
+    apply nth_ext' k
+      (by rw [len_termFvSubstVec (hw.termSubstVec hts).isUTerm])
+      (by rw [len_termSubstVec htsf.isUTerm])
+    intro i hi
+    rw [nth_termFvSubstVec (hw.termSubstVec hts).isUTerm hi,
+      nth_termSubstVec hts.isUTerm hi,
+      nth_termSubstVec htsf.isUTerm hi,
+      nth_termFvSubstVec hts.isUTerm hi, ih i hi]
+
 end termFvSubst
 
 /-! ## Formula-level free-variable substitution `^&a ↦ t`
