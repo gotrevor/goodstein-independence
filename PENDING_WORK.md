@@ -1,5 +1,39 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐⭐ Lap 58 — crux 2 REFRAMED to model-theoretic route + Buchholz ord/R GROUNDED from source
+
+**(a) `gentzen_reduction_internalized` is now a THEOREM** (`21a7318`). Was an opaque object-level axiom
+`𝗣𝗔 ⊢ (prwoInstance gentzenDescentφ 🡒 Con(𝗣𝗔))`; now proved via `provable_of_models 𝗣𝗔` +
+`Semantics.Imp.models_imply` + `Bootstrapping.consistent.defined`, from the clean **per-model semantic
+axiom** `gentzen_descent_of_inconsistent` (Gentzen eq-(5) at model level: `¬𝗣𝗔.Consistent M` ⟹ the
+gentzen descent everywhere `icmp`-descends in `M`). Same axiom COUNT (4) but the deep one is now in the
+proven crux-1 shape. Assembly `#print axioms` = `[propext,choice,Quot.sound,PA_delta1Definable]` + 4.
+
+**(b) Buchholz `ord`/`R` extracted VERBATIM** → `CRUX2-ORD-ASSIGNMENT-2026-06-24.md` (text in
+`scratchpad/buchholz-gentzen.txt`). `o(d) := ω_{dg(d)}(õ(d))`; `õ`/`dg` recursions (I∀/I¬/Ind/K rules);
+consistency = ⊥-derivation ⟹ `tp=Rep` ⟹ infinite `o`-descent (Thm 4.2) ⟹ ¬PRWO.
+
+**(c) ⚠️ LOAD-BEARING FINDING — calculus mismatch.** Buchholz's `ord`/`R` are over **his system Z**
+(chain rule `K^r`, `Ind`, `Rep`/`tp`/`d[n]` ω-simulation), NOT Foundation's **Tait+cut** calculus
+(`Theory.Derivation`: `axL`/`andIntro`/…/`cutRule`/`axm`). Foundation's `Hauptsatz` is **meta-level**
+(Type `⊢ᵀ Γ` realizability, no arithmetized ordinals) — no shortcut. ⟹ **Route A** (recommended):
+arithmetize system Z + a translation `𝗣𝗔-Tait-⊥-deriv → Z-⊥-deriv`. Route B (Schütte on Tait+cut directly)
+fails because PA-induction is an `axm` schema that blocks finite cut-elim. Full analysis in the doc.
+
+**NEXT (hardest-first, concrete + checkable, all Route A):**
+1. **InternalONote natural (Hessenberg) sum `#`** — the ONE genuinely-missing ordinal primitive `õ` needs
+   (`ω^c` = `ocOadd c 1 0`; ω-tower `ω_n` = meta-iterate of `c↦ocOadd c 1 0`; `iadd`/`iomul`/`ibigMul`
+   already exist). Source-independent, bounded — the best first brick. Build `inadd a b` (CNF merge of
+   exponents summing coeffs) + `isNF_inadd`/`icmp_inadd`/`iC_inadd` (mirror `iadd`).
+2. **C0 — arithmetize system Z** as `ZDerivation : V → Prop` (`Fixpoint.Construction`, mirror
+   `Theory.Derivation`); coded `zI∀`/`zI¬`/`zInd`/`zK`+atomic, `fstIdx`/subterm-`<` lemmas; formula `rk`.
+3. **C1 — `iõ`/`idg`/`iord`** by `<`-strong-recursion on Z-codes (recursion combinator: build the
+   derivation analog of Foundation `Language.TermRec.Construction` (`Term/Basic.lean:301`), or graph-Fixpoint).
+4. **C2/C3** — `iR := d↦d[0]`, preserves-⊥; Thm 4.2 internalized (Lemma 4.1 `dg`/`õ` monotonicity). Deep.
+5. **C5** — `gentzenDescentφ` graph + `d₀` via the Route-A translation of `𝗣𝗔.Proof _ ⌜⊥⌝`.
+First action next lap: build brick 1 (`inadd`) in a new `src/GoodsteinPA/InternalNadd.lean` (or extend
+`InternalCor34`), sorry-free + axiom-clean, mirroring the existing `iadd` lemma set.
+
 ## ⭐⭐ Lap 57 — TWO findings: (a) seqDescent_dominated was FALSE, fixed; (b) width-code wall
 
 **(a) Soundness fix (DONE, committed `38c6de0`).** Lap-56's `seqDescent_dominated` was **false at ℕ**
