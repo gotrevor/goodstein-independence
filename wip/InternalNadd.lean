@@ -886,4 +886,23 @@ lemma icmp_term_lt_omega_succ (β k : V) :
     icmp (ocOadd β k 0) (ocOadd (iadd β (ocOadd 0 1 0)) 1 0) = 0 := by
   rw [icmp_ocOadd, self_lt_iadd_one β β le_rfl]; simp [thenV]
 
+/-! ## F2 — a two-power natural sum below a larger ω-power (`ω^{α0} # ω^{α1} ≺ ω^{α}` when `α0,α1 ≺ α`)
+
+The §4 `K^r`-rule assignment (`õ(d) = ω^{õ(d0)} # … # ω^{õ(dl)}`) reorganizes the immediate subderivation
+ordinals into a natural sum of ω-powers. When all those exponents are `≺` a common `α`, the whole sum sits
+below `ω^α` (its CNF is two terms, both with exponent `≺ α`). This is the two-term instance feeding the
+critical/non-critical `K^r` split (Lemma 3.1). -/
+
+/-- **F2 — `ω^{α0} # ω^{α1} ≺ ω^{α}`** when `α0 ≺ α` and `α1 ≺ α`. The natural sum collapses to a single
+`insTerm` (`inadd_omega_pow`) whose lead exponent is `α0` or `α1` (`ocExp_insTerm`), both `≺ α`; the head
+decides (`icmp_zero_of_exp_zero`). -/
+lemma icmp_omega_pow_nadd_lt {α0 α1 α : V} (h0 : icmp α0 α = 0) (h1 : icmp α1 α = 0) :
+    icmp (inadd (ocOadd α0 1 0) (ocOadd α1 1 0)) (ocOadd α 1 0) = 0 := by
+  rw [inadd_omega_pow]
+  refine icmp_zero_of_exp_zero (insTerm_ne_zero _ _ _) (ocOadd_ne_zero _ _ _) ?_
+  rw [ocExp_ocOadd, ocExp_insTerm, if_neg (ocOadd_ne_zero _ _ _), ocExp_ocOadd]
+  by_cases hc : icmp α0 α1 = 0
+  · rw [if_pos hc]; exact h1
+  · rw [if_neg hc]; exact h0
+
 end GoodsteinPA.InternalONote
