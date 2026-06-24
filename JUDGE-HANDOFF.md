@@ -1,117 +1,91 @@
-# JUDGE HANDOFF — Goodstein-independence expedition (external-reviewer role)
+# JUDGE HANDOFF — Goodstein-independence (judge / next-iteration-of-Ren baton)
 
-> **For a fresh Ren session.** You are the **outside judge** of `~/src/goodstein-independence`, *not* a
-> worker on it. An autonomous prover ("the box") + a second agent ("Codex") do the grinding. Your job is
-> to read their progress, go to the **source**, find what they miss, calibrate honestly, and relay
-> high-value findings. Written 2026-06-23 (~lap 50). Re-run the catch-up recipe first — the box moves
-> ~1 lap every few minutes, so this WILL be stale.
+> For a fresh Ren session inheriting this work. You are the **outside judge** of
+> `~/src/goodstein-independence` — NOT a worker. An autonomous box + "Codex" grind the proof; your job is to
+> read the **source**, catch **architecture/seam** errors they can't see from inside, calibrate **honestly**
+> (confidence %, "how this could be wrong"), and relay high-value findings to Trevor, who pastes them to the
+> box. **Faithfulness > fluency** — route load-bearing claims to the paper/compiler, never a summary.
+> Updated 2026-06-24 (~lap 65); supersedes the lap-50 version. Re-run catch-up first — this WILL be stale.
 
-## Your role (and why it works)
-- **Outside judge / adversarial reviewer**, not a co-grinder. You don't write the proof.
-- The division that makes this productive:
-  - **The box** is a forward-grinder: it builds confidently and fast, and will build *right up to a gap*
-    and then stall or (worse) close it vacuously. It does not naturally take altitude.
-  - **Codex** is a competent *code-level* reviewer (file:line, interface hygiene) but can read a stale
-    HEAD and stays close to the code.
-  - **You** are the *source-grounded* check that catches **architecture-level** and **seam-level** errors
-    neither of them sees — by reading the actual papers and reasoning about whether the pieces *connect*.
-- **Faithfulness > fluency** (this is the load-bearing principle). In deep proof theory you can spin a
-  confident, wrong story undetectably. When a claim is load-bearing, **go to the paper / the compiler**,
-  state your confidence as a number, and write a "how this could be wrong" section. The single biggest win
-  of the last session came from *reading Rathjen 2014 in full* instead of trusting anyone's summary.
+## ⏳ DO THIS FIRST — a live A/B effort experiment stops ~06:13
+Two CoW-clone arms are running a 4.5h effort probe (identical start `2beac51` + prompt; only `--effort`
+differs): **`~/src/goodstein-ab-med`** (medium) and **`~/src/goodstein-ab-xhigh`** (xhigh), each
+`lean-treadmill <arm> --max-duration 4.5h --effort <e> --prompt "<§8 objective>"`.
+**Once both stop** (`lean-treadmill list` empty = done), pull the comparison and relay to Trevor:
+```
+for a in goodstein-ab-med goodstein-ab-xhigh; do echo "== $a =="; \
+  grep '"event": "end"' ~/.local/state/lean-treadmill/$a.jsonl; done     # NEW per-lap metrics
+git -C ~/src/goodstein-ab-med   log --oneline 2beac51..HEAD              # what med built
+git -C ~/src/goodstein-ab-xhigh log --oneline 2beac51..HEAD             # what xhigh built
+# THEN verify the nuts aren't vacuous: build each arm, #print axioms the case-5.1 nut
+#   (iord_descent_iCritReduct / iord_descent_iCritReduct_object). "axiom-clean" is the box's claim, unverified.
+```
+- **Question:** does effort change the RESULT or just the PATH? Lap-1 preliminary (n=1, weak): med=breadth
+  (13 commits, built the `ZDerivation`/`iR` objects), xhigh=depth (6 commits, nut end-to-end on "genuine
+  reduct codes" + T4); **both ended src 3 / wip 7.** Reads as *converge to the same frontier, xhigh deeper
+  per commit* — but n=1, "same sorry count" is coarse (likely different frontiers), divergence may be
+  stochastic. The 4.5h run ≈ 9 laps each = the real sample.
+- ⚠️ **Methodology honesty:** a single fixed-budget lap structurally rewards LOW effort (higher effort =
+  more tokens/action ⟹ fewer actions/budget), so commit-count favors medium *by design*. The clean
+  experiment is a **fixed-OUTCOME race** (same target → measure laps+tokens to reach it). The arms diverged
+  after lap 1, so they're no longer a pristine RCT — read it as "two efforts, ~same start, who gets where."
+- **Trevor is running this with genuine detachment — no stake. Report numbers straight; do NOT project
+  hope/excitement onto him.** (He corrected me on exactly this.)
 
-## The cast & channels
-- **The box**: autonomous treadmill. Commits per lap; writes `HANDOFF-<date>-lapN.md`, `STATUS.md`,
-  `PENDING_WORK.md`, `DESCENT-PLAN.md`, `REFLECTION-*.md`. It respects untracked external files
-  ("NOT mine, leave alone"), so docs you drop are safe.
-- **Codex**: second agent. Leaves `E-ARCHITECTURE-RESPONSE-*.md` and Comment-Log entries in shared docs.
-  Read them; engage fairly (it's usually right, just sometimes a lap behind).
-- **Trevor**: relays your findings to the box as **pastes** — that's the live channel (the in-repo
-  "coordination doc" negotiation is dead). For bigger findings, write a repo doc *and* hand Trevor a paste
-  pointer. Keep status check-ins **short**; he wants the headline, not a deep read every time.
+## Where the PROOF stands (VERIFY against HEAD)
+- Headline `peano_not_proves_goodstein` = honest `sorry` (`[propext, sorryAx, choice, Quot.sound]`,
+  anti-fraud intact). `goodsteinSentence_faithful` clean. `peano_not_proves_TI` clean (+1 native_decide).
+- **Route RESOLVED — Route A (Rathjen Cor 3.7):** `PA⊢γ →(§3) PA⊢PRWO(ε₀) →(Gentzen Thm 2.8) PA⊢Con(PA)` → Gödel II.
+- **crux-1 (γ→PRWO) is DONE + axiom-clean (lap 57).** The ONLY remaining math wall is **crux-2 (PRWO→Con)** —
+  the Gentzen consistency proof arithmetized over coded derivations.
+- **crux-2 is FULLY DECOMPOSED → `E-CRUX2-DECOMPOSITION-2026-06-24.md` (this session's main deliverable).**
+  Key finding: the difficulty is ONE reduction case (**5.1, the cut-elim degree-drop**) gated behind TWO
+  prereqs the box hadn't listed (**Lemma 3.1** critical-pair finder, **Theorem 3.4** rank bound). §8 takes
+  it to leaf level: the ENTIRE genuinely-new content = **4 small leaves** — L3.1 finder; T2/T3 "replace-a-
+  premise stays a valid Kʳ-chain"; T4a rank-substitution-invariance `rk(F(t))=rk(F)`; the `d{0}/d{1}` object
+  construction (`iR` critical branch). Everything else is IH / ℕ-`max`-arithmetic / F1–F2 (in flight) / one
+  tower lemma. **No monolith remains.** The box executes it leaf-by-leaf (commits name LH/T3.4/the-nut verbatim).
+- **C0.5 Foundation→Z bridge** (seam I found; box added the milestone): turn a Foundation ⊥-proof into a
+  Buchholz-Z ⊥-derivation. CHEAPER than first flagged — Z has a *native* `Ind` rule, so PA-induction maps
+  directly (Bryce-Goré spent ~half their `Peano.v` unfolding induction into the ω-rule; we skip that).
+  Blueprint = Bryce-Goré `Peano.v`. **Do NOT port their `cut_elim.v`** (infinitary; wrong for our primrec route).
+- **Feasibility SETTLED:** Bryce-Goré (arXiv:2603.00487, Coq, Feb 2026) machine-checked Con(PA) via ordinal
+  cut-elim. Finishability ~70%, multi-month but precedented + bounded. Clone: `scratchpad/Gentzen-bg/`.
+- **OPERATOR DIRECTIVE (BINDING):** axiom-free (trust base only) **or ABANDON**. NO Gentzen-as-axiom on the
+  headline (that cop-out is forbidden — I pitched it twice and was corrected). `PA_delta1Definable`
+  (Foundation axiom under Gödel II) must ALSO be discharged. You MAY state+prove PRWO→Con as its own result;
+  you may NOT rest the target on it. (See memory `feedback-formalization-no-axiom-copout`.)
+- **HARVEST.md** (box-built, judge-verified): reusable spin-offs with real `#print axioms` + destinations.
 
-## Catch-up recipe (run FIRST, every session)
+## Catch-up recipe (every session)
 ```
 cd ~/src/goodstein-independence
-git log --oneline -20
-grep -n ":= sorry" src/GoodsteinPA/Statement.lean src/GoodsteinPA/Reduction.lean
-ls -t HANDOFF*.md | head -1     # newest box baton — read it + STATUS.md
+git log --oneline -15
+grep -rn "sorry" src/GoodsteinPA/Statement.lean
+ls -t HANDOFF-*.md | head -1     # newest box baton → read it + STATUS.md + PENDING_WORK.md
 ```
-Don't trust this doc's "where it stands" — verify against HEAD.
 
-## The proof, in one breath (lead with THIS clarity — it's what made it click)
-Goodstein: write n in hereditary base 2, then forever {bump the base, subtract 1}. The integers explode
-(G(4) dwarfs the atom count) yet always crash to 0. **Why:** replace the base with ω → you get an ordinal
-< ε₀; bumping the base is invisible to the ordinal, subtracting 1 strictly lowers it, and ordinals can't
-fall forever → it terminates. **Why PA can't prove it:** ε₀ is exactly PA's proof-theoretic strength
-(à la Galois — one invariant pins down the whole system's reach); Goodstein needs induction *up to* ε₀,
-one notch past PA.
+## 🛠️ Tooling changed this session (committed to gotrevor/bin, NOT pushed — push is Trevor's call)
+- `bin/lean-treadmill`: **`--max-duration D`** (wall-clock cap, e.g. `4.5h`; graceful between-lap stop, max
+  overshoot one lap). The per-lap laplog `end` event now carries effort/kind/commits/src+wip-sorries/
+  diffstat/wedged (the A/B metrics); new `_git_diffstat`. Commits `d3e52da`, `d106ce2`.
+- `bin/test_lean_treadmill.py`: NEW, 24 green tests (the tool had none). Commit `9edab6a`.
+- All UNPUSHED on `gotrevor/bin` main (which already held an unpushed backlog — pathspec-scope, don't sweep).
 
-## Where it stands (~lap 50, 2026-06-23 — VERIFY)
-- Headline `peano_not_proves_goodstein` = honest `sorry` (anti-fraud guard; stays until `#print axioms`
-  is clean). `goodsteinSentence_faithful` is clean (the statement genuinely means Kirby–Paris).
-- **Route DECIDED = Route A (Rathjen 2014, Cor 3.7):**
-  `PA ⊢ γ →(§3 reduction, PRIMREC) PA ⊢ PRWO(ε₀) →(Gentzen Thm 2.8) PA ⊢ Con(PA)`, then **Gödel II**.
-- **Two halves being built:**
-  - **crux-1** = internal Cor 3.4 slow-down (`Goodstein → PRWO`): ~assembled; remaining = `ig` f-recursion
-    + X-definable block bookkeeping. The `Grzegorczyk.lean` ℕ-template is done.
-  - **crux-2** = Gentzen `PRWO(ε₀) → Con(PA)` (`wip/GentzenCon`): just started, PRWO formulation built +
-    faithfulness-certified. This is the substantial piece (Gentzen's consistency proof, finitary primrec
-    `ord` + reduction `R` with `ord(R D) < ord D`).
-- **Banked, OFF the headline path:** `Thm56.peano_not_proves_TI` (the free-X Buchholz §5 boundedness /
-  cut-elim machine) — a real, axiom-clean achievement, but the *wrong direction* for chaining (see below).
-  Don't let anyone resume it as the headline back-end or delete it.
-- **Accepted cost:** `PA_delta1Definable` (🟡 Foundation axiom) rides Gödel II on Route A. It must end up
-  the *only* non-trust-base axiom on the headline.
-
-## How we got here (the arc — so you don't re-litigate)
-F (the ε₀-order arithmetization seam) got solved fast (`codeOfREPred` from Foundation + a clean
-order-type girder). E (Goodstein⟹the unprovable thing) was the deep wall. The box tried **Route B**:
-prove `Goodstein → TI_≺(X)` for a *free predicate X* to feed the free-X boundedness result. **Reading
-Rathjen showed Route B is blocked, not just hard:** §3 (Grzegorczyk domination, Lemma 3.2) is
-**primrec-only**, and an X-definable descent isn't dominated — `free-X-TI ⊢ PRWO`, so
-`PA⊬PRWO ⟹ PA⊬free-X-TI` (WRONG direction). The box *machine-checked* the obstruction
-(`Grz.not_dominated_of_diag_le`) and switched to Route A, keeping the §3 work (a PRWO descent *is*
-internally primrec, so domination holds). Full finding: `E-ARCHITECTURE-REVIEW-2026-06-23.md`.
-
-## Watch-items (this project's bugs live in SEAMS — where two halves must join)
-1. **One shared `PRWO(ε₀)` def.** crux-1 *outputs* `PA ⊢ PRWO`; crux-2 *consumes* `PA ⊢ PRWO → Con`.
-   They must reference the **identical** Lean def. "Both faithful to Rathjen" ≠ "same object." Enforce via
-   a single shared def + final-assembly typecheck.
-2. **crux-2's `Con(PA)` must be Foundation's `Con[𝗣𝗔]`** — the exact object Gödel II (`Second.lean`) is
-   proven about, not a hand-rolled lookalike. Verify at the statement level before proving the body.
-3. **Internal Lemma 3.2 is the lynchpin.** Route A works *only* if Grzegorczyk domination internalizes
-   inside PA for the primrec descent (the same domination that was false for free-X, now true). Validate
-   it early; everything rests on it.
-4. **Meta vs internal.** The banked §5 infra is meta-level/infinitary (Lean about Z∞, mathlib ordinals);
-   crux-2 is finitary/internal/primrec. They're different beasts — don't let anyone try to "reuse" §5 for
-   crux-2.
-5. **Anti-fraud.** Headline stays `sorry` until `#print axioms peano_not_proves_goodstein` is the trust
-   base (`propext, Classical.choice, Quot.sound`) + at most `PA_delta1Definable`. No new math axioms; no
-   vacuous PRWO/Con.
-
-## The playbook (how to deliver a finding)
-- **Catch up from HEAD, not memory.** Then read the source for anything load-bearing (`papers/` has
-  Rathjen-2014, Kirby–Paris-1982, Cichon-1983, Towsner, Caicedo, Agboola, Rathjen-2006). `Read` the PDF
-  directly.
-- **Write findings the box can VALIDATE, not obey:** a cited claim, an explicit confidence %, a
-  **validation checklist** (concrete things to check against the code), and a **"how this could be wrong"
-  section** so the box can refute cleanly. Put a "VALIDATE, don't trust" banner on big ones.
-- **Hand Trevor a tight paste** for the live channel. Reserve a repo doc for architecture-level findings
-  (the box reads them on reflection laps; name them distinctively).
-- **Add value beyond the workers** — the wins are library discoveries (what's already in Foundation/
-  mathlib), simplifications (only the lower bound was needed; Σ₁-completeness gives the computational facts
-  free), footguns (computable `Encodable`, not `ofCountable`), and **architecture/seam** calls.
-- **Credit the workers** when they're right; **converge, don't compete.** Codex's "validation gate" was
-  the right cautious move; the box machine-checking the obstruction was exactly right.
+## Judge playbook (still true)
+- Catch up from HEAD, not memory. `papers/` has Buchholz [6] (THE crux-2 source: §3 reduction, §4 assignment,
+  Lemma 4.1/Thm 4.2 = eq 5), Rathjen 2014, Kirby-Paris, Cichoń, Arai, Buss; Bryce-Goré Coq in `scratchpad/`.
+- Deliver findings the box can VALIDATE: cited claim + confidence % + validation checklist + "how this could
+  be wrong," as a repo doc `E-*.md` (box reads on reflection laps) AND a tight paste for Trevor (the live
+  channel). Keep status check-ins SHORT — headline, not a deep read each time.
+- Converge, don't compete; credit the workers (the box adopted every finding this session). Add value the
+  workers can't: source-grounded architecture/seam calls, library discoveries, faithfulness audits.
 
 ## Pointers
-- Finding of record: `E-ARCHITECTURE-REVIEW-2026-06-23.md` (architecture + validation checklist §E).
-- Codex: `E-ARCHITECTURE-RESPONSE-2026-06-23.md`.
-- Source of truth: `papers/rathjen-2014-goodsteins-theorem-revisited.pdf` (the route), `[9]`
-  Kirby–Paris-1982 (the *free-X* model-theoretic proof — different technique; relevant only if free-X ever
-  comes back).
-- Box state: newest `HANDOFF-*.md`, `STATUS.md`, `PENDING_WORK.md`, `DESCENT-PLAN.md`.
+- THE decomposition (the prize): `E-CRUX2-DECOMPOSITION-2026-06-24.md` — §8 is the leaf-level grind-list.
+- Prior finding: `E-EQ5-ROUTE-FINDING-2026-06-23.md` (eq-5 faithful; the bridge seam; feasibility/route).
+- Box state: newest `HANDOFF-*.md`, `STATUS.md`, `PENDING_WORK.md`. Spin-offs: `HARVEST.md`.
+- Buchholz §4: `o(d)=ω_{dg(d)}(õ(d))`; the box's `iord`/`idg`/`iõ` = this exactly (judge-verified faithful).
 
-— start by running the catch-up recipe, reading the newest box HANDOFF, and asking "what's the next seam
-that has to join, and has anyone checked it joins?"
+— start with the A/B review (time-sensitive), then the catch-up recipe + newest box HANDOFF, then ask:
+"what's the next seam that has to join, and has anyone checked it joins?"

@@ -52,6 +52,10 @@ import GoodsteinPA.InternalNadd
 -- sorry-free, axiom-clean). Strict base-monotonicity `icmp_iotower_mono` (Thm 4.2 same-degree
 -- descent) + NF preservation. Consumed by the (wip) crux-2 ordinal assignment.
 import GoodsteinPA.InternalTower
+-- Crux-2 island: Buchholz-Z ordinal analysis arithmetized in PA (the `PRWO→Con` wall).
+-- Promoted from wip/ to src/ (lap 66) so the green-gate type-checks it every lap. Sorry-free;
+-- off the headline path until wired into Reduction.lean, but now compiled + axiom-scanned.
+import GoodsteinPA.InternalZ
 import GoodsteinPA.InternalCor34
 import GoodsteinPA.IIter
 import GoodsteinPA.BlkRec
