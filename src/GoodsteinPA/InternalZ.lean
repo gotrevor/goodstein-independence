@@ -4006,4 +4006,17 @@ lemma iRedDescent_zAxReduct_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) :
     iRedDescent (zAxReduct (zAxNeg s p)) (zAxNeg s p) := by
   rw [zAxReduct_zAxNeg]; exact iRedDescent_zAx1_zAxNeg hp
 
+/-- **`zAxReduct` is the identity on a genuine `ZDerivation`**: its tag is one of `0,1,2,3,4`
+(zAtom/zIall/zIneg/zInd/zK), never the atomic-axiom tags `5,6`. Collapses the i-side `zAxReduct`-wrap
+`zAxReduct (iR2 premᵢ) = iR2 premᵢ` introduced by the tag-4 rewrite (the i-side sub-derivation is a
+`ZDerivation`). -/
+lemma zAxReduct_of_ZDerivation {d : V} (hZ : ZDerivation d) : zAxReduct d = d := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩
+  · simp [zAxReduct]
+  · simp [zAxReduct]
+  · simp [zAxReduct]
+  · simp [zAxReduct]
+  · simp [zAxReduct]
+
 end GoodsteinPA.InternalZ
