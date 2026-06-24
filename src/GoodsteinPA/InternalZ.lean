@@ -2584,6 +2584,17 @@ noncomputable def iCritReductSeq (d0 d1 : V) : V := seqCons (seqCons ∅ d0) d1
 @[simp] lemma iCritReductSeq_seq (d0 d1 : V) : Seq (iCritReductSeq d0 d1) :=
   (seq_empty.seqCons d0).seqCons d1
 
+@[simp] lemma iCritReductSeq_lh (d0 d1 : V) : lh (iCritReductSeq d0 d1) = 2 := by
+  rw [iCritReductSeq, Seq.lh_seqCons _ (seq_empty.seqCons d0), Seq.lh_seqCons _ seq_empty, lh_empty,
+    zero_add, one_add_one_eq_two]
+
+@[simp] lemma znth_iCritReductSeq_zero (d0 d1 : V) : znth (iCritReductSeq d0 d1) 0 = d0 := by
+  have h1 : (0 : V) < lh (seqCons (∅ : V) d0) := by
+    rw [Seq.lh_seqCons _ seq_empty, lh_empty, zero_add]; exact one_pos
+  rw [iCritReductSeq, znth_seqCons_of_lt (seq_empty.seqCons d0) d1 h1]
+  have := znth_seqCons_self seq_empty d0
+  rwa [lh_empty] at this
+
 /-- `õ`-fold of the critical reduct sequence: `ω^{õ d{0}} # ω^{õ d{1}}` (N3b's left side). -/
 lemma iseqNaddIdg_iCritReductSeq (d0 d1 : V) :
     iseqNaddIdg (iCritReductSeq d0 d1) =
@@ -4623,6 +4634,136 @@ lemma zDerivation_zInd_inv {s at' p d0 d1 : V} (hZ : ZDerivation (zInd s at' p d
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
+
+/-! ### Rule-inversion (peeling) primitives for the genuine reduct
+
+A genuine, derivation-valid reduction (Bryce–Goré `cut_elimination`-style — shape-dispatched on the cut
+formula, `cut_elimination_valid`) must *peel* the redex premises of a critical chain: the R-redex (an
+I-rule introducing the cut formula on the right) and the L-redex (a §5 left-axiom carrying it on the
+left). These inversions extract exactly the sub-derivation / well-formedness data such a peel consumes,
+mirroring `zDerivation_zInd_inv`. They are axiom-clean and reusable by any validity-preserving reduct. -/
+
+/-- **I∀-rule inversion**: a `ZDerivation` of `zIall s a p d0` has its premise `d0` a `ZDerivation` and
+end-sequent succedent the principal formula `∀p`. Peels the R-redex premise of a critical chain. -/
+lemma zDerivation_zIall_inv {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0)) :
+    ZDerivation d0 ∧ seqSucc s = (^∀ p : V) := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, hd0, hsc⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · obtain rfl : s = s' := by simpa using congrArg fstIdx h
+    obtain rfl : p = p' := by simpa using congrArg zIallF h
+    obtain rfl : d0 = d0' := by simpa using congrArg zIallPrem h
+    exact ⟨hd0, hsc⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+
+/-- **I¬-rule inversion**: a `ZDerivation` of `zIneg s p d0` has premise `d0` a `ZDerivation` and
+end-sequent succedent `¬p` (`= inegF p`). Peels the R-redex premise when the cut formula is a negation. -/
+lemma zDerivation_zIneg_inv {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
+    ZDerivation d0 ∧ seqSucc s = (inegF p : V) := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, hd0, hsc⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · obtain rfl : s = s' := by simpa using congrArg fstIdx h
+    obtain rfl : p = p' := by simpa using congrArg zInegF h
+    obtain rfl : d0 = d0' := by simpa using congrArg zInegPrem h
+    exact ⟨hd0, hsc⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+
+/-- **§5 ∀-axiom inversion**: a `ZDerivation` of the left-axiom `zAxAll s p k` carries the matrix's
+formula-hood and the side condition `∀p ∈ Γ`. Peels the L-redex premise (the `^∀ p` cut formula). -/
+lemma zDerivation_zAxAll_inv {s p k : V} (hZ : ZDerivation (zAxAll s p k)) :
+    IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s) := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, hp, hin⟩ | ⟨s', p', h, _, _⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · obtain rfl : s = s' := by simpa using congrArg fstIdx h
+    obtain rfl : p = p' := by simpa using congrArg zAxAllF h
+    exact ⟨hp, hin⟩
+  · exact absurd (congrArg zTag h) (by simp)
+
+/-- **§5 ¬-axiom inversion**: a `ZDerivation` of the left-axiom `zAxNeg s p` carries the matrix's
+formula-hood and the side condition `¬p ∈ Γ`. Peels the L-redex premise (the `inegF p` cut formula). -/
+lemma zDerivation_zAxNeg_inv {s p : V} (hZ : ZDerivation (zAxNeg s p)) :
+    IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s) := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, hp, hin⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · obtain rfl : s = s' := by simpa using congrArg fstIdx h
+    obtain rfl : p = p' := by simpa using congrArg zAxNegF h
+    exact ⟨hp, hin⟩
+
+/-- **Atom inversion**: a `ZDerivation` of the identity axiom `zAtom s` has its succedent in its
+antecedent (`C ∈ Γ`). The leaf side condition that rules out an empty-antecedent atom. -/
+lemma zDerivation_zAtom_inv {s : V} (hZ : ZDerivation (zAtom s)) :
+    inAnt (seqSucc s) (seqAnt s) := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, hin⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩
+  · obtain rfl : s = s' := by simpa using congrArg fstIdx h
+    exact hin
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+
+/-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
+
+`RedSound` (`iR2 d` is a genuine `ZDerivation` for `ZDerivesEmpty d`) is **FALSE** for the current
+ordinal-faithful `iR2`. The critical reduct `iCritReduct d i j v w` is a chain
+`zK (fstIdx d) (zKrank d − 1) ⟨iCritAux d i v, iCritAux d j w⟩` whose premises are themselves chains
+(`iCritAux _ = zK …`). Every chain node has `tp = isymRep` (`tp_zK`), and `isymRep` is permissible for
+**every** conclusion (`iperm_isymRep`). But `zKValid`'s criticality conjunct demands every premise be
+NON-permissible (`¬iperm (tp dᵢ) s`) — the very hypothesis the L3.1 redex finder
+(`inference_critical_pair_of_chain`) needs to force a genuine R/L redex pair to exist. A chain with a
+`Rep`-tagged premise therefore can never be `zKValid`, so the reduct can never descend again, so the
+`iR2`-orbit is not descent-closed. (Confirmed against Bryce–Goré, arXiv:2603.00487: their `cut_elimination`
+is *genuinely* validity-preserving — `cut_elimination_valid`, shape-dispatched on the cut formula — which
+the ordinal-faithful `iCritReduct` shadow is not.) The fix is the genuine, validity-preserving reduct;
+the inversions above are its peeling primitives. -/
+
+/-- **A `K^r` chain with any chain (`Rep`-tagged) premise is never `zKValid`.** The criticality conjunct
+`¬iperm (tp dₘ) s` fails at the `zK`-premise `m` (`tp_zK` ⟹ `isymRep`, permissible for `s` by
+`iperm_isymRep`). This is the load-bearing obstruction: the reduct `iCritReduct`'s premises are exactly
+such chains, so it is never a valid critical chain — the ordinal-faithful `iR2` is not derivation-valid. -/
+lemma not_zKValid_of_zK_premise {s r ds m s' r' ds' : V} (hm : m < lh ds)
+    (hprem : znth ds m = zK s' r' ds') : ¬ zKValid s r ds := by
+  rintro ⟨_, _, hnperm, _⟩
+  exact hnperm m hm (by rw [hprem, tp_zK]; exact iperm_isymRep s)
+
+/-- **The critical reduct is never `zKValid`** (the concrete obstruction at `iCritReduct`): premise `0`
+of its chain is `iCritAux d i v = zK …`, a `Rep`-tagged chain, so `not_zKValid_of_zK_premise` applies.
+Hence `ZDerivation (iCritReduct …)` cannot be obtained from chain-validity — `RedSound` fails for the
+current `iR2`, and the genuine validity-preserving reduct (Option A) is required. -/
+lemma not_zKValid_iCritReduct (d i j v w : V) :
+    ¬ zKValid (fstIdx d) (zKrank d - 1)
+      (iCritReductSeq (iCritAux d i v) (iCritAux d j w)) := by
+  refine not_zKValid_of_zK_premise (m := 0) (s' := fstIdx d) (r' := zKrank d)
+    (ds' := seqUpdate (zKseq d) i v) ?_ ?_
+  · rw [iCritReductSeq_lh]; exact zero_lt_two
+  · rw [znth_iCritReductSeq_zero]; rfl
 
 /-- Every premise of the Ind-reduct sequence `iIndReductSeq d0 d1 k = ⟨d1,…,d1,d0⟩` is a `ZDerivation`
 when `d0`,`d1` are. -/
