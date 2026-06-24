@@ -567,4 +567,213 @@ lemma idg_zK (s r ds : V) (hds : Seq ds) :
     if_pos (zTag_zK s r ds), zKrank_zK, zKseq_zK, iseqMaxTab,
     iseqMaxAux_idgTable_eq hdom (lh ds) (le_refl _), iseqMaxIdg]
 
+/-! ## `iotil` (`õ`) — the pre-ordinal assignment, total `𝚺₁`
+
+Buchholz §4: `õ(atom)=…(§5)`; `õ(I·d0)=õ(d0)+1`; `õ(Ind d0 d1)=ω^{õ d0} # ω^{õ d1 + 1}`;
+`õ(K^r d0…dl)=ω^{õ d0} # … # ω^{õ dl}`. Here `ω^α = ocOadd α 1 0`, `+1 = iadd · (ocOadd 0 1 0)`,
+`#` = `inadd`. Same table reduction as `idg`. The `K^r` `#`-fold uses the table-helper `iseqNaddTab`. -/
+
+/-! ### `#`-fold over a premise sequence (table form, for the `K^r` step) -/
+
+def iseqNaddTab.blueprint : PR.Blueprint 2 where
+  zero := .mkSigma “y s ds. y = 0”
+  succ := .mkSigma “y ih n s ds.
+    ∃ di, !znthDef di ds n ∧ ∃ v, !znthDef v s di ∧ ∃ w, !ocOaddDef w v 1 0 ∧ !inaddDef y ih w”
+
+noncomputable def iseqNaddTab.construction : PR.Construction V iseqNaddTab.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun x n ih ↦ inadd ih (ocOadd (znth (x 0) (znth (x 1) n)) 1 0)
+  zero_defined := .mk fun v ↦ by simp [iseqNaddTab.blueprint]
+  succ_defined := .mk fun v ↦ by
+    simp [iseqNaddTab.blueprint, znth_defined.iff, ocOadd_defined.iff, inadd_defined.iff]
+
+/-- Partial `#`-fold of `ω^{table@(znth ds i)}` over the first `j` entries. -/
+noncomputable def iseqNaddAux (s ds j : V) : V := iseqNaddTab.construction.result ![s, ds] j
+
+@[simp] lemma iseqNaddAux_zero (s ds : V) : iseqNaddAux s ds 0 = 0 := by
+  simp [iseqNaddAux, iseqNaddTab.construction]
+
+@[simp] lemma iseqNaddAux_succ (s ds j : V) :
+    iseqNaddAux s ds (j + 1) = inadd (iseqNaddAux s ds j) (ocOadd (znth s (znth ds j)) 1 0) := by
+  simp [iseqNaddAux, iseqNaddTab.construction]
+
+def _root_.LO.FirstOrder.Arithmetic.iseqNaddAuxDef : 𝚺₁.Semisentence 4 :=
+  iseqNaddTab.blueprint.resultDef.rew (Rew.subst ![#0, #3, #1, #2])
+
+instance iseqNaddAux_defined : 𝚺₁-Function₃ (iseqNaddAux : V → V → V → V) via iseqNaddAuxDef := .mk
+  fun v ↦ by simp [iseqNaddTab.construction.result_defined_iff, iseqNaddAuxDef]; rfl
+
+instance iseqNaddAux_definable : 𝚺₁-Function₃ (iseqNaddAux : V → V → V → V) :=
+  iseqNaddAux_defined.to_definable
+instance iseqNaddAux_definable' (Γ) : Γ-[m + 1]-Function₃ (iseqNaddAux : V → V → V → V) :=
+  iseqNaddAux_definable.of_sigmaOne
+
+/-- `#`-fold over the whole sequence: `iseqNaddTab s ds = #_{i<lh ds} ω^{znth s (znth ds i)}`. -/
+noncomputable def iseqNaddTab (s ds : V) : V := iseqNaddAux s ds (lh ds)
+
+def _root_.LO.FirstOrder.Arithmetic.iseqNaddTabDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y s ds. ∃ l, !lhDef l ds ∧ !iseqNaddAuxDef y s ds l”
+
+instance iseqNaddTab_defined : 𝚺₁-Function₂ (iseqNaddTab : V → V → V) via iseqNaddTabDef := .mk
+  fun v ↦ by simp [iseqNaddTabDef, iseqNaddTab, lh_defined.iff, iseqNaddAux_defined.iff]
+
+instance iseqNaddTab_definable : 𝚺₁-Function₂ (iseqNaddTab : V → V → V) :=
+  iseqNaddTab_defined.to_definable
+instance iseqNaddTab_definable' (Γ) : Γ-[m + 1]-Function₂ (iseqNaddTab : V → V → V) :=
+  iseqNaddTab_definable.of_sigmaOne
+
+/-! ### `iotil` table -/
+
+/-- Table step of `iotil`: dispatch on `zTag d`, reading sub-õ-values out of the table `s`. -/
+noncomputable def ioNext (d s : V) : V :=
+  if zTag d = 1 then iadd (znth s (zIallPrem d)) (ocOadd 0 1 0)
+  else if zTag d = 2 then iadd (znth s (zInegPrem d)) (ocOadd 0 1 0)
+  else if zTag d = 3 then
+    inadd (ocOadd (znth s (zIndPrem0 d)) 1 0)
+      (ocOadd (iadd (znth s (zIndPrem1 d)) (ocOadd 0 1 0)) 1 0)
+  else if zTag d = 4 then iseqNaddTab s (zKseq d)
+  else 0
+
+def _root_.LO.FirstOrder.Arithmetic.ioNextDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ t, !zTagDef t d ∧ ∃ one, !ocOaddDef one 0 1 0 ∧
+    ( (t = 1 ∧ ∃ p, !zIallPremDef p d ∧ ∃ v, !znthDef v s p ∧ !iaddDef y v one)
+    ∨ (t = 2 ∧ ∃ p, !zInegPremDef p d ∧ ∃ v, !znthDef v s p ∧ !iaddDef y v one)
+    ∨ (t = 3 ∧ ∃ p0, !zIndPrem0Def p0 d ∧ ∃ v0, !znthDef v0 s p0 ∧ ∃ w0, !ocOaddDef w0 v0 1 0 ∧
+        ∃ p1, !zIndPrem1Def p1 d ∧ ∃ v1, !znthDef v1 s p1 ∧ ∃ v1s, !iaddDef v1s v1 one ∧
+        ∃ w1, !ocOaddDef w1 v1s 1 0 ∧ !inaddDef y w0 w1)
+    ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqNaddTabDef y s ds)
+    ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = 0) )”
+
+set_option maxHeartbeats 1000000 in
+instance ioNext_defined : 𝚺₁-Function₂ (ioNext : V → V → V) via ioNextDef := .mk fun v ↦ by
+  simp [ioNextDef, ioNext, zTag_defined.iff, zIallPrem_defined.iff, zInegPrem_defined.iff,
+    zIndPrem0_defined.iff, zIndPrem1_defined.iff, zKseq_defined.iff, iadd_defined.iff,
+    inadd_defined.iff, ocOadd_defined.iff, iseqNaddTab_defined.iff, znth_defined.iff]
+  by_cases h1 : zTag (v 1) = 1
+  · simp [h1]
+  · by_cases h2 : zTag (v 1) = 2
+    · simp [h1, h2]
+    · by_cases h3 : zTag (v 1) = 3
+      · simp [h1, h2, h3]
+      · by_cases h4 : zTag (v 1) = 4
+        · simp [h1, h2, h3, h4]
+        · simp [h1, h2, h3, h4]
+
+instance ioNext_definable : 𝚺₁-Function₂ (ioNext : V → V → V) := ioNext_defined.to_definable
+
+def ioTable.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !mkSeq₁Def y 0”
+  succ := .mkSigma “y ih n. ∃ v, !ioNextDef v (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def ioTable.construction : PR.Construction V ioTable.blueprint where
+  zero := fun _ ↦ !⟦0⟧
+  succ := fun _ n ih ↦ seqCons ih (ioNext (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [ioTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [ioTable.blueprint, ioNext_defined.iff, seqCons_defined.iff]
+
+noncomputable def ioTable (n : V) : V := ioTable.construction.result ![] n
+
+@[simp] lemma ioTable_zero : ioTable (0 : V) = !⟦0⟧ := by simp [ioTable, ioTable.construction]
+
+@[simp] lemma ioTable_succ (n : V) :
+    ioTable (n + 1) = seqCons (ioTable n) (ioNext (n + 1) (ioTable n)) := by
+  simp [ioTable, ioTable.construction]
+
+/-- **The pre-ordinal** `õ(d)` of a code: the `d`-th entry of the table. -/
+noncomputable def iotil (d : V) : V := znth (ioTable d) d
+
+def _root_.LO.FirstOrder.Arithmetic.ioTableDef : 𝚺₁.Semisentence 2 :=
+  ioTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance ioTable_defined : 𝚺₁-Function₁ (ioTable : V → V) via ioTableDef := .mk
+  fun v ↦ by simp [ioTable.construction.result_defined_iff, ioTableDef]; rfl
+
+instance ioTable_definable : 𝚺₁-Function₁ (ioTable : V → V) := ioTable_defined.to_definable
+instance ioTable_definable' (Γ) : Γ-[m + 1]-Function₁ (ioTable : V → V) :=
+  ioTable_definable.of_sigmaOne
+
+def _root_.LO.FirstOrder.Arithmetic.iotilDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ t, !ioTableDef t d ∧ !znthDef y t d”
+
+instance iotil_defined : 𝚺₁-Function₁ (iotil : V → V) via iotilDef := .mk fun v ↦ by
+  simp [iotilDef, iotil, ioTable_defined.iff, znth_defined.iff]
+
+instance iotil_definable : 𝚺₁-Function₁ (iotil : V → V) := iotil_defined.to_definable
+instance iotil_definable' (Γ) : Γ-[m + 1]-Function₁ (iotil : V → V) := iotil_definable.of_sigmaOne
+
+/-! ### Structural correctness of the `iotil` table (mirror `idg`) -/
+
+private lemma def_ioTable {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ ioTable (v i)) :=
+  DefinableFunction₁.comp (F := ioTable) (DefinableFunction.var i)
+
+private lemma def_iotil {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ iotil (v i)) :=
+  DefinableFunction₁.comp (F := iotil) (DefinableFunction.var i)
+
+@[simp] lemma ioTable_seq (n : V) : Seq (ioTable n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_ioTable 0)
+  case zero => simp
+  case succ n ih => rw [ioTable_succ]; exact ih.seqCons _
+
+@[simp] lemma ioTable_lh (n : V) : lh (ioTable n) = n + 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_ioTable 0)) (by definability)
+  case zero => simp
+  case succ n ih => rw [ioTable_succ, Seq.lh_seqCons _ (ioTable_seq n), ih]
+
+lemma znth_ioTable_succ {n k : V} (hk : k < n + 1) :
+    znth (ioTable (n + 1)) k = znth (ioTable n) k := by
+  rw [ioTable_succ]
+  exact znth_seqCons_of_lt (ioTable_seq n) _ (by rw [ioTable_lh]; exact hk)
+
+lemma znth_ioTable_eq_iotil : ∀ N : V, ∀ k ≤ N, znth (ioTable N) k = iotil k := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_le (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := znth) (def_ioTable 1) (DefinableFunction.var 0))
+      (def_iotil 0)
+  case zero =>
+    intro k hk; rcases (nonpos_iff_eq_zero.mp hk) with rfl; rfl
+  case succ N ih =>
+    intro k hk
+    rcases eq_or_lt_of_le hk with rfl | hlt
+    · rfl
+    · rw [znth_ioTable_succ hlt]; exact ih k (le_iff_lt_succ.mpr hlt)
+
+lemma iotil_eq_ioNext {c : V} (hpos : 0 < c) : iotil c = ioNext c (ioTable (c - 1)) := by
+  obtain ⟨M, rfl⟩ : ∃ M, c = M + 1 := ⟨c - 1, (sub_add_self_of_le (pos_iff_one_le.mp hpos)).symm⟩
+  have key : znth (ioTable (M + 1)) (M + 1) = ioNext (M + 1) (ioTable M) := by
+    rw [ioTable_succ]
+    have h := znth_seqCons_self (ioTable_seq M) (ioNext (M + 1) (ioTable M))
+    rwa [ioTable_lh] at h
+  simp only [iotil, add_tsub_cancel_right, key]
+
+/-! ### `iotil` recursion equations (Buchholz §4, finite-premise cases) -/
+
+@[simp] lemma iotil_zAtom (s : V) : iotil (zAtom s) = 0 := by
+  rw [iotil_eq_ioNext (by simp [zAtom]), ioNext]; simp [zTag_zAtom]
+
+@[simp] lemma iotil_zIall (s a p d0 : V) :
+    iotil (zIall s a p d0) = iadd (iotil d0) (ocOadd 0 1 0) := by
+  rw [iotil_eq_ioNext (by simp [zIall]), ioNext, if_pos (zTag_zIall s a p d0), zIallPrem_zIall,
+    znth_ioTable_eq_iotil _ d0 (le_pred_of_lt (d0_lt_zIall s a p d0))]
+
+@[simp] lemma iotil_zIneg (s p d0 : V) :
+    iotil (zIneg s p d0) = iadd (iotil d0) (ocOadd 0 1 0) := by
+  rw [iotil_eq_ioNext (by simp [zIneg]), ioNext, if_neg (by simp), if_pos (zTag_zIneg s p d0),
+    zInegPrem_zIneg, znth_ioTable_eq_iotil _ d0 (le_pred_of_lt (d0_lt_zIneg s p d0))]
+
+@[simp] lemma iotil_zInd (s at' p d0 d1 : V) :
+    iotil (zInd s at' p d0 d1) =
+      inadd (ocOadd (iotil d0) 1 0) (ocOadd (iadd (iotil d1) (ocOadd 0 1 0)) 1 0) := by
+  rw [iotil_eq_ioNext (by simp [zInd]), ioNext, if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zInd s at' p d0 d1), zIndPrem0_zInd, zIndPrem1_zInd,
+    znth_ioTable_eq_iotil _ d0 (le_pred_of_lt (d0_lt_zInd s at' p d0 d1)),
+    znth_ioTable_eq_iotil _ d1 (le_pred_of_lt (d1_lt_zInd s at' p d0 d1))]
+
 end GoodsteinPA.InternalZ
