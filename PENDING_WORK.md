@@ -1,5 +1,42 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐ Lap 59 — natural-sum `#` NF + order foundations DONE; ORDER>iC reprioritization
+
+`wip/InternalNadd.lean` (the lap-58 brick 1) now carries, all `lake env lean` green + axiom-clean
+`[propext,choice,Quot.sound]`:
+- **NF preservation:** `isNF_insTerm` (`isNF e→n≠0→isNF b→isNF (insTerm e n b)`), `isNF_inadd`
+  (`isNF a→isNF b→isNF (inadd a b)`). Order-induction; the `isNF_ocOadd` side-condition (lead-exp `≺`
+  head) discharged through the 3 `insTerm_ocOadd` branches via `icmp_two_iff_swap_zero` / `icmp_eq_imp_eq`
+  / `ocExp_insTerm`.
+- **Unit/prepend laws:** `insTerm_prepend` (`insTerm e n b = ocOadd e n b` when `b=0 ∨ icmp (ocExp b) e=0`),
+  `inadd_zero_right` (`#` right-unit on NF).
+- **ω-power layer:** `thenV_one_right`, `icmp_omega_pow` (`icmp (ω^α)(ω^β)=icmp α β`; `ω^c=ocOadd c 1 0`),
+  `inadd_omega_pow` (`ω^α # b = insTerm α 1 b`).
+
+**⚠️ REPRIORITIZATION (this lap's finding):**
+1. **ORDER, not iC, is what the descent consumes.** Buchholz Thm 4.2 (`o(d[n]) ≺ o(d)`) via Lemma 4.1
+   (`dg`/`õ` monotonicity) needs `#`'s ORDER laws. `iC (a#b) ≤ iC a + iC b` is for ε₀-width control
+   (crux-1 Grzegorczyk levels) and is NOT on the crux-2 descent path; at most it serves C4 bounds.
+2. **`iC_inadd` does NOT follow from the naive `insTerm`-fold.** `iC (insTerm e n b) ≤ max(iC e)(n+iC b)`
+   (or `n+max(iC e)(iC b)`) is provable, but folding it over `a`'s terms over-counts: `inadd (ocOadd ec nc
+   rc) b = insTerm ec nc (inadd rc b)` adds `nc` to the WHOLE accumulator `iC(inadd rc b) ≥ iC rc`,
+   giving `nc+iC rc` where `iC a` only has `max(iC ec)nc` maxed with `iC rc`. The TRUE bound needs the NF
+   fact `ec ≻ (every exp of rc)` so the `nc`-merge can only hit a `b`-coefficient (≤ iC b), never an
+   rc-term. ⟹ a real NF-aware proof, deferred until/unless C4 needs it.
+
+**NEXT deep target (hardest-first) = `#` strict monotonicity on ω-power summands.** Concrete bricks:
+- `ocExp_inadd` — lead exponent of `a#b` is the icmp-max of `ocExp a`, `ocExp b` (NF). Foundational; messy
+  recursion (insTerm lead-exp via `ocExp_insTerm` folded over `a`). Bootstraps all order reasoning.
+- `inadd_strict_mono_left` — `isNF a→isNF a'→isNF b→ icmp a a'=0 → icmp (inadd a b)(inadd a' b)=0`
+  (Hessenberg strict left-mono). THE descent workhorse. Likely via `ocExp_inadd` + term-merge induction.
+- `inadd_comm` (NF) — natural sum is commutative on codes (NF canonical-form uniqueness). Gives
+  right-mono from left-mono and lets `ω^{õ d0}#…#ω^{õ dl}` be reordered (needed to compare reducts).
+- `inadd_assoc` (NF) — associativity, so the left-fold `ω^{õ d0}#(ω^{õ d1}#…)` matches the multiset sum.
+- Read `scratchpad/buchholz-gentzen.txt` §4 (Lemma 4.1 / Thm 4.2 PROOF) to pin the EXACT `#`/`ω^`/tower
+  inequalities each rule-case (I∀/I¬/Ind/K) needs — target those, don't over-build the algebra.
+- ALT (worktree, in parallel if a lap stalls): start C0 (arithmetize system Z `ZDerivation : V→Prop`),
+  independent of the `#` order algebra.
+
 ## ⭐⭐⭐ Lap 58 — crux 2 REFRAMED to model-theoretic route + Buchholz ord/R GROUNDED from source
 
 **(a) `gentzen_reduction_internalized` is now a THEOREM** (`21a7318`). Was an opaque object-level axiom
