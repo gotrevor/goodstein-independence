@@ -19,11 +19,13 @@ NEXT (next bricks): `Phi`/`blueprint`/`construction` (Fixpoint) → `ZDerivation
 (`iõ`/`idg`/`iord = iotower idg iõ` by recursion on it) and C2 (`iR`).
 -/
 import GoodsteinPA.InternalTower
+import Foundation.FirstOrder.Incompleteness.Second
 
 namespace GoodsteinPA.InternalZ
 
 open Classical
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol ISigma1 PeanoMinus
+open LO.FirstOrder.Arithmetic.Bootstrapping
 open GoodsteinPA.InternalONote
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
@@ -251,20 +253,78 @@ end ProjDef
 @[simp] lemma zKrank_le (d : V) : zKrank d ≤ d := le_trans (pi₁_le_self _) (zRest_le_self d)
 @[simp] lemma zKseq_le (d : V) : zKseq d ≤ d := le_trans (pi₂_le_self _) (zRest_le_self d)
 
-/-! ## `irk` — formula rank (STUB)
+/-! ## `irk` — formula rank (Buchholz logical complexity), a real `UformulaRec1` recursion
 
 Buchholz's `dg` uses `r := rk(F)` (logical complexity of the induction formula) in the `Ind`/`K^r`
-cases. A faithful `rk` is a course-of-values recursion on Foundation's coded formulas (qqAnd/qqAll/…),
-its own brick. **STUB this lap:** `irk d := 0` — a genuine total `𝚺₀` function (NOT an axiom), placed
-in `wip/` off the build, to be replaced by the real rank. The degree it produces is therefore a
-lower bound on the faithful degree; correct enough to wire `idg`'s skeleton, flagged for replacement
-(`PENDING_WORK.md`). -/
-noncomputable def irk (_d : V) : V := 0
+cases. `rk` is the standard course-of-values recursion on Foundation's coded `ℒₒᵣ`-formulas:
+`rk(atom)=rk(⊤)=rk(⊥)=0`, `rk(A∧B)=rk(A∨B)=max(rk A, rk B)+1`, `rk(∀F)=rk(∃F)=rk F+1`. Realized as a
+total `𝚺₁` function via Foundation's `UformulaRec1.Construction` (the same recursion engine behind
+`bv`), so it is genuine machine-checked content, NOT a stub. -/
 
-def _root_.LO.FirstOrder.Arithmetic.irkDef : 𝚺₀.Semisentence 2 := .mkSigma “y d. y = 0”
-instance irk_defined : 𝚺₀-Function₁ (irk : V → V) via irkDef := .mk fun v ↦ by simp [irkDef, irk]
-instance irk_definable : 𝚺₀-Function₁ (irk : V → V) := irk_defined.to_definable
-instance irk_definable' (Γ) : Γ-Function₁ (irk : V → V) := irk_definable.of_zero
+namespace IRk
+
+noncomputable def blueprint : UformulaRec1.Blueprint where
+  rel := .mkSigma “y param k R v. y = 0”
+  nrel := .mkSigma “y param k R v. y = 0”
+  verum := .mkSigma “y param. y = 0”
+  falsum := .mkSigma “y param. y = 0”
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. ∃ m, !max.dfn m y₁ y₂ ∧ y = m + 1”
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. ∃ m, !max.dfn m y₁ y₂ ∧ y = m + 1”
+  all := .mkSigma “y param p₁ y₁. y = y₁ + 1”
+  exs := .mkSigma “y param p₁ y₁. y = y₁ + 1”
+  allChanges := .mkSigma “param' param. param' = 0”
+  exsChanges := .mkSigma “param' param. param' = 0”
+
+noncomputable def construction : UformulaRec1.Construction V blueprint where
+  rel {_} := fun _ _ _ ↦ 0
+  nrel {_} := fun _ _ _ ↦ 0
+  verum {_} := 0
+  falsum {_} := 0
+  and {_} := fun _ _ y₁ y₂ ↦ Max.max y₁ y₂ + 1
+  or {_} := fun _ _ y₁ y₂ ↦ Max.max y₁ y₂ + 1
+  all {_} := fun _ y₁ ↦ y₁ + 1
+  exs {_} := fun _ y₁ ↦ y₁ + 1
+  allChanges := fun _ ↦ 0
+  exsChanges := fun _ ↦ 0
+  rel_defined := .mk fun v ↦ by simp [blueprint]
+  nrel_defined := .mk fun v ↦ by simp [blueprint]
+  verum_defined := .mk fun v ↦ by simp [blueprint]
+  falsum_defined := .mk fun v ↦ by simp [blueprint]
+  and_defined := .mk fun v ↦ by simp [blueprint]
+  or_defined := .mk fun v ↦ by simp [blueprint]
+  all_defined := .mk fun v ↦ by simp [blueprint]
+  exs_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  exChanges_defined := .mk fun v ↦ by simp [blueprint]
+
+end IRk
+
+noncomputable def irk (p : V) : V := IRk.construction.result ℒₒᵣ 0 p
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.irkDef : 𝚺₁.Semisentence 2 :=
+  (IRk.blueprint.result ℒₒᵣ).rew (Rew.subst ![#0, ‘0’, #1])
+
+instance irk_defined : 𝚺₁-Function₁ (irk : V → V) via irkDef := .mk fun v ↦ by
+  simpa [irkDef, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using!
+    (IRk.construction.result_defined (L := ℒₒᵣ)).defined ![v 0, 0, v 1]
+
+instance irk_definable : 𝚺₁-Function₁ (irk : V → V) := irk_defined.to_definable
+instance irk_definable' (Γ) : Γ-[m + 1]-Function₁ (irk : V → V) := irk_definable.of_sigmaOne
+
+@[simp] lemma irk_rel {k R v : V} (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
+    irk (^rel k R v : V) = 0 := by simp [irk, hR, hv, IRk.construction]
+@[simp] lemma irk_nrel {k R v : V} (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
+    irk (^nrel k R v : V) = 0 := by simp [irk, hR, hv, IRk.construction]
+@[simp] lemma irk_verum : irk (^⊤ : V) = 0 := by simp [irk, IRk.construction]
+@[simp] lemma irk_falsum : irk (^⊥ : V) = 0 := by simp [irk, IRk.construction]
+@[simp] lemma irk_and {p q : V} (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
+    irk (p ^⋏ q : V) = Max.max (irk p) (irk q) + 1 := by simp [irk, hp, hq, IRk.construction]
+@[simp] lemma irk_or {p q : V} (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
+    irk (p ^⋎ q : V) = Max.max (irk p) (irk q) + 1 := by simp [irk, hp, hq, IRk.construction]
+@[simp] lemma irk_all {p : V} (hp : IsUFormula ℒₒᵣ p) : irk (^∀ p : V) = irk p + 1 := by
+  simp [irk, hp, IRk.construction]
+@[simp] lemma irk_ex {p : V} (hp : IsUFormula ℒₒᵣ p) : irk (^∃ p : V) = irk p + 1 := by
+  simp [irk, hp, IRk.construction]
 
 /-! ## Internal variadic max-fold over a premise sequence
 
@@ -359,7 +419,7 @@ noncomputable def idgNext (d s : V) : V :=
   else if zTag d = 4 then max (zKrank d) (iseqMaxTab s (zKseq d) - 1)
   else 0
 
-def _root_.LO.FirstOrder.Arithmetic.idgNextDef : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arithmetic.idgNextDef : 𝚺₁.Semisentence 3 := .mkSigma
   “y d s. ∃ t, !zTagDef t d ∧
     ( (t = 1 ∧ ∃ p, !zIallPremDef p d ∧ !znthDef y s p)
     ∨ (t = 2 ∧ ∃ p, !zInegPremDef p d ∧ !znthDef y s p)
@@ -389,7 +449,7 @@ instance idgNext_defined : 𝚺₁-Function₂ (idgNext : V → V → V) via idg
 instance idgNext_definable : 𝚺₁-Function₂ (idgNext : V → V → V) := idgNext_defined.to_definable
 
 /-- Blueprint for the `idg` table. -/
-def idgTable.blueprint : PR.Blueprint 0 where
+noncomputable def idgTable.blueprint : PR.Blueprint 0 where
   zero := .mkSigma “y. !mkSeq₁Def y 0”
   succ := .mkSigma “y ih n. ∃ v, !idgNextDef v (n + 1) ih ∧ !seqConsDef y ih v”
 
@@ -413,7 +473,7 @@ noncomputable def idgTable (n : V) : V := idgTable.construction.result ![] n
 /-- **The degree** `dg(d)` of a code: the `d`-th entry of the table. -/
 noncomputable def idg (d : V) : V := znth (idgTable d) d
 
-def _root_.LO.FirstOrder.Arithmetic.idgTableDef : 𝚺₁.Semisentence 2 :=
+noncomputable def _root_.LO.FirstOrder.Arithmetic.idgTableDef : 𝚺₁.Semisentence 2 :=
   idgTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
 
 instance idgTable_defined : 𝚺₁-Function₁ (idgTable : V → V) via idgTableDef := .mk
@@ -423,7 +483,7 @@ instance idgTable_definable : 𝚺₁-Function₁ (idgTable : V → V) := idgTab
 instance idgTable_definable' (Γ) : Γ-[m + 1]-Function₁ (idgTable : V → V) :=
   idgTable_definable.of_sigmaOne
 
-def _root_.LO.FirstOrder.Arithmetic.idgDef : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arithmetic.idgDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y d. ∃ t, !idgTableDef t d ∧ !znthDef y t d”
 
 instance idg_defined : 𝚺₁-Function₁ (idg : V → V) via idgDef := .mk fun v ↦ by
@@ -519,7 +579,7 @@ independent of any value-table). The `K^r` step in `idgNext` reads the *table* f
 `iseqMaxTab (idgTable M) ds`; when `M` dominates every entry (which holds for `M = zK… - 1`), the two
 agree by table stability. This yields the clean `idg_zK` equation. -/
 
-def iseqMaxIdgAux.blueprint : PR.Blueprint 1 where
+noncomputable def iseqMaxIdgAux.blueprint : PR.Blueprint 1 where
   zero := .mkSigma “y ds. y = 0”
   succ := .mkSigma “y ih n ds.
     ∃ di, !znthDef di ds n ∧ ∃ v, !idgDef v di ∧ !max.dfn y ih v”
@@ -541,7 +601,7 @@ noncomputable def iseqMaxIdgAux (ds j : V) : V := iseqMaxIdgAux.construction.res
     iseqMaxIdgAux ds (j + 1) = max (iseqMaxIdgAux ds j) (idg (znth ds j)) := by
   simp [iseqMaxIdgAux, iseqMaxIdgAux.construction]
 
-def _root_.LO.FirstOrder.Arithmetic.iseqMaxIdgAuxDef : 𝚺₁.Semisentence 3 :=
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iseqMaxIdgAuxDef : 𝚺₁.Semisentence 3 :=
   iseqMaxIdgAux.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
 
 instance iseqMaxIdgAux_defined : 𝚺₁-Function₂ (iseqMaxIdgAux : V → V → V) via iseqMaxIdgAuxDef := .mk
@@ -865,7 +925,7 @@ The `dg(d)`-fold ω-exponential tower (`iotower`, `src/InternalTower.lean`) over
 `õ(d)`. This is the [KB81] assignment Thm 4.2 descends on. -/
 noncomputable def iord (d : V) : V := iotower (iotil d) (idg d)
 
-def _root_.LO.FirstOrder.Arithmetic.iordDef : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iordDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y d. ∃ a, !iotilDef a d ∧ ∃ g, !idgDef g d ∧ !iotowerDef y a g”
 
 instance iord_defined : 𝚺₁-Function₁ (iord : V → V) via iordDef := .mk fun v ↦ by
