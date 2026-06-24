@@ -671,6 +671,52 @@ lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : 
     rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
     exact inAnt_fvSubstSeq (iperm_isymLk_iff.mp h)
 
+/-- **`isChainInf` transfers under eigenvariable substitution** (the chain-structure conjunct of
+`zKValid`). Given a chain `s r ds` whose premises are Z-derivations and whose succedents are genuine
+formulas, the substituted chain `(fvSubstSeqt a t s) r ds'` — where `ds'` lists `zsubst (znth ds i) a t`
+— is still a valid `isChainInf`. The point is that every condition is **positive** (closed under
+applying `fvSubst`), so they are *preserved by the consistent substitution*, NOT merely vacuously fixed:
+the `A_{j₀}∈{C,⊥}` condition by `fvSubst_falsum` + congruence, the antecedent threading by
+`inAnt_fvSubstSeq`, and the rank bound by `irk_fvSubst` (rank invariance — this is the one conjunct that
+consumes the succedent formula-hood `hcf`). This corrects the lap-76 worry: the chain *structure*
+transfers cleanly; only the `zKValid` **criticality** conjunct (a negative `¬iperm`) is delicate. -/
+lemma isChainInf_zsubst {a t s r ds ds' : V} (ht : IsUTerm ℒₒᵣ t)
+    (hlh : lh ds' = lh ds)
+    (hZ : ∀ i < lh ds, ZDerivation (znth ds i))
+    (hmap : ∀ i < lh ds, znth ds' i = zsubst (znth ds i) a t)
+    (hcf : ∀ i < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds i))
+    (h : isChainInf s r ds) :
+    isChainInf (fvSubstSeqt a t s) r ds' := by
+  have hAsucc : ∀ i < lh ds, chainAsucc ds' i = fvSubst ℒₒᵣ a t (chainAsucc ds i) := by
+    intro i hi
+    rw [chainAsucc, chainAsucc, hmap i hi, fstIdx_zsubst a t (hZ i hi), seqSucc_fvSubstSeqt]
+  have hAnt : ∀ i < lh ds, chainAnt ds' i = fvSubstSeq a t (chainAnt ds i) := by
+    intro i hi
+    rw [chainAnt, chainAnt, hmap i hi, fstIdx_zsubst a t (hZ i hi), seqAnt_fvSubstSeqt]
+  rw [isChainInf_iff_idx] at h ⊢
+  obtain ⟨j0, hj0, hcond, hthread, hrank⟩ := h
+  refine ⟨j0, by rw [hlh]; exact hj0, ?_, ?_, ?_⟩
+  · -- A_{j₀} ∈ {C, ⊥} (formula-hood-free)
+    rcases hcond with hc | hc
+    · left; rw [hAsucc j0 hj0, hc, seqSucc_fvSubstSeqt]
+    · right; rw [hAsucc j0 hj0, hc]; exact fvSubst_falsum
+  · -- antecedent threading (formula-hood-free)
+    intro i hi k hk
+    have hilt : i < lh ds := lt_of_le_of_lt hi hj0
+    have hkk : k < lh (chainAnt ds i) := by
+      rwa [hAnt i hilt, fvSubstSeq_lh] at hk
+    rw [hAnt i hilt, znth_fvSubstSeq hkk]
+    rcases hthread i hi k hkk with hin | ⟨i', hi'lt, heq⟩
+    · left; rw [seqAnt_fvSubstSeqt]; exact inAnt_fvSubstSeq hin
+    · right
+      refine ⟨i', hi'lt, ?_⟩
+      rw [heq, hAsucc i' (lt_trans hi'lt hilt)]
+  · -- rank bound (consumes succedent formula-hood via irk_fvSubst)
+    intro i hi
+    have hilt : i < lh ds := lt_trans hi hj0
+    rw [hAsucc i hilt, irk_fvSubst ht (hcf i hilt)]
+    exact hrank i hi
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d ≤ a` yields a
