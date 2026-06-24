@@ -4133,4 +4133,74 @@ general `ZDerivation` — only on the non-axiom tags, which the `tp = isymR` red
 lemma zAxReduct_of_tp_isymR {d A : V} (htp : tp d = isymR A) : zAxReduct d = d := by
   rcases tp_isymR_tag htp with h | h <;> simp [zAxReduct, h]
 
+/-- `zAxReduct` is the identity off the §5 atomic-axiom tags (5,6). -/
+lemma zAxReduct_eq_self_of_ne {d : V} (h5 : zTag d ≠ 5) (h6 : zTag d ≠ 6) :
+    zAxReduct d = d := by simp [zAxReduct, h5, h6]
+
+/-- **Wrapping `zAxReduct` around a `ZDerivation` reduct preserves the `iRedDescent` bundle.** On the
+non-axiom tags `zAxReduct` is the identity (`zAxReduct_eq_self_of_ne`); on the §5 axiom leaves (tags
+5/6) it replaces the leaf `zAxAll`/`zAxNeg` by the `Ax^1` reduct `zAx1`, which lies strictly *below*
+the leaf (`icmp_iotil_zAx1_z*`, using the leaf's carried `IsUFormula`) at degree 0 — so the descent
+bundle only improves (via `icmp_trans`). This is what collapses the i-side `zAxReduct (iR2 premᵢ)`
+wrap even when the I-rule sub-derivation `iR2 premᵢ` itself happens to be an axiom leaf. -/
+lemma iRedDescent_zAxReduct_of_iRedDescent {e d : V} (he : ZDerivation e)
+    (h : iRedDescent e d) : iRedDescent (zAxReduct e) d := by
+  rcases zDerivation_iff.mp he with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+    ⟨s, p, k, rfl, hp⟩ | ⟨s, p, rfl, hp⟩
+  · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zAtom]) (by simp [zTag_zAtom])]
+  · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zIall]) (by simp [zTag_zIall])]
+  · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zIneg]) (by simp [zTag_zIneg])]
+  · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zInd]) (by simp [zTag_zInd])]
+  · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zK]) (by simp [zTag_zK])]
+  · rw [zAxReduct_zAxAll]
+    refine ⟨by rw [idg_zAx1, ← idg_zAxAll s p k]; exact h.dg_le, ?_, isNF_iotil_zAx1 s p⟩
+    exact icmp_trans (max (iotil (zAx1 s p)) (max (iotil (zAxAll s p k)) (iotil d)))
+      _ (le_max_left _ _) _ (le_trans (le_max_left _ _) (le_max_right _ _))
+      _ (le_trans (le_max_right _ _) (le_max_right _ _))
+      (icmp_iotil_zAx1_zAxAll hp) h.otil_lt
+  · rw [zAxReduct_zAxNeg]
+    refine ⟨by rw [idg_zAx1, ← idg_zAxNeg s p]; exact h.dg_le, ?_, isNF_iotil_zAx1 s p⟩
+    exact icmp_trans (max (iotil (zAx1 s p)) (max (iotil (zAxNeg s p)) (iotil d)))
+      _ (le_max_left _ _) _ (le_trans (le_max_left _ _) (le_max_right _ _))
+      _ (le_trans (le_max_right _ _) (le_max_right _ _))
+      (icmp_iotil_zAx1_zAxNeg hp) h.otil_lt
+
+/-- **i-side ρ-fact** (R-redex premise): for an I-rule premise `d` (`tp d = R_A`), the wrapped recursive
+reduct `zAxReduct (iR2 d)` satisfies the `iRedDescent` bundle. `iR2 d` is the I-rule's sub-derivation
+(a `ZDerivation`), so `iRedDescent_iR2_of_tp_isymR` gives the un-wrapped bundle and
+`iRedDescent_zAxReduct_of_iRedDescent` collapses the wrap. -/
+lemma iRedDescent_zAxReduct_iR2_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDerivation d) :
+    iRedDescent (zAxReduct (iR2 d)) d := by
+  have hbase := iRedDescent_iR2_of_tp_isymR htp hZ
+  have hZred : ZDerivation (iR2 d) := by
+    rcases zDerivation_iff.mp hZ with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, hd0⟩ | ⟨s, p, d0, rfl, hd0⟩ |
+      ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+      ⟨s, p, k, rfl, _⟩ | ⟨s, p, rfl, _⟩
+    · rw [tp_zAtom] at htp; exact absurd htp (by simp)
+    · rw [iR2_zIall]; exact hd0
+    · rw [iR2_zIneg]; exact hd0
+    · rw [tp_zInd] at htp; exact absurd htp (by simp)
+    · rw [tp_zK] at htp; exact absurd htp (by simp)
+    · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
+    · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
+  exact iRedDescent_zAxReduct_of_iRedDescent hZred hbase
+
+/-- **j-side ρ-fact** (L-axiom redex premise): for a §5 atomic-axiom premise `d` (`tp d = L^k_A`),
+the wrapped recursive reduct `zAxReduct (iR2 d)` satisfies the `iRedDescent` bundle. `iR2` is the
+identity on the axiom leaves, and `zAxReduct (zAxAll/zAxNeg) = zAx1` carries the strict descent
+(`iRedDescent_zAxReduct_zAxAll/_zAxNeg`, using the leaf's `IsUFormula`). -/
+lemma iRedDescent_zAxReduct_iR2_of_tp_isymLk {d k A : V} (htp : tp d = isymLk k A)
+    (hZ : ZDerivation d) : iRedDescent (zAxReduct (iR2 d)) d := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+    ⟨s, p, k', rfl, hp⟩ | ⟨s, p, rfl, hp⟩
+  · rw [tp_zAtom] at htp; exact absurd htp (by simp)
+  · rw [tp_zIall] at htp; exact absurd htp (by simp)
+  · rw [tp_zIneg] at htp; exact absurd htp (by simp)
+  · rw [tp_zInd] at htp; exact absurd htp (by simp)
+  · rw [tp_zK] at htp; exact absurd htp (by simp)
+  · rw [iR2_zAxAll]; exact iRedDescent_zAxReduct_zAxAll hp
+  · rw [iR2_zAxNeg]; exact iRedDescent_zAxReduct_zAxNeg hp
+
 end GoodsteinPA.InternalZ
