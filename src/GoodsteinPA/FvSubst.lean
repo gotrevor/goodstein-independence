@@ -511,6 +511,20 @@ lemma fvSubst_substs1_fvar (ht : IsSemiterm L 0 t) {a' p : V} (haa : a' ≠ a)
   unfold substs1
   rw [fvSubst_subst ht hp hw, hvec]
 
+/-- **`fvSubst` commutes with `substs1` by an arbitrary closed term `v`** (closed `t`): the general form
+of `fvSubst_substs1_fvar`, where the substituted term `v` is itself renamed by `termFvSubst a t`. The
+`zInd` premise/conclusion succedents `substs1 (numeral 0) p`, `substs1 (Sa) p`, `substs1 (t_ind) p`
+transfer through this (each `v` here is closed in bound variables). -/
+lemma fvSubst_substs1 (ht : IsSemiterm L 0 t) {v p : V} (hv : IsSemiterm L 0 v)
+    (hp : IsSemiformula L 1 p) :
+    fvSubst L a t (substs1 L v p) = substs1 L (termFvSubst L a t v) (fvSubst L a t p) := by
+  have hw : IsSemitermVec L 1 0 (?[v] : V) := IsSemitermVec.singleton.mpr hv
+  have hvec : termFvSubstVec L a t 1 (?[v] : V) = ?[termFvSubst L a t v] := by
+    rw [show (1 : V) = 0 + 1 from by simp, termFvSubstVec_cons hv.isUTerm (by simp)]
+    simp
+  unfold substs1
+  rw [fvSubst_subst ht hp hw, hvec]
+
 end fvSubst
 
 end
