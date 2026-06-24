@@ -34,6 +34,20 @@ fails because PA-induction is an `axm` schema that blocks finite cut-elim. Full 
 First action next lap: build brick 1 (`inadd`) in a new `src/GoodsteinPA/InternalNadd.lean` (or extend
 `InternalCor34`), sorry-free + axiom-clean, mirroring the existing `iadd` lemma set.
 
+**BRICK 1 EQUATIONAL CORE DONE (lap 58, `wip/InternalNadd.lean`, `lake env lean` green, axiom-clean
+`[propext,choice,Quot.sound]`).** Natural sum factored into two single-arg course-of-values recursions
+(mirroring `iomul`/`iadd`): `insTerm e n b` (insert `ω^e·n` into NF `b`; `insTerm_ocOadd` 3-way `icmp`
+recursion) and `inadd a b = insTerm (ocExp a)(ocCoeff a)(inadd (ocTail a) b)` (`inadd_ocOadd`,
+`inadd_zero_left`). Both `𝚺₁`-definable (full `*_defined`/`*_definable`/`*_definable'` instances + tables).
+Gotchas banked: open `LO.FirstOrder.Arithmetic.HierarchySymbol` for `DefinableFunction₂/₃.comp`/
+`Definable.comp₁`/`ball_le`; for a 2-param `PR.Blueprint`, `resultDef` natural order is
+`(result, index, param₀, param₁)` so `insTermTableDef := …resultDef.rew (Rew.subst ![#0,#3,#1,#2])`
+(index↦last). **NEXT for brick 1 (the property lemmas, then promote to `src/`):** `isNF_insTerm`/
+`isNF_inadd` (NF preservation), `icmp`-monotonicity (`# ` is commutative + strictly-monotone in each arg
+on NF), `iC_inadd` (`iC (a # b) ≤ iC a + iC b` or similar), and `inadd`-commutativity. These are what
+`õ`'s descent (Lemma 4.1) consumes. Mirror the `iadd`/`iomul` `isNF_*`/`icmp_*`/`iC_*` proof style
+(`InternalONote.lean` ~1820–2100).
+
 ## ⭐⭐ Lap 57 — TWO findings: (a) seqDescent_dominated was FALSE, fixed; (b) width-code wall
 
 **(a) Soundness fix (DONE, committed `38c6de0`).** Lap-56's `seqDescent_dominated` was **false at ℕ**
