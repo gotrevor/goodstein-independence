@@ -1,5 +1,43 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐ Lap 67 — THE tag-4 K-case descent ASSEMBLED (`iord_descent_iR2_zK_of_valid`, axiom-clean)
+
+The crux-2 ordinal nut for the chain/cut rule is machine-checked. `iord_descent_iR2_zK_of_valid`
+(end of `src/GoodsteinPA/InternalZ.lean`) proves `o(iR2 (zK s r ds)) ≺ o(zK s r ds)` for a valid
+`K^r` chain whose premises are `ZDerivation`s, **conditional on `zKValid s r ds`** (the Buchholz K^r
+side conditions). Axiom-clean `[propext, Classical.choice, Quot.sound]`, green 1321 jobs.
+
+Banked substrate this lap (all axiom-clean, all in `src/`):
+- `tp_cases` (tp-trichotomy) + `tp_eq_isymR_of_pi₁_zero`/`tp_eq_isymLk_of_pi₁_one` + `isymIsR`/
+  `pi₁_isym*` (π₁-discriminant 0/1/2) ⟹ `redexPair_tp`: read `tp(redexI)=R_A` ∧ `tp(redexJ)=L^k_A`
+  (shared cut) off the bare `isRedexPair` finder least-pair.
+- `iRedDescent_zAxReduct_of_iRedDescent` (wrap collapse via `icmp_trans`, handles the I-rule
+  sub-derivation being an axiom leaf) + `iRedDescent_zAxReduct_iR2_of_tp_isymR` (i-side) /
+  `_isymLk` (j-side) ⟹ the six ρ-facts of `iord_descent_iRcrit_of_chain'` at `ρ = zAxReduct∘iR2`.
+- `zKValid s r ds` Prop bundle = `isChainInf` ∧ per-premise `iperm`(perm) ∧ `¬iperm`(crit) ∧ per-tag
+  principal-formula `IsUFormula` (tags 1,2,5,6).
+
+### ▶ NEXT PHASE (the one remaining structural gap): wire `zKValid` into the `ZPhi` `zK` disjunct
+The bare `zK` disjunct is `Seq ds ∧ ∀ i<lh ds, premise ∈ C` — it does NOT carry `zKValid`, so a
+genuine `ZDerivation`'s K-node doesn't yet hand you validity. Strengthen the `zK` disjunct to
+`… ∧ zKValid s r ds` (faithful: an unconstrained premise sequence is NOT a valid system-Z `K^r`
+inference). This is a Σ₁/Δ₁ **Fixpoint cascade** (one focused atomic pass, build only at the end):
+1. **Definability of `zKValid` ingredients** (currently MISSING, all bounded/Δ₁ — build as blueprint
+   `Def`s or inline): `seqAnt`/`seqSucc` (=π₁/π₂, trivial), `inAnt` (bounded ∃), `iperm` (Or of
+   isym-equalities + `inAnt`), `chainAsucc`/`chainAnt` (=seqSucc/seqAnt∘fstIdx), `isChainInf`
+   (bounded ∃ j0 + bounded ∀'s over `irk`/`inAnt`), `zAxAllF`/`zAxNegF` (=π₁∘zRest / zRest).
+   `irk` is Σ₁ (`irkDef`), `IsUFormula` is Δ₁ (`(isUFormula ℒₒᵣ).sigma/.pi`).
+2. Add `zKValid` (as Δ₁) to BOTH zblueprint Σ and Π cores (mirror how `IsUFormula` embeds
+   `.sigma`/`.pi`), update `ZPhi` def + `zphi_monotone`/`zphi_strong_finite`/`zphi_iff`/`zPhi_definable`
+   (the zK disjunct gets the extra conjunct; `zKValid` has no `C`-dependence so monotone/strong_finite
+   are trivial on it), and the ~6 `rcases zDerivation_iff.mp` sites (zK pattern gains `hvalid`).
+3. Then `zDerivation_zK_inv` yields `zKValid`; **extend `iord_descent_iR2_struct` tag-4 case** to
+   `exact iord_descent_iR2_zK_of_valid hds hmem hvalid` (replacing the current `simp [zTag_zK] at htag`),
+   dropping the `htag` restriction ⟹ the UNCONDITIONAL `ZDerivation d → icmp (iord (iR2 d)) (iord d)=0`.
+NB: this cascade is sizeable but the pattern is known (lap-66 did the §5-leaf cascade). The descent
+MATH is now entirely banked — only this faithfulness/definability wiring remains before the
+no-infinite-descent → `ZDerivesEmpty d → False` → C0.5 bridge → `Reduction.lean:68`.
+
 ## ⭐ Lap 66 — crux-2 island promoted to src/ + green-gated; K-case j-side architecture pinned
 
 **Done this lap:** (P0+P1a) Farmed goodstein-ab-xhigh's recursive-iR2 spine (3937 lines, the
