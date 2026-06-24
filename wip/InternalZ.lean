@@ -905,4 +905,36 @@ lemma iord_descent_zIneg (s p d0 : V) : icmp (iord d0) (iord (zIneg s p d0)) = 0
 lemma iord_descent_zIall (s a p d0 : V) : icmp (iord d0) (iord (zIall s a p d0)) = 0 :=
   iord_descent_I (by simp) (by simp)
 
+/-! ## Structural NF building blocks for `õ` (toward `isNF (iotil d)` on derivations)
+
+`õ(d)` is a valid CNF code (`isNF`) for genuine derivations. The general fact needs structural
+induction over `ZDerivation` (the C0 Fixpoint), but the per-constructor NF-closure steps are clean
+and provable now: `õ(atom)=0` is NF, and the `K^r` `#`-fold preserves NF given its entries do
+(`isNF_inadd` + `isNF_omega_pow`). These discharge the `isNF (iotil d)` premise of
+`iord_descent_dgdrop` once the Fixpoint lands. -/
+
+/-- `ω^e = ocOadd e 1 0` is NF iff its exponent is. -/
+lemma isNF_omega_pow {e : V} (he : isNF e) : isNF (ocOadd e 1 0) :=
+  (isNF_ocOadd e 1 0).2 ⟨(by simp), he, isNF_zero, Or.inl rfl⟩
+
+@[simp] lemma isNF_iotil_zAtom (s : V) : isNF (iotil (zAtom s)) := by
+  rw [iotil_zAtom]; exact isNF_zero
+
+/-- The `#`-fold `iseqNaddIdgAux` is NF when every folded entry's `õ` is NF. -/
+lemma isNF_iseqNaddIdgAux {ds : V} (hall : ∀ i < lh ds, isNF (iotil (znth ds i))) :
+    ∀ j ≤ lh ds, isNF (iseqNaddIdgAux ds j) := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro _; simpa using isNF_zero
+  case succ j ih =>
+    intro hj
+    rw [iseqNaddIdgAux_succ]
+    exact isNF_inadd (isNF_omega_pow (hall j (lt_of_lt_of_le (by simp) hj))) _
+      (ih (le_trans (by simp) hj))
+
+/-- `õ(K^r_Π ds)` is NF when every premise's `õ` is NF (via `iotil_zK`). -/
+lemma isNF_iseqNaddIdg {ds : V} (hall : ∀ i < lh ds, isNF (iotil (znth ds i))) :
+    isNF (iseqNaddIdg ds) := isNF_iseqNaddIdgAux hall (lh ds) le_rfl
+
 end GoodsteinPA.InternalZ
