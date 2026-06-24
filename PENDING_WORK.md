@@ -67,7 +67,34 @@ reduct must install on the j-side.
 Then the UNCONDITIONAL `ZDerivation d → icmp (iord (iR2 d)) (iord d) = 0` (all tags), the
 no-infinite-descent → `ZDerivesEmpty d → False`, C0.5 bridge, wire `Reduction.lean:68`.
 
-## ⭐⭐ THE blocking structural gap (lap 66, verified): ZPhi lacks the §5 axiom base cases
+## ✅ RESOLVED lap 66: ZPhi extended with the §5 axiom base cases (the structural gap is closed)
+
+`ZPhi`/`ZDerivation` now has 7 disjuncts: zAtom/zIall/zIneg/zInd/zK **+ zAxAll (tag 5) + zAxNeg
+(tag 6)**, each carrying `IsUFormula ℒₒᵣ p`. Full cascade fixed & axiom-clean, green (1321 jobs):
+ZPhi def, zphi_monotone, zphi_strong_finite, zphi_iff, zblueprint (Σ/Π cores embed
+`(isUFormula ℒₒᵣ).sigma`/`.pi`), zPhi_definable, isNF_iotil_of_ZDerivation (new leaves via
+`isNF_iotil_zAxAll/_zAxNeg`), and all 6 `rcases zDerivation_iff.mp` sites (+2 patterns each).
+`zAxReduct_of_ZDerivation` → `zAxReduct_of_tp_isymR` (the ZDerivation form is now false since axioms
+are leaves; the i-side redex premise has `tp = isymR` ⟹ tag 1/2, so `zAxReduct = id`). Added
+`k_lt_zAxAll`. **The redex finder can now fire on a genuine `ZDerivation` — the K-case is reachable.**
+
+**NEXT: assemble `iord_descent_iR2_struct` for tag 4 (the K-case), then the full induction.**
+The pieces are all banked & axiom-clean:
+  - chain inversion `zDerivation_zK_inv` (premises are ZDerivations OR §5 axioms now),
+  - `iR2_zK_eq_iRcrit` (ρ = zAxReduct ∘ iR2), the nut `iord_descent_iRcrit_of_chain'`,
+  - i-side: `iRedDescent_iR2_of_tp_isymR` + `zAxReduct_of_tp_isymR` (collapse the wrap),
+  - j-side: `iRedDescent_zAxReduct_zAxAll/_zAxNeg` (needs `IsUFormula p`, now carried by the leaf).
+  Route: from `ZDerivation (zK s r ds)` derive the chain hyps (hchain/hrank/hwfR/hwfL/hperm/hnperm
+  from the chain validity — CHECK what `zDerivation_zK_inv` + the zK ZPhi disjunct give vs what the
+  nut needs; the chain-validity predicates `chainAsucc`/`chainAnt`/`isChainInf` may need a bridge from
+  the bare `∀ i < lh ds, znth ds i ∈ ZDerivation`), then discharge the six ρ-facts at redexI/redexJ.
+  ⚠️ GAP TO CHECK: the nut needs `hchain`/`hAj0`/`hrank` (chain-structure predicates). The ZPhi zK
+  disjunct only gives `Seq ds ∧ ∀ i<lh ds, premise ∈ ZDerivation` — NOT the chain antecedent-threading
+  (`chainAnt`/`chainAsucc`) the redex finder consumes. Either (a) the zK ZPhi disjunct must be
+  strengthened to a genuine `isChainInf`-style condition, or (b) those predicates are derivable from
+  the premise sequents. Resolve this before the final assembly.
+
+## (historical) THE blocking structural gap (lap 66): ZPhi lacks the §5 axiom base cases — RESOLVED above
 
 `ZPhi` (line ~3165) — the `ZDerivation` fixpoint — has exactly 5 disjuncts: zAtom / zIall / zIneg /
 zInd / zK. **No tag-5/6 disjunct.** So every chain premise (`znth ds i ∈ C` = a `ZDerivation`) has tag

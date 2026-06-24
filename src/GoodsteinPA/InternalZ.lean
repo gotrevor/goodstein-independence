@@ -602,6 +602,8 @@ instance zAxNeg_defined : 𝚺₀-Function₂ (zAxNeg : V → V → V) via zAxNe
 @[simp] lemma s_lt_zAxAll (s p k : V) : s < zAxAll s p k := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma p_lt_zAxAll (s p k : V) : p < zAxAll s p k :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma k_lt_zAxAll (s p k : V) : k < zAxAll s p k :=
+  le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 @[simp] lemma s_lt_zAxNeg (s p : V) : s < zAxNeg s p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma p_lt_zAxNeg (s p : V) : p < zAxNeg s p :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
@@ -3177,17 +3179,22 @@ def ZPhi (C : Set V) (d : V) : Prop :=
   (∃ s a p d0, d = zIall s a p d0 ∧ d0 ∈ C) ∨
   (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C) ∨
   (∃ s at' p d0 d1, d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
-  (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ ∀ i < lh ds, znth ds i ∈ C)
+  (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ ∀ i < lh ds, znth ds i ∈ C) ∨
+  (∃ s p k, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p) ∨
+  (∃ s p, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p)
 
 /-- `ZPhi` is monotone in the premise set `C` (a `Fixpoint.Construction.monotone` field). -/
 lemma zphi_monotone {C C' : Set V} (h : C ⊆ C') {d : V} : ZPhi C d → ZPhi C' d := by
   rintro (hd | ⟨s, a, p, d0, rfl, hd⟩ | ⟨s, p, d0, rfl, hd⟩ |
-    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩)
+    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩ |
+    ⟨s, p, k, rfl, hp⟩ | ⟨s, p, rfl, hp⟩)
   · exact Or.inl hd
   · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h hd⟩)
   · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h hd⟩))
   · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h h0, h h1⟩)))
-  · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, fun i hi => h (hall i hi)⟩)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, fun i hi => h (hall i hi)⟩))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp⟩)))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, p, rfl, hp⟩)))))
 
 /-- `ZPhi` is strongly finite: every premise of `d` is `< d`, so the rule fires already over
 `{y ∈ C | y < d}` (a `Fixpoint.Construction.StrongFinite` field). The K^r case uses
@@ -3195,13 +3202,16 @@ lemma zphi_monotone {C C' : Set V} (h : C ⊆ C') {d : V} : ZPhi C d → ZPhi C'
 lemma zphi_strong_finite {C : Set V} {d : V} :
     ZPhi C d → ZPhi {y | y ∈ C ∧ y < d} d := by
   rintro (hd | ⟨s, a, p, d0, rfl, hd⟩ | ⟨s, p, d0, rfl, hd⟩ |
-    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩)
+    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩ |
+    ⟨s, p, k, rfl, hp⟩ | ⟨s, p, rfl, hp⟩)
   · exact Or.inl hd
   · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, hd, by simp⟩)
   · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, hd, by simp⟩))
   · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, ⟨h0, by simp⟩, ⟨h1, by simp⟩⟩)))
-  · refine Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, fun i hi => ⟨hall i hi, ?_⟩⟩)))
+  · refine Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, fun i hi => ⟨hall i hi, ?_⟩⟩))))
     exact lt_trans (lt_of_mem_rng (hseq.znth hi)) (ds_lt_zK s r ds)
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp⟩)))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, p, rfl, hp⟩)))))
 
 /-- Bounded-quantifier form of `ZPhi` (every existential is `< d`), the shape the arithmetized
 `blueprint` core matches. Mirrors Foundation `Theory.Derivation.phi_iff`. -/
@@ -3212,23 +3222,34 @@ private lemma zphi_iff (C d : V) :
       (∃ s < d, ∃ p < d, ∃ d0 < d, d = zIneg s p d0 ∧ d0 ∈ C) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
-      (∃ s < d, ∃ r < d, ∃ ds < d, d = zK s r ds ∧ Seq ds ∧ ∀ i < lh ds, znth ds i ∈ C) ) := by
+      (∃ s < d, ∃ r < d, ∃ ds < d, d = zK s r ds ∧ Seq ds ∧ ∀ i < lh ds, znth ds i ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ k < d, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p) ∨
+      (∃ s < d, ∃ p < d, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p) ) := by
   constructor
   · rintro (⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, h⟩ | ⟨s, p, d0, rfl, h⟩ |
-      ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩)
+      ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, hseq, hall⟩ |
+      ⟨s, p, k, rfl, hp⟩ | ⟨s, p, rfl, hp⟩)
     · exact Or.inl ⟨s, by simp, rfl⟩
     · exact Or.inr (Or.inl ⟨s, by simp, a, by simp, p, by simp, d0, by simp, rfl, h⟩)
     · exact Or.inr (Or.inr (Or.inl ⟨s, by simp, p, by simp, d0, by simp, rfl, h⟩))
     · exact Or.inr (Or.inr (Or.inr (Or.inl
         ⟨s, by simp, at', by simp, p, by simp, d0, by simp, d1, by simp, rfl, h0, h1⟩)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨s, by simp, r, by simp, ds, by simp, rfl, hseq, hall⟩)))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨s, by simp, r, by simp, ds, by simp, rfl, hseq, hall⟩))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨s, by simp, p, by simp, k, by simp, rfl, hp⟩)))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        ⟨s, by simp, p, by simp, rfl, hp⟩)))))
   · rintro (⟨s, _, rfl⟩ | ⟨s, _, a, _, p, _, d0, _, rfl, h⟩ | ⟨s, _, p, _, d0, _, rfl, h⟩ |
-      ⟨s, _, at', _, p, _, d0, _, d1, _, rfl, h0, h1⟩ | ⟨s, _, r, _, ds, _, rfl, hseq, hall⟩)
+      ⟨s, _, at', _, p, _, d0, _, d1, _, rfl, h0, h1⟩ | ⟨s, _, r, _, ds, _, rfl, hseq, hall⟩ |
+      ⟨s, _, p, _, k, _, rfl, hp⟩ | ⟨s, _, p, _, rfl, hp⟩)
     · exact Or.inl ⟨s, rfl⟩
     · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h⟩)
     · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h⟩))
     · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h0, h1⟩)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨s, r, ds, rfl, hseq, hall⟩)))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, hall⟩))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp⟩)))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, p, rfl, hp⟩)))))
 
 open LO.FirstOrder.Arithmetic in
 /-- Arithmetized `𝚫₁` core for the Z-derivation `Fixpoint` (mirrors Foundation
@@ -3243,7 +3264,9 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
         !zKGraph d s r ds ∧ !seqDef ds ∧
-          ∃ l, !lhDef l ds ∧ ∀ i < l, ∃ z, !znthDef z ds i ∧ z ∈ C) )”)
+          ∃ l, !lhDef l ds ∧ ∀ i < l, ∃ z, !znthDef z ds i ∧ z ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ k < d, !zAxAllGraph d s p k ∧ !(isUFormula ℒₒᵣ).sigma p) ∨
+      (∃ s < d, ∃ p < d, !zAxNegGraph d s p ∧ !(isUFormula ℒₒᵣ).sigma p) )”)
   (.mkPi “d C.
     ( (∃ s < d, !zAtomGraph d s) ∨
       (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d, !zIallGraph d s a p d0 ∧ d0 ∈ C) ∨
@@ -3252,14 +3275,17 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
         !zKGraph d s r ds ∧ !seqDef ds ∧
-          ∀ l, !lhDef l ds → ∀ i < l, ∀ z, !znthDef z ds i → z ∈ C) )”)⟩
+          ∀ l, !lhDef l ds → ∀ i < l, ∀ z, !znthDef z ds i → z ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ k < d, !zAxAllGraph d s p k ∧ !(isUFormula ℒₒᵣ).pi p) ∨
+      (∃ s < d, ∃ p < d, !zAxNegGraph d s p ∧ !(isUFormula ℒₒᵣ).pi p) )”)⟩
 
 lemma zPhi_definable :
     𝚫₁.Defined (fun v : Fin 2 → V ↦ ZPhi {x | x ∈ v 1} (v 0)) zblueprint.core := .mk <| by
   constructor
   · intro v; simp [zblueprint]
   · intro v; simp [zphi_iff, zblueprint, zAtom_defined.iff, zIall_defined.iff, zIneg_defined.iff,
-      zInd_defined.iff, zK_defined.iff, seq_defined.iff, lh_defined.iff, znth_defined.iff]
+      zInd_defined.iff, zK_defined.iff, zAxAll_defined.iff, zAxNeg_defined.iff,
+      seq_defined.iff, lh_defined.iff, znth_defined.iff]
 
 /-- The Z-derivation `Fixpoint.Construction` (`Φ = ZPhi`, with the proved monotonicity). -/
 noncomputable def zconstruction : Fixpoint.Construction V zblueprint where
@@ -3296,12 +3322,15 @@ theorem isNF_iotil_of_ZDerivation : ∀ d : V, ZDerivation d → isNF (iotil d) 
   · simp only [isNF]; definability
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, hd0⟩ | ⟨s, p, d0, rfl, hd0⟩ |
-      ⟨s, at', p, d0, d1, rfl, hd0, hd1⟩ | ⟨s, r, ds, rfl, hds, hmem⟩
+      ⟨s, at', p, d0, d1, rfl, hd0, hd1⟩ | ⟨s, r, ds, rfl, hds, hmem⟩ |
+      ⟨s, p, k, rfl, hp⟩ | ⟨s, p, rfl, hp⟩
     · exact isNF_iotil_zAtom s
     · exact isNF_iotil_zIall (hC d0 hd0).2
     · exact isNF_iotil_zIneg (hC d0 hd0).2
     · exact isNF_iotil_zInd (hC d0 hd0).2 (hC d1 hd1).2
     · exact isNF_iotil_zK hds (fun i hi => (hC (znth ds i) (hmem i hi)).2)
+    · exact isNF_iotil_zAxAll hp
+    · exact isNF_iotil_zAxNeg hp
 
 /-- **Structural descent over `ZDerivation` for the I-rules** (Buchholz Thm 4.2, cases 2–3 = LH1/LH2):
 for any Z-derivation `d` built by `I^a_∀xF` or `I_¬A` (`zTag d ∈ {1,2}`), the reduct strictly lowers
@@ -3317,10 +3346,13 @@ theorem iord_iR_descent_I :
   · definability
   · intro C _ d hphi
     rcases hphi with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
-      ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩
+      ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+      ⟨s, p, k, rfl, _⟩ | ⟨s, p, rfl, _⟩
     · rintro (h | h) <;> simp at h
     · rintro _; exact iord_descent_iR_zIall s a p d0
     · rintro _; exact iord_descent_iR_zIneg s p d0
+    · rintro (h | h) <;> simp at h
+    · rintro (h | h) <;> simp at h
     · rintro (h | h) <;> simp at h
     · rintro (h | h) <;> simp at h
 
@@ -3363,12 +3395,15 @@ companion of `iord_iR_descent_I`. -/
 theorem iord_descent_iRInd_of_ZDerivation (d : V) (hd : ZDerivation d) (htag : zTag d = 3) :
     icmp (iord (iRInd d)) (iord d) = 0 := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
-    ⟨s, at', p, d0, d1, rfl, hd0, hd1⟩ | ⟨s, r, ds, rfl, _, _⟩
+    ⟨s, at', p, d0, d1, rfl, hd0, hd1⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+    ⟨s, p, k, rfl, _⟩ | ⟨s, p, rfl, _⟩
   · simp at htag
   · simp at htag
   · simp at htag
   · exact iord_descent_iRInd_zInd s at' p d0 d1
       (isNF_iotil_of_ZDerivation d0 hd0) (isNF_iotil_of_ZDerivation d1 hd1)
+  · simp at htag
+  · simp at htag
   · simp at htag
 
 /-! ### Chain (`K^r`) inversion + the ZDerivation-facing non-critical chain descent (LH3)
@@ -3387,13 +3422,16 @@ are ruled out by `zTag` (the chain has tag 4). -/
 lemma zDerivation_zK_inv {s r ds : V} (hZ : ZDerivation (zK s r ds)) :
     Seq ds ∧ ∀ i < lh ds, ZDerivation (znth ds i) := by
   rcases zDerivation_iff.mp hZ with ⟨s', h⟩ | ⟨s', a, p, d0, h, _⟩ | ⟨s', p, d0, h, _⟩ |
-    ⟨s', at', p, d0, d1, h, _, _⟩ | ⟨s', r', ds', h, hds', hmem'⟩
+    ⟨s', at', p, d0, d1, h, _, _⟩ | ⟨s', r', ds', h, hds', hmem'⟩ |
+    ⟨s', p, k, h, _⟩ | ⟨s', p, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · obtain rfl : ds = ds' := by simpa using congrArg zKseq h
     exact ⟨hds', fun i hi => hmem' i hi⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
 
 /-- **All-`n` premise NF** of a `ZDerivation` chain: in-range premises are NF (`isNF_iotil_of_ZDerivation`),
 out-of-range default `0` is NF (`isNF_iotil_zero`). Discharges the `hNF : ∀ n` side condition. -/
@@ -3576,12 +3614,15 @@ This is the `redexI`-side of the nut's `ρ`-discharge. -/
 lemma iRedDescent_iR_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDerivation d) :
     iRedDescent (iR d) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, hd0⟩ | ⟨s, p, d0, rfl, hd0⟩ |
-    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+    ⟨s, p, k, rfl, _⟩ | ⟨s, p, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · rw [iR_zIall]; exact iRedDescent_zIall (isNF_iotil_of_ZDerivation d0 hd0)
   · rw [iR_zIneg]; exact iRedDescent_zIneg (isNF_iotil_of_ZDerivation d0 hd0)
   · rw [tp_zInd] at htp; exact absurd htp (by simp)
   · rw [tp_zK] at htp; exact absurd htp (by simp)
+  · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
+  · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
 
 /-! ## C0.5 — the Foundation→Z bridge (NEXT milestone, lap-62 reflection)
 
@@ -3962,7 +4003,8 @@ lemma iord_descent_iR2_struct (d : V) (hd : ZDerivation d)
     (htag : zTag d = 1 ∨ zTag d = 2 ∨ zTag d = 3) :
     icmp (iord (iR2 d)) (iord d) = 0 := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
-    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, _, _⟩
+    ⟨s, at', p, d0, d1, rfl, h0, h1⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+    ⟨s, p, k, rfl, _⟩ | ⟨s, p, rfl, _⟩
   · simp [zTag_zAtom] at htag
   · rw [iR2_zIall]; exact iord_descent_zIall s a p d0
   · rw [iR2_zIneg]; exact iord_descent_zIneg s p d0
@@ -3970,6 +4012,8 @@ lemma iord_descent_iR2_struct (d : V) (hd : ZDerivation d)
     exact iord_descent_iRInd_zInd s at' p d0 d1
       (isNF_iotil_of_ZDerivation d0 h0) (isNF_iotil_of_ZDerivation d1 h1)
   · simp [zTag_zK] at htag
+  · simp [zTag_zAxAll] at htag
+  · simp [zTag_zAxNeg] at htag
 
 /-- **The redexI premise's `iR2`-reduct satisfies the IH bundle, concretely** (the recursive-`iR2`
 analog of lap-71's `iRedDescent_iR_of_tp_isymR`). A premise `d` with `tp d = R_A` is an I-rule
@@ -3980,12 +4024,15 @@ six `ρ`-facts (`iord_descent_iRcrit_of_chain'`'s `hρlt_i`/`hρg_i`/`hρNF_i`) 
 lemma iRedDescent_iR2_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDerivation d) :
     iRedDescent (iR2 d) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, hd0⟩ | ⟨s, p, d0, rfl, hd0⟩ |
-    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩ |
+    ⟨s, p, k, rfl, _⟩ | ⟨s, p, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · rw [iR2_zIall]; exact iRedDescent_zIall (isNF_iotil_of_ZDerivation d0 hd0)
   · rw [iR2_zIneg]; exact iRedDescent_zIneg (isNF_iotil_of_ZDerivation d0 hd0)
   · rw [tp_zInd] at htp; exact absurd htp (by simp)
   · rw [tp_zK] at htp; exact absurd htp (by simp)
+  · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
+  · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
 
 /-! ### j-side §5 atomic-axiom reduct bundle (the K-case's L-premise descent, lap 66)
 
@@ -4016,17 +4063,13 @@ lemma iRedDescent_zAxReduct_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) :
     iRedDescent (zAxReduct (zAxNeg s p)) (zAxNeg s p) := by
   rw [zAxReduct_zAxNeg]; exact iRedDescent_zAx1_zAxNeg hp
 
-/-- **`zAxReduct` is the identity on a genuine `ZDerivation`**: its tag is one of `0,1,2,3,4`
-(zAtom/zIall/zIneg/zInd/zK), never the atomic-axiom tags `5,6`. Collapses the i-side `zAxReduct`-wrap
-`zAxReduct (iR2 premᵢ) = iR2 premᵢ` introduced by the tag-4 rewrite (the i-side sub-derivation is a
-`ZDerivation`). -/
-lemma zAxReduct_of_ZDerivation {d : V} (hZ : ZDerivation d) : zAxReduct d = d := by
-  rcases zDerivation_iff.mp hZ with ⟨s, rfl⟩ | ⟨s, a, p, d0, rfl, _⟩ | ⟨s, p, d0, rfl, _⟩ |
-    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _⟩
-  · simp [zAxReduct]
-  · simp [zAxReduct]
-  · simp [zAxReduct]
-  · simp [zAxReduct]
-  · simp [zAxReduct]
+/-- **`zAxReduct` is the identity on an R-redex (I-rule) premise**: `tp d = isymR A` forces
+`zTag d ∈ {1,2}` (`tp_isymR_tag`), never the atomic-axiom tags `5,6`, so `zAxReduct d = d`. Collapses
+the i-side `zAxReduct`-wrap `zAxReduct (iR2 premᵢ) = iR2 premᵢ` introduced by the tag-4 rewrite (the
+i-side redex premise is an I-rule). Stated on `tp` directly (no `ZDerivation` needed). NOTE: since
+`ZDerivation` now includes the atomic-axiom leaves (tags 5,6), `zAxReduct` is NOT the identity on a
+general `ZDerivation` — only on the non-axiom tags, which the `tp = isymR` redex premise guarantees. -/
+lemma zAxReduct_of_tp_isymR {d A : V} (htp : tp d = isymR A) : zAxReduct d = d := by
+  rcases tp_isymR_tag htp with h | h <;> simp [zAxReduct, h]
 
 end GoodsteinPA.InternalZ
