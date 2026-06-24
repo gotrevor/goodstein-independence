@@ -1703,6 +1703,16 @@ lemma isNF_oAtomLk_pos {C : V} (h : 0 < irk C) : isNF (oAtomLk C) := by
   rw [add_tsub_assoc_of_le h1]
   exact (pos_iff_one_le.mpr (le_trans h1 le_self_add)).ne'
 
+/-- `õ(Ax^{∀p,k})` is a genuine NF for a well-formed matrix `p` (`õ = oAtomLk(∀p)`, `rk(∀p) = rk p+1 > 0`).
+The §5 L-axiom-leaf NF fact for the extended `ZDerivation` (tag 5 base case). -/
+lemma isNF_iotil_zAxAll {s p k : V} (hp : IsUFormula ℒₒᵣ p) : isNF (iotil (zAxAll s p k)) := by
+  rw [iotil_zAxAll]; exact isNF_oAtomLk_pos (by rw [irk_all hp]; simp)
+
+/-- `õ(Ax^{¬p,0})` is a genuine NF for a well-formed `p` (`õ = oAtomLk(¬p)`, `rk(¬p) = rk p+1 > 0`).
+The §5 L-axiom-leaf NF fact for the extended `ZDerivation` (tag 6 base case). -/
+lemma isNF_iotil_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) : isNF (iotil (zAxNeg s p)) := by
+  rw [iotil_zAxNeg]; exact isNF_oAtomLk_pos (by rw [irk_inegF hp]; simp)
+
 /-! ### iõ-fold over a premise sequence (for the variadic `K^r` equation), mirror `iseqMaxIdg` -/
 
 noncomputable def iseqNaddIdgAux.blueprint : PR.Blueprint 1 where
