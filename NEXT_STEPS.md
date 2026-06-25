@@ -39,6 +39,15 @@ feasible internal route, and resume PRIORITY 2.
 **Template to mirror:** `src/GoodsteinPA/Zinfty.lean` (the axiom-clean META ω-rule engine: `allω` rule +
 the full Towsner §19 cut-elimination). The spike arithmetizes what `Zinfty` does at the meta level.
 
+**STATUS (lap 101 — first brick LANDED, `wip/InternalZomega.lean`, axiom-clean):** `zOmegaPrem_valid`
+(premise family uniformly valid, motive-free, just the freshness bound) + `zOmegaPrem_concl` (conclusion
+computed, not threaded) are proven in-kernel. This is the evidence that the substitution-validity moves to
+node-construction (off the cut-elimination recursion) — i.e. the ω-rule view retires the `redZKReady` wall.
+**NEXT = Probe 1: build `iord(zAllω) = sup_t (iord (zOmegaPrem d0 a t)) + 1`** from the premise-family code
+`d0` (the sup over a `zsubst`-generated family). This is THE sharpest arithmetization-risk question:
+buildable → pivot justified, proceed to Probe 2 (the ω-rule cut-elimination step, recursion on `iord`);
+walls → commit to Path X with the evidence.
+
 ## ▶ PRIORITY 2 — Path X fallback (ONLY if the spike walls)
 
 Resume the laps-95–100 plan, now informed: drive the `redZKReady` motive (`Crux2Blueprint.redSoundGen`
