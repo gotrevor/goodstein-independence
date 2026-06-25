@@ -1139,6 +1139,45 @@ theorem sord_redAllExS_lt {s d0 a Cnew dR αAll αEx : V}
   rw [redAllExS, sord_zCutOmega]
   exact inc_imax_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
 
+/-! ### Brick 5g (lap 105) — `max+1` for the induction node too (the complete resolution is uniform)
+
+The induction-node analogue of brick 5e: `redIndExS` stores `max(o(unfolding), o(∃-prem)) + 1`. Same
+`lt_imax_inc_left/right` (operator-control, no positivity) + `inc_imax_strict_mono` (descent, arbitrary
+parent). Together with brick 5e, the COMPLETE `max+1` cut ordinal closes the principal cut step for BOTH
+ω-nodes (∀ and induction) with zero side conditions beyond NF — and NF is automatic for engine-derivation
+premises (`isNF_sord_of_ZDerivation`, brick 5f). -/
+
+/-- **The `max+1`-stored induction/∃-cut reduct** (induction analogue of `redAllExS`). -/
+noncomputable def redIndExS (s s' at' p d0 d1 Cnew dR : V) : V :=
+  zCutOmega s
+    (inc (imax (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))) (sord (zExPrem dR))))
+    (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR))) (zExPrem dR) Cnew
+
+/-- **Induction/∃-cut `hinv` — COMPLETE closure (axiom-clean, NO positivity).** Given both reduced
+premises `ZcOK` and NF `sord`s, the `max+1`-stored induction/∃-cut reduct is `ZcOK` — operator-control
+from NF alone, exactly as the ∀/∃ case. -/
+theorem zcOK_redIndExS {s s' at' p d0 d1 Cnew dR : V}
+    (hL : ZcOK (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR))))
+    (hR : ZcOK (zExPrem dR))
+    (hLnf : isNF (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))))
+    (hRnf : isNF (sord (zExPrem dR))) :
+    ZcOK (redIndExS s s' at' p d0 d1 Cnew dR) := by
+  rw [redIndExS]
+  refine ZcOK.cut hL hR ?_ ?_
+  · exact lt_imax_inc_left hLnf hRnf
+  · exact lt_imax_inc_right hLnf hRnf
+
+/-- **The `max+1`-stored induction/∃-cut reduction STRICTLY drops the stored ordinal — against an
+ARBITRARY `max+1`-stored parent.** Induction analogue of `sord_redAllExS_lt`. -/
+theorem sord_redIndExS_lt {s s' at' p d0 d1 Cnew dR αInd αEx : V}
+    (hLlt : icmp (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))) αInd = 0)
+    (hRlt : icmp (sord (zExPrem dR)) αEx = 0)
+    (hLnf : isNF (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))))
+    (hRnf : isNF (sord (zExPrem dR))) (hAnf : isNF αInd) (hEnf : isNF αEx) :
+    icmp (sord (redIndExS s s' at' p d0 d1 Cnew dR)) (inc (imax αInd αEx)) = 0 := by
+  rw [redIndExS, sord_zCutOmega]
+  exact inc_imax_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
