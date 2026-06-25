@@ -104,6 +104,30 @@ theorem tp_eq_isymRep_of_zTag {d : V}
     (h : zTag d ≠ 1 ∧ zTag d ≠ 2 ∧ zTag d ≠ 5 ∧ zTag d ≠ 6) : tp d = isymRep := by
   unfold tp; rw [if_neg h.1, if_neg h.2.1, if_neg h.2.2.1, if_neg h.2.2.2]
 
+/-- **The chain-`Rep` `tp` facts are FREE (lap 100).** For a chain node `d` (`zTag d = 4`), both `tp d` and
+`tp (red d)` are `isymRep` UNCONDITIONALLY: `tp` of any chain is `Rep` (`tp_eq_isymRep_of_zTag` off the
+I/Ax tags), and `red` of a chain is again a chain (`red (zK …) = iRK …`, `zTag_iRK = 4`), so its `tp` is
+`Rep` too. This discharges two of the three `redZKReady` chain-`Rep` conjuncts — the genuine residual is the
+conclusion-preservation `fstIdx (red d) = fstIdx d` (route-B Rep-reduction, hereditary). The strengthened
+`redSound` motive uses this to supply `redZKReady`'s `hchainRep` from just the `fstIdx` tracking. -/
+theorem tp_red_isymRep_of_zTag_4 {d : V} (hZ : ZDerivation d) (htag : zTag d = 4) :
+    tp d = isymRep ∧ tp (red d) = isymRep := by
+  refine ⟨tp_eq_isymRep_of_zTag ⟨?_, ?_, ?_, ?_⟩, ?_⟩
+  · rw [htag]; simp
+  · rw [htag]; simp
+  · rw [htag]; simp
+  · rw [htag]; simp
+  · rcases zDerivation_iff.mp hZ with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _, _⟩ |
+      ⟨s', p, d0, heq, _, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _, _⟩ | ⟨s', r', ds', heq, _, _, _⟩ |
+      ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩
+    · exact absurd (heq ▸ htag) (by rw [zTag_zAtom]; simp)
+    · exact absurd (heq ▸ htag) (by rw [zTag_zIall]; simp)
+    · exact absurd (heq ▸ htag) (by rw [zTag_zIneg]; simp)
+    · exact absurd (heq ▸ htag) (by rw [zTag_zInd]; simp)
+    · rw [heq, red_zK]; exact tp_eq_isymRep_of_zTag (by rw [zTag_iRK]; refine ⟨?_, ?_, ?_, ?_⟩ <;> simp)
+    · exact absurd (heq ▸ htag) (by rw [zTag_zAxAll]; simp)
+    · exact absurd (heq ▸ htag) (by rw [zTag_zAxNeg]; simp)
+
 /-- **`red` of a `Rep` derivation preserves the endsequent and stays `Rep`.** For `tp v = isymRep`
 (i.e. `v` an atom/Ind/chain), Buchholz's `tp(v) = Rep ⟹ v[0] ⊢ end(v)`: `red v` keeps `fstIdx` and is
 again a `Rep` derivation. **Route B (lap 96):** for the chain case the conclusion-reducing `iRKr` keeps
