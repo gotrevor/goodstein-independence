@@ -1,11 +1,31 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 113 · 2026-06-25 (splice branch FULLY closed)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 114 · 2026-06-25 (inversion prize reframed: feasible)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**,
-re-verified in-kernel lap 113).
+re-verified in-kernel lap 114). The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
 
-> **⭐⭐⭐ Lap-113 — splice `hr'` degree-drop PROVEN; gap isolated to the chain-rank invariant (read FIRST).**
+> **⭐⭐⭐ Lap-114 FRESH-MIND REVIEW — the cut-elimination PRIZE is FEASIBLE (re-principalization), not a multi-year wall (read FIRST — current).**
+> Baton `ANALYSIS-2026-06-25-lap114-inversion-instance-mismatch.md`. Build 🟢 green (1326); headline footprint
+> re-verified in-kernel (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms). **The crux-2 prize**
+> `ZDerivation_red_zK_crit` (`Crux2Blueprint:100`) — the critical-cut SOUNDNESS inversion, framed since lap
+> 110 as "the multi-year cut-elim core (`Zinfty.allInv`)" and the avoided piece (lap-111) — is **FALSE as
+> stated, for a precise FIXABLE reason.** It reduces (via `ZDerivation_iRcritG_of`; outer chain validity is
+> automatic) to two stripped halves `haux0`/`haux1`. `haux0` concludes `Γ → cutFormula d = Γ → F(k)` (k = the
+> L-redex axAll instance); its `isChainInf` threading forces the redexI premise to derive `F(k)`. But `red`'s
+> reduct there is `zsubst d0 a (numeral 0)` (instance **0**, `red_zIall`), deriving `F(0) ≠ F(k)`. **`red`'s
+> critical reduct is unsound — it loses the cut instance.** (Instance-0 is correct for the ordinal DESCENT —
+> `iord` is instance-invariant, so `iord_descent_red` survives — which is exactly why this hid through laps
+> 108–113.) This is lap-104's `red_redAllEx_eq` re-principalization finding, now pinned to the live engine.
+> **FIX (contained; building blocks BANKED):** the R-redex (I∀) premise must be `zsubst d0 a (numeral k)`;
+> its succedent `= cutFormula d` by the new **`seqSucc_zsubst_zIall_premise`** (`Zsubst.lean`, axiom-clean —
+> the linchpin landed this lap), it is a `ZDerivation` by `ZDerivation_zsubst_zIall_premise` (banked), and I¬
+> needs no change. So the inversion is a `red`-redefinition (re-key `iRNextG` tag-4 to substitute the L-redex
+> `k`), NOT new deep machinery; the descent transfers (instance-invariant). **NEXT:** implement the corrected
+> reduct + prove `haux0`/`haux1` (threading) → real `ZDerivation_red_zK_crit` → `redSound`. See
+> `PENDING_WORK.md` lap-114.
+
+> **⭐⭐⭐ Lap-113 — splice `hr'` degree-drop PROVEN; gap isolated to the chain-rank invariant (historical).**
 > Baton `HANDOFF-2026-06-25-lap113.md`. Build 🟢 green (1326). The lap-112 cut-formula strip now drives the
 > splice descent **end-to-end in-kernel**: `iCrit_halves_descend` gained a 7th conjunct
 > `irk (seqSucc (fstIdx (znth (zKseq (red (zK s r ds))) 0))) < r` (via the e0 succedent = `cutFormula`

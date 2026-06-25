@@ -1,5 +1,45 @@
 # Pending work — open obligations & attack paths
 
+## lap 114 — FRESH-MIND REVIEW: the inversion PRIZE is feasible (re-principalization), not a multi-year wall
+**Build 🟢 green 1326; headline footprint intact + re-verified in-kernel (`[propext, sorryAx, choice,
+Quot.sound]`, 0 math axioms). 1 commit (building block + finding).** See
+`ANALYSIS-2026-06-25-lap114-inversion-instance-mismatch.md`.
+
+**DIRECTION CHANGE (kernel-grounded).** The crux-2 prize `ZDerivation_red_zK_crit` (`Crux2Blueprint:100`)
+— the critical-cut SOUNDNESS inversion, framed since lap 110 as "the multi-year cut-elim core, blueprint
+`Zinfty.allInv`" — is **FALSE as stated** for a precise, FIXABLE reason. It delegates (via
+`ZDerivation_iRcritG_of`, `InternalZ:8336`) to two stripped halves `haux0`/`haux1`; the outer chain's
+validity is automatic (`zKValidF_iCritReductGen`). `haux0` concludes `Γ → cutFormula d = Γ → F(k)`, `k`
+the L-redex (axAll) instance; its `isChainInf` threading FORCES the redexI premise to derive `F(k)`. But
+`red`'s reduct there is `zsubst d0 a (numeral 0)` (instance **0**, `red_zIall`), deriving `F(0) ≠ F(k)`.
+**So `red`'s critical reduct is unsound** — it loses the cut instance. (Instance-0 is correct for the
+ordinal DESCENT — `iord` is instance-invariant, so `iord_descent_red` survives — which is why this hid in
+plain sight through laps 108–113.) This is lap-104's `red_redAllEx_eq` re-principalization finding, now
+pinned to the live engine.
+
+**THE FIX (contained, building blocks BANKED):** the critical reduct's R-redex (I∀) premise must be
+`zsubst d0 a (numeral k)` (k = `π₁(π₂(tp (redexJ d)))`, the same `k` `cutFormula` reads). Then:
+- succedent `= cutFormula d` by **`seqSucc_zsubst_zIall_premise`** (`Zsubst.lean`, BANKED this lap,
+  axiom-clean — the linchpin), modulo eigenvariable freshness `hpfresh : fvSubst a (numeral k) p = p` (O3).
+- derivability by `ZDerivation_zsubst_zIall_premise` (`Zsubst.lean:1879`, banked), modulo `maxEigen d0 < a` (O1).
+- I¬ redex needs no change (`red_zIneg = d0`, no instance).
+
+So the inversion is a `red`-redefinition (re-key the tag-4 critical branch of `iRNextG`/`iRNext` to
+substitute the L-redex `k`), NOT new deep machinery.
+
+**NEXT-LAP TARGET (hardest-first, the headline-critical path):**
+1. Implement the corrected critical reduct: re-key `iRNextG`/`iRNext` tag-4 so `ρ (redexI)` substitutes
+   `numeral k` (k from `tp (redexJ d)`) for the I∀ R-redex, leaving I¬/`zAxReduct` as is. Re-check the
+   `red_zK_crit` equation + `𝚺₁`-definability (`iRNextDef`). Descent is instance-invariant ⟹ transfers.
+2. Prove `haux0`/`haux1` (the threading reconstruction — `isChainInf` for `seqUpdate ds redexI (corrected
+   reduct)` at the new conclusion succedent; inherited from the original chain's `isChainInf` restricted
+   to `≤ redexI`, analogous to `ZDerivation_iCritReplaceReduce_of`). Succedent identity is banked.
+3. Thread the orbit freshness data (O1/O3) through the `redSound` motive (same obligations the replace
+   branch already isolates, lap-99/100).
+Then `ZDerivation_red_zK_crit` is REAL → unblocks `redSound`. The chain-REPLACE IH / ⊥-orbit invariant
+(lap-113 next step) is the OTHER deep piece, but the inversion is higher-value (it is the cut-elim content
+and was the avoided piece per lap-111) and now demonstrably contained.
+
 ## lap 113 — splice branch CLOSED; chain-rank invariant PROVEN; NEXT = the iord_descent_red recursion
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
 4 commits.** The splice `hr'` degree-drop is fully proven and `irk_chainAsucc_redexI_le` (the chain-rank

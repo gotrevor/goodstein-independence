@@ -90,9 +90,23 @@ does for the 5.1 branch), so each branch is stated over the genuine per-premise 
 -- the former local copies here were removed to avoid duplicate declarations once Crux2Blueprint imports
 -- `GoodsteinPA.Zsubst` for the route-B regularity threading.)
 
-/-- **5.1 critical sub-residual.** When the chain is critical, `red = iRcritG d ρ` with `ρ` the recursive
-premise reducts; delegates to `ZDerivation_iRcritG_of` (R2 = the two genuine auxiliaries are derivations
-of their reduced endsequents). -/
+/-- **5.1 critical sub-residual — THE cut-elimination prize.** When the chain is critical, `red = iRcritG
+d ρ` with `ρ` the recursive premise reducts; delegates to `ZDerivation_iRcritG_of`, which reduces it to the
+two stripped half-derivations `haux0` (`Γ → cutFormula d`) / `haux1` (Buchholz Thm 3.4(a) inversion).
+
+⚠️⚠️ **LAP-114 CRUX FINDING — this is FALSE for `ρ = zAxReduct ∘ red`; `red`'s critical reduct is unsound.**
+`haux0`'s threading (`isChainInf`) forces its R-redex premise to derive exactly `cutFormula d = F(k)` with
+`k` the L-redex (axAll) instance (`cutFormula_all`). But for an I∀ R-redex `red` gives `zAxReduct (red
+premise) = zsubst d0 a (numeral 0)` — instance **0**, not `k` (`red_zIall`). Instance-0 is correct for the
+ordinal DESCENT (`iord (zsubst d0 a n)` is instance-invariant — why `iord_descent_red` survives) but WRONG
+for SOUNDNESS. **The fix is re-principalization at `k`** (Buchholz §3.2 case 5.1): the R-redex premise must
+be `zsubst d0 a (numeral k)`, whose succedent `= cutFormula d` by `seqSucc_zsubst_zIall_premise` (banked,
+`Zsubst.lean`), and which is a `ZDerivation` by `ZDerivation_zsubst_zIall_premise`. So the inversion is NOT
+a multi-year wall — it is a contained `red`-redefinition (re-key the tag-4 critical branch of `iRNextG` to
+substitute the L-redex instance), with the building blocks already in `src/`. The descent (laps 108-113)
+survives the 0→k change. See `PENDING_WORK` lap-114 + `ANALYSIS-2026-06-25-lap114-inversion-instance-mismatch.md`.
+
+(Statement kept at the current `ρ` to document the gap honestly; the corrected reduct is the next lap's work.) -/
 theorem ZDerivation_red_zK_crit {s r ds : V}
     (hZ : ZDerivation (zK s r ds))
     (hred : ∀ i < lh ds, ZDerivation (red (znth ds i)))

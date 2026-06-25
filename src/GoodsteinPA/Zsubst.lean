@@ -1489,6 +1489,31 @@ lemma red_zIall_tpReduce {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0))
   simp only [fvSubstSeqt, seqSetSucc, hwff.1, hwff.2.1, hΓfresh,
     fvSubst_substs1 ht0 hfa hwff.2.2, termFvSubst_fvar_self, hpfresh]
 
+/-- **The ∀-inversion building block (general instance `t`).** Substituting the I∀ eigenvariable `a` by
+ANY closed term `t` in the premise derivation `d0` yields a derivation whose succedent is the INSTANCE
+`F(t) = substs1 t p`. Generalizes `red_zIall_tpReduce` (the `t = 0` case that `red` currently fixes).
+
+⚠️ **This is the lap-114 crux finding.** The critical-cut SOUNDNESS inversion `ZDerivation_red_zK_crit`
+(`Crux2Blueprint:100`) reduces, via `ZDerivation_iRcritG_of`, to two stripped half-derivations `haux0`
+(`Γ → cutFormula d`) / `haux1`. The left half's threading (`isChainInf`) forces its R-redex premise to
+derive exactly `cutFormula d = F(k)`, where `k` is the L-redex instance (`cutFormula_all`). But the reduct
+`red` supplies there is `zAxReduct (red premise) = zsubst d0 a (numeral 0)` — instance **0**, NOT `k`. So
+`haux0` is UNPROVABLE for `ρ = zAxReduct ∘ red`: `red`'s critical reduct is unsound (it substitutes the
+wrong instance). Instance-0 is correct for the ordinal DESCENT (`iord (zsubst d0 a n)` is instance-
+invariant) but wrong for SOUNDNESS, which needs Buchholz §3.2 case 5.1 re-principalization at `k`. The
+fix: the critical reduct's R-redex premise must be `zsubst d0 a (numeral k)`. This lemma is its succedent
+identity — with `k` the L-redex instance, `zsubst d0 a (numeral k)` derives `Γ → F(k) = Γ → cutFormula d`,
+so `haux0`'s threading closes. The reduct is a `ZDerivation` by `ZDerivation_zsubst_zIall_premise`; the
+matrix/Γ freshness `hpfresh` (a ∉ FV p, the eigenvariable condition, Buchholz O3) is supplied on the
+⊥-orbit by the embedding's fresh-eigenvariable choice. See `PENDING_WORK` lap-114. -/
+lemma seqSucc_zsubst_zIall_premise {s a p d0 t : V} (ht : IsSemiterm ℒₒᵣ 0 t)
+    (hZ : ZDerivation (zIall s a p d0)) (hpfresh : fvSubst ℒₒᵣ a t p = p) :
+    seqSucc (fstIdx (zsubst d0 a t)) = substs1 ℒₒᵣ t p := by
+  obtain ⟨hd0, _, hwff⟩ := zDerivation_zIall_inv hZ
+  have hfa : IsSemiterm ℒₒᵣ 0 (^&a : V) := by simp
+  rw [fstIdx_zsubst _ _ hd0, seqSucc_fvSubstSeqt, hwff.2.1, fvSubst_substs1 ht hfa hwff.2.2]
+  simp only [termFvSubst_fvar_self, hpfresh]
+
 /-- **5.2.2 replace branch — regularity preserved (unconditional).** `red (zK s r ds) = K^r(i/red dᵢ)`;
 regular since every original premise is (`ZRegular_zK_premise`) and the swapped reduct `red dᵢ` is (IH). -/
 lemma ZRegular_red_zK_replace {s r ds : V} (hds : Seq ds)
