@@ -305,6 +305,27 @@ in place at `i`, with the genuine reduct rank `r' = max{rk(A(dᵢ)), r}` (judge 
 rank bound `r' ≤ dg(parent)` (`hr'`), the `K^r` ordinal strictly descends via the F2 rotation kernel
 (`iotil_seqInsert_lt`) + the rank-general `idg` bound (`idg_seqInsert_le'`) through `iord_descent_le`,
 i.e. the banked `iord_descent_seqInsert'`. Stated against the explicit reduct equation `hred`. -/
+lemma iRedDescent_red_zK_splice_eq {s r ds i a b s' r' : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hred : red (zK s r ds) = zK s' r' (seqInsert ds i a b))
+    (hr' : r' ≤ idg (zK s r ds))
+    (ha : icmp (iotil a) (iotil (znth ds i)) = 0) (hb : icmp (iotil b) (iotil (znth ds i)) = 0)
+    (hag : idg a ≤ idg (znth ds i)) (hbg : idg b ≤ idg (znth ds i))
+    (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
+    iRedDescent (red (zK s r ds)) (zK s r ds) := by
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  rw [hred]
+  exact ⟨idg_seqInsert_le' hds hi hr' hag hbg,
+    iotil_seqInsert_lt hds hi ha hb hNF hNFa hNFb,
+    isNF_iotil_zK (seqInsert_seq ds i a b) (fun n hn =>
+      forall_znth_seqInsert (P := fun x => isNF (iotil x)) hi hNFa hNFb
+        (fun k _ => hNF k) n (by rwa [seqInsert_lh] at hn))⟩
+
+/-- **`iord`-descent corollary of the SPLICE bundle** (the form the current `iord_descent_red`
+chain-splice dispatch consumes). -/
 lemma iord_descent_red_zK_splice_eq {s r ds i a b s' r' : V}
     (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
     (hred : red (zK s r ds) = zK s' r' (seqInsert ds i a b))
@@ -312,14 +333,10 @@ lemma iord_descent_red_zK_splice_eq {s r ds i a b s' r' : V}
     (ha : icmp (iotil a) (iotil (znth ds i)) = 0) (hb : icmp (iotil b) (iotil (znth ds i)) = 0)
     (hag : idg a ≤ idg (znth ds i)) (hbg : idg b ≤ idg (znth ds i))
     (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
-    icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 := by
-  have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
-    rcases lt_or_ge n (lh ds) with hn | hn
-    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
-    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
-  have hnf : isNF (iotil (zK s r ds)) := isNF_iotil_zK hds (fun n _ => hNF n)
-  rw [hred]
-  exact iord_descent_seqInsert' hds hi hnf hr' ha hb hag hbg hNF hNFa hNFb
+    icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 :=
+  iord_descent_of_iRedDescent
+    (iRedDescent_red_zK_splice_eq hds hmem hi hred hr' ha hb hag hbg hNFa hNFb)
+    (isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation _ (hmem n hn)))
 
 /-- **I∀ genuine-reduct descent bundle.** `red (zIall s a p d0) = zsubst d0 a 0` satisfies `iRedDescent`
 against `zIall s a p d0` — NO regularity needed for the ORDINAL bundle (only the eigensubst-invariance of
@@ -342,6 +359,15 @@ selected premise `dᵢ = znth ds (permIdx)` is a chain (`zTag = 4`) that is itse
 (`permIdx dᵢ < lh (zKseq dᵢ)`), `red (zK s r ds) = K^r(i/red dᵢ)` (`red_zK_rep`), so the descent is exactly
 `iord_descent_red_zK_replace_eq` fed the recursive IH `iRedDescent (red dᵢ) dᵢ`. This is the precise interface
 the strong-induction recursion supplies for the chain-replace branch. -/
+lemma iRedDescent_red_zK_chain_replace {s r ds : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds)))))
+    (hIH : iRedDescent (red (znth ds (permIdx (zK s r ds)))) (znth ds (permIdx (zK s r ds)))) :
+    iRedDescent (red (zK s r ds)) (zK s r ds) :=
+  iRedDescent_red_zK_replace_eq hds hmem h1 (red_zK_rep h1 h2) hIH
+
 lemma iord_descent_red_zK_chain_replace {s r ds : V}
     (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n))
     (h1 : permIdx (zK s r ds) < lh ds)
@@ -377,6 +403,28 @@ lemma iord_descent_red_zK_chain_splice {s r ds : V}
     (hNFb : isNF (iotil (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1))) :
     icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 :=
   iord_descent_red_zK_splice_eq hds hmem h1 (red_zK_splice h1 h2 htag) hr' ha hb hag hbg hNFa hNFb
+
+/-- **`iRedDescent` form of the chain-SPLICE wrapper** (for the `iRedDescent_red` recursion). -/
+lemma iRedDescent_red_zK_chain_splice {s r ds : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds)))))
+    (htag : zTag (znth ds (permIdx (zK s r ds))) = 4)
+    (hr' : max (irk (seqSucc (fstIdx
+        (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)))) r ≤ idg (zK s r ds))
+    (ha : icmp (iotil (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0))
+        (iotil (znth ds (permIdx (zK s r ds)))) = 0)
+    (hb : icmp (iotil (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1))
+        (iotil (znth ds (permIdx (zK s r ds)))) = 0)
+    (hag : idg (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)
+        ≤ idg (znth ds (permIdx (zK s r ds))))
+    (hbg : idg (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1)
+        ≤ idg (znth ds (permIdx (zK s r ds))))
+    (hNFa : isNF (iotil (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)))
+    (hNFb : isNF (iotil (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1))) :
+    iRedDescent (red (zK s r ds)) (zK s r ds) :=
+  iRedDescent_red_zK_splice_eq hds hmem h1 (red_zK_splice h1 h2 htag) hr' ha hb hag hbg hNFa hNFb
 
 /-- **The atom-selection FIXPOINT defect, formalized (lap 109).** If the selected (least-permissible)
 premise of a non-critical chain is a bare identity-atom `zAtom sᵢ` (`zTag = 0`, a `red`-normal form), the
