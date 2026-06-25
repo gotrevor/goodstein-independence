@@ -16,11 +16,26 @@ disjunct holds), so they close ONLY by vacuity. The vacuity is Cor 2.1, **alread
 `tp = isymRep`, but an L-axiom has `tp = isymLk ≠ isymRep`. Both branches discharged by `exfalso` + that
 lemma. No new infrastructure needed.
 
-**Residual `sorry`s in `iord_descent_red` (2, was 5 at lap start):**
-1. **chain-REPLACE IH** — the strong-induction recursion (`red dᵢ` fixpoint ⟹ node fixpoint LEFT; else
-   the disjunctive premise IH on `dᵢ` + `iord_descent_red_zK_chain_replace` gives descent RIGHT). Needs WF
-   recursion on the derivation code. Highest-value next.
-2. **splice `hr'`** — the lap-110 `iCritReductG` cut-formula strip (cut on stripped `A(d)`, strict rank).
+**⚠ HONESTY CORRECTION:** the disjunctive form resolved `iord_descent_red` but RELOCATED the atom-stall to
+M3. The atom branch's `Or.inl` is GENUINELY true — the orbit can reach a `red`-FIXPOINT at an atom(Rep)-
+selected ∅→⊥ K-node (atom = Rep, Cor 2.1 PERMITS it; only axAll/axNeg are vacuous). So `false_of_ZDerivesEmpty`
+must handle a STALLING orbit (a fixpoint K-node is not cut-free ⟹ neither "infinite descent" nor "cut-free
+absurd" fires). True fix is engine/embedding-level: (a) refine `permIdx`/`isPermPrem` to skip Rep premises, or
+(b) M2 produces chains with no index-0 Rep/atom. The 2nd grind commit msg's "fully resolved" overstated it.
+
+**Residual `sorry`s in `iord_descent_red` (2, was 5 at lap start) — both deep, confirmed this lap:**
+1. **chain-REPLACE IH** — the chain-spine strong induction. Hits **lap-101's wall**: chain premises have
+   GROWING antecedents (not ∅→⊥) ⟹ Cor 2.1 doesn't reapply ⟹ inner axAll/axNeg/atom can't use empty-ant
+   vacuity. Needs the permIdx-skip-Rep refinement (a).
+2. **splice `hr'`** — needs the lap-110 cut-formula strip. CONFIRMED no shortcut: `zKValidF` gives only
+   `irk (chainAsucc ds i) ≤ r` (non-strict, `InternalZ:1290/1299`); `idg(parent) = max(r, iseqMaxIdg ds − 1)`
+   off by one. Strip is LOCALIZED to `iRcritG`'s cut-formula arg (`InternalZ:6427`: `chainAsucc (zKseq d)
+   (redexI d)` = principal → a `cutFormula d` = stripped `A(d)`). Ripples to `ZDerivation_iRcritG_of` /
+   `ZDerivation_red_zK_crit` (both already sorry) + splice `irk`; descent lemmas IMMUNE (lap-110). Closes via
+   `irk_cut_lt_rank_forall`/`_neg` (`InternalZ:411`). **This strip ALSO unblocks the inversion prize (`:96`).**
+
+**Recommended next-lap order:** cut-formula strip (2) — unblocks `hr'` + the inversion prize; then the
+permIdx-skip-Rep refinement (1)+(a) — dissolves the chain-spine wall AND the M3 atom-stall at once.
 
 Then the prize: ∀/¬-INVERSION (`ZDerivation_red_zK_crit`, template `Zinfty.allInv`); then M3
 `false_of_ZDerivesEmpty` (fixpoint-or-descent endgame: a `red`-fixpoint ⊥-orbit is cut-free ⟹ absurd; else
