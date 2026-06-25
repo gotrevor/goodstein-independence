@@ -45,9 +45,19 @@ indices**, so a freshness invariant phrased on eigenvariable indices (`maxEigen 
    premise bound from the `maxEigen` recursion eqs (`le_max_left/right` for `zIall`/`zInd`, `le_iseqMaxEigen`
    for `zK`). The dead sequent bound `hsa : s ≤ a` is removed (never used). Corollaries
    `ZDerivation_zsubst_zIall_premise`/`_zInd_premise1` retargeted to `maxEigen d0 < a` / `maxEigen d1 < π₁ at'`.
-4. **← START HERE: O1** — strengthen `zIallWff`/`zIndWff` with `maxEigen d0 < eigenvar`, discharge in M2,
-   prove `red` maintains it (stable by `maxEigen_zsubst`). 5. Route-B reducts discharge
-   unconditionally (banked corollaries + `tpReduce`).
+4. **O1 — ARCHITECTURE CHANGED (lap 93): additive `zReg`, NOT a `zIallWff` edit.** Baking freshness into
+   `zIallWff` reshapes the `ZDerivation` fixpoint (blueprint/definability/embedding all break — large blast
+   radius). Instead, **✅ DONE (lap 93, `Zsubst.lean`, axiom-clean, green 1325):** a standalone `𝚺₁`
+   *hereditary-freshness* function `zReg d` (violation count; `0` iff regular), built on the `maxEigen`/`idg`
+   table template (`ltFlag`/`zRegNext`/`zRegTable` + recursion eqs `zReg_zAtom`/`_zIall`(`max (ltFlag (maxEigen
+   d0) a) (zReg d0)`)/`_zIneg`/`_zInd`/`_zAx*`/`_zK`(`iseqReg ds`)). Predicate `ZRegular d := zReg d = 0`.
+   Route-B bridges `maxEigen_lt_of_regular_zIall`/`_zInd` (regular node ⟹ the `maxEigen d0 < a` / `maxEigen d1
+   < π₁ at'` that reformulated `ZDerivation_zsubst` consumes). Substitution step `zReg_zsubst` (ZDerivation d ⟹
+   `zReg (zsubst d a t) = zReg d`) — regularity preserved by closed-term subst. `#print axioms` clean.
+5. **← START HERE: thread `ZRegular` through `red`/`redSound`** — (a) embedding produces regular derivations
+   (`ZRegular` of the contradiction derivation), (b) `red` preserves `ZRegular` (the genuinely hard step: the
+   splice/replace reducts, not just `zsubst` which is done). Then the route-B reducts discharge with the
+   bridges. The non-substitution `red` steps (Buchholz 5.2.1/5.2.2) are the remaining O1 difficulty.
 2. **(Path X) — ✅ O2 BANKED this lap (`Zsubst.lean`, axiom-clean):** `ZDerivation_zsubst_zIall_premise`
    and `ZDerivation_zsubst_zInd_premise1` discharge the route-B I∀/Ind eigensubst reducts **directly from
    the existing `ZDerivation_zsubst`**, under the freshness bound `d0 ≤ a` / `d1 ≤ π₁ at'`. This

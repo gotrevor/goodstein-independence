@@ -1159,6 +1159,319 @@ theorem maxEigen_zsubst (a t : V) :
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
 
+/-! ## `zReg` — hereditary eigenvariable freshness (Path-X O1 foundation)
+
+`zReg d` = **violation count**: `0` iff `d` is *regular*, i.e. every `zIall`/`zInd` node `n` in `d` has
+`maxEigen(premise n) < eigenvar(n)` (the eigenvariable strictly exceeds every eigenvariable index used in
+its premise — Buchholz's freshness side-condition). Built by the exact `maxEigen`/`idg` table template,
+folding the **max** of a per-node freshness flag (`ltFlag`) and the premise violations.
+
+This is the *additive* O1 architecture (lap 93): rather than baking freshness into `zIallWff` (which would
+shrink the `ZDerivation` fixpoint and force the embedding to re-prove it), `zReg` is a standalone `𝚺₁`
+function threaded *alongside* `ZDerivation`. The two facts O1 needs — the route-B bound
+`maxEigen d0 < a` (from `ZRegular (zIall …)`) and stability under `red` — both follow from `zReg`'s
+recursion equations and `zReg_zsubst` (regularity is preserved by closed-term substitution, since both
+`maxEigen` and the eigenvariables are). -/
+
+/-- `ltFlag x y = 0` iff `x < y`, else `1` — the per-node freshness violation indicator. -/
+noncomputable def ltFlag (x y : V) : V := if x < y then 0 else 1
+
+def _root_.LO.FirstOrder.Arithmetic.ltFlagDef : 𝚺₀.Semisentence 3 := .mkSigma
+  “z x y. (x < y ∧ z = 0) ∨ (y ≤ x ∧ z = 1)”
+
+instance ltFlag_defined : 𝚺₀-Function₂ (ltFlag : V → V → V) via ltFlagDef := .mk fun v ↦ by
+  by_cases h : v 1 < v 2 <;> simp [ltFlagDef, ltFlag, h, not_lt.mp, le_of_lt, not_le.mpr] <;>
+    simp [not_lt] at h ⊢ <;> omega
+instance ltFlag_definable : 𝚺₀-Function₂ (ltFlag : V → V → V) := ltFlag_defined.to_definable
+
+@[simp] lemma ltFlag_eq_zero_iff {x y : V} : ltFlag x y = 0 ↔ x < y := by
+  unfold ltFlag; by_cases h : x < y <;> simp [h]
+
+noncomputable def zRegNext (d s : V) : V :=
+  if zTag d = 1 then max (ltFlag (maxEigen (zIallPrem d)) (zIallEig d)) (znth s (zIallPrem d))
+  else if zTag d = 2 then znth s (zInegPrem d)
+  else if zTag d = 3 then
+    max (ltFlag (maxEigen (zIndPrem1 d)) (zIndEig d))
+      (max (znth s (zIndPrem0 d)) (znth s (zIndPrem1 d)))
+  else if zTag d = 4 then iseqMaxTab s (zKseq d)
+  else 0
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zRegNextDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ t, !zTagDef t d ∧
+    ( (t = 1 ∧ ∃ p, !zIallPremDef p d ∧ ∃ m, !maxEigenDef m p ∧ ∃ ea, !zIallEigDef ea d ∧
+         ∃ fl, !ltFlagDef fl m ea ∧ ∃ v, !znthDef v s p ∧ !max.dfn y fl v)
+    ∨ (t = 2 ∧ ∃ p, !zInegPremDef p d ∧ !znthDef y s p)
+    ∨ (t = 3 ∧ ∃ p1, !zIndPrem1Def p1 d ∧ ∃ m, !maxEigenDef m p1 ∧ ∃ ie, !zIndEigDef ie d ∧
+         ∃ fl, !ltFlagDef fl m ie ∧ ∃ p0, !zIndPrem0Def p0 d ∧ ∃ v0, !znthDef v0 s p0 ∧
+         ∃ v1, !znthDef v1 s p1 ∧ ∃ mm, !max.dfn mm v0 v1 ∧ !max.dfn y fl mm)
+    ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqMaxTabDef y s ds)
+    ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = 0) )”
+
+set_option maxHeartbeats 1000000 in
+instance zRegNext_defined : 𝚺₁-Function₂ (zRegNext : V → V → V) via zRegNextDef :=
+  .mk fun v ↦ by
+    simp [zRegNextDef, zRegNext, zTag_defined.iff, zIallPrem_defined.iff, maxEigen_defined.iff,
+      zIallEig_defined.iff, ltFlag_defined.iff, zInegPrem_defined.iff, zIndPrem0_defined.iff,
+      zIndPrem1_defined.iff, zIndEig_defined.iff, zKseq_defined.iff, iseqMaxTab_defined.iff,
+      znth_defined.iff, max_defined.iff]
+    by_cases h1 : zTag (v 1) = 1
+    · simp [h1]
+    · by_cases h2 : zTag (v 1) = 2
+      · simp [h1, h2]
+      · by_cases h3 : zTag (v 1) = 3
+        · simp [h1, h2, h3]
+        · by_cases h4 : zTag (v 1) = 4
+          · simp [h1, h2, h3, h4]
+          · simp [h1, h2, h3, h4]
+
+instance zRegNext_definable : 𝚺₁-Function₂ (zRegNext : V → V → V) := zRegNext_defined.to_definable
+
+noncomputable def zRegTable.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !mkSeq₁Def y 0”
+  succ := .mkSigma “y ih n. ∃ v, !zRegNextDef v (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def zRegTable.construction : PR.Construction V zRegTable.blueprint where
+  zero := fun _ ↦ !⟦0⟧
+  succ := fun _ n ih ↦ seqCons ih (zRegNext (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [zRegTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [zRegTable.blueprint, zRegNext_defined.iff, seqCons_defined.iff]
+
+noncomputable def zRegTable (n : V) : V := zRegTable.construction.result ![] n
+
+@[simp] lemma zRegTable_zero : zRegTable (0 : V) = !⟦0⟧ := by simp [zRegTable, zRegTable.construction]
+
+@[simp] lemma zRegTable_succ (n : V) :
+    zRegTable (n + 1) = seqCons (zRegTable n) (zRegNext (n + 1) (zRegTable n)) := by
+  simp [zRegTable, zRegTable.construction]
+
+/-- **Violation count** `zReg d`: `0` iff `d` is hereditarily eigenvariable-fresh. -/
+noncomputable def zReg (d : V) : V := znth (zRegTable d) d
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zRegTableDef : 𝚺₁.Semisentence 2 :=
+  zRegTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance zRegTable_defined : 𝚺₁-Function₁ (zRegTable : V → V) via zRegTableDef := .mk
+  fun v ↦ by simp [zRegTable.construction.result_defined_iff, zRegTableDef]; rfl
+instance zRegTable_definable : 𝚺₁-Function₁ (zRegTable : V → V) := zRegTable_defined.to_definable
+instance zRegTable_definable' (Γ) : Γ-[m + 1]-Function₁ (zRegTable : V → V) :=
+  zRegTable_definable.of_sigmaOne
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zRegDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ t, !zRegTableDef t d ∧ !znthDef y t d”
+
+instance zReg_defined : 𝚺₁-Function₁ (zReg : V → V) via zRegDef := .mk fun v ↦ by
+  simp [zRegDef, zReg, zRegTable_defined.iff, znth_defined.iff]
+instance zReg_definable : 𝚺₁-Function₁ (zReg : V → V) := zReg_defined.to_definable
+instance zReg_definable' (Γ) : Γ-[m + 1]-Function₁ (zReg : V → V) := zReg_definable.of_sigmaOne
+
+/-! ### Structural correctness of the `zReg` table (mirror `maxEigen`) -/
+
+private lemma def_zRegTable {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ zRegTable (v i)) :=
+  DefinableFunction₁.comp (F := zRegTable) (DefinableFunction.var i)
+
+private lemma def_zReg {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ zReg (v i)) :=
+  DefinableFunction₁.comp (F := zReg) (DefinableFunction.var i)
+
+@[simp] lemma zRegTable_seq (n : V) : Seq (zRegTable n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_zRegTable 0)
+  case zero => simp
+  case succ n ih => rw [zRegTable_succ]; exact ih.seqCons _
+
+@[simp] lemma zRegTable_lh (n : V) : lh (zRegTable n) = n + 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_zRegTable 0)) (by definability)
+  case zero => simp
+  case succ n ih => rw [zRegTable_succ, Seq.lh_seqCons _ (zRegTable_seq n), ih]
+
+lemma znth_zRegTable_succ {n k : V} (hk : k < n + 1) :
+    znth (zRegTable (n + 1)) k = znth (zRegTable n) k := by
+  rw [zRegTable_succ]
+  exact znth_seqCons_of_lt (zRegTable_seq n) _ (by rw [zRegTable_lh]; exact hk)
+
+lemma znth_zRegTable_eq_zReg : ∀ N : V, ∀ k ≤ N, znth (zRegTable N) k = zReg k := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_le (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := znth) (def_zRegTable 1) (DefinableFunction.var 0))
+      (def_zReg 0)
+  case zero => intro k hk; rcases (nonpos_iff_eq_zero.mp hk) with rfl; rfl
+  case succ N ih =>
+    intro k hk
+    rcases eq_or_lt_of_le hk with rfl | hlt
+    · rfl
+    · rw [znth_zRegTable_succ hlt]; exact ih k (le_iff_lt_succ.mpr hlt)
+
+lemma zReg_eq_zRegNext {c : V} (hpos : 0 < c) : zReg c = zRegNext c (zRegTable (c - 1)) := by
+  obtain ⟨M, rfl⟩ : ∃ M, c = M + 1 := ⟨c - 1, (sub_add_self_of_le (pos_iff_one_le.mp hpos)).symm⟩
+  have key : znth (zRegTable (M + 1)) (M + 1) = zRegNext (M + 1) (zRegTable M) := by
+    rw [zRegTable_succ]
+    have h := znth_seqCons_self (zRegTable_seq M) (zRegNext (M + 1) (zRegTable M))
+    rwa [zRegTable_lh] at h
+  simp only [zReg, add_tsub_cancel_right, key]
+
+/-! ### `zReg` recursion equations -/
+
+@[simp] lemma zReg_zAtom (s : V) : zReg (zAtom s) = 0 := by
+  rw [zReg_eq_zRegNext (by simp [zAtom]), zRegNext]; simp [zTag_zAtom]
+
+@[simp] lemma zReg_zIall (s a p d0 : V) :
+    zReg (zIall s a p d0) = max (ltFlag (maxEigen d0) a) (zReg d0) := by
+  rw [zReg_eq_zRegNext (by simp [zIall]), zRegNext, if_pos (zTag_zIall s a p d0),
+    zIallPrem_zIall, zIallEig_zIall,
+    znth_zRegTable_eq_zReg _ d0 (le_pred_of_lt (d0_lt_zIall s a p d0))]
+
+@[simp] lemma zReg_zIneg (s p d0 : V) : zReg (zIneg s p d0) = zReg d0 := by
+  rw [zReg_eq_zRegNext (by simp [zIneg]), zRegNext, if_neg (by simp), if_pos (zTag_zIneg s p d0),
+    zInegPrem_zIneg, znth_zRegTable_eq_zReg _ d0 (le_pred_of_lt (d0_lt_zIneg s p d0))]
+
+@[simp] lemma zReg_zInd (s at' p d0 d1 : V) :
+    zReg (zInd s at' p d0 d1) = max (ltFlag (maxEigen d1) (π₁ at')) (max (zReg d0) (zReg d1)) := by
+  rw [zReg_eq_zRegNext (by simp [zInd]), zRegNext, if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zInd s at' p d0 d1), zIndPrem1_zInd, zIndEig_zInd, zIndPrem0_zInd,
+    znth_zRegTable_eq_zReg _ d0 (le_pred_of_lt (d0_lt_zInd s at' p d0 d1)),
+    znth_zRegTable_eq_zReg _ d1 (le_pred_of_lt (d1_lt_zInd s at' p d0 d1))]
+
+@[simp] lemma zReg_zAxAll (s p k : V) : zReg (zAxAll s p k) = 0 := by
+  rw [zReg_eq_zRegNext (by simp [zAxAll]), zRegNext]; simp [zTag_zAxAll]
+
+@[simp] lemma zReg_zAxNeg (s p : V) : zReg (zAxNeg s p) = 0 := by
+  rw [zReg_eq_zRegNext (by simp [zAxNeg]), zRegNext]; simp [zTag_zAxNeg]
+
+@[simp] lemma zReg_zAx1 (s C : V) : zReg (zAx1 s C) = 0 := by
+  rw [zReg_eq_zRegNext (by simp [zAx1]), zRegNext]; simp [zTag_zAx1]
+
+/-! ### `zReg`-fold over a premise sequence (for the `K^r` equation) -/
+
+noncomputable def iseqRegAux.blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y ds. y = 0”
+  succ := .mkSigma “y ih n ds. ∃ di, !znthDef di ds n ∧ ∃ v, !zRegDef v di ∧ !max.dfn y ih v”
+
+noncomputable def iseqRegAux.construction : PR.Construction V iseqRegAux.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun x n ih ↦ max ih (zReg (znth (x 0) n))
+  zero_defined := .mk fun v ↦ by simp [iseqRegAux.blueprint]
+  succ_defined := .mk fun v ↦ by
+    simp [iseqRegAux.blueprint, znth_defined.iff, zReg_defined.iff, max_defined.iff]
+
+noncomputable def iseqRegAux (ds j : V) : V := iseqRegAux.construction.result ![ds] j
+
+@[simp] lemma iseqRegAux_zero (ds : V) : iseqRegAux ds 0 = 0 := by
+  simp [iseqRegAux, iseqRegAux.construction]
+
+@[simp] lemma iseqRegAux_succ (ds j : V) :
+    iseqRegAux ds (j + 1) = max (iseqRegAux ds j) (zReg (znth ds j)) := by
+  simp [iseqRegAux, iseqRegAux.construction]
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iseqRegAuxDef : 𝚺₁.Semisentence 3 :=
+  iseqRegAux.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
+
+instance iseqRegAux_defined : 𝚺₁-Function₂ (iseqRegAux : V → V → V) via iseqRegAuxDef :=
+  .mk fun v ↦ by simp [iseqRegAux.construction.result_defined_iff, iseqRegAuxDef]; rfl
+instance iseqRegAux_definable : 𝚺₁-Function₂ (iseqRegAux : V → V → V) := iseqRegAux_defined.to_definable
+instance iseqRegAux_definable' (Γ) : Γ-[m + 1]-Function₂ (iseqRegAux : V → V → V) :=
+  iseqRegAux_definable.of_sigmaOne
+
+/-- **`zReg`-fold over a sequence**: `iseqReg ds = max_{i < lh ds} zReg(znth ds i)`. -/
+noncomputable def iseqReg (ds : V) : V := iseqRegAux ds (lh ds)
+
+lemma iseqMaxAux_zRegTable_eq {M ds : V} (hdom : ∀ i < lh ds, znth ds i ≤ M) :
+    ∀ j ≤ lh ds, iseqMaxAux (zRegTable M) ds j = iseqRegAux ds j := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (by definability) ?_
+    refine Definable.comp₂
+      (DefinableFunction₃.comp (F := iseqMaxAux)
+        (DefinableFunction₁.comp (F := zRegTable) (DefinableFunction.const M))
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction₂.comp (F := iseqRegAux) (DefinableFunction.const ds)
+        (DefinableFunction.var 0))
+  case zero => intro _; simp
+  case succ j ih =>
+    intro hj
+    rw [iseqMaxAux_succ, iseqRegAux_succ, ih (le_trans (by simp) hj),
+      znth_zRegTable_eq_zReg M (znth ds j) (hdom j (lt_of_lt_of_le (by simp) hj))]
+
+lemma zReg_zK (s r ds : V) (hds : Seq ds) : zReg (zK s r ds) = iseqReg ds := by
+  have hdom : ∀ i < lh ds, znth ds i ≤ zK s r ds - 1 := fun i hi ↦
+    le_pred_of_lt (lt_trans (lt_of_mem_rng (hds.znth hi)) (ds_lt_zK s r ds))
+  rw [zReg_eq_zRegNext (by simp [zK]), zRegNext, if_neg (by simp), if_neg (by simp),
+    if_neg (by simp), if_pos (zTag_zK s r ds), zKseq_zK, iseqMaxTab,
+    iseqMaxAux_zRegTable_eq hdom (lh ds) (le_refl _), iseqReg]
+
+lemma iseqRegAux_congr {A B : V} (hpt : ∀ i < lh A, zReg (znth A i) = zReg (znth B i)) :
+    ∀ j ≤ lh A, iseqRegAux A j = iseqRegAux B j := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := iseqRegAux) (DefinableFunction.const A) (DefinableFunction.var 0))
+      (DefinableFunction₂.comp (F := iseqRegAux) (DefinableFunction.const B) (DefinableFunction.var 0))
+  case zero => intro _; simp
+  case succ j ih =>
+    intro hj
+    rw [iseqRegAux_succ, iseqRegAux_succ, ih (le_trans (by simp) hj),
+      hpt j (lt_of_lt_of_le (by simp) hj)]
+
+/-! ### `ZRegular` and the route-B freshness bridge -/
+
+/-- **Regularity**: `d` is hereditarily eigenvariable-fresh (`zReg d = 0`). -/
+def ZRegular (d : V) : Prop := zReg d = 0
+
+/-- **Route-B bridge (I∀)**: a regular `zIall` node has the freshness bound `maxEigen d0 < a` that the
+reformulated `ZDerivation_zsubst` consumes. -/
+lemma maxEigen_lt_of_regular_zIall {s a p d0 : V} (h : ZRegular (zIall s a p d0)) :
+    maxEigen d0 < a := by
+  unfold ZRegular at h
+  rw [zReg_zIall] at h
+  exact ltFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp (h ▸ le_max_left _ _))
+
+/-- **Route-B bridge (Ind step premise)**: a regular `zInd` node has `maxEigen d1 < π₁ at'`. -/
+lemma maxEigen_lt_of_regular_zInd {s at' p d0 d1 : V} (h : ZRegular (zInd s at' p d0 d1)) :
+    maxEigen d1 < π₁ at' := by
+  unfold ZRegular at h
+  rw [zReg_zInd] at h
+  exact ltFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp (h ▸ le_max_left _ _))
+
+/-! ### `zReg_zsubst` — regularity is preserved by closed-term substitution
+
+Since `zsubst` preserves both `maxEigen` (`maxEigen_zsubst`) and the eigenvariables themselves
+(`zsubst_zIall`/`zInd` keep the binder), every per-node freshness flag is unchanged, so `zReg` is
+invariant. This is the substitution step of "red preserves regularity" (O1). -/
+theorem zReg_zsubst (a t : V) : ∀ d, ZDerivation d → zReg (zsubst d a t) = zReg d := by
+  apply zDerivation_induction (P := fun d => zReg (zsubst d a t) = zReg d)
+  · definability
+  · intro C hC d hphi
+    rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
+      ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    · simp [zsubst_zAtom]
+    · rw [zsubst_zIall, zReg_zIall, zReg_zIall, (hC d0 hd0).2,
+        maxEigen_zsubst a t d0 (hC d0 hd0).1]
+    · rw [zsubst_zIneg, zReg_zIneg, zReg_zIneg, (hC d0 hd0).2]
+    · rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd,
+        zReg_zInd, zReg_zInd, (hC d0 hd0).2, (hC d1 hd1).2,
+        maxEigen_zsubst a t d1 (hC d1 hd1).1]
+      simp only [pi₁_pair]
+    · rw [zsubst_zK, zReg_zK _ _ _ (tblMapSeq_seq _ _), zReg_zK s r ds hseq]
+      have hlh : lh (tblMapSeq (zsubstTable a t (zK s r ds - 1)) ds) = lh ds := tblMapSeq_lh _ _
+      have hpt : ∀ i < lh (tblMapSeq (zsubstTable a t (zK s r ds - 1)) ds),
+          zReg (znth (tblMapSeq (zsubstTable a t (zK s r ds - 1)) ds) i) = zReg (znth ds i) := by
+        intro i hi
+        rw [hlh] at hi
+        rw [znth_tblMapSeq hi, znth_zsubstTable_eq_zsubst a t _ (znth ds i)
+          (le_pred_of_lt (lt_of_le_of_lt (znth_le_self ds i) (ds_lt_zK s r ds)))]
+        exact (hC _ (hmem i hi)).2
+      simp only [iseqReg]
+      rw [iseqRegAux_congr hpt _ (le_refl _), hlh]
+    · simp [zsubst_zAxAll]
+    · simp [zsubst_zAxNeg]
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d` whose every
