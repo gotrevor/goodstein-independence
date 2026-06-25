@@ -111,68 +111,37 @@ theorem ZInf.weaken_under {Γ X Y : V} (hΓ : Seq Γ) (d : ZInf (seqCons Γ X)) 
     · exact inAnt_seqCons_self (hΓ.seqCons Y)
     · exact inAnt_seqCons_of (hΓ.seqCons Y) (inAnt_seqCons_of hΓ hCΓ))
 
-/-! ### ∀-inversion (the port of `Zinfty.allInvAux` — the structural cut-elimination recursion)
+/-! ### ∀-inversion — and the lap-107 finding that THIS statement is VACUOUS
 
-The genuinely-deep core. From a `ZInf`-derivation of any sequent containing `^∀ φ`, for every closed
-term `t` we extract a derivation of the SAME sequent with the instance `φ(t)` added. The recursion is
-STRUCTURAL on `ZInf` (Lean's recursor, including the infinitary `allω` IH) — the V-internal port of the
-mathlib `Zinfty.allInvAux`. Principal case (`allω` introducing exactly `^∀ φ`) = premise selection at `t`;
-every other rule COMMUTES (recurse into premises, re-apply, reorder via the weakening helpers). This is the
-re-principalization the lap-104 orbit-stall needs, now a closed structural recursion.
+⚠️ **LAP-107 COURSE-CORRECTION (kernel-verified).** The statement below — `ZInf Γ → inAnt (^∀φ) Γ →
+ZInf (seqCons Γ (φ(t)))` — is **VACUOUS**: it is provable by a SINGLE weakening (`ZInf.weaken_top d.seq d`),
+using neither `ht` (that `t` is a closed term) NOR the `^∀φ ∈ Γ` hypothesis. Verified in-kernel by
+replacing the whole 40-line `induction` with `exact ZInf.weaken_top d.seq d` (lean accepts; only an
+"`ht` unused" linter warning fires). So the lap-106 "principal case proven" + the six commuting `sorry`s
+were elaborate work on a content-free lemma, and the planned `permCongr` perf fix would polish nothing.
 
-**STATUS (lap 106):** the recursion STRUCTURE is in place and the principal `allω` selection + the
-atomic base cases are proven; the COMMUTING cases (`weak`/`andI`/`orI`/`exI`/`cut`/`allω`-side) carry a
-disclosed `sorry` — their membership/permutation bookkeeping over `seqCons`-towers triggers pathological
-HFS `whnf` under `induction` (timeout even at 1.6M heartbeats). The fix (next lap) is a cheap permutation
-API: a single `ZInf.permCongr : (∀ A, inAnt A Γ ↔ inAnt A Δ) → ZInf Γ → ZInf Δ` proven ONCE standalone
-(outside `induction`, where the helpers compile fast), so each commuting case is one `permCongr` call
-with a `tauto`-closed membership `↔`. The math is the verbatim `allInvAux` port; only the term-mode
-bookkeeping cost is open. -/
-theorem ZInf.allInv {φ t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
+**Why vacuous — the two missing pieces of `Zinfty.allInvAux`.** The META `allInvAux` (`src/Zinfty.lean:429`)
+concludes `Provable (o d) c (insert (χ/[nm n]) (Γ.erase (∀⁰χ)))`. Its ENTIRE content is (1) **ordinal
+preservation** — same bound `o d`, same cut rank `c`; and (2) **erasure** — `∀⁰χ` is REMOVED, `χ(t)` added.
+`ZInf : V → Prop` carries **no ordinal index**, and this statement **keeps `^∀φ`** (output `seqCons Γ φ(t)`
+⊇ `Γ`). With `^∀φ` retained and no ordinal to preserve, the conclusion is just a weakening of `Γ` — trivial.
+
+**Consequence (see `NEXT_STEPS.md` lap-107).** Cut-elimination IS an argument about ORDINALS; a carrier
+with no ordinal cannot express it. `ZInf` is therefore a DEAD carrier for crux-2. More fundamentally, every
+EXTERNAL Lean inductive (`ZInf`/`ZcOK`/`ZcDer`) is non-load-bearing for the headline: the headline needs
+`IΣ₁ ⊢ Con(PA)`, i.e. the descent must hold in EVERY `V ⊧ IΣ₁`, including non-standard models whose coded
+⊥-proof `z` is non-standard — and no external (well-founded) inductive tree exists for a non-standard `z`,
+so `foundation_bot_to_Z_empty` is unprovable for such `z`. The load-bearing carrier is the Σ₁ CODE engine
+`red`/`iord` (`InternalZ.lean`), which is already arithmetized and works on non-standard codes. The real
+obstruction is that engine `red` (= `iRNextG`) dispatches ONLY on the conclusion's top `zTag`, so after one
+K/cut reduction the reduct's top is no longer a cut and `red` stalls (lap-104) — `iord_descent_red` is
+therefore unprovable for the current `red`. FIX = redesign `red` to locate the relevant redex anywhere in
+the derivation (Gentzen's reduction), with a provable `iord` descent. `ZInf` stays only as a combinatorial
+sketch of the inversion cases. -/
+theorem ZInf.allInv_vacuous {φ t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     ∀ {Γ : V}, ZInf Γ → inAnt (qqAll φ) Γ → ZInf (seqCons Γ (substs1 ℒₒᵣ t φ)) := by
-  intro Γ d
-  induction d with
-  | @axL Γ k r v hΓ hp hn =>
-    intro _
-    exact .axL (hΓ.seqCons _) (inAnt_seqCons_of hΓ hp) (inAnt_seqCons_of hΓ hn)
-  | @verumR Γ hΓ h =>
-    intro _
-    exact .verumR (hΓ.seqCons _) (inAnt_seqCons_of hΓ h)
-  | @weak Δ Γ hΓ d' h ih =>
-    -- COMMUTING: weakening; split on whether `^∀ φ ∈ Δ`. (bookkeeping `sorry`, see status note)
-    intro _; sorry
-  | @andI Γ₀ φ' ψ' hΓ dφ dψ ihφ ihψ =>
-    -- COMMUTING ∧: recurse into both conjunct premises, re-apply `andI`, reorder. (bookkeeping `sorry`)
-    intro hmem
-    have hne : (qqAll φ : V) ≠ qqAnd φ' ψ' := by intro H; simp [qqAll, qqAnd] at H
-    have hmem0 : inAnt (qqAll φ) Γ₀ := inAnt_of_seqCons_ne hΓ hmem hne
-    sorry
-  | @orI Γ₀ φ' ψ' hΓ d' ih =>
-    -- COMMUTING ∨: recurse into the premise, re-apply `orI`, reorder. (bookkeeping `sorry`)
-    intro hmem
-    have hne : (qqAll φ : V) ≠ qqOr φ' ψ' := by intro H; simp [qqAll, qqOr] at H
-    have hmem0 : inAnt (qqAll φ) Γ₀ := inAnt_of_seqCons_ne hΓ hmem hne
-    sorry
-  | @allω Γ₀ φ' hΓ dprem ih =>
-    intro hmem
-    by_cases hφ : φ' = φ
-    · -- PRINCIPAL: the last rule introduces exactly `^∀ φ`; select the premise at the inversion
-      -- witness `t` (it derives the instance `φ(t)`) and re-insert `^∀ φ` below. PROVEN.
-      subst hφ
-      exact (dprem t ht).weaken_under hΓ
-    · -- COMMUTING ∀ (a different matrix `φ' ≠ φ`): invert each ω-premise, re-apply `allω`. (`sorry`)
-      have hne : (qqAll φ : V) ≠ qqAll φ' := fun H => hφ ((qqAll_inj _ _).mp H.symm)
-      have hmem0 : inAnt (qqAll φ) Γ₀ := inAnt_of_seqCons_ne hΓ hmem hne
-      sorry
-  | @exI Γ₀ φ' t' hΓ ht' dprem ih =>
-    -- COMMUTING ∃: invert the premise, re-apply `exI` at the same witness, reorder. (bookkeeping `sorry`)
-    intro hmem
-    have hne : (qqAll φ : V) ≠ qqExs φ' := by intro H; simp [qqAll, qqExs] at H
-    have hmem0 : inAnt (qqAll φ) Γ₀ := inAnt_of_seqCons_ne hΓ hmem hne
-    sorry
-  | @cut Γ₀ φc hΓ d₁ d₂ ih₁ ih₂ =>
-    -- COMMUTING cut: invert both cut premises, re-apply `cut`. (bookkeeping `sorry`)
-    intro hmem; sorry
+  -- VACUOUS: pure weakening — adds `φ(t)` without erasing `^∀φ`, and `ZInf` tracks no ordinal.
+  intro Γ d _; exact ZInf.weaken_top d.seq d
 
 end GoodsteinPA.InternalZ.PathCInf
 

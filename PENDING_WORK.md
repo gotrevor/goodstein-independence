@@ -1,5 +1,56 @@
 # Pending work — open obligations & attack paths
 
+## lap 107 — ⭐⭐⭐ FRESH-MIND REVIEW: the external-inductive prototype track is a DEAD END (kernel-verified); pivot to the Σ₁ engine `red` redesign
+
+**Two in-kernel findings this lap force a direction change (build 🟢 green 1325; `src/` untouched).**
+
+**Finding 1 — `ZInf.allInv` is VACUOUS (verified).** The lap-106 ∀-inversion lemma
+(`ZInf Γ → inAnt (^∀φ) Γ → ZInf (seqCons Γ φ(t))`) is provable by a SINGLE weakening
+(`ZInf.weaken_top d.seq d`), using neither `ht` nor the membership hypothesis — confirmed by replacing the
+whole `induction` and elaborating (`wip/PathCInf.lean`, now renamed `ZInf.allInv_vacuous` with the one-liner
+proof + the finding in its docstring). Root cause: the META `Zinfty.allInvAux` content is (1) **ordinal
+preservation** (`Provable (o d) c …`) and (2) **erasure** of `^∀φ` (`Γ.erase (∀⁰χ)`); `ZInf : V → Prop`
+has **no ordinal index** and the statement **keeps `^∀φ`**, so the conclusion is a mere weakening of `Γ`.
+⟹ the lap-106 "principal case proven" + 6 commuting `sorry`s + the planned `permCongr` perf fix were all
+work on a content-free lemma. **STOP the `permCongr` fix.**
+
+**Finding 2 — external inductives are NON-LOAD-BEARING for the headline.** `ZInf`/`ZcOK`/`ZcDer` are all
+external Lean `inductive … : V → Prop` (PathCOmega.lean:701-702 says so explicitly: "PROTOTYPE the
+cut-elimination math … the Σ₁ port … is the deferred final brick"). But the headline needs `IΣ₁ ⊢ Con(PA)`,
+i.e. the ε₀-descent must hold in EVERY `V ⊧ IΣ₁`, including non-standard models where the coded ⊥-proof `z`
+is **non-standard** — and no external (well-founded) inductive tree exists for a non-standard `z`, so the
+embedding `foundation_bot_to_Z_empty` (`Crux2Blueprint.lean:576`) is **unprovable** for such `z`. The
+prototypes can guide the inversion combinatorics but can never be wired in. The load-bearing carrier is the
+**Σ₁ CODE engine** `red`/`iord` (`InternalZ.lean`), which is already arithmetized and total on all codes
+(standard + non-standard) — that's why `iord_red_iterate_descends` builds the ℕ-indexed descent.
+
+**The real obstruction (re-confirmed, lap-104).** Engine `red d = znth (redTable d) d` steps via
+`iRNextG d s` (`InternalZ.lean:6915`), which dispatches **only on the conclusion's top `zTag`**
+(1→eigensubst, 2→peel, 3→`iRInd`, 4→`iRK`, else→identity). After one K/cut reduction the reduct's top is no
+longer a cut, so `red` becomes identity → the orbit STALLS (lap-104: `red_redAllEx_eq`,
+`sord_red_iterate_stalls_AllEx`). Hence `iord_descent_red` (`Crux2Blueprint.lean:533`) is **unprovable for
+the current `red`**, and it is the true crux of crux-2.
+
+**⏭ NEXT (hardest-first) — the engine `red` redesign (Gentzen's reduction on codes):**
+1. **Redesign `red`/`iRNextG` to locate the relevant redex anywhere in the derivation code, not just the top
+   node.** For an empty-sequent (∅→⊥) derivation the endsequent has no logical content, so the lowest
+   inference must be a cut; reduce THAT cut and the conclusion stays ∅→⊥ with a strictly smaller `iord`.
+   This is a Σ₁ tree-search (`redTable`-style) for the lowest/topmost cut + a local key-reduction. The
+   prototype inversion cases (which premise to select at the witness `t`, how `#`/`iotower` ordinals combine)
+   are the GUIDE — port them onto codes.
+2. **Prove `iord_descent_red`** (the K/cut case; the Ind case `iord_descent_red_zInd` is already done) for
+   the redesigned `red`: `icmp (iord (red d)) (iord d) = 0` for a regular ∅→⊥ orbit `d`.
+3. **`false_of_ZDerivesEmpty`** (`Crux2Blueprint.lean:588`): the ℕ-indexed `iord`-descent (already assembled,
+   `iord_red_iterate_descends`) contradicts `PRWO(ε₀)`. Wire crux-1 PRWO + the embedding.
+4. Discharge the remaining `Crux2Blueprint` validity `sorry`s (78/95/196/369/455) + `foundation_bot_to_Z_empty`
+   (576), then wire crux-1 ∘ crux-2 → `Reduction.goodstein_implies_consistency` → headline (ONLY when
+   `#print axioms` clean).
+
+**`wip/PathCInf.lean` + the `ZcDer`/`ZcOK` prototypes stay as a combinatorial sketch — do NOT invest more in
+them; they cannot reach the headline.** Keep `InternalZ`/`Crux2Blueprint` (the engine) green in `src/`.
+
+---
+
 ## lap 106 — ✅ prerequisite 1 (conclusion-tracking) STARTED: `ZcDer` + conclusion-faithful principal ∀-inversion
 **Brick 5o (`wip/PathCOmega.lean`, all axiom-clean `[propext, choice, Quot.sound]`; `lake build GoodsteinPA`
 green 1325; `src/` untouched).** Closes lap-105's NEXT prerequisite (1, "conclusion-tracking on the datatype"):

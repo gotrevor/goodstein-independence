@@ -1,3 +1,37 @@
+# NEXT STEPS — crux-2 (lap 107: PIVOT off the external-inductive prototypes onto the Σ₁ engine `red` redesign)
+
+> **⭐⭐⭐ LAP-107 FRESH-MIND REVIEW — DIRECTION CHANGE (read FIRST; supersedes the lap-102→106 `ZInf`/`ZcDer`
+> prototype plan below).** Two kernel-verified findings (build 🟢 1325, `src/` untouched):
+>
+> **(1) `ZInf.allInv` is VACUOUS.** It is provable by ONE weakening (`ZInf.weaken_top d.seq d`), ignoring
+> both `ht` and the `^∀φ` membership — confirmed by elaborating the one-liner in place of the lap-106
+> 40-line `induction` (`wip/PathCInf.lean`, now `ZInf.allInv_vacuous`). The META `Zinfty.allInvAux`'s entire
+> content is **ordinal preservation** (`Provable (o d) c …`) + **erasure** of `^∀φ` (`Γ.erase (∀⁰χ)`); the
+> port has neither (`ZInf : V → Prop` carries no ordinal; the statement keeps `^∀φ`, so it is a weakening).
+> ⟹ the lap-106 "principal case" + commuting `sorry`s + the planned `permCongr` fix were content-free. STOP.
+>
+> **(2) External inductives can't reach the headline.** `ZInf`/`ZcOK`/`ZcDer` are all external Lean
+> inductives (PathCOmega.lean:701-702 admits this is a deferred-arithmetization PROTOTYPE). The headline is
+> `IΣ₁ ⊢ Con(PA)` — the descent must hold in EVERY `V ⊧ IΣ₁`, including non-standard models whose coded
+> ⊥-proof `z` is non-standard, for which no external well-founded tree exists ⟹ `foundation_bot_to_Z_empty`
+> is unprovable on the prototype. **Cut-elimination is fundamentally an argument about ORDINALS over CODES;
+> the load-bearing carrier is the Σ₁ engine `red`/`iord` (`InternalZ.lean`), already arithmetized and total
+> on non-standard codes** — that's what `iord_red_iterate_descends` already rides.
+>
+> **THE CRUX (re-confirmed lap-104).** Engine `red` steps via `iRNextG` (`InternalZ.lean:6915`), dispatching
+> ONLY on the conclusion's top `zTag` (4→`iRK` cut-reduct, else→identity). After one K-reduction the top is
+> no longer a cut ⟹ `red` stalls ⟹ `iord_descent_red` (`Crux2Blueprint.lean:533`) is unprovable for the
+> current `red`. This is the real, sole open crux of crux-2.
+>
+> **NEXT (hardest-first):** (1) **Redesign `red`/`iRNextG`** to find the lowest cut anywhere in the
+> ∅→⊥ derivation code (Σ₁ tree-search à la `redTable`) and key-reduce it, keeping conclusion ∅→⊥ and
+> strictly dropping `iord` — the prototype inversion cases are the COMBINATORIAL guide (which premise/witness,
+> how `#`/`iotower` ordinals combine), to be ported onto codes. (2) Prove `iord_descent_red` (K case) for the
+> redesign. (3) `false_of_ZDerivesEmpty` from the descent + PRWO. (4) discharge the `Crux2Blueprint` validity
+> `sorry`s + the embedding, then wire crux-1 ∘ crux-2 → `Reduction.goodstein_implies_consistency` → headline
+> (ONLY when `#print axioms` clean). The prototypes (`PathCInf`/`ZcDer`/`ZcOK`) stay as a sketch — no further
+> investment. See `PENDING_WORK.md` lap-107, `HANDOFF-2026-06-25-lap107.md`, `STATUS.md`.
+
 # NEXT STEPS — Path C (lap 106: conclusion-tracking `ZcDer` LANDED; the inversion-recursion architecture pinned)
 
 > **⭐⭐⭐ LAP-106 (read FIRST).** The conclusion-tracking layer (lap-105 NEXT prerequisite 1a) is built and
