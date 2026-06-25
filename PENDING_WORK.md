@@ -8,9 +8,11 @@ Probe 2 lemmas in `wip/InternalZomega.lean` (axiom-clean): `iotil_zK_iIndReduct(
 `ocOadd_coeff_strictMono`.
 
 **Path-C brick list (`wip/PathCOmega.lean`):**
-- **Brick 1 — DONE (axiom-clean).** `zAllOmega`/`zAllOmegaValid` (the stored-ordinal ω-∀-node + validity);
-  `zIall_realizes_zAllOmegaValid` (a regular finitary `zIall` realizes it, stored ordinal = the node's own
-  `iord`, descent from banked `iord_descent_zIall`); `zAllOmega_cut_valid`/`_descends` (the ∀-cut invariant).
+- **Brick 1 — DONE, FULL (axiom-clean).** `zAllOmega`/`zAllOmegaValid`(+`Full`) — the stored-ordinal ω-∀-node
+  + complete validity (premise family valid + conclusion-tracked `Γ→F(t)` + ordinal ≺ stored `α`).
+  `zIall_realizes_zAllOmegaValid(Full)` (a regular finitary `zIall` realizes ALL THREE, stored ordinal = the
+  node's own `iord`); `zAllOmega_concl` (conclusion computed, not threaded); `zAllOmega_cut_valid`/`_descends`
+  (the ∀-cut invariant).
 - **Brick 2 (NEXT) — `cutElimStep`** (single rank drop, all node shapes; `Zinfty.cutElimStep`/
   `cutElimPrincipal` template; ∀-cut case = brick 1, others = `cutReduce*` for ∧/∨/atom).
 - **Brick 3 — the induction ω-node.** KERNEL DONE (axiom-clean): `indOmegaStoredOrd` (the stored limit
@@ -21,8 +23,10 @@ Probe 2 lemmas in `wip/InternalZomega.lean` (axiom-clean): `iotil_zK_iIndReduct(
 - **Brick 4 — `false_of_ZDerivesEmpty` (Path C)**: `red` = one `cutElimStep`; ∅→⊥ has no cut-free proof ⟹
   stored ordinal descends forever ⟹ infinite ε₀-descent ⟹ contradicts PRWO(ε₀) (crux-1).
 - **Σ₁-definability** of `zAllOmega`/`zAllOmegaValid` (bookkeeping; `⟪…⟫`/`icmp`/`iord` are `𝚺₁`/`𝚫₁`).
-- **Conclusion-tracking conjunct** of `zAllOmegaValid` (the spike's `zOmegaPrem_concl`, needs O3 freshness
-  threaded — deferred from brick 1).
+- **Cut-tree carrier for the induction node** — brick 3's ordinal bound uses the FINITARY `iIndReductSeq`
+  carrier (re-imports the K-chain). The ordinal fact is path-portable (cut-trees use the same `#`-natural
+  sum), but the final Path-C induction node's premise must be a cut-TREE deriving `F(k)`, not the chain.
+  Build once the cut-node datatype (brick 2) exists.
 
 ## Reflection — 2026-06-25 (lap 101 DEEP REFLECTION)
 **See `REFLECTION-2026-06-25-lap101.md` + `NEXT_STEPS.md` (the corrected priority list).** Kernel

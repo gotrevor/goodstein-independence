@@ -81,6 +81,51 @@ theorem zAllOmega_cut_valid {s d0 a α t : V}
     ZDerivation (zsubst d0 a t) :=
   hvalid.1 t ht
 
+/-! ### Brick 1, completed — conclusion-TRACKING (the deferred `zAllOmegaValid` conjunct)
+
+The minimal `zAllOmegaValid` dropped conclusion-tracking. Here it is, with the eigenvariable side-condition
+O3 supplied explicitly (the embedding's fresh-eigenvariable choice gives it). The full validity predicate
+`zAllOmegaValidFull` is the complete Path-C ω-∀-node datum: premise family valid + conclusion-tracked +
+ordinal-bounded by the stored `α` — and a regular finitary `zIall` realizes ALL THREE. -/
+
+/-- **Conclusion-tracking for the ω-∀-node premise.** Premise-`t` derives exactly `Γ→F(t)`
+(`= seqSetSucc s (substs1 t p)`), given the O3 eigenvariable side-condition (`a` substitution-invariant in
+the matrix `p` and antecedent `Γ`) — Buchholz's condition supplied at the I∀ node, NOT re-discharged per
+cut. The reduct's conclusion is COMPUTED, never threaded through a motive (the contrast with the finitary
+`tpReduce`/`redZKReady` machinery). -/
+theorem zAllOmega_concl {s a p d0 t : V} (hZ : ZDerivation (zIall s a p d0))
+    (hpfresh : fvSubst ℒₒᵣ a t p = p)
+    (hΓfresh : fvSubstSeq a t (seqAnt s) = seqAnt s)
+    (ht : IsSemiterm ℒₒᵣ 0 t) :
+    fstIdx (zsubst d0 a t) = seqSetSucc s (substs1 ℒₒᵣ t p) := by
+  obtain ⟨hd0, _, hwff⟩ := zDerivation_zIall_inv hZ
+  have hfa : IsSemiterm ℒₒᵣ 0 (^&a : V) := by simp
+  rw [fstIdx_zsubst _ _ hd0]
+  simp only [fvSubstSeqt, seqSetSucc, hwff.1, hwff.2.1, hΓfresh,
+    fvSubst_substs1 ht hfa hwff.2.2, termFvSubst_fvar_self, hpfresh]
+
+/-- **Full Path-C ω-∀-node validity** — the complete node datum: premise family uniformly valid AND
+conclusion-tracked (`Γ→F(t)`) AND every premise ordinal `≺ α`. -/
+def zAllOmegaValidFull (s p d0 a α : V) : Prop :=
+  (∀ t, IsSemiterm ℒₒᵣ 0 t → ZDerivation (zsubst d0 a t)) ∧
+  (∀ t, IsSemiterm ℒₒᵣ 0 t → fstIdx (zsubst d0 a t) = seqSetSucc s (substs1 ℒₒᵣ t p)) ∧
+  (∀ t, IsSemiterm ℒₒᵣ 0 t → icmp (iord (zsubst d0 a t)) α = 0)
+
+/-- **Brick 1 capstone — a regular finitary `zIall` realizes the FULL Path-C ω-∀-node** (all three
+conjuncts), with stored ordinal = the node's own `iord`. The existing I∀ embedding produces a complete,
+valid Path-C ω-node — validity (`ZDerivation_zsubst_zIall_premise`), conclusion (`zAllOmega_concl`), and the
+stored-ordinal side-condition (`iord_descent_zIall`), all from banked lemmas + the embedding's O3 data. -/
+theorem zIall_realizes_zAllOmegaValidFull {s a p d0 : V}
+    (hZ : ZDerivation (zIall s a p d0)) (hreg : maxEigen d0 < a)
+    (hO3p : ∀ t, IsSemiterm ℒₒᵣ 0 t → fvSubst ℒₒᵣ a t p = p)
+    (hO3Γ : ∀ t, IsSemiterm ℒₒᵣ 0 t → fvSubstSeq a t (seqAnt s) = seqAnt s) :
+    zAllOmegaValidFull s p d0 a (iord (zIall s a p d0)) := by
+  refine ⟨fun t ht => ZDerivation_zsubst_zIall_premise ht hZ hreg,
+    fun t ht => zAllOmega_concl hZ (hO3p t ht) (hO3Γ t ht) ht,
+    fun t ht => ?_⟩
+  rw [iord_zsubst ht.isUTerm (zDerivation_zIall_inv hZ).1 a]
+  exact iord_descent_zIall s a p d0
+
 /-! ## Brick 3 kernel — the INDUCTION ω-node's stored ordinal (the limit case)
 
 Probe 2 (`wip/InternalZomega.lean`) showed the induction ω-node's premise ordinals strictly increase in
@@ -102,7 +147,15 @@ indOmegaStoredOrd …` for ALL `k > 0`. Proof: the degree is constant (`idg_zK_i
 comparison lifts (`icmp_iotower_mono`) from the õ-bound `ω^{õ d1}·k # ω^{õ d0} ≺ ω^{õ d1 + 1} # ω^{õ d0}`,
 which is `inadd_right_mono` applied to the banked `icmp_term_lt_omega_succ` (`ω^β·k ≺ ω^{β+1}`, all finite
 `k`). This is the Buchholz operator-control side-condition for the induction ω-node, DISCHARGED — the limit
-Probe 2 showed `iord` can't compute, assigned as a fixed code that provably dominates the family. -/
+Probe 2 showed `iord` can't compute, assigned as a fixed code that provably dominates the family.
+
+**Carrier note (design honesty).** The premise here is the FINITARY unfolding `zK … (iIndReductSeq …)`,
+which under the true ω-rule (Towsner `ZinftyF.Deriv`) would be a cut-TREE deriving `F(k)`, not a Buchholz
+K-chain. So this exact node is NOT the final Path-C induction node — but the ORDINAL fact IS path-portable:
+Buchholz combines cut-premise ordinals by the same `#`-natural-sum, so a cut-tree unfolding of depth `k`
+carries the same õ `ω^{õd1}·k # ω^{õd0}`, dominated by the same limit. This lemma stands as (i) Probe-2
+evidence that the limit is the right stored ordinal, and (ii) a reusable ordinal bound for the eventual
+cut-tree node. -/
 theorem iord_iIndReduct_lt_storedBound {s s' at' p d0 d1 k : V} (hk : 0 < k)
     (hd0 : isNF (iotil d0)) (hd1 : isNF (iotil d1)) :
     icmp (iord (zK s' (irk p) (iIndReductSeq d0 d1 k)))
