@@ -4368,6 +4368,25 @@ lemma zDerivation_zK_intro {s r ds : V} (hseq : Seq ds)
   zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
     ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩)))))
 
+/-- **Own-permissibility of a `ZDerivation` (Buchholz Lemma 3.3, `tp(d) ◁ End(d)`).** Every genuine
+Z-derivation's top inference symbol is permissible for its OWN end-sequent: `Rep` rules (atom/Ind/chain)
+trivially (`iperm_isymRep`), the I-rules from the `ZPhi` succedent side condition (`seqSucc s = ∀p`/`¬A`),
+the §5 atomic axioms from the `inAnt` side condition. This is the uniform discharge of the `hperm_v`
+obligations throughout the `RedSound` leaves (previously supplied per-rule) — in particular the spliced
+halves' own-permissibility in the 5.2.1 case. -/
+lemma iperm_tp_fstIdx_of_ZDerivation {d : V} (hZ : ZDerivation d) :
+    iperm (tp d) (fstIdx d) := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, hsc, _⟩ |
+    ⟨s, p, d0, rfl, _, hsc, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩
+  · rw [tp_zAtom]; exact iperm_isymRep _
+  · rw [fstIdx_zIall]; exact iperm_tp_zIall hsc
+  · rw [fstIdx_zIneg]; exact iperm_tp_zIneg hsc
+  · rw [tp_zInd]; exact iperm_isymRep _
+  · rw [tp_zK]; exact iperm_isymRep _
+  · rw [fstIdx_zAxAll]; exact iperm_tp_zAxAll hin
+  · rw [fstIdx_zAxNeg]; exact iperm_tp_zAxNeg hin
+
 /-- **All-`n` premise NF** of a `ZDerivation` chain: in-range premises are NF (`isNF_iotil_of_ZDerivation`),
 out-of-range default `0` is NF (`isNF_iotil_zero`). Discharges the `hNF : ∀ n` side condition. -/
 lemma isNF_iotil_znth_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) :
