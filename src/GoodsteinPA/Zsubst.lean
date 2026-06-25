@@ -1514,6 +1514,25 @@ lemma seqSucc_zsubst_zIall_premise {s a p d0 t : V} (ht : IsSemiterm ℒₒᵣ 0
   rw [fstIdx_zsubst _ _ hd0, seqSucc_fvSubstSeqt, hwff.2.1, fvSubst_substs1 ht hfa hwff.2.2]
   simp only [termFvSubst_fvar_self, hpfresh]
 
+/-- **The corrected critical reduct's R-redex premise derives `cutFormula d` (second linchpin).** When the
+redexI premise of a critical chain `d` is an I∀ node `zIall sᵢ a p d0` (R-principal for `∀p`), the
+re-principalized reduct `zsubst d0 a (numeral k)` at the L-redex instance `k = π₁(π₂(tp (redexJ premise)))`
+— the SAME `k` that `cutFormula` reads — derives succedent exactly `cutFormula d`. Combines
+`seqSucc_zsubst_zIall_premise` (the instance-`k` succedent) with `cutFormula_all` (`cutFormula d = F(k)` in
+the `∀`-branch). This is what makes the corrected `haux0`'s `isChainInf` j₀=redexI succedent clause hold —
+the step `red`'s instance-0 reduct cannot provide (lap-114 finding). Modulo the eigenvariable freshness
+`hpfresh` (Buchholz O3, supplied on the ⊥-orbit). -/
+lemma seqSucc_corrected_redexI_eq_cutFormula {d sᵢ a p d0 : V}
+    (hIall : znth (zKseq d) (redexI d) = zIall sᵢ a p d0)
+    (hpremZ : ZDerivation (zIall sᵢ a p d0))
+    (hpfresh : fvSubst ℒₒᵣ a
+        (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d)))))) p = p) :
+    seqSucc (fstIdx (zsubst d0 a
+        (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d)))))))) = cutFormula d := by
+  have hprincipal : chainAsucc (zKseq d) (redexI d) = (^∀ p : V) := by
+    unfold chainAsucc; rw [hIall, fstIdx_zIall]; exact (zDerivation_zIall_inv hpremZ).2.1
+  rw [seqSucc_zsubst_zIall_premise (by simp) hpremZ hpfresh, cutFormula_all hprincipal]
+
 /-- **5.2.2 replace branch — regularity preserved (unconditional).** `red (zK s r ds) = K^r(i/red dᵢ)`;
 regular since every original premise is (`ZRegular_zK_premise`) and the swapped reduct `red dᵢ` is (IH). -/
 lemma ZRegular_red_zK_replace {s r ds : V} (hds : Seq ds)
