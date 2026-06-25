@@ -36,22 +36,61 @@ exI/cut` (here `axL` covers the literal+negation axiom; `axTrue`/`verumR` the tr
 ω-rule `allω` ranges over all closed terms `t` (the standard-model instances), strictly positive ⟹ Lean
 accepts it with a full structural recursor. -/
 inductive ZInf : V → Prop where
-  | axL {Γ k r v : V} (hp : inAnt (qqRel k r v) Γ) (hn : inAnt (qqNRel k r v) Γ) : ZInf Γ
-  | verumR {Γ : V} (h : inAnt (qqVerum : V) Γ) : ZInf Γ
-  | weak {Δ Γ : V} (d : ZInf Δ) (h : ∀ A, inAnt A Δ → inAnt A Γ) : ZInf Γ
-  | andI {Γ φ ψ : V} (dφ : ZInf (seqCons Γ φ)) (dψ : ZInf (seqCons Γ ψ)) :
+  | axL {Γ k r v : V} (hΓ : Seq Γ) (hp : inAnt (qqRel k r v) Γ) (hn : inAnt (qqNRel k r v) Γ) : ZInf Γ
+  | verumR {Γ : V} (hΓ : Seq Γ) (h : inAnt (qqVerum : V) Γ) : ZInf Γ
+  | weak {Δ Γ : V} (hΓ : Seq Γ) (d : ZInf Δ) (h : ∀ A, inAnt A Δ → inAnt A Γ) : ZInf Γ
+  | andI {Γ φ ψ : V} (hΓ : Seq Γ) (dφ : ZInf (seqCons Γ φ)) (dψ : ZInf (seqCons Γ ψ)) :
       ZInf (seqCons Γ (qqAnd φ ψ))
-  | orI {Γ φ ψ : V} (d : ZInf (seqCons (seqCons Γ ψ) φ)) : ZInf (seqCons Γ (qqOr φ ψ))
-  | allω {Γ φ : V} (d : ∀ t, IsSemiterm ℒₒᵣ 0 t → ZInf (seqCons Γ (substs1 ℒₒᵣ t φ))) :
+  | orI {Γ φ ψ : V} (hΓ : Seq Γ) (d : ZInf (seqCons (seqCons Γ ψ) φ)) : ZInf (seqCons Γ (qqOr φ ψ))
+  | allω {Γ φ : V} (hΓ : Seq Γ)
+      (d : ∀ t, IsSemiterm ℒₒᵣ 0 t → ZInf (seqCons Γ (substs1 ℒₒᵣ t φ))) :
       ZInf (seqCons Γ (qqAll φ))
-  | exI {Γ φ t : V} (ht : IsSemiterm ℒₒᵣ 0 t) (d : ZInf (seqCons Γ (substs1 ℒₒᵣ t φ))) :
+  | exI {Γ φ t : V} (hΓ : Seq Γ) (ht : IsSemiterm ℒₒᵣ 0 t)
+      (d : ZInf (seqCons Γ (substs1 ℒₒᵣ t φ))) :
       ZInf (seqCons Γ (qqExs φ))
-  | cut {Γ φ : V} (d₁ : ZInf (seqCons Γ φ)) (d₂ : ZInf (seqCons Γ (neg ℒₒᵣ φ))) : ZInf Γ
+  | cut {Γ φ : V} (hΓ : Seq Γ) (d₁ : ZInf (seqCons Γ φ)) (d₂ : ZInf (seqCons Γ (neg ℒₒᵣ φ))) :
+      ZInf Γ
 
-/-- **Weakening is admissible at the membership level** (the `weak` constructor, repackaged): if every
-formula of `Δ` occurs in `Γ`, a `ZInf Δ` lifts to `ZInf Γ`. The reusable monotonicity the inversion
-recursion leans on (cf. `Zinfty`'s `Provable.weakening`). -/
-theorem ZInf.weakening {Δ Γ : V} (d : ZInf Δ) (h : ∀ A, inAnt A Δ → inAnt A Γ) : ZInf Γ :=
-  .weak d h
+/-- **Every `ZInf`-derivable conclusion is a well-formed `Seq`** (carried by each constructor; the
+seqCons-conclusion nodes via `Seq.seqCons`). The membership bookkeeping (`inAnt_seqCons`) needs it. -/
+theorem ZInf.seq {Γ : V} (d : ZInf Γ) : Seq Γ := by
+  cases d with
+  | axL hΓ => exact hΓ
+  | verumR hΓ => exact hΓ
+  | weak hΓ => exact hΓ
+  | andI hΓ => exact hΓ.seqCons _
+  | orI hΓ => exact hΓ.seqCons _
+  | allω hΓ => exact hΓ.seqCons _
+  | exI hΓ => exact hΓ.seqCons _
+  | cut hΓ => exact hΓ
+
+/-- **Weakening is admissible at the membership level** (the `weak` constructor, repackaged): if `Γ` is a
+`Seq` and every formula of `Δ` occurs in `Γ`, a `ZInf Δ` lifts to `ZInf Γ`. The reusable monotonicity the
+inversion recursion leans on (cf. `Zinfty`'s `Provable.weakening`). -/
+theorem ZInf.weakening {Δ Γ : V} (hΓ : Seq Γ) (d : ZInf Δ) (h : ∀ A, inAnt A Δ → inAnt A Γ) : ZInf Γ :=
+  .weak hΓ d h
+
+/-! ### Membership bookkeeping for the inversion recursion -/
+
+/-- `A` is in `Γ ⌢ A`. -/
+theorem inAnt_seqCons_self {Γ A : V} (hΓ : Seq Γ) : inAnt A (seqCons Γ A) :=
+  (inAnt_seqCons hΓ).mpr (Or.inl rfl)
+
+/-- Membership is preserved by `seqCons`. -/
+theorem inAnt_seqCons_of {Γ A B : V} (hΓ : Seq Γ) (h : inAnt A Γ) : inAnt A (seqCons Γ B) :=
+  (inAnt_seqCons hΓ).mpr (Or.inr h)
+
+/-- **`seqCons` commutes up to membership**: `Γ⌢A⌢B` and `Γ⌢B⌢A` have the same members. The reorder the
+commuting inversion cases need (cf. `Zinfty.invPush1`/`invPull1`). -/
+theorem inAnt_seqCons_comm {Γ A B C : V} (hΓ : Seq Γ) :
+    inAnt C (seqCons (seqCons Γ A) B) ↔ inAnt C (seqCons (seqCons Γ B) A) := by
+  rw [inAnt_seqCons (hΓ.seqCons A), inAnt_seqCons (hΓ.seqCons B),
+    inAnt_seqCons hΓ, inAnt_seqCons hΓ]
+  tauto
+
+/-- A formula in `Γ ⌢ A` other than `A` itself is in `Γ`. -/
+theorem inAnt_of_seqCons_ne {Γ A B : V} (hΓ : Seq Γ) (h : inAnt B (seqCons Γ A)) (hne : B ≠ A) :
+    inAnt B Γ := ((inAnt_seqCons hΓ).mp h).resolve_left hne
 
 end GoodsteinPA.InternalZ.PathCInf
+
