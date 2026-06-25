@@ -647,6 +647,104 @@ lemma shift_quote_fixitr (ψ' : SyntacticFormula ℒₒᵣ) :
   · intro x hx
     exact absurd hx (by simp [Semiformula.FVar?, hfv])
 
+/-- `subst (fvarSeq k) ⌜F⌝ = ⌜F ⇜ (&·)⌝` — internal `subst` by the free-var vector opens the `k` bound
+vars of a `k`-ary formula to free vars `&0..&(k-1)`. Mirrors `subst_fvarSeq_fixitr`. -/
+lemma subst_fvarSeq_quote {k : ℕ} (F : SyntacticSemiformula ℒₒᵣ k) :
+    subst ℒₒᵣ (fvarSeq (k : V)) (⌜F⌝ : V)
+      = (⌜F ⇜ (fun i : Fin k ↦ (&(↑(i : ℕ)) : SyntacticSemiterm ℒₒᵣ 0))⌝ : V) := by
+  have key := Semiformula.typed_quote_substs (V := V)
+    (φ := F) (w := fun x : Fin k ↦ (&(↑(x : ℕ)) : SyntacticSemiterm ℒₒᵣ 0))
+  have hval := congrArg (fun g : Bootstrapping.Semiformula V ℒₒᵣ 0 => g.val) key
+  simp only [Semiformula.val_substs, Semiterm.typed_quote_fvar, fvarSeqVec_val] at hval
+  exact hval.symm
+
+/-- For an fv-free `k`-ary `F`, the open `F ⇜ (&0..&(k-1))` has free variables only below `k`. -/
+lemma fvar?_substs_lt {k x : ℕ} {F : SyntacticSemiformula ℒₒᵣ k}
+    (hF : F.freeVariables = ∅)
+    (h : (F ⇜ (fun i : Fin k ↦ (&(↑(i : ℕ)) : SyntacticSemiterm ℒₒᵣ 0))).FVar? x) : x < k := by
+  rcases Semiformula.fvar?_rew h with ⟨i, hi⟩ | ⟨z, hz, _⟩
+  · simp only [Rew.subst_bvar] at hi
+    have : x = (i : ℕ) := by simpa [Semiterm.FVar?] using hi
+    exact this ▸ i.isLt
+  · exact absurd hz (by simp [Semiformula.FVar?, hF])
+
+/-- A shift-fixed syntactic formula has no free variables (shift increments every free var, so a fixed
+point can have none — proved by descent: any free var `x` forces `x-1` free too, down to the
+impossible `0`). -/
+lemma freeVariables_eq_empty_of_shift {n : ℕ} {F : SyntacticSemiformula ℒₒᵣ n}
+    (h : Rewriting.shift F = F) : F.freeVariables = ∅ := by
+  rw [Finset.eq_empty_iff_forall_notMem]
+  intro x
+  induction x using Nat.strong_induction_on with
+  | _ x ih =>
+    intro hx
+    have hfv : (Rewriting.shift F).FVar? x := by rw [h]; exact hx
+    rcases Semiformula.fvar?_rew hfv with ⟨i, hi⟩ | ⟨z, hz, hzx⟩
+    · simp at hi
+    · simp only [Rew.shift_fvar] at hzx
+      have hxz : x = z + 1 := by simpa [Semiterm.FVar?] using hzx
+      exact ih z (by omega) hz
+
+/-- `subst` by `fvarSeq m` equals `subst` by `fvarSeq k` for a `k`-ary formula when `k ≤ m` (the extra
+entries `k..m-1` are never read). Stated at generic `V` so the `k ≤ m` bound stays in `V`'s order. -/
+lemma subst_fvarSeq_le {k m F : V} (hF : IsSemiformula ℒₒᵣ k F) (hkm : k ≤ m) :
+    subst ℒₒᵣ (fvarSeq m) F = subst ℒₒᵣ (fvarSeq k) F := by
+  apply subst_eq_subst_of hF
+  · rw [len_fvarSeq]; exact (IsSemitermVec_fvarSeq _).isUTerm
+  · rw [len_fvarSeq]; exact (IsSemitermVec_fvarSeq _).isUTerm
+  · rw [len_fvarSeq]; exact hkm
+  · rw [len_fvarSeq]
+  · intro i hi
+    rw [nth_fvarSeq (lt_of_lt_of_le hi hkm), nth_fvarSeq hi]
+
+/-- `k+1`-instance of `subst_fvarSeq_le` (bundles the `k ≤ k+1` bound at generic `V`, dodging the
+`V = ℕ` order diamond, since `V`'s `+` on `ℕ` IS native but its `≤`/`-` are not). -/
+lemma subst_fvarSeq_succ {k F : V} (hF : IsSemiformula ℒₒᵣ k F) :
+    subst ℒₒᵣ (fvarSeq (k + 1)) F = subst ℒₒᵣ (fvarSeq k) F :=
+  subst_fvarSeq_le hF le_self_add
+
+/-- **The criticality crux** (the math heart of `mem_iff`). For `ψ` with a free variable
+(`0 < ψ.fvSup`), the closure-rewritten body `⌜fixitr 0 ψ.fvSup ▹ ψ⌝` is NOT
+`(ψ.fvSup - 1)`-ary-*and*-fv-free. This pins `m = ψ.fvSup` in the recognizer (`IsInductionAxiomCode`'s
+criticality conjunct holds for the canonical witness). Route (lap-80 KEY FINDING, unblocked lap 81 by
+`subst_eq_subst_of`): if it were so, `IsSemiformula.sound` gives an `(m-1)`-ary `F` with `⌜F⌝ = body`;
+`F` is fv-free (from the shift conjunct, via `freeVariables_eq_empty_of_shift`); applying
+`subst (fvarSeq m)` to both — `subst_fvarSeq_fixitr` on the right, `subst_fvarSeq_succ` + `subst_fvarSeq_quote`
+on the left — forces `ψ = F ⇜ (&·)`, whose free vars are `< m-1` (`fvar?_substs_lt`), contradicting
+`ψ.FVar? (m-1)` (`fvar?_fvSup_pred`). -/
+lemma not_criticality_aux {ψ : SyntacticFormula ℒₒᵣ} (hm : 0 < ψ.fvSup) :
+    ¬ (IsSemiformula ℒₒᵣ ((ψ.fvSup : ℕ) - 1)
+          (⌜Rew.fixitr 0 ψ.fvSup ▹ ψ⌝ : ℕ)
+        ∧ Bootstrapping.shift ℒₒᵣ (⌜Rew.fixitr 0 ψ.fvSup ▹ ψ⌝ : ℕ)
+            = (⌜Rew.fixitr 0 ψ.fvSup ▹ ψ⌝ : ℕ)) := by
+  rintro ⟨hsem, hshift⟩
+  obtain ⟨F, hF⟩ := hsem.sound
+  have hshiftF : Rewriting.shift F = F := by
+    apply (LO.FirstOrder.Semiformula.quote_inj_iff (V := ℕ) (L := ℒₒᵣ)).mp
+    rw [Semiformula.quote_shift (V := ℕ) (φ := F), hF]; exact hshift
+  have hFempty : F.freeVariables = ∅ := freeVariables_eq_empty_of_shift hshiftF
+  have hRHS : subst ℒₒᵣ (fvarSeq (ψ.fvSup : ℕ)) (⌜Rew.fixitr 0 ψ.fvSup ▹ ψ⌝ : ℕ) = (⌜ψ⌝ : ℕ) := by
+    have h := subst_fvarSeq_fixitr (V := ℕ) ψ
+    simpa using h
+  have hIsF : IsSemiformula ℒₒᵣ ((ψ.fvSup : ℕ) - 1) (⌜F⌝ : ℕ) := hF ▸ hsem
+  have hcong : subst ℒₒᵣ (fvarSeq (ψ.fvSup : ℕ)) (⌜F⌝ : ℕ)
+      = subst ℒₒᵣ (fvarSeq ((ψ.fvSup : ℕ) - 1)) (⌜F⌝ : ℕ) := by
+    have key := subst_fvarSeq_succ (V := ℕ) (k := (ψ.fvSup : ℕ) - 1) hIsF
+    rwa [show (ψ.fvSup : ℕ) - 1 + 1 = ψ.fvSup from by omega] at key
+  have hopen : (⌜F ⇜ (fun i : Fin ((ψ.fvSup : ℕ) - 1) ↦ (&(↑(i : ℕ)) : SyntacticSemiterm ℒₒᵣ 0))⌝ : ℕ)
+      = (⌜ψ⌝ : ℕ) := by
+    have h2 := subst_fvarSeq_quote (V := ℕ) (k := (ψ.fvSup : ℕ) - 1) F
+    simp only [natCast_nat] at h2
+    rw [← h2, ← hcong, hF, hRHS]
+  have heq : (F ⇜ (fun i : Fin ((ψ.fvSup : ℕ) - 1) ↦ (&(↑(i : ℕ)) : SyntacticSemiterm ℒₒᵣ 0))) = ψ := by
+    apply (LO.FirstOrder.Semiformula.quote_inj_iff (V := ℕ) (L := ℒₒᵣ)).mp
+    exact hopen
+  have hfv : ψ.FVar? (ψ.fvSup - 1) := fvar?_fvSup_pred hm
+  have hlt : ψ.fvSup - 1 < (ψ.fvSup : ℕ) - 1 := by
+    apply fvar?_substs_lt hFempty
+    rw [heq]; exact hfv
+  omega
+
 end Recognizer
 
 /-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
