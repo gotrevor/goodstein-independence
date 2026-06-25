@@ -1472,6 +1472,86 @@ theorem zReg_zsubst (a t : V) : ∀ d, ZDerivation d → zReg (zsubst d a t) = z
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
 
+/-! ## `red` preserves `ZRegular` — the structural and Ind cases (Path-X O1, lap 93)
+
+`red` is the genuine one-step reduction. For regularity preservation `ZRegular d → ZRegular (red d)`:
+the structural rules strip to a premise (`red_zIall = d0`, `red_zIneg = d0`) or are the identity
+(atoms/axioms), so regularity is immediate; the `Ind` reduct `iRInd = zK s (irk p) (iIndReductSeq d0 d1 1)`
+is a chain over the *literal* premises `⟨d1, d0⟩` (no substitution at this level), so its `zReg` is
+`max (zReg d1) (zReg d0)`. The remaining case is the chain dispatch `red (zK …) = iRK …` (5.1/5.2.1/5.2.2),
+the genuinely hard step (it threads `zReg_zsubst` through the critical reduct's splice/replace). -/
+
+/-- `zReg`-fold congruence on agreeing entries (znth form, mirror `iseqMaxIdgAux_congr`). -/
+lemma iseqRegAux_znth_congr {ds ds' : V} :
+    ∀ j, (∀ i < j, znth ds i = znth ds' i) → iseqRegAux ds j = iseqRegAux ds' j := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (Definable.ball_lt (by definability) (by definability)) ?_
+    refine Definable.comp₂
+      (DefinableFunction₂.comp (F := iseqRegAux) (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction₂.comp (F := iseqRegAux) (DefinableFunction.const ds') (DefinableFunction.var 0))
+  case zero => intro _; rw [iseqRegAux_zero, iseqRegAux_zero]
+  case succ j ih =>
+    intro h
+    rw [iseqRegAux_succ, iseqRegAux_succ, ih (fun i hi => h i (lt_trans hi (by simp))), h j (by simp)]
+
+/-- `zReg`-fold over a `seqCons`: `iseqReg (seqCons ds v) = max (iseqReg ds) (zReg v)`. -/
+lemma iseqReg_seqCons {ds v : V} (hds : Seq ds) :
+    iseqReg (seqCons ds v) = max (iseqReg ds) (zReg v) := by
+  rw [iseqReg, iseqReg, Seq.lh_seqCons v hds, iseqRegAux_succ,
+    iseqRegAux_znth_congr (lh ds) (fun i hi => (znth_seqCons_of_lt hds v hi).symm),
+    znth_seqCons_self hds v]
+
+/-- `zReg`-fold over a constant block: if every entry's `zReg` is `c`, the fold is `c` (for `0<j`). -/
+lemma iseqRegAux_const {ds c : V} (hconst : ∀ i < lh ds, zReg (znth ds i) = c) :
+    ∀ j, 0 < j → j ≤ lh ds → iseqRegAux ds j = c := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.imp (by definability) (Definable.imp (by definability) ?_)
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := iseqRegAux) (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (by definability)
+  case zero => intro h; exact absurd h (by simp)
+  case succ j ih =>
+    intro _ hj
+    rw [iseqRegAux_succ, hconst j (lt_of_lt_of_le (by simp) hj)]
+    rcases eq_or_ne j 0 with rfl | hj0
+    · rw [iseqRegAux_zero]; simp
+    · rw [ih (pos_iff_ne_zero.mpr hj0) (le_trans (by simp) hj), max_self]
+
+/-- `zReg`-fold of a constant block `iRepeatSeq v k`: `= zReg v` (for `0<k`). -/
+lemma iseqReg_iRepeatSeq {v k : V} (hk : 0 < k) : iseqReg (iRepeatSeq v k) = zReg v := by
+  have hconst : ∀ i < lh (iRepeatSeq v k), zReg (znth (iRepeatSeq v k) i) = zReg v :=
+    fun i hi => by rw [znth_iRepeatSeq i (by rwa [iRepeatSeq_lh] at hi)]
+  rw [iseqReg, iseqRegAux_const hconst (lh (iRepeatSeq v k)) (by rw [iRepeatSeq_lh]; exact hk) le_rfl]
+
+/-- `zReg`-fold of the Ind reduct sequence: `max (zReg d1) (zReg d0)` (for `0<k`). -/
+lemma iseqReg_iIndReductSeq {d0 d1 k : V} (hk : 0 < k) :
+    iseqReg (iIndReductSeq d0 d1 k) = max (zReg d1) (zReg d0) := by
+  rw [iIndReductSeq, iseqReg_seqCons (iRepeatSeq_seq d1 k), iseqReg_iRepeatSeq hk]
+
+/-- **`red` preserves `ZRegular` (structural + Ind cases).** Stated per the `ZDerivation` constructor;
+the chain (`zK`) case is the remaining frontier (the `iRK` dispatch). -/
+lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
+    (hnK : zTag d ≠ 4) : ZRegular (red d) := by
+  unfold ZRegular at hreg ⊢
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · rw [red_zAtom]; simpa using hreg
+  · rw [red_zIall]; rw [zReg_zIall] at hreg
+    exact nonpos_iff_eq_zero.mp (hreg ▸ le_max_right _ _)
+  · rw [red_zIneg]; rwa [zReg_zIneg] at hreg
+  · -- Ind: reduct is the chain ⟨d1, d0⟩, regular since both premises are
+    rw [red_zInd, iRInd_zInd, zReg_zK _ _ _ (iIndReductSeq_seq d0 d1 1), iseqReg_iIndReductSeq one_pos]
+    rw [zReg_zInd] at hreg
+    have h0 : zReg d0 = 0 := nonpos_iff_eq_zero.mp (hreg ▸ le_trans (le_max_left _ _) (le_max_right _ _))
+    have h1 : zReg d1 = 0 := nonpos_iff_eq_zero.mp (hreg ▸ le_trans (le_max_right _ _) (le_max_right _ _))
+    rw [h0, h1]; simp
+  · exact absurd (zTag_zK s r ds) hnK
+  · rw [red_zAxAll]; simpa using hreg
+  · rw [red_zAxNeg]; simpa using hreg
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d` whose every

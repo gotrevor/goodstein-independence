@@ -54,10 +54,17 @@ indices**, so a freshness invariant phrased on eigenvariable indices (`maxEigen 
    Route-B bridges `maxEigen_lt_of_regular_zIall`/`_zInd` (regular node ⟹ the `maxEigen d0 < a` / `maxEigen d1
    < π₁ at'` that reformulated `ZDerivation_zsubst` consumes). Substitution step `zReg_zsubst` (ZDerivation d ⟹
    `zReg (zsubst d a t) = zReg d`) — regularity preserved by closed-term subst. `#print axioms` clean.
-5. **← START HERE: thread `ZRegular` through `red`/`redSound`** — (a) embedding produces regular derivations
-   (`ZRegular` of the contradiction derivation), (b) `red` preserves `ZRegular` (the genuinely hard step: the
-   splice/replace reducts, not just `zsubst` which is done). Then the route-B reducts discharge with the
-   bridges. The non-substitution `red` steps (Buchholz 5.2.1/5.2.2) are the remaining O1 difficulty.
+5. **`red` preserves `ZRegular` — structural + Ind cases DONE (lap 93, `Zsubst.lean`, axiom-clean, green
+   1325).** `ZRegular_red_of_not_zK` covers atom/zIall(→d0)/zIneg(→d0)/zInd(→`iRInd`)/zAxAll/zAxNeg. KEY
+   simplification found: `iRInd (zInd …) = zK s (irk p) (iIndReductSeq d0 d1 1)` is a chain over the
+   *literal* premises `⟨d1,d0⟩` — **no substitution at the Ind level** — so its `zReg = max (zReg d1) (zReg
+   d0) = 0`. Added the `iseqReg` fold lemmas (`_seqCons`/`_const`/`_iRepeatSeq`/`_iIndReductSeq`,
+   `iseqRegAux_znth_congr`) mirroring `iseqMaxIdg`.
+6. **← START HERE: the `zK` chain case of `red` preserves `ZRegular`** = `red (zK …) = iRK …` (Buchholz
+   5.1 `iRcritG` / 5.2.1 splice / 5.2.2 replace). This is where `zReg_zsubst` threads through the critical
+   reduct. Then assemble `red_preserves_ZRegular` (all cases) + embedding ⟹ `ZRegular`. Then route-B
+   reducts discharge via the bridges `maxEigen_lt_of_regular_zIall`/`_zInd`. The `zK` dispatch is the
+   remaining O1 difficulty (the genuine cut-elimination substitution lives only here, NOT in zIall/Ind).
 2. **(Path X) — ✅ O2 BANKED this lap (`Zsubst.lean`, axiom-clean):** `ZDerivation_zsubst_zIall_premise`
    and `ZDerivation_zsubst_zInd_premise1` discharge the route-B I∀/Ind eigensubst reducts **directly from
    the existing `ZDerivation_zsubst`**, under the freshness bound `d0 ≤ a` / `d1 ≤ π₁ at'`. This
