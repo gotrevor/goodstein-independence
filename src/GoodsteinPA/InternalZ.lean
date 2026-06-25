@@ -5015,6 +5015,18 @@ lemma permIdx_le_of_isPermPrem {s r ds m : V} (hm : m < lh ds)
   simp only [permIdx, zKseq_zK, fstIdx_zK]
   exact permIdxAux_le_of_isPermPrem ds s (lh ds) m hm hperm
 
+/-- **The selection bound from a permissible premise `≤ j₀` (Buchholz §5.2, wiring).** Packages
+`permIdx_le_of_isPermPrem` + `le_trans`: if SOME premise at an index `m ≤ j₀` is permissible w.r.t. the
+conclusion (`iperm (tp dₘ) s`), then the globally-least permissible index `permIdx ≤ j₀`. This is the exact
+form feeding `thread_rank_restrict_of_le`'s `i ≤ j₀` argument (with `i := permIdx`). The orbit must supply
+the witness `∃ m ≤ j₀, permissible` (Buchholz's non-critical case guarantees it; the repo's
+`permIdx < lh ds` non-criticality is WEAKER — `permIdx` may exceed `j₀` without this witness). -/
+lemma permIdx_le_of_exists_isPermPrem {s r ds j0 : V}
+    (h : ∃ m ≤ j0, m < lh ds ∧ iperm (tp (znth ds m)) s) :
+    permIdx (zK s r ds) ≤ j0 := by
+  obtain ⟨m, hmj0, hmlt, hperm⟩ := h
+  exact le_trans (permIdx_le_of_isPermPrem hmlt hperm) hmj0
+
 /-- **Threading/rank restriction to a smaller index (Buchholz §5.2 selection bound, wiring piece B).**
 Given the parent chain's threading/rank data held up to `j₀` (`hthr`/`hrk`, the `isChainInf` witness
 conjuncts) and `i ≤ j₀` (the selection bound `permIdx ≤ j₀` from `permIdx_le_of_isPermPrem` together with
