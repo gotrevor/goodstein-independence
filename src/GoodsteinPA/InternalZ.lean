@@ -3462,6 +3462,142 @@ lemma zKValidF_seqUpdate {s r ds i v : V} (hi : i < lh ds)
   · intro n hn
     rw [chainAsucc_seqUpdate hi hv]; exact hcf n (by rwa [seqUpdate_lh] at hn)
 
+/-! ### Splice end-sequent read-outs (case 5.2.1): `chainAsucc`/`chainAnt` of `seqCons (seqUpdate ds j a) b`
+
+The chain-validity ingredients (`isChainInf`/`zKValidF`) read the splice chain only through its
+per-premise end-sequent projections. These resolve `chainAsucc`/`chainAnt` at every index of the splice
+`cs = seqCons (seqUpdate ds j a) b`: the appended slot `lh ds` reads `b`, the updated slot `j` reads `a`,
+all other slots `k < lh ds` (`k ≠ j`) read the original `znth ds k`. They are the prerequisite for the
+splice's `isChainInf`/`zKValidF` validity (deliverable (b) of the lap-86 5.2.1 dispatch). -/
+
+/-- The appended half `b` carries the splice's top succedent. -/
+@[simp] lemma chainAsucc_seqCons_seqUpdate_top (ds j a b : V) :
+    chainAsucc (seqCons (seqUpdate ds j a) b) (lh ds) = seqSucc (fstIdx b) := by
+  unfold chainAsucc; rw [znth_seqCons_seqUpdate_top]
+
+/-- The appended half `b` carries the splice's top antecedent. -/
+@[simp] lemma chainAnt_seqCons_seqUpdate_top (ds j a b : V) :
+    chainAnt (seqCons (seqUpdate ds j a) b) (lh ds) = seqAnt (fstIdx b) := by
+  unfold chainAnt; rw [znth_seqCons_seqUpdate_top]
+
+/-- Below the appended slot the splice's succedent reads the in-place update. -/
+lemma chainAsucc_seqCons_seqUpdate_lt {ds j a b k : V} (hk : k < lh ds) :
+    chainAsucc (seqCons (seqUpdate ds j a) b) k = chainAsucc (seqUpdate ds j a) k := by
+  unfold chainAsucc; rw [znth_seqCons_seqUpdate_lt hk]
+
+/-- Below the appended slot the splice's antecedent reads the in-place update. -/
+lemma chainAnt_seqCons_seqUpdate_lt {ds j a b k : V} (hk : k < lh ds) :
+    chainAnt (seqCons (seqUpdate ds j a) b) k = chainAnt (seqUpdate ds j a) k := by
+  unfold chainAnt; rw [znth_seqCons_seqUpdate_lt hk]
+
+/-- The in-place half `a` carries succedent at the updated slot `j`. -/
+lemma chainAsucc_seqUpdate_self {ds j a : V} (hj : j < lh ds) :
+    chainAsucc (seqUpdate ds j a) j = seqSucc (fstIdx a) := by
+  unfold chainAsucc; rw [znth_seqUpdate_self hj]
+
+/-- Off the updated slot, `seqUpdate`'s succedent is the original's. -/
+lemma chainAsucc_seqUpdate_of_ne {ds j a k : V} (hk : k ≠ j) :
+    chainAsucc (seqUpdate ds j a) k = chainAsucc ds k := by
+  unfold chainAsucc; rw [znth_seqUpdate_of_ne hk]
+
+/-- The in-place half `a` carries antecedent at the updated slot `j`. -/
+lemma chainAnt_seqUpdate_self {ds j a : V} (hj : j < lh ds) :
+    chainAnt (seqUpdate ds j a) j = seqAnt (fstIdx a) := by
+  unfold chainAnt; rw [znth_seqUpdate_self hj]
+
+/-- Off the updated slot, `seqUpdate`'s antecedent is the original's. -/
+lemma chainAnt_seqUpdate_of_ne {ds j a k : V} (hk : k ≠ j) :
+    chainAnt (seqUpdate ds j a) k = chainAnt ds k := by
+  unfold chainAnt; rw [znth_seqUpdate_of_ne hk]
+
+/-- **5.2.1 splice — `isChainInf` structural reduction.** The sub-critical splice
+`cs = seqCons (seqUpdate ds j a) b` (Buchholz §3.2 case 5.2.1: premise `j` of the critical chain is
+expanded into its two halves `a = dⱼ{1}` in place and `b = dⱼ{0}` appended at the end) is chain-valid for
+the conclusion `s'`/rank `r'` exactly when the appended half `b` carries `s'`'s succedent, the
+antecedents thread back (each `B ∈ Γₖ` lands in `s'`'s antecedent or a strictly-earlier succedent), and
+the ranks below the distinguished top stay `≤ r'`. This reduces splice validity to the local
+end-sequent threading facts about the two halves — the cut-formula bookkeeping the dispatch must supply.
+(Mirror of `isChainInf_of_last`, with `j₀ = lh ds`.) -/
+lemma isChainInf_iSpliceEnd {s' r' ds j a b : V} (_hj : j < lh ds)
+    (hlast : chainAsucc (seqCons (seqUpdate ds j a) b) (lh ds) = seqSucc s'
+        ∨ chainAsucc (seqCons (seqUpdate ds j a) b) (lh ds) = (^⊥ : V))
+    (hthread : ∀ i ≤ lh ds, ∀ B, inAnt B (chainAnt (seqCons (seqUpdate ds j a) b) i) →
+        inAnt B (seqAnt s') ∨ ∃ i' < i, B = chainAsucc (seqCons (seqUpdate ds j a) b) i')
+    (hrank : ∀ i < lh ds, irk (chainAsucc (seqCons (seqUpdate ds j a) b) i) ≤ r') :
+    isChainInf s' r' (seqCons (seqUpdate ds j a) b) := by
+  have hlen : 0 < lh (seqCons (seqUpdate ds j a) b) := by
+    rw [lh_seqCons_seqUpdate]; exact lt_of_le_of_lt (show (0 : V) ≤ lh ds by simp) (lt_add_one _)
+  have htop : lh (seqCons (seqUpdate ds j a) b) - 1 = lh ds := by
+    rw [lh_seqCons_seqUpdate]; simp
+  refine isChainInf_of_last hlen ?_ ?_ ?_
+  · rw [htop]; exact hlast
+  · rw [htop]; exact hthread
+  · rw [htop]; exact hrank
+
+/-- **5.2.1 splice — full `zKValidF` reduction.** Given the splice's `isChainInf` core (the structural
+threading, from `isChainInf_iSpliceEnd`) plus the per-half well-formedness of the two halves `a`, `b`
+(own-permissibility `iperm (tp ·) (fstIdx ·)`, Buchholz Lemma 3.3 / `iperm_tp_fstIdx_of_ZDerivation`; the
+tag-gated principal-formula-hood) and the original chain's per-premise well-formedness, the spliced chain
+is faithfully valid `zKValidF`. This is the reusable "splice a premise's two halves into a valid `K^r`
+chain ⟹ still valid" fact, the validity half (b) of `RedSound`'s 5.2.1 case. The off-`j`, below-top
+conjuncts inherit from the original chain; the at-`j` (`a`) and top (`b`) ones come from the halves. -/
+lemma zKValidF_iSpliceEnd {s' r' ds j a b : V} (hj : j < lh ds)
+    (hci : isChainInf s' r' (seqCons (seqUpdate ds j a) b))
+    (hperm_a : iperm (tp a) (fstIdx a)) (hperm_b : iperm (tp b) (fstIdx b))
+    (hf1_a : zTag a = 1 → IsUFormula ℒₒᵣ (zIallF a)) (hf1_b : zTag b = 1 → IsUFormula ℒₒᵣ (zIallF b))
+    (hf2_a : zTag a = 2 → IsUFormula ℒₒᵣ (zInegF a)) (hf2_b : zTag b = 2 → IsUFormula ℒₒᵣ (zInegF b))
+    (hf5_a : zTag a = 5 → IsUFormula ℒₒᵣ (zAxAllF a)) (hf5_b : zTag b = 5 → IsUFormula ℒₒᵣ (zAxAllF b))
+    (hf6_a : zTag a = 6 → IsUFormula ℒₒᵣ (zAxNegF a)) (hf6_b : zTag b = 6 → IsUFormula ℒₒᵣ (zAxNegF b))
+    (hfa_a : IsUFormula ℒₒᵣ (seqSucc (fstIdx a))) (hfa_b : IsUFormula ℒₒᵣ (seqSucc (fstIdx b)))
+    (hss : IsUFormula ℒₒᵣ (seqSucc s'))
+    (hsa : ∀ k < lh (seqAnt s'), IsUFormula ℒₒᵣ (znth (seqAnt s') k))
+    (hperm : ∀ i < lh ds, iperm (tp (znth ds i)) (fstIdx (znth ds i)))
+    (hg1 : ∀ i < lh ds, zTag (znth ds i) = 1 → IsUFormula ℒₒᵣ (zIallF (znth ds i)))
+    (hg2 : ∀ i < lh ds, zTag (znth ds i) = 2 → IsUFormula ℒₒᵣ (zInegF (znth ds i)))
+    (hg5 : ∀ i < lh ds, zTag (znth ds i) = 5 → IsUFormula ℒₒᵣ (zAxAllF (znth ds i)))
+    (hg6 : ∀ i < lh ds, zTag (znth ds i) = 6 → IsUFormula ℒₒᵣ (zAxNegF (znth ds i)))
+    (hcf : ∀ i < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds i)) :
+    zKValidF s' r' (seqCons (seqUpdate ds j a) b) := by
+  -- Resolve a premise of the splice at index `n < lh ds + 1` into the three cases.
+  have key : ∀ {P : V → Prop} (n : V), n < lh ds + 1 →
+      (P a) → (P b) → (∀ k, k < lh ds → k ≠ j → P (znth ds k)) →
+      P (znth (seqCons (seqUpdate ds j a) b) n) := by
+    intro P n hn ha hb hoff
+    rcases lt_or_eq_of_le (le_iff_lt_succ.mpr hn) with hlt | heq
+    · rw [znth_seqCons_seqUpdate_lt hlt]
+      rcases eq_or_ne n j with rfl | hne
+      · rwa [znth_seqUpdate_self hj]
+      · rw [znth_seqUpdate_of_ne hne]; exact hoff n hlt hne
+    · rw [heq, znth_seqCons_seqUpdate_top]; exact hb
+  refine ⟨hci, ?_, ?_, ?_, ?_, ?_, ?_, hss, hsa⟩
+  · intro n hn
+    rw [lh_seqCons_seqUpdate] at hn
+    exact key (P := fun x => iperm (tp x) (fstIdx x)) n hn hperm_a hperm_b (fun k hk _ => hperm k hk)
+  · intro n hn
+    rw [lh_seqCons_seqUpdate] at hn
+    exact key (P := fun x => zTag x = 1 → IsUFormula ℒₒᵣ (zIallF x)) n hn hf1_a hf1_b
+      (fun k hk _ => hg1 k hk)
+  · intro n hn
+    rw [lh_seqCons_seqUpdate] at hn
+    exact key (P := fun x => zTag x = 2 → IsUFormula ℒₒᵣ (zInegF x)) n hn hf2_a hf2_b
+      (fun k hk _ => hg2 k hk)
+  · intro n hn
+    rw [lh_seqCons_seqUpdate] at hn
+    exact key (P := fun x => zTag x = 5 → IsUFormula ℒₒᵣ (zAxAllF x)) n hn hf5_a hf5_b
+      (fun k hk _ => hg5 k hk)
+  · intro n hn
+    rw [lh_seqCons_seqUpdate] at hn
+    exact key (P := fun x => zTag x = 6 → IsUFormula ℒₒᵣ (zAxNegF x)) n hn hf6_a hf6_b
+      (fun k hk _ => hg6 k hk)
+  · intro n hn
+    rw [lh_seqCons_seqUpdate] at hn
+    rcases lt_or_eq_of_le (le_iff_lt_succ.mpr hn) with hlt | heq
+    · rw [chainAsucc_seqCons_seqUpdate_lt hlt]
+      rcases eq_or_ne n j with rfl | hne
+      · rw [chainAsucc_seqUpdate_self hj]; exact hfa_a
+      · rw [chainAsucc_seqUpdate_of_ne hne]; exact hcf n hlt
+    · rw [heq, chainAsucc_seqCons_seqUpdate_top]; exact hfa_b
+
 /-- The critical auxiliary `d{ν} = K^r(i/v)`: the chain `d` with premise `i` replaced by `v`. -/
 noncomputable def iCritAux (d i v : V) : V := zK (fstIdx d) (zKrank d) (seqUpdate (zKseq d) i v)
 
