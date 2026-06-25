@@ -1465,6 +1465,55 @@ theorem zcDer_redAllExS_orbit_step {s s' d0 a αAll sE αEx CE tE dE C : V}
     (lt_imax_inc_left (isNF_sord_of_ZDerivation hLZ) (isNF_sord_of_ZDerivation hRZ))
     (lt_imax_inc_right (isNF_sord_of_ZDerivation hLZ) (isNF_sord_of_ZDerivation hRZ))
 
+/-! ### Brick 5q (lap 106) — the `ZcDer` per-node inversion-step family (∃, cut)
+
+The conclusion-tracking analogues of lap-105's `zcOK_sord_descent_zExOmega`/`zcOK_sord_descent_zCutOmega`:
+each non-ω-∀ `ZcDer` node shape exposes its premise(s) as `ZcDer` with a strict `sord`-drop — the local
+`hinv`+`hdrop` building block the orbit's `red` step consumes, now on the conclusion-tracking layer. With
+`zcDer_iord_descent_allOmega` (∀, 5o) these complete the per-node inversion-step family on `ZcDer`. The
+conclusion-tracking conjuncts on ∃/cut (the formula each premise derives) await the calculus extension
+(PENDING_WORK lap-106 NEXT 1); these are the ordinal/structure halves, sorry-free. -/
+
+/-- **∃-node inversion on `ZcDer`.** A `ZcDer` ∃-node decomposes into its witness premise `d` (`ZcDer`) and
+the operator-control bound `sord d ≺ α`. -/
+theorem zcDer_ex_inv {s α C t d : V} (h : ZcDer (zExOmega s α C t d)) :
+    ZcDer d ∧ icmp (sord d) α = 0 := by
+  rcases zcDer_iff.mp h with hd | ⟨s', d0', a', α', p, heq, _, _, _, _⟩ |
+    ⟨s', α', C0, t', d0, heq, hprem, hdesc⟩ | ⟨s', α', dL', dR', C0, heq, _, _, _, _⟩
+  · exact absurd (zTag_zExOmega s α C t d) (zTag_ne_ten_of_ZDerivation hd)
+  · exact absurd (congrArg zTag heq) (by simp)
+  · have hd0 : d = d0 := by have := congrArg zExPrem heq; simpa using this
+    have hα : α = α' := by have := congrArg sord heq; simpa using this
+    subst hd0 hα; exact ⟨hprem, hdesc⟩
+  · exact absurd (congrArg zTag heq) (by simp)
+
+/-- **∃-node inversion step on `ZcDer`** (premise `ZcDer` + strict `sord`-drop). -/
+theorem zcDer_sord_descent_zExOmega {s α C t d : V} (h : ZcDer (zExOmega s α C t d)) :
+    ZcDer d ∧ icmp (sord d) (sord (zExOmega s α C t d)) = 0 := by
+  obtain ⟨hd, hdesc⟩ := zcDer_ex_inv h
+  exact ⟨hd, by rw [sord_zExOmega]; exact hdesc⟩
+
+/-- **Cut-node inversion on `ZcDer`.** A `ZcDer` cut node decomposes into both premises (`ZcDer`) and the
+two operator-control bounds. -/
+theorem zcDer_cut_inv {s α dL dR C : V} (h : ZcDer (zCutOmega s α dL dR C)) :
+    ZcDer dL ∧ ZcDer dR ∧ icmp (sord dL) α = 0 ∧ icmp (sord dR) α = 0 := by
+  rcases zcDer_iff.mp h with hd | ⟨s', d0', a', α', p, heq, _, _, _, _⟩ |
+    ⟨s', α', C0, t', d0, heq, _, _⟩ | ⟨s', α', dL', dR', C0, heq, hL, hR, hLd, hRd⟩
+  · exact absurd (zTag_zCutOmega s α dL dR C) (zTag_ne_nine_of_ZDerivation hd)
+  · exact absurd (congrArg zTag heq) (by simp)
+  · exact absurd (congrArg zTag heq) (by simp)
+  · have hdL : dL = dL' := by have := congrArg zCutL heq; simpa using this
+    have hdR : dR = dR' := by have := congrArg zCutR heq; simpa using this
+    have hα : α = α' := by have := congrArg sord heq; simpa using this
+    subst hdL hdR hα; exact ⟨hL, hR, hLd, hRd⟩
+
+/-- **Cut-node inversion step on `ZcDer`** (both premises `ZcDer` + strict `sord`-drop). -/
+theorem zcDer_sord_descent_zCutOmega {s α dL dR C : V} (h : ZcDer (zCutOmega s α dL dR C)) :
+    ZcDer dL ∧ ZcDer dR ∧ icmp (sord dL) (sord (zCutOmega s α dL dR C)) = 0
+      ∧ icmp (sord dR) (sord (zCutOmega s α dL dR C)) = 0 := by
+  obtain ⟨hL, hR, hLd, hRd⟩ := zcDer_cut_inv h
+  rw [sord_zCutOmega]; exact ⟨hL, hR, hLd, hRd⟩
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
