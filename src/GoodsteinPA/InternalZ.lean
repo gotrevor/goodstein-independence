@@ -5163,6 +5163,23 @@ lemma iR2_zK_eq_iRcrit (s r ds : V) :
     iR2 (zK s r ds) = iRcrit (zK s r ds) (fun n => zAxReduct (iR2 (znth ds n))) := by
   rw [iR2_zK, iRcrit]
 
+/-- **`red` and `iR2` agree off the critical K-case.** `iRNextG` and `iRNext` have identical I-rule/`Ind`
+branches (none reads the table), so on any non-tag-4 code the genuine reduct equals the ordinal-shadow.
+The two differ ONLY at tag 4 (`iRcritG` vs `iCritReduct`), and even there the ordinal is preserved
+(`iord_iRcritG_eq_iRcrit`). -/
+lemma red_eq_iR2_of_tag_ne_four {x : V} (h : zTag x ≠ 4) : red x = iR2 x := by
+  rcases eq_or_ne x 0 with rfl | hpos
+  · simp [red, iR2]
+  · have hp := pos_iff_ne_zero.mpr hpos
+    rw [red_eq_iRNextG hp, iR2_eq_iRNext hp, iRNextG, iRNext]
+    by_cases h1 : zTag x = 1
+    · simp [h1]
+    · by_cases h2 : zTag x = 2
+      · simp [h1, h2]
+      · by_cases h3 : zTag x = 3
+        · simp [h1, h2, h3]
+        · simp [h1, h2, h3, h]
+
 /-- **The redexI premise's `iR2`-reduct satisfies the IH bundle, concretely** (the recursive-`iR2`
 analog of lap-71's `iRedDescent_iR_of_tp_isymR`). A premise `d` with `tp d = R_A` is an I-rule
 (`tp_isymR_tag` ⟹ tag 1/2), where `iR2 d = d0` (the sub-derivation) agrees with the old `iR`; so the
