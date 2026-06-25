@@ -33,6 +33,19 @@ substitution wall" again: eigen-subst is a SEPARATE, harder substitution lemma (
 in the derivation, not a fresh slot). **Genuine next deep target** = an eigenvariable-substitution
 ZDerivation lemma (`zsubst d₀ e t` valid when `e` is `d₀`'s genuine eigenvar, freshness from the rule).
 
+**⚠️ (O3) The route-B invariant must be ANTECEDENT-MEMBERSHIP-EQUIVALENCE, not raw `fstIdx =`.**
+Buchholz sequents are sets; the repo codes antecedents as `seqCons` sequences with `inAnt` membership,
+and the per-rule `…Wff` predicates track the antecedent INCONSISTENTLY: `zIallWff` pins
+`seqAnt(fstIdx d0) = seqAnt s` EXACTLY, but `zInegWff` only pins `inAnt p (seqAnt(fstIdx d0))`
+(membership). So `fstIdx (red (zIneg …)) = tpReduce (R_¬A) Π 0` FAILS as raw equality (`red zIneg = d0`
+has antecedent `Γ'∋p`, not the canonical `seqCons Γ p`). ⟹ state the invariant as: `red d` derives a
+sequent with succedent `= seqSucc (tpReduce …)` AND antecedent `≈` (same membership-set as)
+`seqAnt (tpReduce …)`. The chain-rule threading already consumes antecedents via `inAnt` only
+(`isChainInf`/`chainAnt` at `InternalZ.lean:1157`), so it is robust to this — the invariant equivalence
+suffices to rebuild parent chains. **`tpReduce` gives the canonical representative; the invariant is
+up-to-`inAnt`-equality to it.** (Headline ⊥-orbit's `fstIdx_red_eq_tpReduce_of_Rep` is EXACT — `Π=∅→⊥`,
+no antecedent ambiguity — so O3 only bites in the general structural induction, not the headline rung.)
+
 **NEXT (route-B continuation, in dependency order):**
 1. **O2 first** (eigen-subst lemma) — it gates the I∀ reduct; without it route B's I∀/Ind branches
    can't produce valid reducts. Decompose: does `zsubst` already compute the right *term* substitution
