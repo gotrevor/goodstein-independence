@@ -120,6 +120,18 @@ genuinely independent deep thread.
 
 ---
 
+## 📍 Lap 100 (ordinal side) — iord_descent_red dispatch + Ind leaf banked
+`iord_descent_red` (Crux2Blueprint, `icmp (iord (red d)) (iord d) = 0` over `ZDerivesEmptyR`) is the
+ORDINAL companion of `redSound`, structurally PARALLEL to `ZDerivation_red_zK`. Orbit `d` is only Ind or K
+(`zTag_Ind_or_K_of_ZDerivesEmpty`). **Lap-100 banked `iord_descent_red_zInd`** (the Ind leaf, axiom-clean,
+via `iord_descent_iRInd_of_ZDerivation`). **K-case ordinal residual** mirrors the validity dispatch: banked
+per-branch descents `iord_descent_iRcrit_of_chain` (5.1 critical), `iord_descent_iCritAux`/`_iCritReduct_
+object` (5.2.2 replace), `iord_descent_seqInsert`/`_iSpliceEnd` (5.2.1 splice). NOTE: `iord_descent_iR2_of_
+ZDerivesEmpty` (banked) needs `hcrit` (chain critical) — only the 5.1 case; the non-critical K-case descent
+is the genuine residual, needing the same selection-bound + per-tag structure as `redZKReady`. Next-lap:
+consolidate the K-case ordinal residual into an `iordDescentReady`-style obligation (mirror `redZKReady`),
+or attack the shared motive (which feeds BOTH validity + ordinal sides per the lap-99 structural finding).
+
 ## 📍 Lap 99 — VALIDITY LAYER + selection bound DONE; remaining = O3-freshness motive + assembly
 **Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). Lap-97's
 "architectural wall" RESOLVED (the eigensubst rewire landed lap 97; `red (zIall) = zsubst d0 a 0`).**
