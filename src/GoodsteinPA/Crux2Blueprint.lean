@@ -49,9 +49,81 @@ Buchholz Thm 3.4(b) / Thm 6.2: principal sequent ⊆ Γ, cut-rank `< m`. Proved 
 induction over the same `red` (not recovered post-hoc from the ordinal side) — threading the banked
 `zKValidFDef` (faithful validity). This is the cut-elimination core; everything downstream is plumbing. -/
 
+/-! ### `redSound` decomposed: structural induction skeleton + two precise validity residuals
+
+`redSound` is the genuine cut-elimination soundness. We prove the GENERAL form
+`redSoundGen : ∀ d, ZDerivation d → ZDerivation (red d)` by `zDerivation_induction`; the seven `ZPhi`
+disjuncts split as:
+
+* **atom / Ax∀ / Ax¬** (`red = d`): rebuilt directly from the disjunct via `zDerivation_iff.mpr`.
+* **I∀ / I¬** (`red = d₀`, the premise): the immediate sub-derivation, from the IH.
+* **Ind** (`red = zK s (irk p) (iIndReductSeq d₀ d₁ 1)`): a chain whose premises are the Ind premises
+  (`znth_iIndReductSeq_ZDerivation`); a genuine `ZDerivation` once the produced chain is valid — the
+  residual `zKValid_iIndReduct_of_zInd` (Buchholz Thm 3.4, Ind case).
+* **K** (`red = iRK …`, the 5.1/5.2.1/5.2.2 dispatch): the genuine recombination is a `ZDerivation`
+  given every premise reduct `red dᵢ` is — the residual `ZDerivation_red_zK` (Buchholz Thm 3.4, K case;
+  the heart of cut-elimination).
+
+This splits the single fat `redSound` `sorry` into exactly the two deep Buchholz-3.4 validity facts. -/
+
+/-- **Residual (Ind case of Buchholz Thm 3.4).** The Ind-reduct chain `zK s (irk p) (iIndReductSeq d₀ d₁ 1)`
+of a valid `Ind` inference is itself a valid `K`-chain. The chain's `Seq` structure and per-premise
+derivability are free (`znth_iIndReductSeq_ZDerivation`); this is the validity-threading obligation. -/
+theorem zKValid_iIndReduct_of_zInd {s at' p d0 d1 : V}
+    (hZ : ZDerivation (zInd s at' p d0 d1)) :
+    zKValid s (irk p) (iIndReductSeq d0 d1 1) := sorry
+
+/-- **Residual (K case of Buchholz Thm 3.4 — the cut-elimination core).** The genuine reduct `red` of a
+valid chain `zK s r ds` is again a `ZDerivation`, given that the reduct of every premise is. The
+dispatch (`iRK`: 5.1 critical / 5.2.1 splice / 5.2.2 replace) is already wired into `red`
+(`red_zK`/`red_zK_crit`); this lemma supplies the validity-preservation across the dispatch. -/
+theorem ZDerivation_red_zK {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hred : ∀ i < lh ds, ZDerivation (red (znth ds i))) :
+    ZDerivation (red (zK s r ds)) := sorry
+
+/-- **`redSound`, general form.** The `red`-reduct of ANY genuine `ZDerivation` is again a `ZDerivation`
+(full cut-elimination soundness). Structural induction over `ZDerivation`; the two deep cases delegate to
+`zKValid_iIndReduct_of_zInd` (Ind) and `ZDerivation_red_zK` (K). -/
+theorem redSoundGen : ∀ d : V, ZDerivation d → ZDerivation (red d) := by
+  apply zDerivation_induction (P := fun d : V => ZDerivation (red d))
+  · definability
+  · intro C hC d hphi
+    rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsucc, hwff⟩ |
+      ⟨s, p, d0, rfl, hd0, hsucc, hwff⟩ |
+      ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
+      ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩
+    · -- zAtom: red = identity
+      rw [red_zAtom]; exact zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)
+    · -- zIall: red = d0 (the premise)
+      rw [red_zIall]; exact (hC d0 hd0).1
+    · -- zIneg: red = d0
+      rw [red_zIneg]; exact (hC d0 hd0).1
+    · -- zInd: red = chain reduct; residual supplies validity
+      have hZ : ZDerivation (zInd s at' p d0 d1) := zDerivation_iff.mpr
+        (Or.inr (Or.inr (Or.inr (Or.inl
+          ⟨s, at', p, d0, d1, rfl, (hC d0 hd0).1, (hC d1 hd1).1, hwff⟩))))
+      rw [red_zInd, iRInd_zInd, zDerivation_iff]
+      exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨s, irk p, iIndReductSeq d0 d1 1, rfl, iIndReductSeq_seq d0 d1 1,
+          fun i hi => znth_iIndReductSeq_ZDerivation (hC d0 hd0).1 (hC d1 hd1).1 i hi,
+          zKValidF_of_zKValid (zKValid_iIndReduct_of_zInd hZ)⟩))))
+    · -- zK: the dispatch; residual supplies validity-preservation
+      exact ZDerivation_red_zK
+        (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+          ⟨s, r, ds, rfl, hds, fun i hi => (hC (znth ds i) (hmem i hi)).1, hvalid⟩))))))
+        (fun i hi => (hC (znth ds i) (hmem i hi)).2)
+    · -- zAxAll: red = identity
+      rw [red_zAxAll]; exact zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))
+    · -- zAxNeg: red = identity
+      rw [red_zAxNeg]; exact zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        (Or.inr ⟨s, p, rfl, hp, hin⟩))))))
+
 /-- **M1b — THE nut.** The `red`-reduct of a contradiction derivation is again a genuine `ZDerivation`.
-(Re-pointed `RedSound`, off the dead `iR2`.) -/
-theorem redSound : ∀ d : V, ZDerivesEmpty d → ZDerivation (red d) := sorry
+(Re-pointed `RedSound`, off the dead `iR2`.) Now a direct corollary of the general `redSoundGen`. -/
+theorem redSound : ∀ d : V, ZDerivesEmpty d → ZDerivation (red d) :=
+  fun d h => redSoundGen d h.1
 
 /-- **M1b (descent re-point, one step).** The banked ordinal descent, restated over `red`
 (`iR2` analogue: `iord_descent_iR2_of_ZDerivesEmpty`). -/
