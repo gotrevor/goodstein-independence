@@ -211,7 +211,20 @@ theorem ZDerivation_red_zK {s r ds : V}
       -- (Lap-95 GATED dispatch — the OLD `iRK` mis-spliced here.) The deep validity residual:
       -- a keep-Π replace is faithful only for `tp = Rep`, so the conclusion must reduce (lap-90).
       rw [red_zK_rep_nonchain h1 htag]
-      sorry
+      by_cases htp : tp (znth ds (permIdx (zK s r ds))) = isymRep
+      · -- atom / Ind: `tp dᵢ = Rep`, `tpReduce` is the identity, conclusion `Π` KEPT. The premise
+        -- reduct keeps its endsequent + stays `Rep` (`red_rep_of_tp_isymRep`, with `hsel` vacuous since
+        -- `zTag dᵢ ≠ 4`), so the keep-`Π` `ZDerivation_red_zK_replace` discharges it. (Lap 99.)
+        have hdiZ : ZDerivation (znth ds (permIdx (zK s r ds))) := (zDerivation_zK_inv hZ).2 _ h1
+        obtain ⟨hredfst, hredtp⟩ := red_rep_of_tp_isymRep hdiZ htp (fun h4 _ => absurd h4 htag)
+        exact ZDerivation_red_zK_replace hZ hred h1 htp hredfst hredtp
+      · -- I∀ / I¬ / axAll / axNeg: genuinely conclusion-reducing (`tp dᵢ ≠ Rep`). The validity
+        -- constructors are banked (`ZDerivation_iCritReplaceReduce_of` for I∀/I¬,
+        -- `ZDerivation_zK_seqAddAnt` for axAll, axNeg residual); the OPEN data is the O3 eigenvariable
+        -- freshness (`red_zIall_tpReduce`) + the conclusion `Seq`/wff, threaded by the strengthened
+        -- `redSoundGen` motive (PENDING_WORK lap-99 path A). The `permIdx ≤ j₀` threading is banked
+        -- (`permIdx_le_of_isPermPrem`).
+        sorry
   · -- 5.1 critical
     rw [red_zK_crit h1]
     exact ZDerivation_red_zK_crit hZ hred h1
