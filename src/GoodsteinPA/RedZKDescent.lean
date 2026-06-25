@@ -169,4 +169,29 @@ lemma iord_descent_red_zK_replace_eq {s s' r ds i : V}
   · exact iotil_zK_lt_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hi hlt heq hNF hNF'
   · exact isNF_iotil_zK (seqUpdate_seq ds i _) (fun n _ => hNF' n)
 
+/-- **The non-critical SPLICE-branch K-case descent (Buchholz Def-3.2 case 5.2.1), conditional on the two
+spliced halves descending below the selected premise.** When the selected premise `dᵢ = znth ds i`
+(`i = permIdx`) is itself a CRITICAL chain (`zTag dᵢ = 4` ∧ `dᵢ` critical), `red (zK s r ds) =
+K^{r'}(seqInsert ds i a b)` splices `dᵢ`'s two critical-reduct halves `a,b = znth (zKseq (red dᵢ)) {0,1}`
+in place at `i`, with the genuine reduct rank `r' = max{rk(A(dᵢ)), r}` (judge §8.3 LH5). Given each half's
+`õ`/`idg` bound below `dᵢ` (`ha`/`hb`/`hag`/`hbg`, from the critical reduction of `dᵢ`) and the faithful
+rank bound `r' ≤ dg(parent)` (`hr'`), the `K^r` ordinal strictly descends via the F2 rotation kernel
+(`iotil_seqInsert_lt`) + the rank-general `idg` bound (`idg_seqInsert_le'`) through `iord_descent_le`,
+i.e. the banked `iord_descent_seqInsert'`. Stated against the explicit reduct equation `hred`. -/
+lemma iord_descent_red_zK_splice_eq {s r ds i a b s' r' : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hred : red (zK s r ds) = zK s' r' (seqInsert ds i a b))
+    (hr' : r' ≤ idg (zK s r ds))
+    (ha : icmp (iotil a) (iotil (znth ds i)) = 0) (hb : icmp (iotil b) (iotil (znth ds i)) = 0)
+    (hag : idg a ≤ idg (znth ds i)) (hbg : idg b ≤ idg (znth ds i))
+    (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
+    icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 := by
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hnf : isNF (iotil (zK s r ds)) := isNF_iotil_zK hds (fun n _ => hNF n)
+  rw [hred]
+  exact iord_descent_seqInsert' hds hi hnf hr' ha hb hag hbg hNF hNFa hNFb
+
 end GoodsteinPA.InternalZ
