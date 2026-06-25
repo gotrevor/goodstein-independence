@@ -5743,6 +5743,44 @@ instance seqAddAnt_defined : 𝚺₁-Function₂ (seqAddAnt : V → V → V) via
     seqSucc_defined.iff, pair_defined.iff]
 instance seqAddAnt_definable : 𝚺₁-Function₂ (seqAddAnt : V → V → V) := seqAddAnt_defined.to_definable
 
+/-- **`tpReduce` is `𝚺₁`-definable** (route-B keystone, lap 91). The `Σ₁` graph of Buchholz's reduced
+sequent `I(Π,n)`, so the route-B reduct `red` can emit `tpReduce (tp dᵢ) Π 0` as a definable conclusion.
+Three-way dispatch on `π₁ I` (`2`=Rep / `0`=R / else L), inner two-way on the principal-formula
+connective `π₁(π₂ I − 1) = 6` (`∀`) via `subDef` (peel the `+1` of the qq-constructor). -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.tpReduceDef : 𝚺₁.Semisentence 4 := .mkSigma
+  “y I s n.
+    ∃ p1I, !pi₁Def p1I I ∧
+    ( (p1I = 2 ∧ y = s)
+    ∨ (p1I = 0 ∧ ∃ A, !pi₂Def A I ∧ ∃ Am, !subDef Am A 1 ∧ ∃ q, !pi₁Def q Am ∧
+        ( (q = 6 ∧ ∃ bod, !pi₂Def bod Am ∧ ∃ nn, !(Bootstrapping.Arithmetic.numeralGraph) nn n ∧
+            ∃ sub, !(substs1Graph ℒₒᵣ) sub nn bod ∧ !seqSetSuccDef y s sub)
+        ∨ (q ≠ 6 ∧ ∃ p2Am, !pi₂Def p2Am Am ∧ ∃ qq, !pi₁Def qq p2Am ∧ ∃ ng, !(negGraph ℒₒᵣ) ng qq ∧
+            ∃ bot, !qqFalsumDef bot ∧ ∃ ss, !seqSetSuccDef ss s bot ∧ !seqAddAntDef y ng ss) ))
+    ∨ (p1I ≠ 2 ∧ p1I ≠ 0 ∧ ∃ p2I, !pi₂Def p2I I ∧ ∃ A, !pi₂Def A p2I ∧ ∃ Am, !subDef Am A 1 ∧
+        ∃ q, !pi₁Def q Am ∧
+        ( (q = 6 ∧ ∃ k, !pi₁Def k p2I ∧ ∃ nk, !(Bootstrapping.Arithmetic.numeralGraph) nk k ∧
+            ∃ bod, !pi₂Def bod Am ∧
+            ∃ sub, !(substs1Graph ℒₒᵣ) sub nk bod ∧ !seqAddAntDef y sub s)
+        ∨ (q ≠ 6 ∧ ∃ p2Am, !pi₂Def p2Am Am ∧ ∃ qq, !pi₁Def qq p2Am ∧ ∃ ng, !(negGraph ℒₒᵣ) ng qq ∧
+            !seqSetSuccDef y s ng) )) )”
+
+set_option maxHeartbeats 2000000 in
+instance tpReduce_defined : 𝚺₁-Function₃ (tpReduce : V → V → V → V) via tpReduceDef := .mk fun v ↦ by
+  simp [tpReduceDef, tpReduce, pi₁_defined.iff, pi₂_defined.iff, sub_defined.iff,
+    (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff, (substs1.defined (L := ℒₒᵣ)).iff,
+    (neg.defined (L := ℒₒᵣ)).iff, qqFalsum_defined.iff, seqSetSucc_defined.iff, seqAddAnt_defined.iff]
+  by_cases h2 : π₁ (v 1) = 2
+  · simp [h2]
+  · by_cases h0 : π₁ (v 1) = 0
+    · simp [h2, h0]
+      by_cases hq : π₁ (π₂ (v 1) - 1) = 6 <;> simp [hq, numeral_eq_natCast]
+    · simp [h2, h0]
+      by_cases hq : π₁ (π₂ (π₂ (v 1)) - 1) = 6 <;> simp [hq, numeral_eq_natCast]
+
+instance tpReduce_definable : 𝚺₁-Function₃ (tpReduce : V → V → V → V) := tpReduce_defined.to_definable
+instance tpReduce_definable' (Γ) : Γ-[m + 1]-Function₃ (tpReduce : V → V → V → V) :=
+  tpReduce_definable.of_sigmaOne
+
 /-- `iCritAux d i v = zK (fstIdx d) (zKrank d) (seqUpdate (zKseq d) i v)` (the critical auxiliary
 `d{ν} = K^r(i/v)`, a chain with premise `i` replaced by `v`). -/
 def _root_.LO.FirstOrder.Arithmetic.iCritAuxDef : 𝚺₁.Semisentence 4 := .mkSigma
