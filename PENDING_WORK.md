@@ -15,9 +15,16 @@ splice descent (`7371573`), baton (`3dc2cb4`).
 - **`iord_descent_red_zK_splice_eq`** (5.2.1) — reduces to the two halves' bounds + rank bound `r'≤dg(parent)`
   via the banked rank-general `iord_descent_seqInsert'`.
 
-### ⚠️ THE RECURSION WALL — kernel-confirmed obstruction (the gating crux)
-Wiring the two `_eq` lemmas needs `iord_descent_red` restructured as a strong induction (mirror
-`redSoundGen`) to supply the premise IH `iRedDescent (red dᵢ) dᵢ`. **The IH's STRICT `otil_lt` requires the
+### K-branch dispatch — three reducible sub-cases CLOSED in place (lap-109 late)
+`iord_descent_red`'s non-critical K-branch now dispatches on the selected premise's tag. CLOSED (banked,
+non-recursive `iRedDescent` bundles → `iord_descent_red_zK_replace_eq`): **I¬** (`iRedDescent_zIneg`),
+**Ind** (`iRedDescent_zInd`), **I∀** (`iRedDescent_red_zIall`, NEW — eigensubst-invariant, no regularity).
+**REMAINING sub-sorries (4):** `atom`/`axAll`/`axNeg` (the FIXPOINT defect — `red dᵢ = dᵢ`, no descent) and
+`chain` (the recursive core). The critical branch + I-rule/Ind branches are DONE.
+
+### ⚠️ THE RECURSION WALL — kernel-confirmed obstruction (the gating crux for the `chain` sub-case)
+Wiring the two `_eq` lemmas for the `chain` sub-case needs `iord_descent_red` restructured as a strong
+induction (mirror `redSoundGen`) to supply the premise IH `iRedDescent (red dᵢ) dᵢ`. **The IH's STRICT `otil_lt` requires the
 selected premise `dᵢ = znth ds (permIdx)` to be REDUCIBLE.** Kernel facts established this lap:
 - `iperm (isymLk k A) q ↔ inAnt A (seqAnt q)` (`iperm_isymLk_iff`) — axiom leaves CAN be permissible.
 - `iperm isymRep q` is ALWAYS true (`iperm_isymRep`) — every Rep premise is permissible ⟹ `permIdx = 0` when
