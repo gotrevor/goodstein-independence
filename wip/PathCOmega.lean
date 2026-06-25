@@ -252,6 +252,30 @@ noncomputable def sord (d : V) : V :=
 @[simp] lemma sord_zIndOmega (s at' p d0 d1 α : V) : sord (zIndOmega s at' p d0 d1 α) = α := by
   rw [sord, zTag_zIndOmega, if_neg (by simp), if_pos rfl, zRest_zIndOmega]; simp
 
+/-! #### `sord` is `𝚺₁`-definable (the arithmetization prerequisite)
+
+`gentzenDescentφ` arithmetizes `n ↦ sord (red^[n] d₀)`; that needs `sord` to be a `𝚺₁` internal function.
+It is: a 2-way `zTag`-dispatch (`𝚺₀`) over `zRest`-projections (`𝚺₀`) with an `iord` fallback (`𝚺₁`), so
+the graph is `𝚺₁`. Templated on `iordDef` (the assignment's own graph), the dispatch encoded as guarded
+implications matching the `if`-cascade. -/
+
+/-- **The `𝚺₁` graph of `sord`.** `y = sord d` iff: `tg = zTag d`, `zr = zRest d`, and the tag-guarded
+value (`tg=7 ⟹ y=π₂²zr`; `tg=8 ⟹ y=π₂⁴zr`; else `y=iord d`). Deterministic disjunction (the `if`-cascade
+read as guarded `∨`), templated on `tpReduceDef`'s dispatch idiom. -/
+noncomputable def sordDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ tg, !zTagDef tg d ∧ ∃ zr, !zRestDef zr d ∧
+    ( (tg = 7 ∧ ∃ a, !pi₂Def a zr ∧ !pi₂Def y a)
+    ∨ (tg ≠ 7 ∧ tg = 8 ∧ ∃ a, !pi₂Def a zr ∧ ∃ b, !pi₂Def b a ∧ ∃ e, !pi₂Def e b ∧ !pi₂Def y e)
+    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ !iordDef y d) )”
+
+instance sord_defined : 𝚺₁-Function₁ (sord : V → V) via sordDef := .mk fun v ↦ by
+  simp [sordDef, sord, zTag_defined.iff, zRest_defined.iff, pi₂_defined.iff, iord_defined.iff]
+  by_cases h7 : zTag (v 1) = 7
+  · simp [h7, numeral_eq_natCast]
+  · by_cases h8 : zTag (v 1) = 8 <;> simp [h7, h8, numeral_eq_natCast]
+
+instance sord_definable : 𝚺₁-Function₁ (sord : V → V) := sord_defined.to_definable
+
 /-- **The ω-∀-cut drop, in `sord` form (brick 1 ∘ projection).** A critical ∀-cut on the stored-ordinal
 ω-∀-node `zAllOmega s d0 a α` selects premise `zsubst d0 a t`, whose computed `iord` is `≺` the node's
 stored `sord = α` — i.e. `icmp (iord premise) (sord node) = 0`. This is brick 1's `zAllOmega_cut_descends`
