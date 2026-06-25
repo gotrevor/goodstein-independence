@@ -85,7 +85,7 @@ import GoodsteinPA.DescentConstruction
 import GoodsteinPA.ReductModel
 import GoodsteinPA.XCongruence
 
--- Second front to the axiom-free headline (lap 78): discharge Foundation's `PA_delta1Definable`
--- axiom in-repo. `𝗣𝗔⁻.Δ₁` is axiom-clean; the full induction-scheme Δ₁ recognizer is the disclosed
--- remaining obligation. Not yet wired into `Reduction.lean` (anti-fraud — see file docstring).
-import GoodsteinPA.PADelta1
+-- Front 2 (Foundation's `PA_delta1Definable` axiom) is RESOLVED UPSTREAM: Foundation@e6e1ad1 proves
+-- both `PA_delta1Definable` / `ISigma1_delta1Definable` as instances (were bare axioms), so
+-- `peano_not_proves_consistency` is now axiom-clean with zero in-repo work. The old `PADelta1.lean`
+-- in-repo re-derivation (a sorry'd `(InductionScheme ℒₒᵣ Set.univ).Δ₁`) is deleted as vestigial.

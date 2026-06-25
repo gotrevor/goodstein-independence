@@ -4,8 +4,9 @@
 # mathlib-only growth theory) lives in ~/src/lean-formalizations.
 #
 # Foundation comes from the lean-universe store (4.31.0). It was added as a universe package
-# 2026-06-21, so goodstein consumes it via a git require (gotrevor/Foundation@a5eda23, our v4.31
-# port; upstream is still v4.29.0) with the store's pre-built oleans CoW-cloned into this repo's
+# 2026-06-21, so goodstein consumes it via a git require (gotrevor/Foundation, our v4.31 port;
+# exact rev pinned in the [[require]] block below, maintained by lake-base link) with the
+# store's pre-built oleans CoW-cloned into this repo's
 # own .lake/packages by `lake-base link goodstein-independence --require Foundation`. That makes
 # goodstein self-contained + offline-buildable (no dependency on the ~/src/Foundation sibling
 # clone) and still Replays Foundation's 1671 jobs instead of rebuilding. The [[require]] block
@@ -20,4 +21,4 @@ name = "GoodsteinPA"
 [[require]]
 name = "Foundation"
 git = "https://github.com/gotrevor/Foundation.git"
-rev = "a5eda23a4bd57517cefaab3c7d31cafc5e11d9c6"
+rev = "e6e1ad149d3622b1e670c62092827f84fc276d1c"
