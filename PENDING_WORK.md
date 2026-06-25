@@ -1,5 +1,43 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 100 — 3/4 non-Rep replace capstones ASSEMBLED + wiring piece B banked
+**Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms).** This lap banked,
+all axiom-clean `[propext, choice, Quot.sound]`:
+- `ZDerivation_zK_replace_zIneg_of` (Crux2Blueprint) — **I¬ non-Rep replace fully assembled** modulo orbit
+  invariants. Uses `ZDerivation_iCritReplaceReduce_general` (membership isChainInf, antecedent GROWS by `p`).
+  Un-discharged inputs: `hd0ant : seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p` (faithful premise-antecedent,
+  the I¬ analogue of I∀'s O3 freshness — `zInegWff` pins only `p ∈ antecedent`), `hSeqs`/`hSeqsi` (Seq-wff),
+  `hthread`/`hrank`.
+- `ZDerivation_zK_replace_zAxAll_of` (Crux2Blueprint) — **axAll non-Rep replace fully assembled** (cleanest;
+  NO threading needed — pure antecedent monotonicity via `ZDerivation_zK_seqAddAnt`). Un-discharged:
+  `hSeqs` + `hAwff : IsUFormula (substs1 (numeral k) p)`.
+- `thread_rank_restrict_of_le` (InternalZ, after `permIdx_le_of_isPermPrem`) — **wiring piece B**: restrict
+  parent threading/rank up-to-`j₀` down to `i ≤ j₀`. Trivial `le_trans`, exactly the capstones' `hthread`/`hrank`.
+
+**STATUS of the four non-Rep cases:** I∀ ✅ (lap 99 `_zIall_of`), I¬ ✅, axAll ✅, **axNeg ❌ OPEN (Path C)**.
+
+### ⚠ axNeg is GENUINELY harder — NOT a simple succedent-replacement (lap-100 finding)
+The axNeg reduct (5.2.2, `tp(d):=tp(dᵢ)`) gives conclusion `Γ→p` (`seqSetSucc s p`). But the reduct premise
+`red dᵢ = dᵢ` keeps succedent `D = seqSucc sᵢ ≠ p`. So unlike I∀/I¬ (where the reduced premise's succedent
+MATCHES the new conclusion succedent, feeding `isChainInf_…_reduceR`'s `hsucc_v`), **for axNeg no premise has
+succedent `p`** — the naive `isChainInf (seqSetSucc s p) r ds` is FALSE (`chainAsucc ds j₀' = p` has no
+witness). Buchholz handles `¬A` via the CRITICAL pair (5.1: an L⁰_{¬A} redex pairs with an R_{¬A} I¬-intro,
+cut on `¬A` → cut on `A`), NOT a standalone 5.2.2 replace. **Two attack paths for axNeg:**
+  - *Path C1:* prove axNeg can NEVER be the minimal-permissible non-chain premise on the ⊥-orbit (then the
+    `htp`-false dispatch branch for axNeg is vacuous / unreachable). Check `iperm (L⁰_{¬p}) s` reachability.
+  - *Path C2:* build a genuine succedent-replacement constructor that re-derives `Γ→p` using the `¬p ∈ Γ`
+    side condition + the chain — i.e. follow Buchholz's actual ¬-axiom cut (restructures premises). Read
+    `papers/buchholz-on-gentzens…md:80-95` (the `A,Θ→⊥ / Θ→A / Θ→D` triple for `V=¬A`).
+
+### ▶ THE bottleneck remains the motive cascade (next: Path 1 / Path A1)
+With 3/4 capstones + piece B, the validity infra is DONE-enough to consume the invariants. The remaining
+work to CLOSE `Crux2Blueprint`'s two non-Rep sorries is to SUPPLY the invariants via a strengthened
+`redSoundGen` motive (define `ZGood`/`ZFresh` hereditary bundle: Seq-wff conclusion + O3-freshness +
+faithful premise-antecedent + threading; prove `red`-heredity; thread as a second motive conjunct). This is
+the single biggest remaining lever. START here next lap.
+
+---
+
 ## 📋 Lap 99 — FULL crux-2 sorry inventory + dependency structure (unblock-protocol)
 **Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms).** Every open crux-2
 sorry and how they depend:
