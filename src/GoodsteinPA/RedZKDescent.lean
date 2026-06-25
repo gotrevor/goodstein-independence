@@ -145,13 +145,15 @@ documented residual (the cut-rank `rk(A(dᵢ))` degree-drop bookkeeping). Mirror
 `idg_iCritAux_le`) since `iotil`/`idg` ignore the half's reset conclusion/rank. -/
 lemma iCrit_halves_descend {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh ds)
     (hds : Seq ds) (hmem : ∀ i < lh ds, ZDerivation (znth ds i))
-    (hreg : ∀ i < lh ds, ZRegular (znth ds i)) (hvalid : zKValid s r ds) :
+    (hreg : ∀ i < lh ds, ZRegular (znth ds i)) (hvalid : zKValid s r ds)
+    (hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r) :
     icmp (iotil (znth (zKseq (red (zK s r ds))) 0)) (iotil (zK s r ds)) = 0 ∧
     icmp (iotil (znth (zKseq (red (zK s r ds))) 1)) (iotil (zK s r ds)) = 0 ∧
     idg (znth (zKseq (red (zK s r ds))) 0) ≤ idg (zK s r ds) ∧
     idg (znth (zKseq (red (zK s r ds))) 1) ≤ idg (zK s r ds) ∧
     isNF (iotil (znth (zKseq (red (zK s r ds))) 0)) ∧
-    isNF (iotil (znth (zKseq (red (zK s r ds))) 1)) := by
+    isNF (iotil (znth (zKseq (red (zK s r ds))) 1)) ∧
+    irk (seqSucc (fstIdx (znth (zKseq (red (zK s r ds))) 0))) < r := by
   obtain ⟨hci, hperm0, hnperm0, hf1, hf2, hf5, hf6, _hsucc, _hssf, _hsaf⟩ := hvalid
   obtain ⟨j0, hj0, hAj0, hchain, hrank⟩ := hci
   have hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ False :=
@@ -217,7 +219,16 @@ lemma iCrit_halves_descend {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh ds)
   have hidg1 : idg (znth (zKseq (red (zK s r ds))) 1)
       = idg (iCritAux (zK s r ds) (redexJ (zK s r ds)) vJ) := by
     rw [e1, iCritAux_zK, idg_zK _ _ _ (seqUpdate_seq ds _ vJ), idg_zK _ _ _ (seqUpdate_seq ds _ vJ)]
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  -- The redex R-principal `A_i = chainAsucc ds (redexI)` equals `π₂ (tp dᵢ)` by R-permissibility
+  -- (global `hperm0` at `redexI < lh ds`), so the redexCode's `tp = R_{A_i}` is in `chainAsucc` form
+  -- — exactly what `irk_cutFormula_lt` consumes. This is the rank-side conjunct (T3.4(a) strict drop).
+  have hRedI' : tp (znth ds (redexI (zK s r ds)))
+      = isymR (π₂ (tp (znth ds (redexI (zK s r ds))))) := hRedI
+  have hChA : chainAsucc ds (redexI (zK s r ds)) = π₂ (tp (znth ds (redexI (zK s r ds)))) := by
+    have hp := hperm0 _ hIlt
+    rw [hRedI', iperm_isymR_iff] at hp
+    exact hp.symm
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · rw [hiotil0]; exact iotil_iCritAux_lt hds hIlt hbI.otil_lt hNF hbI.nf
   · rw [hiotil1]; exact iotil_iCritAux_lt hds hJlt hbJ.otil_lt hNF hbJ.nf
   · rw [hidg0]; exact idg_iCritAux_le hds hIlt hbI.dg_le
@@ -232,6 +243,12 @@ lemma iCrit_halves_descend {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh ds)
       rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
       · rw [znth_seqUpdate_self hJlt]; exact hbJ.nf
       · rw [znth_seqUpdate_of_ne hne]; exact hNF n)
+  · -- T3.4(a): `rk(A(d)) < r`. Read out the half-0 succedent as `cutFormula`, then strict drop.
+    rw [e0, fstIdx_zK, seqSucc_seqSetSucc]
+    refine irk_cutFormula_lt (d := zK s r ds) ?_ ?_ ?_
+    · rw [zKseq_zK]; exact hmem _ hIlt
+    · rw [zKseq_zK, hChA]; exact hRedI
+    · rw [zKseq_zK]; exact hrankI
 
 /-- **The non-critical REPLACE-branch K-case descent (Buchholz Def-3.2 case 5.2.2), conditional on the
 selected premise's reduct descending.** Both replace dispatches (`red_zK_rep` chain-`dᵢ`-non-critical and

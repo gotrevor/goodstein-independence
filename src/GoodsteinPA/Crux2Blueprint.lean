@@ -529,6 +529,27 @@ theorem iord_descent_red_zInd (d : V) (hd : ZDerivation d) (htag : zTag d = 3) :
   · simp at htag
   · simp at htag
 
+/-- **[OPEN — the chain rank invariant, T3.4(a) input]** For a valid critical `K`-chain `zK s r ds`,
+the `redexCode` redex's R-principal `A_i = chainAsucc ds (redexI)` has rank `≤ r`.
+
+This is the lone residual of the splice `hr'` degree-drop after lap-112's cut-formula strip wired in:
+`irk_cutFormula_lt` gives `rk(A(d)) < rk(A_i) ≤ r` and all the surrounding `idg`/`iseqMaxIdg` arithmetic
+is now PROVEN (`iCrit_halves_descend` 7th conjunct + `iord_descent_red`'s splice branch); the only
+missing fact is this `rk(A_i) ≤ r`.
+
+**Why it is not yet free.** `zKValid`'s chain-rank clause (`isChainInf`) only bounds
+`∀ i < j₀, irk (chainAsucc ds i) ≤ r` for the chain's distinguished exit index `j₀`. To apply it to the
+`redexCode` redex `(redexI, redexJ)` we need `redexI < j₀`. That holds once `redexJ ≤ j₀` (then
+`redexI < redexJ ≤ j₀`), which is true when `j₀ = lh ds - 1` (every premise is threaded) — exactly how
+genuine reducts are built (`isChainInf_of_last`). But `isChainInf` only promises `∃ j₀ < lh ds`, so the
+redex could in principle sit in the un-threaded tail `(j₀, lh ds)` with unbounded cut rank. The faithful
+fix (next lap) is to strengthen the chain-validity invariant so the exit index is the last premise
+(`j₀ = lh ds - 1`), making the rank clause cover every cut; that ripples through `isChainInf`'s
+definability + every reduct's chain-validity proof, so it is its own focused campaign. -/
+lemma irk_chainAsucc_redexI_le {s r ds : V} (hvalid : zKValid s r ds) :
+    irk (chainAsucc ds (redexI (zK s r ds))) ≤ r := by
+  sorry
+
 /-- **M1b (descent re-point, one step).** The banked ordinal descent, restated over `red`. A `∅→⊥`
 derivation has top tag `3` (Ind) or `4` (K/cut) (`zTag_Ind_or_K_of_ZDerivesEmpty`).
 
@@ -607,11 +628,27 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) :
               ZRegular_zK_premise hds' (heq ▸ hreg (permIdx (zK s r ds)) hcrit) hi
             have hvalidZ : zKValid s' r' ds' :=
               zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid', zKCritical_of_not_permIdx_lt hcrit'⟩
-            obtain ⟨ha, hb, hag, hbg, hNFa, hNFb⟩ :=
-              iCrit_halves_descend hcrit' hds' hmem' hreg' hvalidZ
-            rw [← heq] at ha hb hag hbg hNFa hNFb
+            have hrankI' : irk (chainAsucc ds' (redexI (zK s' r' ds'))) ≤ r' :=
+              irk_chainAsucc_redexI_le hvalidZ
+            obtain ⟨ha, hb, hag, hbg, hNFa, hNFb, hrk7⟩ :=
+              iCrit_halves_descend hcrit' hds' hmem' hreg' hvalidZ hrankI'
+            rw [← heq] at ha hb hag hbg hNFa hNFb hrk7
             refine Or.inr (iord_descent_red_zK_chain_splice hds hmem hcrit h2 htag4 ?_ ha hb hag hbg hNFa hNFb)
-            sorry
+            -- `hr'`: `max (irk A(dᵢ)) r ≤ idg (zK s r ds)`. The strict drop `irk A(dᵢ) < r' = zKrank dᵢ`
+            -- (`hrk7`) chains: `< r' ≤ idg dᵢ ≤ iseqMaxIdg ds`, so `≤ iseqMaxIdg ds - 1 ≤ idg (zK s r ds)`;
+            -- `r ≤ idg (zK s r ds)` directly. All `idg` arithmetic now PROVEN.
+            have hr'_le_idgdi : r' ≤ idg (znth ds (permIdx (zK s r ds))) := by
+              rw [heq]; exact r_le_idg_zK s' r' ds' hds'
+            have hdi_le : idg (znth ds (permIdx (zK s r ds))) ≤ iseqMaxIdg ds :=
+              le_iseqMaxIdgAux (lh ds) _ hcrit
+            have hinner : irk (seqSucc (fstIdx (znth (zKseq
+                (red (znth ds (permIdx (zK s r ds))))) 0))) < idg (znth ds (permIdx (zK s r ds))) :=
+              lt_of_lt_of_le hrk7 hr'_le_idgdi
+            rw [idg_zK s r ds hds]
+            exact max_le
+              (le_trans (le_trans (le_pred_of_lt hinner) (tsub_le_tsub_right hdi_le 1))
+                (le_max_right _ _))
+              (le_max_left _ _)
         · -- axAll (tag 5): VACUOUS in a ⊥-orbit — the SELECTION INVARIANT (lap 111). Cor 2.1
           -- (`tp_selected_isymRep_of_emptyAnt_botSucc`) forces the selected premise of a `∅→⊥` K-node
           -- to have `tp = isymRep`, but an L-axiom has `tp = isymLk ≠ isymRep`. So `permIdx` never
