@@ -484,6 +484,30 @@ theorem sord_redAllEx_lt {s d0 a αAll Cnew dR α : V}
   -- selected ∀-premise: iord ≺ αAll (brick 1) ≺ α, so ≺ α (transitivity); ∃-premise ≺ α (hEx)
   exact icmp_imax_lt (icmp_trans' (zAllOmega_cut_descends hAll ht) hAlllt) hEx.2
 
+/-- **The induction/∃-cut reduct.** The cut formula is the induction conclusion `∀x F` (derived by the
+induction ω-node `zIndOmega`) cut against `∃x ¬F` (the ∃-node `dR`). The reduct SELECTS the depth-`t`
+induction unfolding `zK s' (irk p) (iIndReductSeq d0 d1 t)` (`t = zExTerm dR`, deriving `F(t)`; brick 3) and
+the ∃-premise `zExPrem dR` (`⊢ ¬F(t)`), rebuilding the smaller cut on `Cnew = F(t)` storing the ε₀-max. The
+unfolding conclusion `s'` is a parameter (the ordinal bound brick 3 gives is `s'`-independent). -/
+noncomputable def redIndEx (s s' at' p d0 d1 Cnew dR : V) : V :=
+  zCutOmega s (imax (iord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))) (sord (zExPrem dR)))
+    (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR))) (zExPrem dR) Cnew
+
+/-- **The induction/∃-cut reduction STRICTLY drops the stored ordinal.** From brick 3
+(`iord_iIndReduct_lt_storedBound`: the depth-`t` unfolding's `iord ≺ indOmegaStoredOrd`, for `t > 0` and NF
+premises) and the cut's operator-control on the induction node (`indOmegaStoredOrd ≺ α`), the selected
+unfolding's `iord ≺ α` (transitivity); the ∃-premise's `sord ≺ α` (`hEx`); so the reduct's stored ordinal
+`≺ α`. The induction analogue of `sord_redAllEx_lt` — the genuine LIMIT case the computed `iord` could not
+itself assign, here discharged via the stored limit. -/
+theorem sord_redIndEx_lt {s s' at' p d0 d1 Cnew dR α : V}
+    (hk : 0 < zExTerm dR) (hd0 : isNF (iotil d0)) (hd1 : isNF (iotil d1))
+    (hIndlt : icmp (indOmegaStoredOrd s at' p d0 d1) α = 0)
+    (hEx : zExOmegaValid α (zExPrem dR)) :
+    icmp (sord (redIndEx s s' at' p d0 d1 Cnew dR)) α = 0 := by
+  rw [redIndEx, sord_zCutOmega]
+  exact icmp_imax_lt
+    (icmp_trans' (iord_iIndReduct_lt_storedBound hk hd0 hd1) hIndlt) hEx.2
+
 /-! ### Node projections + the cut-orbit `red` (first dispatch case)
 
 The total `red` reduces the topmost cut by reading its premises' node types off the data. Here are the
