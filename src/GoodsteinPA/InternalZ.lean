@@ -5033,6 +5033,35 @@ lemma fstIdx_red_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
 
+/-! ### The ordinal of `red`'s K-case = the ordinal of `iR2`'s K-case (the descent bridge)
+
+`iRcritG` (genuine, correct endsequents) and `iRcrit` (ordinal-shadow) differ ONLY in the auxiliaries'
+conclusion sequents (`seqSetSucc`/`seqAddAnt` vs the reused `fstIdx d`). Since `iotil`/`idg` of a chain
+`zK s r ds` are independent of `s` (`iotil_zK = iseqNaddIdg ds`, `idg_zK = max r (iseqMaxIdg ds - 1)`),
+the two reducts carry the SAME `iord`. So the (banked) ordinal descent on `iRcrit` transfers verbatim to
+`red`'s K-case — `red`'s validity-faithfulness costs nothing on the ordinal side. -/
+
+@[simp] lemma iotil_iRcritG_eq_iRcrit (d : V) (ρ : V → V) :
+    iotil (iRcritG d ρ) = iotil (iRcrit d ρ) := by
+  rw [iRcritG, iCritReductG, iRcrit, iCritReduct, iCritAux, iCritAux,
+    iotil_zK _ _ _ (iCritReductSeq_seq _ _), iotil_zK _ _ _ (iCritReductSeq_seq _ _),
+    iseqNaddIdg_iCritReductSeq, iseqNaddIdg_iCritReductSeq,
+    iotil_zK _ _ _ (seqUpdate_seq _ _ _), iotil_zK _ _ _ (seqUpdate_seq _ _ _),
+    iotil_zK _ _ _ (seqUpdate_seq _ _ _), iotil_zK _ _ _ (seqUpdate_seq _ _ _)]
+
+@[simp] lemma idg_iRcritG_eq_iRcrit (d : V) (ρ : V → V) :
+    idg (iRcritG d ρ) = idg (iRcrit d ρ) := by
+  rw [iRcritG, iCritReductG, iRcrit, iCritReduct, iCritAux, iCritAux,
+    idg_zK _ _ _ (iCritReductSeq_seq _ _), idg_zK _ _ _ (iCritReductSeq_seq _ _),
+    iseqMaxIdg_iCritReductSeq, iseqMaxIdg_iCritReductSeq,
+    idg_zK _ _ _ (seqUpdate_seq _ _ _), idg_zK _ _ _ (seqUpdate_seq _ _ _),
+    idg_zK _ _ _ (seqUpdate_seq _ _ _), idg_zK _ _ _ (seqUpdate_seq _ _ _)]
+
+/-- **The genuine reduct's K-case has the same ordinal as the ordinal-shadow `iRcrit`.** -/
+lemma iord_iRcritG_eq_iRcrit (d : V) (ρ : V → V) :
+    iord (iRcritG d ρ) = iord (iRcrit d ρ) := by
+  rw [iord_eq, iord_eq, iotil_iRcritG_eq_iRcrit, idg_iRcritG_eq_iRcrit]
+
 /-! ### Structural correctness of the `iR2` table (mirror `idg`) -/
 
 private lemma def_iRTable {k} (i : Fin k) :
