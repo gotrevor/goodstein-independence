@@ -7012,6 +7012,21 @@ lemma zDerivation_zIneg_inv {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
 
+/-- **Route-B conclusion invariant, I¬ case (lap 91).** The I¬ reduct `red (zIneg s p d0) = d0`
+(Buchholz Def 3.2 clause 3, `d[0] := d₀`, NO substitution) already meets route B: its succedent equals
+that of the reduced sequent `tpReduce (R_¬p) Π 0 = p,Γ→⊥` (both `⊥`), and `p` is in its antecedent —
+i.e. `d0 ⊢ p,Γ→⊥`, exactly Buchholz `R_¬A(Π,0)`. So the I¬ branch needs NO rewire and NO eigen-subst
+(unlike I∀, Buchholz clause 2, which substitutes the eigenvariable — see PENDING_WORK lap-91 O2). The
+full antecedent equality is up-to-`inAnt` (O3): `zInegWff` pins only `p ∈ antecedent`, which is what the
+parent chain-rule threading (`isChainInf` via `inAnt`) consumes. -/
+lemma red_zIneg_tpReduce {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
+    seqSucc (fstIdx (red (zIneg s p d0)))
+        = seqSucc (tpReduce (tp (zIneg s p d0)) (fstIdx (zIneg s p d0)) 0)
+      ∧ inAnt p (seqAnt (fstIdx (red (zIneg s p d0)))) := by
+  obtain ⟨hd0, hsucc, hbot, hmem, hp⟩ := zDerivation_zIneg_inv hZ
+  rw [red_zIneg, tp_zIneg, tpReduce_isymR_neg p (fstIdx (zIneg s p d0)) 0 hp]
+  exact ⟨by rw [hbot, seqSucc_seqAddAnt, seqSucc_seqSetSucc], hmem⟩
+
 /-- **§5 ∀-axiom inversion**: a `ZDerivation` of the left-axiom `zAxAll s p k` carries the matrix's
 formula-hood and the side condition `∀p ∈ Γ`. Peels the L-redex premise (the `^∀ p` cut formula). -/
 lemma zDerivation_zAxAll_inv {s p k : V} (hZ : ZDerivation (zAxAll s p k)) :
