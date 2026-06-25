@@ -29,7 +29,7 @@ Verified open-access at download time 2026-06-22 (US network).
 - **The source independence result.** Theorem 1: Goodstein's theorem (formalized in first-order arithmetic) is **not provable in PA** — plus the Hydra game. This is the headline statement the whole box exists to formalize. Page-1 verified: contains the `G_n(m)` definition and the "not provable in P" claim. Phase: **encoding** + **Goodstein ⟹ TI(ε₀)** (the target theorem itself).
 
 ### Goodstein, R. L. (1944). "On the restricted ordinal theorem." J. Symbolic Logic 9, 33–41. — see "Needs access"
-(No open copy found; original is JSTOR/paywalled. The *content* — the termination theorem via base-bumping ↔ ordinals — is reproduced faithfully in Caicedo, Agboola, Towsner, and Cichon below, which suffice for the encoding phase.)
+(No open copy found; original is JSTOR/paywalled. The *content* — the termination theorem via base-bumping ↔ ordinals — is reproduced faithfully in Caicedo, Sladek, Towsner, and Cichon below, which suffice for the encoding phase.)
 
 ### Cichoń, E. A. (1983). "A short proof of two recently discovered independence results using recursion theoretic methods." Proc. AMS 87(4), 704–706.
 - Source URL: https://www.ams.org/journals/proc/1983-087-04/S0002-9939-1983-0687646-0/S0002-9939-1983-0687646-0.pdf (AMS open)
@@ -69,12 +69,12 @@ Verified open-access at download time 2026-06-22 (US network).
 ### Siders, A. "Gentzen's consistency proofs for arithmetic." (JAIST lecture notes.)
 - Source URL: http://www.jaist.ac.jp/~mizuhito/jss12/Siders.pdf (open course notes)
 - Local file: `siders-gentzen-consistency-proofs-arithmetic.pdf`
-- **Compact modern English exposition of Gentzen's PA consistency proof.** Good companion to the German Buchholz notes for the same ε₀-bounded argument. Phase: **ε₀ girder**.
+- ⚠️ **Format corrected 2026-06-24:** this is a **26-slide March 2012 lecture deck** (Annika Siders, Univ. of Helsinki; JSS'12), **not** a full paper — it states the architecture + one worked case, but the actual proofs live in her separate "Without Heightlines" paper (NOT in this repo); do **not** cite lemmas from it. Genuine value: corroborates crux-2's hard nut (independently fingers *contraction on the cut formula*) and sketches a Howard-style **vector-assignment** descent — a fallback mechanism, not a drop-in (it targets intuitionistic HA). Phase: **ε₀ girder** (cross-check / fallback only).
 
 ### Arai, T. (2023). "Lectures on ordinal analysis." arXiv:2304.00246.
 - Source URL: https://arxiv.org/pdf/2304.00246
 - Local file: `arai-lectures-on-ordinal-analysis.pdf`
-- **Modern, self-contained ordinal-analysis lecture notes** (84 pp): ordinal notations, infinitary derivations, cut-elimination, proof-theoretic ordinals. Author confirmed (Toshiyasu Arai). Phase: **ε₀ girder** + **encoding** (ordinal notation systems).
+- **Modern, self-contained ordinal-analysis lecture notes** (84 pp): ordinal notations, infinitary derivations, cut-elimination, proof-theoretic ordinals. Author confirmed (Toshiyasu Arai). ⚠️ **Altitude corrected 2026-06-24:** the worked content is **KPω-and-above** (Bachmann–Howard, recursively-Mahlo, Π-reflection); ε₀ appears only as scaffolding (the `ε_{Ω+1}` index of the ψ-collapse), with **no PA/Goodstein/ε₀-as-PA-ordinal content**. Treat as a **method-exemplar / "next-storey" reference** (the operator-controlled-derivation *shape*, cf. the banked `PA ⊬ TI(ε₀)` monument), NOT an ε₀-girder working source. Phase: **method exemplar** (one tier above ε₀).
 
 ### Freund, A. (2021). "Unprovability in mathematics: a first course on ordinal analysis." arXiv:2109.06258.
 - Source URL: https://arxiv.org/pdf/2109.06258
@@ -91,17 +91,17 @@ Verified open-access at download time 2026-06-22 (US network).
 - Local file: `caicedo-goodstein-function-notes.pdf`
 - Short, clean exposition of Goodstein sequences and the base-bumping ↔ ordinal correspondence. Phase: **encoding** (the `G_n(m)` ↔ CNF/ε₀ map, stated crisply).
 
-### Agboola, A. "The termite and the tower: Goodstein sequences and provability in PA." (UCSB course notes.)
+### Sladek, W. (2007). "The termite and the tower: Goodstein sequences and provability in PA." (Notes; thanks A. Caicedo. Hosted on A. Agboola's UCSB course page.)
 - Source URL: https://web.math.ucsb.edu/~agboola/teaching/2022/spring/8/notes/goodstein.pdf (course site)
 - Local file: `agboola-termite-and-tower-goodstein.pdf`
-- 22-pp lecture notes walking the full arc: Goodstein sequences → ε₀ → unprovability in PA. A readable end-to-end narrative of the box's whole storyline. Phase: **encoding** + **Goodstein ⟹ TI(ε₀)** + **Gödel II hook**.
+- 22-pp lecture notes walking the full arc: Goodstein sequences → ε₀ → unprovability in PA. A readable end-to-end narrative of the box's whole storyline. ⚠️ **Provenance corrected 2026-06-24:** the PDF title page is authored by **Will Sladek (May 17, 2007)**, not Agboola — it is Sladek's notes hosted on Agboola's course site; the local filename `agboola-…` is a misnomer (PDF not renamed). Headline-relevant asset is the growth-rate chain (Caicedo closed form + Kreisel/Kirby–Paris domination). Phase: **encoding** + **Goodstein ⟹ TI(ε₀)** + **Gödel II hook** (Route B / fast-growing).
 
 ### Towsner, H. "Goodstein's theorem, ε₀, and unprovability." (Notes, UPenn.)
 - Source URL: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf (author's site)
 - Local file: `towsner-goodstein-epsilon0-unprovability.pdf`
 - Focused exposition: Goodstein termination ↔ well-foundedness of ε₀, and why that is exactly what PA cannot prove. Phase: **Goodstein ⟹ TI(ε₀)** + **Gödel II hook**.
 
-### Felgenhauer, B. et al. "Nested multisets, hereditary multisets, and syntactic ordinals in Isabelle/HOL." FSCD 2017, LIPIcs 84, art. 11.
+### Blanchette, J. C., Fleury, M. & Traytel, D. "Nested multisets, hereditary multisets, and syntactic ordinals in Isabelle/HOL." FSCD 2017, LIPIcs 84, art. 11.  *(Author corrected 2026-06-24: was mis-credited to "Felgenhauer, B. et al."; Felgenhauer authored the separate `Goodstein_Lambda` AFP entry below.)*
 - Source URL: https://drops.dagstuhl.de/opus/volltexte/2017/7715/pdf/LIPIcs-FSCD-2017-11.pdf (Dagstuhl LIPIcs, open)
 - Local file: `nested-multisets-syntactic-ordinals-isabelle-fscd2017.pdf`
 - **Existing Isabelle/HOL formalization** of ordinals < ε₀ as hereditary multisets, with a machine-checked Goodstein's theorem (AFP entry `Nested_Multisets_Ordinals`, theory `Goodstein_Sequence`). Direct reuse model for the ε₀ ordinal-notation layer. Phase: **formalization** (encoding + Goodstein⟹ε₀ in a real proof assistant).
