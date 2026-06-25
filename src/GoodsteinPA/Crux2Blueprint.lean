@@ -510,6 +510,24 @@ regular ⊥-orbit (`ZDerivesEmptyR`). -/
 theorem redSound : ∀ d : V, ZDerivesEmptyR d → ZDerivation (red d) :=
   fun d h => redSoundGen d h.1.1 h.2
 
+/-- **`iord_descent_red`, Ind case (lap 100).** For an Ind node (`zTag d = 3`), `red d = iRInd d` (a chain
+reduct), and the ordinal strictly descends — directly from the banked `iord_descent_iRInd_of_ZDerivation`.
+This is the Ind leaf of `iord_descent_red`'s dispatch (the orbit's `d` is only Ind or K — atoms/I-rules/
+axioms can't conclude `∅→⊥`). The K case is the deep residual (mirrors `ZDerivation_red_zK`'s dispatch on
+the ordinal side: `iord_descent_iCritAux`/`_seqInsert`/`_iRcrit_of_chain`). -/
+theorem iord_descent_red_zInd (d : V) (hd : ZDerivation d) (htag : zTag d = 3) :
+    icmp (iord (red d)) (iord d) = 0 := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · rw [red_zInd]; exact iord_descent_iRInd_of_ZDerivation _ hd htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+
 /-- **M1b (descent re-point, one step).** The banked ordinal descent, restated over `red`
 (`iR2` analogue: `iord_descent_iR2_of_ZDerivesEmpty`). -/
 theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (iord d) = 0 := sorry
