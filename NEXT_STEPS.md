@@ -1,3 +1,34 @@
+# NEXT STEPS — Path C (lap 106: conclusion-tracking `ZcDer` LANDED; the inversion-recursion architecture pinned)
+
+> **⭐⭐⭐ LAP-106 (read FIRST).** The conclusion-tracking layer (lap-105 NEXT prerequisite 1a) is built and
+> axiom-clean in `wip/PathCOmega.lean`: `inductive ZcDer` (= `ZcOK` + the ω-∀ node's conclusion data), the
+> forgetful `ZcDer.toZcOK` (so all lap-105 ordinal bricks apply), the recursion-equation `zcDer_iff`, the
+> conclusion-faithful principal ∀-inversion `zcDer_iord_descent_allOmega`, the embedding realization
+> `zIall_realizes_ZcDer`, the principal ∀/∃-cut orbit step `zcDer_redAllExS_orbit_step`, and the complete
+> per-node inversion-step family `zcDer_{ex,cut}_inv` / `zcDer_sord_descent_z{ExOmega,CutOmega}`.
+>
+> **⚠ ARCHITECTURAL FORK pinned this lap — the inversion recursion must BRIDGE two calculi.** The META
+> inversion/cut-elim template `Zinfty.{allInvAux,andInvAux,orInvAux,cutElim}` (`src/Zinfty.lean`, complete +
+> axiom-clean) is **one-sided Tait**: `Deriv : Seq → Type`, `Seq = Finset Form` (all formulas on the right,
+> negation via `∼φ`); 9 constructors `axL/axTrue/verumR/weak/andI/orI/allω/exI/cut`; ordinals are mathlib
+> `Ordinal.{0}` (NOT arithmetized). The Path-C ordinal machinery (`sord`/`iord`/`max+1`/`#`, `zCutOmega` etc.,
+> all of `wip/PathCOmega.lean` + `InternalZ`) is **two-sided engine** (`Γ→C`, single succedent, Buchholz Z∞
+> `R_A`/`Lk_A`/`Cut_D`; cut premises `Γ,D→C` and `Γ→D`) with V-internal ε₀-codes. The commuting ∀-inversion
+> needs BOTH: `allInvAux`'s proof STRUCTURE (structural recursion through the last rule) AND the engine's NF
+> ordinal codes (for the PRWO descent). **Decision for next lap:** arithmetize `Zinfty.Deriv`'s proof
+> structure as a V-internal inductive (`ZInf`, the one-sided Tait derivation over Finset-codes), port
+> `allInvAux`/`cutElim` to it (structural — Lean's recursor handles the ω-rule), then relate its
+> derivation-height to the engine `iord` so the descent rides crux-1 PRWO(ε₀). The two-sided `ZcDer` nodes
+> remain the ORDINAL carriers; `ZInf` is the proof-structure carrier. **The leaf-blocker** (`ZcDer.leaf`
+> wraps an arbitrary engine `ZDerivation` → not structurally invertible) is dissolved by `ZInf` having
+> explicit `andI/orI/exI/cut` constructors so leaves are genuinely atomic (`axL/axTrue/verumR`).
+>
+> NEXT (hardest-first): (1) define `ZInf : V → Prop` (arithmetized `Zinfty.Deriv`, Finset-code conclusion,
+> the 9 Tait constructors — strict-positivity of `allω` is the real check); (2) port `allInvAux` to `ZInf`
+> (structural recursion, ω-∀ principal = premise selection); (3) port `cutElim`/`cutElimStep`; (4) bridge
+> `ZInf`-height ↔ engine `iord` for the PRWO descent; (5) wire to `false_of_ZDerivesEmpty`
+> (`Crux2Blueprint.lean:588`) → headline. See `HANDOFF-2026-06-25-lap106.md`, `PENDING_WORK.md` lap-106.
+
 # NEXT STEPS — Path C (lap 105: the `#`-natural-sum resolves the principal ∀/∃ ordinal tension)
 
 > **⭐⭐ LAP-105 UPDATE (read FIRST).** Lap 104 deferred the cut node's ordinal as Gentzen's `ω`-tower,
