@@ -85,6 +85,12 @@ import GoodsteinPA.DescentConstruction
 import GoodsteinPA.ReductModel
 import GoodsteinPA.XCongruence
 
+-- Crux-2 blueprint (judge seed, lap 84): the genuine reduct `red` + `RedSound` ⟹ Gentzen
+-- contradiction, decomposed into named sorried leaves M1a–M3 so the assembly is wired BY
+-- CONSTRUCTION. Green-gated (imported here, not an island). Leaves discharged via the InternalZ
+-- validity infrastructure (`iCritReductG`/`zKValidF_iCritReductGen`/`ZDerivation_iCritReductG_of`).
+import GoodsteinPA.Crux2Blueprint
+
 -- Front 2 (Foundation's `PA_delta1Definable` axiom) is RESOLVED UPSTREAM: Foundation@e6e1ad1 proves
 -- both `PA_delta1Definable` / `ISigma1_delta1Definable` as instances (were bare axioms), so
 -- `peano_not_proves_consistency` is now axiom-clean with zero in-repo work. The old `PADelta1.lean`
