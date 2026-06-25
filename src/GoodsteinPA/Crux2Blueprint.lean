@@ -538,10 +538,11 @@ dispatches the three Buchholz Def-3.2 case-5 sub-reducts (5.1 critical `iRcritG`
 replace, `red_zK_crit`/`_splice`/`_rep`). Only the *critical* sub-reduct's descent is banked
 (`iord_descent_iR2_zK_of_valid`, for the `iR2`-ρ — needs re-pointing to the `red`-ρ); the splice/replace
 sub-reduct descents are the genuine open ordinal-analysis core. See `STATUS.md` / `PENDING_WORK.md` lap-107. -/
-theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (iord d) = 0 := by
+theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) :
+    red d = d ∨ icmp (iord (red d)) (iord d) = 0 := by
   rcases zTag_Ind_or_K_of_ZDerivesEmpty hd.1 with htag | htag
-  · -- Ind (tag 3): `red d = iRInd d`, banked descent. PROVEN.
-    exact iord_descent_red_zInd d hd.1.1 htag
+  · -- Ind (tag 3): `red d = iRInd d`, banked STRICT descent (RIGHT disjunct). PROVEN.
+    exact Or.inr (iord_descent_red_zInd d hd.1.1 htag)
   · -- K/cut (tag 4): dispatch on the `permIdx` criticality sentinel.
     rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
       ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
@@ -564,23 +565,25 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
         rcases zDerivation_iff.mp hdiZ with ⟨s', heq, _⟩ | ⟨s', a', p', d0, heq, hd0, _⟩ |
           ⟨s', p', d0, heq, hd0, _⟩ | ⟨s', at'', p', d0, d1, heq, hd0, hd1, _⟩ |
           ⟨s', r', ds', heq, hds', hmem', hvalid'⟩ | ⟨s', p', k, heq, _, _⟩ | ⟨s', p', heq, _, _⟩
-        · -- atom (tag 0): `red dᵢ = dᵢ`, FIXPOINT — no `iord` descent (engine defect).
-          sorry
+        · -- atom (tag 0): `red dᵢ = dᵢ` (`zAtom` is `red`-normal, `tp = isymRep`, Rep-reduce is the
+          -- identity), so the WHOLE node is a genuine `red`-FIXPOINT. The disjunctive descent closes
+          -- on the LEFT — `red_zK_fixpoint_of_atom_selected` (lap 109, banked). No descent needed.
+          exact Or.inl (red_zK_fixpoint_of_atom_selected hds hcrit heq)
         · -- I∀ (tag 1): `red dᵢ = zsubst d0 a 0`, banked `iRedDescent_red_zIall` (eigensubst-invariant
           -- ordinal bundle, no regularity needed) — no recursion.
           have htag_ne4 : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [heq]; simp
-          refine iord_descent_red_zK_replace_eq hds hmem hcrit
-            (red_zK_rep_nonchain hcrit htag_ne4) ?_
+          refine Or.inr (iord_descent_red_zK_replace_eq hds hmem hcrit
+            (red_zK_rep_nonchain hcrit htag_ne4) ?_)
           rw [heq]; exact iRedDescent_red_zIall (heq ▸ hdiZ)
         · -- I¬ (tag 2): `red dᵢ = d0`, banked `iRedDescent_zIneg` — no recursion.
           have htag_ne4 : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [heq]; simp
-          refine iord_descent_red_zK_replace_eq hds hmem hcrit
-            (red_zK_rep_nonchain hcrit htag_ne4) ?_
+          refine Or.inr (iord_descent_red_zK_replace_eq hds hmem hcrit
+            (red_zK_rep_nonchain hcrit htag_ne4) ?_)
           rw [heq, red_zIneg]; exact iRedDescent_zIneg (isNF_iotil_of_ZDerivation d0 hd0)
         · -- Ind (tag 3): `red dᵢ = iRInd dᵢ`, banked `iRedDescent_zInd` — no recursion.
           have htag_ne4 : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [heq]; simp
-          refine iord_descent_red_zK_replace_eq hds hmem hcrit
-            (red_zK_rep_nonchain hcrit htag_ne4) ?_
+          refine Or.inr (iord_descent_red_zK_replace_eq hds hmem hcrit
+            (red_zK_rep_nonchain hcrit htag_ne4) ?_)
           rw [heq, red_zInd]
           exact iRedDescent_zInd (isNF_iotil_of_ZDerivation d0 hd0) (isNF_iotil_of_ZDerivation d1 hd1)
         · -- chain (tag 4): the recursive core. Dispatch on `dᵢ`'s OWN criticality; each branch is reduced
@@ -589,8 +592,11 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
           have htag4 : zTag (znth ds (permIdx (zK s r ds))) = 4 := by rw [heq]; exact zTag_zK _ _ _
           by_cases h2 : permIdx (znth ds (permIdx (zK s r ds)))
               < lh (zKseq (znth ds (permIdx (zK s r ds))))
-          · -- `dᵢ` non-critical → REPLACE; residual = the premise IH `iRedDescent (red dᵢ) dᵢ`.
-            refine iord_descent_red_zK_chain_replace hds hmem hcrit h2 ?_
+          · -- `dᵢ` non-critical → REPLACE. Disjunctive form: if `dᵢ` is itself a `red`-fixpoint the
+            -- whole node is too (LEFT); otherwise the strong-induction premise IH gives strict descent
+            -- (RIGHT, wired via `iord_descent_red_zK_chain_replace`). The disjunction is TRUE either
+            -- way; residual `sorry` = the IH recursion (the chain-REPLACE strong induction, lap 111+).
+            refine Or.inr (iord_descent_red_zK_chain_replace hds hmem hcrit h2 ?_)
             sorry
           · -- `dᵢ` critical → SPLICE; the two halves' `õ`/`idg`/NF bounds are supplied by the banked
             -- `iCrit_halves_descend` (the critical reduct's halves reduce `dᵢ`'s OWN premise sequence at
@@ -604,16 +610,22 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
             obtain ⟨ha, hb, hag, hbg, hNFa, hNFb⟩ :=
               iCrit_halves_descend hcrit' hds' hmem' hreg' hvalidZ
             rw [← heq] at ha hb hag hbg hNFa hNFb
-            refine iord_descent_red_zK_chain_splice hds hmem hcrit h2 htag4 ?_ ha hb hag hbg hNFa hNFb
+            refine Or.inr (iord_descent_red_zK_chain_splice hds hmem hcrit h2 htag4 ?_ ha hb hag hbg hNFa hNFb)
             sorry
-        · -- axAll (tag 5): `red dᵢ = dᵢ`, FIXPOINT (axiom normal form).
+        · -- axAll (tag 5): NOT a clean node-fixpoint. `red dᵢ = dᵢ` (axiom normal) BUT `tp dᵢ = isymLk`,
+          -- so `red_zK_rep_nonchain` strips the CONCLUSION (`tpReduce isymLk s 0 ≠ s`) while `iord`
+          -- (premise-only) is UNCHANGED ⟹ neither `red d = d` nor strict `iord` descent holds here.
+          -- This closes ONLY via the SELECTION INVARIANT (lap 111, the genuine remaining obstruction):
+          -- `permIdx` of a valid ⊥-orbit K-node never selects a lone axiom L-leaf, so this branch is
+          -- VACUOUS. Residual `sorry` = that invariant (then the disjunction holds vacuously).
           sorry
-        · -- axNeg (tag 6): `red dᵢ = dᵢ`, FIXPOINT (axiom normal form).
+        · -- axNeg (tag 6): same as axAll — `tp dᵢ = isymLk` strips the conclusion, `iord` unchanged;
+          -- closes via the SELECTION INVARIANT (vacuous in a valid ⊥-orbit). Residual.
           sorry
       · -- CRITICAL (5.1): `red (zK s r ds) = iRcritG …`, banked descent. Criticality is supplied by the
         -- `permIdx = lh ds` sentinel (`zKCritical_of_not_permIdx_lt`), so the full `zKValid` is in hand.
-        exact iord_descent_red_zK_crit hcrit hds hmem hreg
-          (zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid, zKCritical_of_not_permIdx_lt hcrit⟩)
+        exact Or.inr (iord_descent_red_zK_crit hcrit hds hmem hreg
+          (zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid, zKCritical_of_not_permIdx_lt hcrit⟩))
     · simp at htag
     · simp at htag
 
@@ -639,10 +651,12 @@ theorem ZDerivesEmptyR_red_iterate {z : V} (hz : ZDerivesEmptyR z) :
       rw [Function.iterate_succ_apply']
       exact ZDerivesEmptyR_red (ZDerivesEmptyR_red_iterate hz n)
 
-/-- **The infinite ε₀-descent of crux-2.** `n ↦ iord (red^[n] z)` strictly `≺`-descends along the regular
-⊥-orbit. An infinite primitive-recursive ε₀-descent — exactly what `PRWO(ε₀)` forbids. -/
+/-- **The per-step crux-2 dichotomy** (lap 111, disjunctive `iord_descent_red`). At each `red`-orbit
+step, either the step is a `red`-**fixpoint** (`red^[n+1] z = red^[n] z`) or `iord` strictly `≺`-descends.
+The endgame (`false_of_ZDerivesEmpty`) closes either way: a fixpoint of `red` on a ⊥-orbit is a cut-free
+∅→⊥ derivation (absurd), and a never-fixpoint orbit is an infinite ε₀-descent (`PRWO(ε₀)` forbids it). -/
 theorem iord_red_iterate_descends {z : V} (hz : ZDerivesEmptyR z) (n : ℕ) :
-    icmp (iord (red^[n+1] z)) (iord (red^[n] z)) = 0 := by
+    red^[n+1] z = red^[n] z ∨ icmp (iord (red^[n+1] z)) (iord (red^[n] z)) = 0 := by
   rw [Function.iterate_succ_apply']
   exact iord_descent_red (ZDerivesEmptyR_red_iterate hz n)
 

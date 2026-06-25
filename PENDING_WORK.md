@@ -1,5 +1,32 @@
 # Pending work — open obligations & attack paths
 
+## lap 111 — DEEP REFLECTION + disjunctive `iord_descent_red` (atom branch CLOSED; SELECTION INVARIANT named)
+**Build 🟢 green 1326; headline footprint intact + re-verified in-kernel (`[propext, sorryAx, choice,
+Quot.sound]`, 0 math axioms). 2 commits (synthesis + grind).** See `REFLECTION-2026-06-25-lap111.md`.
+
+**Landed (grind):** `iord_descent_red` retyped to the disjunctive `red d = d ∨ icmp (iord (red d)) (iord d) =
+0` (and `iord_red_iterate_descends` to the matching per-step dichotomy). Working branches → `Or.inr`. **Atom
+branch genuinely closed** via `Or.inl (red_zK_fixpoint_of_atom_selected …)` (a TRUE node-fixpoint:
+`tp=isymRep`, `tpReduce_isymRep s 0 = s`).
+
+**KEY finding — the obstruction is the SELECTION INVARIANT, now precisely located.** axAll/axNeg (tags 5/6)
+are NOT clean node-fixpoints: `red dᵢ = dᵢ` but `tp dᵢ = isymLk`, so `red_zK_rep_nonchain` STRIPS the
+conclusion (`tpReduce isymLk s 0 ≠ s`) while `iord` (premise-only, lap-110) is UNCHANGED ⟹ at those nodes
+NEITHER disjunct holds. The only honest close is **vacuity**: a valid ⊥-orbit K-node's `permIdx` never
+selects a lone axiom L-leaf (a `L^k_A` without a matching `R_A` is not a redex). THIS is the single named
+crux now — prove it from `zKValid`/`hvalid` + the critical-pair structure, and the axAll/axNeg branches
+become vacuous (atom is already covered by the fixpoint).
+
+**Residual `sorry`s in `iord_descent_red` (4, was 5):**
+1. **axAll / axNeg** (2) — the SELECTION INVARIANT (above). Highest-value next: it dissolves both.
+2. **chain-REPLACE IH** — the strong-induction recursion (`red dᵢ` fixpoint ⟹ node fixpoint LEFT; else
+   premise IH descent RIGHT). Needs WF recursion on the derivation code.
+3. **splice `hr'`** — the lap-110 `iCritReductG` cut-formula strip (cut on stripped `A(d)`, strict rank).
+
+Then the prize: ∀/¬-INVERSION (`ZDerivation_red_zK_crit`, template `Zinfty.allInv`); then M3
+`false_of_ZDerivesEmpty` (fixpoint-or-descent endgame: a `red`-fixpoint ⊥-orbit is cut-free ⟹ absurd; else
+infinite ε₀-descent ⟹ PRWO) + M2 embedding; then wire → headline (ONLY when `#print axioms` clean).
+
 ## lap 110 — splice branch: 6 of 7 sub-sorries CLOSED; `hr'` isolated as the degree-drop residual
 **Build 🟢 green 1326; headline footprint intact (`peano_not_proves_goodstein = [propext, sorryAx, choice,
 Quot.sound]`, 0 math axioms).** 1 code commit.
