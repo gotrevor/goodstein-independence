@@ -170,6 +170,52 @@ theorem iord_iIndReduct_lt_storedBound {s s' at' p d0 d1 k : V} (hk : 0 < k)
       (ocOadd (iotil d0) 1 0) (isNF_omega_pow hd0))
     (idg (zInd s at' p d0 d1))
 
+/-! ### Brick 3 — packaging the induction ω-node (node + validity + realization)
+
+Mirroring brick 1 (`zAllOmega`/`zAllOmegaValid`/`zIall_realizes_zAllOmegaValid`), here is the induction
+ω-node as a Path-C datatype: a node `zIndOmega` (tag 8), a validity predicate `zIndOmegaValid` (premise
+family uniformly valid AND every depth-`k` unfolding's `iord ≺ the stored limit ordinal`), and the
+realization theorem — a regular finitary `zInd` realizes the Path-C induction ω-node with stored ordinal =
+the fixed limit `indOmegaStoredOrd`, ALL THREE conjuncts axiom-clean from banked lemmas.
+
+The premise carrier here is the engine's finitary unfolding `iIndReductSeq d0 d1 k = ⟨d1,…,d1,d0⟩` (the
+depth-`k` chain), per the carrier note on `iord_iIndReduct_lt_storedBound`: the ORDINAL fact is
+path-portable (the eventual cut-tree unfolding of depth `k` carries the same õ), and the per-premise
+`ZDerivation`-hood (`znth_iIndReductSeq_ZDerivation`) is a genuine, motive-free fact — exactly the
+premise-family validity the stored-ordinal ω-node datum requires (no `zKValid` chain wall, since validity
+is read per-premise, never as a whole-chain reduct). -/
+
+/-- **The Path-C stored-ordinal induction ω-node** (tag 8). `s` conclusion, `at'`/`p` the induction data,
+`d0`/`d1` the base/step premises, `α` the STORED limit ordinal. The premise family is the depth-`k`
+unfolding `k ↦ iIndReductSeq d0 d1 k` (computed on demand). -/
+noncomputable def zIndOmega (s at' p d0 d1 α : V) : V := ⟪s, 8, at', p, d0, d1, α⟫ + 1
+
+/-- **Stored-ordinal induction ω-node validity.** Every premise of every depth-`k` unfolding (`k > 0`) is a
+`ZDerivation`, and every depth-`k` unfolding's ordinal `iord (zK s' (irk p) (iIndReductSeq d0 d1 k))` is
+strictly below the stored limit `α`, uniformly in `k` and the unfolding's conclusion sequent `s'`. The
+second conjunct is the Buchholz operator-control side-condition for the induction node — the genuine LIMIT
+Probe 2 (`iotil_zK_iIndReduct_strictMono`) showed the computed `iord` cannot reach, here discharged as a
+fixed `α` that provably dominates the whole family (`iord_iIndReduct_lt_storedBound`, brick 3 kernel). -/
+def zIndOmegaValid (p d0 d1 α : V) : Prop :=
+  (∀ k, 0 < k → ∀ i < lh (iIndReductSeq d0 d1 k), ZDerivation (znth (iIndReductSeq d0 d1 k) i)) ∧
+  (∀ s' k, 0 < k → icmp (iord (zK s' (irk p) (iIndReductSeq d0 d1 k))) α = 0)
+
+/-- **Brick 3 capstone — a regular finitary `zInd` REALIZES the stored-ordinal induction ω-node**, with the
+stored ordinal taken to be the fixed limit `indOmegaStoredOrd`. Premise-family validity is the motive-free
+`znth_iIndReductSeq_ZDerivation` (each Ind-unfolding premise is `d0` or `d1`, both `ZDerivation`s by
+`zDerivation_zInd_inv`); the limit-domination side-condition is exactly brick 3's
+`iord_iIndReduct_lt_storedBound` (the NF hypotheses are free from `isNF_iotil_of_ZDerivation`). So the
+existing native `zInd` node produces a complete, valid Path-C induction ω-node whose stored ordinal is the
+genuine limit — the case the computed `iord` provably cannot assign. This is the induction analogue of
+`zIall_realizes_zAllOmegaValid`. -/
+theorem zInd_realizes_zIndOmegaValid {s at' p d0 d1 : V}
+    (hZ : ZDerivation (zInd s at' p d0 d1)) :
+    zIndOmegaValid p d0 d1 (indOmegaStoredOrd s at' p d0 d1) := by
+  obtain ⟨h0, h1, _⟩ := zDerivation_zInd_inv hZ
+  exact ⟨fun k _ i hi => znth_iIndReductSeq_ZDerivation h0 h1 i hi,
+    fun s' k hk => iord_iIndReduct_lt_storedBound (s := s) (at' := at') hk
+      (isNF_iotil_of_ZDerivation _ h0) (isNF_iotil_of_ZDerivation _ h1)⟩
+
 /-! ## Brick 4 skeleton — the stored-ordinal infinite descent (path-portable)
 
 **Endgame design (clarified lap 102).** Two distinct cut-elimination reductions exist; Path C uses the
