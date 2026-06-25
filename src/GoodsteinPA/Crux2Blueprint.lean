@@ -566,8 +566,12 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
           ⟨s', r', ds', heq, _, _, _⟩ | ⟨s', p', k, heq, _, _⟩ | ⟨s', p', heq, _, _⟩
         · -- atom (tag 0): `red dᵢ = dᵢ`, FIXPOINT — no `iord` descent (engine defect).
           sorry
-        · -- I∀ (tag 1): `red dᵢ = zsubst d0 a 0`, needs the eigensubst regularity bundle.
-          sorry
+        · -- I∀ (tag 1): `red dᵢ = zsubst d0 a 0`, banked `iRedDescent_red_zIall` (eigensubst-invariant
+          -- ordinal bundle, no regularity needed) — no recursion.
+          have htag_ne4 : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [heq]; simp
+          refine iord_descent_red_zK_replace_eq hds hmem hcrit
+            (red_zK_rep_nonchain hcrit htag_ne4) ?_
+          rw [heq]; exact iRedDescent_red_zIall (heq ▸ hdiZ)
         · -- I¬ (tag 2): `red dᵢ = d0`, banked `iRedDescent_zIneg` — no recursion.
           have htag_ne4 : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [heq]; simp
           refine iord_descent_red_zK_replace_eq hds hmem hcrit

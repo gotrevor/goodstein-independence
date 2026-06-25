@@ -194,6 +194,22 @@ lemma iord_descent_red_zK_splice_eq {s r ds i a b s' r' : V}
   rw [hred]
   exact iord_descent_seqInsert' hds hi hnf hr' ha hb hag hbg hNF hNFa hNFb
 
+/-- **I∀ genuine-reduct descent bundle.** `red (zIall s a p d0) = zsubst d0 a 0` satisfies `iRedDescent`
+against `zIall s a p d0` — NO regularity needed for the ORDINAL bundle (only the eigensubst-invariance of
+the assignment): `iotil_zsubst`/`idg_zsubst` carry the banked `iRedDescent_zIall` (stated for the `iR2`-ρ
+`d0`) onto the genuine eigensubst reduct. The selected-I∀-premise case of the non-critical K-branch
+(`iord_descent_red`) feeds this to `iord_descent_red_zK_replace_eq`. -/
+lemma iRedDescent_red_zIall {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0)) :
+    iRedDescent (red (zIall s a p d0)) (zIall s a p d0) := by
+  obtain ⟨hd0, _, _⟩ := zDerivation_zIall_inv hZ
+  have hut0 : IsUTerm ℒₒᵣ (Bootstrapping.Arithmetic.numeral 0 : V) :=
+    (by simp : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral 0 : V)).isUTerm
+  have hb0 := iRedDescent_zIall (s := s) (a := a) (p := p) (isNF_iotil_of_ZDerivation d0 hd0)
+  rw [red_zIall]
+  exact ⟨by rw [idg_zsubst hut0 a d0 hd0]; exact hb0.dg_le,
+    by rw [iotil_zsubst hut0 a d0 hd0]; exact hb0.otil_lt,
+    by rw [iotil_zsubst hut0 a d0 hd0]; exact hb0.nf⟩
+
 /-- **The atom-selection FIXPOINT defect, formalized (lap 109).** If the selected (least-permissible)
 premise of a non-critical chain is a bare identity-atom `zAtom sᵢ` (`zTag = 0`, a `red`-normal form), the
 genuine reduct is a **FIXPOINT**: `red (zK s r ds) = zK s r ds`. Because the non-chain replace dispatch
