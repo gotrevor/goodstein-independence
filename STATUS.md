@@ -1,9 +1,23 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 111 · 2026-06-25 · `0885638`
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 113 · 2026-06-25
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**,
-re-verified in-kernel this lap).
+re-verified in-kernel lap 113).
+
+> **⭐⭐⭐ Lap-113 — splice `hr'` degree-drop PROVEN; gap isolated to the chain-rank invariant (read FIRST).**
+> Baton `HANDOFF-2026-06-25-lap113.md`. Build 🟢 green (1326). The lap-112 cut-formula strip now drives the
+> splice descent **end-to-end in-kernel**: `iCrit_halves_descend` gained a 7th conjunct
+> `irk (seqSucc (fstIdx (znth (zKseq (red (zK s r ds))) 0))) < r` (via the e0 succedent = `cutFormula`
+> readout + `irk_cutFormula_lt`, T3.4(a) strict drop; redex R-principal put in `chainAsucc` form by global
+> R-permissibility). `iord_descent_red`'s splice branch now **closes `hr'` fully** — all `idg`/`iseqMaxIdg`
+> arithmetic PROVEN — so it drops from 2 internal sorries to **1** (only the chain-REPLACE IH remains).
+> The lone splice residual is now a single clean Buchholz-standard statement **`irk_chainAsucc_redexI_le`**
+> (`Crux2Blueprint:549`): `zKValid ⟹ irk (chainAsucc ds redexI) ≤ r`. **THE next campaign:** it needs
+> `redexI < j₀` (chain exit index), true once `j₀ = lh ds − 1` (every premise threaded, as
+> `isChainInf_of_last` builds them) — but `isChainInf` only promises `∃ j₀ < lh ds`, so a redex could sit
+> in the un-threaded tail `(j₀, lh ds)`. Faithful fix = strengthen `isChainInf`'s exit invariant to the
+> last premise (ripples through its 𝚫₁-def + every reduct's chain-validity; 63 refs → its own campaign).
 
 > **⭐⭐⭐ Lap-111 DEEP REFLECTION — direction KEPT, ONE structural lever identified (read FIRST — current).**
 > Primary deliverable `REFLECTION-2026-06-25-lap111.md`. Build 🟢 green (1326); statement re-audited vs paper
