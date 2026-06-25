@@ -6420,6 +6420,88 @@ instance iR2_defined : 𝚺₁-Function₁ (iR2 : V → V) via iR2Def := .mk fun
 instance iR2_definable : 𝚺₁-Function₁ (iR2 : V → V) := iR2_defined.to_definable
 instance iR2_definable' (Γ) : Γ-[m + 1]-Function₁ (iR2 : V → V) := iR2_definable.of_sigmaOne
 
+/-! ## The STRIPPED cut formula `A(d)` (Buchholz Thm 3.4(a)) — the rank-strict critical reduct
+
+Buchholz Thm 3.4(a) cuts the critical reduct on the **stripped** subformula `A(d)`, not on the
+principal `A_i = chainAsucc (zKseq d) (redexI d)`: for `A_i = ∀xF` the cut formula is the L-instance
+`F(k)` (`k` read off the `L^k_{A_i}` redex premise `redexJ`), and `rk(F(k)) < rk(∀xF) ≤ r`; for
+`A_i = ¬A = inegF A` it is `A`, and `rk(A) < rk(¬A) ≤ r`. This **strict** drop (`< r`, vs the
+principal's non-strict `≤ r`) is exactly what the splice rank bound `hr'` and the critical-soundness
+`hCrk` need (lap-110 root cause). `cutFormula` computes it; `irk_cutFormula_lt` is the strict bound. -/
+
+/-- The inference-symbol shape forces the cut formula `A_i` of an `L^k_{A_i}` redex premise to be
+either `∀xF` (tag-5 axiom) or `¬A = inegF A` (tag-6 axiom): the only two `tp`-cases that emit an
+`isymLk`. -/
+lemma tp_isymLk_form {d k A : V} (h : tp d = isymLk k A) :
+    (∃ p, A = (^∀ p : V)) ∨ (∃ p, A = inegF p) := by
+  unfold tp at h
+  by_cases ht1 : zTag d = 1
+  · rw [if_pos ht1] at h; exact absurd h (by simp [isymR, isymLk])
+  rw [if_neg ht1] at h
+  by_cases ht2 : zTag d = 2
+  · rw [if_pos ht2] at h; exact absurd h (by simp [isymR, isymLk])
+  rw [if_neg ht2] at h
+  by_cases ht5 : zTag d = 5
+  · rw [if_pos ht5] at h
+    exact Or.inl ⟨_, ((isymLk_inj _ _ _ _).mp h.symm).2⟩
+  rw [if_neg ht5] at h
+  by_cases ht6 : zTag d = 6
+  · rw [if_pos ht6] at h
+    exact Or.inr ⟨_, ((isymLk_inj _ _ _ _).mp h.symm).2⟩
+  rw [if_neg ht6] at h; exact absurd h (by simp [isymRep, isymLk])
+
+/-- **The stripped cut formula `A(d)`.** `A_i := chainAsucc (zKseq d) (redexI d)` (principal of the
+`R`-redex premise). If `A_i = ∀xF` (`π₁(A_i−1) = 6`, the `qqAll` tag) then `A(d) = F(k)` with the
+instance `k = π₁(π₂(tp d_redexJ))` read off the `L^k` premise; else (`A_i = ¬A`) `A(d) = A`. -/
+noncomputable def cutFormula (d : V) : V :=
+  if π₁ (chainAsucc (zKseq d) (redexI d) - 1) = 6 then
+    substs1 ℒₒᵣ
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d))))))
+      (π₂ (chainAsucc (zKseq d) (redexI d) - 1))
+  else
+    neg ℒₒᵣ (π₁ (π₂ (chainAsucc (zKseq d) (redexI d) - 1)))
+
+/-- `∀`-case readout: when the principal is `∀xF`, the stripped cut formula is the instance `F(k)`. -/
+lemma cutFormula_all {d p : V}
+    (hA : chainAsucc (zKseq d) (redexI d) = (^∀ p : V)) :
+    cutFormula d = substs1 ℒₒᵣ
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d)))))) p := by
+  unfold cutFormula
+  rw [hA, if_pos (by simp [qqAll])]
+  simp [qqAll]
+
+/-- `¬`-case readout: when the principal is `¬A = inegF A` (with `A` a `UFormula`), the stripped cut
+formula is `A`. -/
+lemma cutFormula_neg {d p : V} (hp : IsUFormula ℒₒᵣ p)
+    (hA : chainAsucc (zKseq d) (redexI d) = inegF p) :
+    cutFormula d = p := by
+  unfold cutFormula
+  rw [hA, if_neg (by simp [inegF, qqOr])]
+  simp [inegF, qqOr, hp.neg_neg]
+
+/-- **T3.4(a) strict rank bound for the stripped cut formula.** From the `L^k_{A_i}` redex symbol
+(`hLj`), the principal being a sentence (`hsf : closed`) of rank `≤ r` (`hrank`), the stripped cut
+formula has rank **strictly** below `r` — `rk(F(k)) < rk(∀xF) ≤ r` / `rk(A) < rk(¬A) ≤ r`. This is the
+degree drop the principal cut formula (`≤ r`, non-strict) fails to give (lap-110 root cause). -/
+lemma irk_cutFormula_lt {d k r : V}
+    (hLj : tp (znth (zKseq d) (redexJ d)) = isymLk k (chainAsucc (zKseq d) (redexI d)))
+    (hsf : IsSemiformula ℒₒᵣ 0 (chainAsucc (zKseq d) (redexI d)))
+    (hrank : irk (chainAsucc (zKseq d) (redexI d)) ≤ r) :
+    irk (cutFormula d) < r := by
+  rcases tp_isymLk_form hLj with ⟨p, hp⟩ | ⟨p, hp⟩
+  · -- `A_i = ∀xF`, cut formula `F(k)`: `rk(F(k)) < rk(∀xF) ≤ r`.
+    rw [cutFormula_all hp]
+    have hsfp : IsSemiformula ℒₒᵣ 1 p := by
+      have h := (IsSemiformula.all (L := ℒₒᵣ)).mp
+        (show IsSemiformula ℒₒᵣ 0 (^∀ p) by rw [← hp]; exact hsf)
+      simpa using h
+    exact irk_cut_lt_rank_forall (m := 0) hsfp (by simp) (hp ▸ hrank)
+  · -- `A_i = ¬A = inegF A`, cut formula `A`: `rk(A) < rk(¬A) ≤ r`.
+    have hUf : IsUFormula ℒₒᵣ (inegF p) := by rw [← hp]; exact hsf.isUFormula
+    have hUfp : IsUFormula ℒₒᵣ p := by rw [inegF] at hUf; simpa using hUf
+    rw [cutFormula_neg hUfp hp]
+    exact irk_cut_lt_rank_neg hUfp (hp ▸ hrank)
+
 /-- **The genuine closed critical branch** for `red`'s tag-4 case: `K^{r-1}_Π ⟨d{0}, d{1}⟩` where the cut
 formula is `A(d) = chainAsucc (zKseq d) (redexI d)`, the auxiliaries replace the redex premises `i = redexI d`,
 `j = redexJ d` by their `ρ`-reducts, and carry the reduced endsequents. Closed term; only `ρ` (the N1 IH)
