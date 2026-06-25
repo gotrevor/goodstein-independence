@@ -27,8 +27,14 @@ descent; the genuine `red` MUST dispatch the **5.2** cases too.
    vs Buchholz's `∀ i ≤ j₀` — the `j₀`-restricted form is the faithful branch; decide whether the
    stronger `∀ i < lh ds` mis-classifies any Buchholz-critical chain (if some i > j₀ has tp(dᵢ) ◁ Π).
 2. **5.2.1 splice** — genuine in-place splice object + `zKValidF`; descent = `iord_descent_iSpliceEnd`.
-3. **5.2.2 replace** — `zK (tp(dᵢ)(s,n)) r (seqUpdate ds i (red dᵢ))` + `zKValidF_seqUpdate`; descent =
-   `iord_descent_iCritAux`. Wire the reduced-succedent op `tp(dᵢ)(s,n)`.
+3. **5.2.2 replace — VALIDITY DONE (lap 86):** `ZDerivation_iCritAux_of` (axiom-clean, next to
+   `iord_descent_iCritAux_of_ZDerivation`): replacing premise `i` of a valid chain by a same-end-sequent
+   reduct `v` that is a `ZDerivation` (+ its own well-formedness) gives `ZDerivation (iCritAux …)`. With
+   the banked descent, the 5.2.2 leaf is complete at the lemma level — both invariants take the same N1
+   IH on `v = red dᵢ`. For ⊥-chains the chosen premise is a `Rep`-chain so `tp(dᵢ)(Π,n)=Π` (conclusion
+   unchanged) and `v`'s well-formedness hyps are automatic (`tp = isymRep`, I/Ax conjuncts vacuous) — a
+   specialized tag-4 corollary collapses them. STILL TODO: the general 5.2.2 conclusion op `tp(dᵢ)(s,n)`
+   for the non-⊥ / non-Rep sub-case (only needed if `red` is defined on all d, not just ⊥-chains).
 4. **`redSound`** = `zDerivation_induction`, tag-4 split 5.1/5.2.1/5.2.2 → `zKValidF` chain;
    `iord_descent_red` becomes UNCONDITIONAL. (R2 / `zAx1` tag-7 from lap-85 still apply to the 5.1 case.)
 

@@ -4392,6 +4392,35 @@ lemma iord_descent_iCritAux_of_ZDerivation {s r ds i v : V}
     isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation (znth ds n) (hmem n hn))
   exact iord_descent_iCritAux hds hi hnf hlt hle hNFall hNFv
 
+/-- **5.2.2 replace-premise VALIDITY (the genuine-reduct RedSound leaf for the non-critical chain case).**
+Replacing premise `i` of a faithfully-valid chain derivation `zK s r ds` by a reduct `v` that is itself a
+`ZDerivation` with the same end-sequent (`fstIdx v = fstIdx (znth ds i)`) and its own well-formedness
+yields a `ZDerivation` of the updated chain `iCritAux (zK s r ds) i v = zK s r (seqUpdate ds i v)`. This
+is Buchholz Def 3.2 case 5.2.2 (non-critical: `d[n] = K^r_Π(i/dᵢ[n])`, the conclusion `Π` and rank `r`
+unchanged because the chosen premise is a `Rep`, `tp(dᵢ)(Π,n) = Π`) at the validity layer:
+`zDerivation_zK_intro` over the banked `zKValidF_seqUpdate`, the at-index premise supplied by the reduct's
+own derivation `hZv`. Together with `iord_descent_iCritAux_of_ZDerivation` (the descent, banked) this is
+the complete 5.2.2 leaf — both invariants take the same N1 IH on the replaced premise `v = red dᵢ`. -/
+lemma ZDerivation_iCritAux_of {s r ds i v : V} (hi : i < lh ds)
+    (hZ : ZDerivation (zK s r ds)) (hZv : ZDerivation v)
+    (hv : fstIdx v = fstIdx (znth ds i))
+    (hperm_v : iperm (tp v) (fstIdx v))
+    (hf1_v : zTag v = 1 → IsUFormula ℒₒᵣ (zIallF v))
+    (hf2_v : zTag v = 2 → IsUFormula ℒₒᵣ (zInegF v))
+    (hf5_v : zTag v = 5 → IsUFormula ℒₒᵣ (zAxAllF v))
+    (hf6_v : zTag v = 6 → IsUFormula ℒₒᵣ (zAxNegF v)) :
+    ZDerivation (iCritAux (zK s r ds) i v) := by
+  rw [iCritAux_zK]
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  have hvalid := zKValidF_of_ZDerivation_zK hZ
+  refine zDerivation_zK_intro (seqUpdate_seq ds i v) ?_
+    (zKValidF_seqUpdate hi hv hperm_v hf1_v hf2_v hf5_v hf6_v hvalid)
+  intro n hn
+  rw [seqUpdate_lh] at hn
+  rcases eq_or_ne n i with rfl | hne
+  · rw [znth_seqUpdate_self hi]; exact hZv
+  · rw [znth_seqUpdate_of_ne hne]; exact hmem n hn
+
 /-! ### The reduct-descent IH interface `iRedDescent` (Buchholz Lemma 4.1 (a)+(b)(i)+NF closure)
 
 The Thm-4.2 structural induction (still upstream, gated on the recursive `iR`) feeds the chain case one
