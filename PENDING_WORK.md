@@ -60,11 +60,17 @@ indices**, so a freshness invariant phrased on eigenvariable indices (`maxEigen 
    *literal* premises `⟨d1,d0⟩` — **no substitution at the Ind level** — so its `zReg = max (zReg d1) (zReg
    d0) = 0`. Added the `iseqReg` fold lemmas (`_seqCons`/`_const`/`_iRepeatSeq`/`_iIndReductSeq`,
    `iseqRegAux_znth_congr`) mirroring `iseqMaxIdg`.
-6. **← START HERE: the `zK` chain case of `red` preserves `ZRegular`** = `red (zK …) = iRK …` (Buchholz
-   5.1 `iRcritG` / 5.2.1 splice / 5.2.2 replace). This is where `zReg_zsubst` threads through the critical
-   reduct. Then assemble `red_preserves_ZRegular` (all cases) + embedding ⟹ `ZRegular`. Then route-B
-   reducts discharge via the bridges `maxEigen_lt_of_regular_zIall`/`_zInd`. The `zK` dispatch is the
-   remaining O1 difficulty (the genuine cut-elimination substitution lives only here, NOT in zIall/Ind).
+6. **`zK` chain case — reusable building blocks DONE (lap 93, `Zsubst.lean`, axiom-clean, green 1325).**
+   `ZRegular_zK_of_premises` (a chain all of whose premises are regular IS regular; via `iseqReg_eq_zero_of`)
+   and `ZRegular_zAxReduct` (the per-premise atomic reduct preserves regularity — it returns `zAx1`/identity).
+   All three `iRK` branches produce a chain over regular reducts, so these are the shared closing lemmas.
+7. **← START HERE: finish the `zK` case** — for each `iRK` branch (5.1 `iRcritG`=`iCritReductG`, 5.2.1 splice
+   `iRKs`, 5.2.2 replace `iRKr`), show its premise sequence has all-regular entries, then close with
+   `ZRegular_zK_of_premises`. The reduct premises are chains over `seqUpdate (zKseq d) idx (zAxReduct (red
+   premise))` / `iCritReductSeq` / `seqInsert`; need `znth_seqUpdate`/`znth_iCritReductSeq` (exist) + the
+   redTable IH `znth (redTable …) (znth ds i) = red (znth ds i)` + `ZRegular_zAxReduct` + `ZRegular_zK_of_premises`.
+   This is best framed as the `redTable` course-of-values induction (`red`-preserves-`ZRegular`, full). Then
+   embedding ⟹ `ZRegular`, then route-B reducts discharge via `maxEigen_lt_of_regular_zIall`/`_zInd`.
 2. **(Path X) — ✅ O2 BANKED this lap (`Zsubst.lean`, axiom-clean):** `ZDerivation_zsubst_zIall_premise`
    and `ZDerivation_zsubst_zInd_premise1` discharge the route-B I∀/Ind eigensubst reducts **directly from
    the existing `ZDerivation_zsubst`**, under the freshness bound `d0 ≤ a` / `d1 ≤ π₁ at'`. This

@@ -1552,6 +1552,38 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
   · rw [red_zAxAll]; simpa using hreg
   · rw [red_zAxNeg]; simpa using hreg
 
+/-! ### Reusable building blocks for the `zK` chain case (5.1/5.2.1/5.2.2)
+
+All three `iRK` branches produce a chain whose premises are regular reducts. These are the shared
+lemmas: a chain with all-regular premises is regular (`ZRegular_zK_of_premises`), and the per-premise
+atomic reduct `zAxReduct` preserves regularity. The remaining `zK` work is to show each branch's premise
+sequence (`seqUpdate`/`iCritReductSeq`/splice) has all-regular entries — then these close it. -/
+
+/-- A chain `iseqReg`-fold vanishes when every premise is regular. -/
+lemma iseqReg_eq_zero_of {ds : V} (h : ∀ i < lh ds, zReg (znth ds i) = 0) : iseqReg ds = 0 := by
+  unfold iseqReg
+  rcases eq_or_ne (lh ds) 0 with h0 | h0
+  · rw [h0]; simp
+  · exact iseqRegAux_const h (lh ds) (pos_iff_ne_zero.mpr h0) le_rfl
+
+/-- **A `K`-chain all of whose premises are regular is regular.** The shared closing lemma for the three
+`iRK` branches (each reduct is a chain over regular premises). -/
+lemma ZRegular_zK_of_premises {s r ds : V} (hds : Seq ds)
+    (h : ∀ i < lh ds, ZRegular (znth ds i)) : ZRegular (zK s r ds) := by
+  unfold ZRegular
+  rw [zReg_zK s r ds hds]
+  exact iseqReg_eq_zero_of (fun i hi => h i hi)
+
+/-- **`zAxReduct` preserves regularity.** On atomic axioms it returns a `zAx1` node (`zReg = 0`);
+otherwise it is the identity. So a regular premise yields a regular per-premise reduct. -/
+lemma ZRegular_zAxReduct {x : V} (h : ZRegular x) : ZRegular (zAxReduct x) := by
+  unfold zAxReduct
+  by_cases h5 : zTag x = 5
+  · rw [if_pos h5]; unfold ZRegular; exact zReg_zAx1 _ _
+  · by_cases h6 : zTag x = 6
+    · rw [if_neg h5, if_pos h6]; unfold ZRegular; exact zReg_zAx1 _ _
+    · rw [if_neg h5, if_neg h6]; exact h
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d` whose every
