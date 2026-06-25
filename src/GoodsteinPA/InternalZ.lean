@@ -4907,6 +4907,30 @@ lemma permIdxAux_found (ds s N : V) (h : ∃ i < N, isPermPrem ds s i) :
       exact absurd hi (permIdxAux_eq_self_of_none ds s N h' i hiN)
   exact ⟨hlt, permIdxAux_isPermPrem_of_lt ds s N hlt⟩
 
+/-- **First-hit is LEAST** — the returned index is `≤` any permissible index `m < N`. Since `permIdxAux`
+scans low-to-high and stops at the first hit, it never overshoots a permissible premise. The key
+leastness fact behind `permIdx ≤ j₀` (the Buchholz §5.2 selection `i ≤ j₀ minimal s.t. tp(dᵢ) ◁ Π`). -/
+lemma permIdxAux_le_of_isPermPrem (ds s : V) :
+    ∀ N, ∀ m < N, isPermPrem ds s m → permIdxAux ds s N ≤ m := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · simp only [isPermPrem]; definability
+  case zero => intro m hm; exact absurd hm (by simp)
+  case succ n ih =>
+    intro m hm hperm
+    rw [permIdxAux_succ]
+    by_cases h1 : permIdxAux ds s n < n
+    · rw [if_pos h1]
+      rcases lt_or_eq_of_le (lt_succ_iff_le.mp hm) with hmn | hmn
+      · exact ih m hmn hperm
+      · subst hmn; exact le_of_lt h1
+    · rw [if_neg h1]
+      have hn : permIdxAux ds s n = n := le_antisymm (permIdxAux_le ds s n) (not_lt.mp h1)
+      have hnone := permIdxAux_eq_self_of_none ds s n hn
+      rcases lt_or_eq_of_le (lt_succ_iff_le.mp hm) with hmn | hmn
+      · exact absurd hperm (hnone m hmn)
+      · subst hmn; rw [if_pos hperm]
+
 /-- **The 5.2 dispatch index of a chain** = least permissible premise index, sentinel `lh (zKseq d)`. -/
 noncomputable def permIdx (d : V) : V := permIdxAux (zKseq d) (fstIdx d) (lh (zKseq d))
 
@@ -4922,6 +4946,18 @@ lemma permIdx_lt_of_not_zKCritical {s r ds : V} (h : ¬ zKCritical s ds) :
   have hf := permIdxAux_found ds s (lh ds) hex
   simp only [permIdx, zKseq_zK, fstIdx_zK]
   exact hf
+
+/-- **`permIdx ≤ j₀` (the Buchholz §5.2 selection bound).** The selected dispatch index is `≤` ANY
+permissible premise index. In particular, when a chain is non-critical *in Buchholz's sense* — there is a
+permissible premise at an index `≤ j₀` (the distinguished top of `isChainInf`) — the repo's globally-least
+`permIdx` lands at-or-below `j₀`, so the original chain's threading/rank (held only up to `j₀`) RESTRICTS to
+threading/rank up to `permIdx`. This is the structural fact that feeds `ZDerivation_iCritReplaceReduce_of`'s
+`hthread`/`hrank` hypotheses in the R-rule replace wiring. -/
+lemma permIdx_le_of_isPermPrem {s r ds m : V} (hm : m < lh ds)
+    (hperm : iperm (tp (znth ds m)) s) :
+    permIdx (zK s r ds) ≤ m := by
+  simp only [permIdx, zKseq_zK, fstIdx_zK]
+  exact permIdxAux_le_of_isPermPrem ds s (lh ds) m hm hperm
 
 /-- **`permIdx` is `𝚺₁`-definable** — the dispatch index `permIdx d = permIdxAux (zKseq d) (fstIdx d)
 (lh (zKseq d))` composes the already-definable `zKseq`/`fstIdx`/`lh`/`permIdxAux`. Required so the
