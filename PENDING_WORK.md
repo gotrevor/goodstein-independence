@@ -19,12 +19,22 @@ needs freshness tracking in the Wff predicates (O1). TWO honest paths now:
   A critical cut *selects* premise `dₙ` instead of substituting ⟹ O1+O2+`tpReduce` all vanish. Higher one-time
   cost, removes the coupling permanently.
 
-**NEXT — sharp first probe: measure Path X's O1 cost (cheapest decisive test between X and C).**
-1. **Probe O1 blast radius.** In a `wip/` copy (or behind a flag), strengthen `zIallWff` with an
-   eigenvariable-freshness clause (`a ∉ FV(seqAnt s)`, i.e. `a` not free in the antecedent / not an inner
-   eigenvariable). Measure how far it cascades through `ZPhi` producers/consumers + `zIallWffDef` Δ₁-definability.
-   Localized add → **Path X wins** (drive `ZDerivation_zsubst_eigen` next). Cascades through fixpoint/reduction
-   → **Path C wins** (build `wip/InternalZomega.lean`).
+**⭐ DECISION (end of lap 92 — `DECISION-2026-06-25-lap92-path-X-favored.md`): Path X favored.** The ω-rule
+precedents (`Zinfty.lean`, Bryce–Goré) are META-level (premises = native functions); they do NOT de-risk the
+arithmetized ω-rule (Σ₁ `Z*` notations over codes), which is the un-precedented hard part the repo chose
+finitary to avoid. Path X completes the invested finitary arithmetization with standard bookkeeping, and O1
+is now shown **tractable + maintainable** via the key insight: `zsubst` (closed term) **preserves eigenvariable
+indices**, so a freshness invariant phrased on eigenvariable indices (`maxEigen premise < eigenvar`) is
+**stable through `red`** (the code-bound `d≤a` was not). Path C is the fallback only if step 4 below walls.
+
+**NEXT — Path X foundation lemmas (concrete, low-risk, reuse the `idg` recursion template):**
+1. **Define `maxEigen d`** = largest eigenvariable index in `d`, via the EXACT `idg`/`idgNext`/`idgTable`/
+   `PR.Construction` template (`InternalZ.lean`): `maxEigenNext d s` reads premise results `znth s (zIallPrem d)`
+   etc. + `zIallEig`/`zIndEig`; Σ₁-definable by the same mechanical proof as `idgNext_defined`. **← start here.**
+2. **`maxEigen_zsubst : maxEigen (zsubst d a t) = maxEigen d`** (closed `t`) — the substitution-stability crux.
+3. **Reformulate `ZDerivation_zsubst`** from `d ≤ a` to `maxEigen d < a` (body unchanged; `e ≠ a` now from
+   `e ≤ maxEigen d < a`). 4. **O1:** strengthen `zIallWff`/`zIndWff` with `maxEigen d0 < eigenvar`, discharge in
+   M2, prove `red` maintains it. 5. Route-B reducts discharge unconditionally (banked corollaries + `tpReduce`).
 2. **(Path X) — ✅ O2 BANKED this lap (`Zsubst.lean`, axiom-clean):** `ZDerivation_zsubst_zIall_premise`
    and `ZDerivation_zsubst_zInd_premise1` discharge the route-B I∀/Ind eigensubst reducts **directly from
    the existing `ZDerivation_zsubst`**, under the freshness bound `d0 ≤ a` / `d1 ≤ π₁ at'`. This
