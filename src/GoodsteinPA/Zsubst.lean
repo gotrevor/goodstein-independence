@@ -1626,6 +1626,111 @@ lemma ZRegular_zK_of_iCritReductSeq {s' r' d0 d1 : V} (h0 : ZRegular d0) (h1 : Z
     ZRegular (zK s' r' (iCritReductSeq d0 d1)) :=
   ZRegular_zK_of_premises (iCritReductSeq_seq d0 d1) (forall_lt_iCritReductSeq h0 h1)
 
+/-- **Regularity of a `seqInsert` chain** (5.2.1 splice `iRKs`): inserting two regular halves `a,b` in
+place of premise `i` keeps the chain regular. The 5.2.1 analogue of `ZRegular_zK_of_seqUpdate`, via the
+pointwise read-out `forall_znth_seqInsert`. -/
+lemma ZRegular_zK_of_seqInsert {s' r' ds i a b : V} (hi : i < lh ds)
+    (hall : ∀ m < lh ds, ZRegular (znth ds m)) (ha : ZRegular a) (hb : ZRegular b) :
+    ZRegular (zK s' r' (seqInsert ds i a b)) := by
+  refine ZRegular_zK_of_premises (seqInsert_seq ds i a b) ?_
+  intro n hn
+  rw [seqInsert_lh] at hn
+  exact forall_znth_seqInsert (P := ZRegular) hi ha hb hall n hn
+
+/-! ### `red`-preserves-`ZRegular`, the `zK` chain dispatch (5.1 / 5.2.1 / 5.2.2)
+
+`red (zK s r ds)` dispatches via `iRK` on two criticality sentinels (`red_zK_crit`/`_rep`/`_splice`).
+Each branch reduct is a chain over a `seqUpdate`/`seqInsert`/`iCritReductSeq` of `ds` with one or two
+premises swapped for already-tabulated reducts `red dᵢ`. The structural-block lemmas above close the
+`seqUpdate`/`iCritReductSeq` branches **standalone** from the IH (`ZRegular (red premise)`); the
+`seqInsert` (5.2.1) branch additionally needs the two splice **halves** `znth (zKseq (red dᵢ)) {0,1}`
+regular, which holds when `red dᵢ` is a chain (`tag 4`) — exactly the `zKValidF`-supplied fact threaded
+inside `redSound` (lap-93 finding). So `_replace`/`_crit` are unconditional; `_splice` takes the
+halves' regularity as an explicit hypothesis. -/
+
+/-- **5.2.2 replace recursion equation** (port of the `Crux2Blueprint` `red_zK_rep`, here in the build):
+non-critical chain whose least-permissible premise is itself non-critical ⟹ `red` swaps premise
+`i = permIdx d` for its tabulated reduct `red dᵢ`. -/
+lemma red_zK_rep {s r ds : V} (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    red (zK s r ds)
+      = iCritAux (zK s r ds) (permIdx (zK s r ds))
+          (red (znth ds (permIdx (zK s r ds)))) := by
+  have hbound : znth ds (permIdx (zK s r ds)) ≤ zK s r ds - 1 :=
+    le_trans (znth_le_self ds _) (le_pred_of_lt (ds_lt_zK s r ds))
+  rw [red_zK, iRK]
+  simp only [zKseq_zK]
+  rw [if_pos h1, if_pos h2, iRKr, zKseq_zK, znth_redTable_eq_red _ _ hbound]
+
+/-- **5.2.1 splice recursion equation** (port of `Crux2Blueprint` `red_zK_splice`): non-critical chain
+whose least-permissible premise `dᵢ` is itself critical ⟹ `red` splices `dᵢ`'s two reduct-halves
+`znth (zKseq (red dᵢ)) {0,1}` in place at `i`. -/
+lemma red_zK_splice {s r ds : V} (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    red (zK s r ds)
+      = zK s
+          (max (irk (seqSucc (fstIdx
+            (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)))) r)
+          (seqInsert ds (permIdx (zK s r ds))
+            (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)
+            (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1)) := by
+  have hbound : znth ds (permIdx (zK s r ds)) ≤ zK s r ds - 1 :=
+    le_trans (znth_le_self ds _) (le_pred_of_lt (ds_lt_zK s r ds))
+  rw [red_zK, iRK]
+  simp only [zKseq_zK]
+  rw [if_pos h1, if_neg h2, iRKs, zKseq_zK, znth_redTable_eq_red _ _ hbound,
+    fstIdx_zK, zKrank_zK]
+
+/-- **5.2.2 replace branch — regularity preserved (unconditional).** `red (zK s r ds) = K^r(i/red dᵢ)`;
+regular since every original premise is (`ZRegular_zK_premise`) and the swapped reduct `red dᵢ` is (IH). -/
+lemma ZRegular_red_zK_replace {s r ds : V} (hds : Seq ds)
+    (hreg : ZRegular (zK s r ds))
+    (hred : ∀ i < lh ds, ZRegular (red (znth ds i)))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    ZRegular (red (zK s r ds)) := by
+  rw [red_zK_rep h1 h2, iCritAux_zK]
+  exact ZRegular_zK_of_seqUpdate
+    (fun m hm => ZRegular_zK_premise hds hreg hm) (hred _ h1)
+
+/-- **5.1 critical branch — regularity preserved.** `red (zK s r ds) = iRcritG …` is a chain over
+`iCritReductSeq d{0} d{1}`, each half a `seqUpdate` of `ds` swapping a redex premise for its tabulated
+reduct `red (znth ds (redexI/J))`; regular when those two reducts are (supplied — they are IH instances
+once the redex indices are in range). -/
+lemma ZRegular_red_zK_crit {s r ds : V} (hds : Seq ds)
+    (hreg : ZRegular (zK s r ds))
+    (hI : ZRegular (red (znth ds (redexI (zK s r ds)))))
+    (hJ : ZRegular (red (znth ds (redexJ (zK s r ds)))))
+    (hcrit : ¬ permIdx (zK s r ds) < lh ds) :
+    ZRegular (red (zK s r ds)) := by
+  rw [red_zK_crit hcrit, iRcritG]
+  simp only [fstIdx_zK, zKseq_zK, zKrank_zK, iCritReductG]
+  refine ZRegular_zK_of_iCritReductSeq ?_ ?_
+  · exact ZRegular_zK_of_seqUpdate
+      (fun m hm => ZRegular_zK_premise hds hreg hm) (ZRegular_zAxReduct hI)
+  · exact ZRegular_zK_of_seqUpdate
+      (fun m hm => ZRegular_zK_premise hds hreg hm) (ZRegular_zAxReduct hJ)
+
+/-- **5.2.1 splice branch — regularity preserved, given the halves are regular.** `red (zK s r ds)`
+splices the two halves `a,b = znth (zKseq (red dᵢ)) {0,1}` in place at `i`; regular when every original
+premise is (`ZRegular_zK_premise`) and `a,b` are. The halves' regularity holds when `red dᵢ` is a chain
+(`tag 4`), discharged inside `redSound` from the `zKValidF`-supplied tag (lap-93 finding) — here an
+explicit hypothesis. -/
+lemma ZRegular_red_zK_splice {s r ds : V} (hds : Seq ds)
+    (hreg : ZRegular (zK s r ds))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds)))))
+    (ha : ZRegular (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0))
+    (hb : ZRegular (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1)) :
+    ZRegular (red (zK s r ds)) := by
+  rw [red_zK_splice h1 h2]
+  exact ZRegular_zK_of_seqInsert h1
+    (fun m hm => ZRegular_zK_premise hds hreg hm) ha hb
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d` whose every
