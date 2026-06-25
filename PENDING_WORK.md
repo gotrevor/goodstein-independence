@@ -26,6 +26,18 @@ two Cut premises — NOT the loose "C/¬C" of earlier handoffs. Pin this before 
 to ex/cut.
 
 **⏭ NEXT (hardest-first):**
+0. **`ZInf.allInv` commuting cases — the bookkeeping `sorry`s (`wip/PathCInf.lean`).** The ∀-inversion
+   recursion STRUCTURE + the principal `allω` selection + atomic base cases (`axL`/`verumR`) are PROVEN.
+   The commuting cases (`weak`/`andI`/`orI`/`exI`/`cut`/`allω`-side) carry a disclosed `sorry`: their
+   `seqCons`-tower permutation/membership bookkeeping triggers pathological HFS `whnf` under `induction`
+   (timeout even at 1.6M heartbeats). **Suspected cause:** `seqCons_comm`/`weaken_*` take the consed
+   formulas IMPLICITLY, so Lean infers them by unifying `seqCons (seqCons Γ A) B` against the premise type
+   — forcing `lh`/`insert` whnf. **Fix (next lap):** (a) give the helpers EXPLICIT formula args (no
+   inference), and/or (b) a single `ZInf.permCongr : Seq Δ → (∀ A, inAnt A Γ ↔ inAnt A Δ) → ZInf Γ → ZInf Δ`
+   proven ONCE standalone (helpers compile fast OUTSIDE `induction`), each commuting case = one `permCongr`
+   with a `tauto`-closed membership `↔`. The math is the verbatim `Zinfty.allInvAux` port; only term-mode
+   cost is open. Then: port `andInvAux`/`orInvAux`, then `cutElimStep`, then bridge `ZInf`-height ↔ engine
+   `iord` for the PRWO descent, then wire to `false_of_ZDerivesEmpty` (`Crux2Blueprint.lean:588`).
 1. **Extend conclusion-tracking to the ∃ and cut nodes** (shapes pinned above) so the commuting ∀-inversion
    is statable on a cut/∃ last rule. Add the conclusion conjuncts to `ZcDer.ex`/`ZcDer.cut`.
 2. **The commuting ∀-inversion recursion** over `ZcDer` (structural — the recursor handles the ω-family),
