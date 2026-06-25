@@ -1,5 +1,48 @@
 # Pending work — open obligations & attack paths
 
+## lap 110 — splice branch: 6 of 7 sub-sorries CLOSED; `hr'` isolated as the degree-drop residual
+**Build 🟢 green 1326; headline footprint intact (`peano_not_proves_goodstein = [propext, sorryAx, choice,
+Quot.sound]`, 0 math axioms).** 1 code commit.
+
+### Banked this lap (`RedZKDescent.lean`, axiom-clean `[propext, choice, Quot.sound]`, green-gated)
+- **`iCrit_halves_descend`** — for a valid critical `K^r` chain `dᵢ = zK s r ds`, the two critical-reduct
+  halves `a,b = znth (zKseq (red dᵢ)) {0,1}` satisfy the per-half `õ`/`idg`/NF bounds below `dᵢ`
+  (`ha`/`hb`/`hag`/`hbg`/`hNFa`/`hNFb`). **Key in-kernel fact:** the critical 5.1 reduct's `õ`-jump lives in
+  the OUTER `K^{r-1}` rank-drop, NOT the individual halves — each half is a `K`-chain over
+  `seqUpdate ds (redexI/J) (red·)` (i.e. `dᵢ`'s OWN premise sequence with the redex R/L premise swapped for
+  its strictly-descending genuine reduct), so each premise-fold descends below `dᵢ` via `iotil_iCritAux_lt` /
+  `idg_iCritAux_le` (`iotil`/`idg` ignore the half's reset conclusion/rank). Mirrors `iord_descent_red_zK_crit`'s
+  redex extraction.
+- **Wired into `iord_descent_red`'s splice branch** (`Crux2Blueprint.lean:595`): feeds the 6 bounds to
+  `iord_descent_red_zK_chain_splice`, closing 6 of its 7 residual `sorry`s. **Only `hr'` remains.**
+
+### ⚠️ THE `hr'` RESIDUAL — sharp in-kernel characterization (the splice degree-drop crux)
+`hr' : max (irk (seqSucc (fstIdx (znth (zKseq (red dᵢ)) 0)))) r ≤ idg (zK s r ds)`. Established this lap:
+`seqSucc (fstIdx (half0)) = chainAsucc dsᵢ (redexI dᵢ) = C`, the redex **principal** formula (the R-premise's
+succedent). So `hr' = max (irk C) r ≤ idg(parent)`. The `r ≤ idg(parent)` half is `r_le_idg_zK`. The hard
+half is `irk C ≤ idg(parent)`:
+- `idg(parent) = max(r, iseqMaxIdg ds - 1)` (the `-1` is one cut-elim degree drop, baked into `idg_zK`).
+- `irk C ≤ r'ᵢ` (dᵢ's rank) ONLY (`≤`, from the critical-pair finder `inference_critical_pair_rank`'s
+  `hrank`), and `r'ᵢ ≤ idg(dᵢ) ≤ iseqMaxIdg ds`. So `irk C ≤ iseqMaxIdg ds` — **off by one** vs the needed
+  `≤ iseqMaxIdg ds - 1`. The bound FAILS in the edge case `irk C = r'ᵢ = idg(dᵢ) = iseqMaxIdg ds` (dᵢ the
+  strict-max-degree premise, its rank = its degree = the principal rank) unless `r ≥ iseqMaxIdg ds`.
+- `red_zK_splice`'s rank `irk C` (principal `C = A_i`) is CORRECT — splicing `dⱼ`'s halves
+  `d{0} ⊢ Θ→C`, `d{1} ⊢ C,Θ→D` flat into the parent makes the parent cut on `C`, so the parent rank must
+  be `≥ irk C`. Not a stripping bug.
+- **EDGE CASE where `hr'` genuinely FAILS** (in-kernel worked out): `irk C = r'ⱼ = idg(dⱼ) = iseqMaxIdg ds`
+  with `dⱼ` the strict-max-degree premise and `r < iseqMaxIdg ds`. Then the splice rank `irk C = iseqMaxIdg ds`
+  EXCEEDS `idg(parent) = max(r, iseqMaxIdg ds - 1)` — `iord` goes UP, descent fails. This is the cut-elim
+  degree-drop pressure point: reducing the degree-DETERMINING critical premise `dⱼ` ought to drop the parent
+  degree, but the spliced rank `irk C` doesn't fall below it. **Two genuine resolution paths (NEXT, hardest-first):**
+  1. **Chain-rank invariant ruling out the edge case.** Show a valid chain has `irk(chainAsucc ds i) < idg`
+     STRICT (or `r'ⱼ < iseqMaxIdg ds` when `dⱼ` is a chain premise) — i.e. the parent's degree strictly
+     dominates any premise's cut-formula rank. Likely from a hereditary `idg`-vs-rank invariant carried by
+     `zKValidF`/the embedding. If true, `irk C ≤ iseqMaxIdg ds - 1 ≤ idg(parent)` and `hr'` closes via
+     `le_iseqMaxIdgAux` + `idg_zK`.
+  2. **Measure refinement.** Adjust `iord`/the splice so the degree-determining premise's reduction is
+     reflected (the splice rank should track the halves' reduced degrees, not `dⱼ`'s full pre-reduction rank).
+  This shares the cut-rank/degree-drop bookkeeping with `redZKReady`'s motive (`Crux2Blueprint:340/493`).
+
 ## lap 109 — K-case branch-descent TRIO banked; the recursion wall CHARACTERIZED in-kernel
 **Build 🟢 green 1326; headline footprint intact (`peano_not_proves_goodstein = [propext, sorryAx, choice,
 Quot.sound]`).** 4 commits: critical sub-branch wired in place (`9e86a26`), replace descent (`8138b91`),

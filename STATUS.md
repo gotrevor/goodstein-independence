@@ -1,6 +1,19 @@
 # STATUS — GoodsteinPA 📊
 
-> **⭐⭐⭐ Lap-107 FRESH-MIND REVIEW — DIRECTION CHANGE: the external-inductive prototype track is a DEAD END (read FIRST — current).**
+> **⭐⭐⭐ Lap-110 — splice branch 6/7 CLOSED (`iCrit_halves_descend`); `hr'` degree-drop crux isolated (read FIRST — current).**
+> Baton `HANDOFF-2026-06-25-lap110.md`. Build 🟢 green (`lake build GoodsteinPA`, **1326**); headline footprint
+> intact (`peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]`, 0 math axioms;
+> `iCrit_halves_descend` axiom-clean `[propext, choice, Quot.sound]`). Banked `iCrit_halves_descend`
+> (`RedZKDescent.lean`): the two critical-reduct halves descend below `dᵢ` because each is a `K`-chain over
+> `dᵢ`'s own premise seq with the redex R/L premise swapped for its descending reduct (the critical `õ`-jump is
+> in the OUTER `K^{r-1}` rank-drop, NOT the halves). Wired into `iord_descent_red`'s splice branch
+> (`Crux2Blueprint:595`), closing 6 of its 7 sub-`sorry`s. **The lone splice residual is the rank bound
+> `hr' : max(irk C) r ≤ idg(parent)`** with `C` the redex principal formula — fails by ONE in the edge case
+> `irk C = r'ᵢ = idg(dᵢ) = iseqMaxIdg ds`; needs a STRICT chain-rank-vs-degree invariant or a measure/rank
+> refinement (PENDING_WORK lap-110, two paths). Other open K-case residuals: chain-REPLACE IH (atom-fixpoint
+> wall, lap-109) + atom/axAll/axNeg fixpoints. See `HANDOFF-2026-06-25-lap110.md`, `PENDING_WORK.md` lap-110.
+
+> **⭐⭐⭐ Lap-107 FRESH-MIND REVIEW — DIRECTION CHANGE: the external-inductive prototype track is a DEAD END (read FIRST — historical).**
 > Baton `HANDOFF-2026-06-25-lap107.md`. Build 🟢 green (1325); `src/` UNTOUCHED (headline footprint intact,
 > re-verified in-kernel: `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]`,
 > 0 math axioms; `peano_not_proves_consistency` / `not_proves_of_implies_consistency` axiom-clean
