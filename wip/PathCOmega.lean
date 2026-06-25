@@ -1423,6 +1423,22 @@ theorem zcDer_iord_descent_allOmega {s d0 a α t : V}
   obtain ⟨p, hc, hp, hpc, hd⟩ := zcDer_allOmega_inv h
   exact ⟨hp t ht, ⟨p, hc, hpc t ht⟩, by rw [sord_zAllOmega]; exact hd t ht⟩
 
+/-- **The embedding's I∀ image realizes a CONCLUSION-TRACKING ω-∀ `ZcDer` node.** A regular finitary I∀
+node `zIall s a p d0` (with fresh eigenvariable + the O3 substitution-invariance data the embedding
+supplies) lifts to a `ZcDer` ω-∀-node with stored ordinal its own `iord` — ALL the conclusion-tracking
+data (succedent `^∀ p`, each premise deriving `Γ ⟹ p(t)`) discharged from `zIall_realizes_zAllOmegaValidFull`
++ the conclusion succedent `zDerivation_zIall_inv`. So the conclusion-tracking layer `ZcDer` is inhabited
+by the embedding's image, not just an abstract prototype — the `hz`-flavoured realization for the ω-∀ node
+on the conclusion-tracking layer (the ∃/cut realizations await their conclusion-tracking extension). -/
+theorem zIall_realizes_ZcDer {s a p d0 : V}
+    (hZ : ZDerivation (zIall s a p d0)) (hreg : maxEigen d0 < a)
+    (hO3p : ∀ t, IsSemiterm ℒₒᵣ 0 t → fvSubst ℒₒᵣ a t p = p)
+    (hO3Γ : ∀ t, IsSemiterm ℒₒᵣ 0 t → fvSubstSeq a t (seqAnt s) = seqAnt s) :
+    ZcDer (zAllOmega s d0 a (iord (zIall s a p d0))) := by
+  obtain ⟨hprem, hpremC, hdesc⟩ := zIall_realizes_zAllOmegaValidFull hZ hreg hO3p hO3Γ
+  exact ZcDer.omegaAll (zDerivation_zIall_inv hZ).2.1
+    (fun t ht => .leaf (hprem t ht)) hpremC hdesc
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C

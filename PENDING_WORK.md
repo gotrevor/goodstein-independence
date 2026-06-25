@@ -1,5 +1,39 @@
 # Pending work — open obligations & attack paths
 
+## lap 106 — ✅ prerequisite 1 (conclusion-tracking) STARTED: `ZcDer` + conclusion-faithful principal ∀-inversion
+**Brick 5o (`wip/PathCOmega.lean`, all axiom-clean `[propext, choice, Quot.sound]`; `lake build GoodsteinPA`
+green 1325; `src/` untouched).** Closes lap-105's NEXT prerequisite (1, "conclusion-tracking on the datatype"):
+- `fstIdx_zAllOmega`/`fstIdx_zExOmega` — the missing Path-C conclusion projections.
+- `inductive ZcDer : V → Prop` — `ZcOK` refined so the ω-∀ node carries its conclusion data (succedent
+  `^∀ p`, premise-`t` derives `Γ⟹p(t)` = `seqSetSucc s (substs1 t p)`). Strictly positive ⟹ Lean gives a
+  STRUCTURAL recursor incl. an IH over the infinitary ω-premise family — the recursion vehicle for the
+  commuting inversion at the PROTOTYPE level (the deferred Σ₁/PRWO transfinite induction is only for the
+  arithmetized layer; the inductive itself recurses structurally).
+- `ZcDer.toZcOK` — forgetful map (structural induction), so EVERY lap-105 ordinal brick applies to a
+  `ZcDer` orbit.
+- `zcDer_iff`/`ZcPhiD` — the inversion vehicle (cf. `zcOK_iff`).
+- `zcDer_allOmega_inv` — first end-sequent recovery on the Path-C layer (matrix `p`, instance conclusions).
+- `zcDer_iord_descent_allOmega` — the principal ∀-inversion step, now CONCLUSION-faithful (new over
+  lap-105's `zcOK_iord_descent_zAllOmega`): premise derives `Γ⟹p(t)`, `ZcDer`-preserved, `iord ≺ α`.
+- `zIall_realizes_ZcDer` — the embedding's I∀ image realizes a conclusion-tracking ω-∀ `ZcDer` node (so
+  `ZcDer` is inhabited by real derivations, not an abstract prototype).
+
+**Calculus pinned this lap (Buchholz Z∞, `scratchpad/buchholz-gentzen.txt:924-972`):** sequents `Γ→C`
+(single succedent); inference symbols `R_A` (intro on RIGHT/succedent), `Lk_A` (intro on LEFT/antecedent),
+`Cut_D`. Cut on `D`: premise0 = `Γ,D→C` (`Cut_D(Π,0)=Π.D`, D in antecedent), premise1 = `Γ→D`
+(`Cut_D(Π,1)=D,Π`). So Path-C `zCutOmega s α dL dR C`: conclusion `s`, cut formula `C`, dL/dR derive the
+two Cut premises — NOT the loose "C/¬C" of earlier handoffs. Pin this before extending conclusion-tracking
+to ex/cut.
+
+**⏭ NEXT (hardest-first):**
+1. **Extend conclusion-tracking to the ∃ and cut nodes** (shapes pinned above) so the commuting ∀-inversion
+   is statable on a cut/∃ last rule. Add the conclusion conjuncts to `ZcDer.ex`/`ZcDer.cut`.
+2. **The commuting ∀-inversion recursion** over `ZcDer` (structural — the recursor handles the ω-family),
+   porting `Zinfty.allInvAux`'s case structure (ω-∀ principal = `zcDer_iord_descent_allOmega` banked).
+   BLOCKER: `ZcDer.leaf` wraps an arbitrary engine `ZDerivation`, so a leaf deriving `Γ⟹^∀ p` still needs
+   ENGINE-level ∀-inversion — motivates expanding the datatype with explicit ∧/∨/atom constructors (leaves
+   become atomic). NEXT_STEPS PRIORITY-1 item 1 ("ADD ∧/∨ intro + atom-axiom") is the same call.
+
 ## lap 105 — ✅ the cut-node ORDINAL bookkeeping is CLOSED; ⏭ the structural `hinv` (inversion) is the bottleneck
 **See `HANDOFF-2026-06-25-lap105.md`, STATUS lap-105 box.** Build green 1325; `src/` untouched (headline 0
 math axioms). This lap CLOSED the lap-104 ordinal obstruction (the `imax`-can't-do-operator-control finding):
