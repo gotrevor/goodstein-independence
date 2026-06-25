@@ -3614,6 +3614,40 @@ lemma isChainInf_seqUpdate_reduceR {s s' r ds i v : V} (hi : i < lh ds)
   · intro i' hi'
     rw [chainAsucc_seqUpdate_of_ne (ne_of_lt hi')]; exact hrank i' hi'
 
+/-- **GENERAL conclusion-reducing `isChainInf` at `j₀ = i` — membership (`inAnt`) form.** The fully general
+replace primitive that subsumes `isChainInf_seqUpdate_reduceR`: it threads premise `i`'s (possibly CHANGED)
+antecedent and the lower premises' antecedents into the reduced conclusion `s'` directly via membership,
+rather than requiring `seqAnt (fstIdx v) = chainAnt ds i` and `seqAnt s' = seqAnt s`. This is what the FOUR
+non-`Rep` cases need: I∀ (succedent → `F(0)`, antecedent kept), I¬ (antecedent GAINS `p`, succedent → `⊥`),
+axNeg (succedent → `p`), axAll (antecedent gains `F(k)`) — Buchholz threads on `inAnt`, robust to antecedent
+reordering. `hsucc_v` = the new premise-`i` succedent is `s'`'s or `⊥` (the `j₀` succedent condition);
+`hant_thread` = premise `i`'s new antecedent threads into `s'`; `hlt_thread` = lower premises thread into
+`s'`; `hrank` from the parent (via `permIdx ≤ j₀`). -/
+lemma isChainInf_reduceR_membership {s' r ds i v : V} (hi : i < lh ds)
+    (hsucc_v : seqSucc (fstIdx v) = seqSucc s' ∨ seqSucc (fstIdx v) = (^⊥ : V))
+    (hant_thread : ∀ B, inAnt B (seqAnt (fstIdx v)) →
+        inAnt B (seqAnt s') ∨ ∃ i'' < i, B = chainAsucc ds i'')
+    (hlt_thread : ∀ i' < i, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s') ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < i, irk (chainAsucc ds i') ≤ r) :
+    isChainInf s' r (seqUpdate ds i v) := by
+  refine ⟨i, by rwa [seqUpdate_lh], ?_, ?_, ?_⟩
+  · rw [chainAsucc_seqUpdate_self hi]; exact hsucc_v
+  · intro i' hi' B hB
+    rcases eq_or_ne i' i with rfl | hne
+    · rw [chainAnt_seqUpdate_self hi] at hB
+      rcases hant_thread B hB with h | ⟨i'', hi'', hB'⟩
+      · left; exact h
+      · exact Or.inr ⟨i'', hi'', by rw [chainAsucc_seqUpdate_of_ne (ne_of_lt hi''), hB']⟩
+    · have hi'lt : i' < i := lt_of_le_of_ne hi' hne
+      rw [chainAnt_seqUpdate_of_ne hne] at hB
+      rcases hlt_thread i' hi'lt B hB with h | ⟨i'', hi'', hB'⟩
+      · left; exact h
+      · exact Or.inr ⟨i'', hi'', by
+          rw [chainAsucc_seqUpdate_of_ne (ne_of_lt (lt_trans hi'' hi'lt)), hB']⟩
+  · intro i' hi'
+    rw [chainAsucc_seqUpdate_of_ne (ne_of_lt hi')]; exact hrank i' hi'
+
 /-- **L-rule replace — `isChainInf` conclusion-antecedent weakening (Buchholz Def 3.2 case 5.2.2, axiom
 selected premise).** When the selected premise `dᵢ` is a §5 left-axiom (`tp dᵢ = L^k_A`), the reduct is
 the IDENTITY (`red dᵢ = dᵢ`) and the conclusion gains the cut-formula instance `A(k)` in its ANTECEDENT
