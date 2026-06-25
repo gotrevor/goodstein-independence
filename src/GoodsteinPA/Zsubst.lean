@@ -1777,19 +1777,17 @@ lemma ZRegular_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
   · rw [heq] at htag; simp at htag
 
 /-- **`red` preserves `ZRegular` — the full `zK` chain case.** Dispatches on the two `iRK` sentinels and
-calls the three branch lemmas. Two pieces of validity data, supplied by `redSound` from `zKValidF`:
-* `hredex` — on the critical branch, the redex indices `redexI/redexJ` are in range (`< lh ds`), so the
-  redex-premise reducts are IH instances. (From `inference_critical_pair_of_chain` + the rank invariant,
-  exactly the `iord_descent_iRcrit_of_chain` derivation of `hIlh'/hJlh'`.)
-* `hseltag` — on the splice branch, the selected premise `dᵢ` is a chain (`zTag dᵢ = 4`), so its reduct is
-  a critical-reduct with regular halves. (The Rep/chain selection — `zKValidF`'s permissibility data.)
-The selected premise's `ZDerivation` is free (`zDerivation_zK_inv`). This is the regularity half of the
-combined "red preserves valid+regular" induction; the validity half stays route-B-blocked (lap-90). -/
+calls the three branch lemmas. The critical branch's redex bounds are now discharged INTERNALLY from the
+chain's own validity: `zKValidF_of_ZDerivation_zK hZ` + criticality (`zKCritical_of_not_permIdx_lt`) gives
+`zKValid`, and `redexI_redexJ_lt_of_zKValid` puts the redex indices in range. The ONLY remaining validity
+leaf is `hseltag`: on the splice branch the selected premise `dᵢ` is a chain (`zTag dᵢ = 4`), so its reduct
+is a critical-reduct with regular halves (the Rep/chain selection — `zKValidF`'s permissibility data, the
+genuine open sub-wall). The selected premise's `ZDerivation` is free (`zDerivation_zK_inv`). This is the
+regularity half of the combined "red preserves valid+regular" induction; the validity half stays
+route-B-blocked (lap-90). -/
 lemma ZRegular_red_zK {s r ds : V} (hds : Seq ds)
     (hZ : ZDerivation (zK s r ds)) (hreg : ZRegular (zK s r ds))
     (hred : ∀ i < lh ds, ZRegular (red (znth ds i)))
-    (hredex : ¬ permIdx (zK s r ds) < lh ds →
-      redexI (zK s r ds) < lh ds ∧ redexJ (zK s r ds) < lh ds)
     (hseltag : permIdx (zK s r ds) < lh ds →
       ¬ permIdx (znth ds (permIdx (zK s r ds)))
           < lh (zKseq (znth ds (permIdx (zK s r ds)))) →
@@ -1801,7 +1799,9 @@ lemma ZRegular_red_zK {s r ds : V} (hds : Seq ds)
     · exact ZRegular_red_zK_replace hds hreg hred h1 h2
     · exact ZRegular_red_zK_splice_of_chain hds hreg hred h1 h2
         ((zDerivation_zK_inv hZ).2 _ h1) (hseltag h1 h2)
-  · obtain ⟨hI, hJ⟩ := hredex h1
+  · have hvalid : zKValid s r ds := zKValid_iff_zKValidF_and_zKCritical.mpr
+      ⟨zKValidF_of_ZDerivation_zK hZ, zKCritical_of_not_permIdx_lt h1⟩
+    obtain ⟨hI, hJ⟩ := redexI_redexJ_lt_of_zKValid hvalid
     exact ZRegular_red_zK_crit hds hreg (hred _ hI) (hred _ hJ) h1
 
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)

@@ -6759,6 +6759,60 @@ lemma iord_descent_iR2_zK_of_valid {s r ds : V} (hds : Seq ds)
     (fun A h => by rw [h]; exact irk_falsum) rfl hNF
     hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
 
+/-- **Redex indices of a valid critical `K`-chain are in range** (`redexI/redexJ < lh ds`). The
+chain-structure half of the `iord_descent_iR2_zK_of_valid` recipe, extracted: from chain validity
+`zKValid` (the criticality conjunct supplies `hnperm`, the formula-hood the `hwfR`/`hwfL` rank facts),
+`inference_critical_pair_of_chain` certifies a redex exists below the finder's sentinel, so the
+definable finder `redexCode` returns an in-range `isRedexPair`. The route-B/regularity reducts read the
+two redex-premise reducts `red (znth ds (redexI/redexJ …))` as IH instances — this lemma supplies their
+index bounds (`ZRegular_red_zK`'s `hredex`). -/
+lemma redexI_redexJ_lt_of_zKValid {s r ds : V}
+    (hvalid : zKValid s r ds) :
+    redexI (zK s r ds) < lh ds ∧ redexJ (zK s r ds) < lh ds := by
+  obtain ⟨hci, hperm0, hnperm0, hf1, hf2, hf5, hf6, _hsucc, _hssf, _hsaf⟩ := hvalid
+  obtain ⟨j0, hj0, hAj0, hchain, hrank⟩ := hci
+  have hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ False :=
+    fun i hi A h => Or.inl (tp_isymR_pos h (hf1 i (lt_of_le_of_lt hi hj0))
+      (hf2 i (lt_of_le_of_lt hi hj0)))
+  have hwfL : ∀ i ≤ j0, ∀ k A, tp (znth ds i) = isymLk k A → 0 < irk A ∨ (A = (^⊥ : V)) :=
+    fun i hi k A h => Or.inl (tp_isymLk_pos h (hf5 i (lt_of_le_of_lt hi hj0))
+      (hf6 i (lt_of_le_of_lt hi hj0)))
+  have hperm : ∀ i ≤ j0, iperm (tp (znth ds i)) (fstIdx (znth ds i)) :=
+    fun i hi => hperm0 i (lt_of_le_of_lt hi hj0)
+  have hnperm : ∀ i ≤ j0, ¬ iperm (tp (znth ds i)) s :=
+    fun i hi => hnperm0 i (lt_of_le_of_lt hi hj0)
+  obtain ⟨i0, j1, k0, hij, hjle, hRi, hLj, hrkpos, hrkr⟩ :=
+    inference_critical_pair_of_chain (Tr := fun _ => False) (Fa := fun A => A = (^⊥ : V))
+      hj0 hAj0 hchain hrank hwfR hwfL hperm hnperm (fun _ h => h.1)
+      (fun A h => by rw [h]; exact irk_falsum) rfl
+  have hjlt : j1 < lh ds := lt_of_le_of_lt hjle hj0
+  have hilt : i0 < lh ds := lt_trans hij hjlt
+  have hredex : isRedexPair ds (⟪i0, j1⟫ : V) := by
+    simp only [isRedexPair, pi₁_pair, pi₂_pair]
+    refine ⟨hij, hjlt, ?_, ?_, ?_⟩
+    · rw [hRi]; simp [isymR]
+    · rw [hLj]; simp [isymLk]
+    · rw [hRi, hLj]; simp [isymR, isymLk]
+  have hex : ∃ c < (⟪lh (zKseq (zK s r ds)), lh (zKseq (zK s r ds))⟫ : V),
+      isRedexPair (zKseq (zK s r ds)) c := by
+    simp only [zKseq_zK]; exact ⟨⟪i0, j1⟫, pair_lt_pair hilt hjlt, hredex⟩
+  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
+  simp only [zKseq_zK] at hrc
+  exact ⟨lt_trans hrc.1 hrc.2.1, hrc.2.1⟩
+
+/-- **Criticality from the `permIdx` sentinel**: `¬ permIdx (zK s r ds) < lh ds` (the `iRK` critical
+branch) ⟹ `zKCritical s ds` (no premise is permissible). The `permIdx = lh ds` sentinel means the
+first-hit search found nothing (`permIdxAux_eq_self_of_none`). -/
+lemma zKCritical_of_not_permIdx_lt {s r ds : V} (h : ¬ permIdx (zK s r ds) < lh ds) :
+    zKCritical s ds := by
+  have heq : permIdx (zK s r ds) = lh ds :=
+    le_antisymm (by have := permIdxAux_le ds (fstIdx (zK s r ds)) (lh (zKseq (zK s r ds)));
+                     simpa [permIdx, fstIdx_zK, zKseq_zK] using this) (not_lt.mp h)
+  intro i hi
+  have := permIdxAux_eq_self_of_none ds (fstIdx (zK s r ds)) (lh (zKseq (zK s r ds)))
+    (by simpa [permIdx, fstIdx_zK, zKseq_zK] using heq) i (by simpa [zKseq_zK] using hi)
+  simpa [isPermPrem, fstIdx_zK] using this
+
 /-! ## The Thm-4.2 one-step descent through the recursive `iR2` — ALL reducible rules (tags 1,2,3,4)
 
 With `iR2` total and the refined `ZPhi` carrying `zKValid` on its `zK` disjunct, the descent
