@@ -28,12 +28,39 @@ chain premise `dᵢ`, i.e. the recursive IH of `iord_descent_red` on `dᵢ`.
      check it factors through `iord_descent_le`/`iord_descent_iCritAux` to expose the bundle.
    - **critical NODE** (`hcrit` false, `red = iRcritG`): needs the bundle from `iord_descent_red_zK_crit`
      (`RedZKDescent:84`) — same factoring check.
-3. **Definability RISK:** `sigma1_order_induction` needs the motive `𝚺₁-Predicate`. The motive is
-   `ZDerivation d → red d = d ∨ (idg (red d) ≤ idg d ∧ icmp (iotil (red d)) (iotil d) = 0 ∧ isNF (iotil
-   (red d)))`. `red`/`idg`/`iotil` are `𝚺₁-Function₁`, `ZDerivation` is `𝚫₁`, `isNF` needs its definability
-   instance checked. Try `definability`; if it aesop-blows-up, unfold `iRedDescent` + build the
-   `Definable` term explicitly (`.comp₂` for `red`-composites, cf. the `definability-aesop-depth-blowup`
-   reference note). This is the one genuine unknown.
+3. **Definability:** `sigma1_order_induction` needs the motive `𝚺₁-Predicate` (`red`/`idg`/`iotil` are
+   `𝚺₁-Function₁`, `ZDerivation` is `𝚫₁`); try `definability`, fall back to explicit `.comp₂` per the
+   `definability-aesop-depth-blowup` note.
+
+### ⚠️ KEY FINDINGS (lap 113, 2nd half) — the naive `iRedDescent` recursion is WRONG; two real obstacles
+Banked all K-node `iRedDescent` bundles (`iRedDescent_red_zK_replace_eq`/`_splice_eq`/`_chain_replace`/
+`_chain_splice`; Ind is `iRedDescent_zInd`). But TWO kernel-grounded facts show the general theorem
+`ZDerivation d → red d = d ∨ iRedDescent (red d) d` is **FALSE as stated**:
+
+- **(A) The critical-NODE reduct breaks `iRedDescent`.** `red (critical zK) = iRcrit = cut`, whose descent
+  is `iord_descent_cut` (`InternalZ:2596`): `idg e + 1 ≤ idg d` (degree DROPS) with
+  `icmp (iotil e) (ocOadd (iotil d) 1 0) = 0` (i.e. `õ(e) < ω^{õ(d)}` — `õ` may RISE!). So `iRedDescent`'s
+  `otil_lt` (`õ(e) < õ(d)`) FAILS for the cut. ⟹ the theorem must EXCLUDE critical K-chains: condition it
+  on `¬ (zTag d = 4 ∧ ¬ permIdx d < lh (zKseq d))`. The recursion preserves this: the IH is only applied
+  at chain-REPLACE (`Crux2Blueprint:599`), where the premise `dᵢ` is a NON-critical chain (`h2` true);
+  critical premises are SPLICED (`iCrit_halves`, no IH), and splice KEEPS `õ` descending
+  (`iotil_seqInsert_lt`) — that's the whole point of splicing-not-cutting.
+
+- **(B) axAll/axNeg-SELECTED premise → neither disjunct holds (the lap-111 selection invariant, now in
+  general sub-chains).** If a non-critical node's `permIdx`-selected premise `dᵢ` has `tp = isymLk`
+  (tag 5/6 axAll/axNeg, which ARE `red`-fixpoints `red dᵢ = dᵢ`), then `red_zK_rep_nonchain` gives
+  `red node = zK (tpReduce (isymLk…) s 0) r ds` — premises `ds` UNCHANGED (so `õ(red node) = õ(node)`,
+  `idg` equal ⟹ `iRedDescent.otil_lt` FAILS) but the CONCLUSION is reduced (`tpReduce isymLk ≠ id`, unlike
+  `tpReduce_isymRep` for atoms ⟹ NOT a fixpoint either). So a general non-critical node with an L-axiom
+  selected satisfies NEITHER `red d = d` NOR `iRedDescent`. For the `∅→⊥` TOP node this is killed by Cor 2.1
+  (`tp_selected_isymRep_of_emptyAnt_botSucc`: the selected premise of a `∅→⊥` K-node has `tp = isymRep`,
+  never `isymLk`). **The open question: does that selection invariant PROPAGATE through the reduction to
+  every sub-chain the recursion visits?** If the reduced sub-chains stay `⊥`-succedent orbits, Cor 2.1
+  reapplies and axAll/axNeg are never selected; then the recursion closes. This is the genuine remaining
+  content — an INVARIANT (`⊥`-orbit / selected-`tp = isymRep`) threaded through `red`, NOT a mechanical
+  strong induction. Likely the right statement: prove the recursion for chains whose conclusion succedent
+  is `⊥` (or carries the orbit invariant), so both (A)'s criticality and (B)'s L-axiom selection are
+  controlled. Re-examine the lap-107/111 `ZInf`/`ZcOK` prototype inversion cases for the invariant shape.
 
 Once `iord_descent_red` is sorry-free, the open frontier = the PRIZE (`ZDerivation_red_zK_crit` inversion)
 + validity sorries (`zKValidF_iIndReduct_of_zInd`, splice/axNeg validity) + M2/M3.
