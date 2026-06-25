@@ -373,6 +373,27 @@ theorem icmp_imax_lt {a b α : V} (ha : icmp a α = 0) (hb : icmp b α = 0) :
     icmp (imax a b) α = 0 := by
   unfold imax; split <;> assumption
 
+/-- **`imax` is `𝚺₁`-definable** (needed for `red`'s definability). Two-way dispatch on `icmp a b = 0`. -/
+noncomputable def imaxDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y a b. ∃ c, !icmpDef c a b ∧ ((c = 0 ∧ y = b) ∨ (c ≠ 0 ∧ y = a))”
+
+instance imax_defined : 𝚺₁-Function₂ (imax : V → V → V) via imaxDef := .mk fun v ↦ by
+  simp [imaxDef, imax, icmp_defined.iff]
+  by_cases h : icmp (v 1) (v 2) = 0 <;> simp [h]
+
+instance imax_definable : 𝚺₁-Function₂ (imax : V → V → V) := imax_defined.to_definable
+
+/-- **Generic cut-reduct drop — the UNIFORM ordinal descent for every cut-formula shape.** ANY rebuilt cut
+`zCutOmega s (imax (sord dL) (sord dR)) dL dR C` whose two reduced premises each have `sord ≺ α` has its own
+stored `sord ≺ α`. So every cut case of `red` (∀-witness selection, ∧/∨-projection, atom) drops the ordinal
+by the SAME `icmp_imax_lt` argument — the reduct premises are immediate sub-derivations (smaller `sord`),
+and the rebuilt cut stores their max. `sord_redCutAll_lt` is the `∀` instance; the other shapes instantiate
+this verbatim once their premise-extraction is defined. -/
+theorem sord_zCutOmega_imax_lt {s dL dR C α : V}
+    (hL : icmp (sord dL) α = 0) (hR : icmp (sord dR) α = 0) :
+    icmp (sord (zCutOmega s (imax (sord dL) (sord dR)) dL dR C)) α = 0 := by
+  rw [sord_zCutOmega]; exact icmp_imax_lt hL hR
+
 /-- **The ∀-cut reduct** (Path C `red`, the `cut`-vs-`∀x F` case). Selects the witness premise `zsubst d0 a
 t` (brick 1) and the `∃`-side witness sub-derivation `dR_t`, rebuilding a smaller cut on `Cnew = F(t)` whose
 stored ordinal is the ε₀-max of the two reduced premises' stored ordinals. NO chain, NO `zKValid` reduct —
