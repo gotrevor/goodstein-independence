@@ -851,6 +851,95 @@ theorem zcOK_redAllEx_of_ctrl {s α s' d0 a αAll sE αEx CE tE dE C : V}
   simp only [zExTerm_zExOmega, zExPrem_zExOmega]
   exact ZcOK.cut hZl hZr hLctrl hRctrl
 
+/-! ### Brick 5c (lap 105) — the natural-sum `#` RESOLUTION of the lap-104 `imax` tension
+
+Lap 104 found `imax` cannot serve the cut node's operator-control (`sord premise ≺ stored`): the
+max-ACHIEVING premise EQUALS `imax`, never `≺` it. It framed the fix as Gentzen's rank-aware ordinal
+(the `ω`-tower), deferring it as "genuinely multi-month". **That deferral is unnecessary for the
+principal ∀/∃ step.** The natural (Hessenberg) sum `inadd` (`#`) on CNF codes — already used for the
+induction node's stored ordinal (`indOmegaStoredOrd`) — supplies BOTH obligations at once:
+
+- **Operator-control** holds because `#` is STRICTLY self-dominating: `X ≺ X # g` whenever `g ≻ 0`
+  (`lt_inadd_self_right`), and `g ≺ X # g` whenever `X ≻ 0` (`lt_inadd_self_left`). So a cut node
+  storing `(sord dL) # (sord dR)` strictly dominates BOTH premises (each other premise positive) —
+  exactly what `imax` could not do.
+- **Descent** holds because `#` is STRICTLY MONOTONE in both arguments (`inadd_strict_mono`): if the
+  reduct's two premises are each `≺` the parent's corresponding premise (`sord (zsubst …) ≺ αAll`,
+  `sord (zExPrem …) ≺ αEx`), then `(sord (zsubst …)) # (sord (zExPrem …)) ≺ αAll # αEx`. So against a
+  parent that ALSO stores `#` of its premises, the reduct strictly drops — **no additive-principality
+  of the parent ordinal is needed** (the worry that drove lap 104 to `imax`). The parent's `#`-stored
+  ordinal is itself the operator-controlled value, and strict-monotonicity carries the descent.
+
+This is the standard Schütte `#`-bookkeeping (Towsner's meta proof combines cut premises by natural
+sum); the single-ordinal `red`-descent rides on it for the principal cut. (The remaining genuinely-deep
+content — rank-mixing across compound cut formulas, where a single cut reduction spawns lower-rank cuts
+— is where the `ω`-tower of `Zinfty.cutElimStep` collapses `(rank, ord)` into one ordinal; that is the
+NEXT obligation, now sharply isolated to compound formulas, off the ∀/∃ principal step.) -/
+
+/-- **Natural-sum strict self-domination, right summand.** `X ≺ X # g` for NF `X, g` with `g ≻ 0`.
+The operator-control fact `imax` could not provide: the left premise is strictly below the cut's stored
+`# `-ordinal. -/
+theorem lt_inadd_self_right {X g : V} (hX : isNF X) (hg : isNF g) (hg0 : icmp 0 g = 0) :
+    icmp X (inadd X g) = 0 := by
+  have := inadd_left_mono isNF_zero hg hg0 X hX
+  rwa [inadd_zero_right X hX] at this
+
+/-- **Natural-sum strict self-domination, left summand.** `g ≺ X # g` for NF `X, g` with `X ≻ 0`. -/
+theorem lt_inadd_self_left {X g : V} (hX : isNF X) (hg : isNF g) (hX0 : icmp 0 X = 0) :
+    icmp g (inadd X g) = 0 := by
+  have := inadd_right_mono isNF_zero hX hX0 g hg
+  rwa [inadd_zero_left] at this
+
+/-- **Natural-sum strict monotonicity (both arguments).** `a ≺ a' → b ≺ b' → a # b ≺ a' # b'`
+(all NF). The descent fact: a reduct whose two premises strictly drop below the parent's two premises
+has its `#`-stored ordinal strictly below the parent's `#`-stored ordinal — no additive-principality
+of the parent needed. -/
+theorem inadd_strict_mono {a a' b b' : V}
+    (ha : isNF a) (ha' : isNF a') (hb : isNF b) (hb' : isNF b')
+    (h1 : icmp a a' = 0) (h2 : icmp b b' = 0) : icmp (inadd a b) (inadd a' b') = 0 :=
+  icmp_trans' (inadd_right_mono ha ha' h1 b hb) (inadd_left_mono hb hb' h2 a' ha')
+
+/-- **The `#`-stored ∀/∃-cut reduct.** Identical to `redAllEx` but the stored ordinal is the natural
+SUM `(sord (selected ∀-premise)) # (sord (∃-premise))`, not their `imax`. The sum stores the reduced
+premises' OWN stored ordinals (`sord`, not `iord`) — correct even when a premise is itself a cut/ω-node
+(general Path-C), unlike `imax`'s `iord` left field. -/
+noncomputable def redAllExN (s d0 a Cnew dR : V) : V :=
+  zCutOmega s (inadd (sord (zsubst d0 a (zExTerm dR))) (sord (zExPrem dR)))
+    (zsubst d0 a (zExTerm dR)) (zExPrem dR) Cnew
+
+/-- **Principal ∀/∃-cut `hinv` — FULL closure, `imax`-free (axiom-clean).** The `#`-stored reduct of a
+`ZcOK` cut (left = ω-∀-node, right = ∃-node) is `ZcOK`. Operator-control is DISCHARGED from the
+premises' positivity + NF alone (`lt_inadd_self_right`/`lt_inadd_self_left`) — no externally-supplied
+`hLctrl`/`hRctrl` (contrast `zcOK_redAllEx_of_ctrl`, which had to assume them and could not prove them
+for `imax`). This closes the operator-control half of `hinv` for the principal ∀/∃ step. -/
+theorem zcOK_redAllExN {s α s' d0 a αAll sE αEx CE tE dE C : V}
+    (h : ZcOK (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE αEx CE tE dE) C))
+    (htE : IsSemiterm ℒₒᵣ 0 tE)
+    (hLnf : isNF (sord (zsubst d0 a tE))) (hRnf : isNF (sord dE))
+    (hLpos : icmp 0 (sord (zsubst d0 a tE)) = 0) (hRpos : icmp 0 (sord dE) = 0) :
+    ZcOK (redAllExN s d0 a C (zExOmega sE αEx CE tE dE)) := by
+  obtain ⟨hZl, hZr⟩ := zcOK_redAllEx_premises h htE
+  rw [redAllExN]
+  simp only [zExTerm_zExOmega, zExPrem_zExOmega]
+  refine ZcOK.cut hZl hZr ?_ ?_
+  · exact lt_inadd_self_right hLnf hRnf hRpos
+  · exact lt_inadd_self_left hLnf hRnf hLpos
+
+/-- **The `#`-stored ∀/∃-cut reduction STRICTLY drops the stored ordinal — against a `#`-stored parent.**
+If the reduct's selected ∀-premise and the ∃-premise each have `sord ≺` the parent's corresponding
+premise ordinals (`αAll`, `αEx`), the reduct's stored `# `-ordinal is `≺ αAll # αEx` — the parent's
+own `# `-stored ordinal. This is the per-step descent for the principal ∀/∃ cut WITHOUT
+additive-principality (the obstruction lap-104's `imax` was chosen to dodge): strict-monotonicity of
+`#` (`inadd_strict_mono`) carries it, given consistent `#`-storage on both parent and reduct. -/
+theorem sord_redAllExN_lt {s d0 a Cnew dR αAll αEx : V}
+    (hLlt : icmp (sord (zsubst d0 a (zExTerm dR))) αAll = 0)
+    (hRlt : icmp (sord (zExPrem dR)) αEx = 0)
+    (hLnf : isNF (sord (zsubst d0 a (zExTerm dR)))) (hRnf : isNF (sord (zExPrem dR)))
+    (hAnf : isNF αAll) (hEnf : isNF αEx) :
+    icmp (sord (redAllExN s d0 a Cnew dR)) (inadd αAll αEx) = 0 := by
+  rw [redAllExN, sord_zCutOmega]
+  exact inadd_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C

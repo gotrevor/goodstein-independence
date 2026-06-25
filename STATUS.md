@@ -1,6 +1,23 @@
 # STATUS — GoodsteinPA 📊
 
-> **⭐⭐⭐ Lap-104 FRESH-MIND REVIEW + IN-KERNEL ENDGAME CORRECTION (read FIRST — current).** Baton
+> **⭐⭐⭐ Lap-105 — the natural-sum `#` RESOLUTION of the lap-104 `imax` tension (read FIRST — current).**
+> Baton `HANDOFF-2026-06-25-lap105.md`. Build 🟢 green (1325); `src/` UNTOUCHED (headline footprint intact:
+> `peano_not_proves_goodstein = [propext, sorryAx, choice, Quot.sound]`, 0 math axioms). Lap-104's 2nd
+> in-kernel finding (the `imax` stored ordinal can't satisfy the cut node's operator-control, since the
+> max-ACHIEVING premise EQUALS `imax`) framed the fix as Gentzen's `ω`-tower, "multi-month". **This lap shows
+> that deferral is unnecessary for the principal ∀/∃ step.** The natural (Hessenberg) sum `inadd` (`#`,
+> already in `InternalNadd.lean`) supplies BOTH obligations at once (5 new axiom-clean lemmas in
+> `wip/PathCOmega.lean`): operator-control from STRICT SELF-DOMINATION (`X ≺ X#g` for `g≻0`,
+> `lt_inadd_self_right`/`_left`), and descent from STRICT MONOTONICITY (`a≺a' → b≺b' → a#b ≺ a'#b'`,
+> `inadd_strict_mono`). `zcOK_redAllExN` closes the operator-control half of `hinv` for the principal ∀/∃ cut
+> with NO assumed `hLctrl`/`hRctrl` (contrast lap-104's `zcOK_redAllEx_of_ctrl`); `sord_redAllExN_lt` gives
+> the per-step descent **against a `#`-stored parent with NO additive-principality needed** — precisely the
+> obstruction that drove lap 104 to `imax`. **The `ω`-tower is now isolated to its true locus: rank-mixing
+> across COMPOUND cut formulas (∧/∨, where one cut spawns two lower-rank cuts), NOT the ∀/∃ principal step.**
+> NEXT (hardest-first): general ∀-inversion `redInv∀` (re-principalize non-ω-∀ left premises), then the
+> internal `iomegaTower` for the compound cases. See `HANDOFF-2026-06-25-lap105.md`, `NEXT_STEPS.md`.
+
+> **⭐⭐⭐ Lap-104 FRESH-MIND REVIEW + IN-KERNEL ENDGAME CORRECTION (historical — see lap-105 box above).** Baton
 > `HANDOFF-2026-06-25-lap104.md`. Build 🟢 green (`lake build GoodsteinPA`, 1325); `src/` UNTOUCHED (headline
 > footprint intact — re-verified in-kernel `lake env lean`: `peano_not_proves_goodstein = [propext, sorryAx,
 > choice, Quot.sound]`, **0** math axioms; `peano_not_proves_consistency` clean; `not_proves_of_implies_consistency`

@@ -1,3 +1,14 @@
+# NEXT STEPS — Path C (lap 105: the `#`-natural-sum resolves the principal ∀/∃ ordinal tension)
+
+> **⭐⭐ LAP-105 UPDATE (read FIRST).** Lap 104 deferred the cut node's ordinal as Gentzen's `ω`-tower,
+> "multi-month". For the PRINCIPAL ∀/∃ step that deferral was unnecessary: the natural sum `inadd` (`#`)
+> closes BOTH operator-control (strict self-domination, `lt_inadd_self_right`/`_left`) AND descent (strict
+> monotonicity, `inadd_strict_mono`) at once — `zcOK_redAllExN` + `sord_redAllExN_lt` (`wip/PathCOmega.lean`,
+> axiom-clean). The `ω`-tower is now isolated to **COMPOUND** cut formulas (∧/∨, rank-mixing). Remaining
+> hardest-first: (1) general ∀-inversion `redInv∀` (re-principalize a non-ω-∀ left premise; `Zinfty.allInvAux`
+> META template); (2) internal `iomegaTower` port (`Zinfty.omegaTower` → ε₀-codes via `iotower`) for the ∧/∨
+> cases only. Then `red_iterate_descends` with `P = ZcOK ∧ derives ∅→⊥`, embedding (`hz`), arithmetization.
+
 # NEXT STEPS — Path C (lap 104: endgame CORRECTED — datatype + inversion is `hinv`)
 
 > **⭐⭐ LAP-104 CORRECTION (read FIRST — supersedes the lap-102/103 "complete `red` dispatch + `hdrop`"
