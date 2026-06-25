@@ -1462,6 +1462,33 @@ lemma red_zK_rep_nonchain {s r ds : V} (h1 : permIdx (zK s r ds) < lh ds)
   rw [if_pos h1, if_neg (by simp [htag]), iRKr, zKseq_zK, fstIdx_zK, zKrank_zK,
     znth_redTable_eq_red _ _ hbound]
 
+/-! ### I∀ conclusion-tracking — `red (zIall …)` derives the `tpReduce`'d sequent (route-B, lap 98)
+
+The replace branch of `ZDerivation_red_zK` (`Crux2Blueprint.lean:206/214`) needs, for a NON-`Rep`
+selected premise `dᵢ`, that the I∀ reduct `red dᵢ = zsubst d0 a 0` carries exactly the reduced
+end-sequent `tpReduce (R_∀xF) (end dᵢ) 0 = Γ→F(0)` — the lap-97 eigensubst made `red dᵢ` *derive*
+`Γ→F(0)`; this lemma certifies its end-sequent IS `Γ→F(0)`, so the conclusion-reduced chain validity
+(`isChainInf` on the swapped premise) can consume it. The I∀ analogue of the proved I¬
+`red_zIneg_tpReduce` (`InternalZ.lean:7521`); harder because I∀ *substitutes* the eigenvariable, so it
+needs the eigenvariable-freshness facts `a ∉ FV(p)` / `a ∉ FV(Γ)` (Buchholz's eigenvariable condition,
+O3 — supplied on the orbit by the embedding's fresh-eigenvariable choice). -/
+
+/-- **I∀ reduct end-sequent = the `tpReduce`'d sequent.** Given the eigenvariable `a` is fresh in the
+matrix `p` (`hpfresh`) and in the conclusion antecedent `Γ = seqAnt s` (`hΓfresh`), the I∀ reduct
+`red (zIall s a p d0) = zsubst d0 a 0` has end-sequent `tpReduce (tp (zIall …)) s 0 = Γ→F(0)`. This is
+the route-B conclusion-tracking fact for the ∀-principal cut (`red_zIneg_tpReduce` is its I¬ sibling). -/
+lemma red_zIall_tpReduce {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0))
+    (hpfresh : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral 0) p = p)
+    (hΓfresh : fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) (seqAnt s) = seqAnt s) :
+    fstIdx (red (zIall s a p d0))
+      = tpReduce (tp (zIall s a p d0)) (fstIdx (zIall s a p d0)) 0 := by
+  obtain ⟨hd0, _, hwff⟩ := zDerivation_zIall_inv hZ
+  have ht0 : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral 0 : V) := by simp
+  have hfa : IsSemiterm ℒₒᵣ 0 (^&a : V) := by simp
+  rw [red_zIall, tp_zIall, fstIdx_zIall, tpReduce_isymR_all, fstIdx_zsubst _ _ hd0]
+  simp only [fvSubstSeqt, seqSetSucc, hwff.1, hwff.2.1, hΓfresh,
+    fvSubst_substs1 ht0 hfa hwff.2.2, termFvSubst_fvar_self, hpfresh]
+
 /-- **5.2.2 replace branch — regularity preserved (unconditional).** `red (zK s r ds) = K^r(i/red dᵢ)`;
 regular since every original premise is (`ZRegular_zK_premise`) and the swapped reduct `red dᵢ` is (IH). -/
 lemma ZRegular_red_zK_replace {s r ds : V} (hds : Seq ds)

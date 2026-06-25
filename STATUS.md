@@ -1,5 +1,23 @@
 # STATUS — GoodsteinPA 📊
 
+> **⭐⭐⭐ Lap-98 FRESH-MIND REVIEW (read FIRST — current).** Re-verified kernel (real `#print axioms`,
+> green 1325): headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]`
+> (bare `sorry`; the lone math residual `sorryAx` = crux-2), `peano_not_proves_consistency` clean.
+> **Direction KEPT — and the obvious-looking alternative was actively REFUTED, not assumed.** This lap I
+> empirically re-litigated "should we abandon crux-2 (7 sorries) for the semantic/TI route (1 sorry)?":
+> `peano_not_proves_TI` (Thm 5.6) IS axiom-clean and `peano_not_proves_goodstein_modulo_semantic` is clean
+> **modulo the single `DescentSemantic:582` β-wall sorry** — which *looks* one-sorry-from-done. **It is a
+> trap.** The lap-45/46 machine-checked finding (`Grz.not_dominated_of_diag_le`) stands: Rathjen §3's
+> slow-down is **primrec-only**, a free-`X` (oracle) descent is **not** primrec-dominated, so that `sorry`
+> asks for the *impossible* — and `modulo_semantic` is a vestigial theorem built on a FALSE sorry; wiring it
+> to the headline would be fraud (free-X-TI ⊢ PRWO is the wrong direction anyway). **The PRWO descent IS
+> internally primrec, so crux-2 (Gentzen `PRWO→Con`) is the only honest route.** crux-2's cut-elimination
+> is the genuine highest-value target; the lap-97 I∀ eigensubst rewire unblocked its zK validity residuals.
+> **NEXT (handoff lap-97, validated):** `ZDerivation_red_zK` replace branches (Crux2Blueprint:206,214) →
+> `iord_descent_red` → `foundation_bot_to_Z_empty`/`false_of_ZDerivesEmpty` → wire to headline. **HOUSEKEEPING
+> flagged:** `DescentSemantic:582` + `peano_not_proves_goodstein_modulo_semantic` are off-path/built-on-a-
+> dead-sorry — candidates for `wip/` (deferred; harmless disclosed sorries, not blocking).
+
 **Kirby–Paris: `𝗣𝗔 ⊬ Goodstein`. ROUTE RESOLVED (lap 45→46) to Rathjen 2014 Cor 3.7 = the original
 DIRECTION/Gödel-II plan: `𝗣𝗔⊢γ →(§3, all primrec) 𝗣𝗔⊢PRWO(ε₀) →(Gentzen Thm 2.8(i)) 𝗣𝗔⊢Con(𝗣𝗔)`, then
 Gödel II.** The §3 internal pipeline = internal Cor 3.4 (Grzegorczyk `g`-padding, internal level — DEEP,
@@ -9,7 +27,9 @@ asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). **Crux 1 (
 (lap 57); crux 2 (`PRWO→Con`, Buchholz-Z ordinal analysis arithmetized in IΣ₁) is the sole remaining math
 content — the 🟡 active frontier, now sharply localized to `RedSound` (InternalZ.lean): the `iR2`-reduct of
 a contradiction derivation must itself be a genuine `ZDerivation` = real internalized cut-elimination.** ·
-**Build**: 🟢 green (`lake build GoodsteinPA`, 1325 jobs) · **Updated**: lap 95 (FRESH-MIND REVIEW —
+**Build**: 🟢 green (`lake build GoodsteinPA`, 1325 jobs) · **Updated**: lap 98 (FRESH-MIND REVIEW —
+direction KEPT; semantic/TI alternative empirically REFUTED as a dead `sorry`, see lap-98 box at top) ·
+earlier lap 95 (FRESH-MIND REVIEW —
 direction KEPT, **Path X CONFIRMED + SHARPENED**: the crux-2 wall is now pinned to ONE surgical fix — gate
 `iRK`'s splice on `zTag dᵢ = 4` (NOT a 2–3k-line ω-rule rewrite; O1/O2 are DONE); de-risked in
 `wip/InternalZdispatch.lean`; see `ANALYSIS-2026-06-25-lap95-dispatch-fix-not-pivot.md`) · earlier lap 92
