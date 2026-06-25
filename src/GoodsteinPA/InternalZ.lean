@@ -6461,6 +6461,30 @@ noncomputable def cutFormula (d : V) : V :=
   else
     neg ℒₒᵣ (π₁ (π₂ (chainAsucc (zKseq d) (redexI d) - 1)))
 
+/-- `𝚺₁` graph of `cutFormula` (template `tpReduceDef`): dispatch on the `qqAll` tag `π₁(A_i−1) = 6`,
+the `∀`-branch substituting the `numeral` of the `L^k` instance into the matrix. -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.cutFormulaDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ ds, !zKseqDef ds d ∧ ∃ i, !redexIDef i d ∧ ∃ A, !chainAsuccDef A ds i ∧
+    ∃ Am, !subDef Am A 1 ∧ ∃ q, !pi₁Def q Am ∧
+    ( (q = 6 ∧ ∃ j, !redexJDef j d ∧ ∃ dj, !znthDef dj ds j ∧ ∃ tj, !tpDef tj dj ∧
+        ∃ p2j, !pi₂Def p2j tj ∧ ∃ k, !pi₁Def k p2j ∧
+        ∃ nk, !(Bootstrapping.Arithmetic.numeralGraph) nk k ∧
+        ∃ bod, !pi₂Def bod Am ∧ !(substs1Graph ℒₒᵣ) y nk bod)
+    ∨ (q ≠ 6 ∧ ∃ p2Am, !pi₂Def p2Am Am ∧ ∃ qq, !pi₁Def qq p2Am ∧ !(negGraph ℒₒᵣ) y qq) )”
+
+set_option maxHeartbeats 1600000 in
+instance cutFormula_defined : 𝚺₁-Function₁ (cutFormula : V → V) via cutFormulaDef := .mk fun v ↦ by
+  simp [cutFormulaDef, cutFormula, zKseq_defined.iff, redexI_defined.iff, chainAsucc_defined.iff,
+    sub_defined.iff, pi₁_defined.iff, redexJ_defined.iff, znth_defined.iff, tp_defined.iff,
+    pi₂_defined.iff, (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff,
+    (substs1.defined (L := ℒₒᵣ)).iff, (neg.defined (L := ℒₒᵣ)).iff]
+  by_cases hq : π₁ (chainAsucc (zKseq (v 1)) (redexI (v 1)) - 1) = 6 <;>
+    simp [hq, numeral_eq_natCast]
+
+instance cutFormula_definable : 𝚺₁-Function₁ (cutFormula : V → V) := cutFormula_defined.to_definable
+instance cutFormula_definable' (Γ) : Γ-[m + 1]-Function₁ (cutFormula : V → V) :=
+  cutFormula_definable.of_sigmaOne
+
 /-- `∀`-case readout: when the principal is `∀xF`, the stripped cut formula is the instance `F(k)`. -/
 lemma cutFormula_all {d p : V}
     (hA : chainAsucc (zKseq d) (redexI d) = (^∀ p : V)) :
