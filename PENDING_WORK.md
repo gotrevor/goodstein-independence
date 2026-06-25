@@ -1,5 +1,35 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 83 fresh-mind REFINEMENT (read before executing the lap-82 re-point) — "descent = just wiring" is OVERSTATED
+
+Re-read `iord_descent_iR2_zK_of_valid` (`InternalZ.lean:4755`) end-to-end. The lap-82 KEY FINDING
+("step 2 is not new descent math, only wire the banked `iord_descent_iCritAux`/`_iSpliceEnd` into a
+dispatch") is **too optimistic on one point**: the K-descent does NOT merely *consume* criticality as a
+side fact — it uses `hnperm` (criticality) to **FIND THE REDEX** via `inference_critical_pair_of_chain`,
+and then `rw [iR2_zK_eq_iRcrit]` to make `iR2` BE that critical reduct. So:
+
+- In the **non-critical** case there is provably **no such redex** (some premise `i ≤ j₀` has
+  `iperm (tp dᵢ) s`), so `inference_critical_pair_of_chain` is inapplicable AND `iRcrit` (= the current
+  `iR2_zK`) reduces nothing useful. The banked `iord_descent_iCritAux` descends the reduct
+  `zK s r (seqUpdate ds i v)` — but **only if `iR2_zK` actually PRODUCES that reduct**, which it does
+  not: `iR2_zK_eq_iRcrit` is unconditional. Wiring the banked descent therefore REQUIRES the reduct
+  function `iR2_zK` itself to branch on `zKCritical s ds` (critical → `iRcrit`; non-critical → `iCritAux`
+  replace; sub-critical → `iSpliceEnd` splice). That is a **definitional change to the reduct**, not a
+  proof-only dispatch — and it breaks `iR2_zK_eq_iRcrit` and everything proved through it (`iR2_zK`,
+  the redex-finder route in `iord_descent_iR2_zK_of_valid`, plus the §5 `zAxReduct` bundles which assume
+  the iRcrit shape). The lap-82 plan's own step-3 escape hatch ("if `iR2` can't be made to dispatch case
+  5.2, define a NEW reduct and re-point `RedSound` + descent onto it") is the realistic route.
+
+- **Net:** the re-point of `ZPhi` → `zKValidF` (step 1) cannot stay green by itself — it forces
+  `iord_descent_iR2_zK_of_valid` to take only `zKValidF`, whose non-critical case has no banked
+  *producer*. Recommended lap-83 sequencing: **(a)** first build the non-critical reduct + its descent
+  capstone as a STANDALONE green lemma `iord_descent_iCritAux_zK_noncrit` (hypotheses: `zKValidF` +
+  `¬zKCritical` + the witnessing `i`), reusing banked `iord_descent_iCritAux`; **(b)** likewise the
+  sub-critical splice capstone; **(c)** ONLY THEN define the dispatching reduct (new `iR2'` or a guarded
+  `iR2_zK`) and re-point — so each step lands green and committable rather than a red all-or-nothing swap.
+  This keeps "hardest-first" honest: the genuinely-new math is the non-critical/sub-critical *producers*
+  (selecting the witness `i` / splice point from `isChainInf` + ¬criticality), then `RedSound` validity.
+
 ## ⭐⭐ Lap 82 (OPERATOR REDIRECT) — crux-2 unblocked: criticality ≠ chain-validity
 
 **Build 🟢 green.** Operator moved Front 2 (`PA_delta1Definable`) to a parallel box — it's a tracked
