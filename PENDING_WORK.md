@@ -1,5 +1,44 @@
 # Pending work — open obligations & attack paths
 
+## lap 113 — splice branch CLOSED; chain-rank invariant PROVEN; NEXT = the iord_descent_red recursion
+**Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
+4 commits.** The splice `hr'` degree-drop is fully proven and `irk_chainAsucc_redexI_le` (the chain-rank
+invariant) is a real axiom-clean proof (NO `isChainInf` refactor — pairing joint-monotonicity bounds the
+minimal redex below `j₀`). `iord_descent_red` is down to **ONE** internal sorry.
+
+**THE remaining sorry = the chain-REPLACE strong-induction IH** (`Crux2Blueprint:~595`,
+`Or.inr (iord_descent_red_zK_chain_replace … ?_)`): needs `iRedDescent (red dᵢ) dᵢ` for a non-critical
+chain premise `dᵢ`, i.e. the recursive IH of `iord_descent_red` on `dᵢ`.
+
+**THE FIX = restructure `iord_descent_red` to conclude `iRedDescent` + strong induction.** Concretely:
+1. Prove `iRedDescent_red_of_ZDerivation (d) : ZDerivation d → red d = d ∨ iRedDescent (red d) d` by
+   `induction d using ISigma1.sigma1_order_induction` (premises `dᵢ < d` via `znth ds i < ds < zK s r ds`).
+   `iord_descent_red` then = a 3-line corollary (`iord_descent_of_iRedDescent` on the RIGHT disjunct).
+2. **Per-branch `iRedDescent` bundles** (every K-node reduct factors through `iord_descent_le` =
+   `idg_le ∧ iotil_lt ∧ nf`, so the bundles ALWAYS exist):
+   - atom / axAll / axNeg: `red d = d` ⟹ LEFT (`red_zAtom`/`red_zAxAll`/`red_zAxNeg`). ✓ trivial
+   - I∀ / I¬: `iRedDescent_red_zIall` / (`red_zIneg ▸ iRedDescent_zIneg`). ✓ banked
+   - **REPLACE**: `iRedDescent_red_zK_replace_eq` — **DONE this lap** (`RedZKDescent`). chain-replace branch
+     feeds it the IH (`dᵢ < d`); if IH gives LEFT (`red dᵢ = dᵢ`) the whole node is a fixpoint (LEFT).
+   - **SPLICE**: needs `iRedDescent_red_zK_splice_eq` — TODO: same as `iord_descent_red_zK_splice_eq` but
+     also prove the reduct's own NF `isNF (iotil (zK s' r' (seqInsert ds i a b)))` via a case analysis on
+     `znth_seqInsert_{pre,at,at1,suf}` (a/b are NF by `hNFa`/`hNFb`, ds-premises by `hNF`). ~15 lines; the
+     other two fields = `idg_seqInsert_le'` / `iotil_seqInsert_lt`.
+   - **Ind**: needs `iRedDescent_red_zInd` — `iord_descent_iRInd_zInd` goes through `iord_descent_iIndReduct`;
+     check it factors through `iord_descent_le`/`iord_descent_iCritAux` to expose the bundle.
+   - **critical NODE** (`hcrit` false, `red = iRcritG`): needs the bundle from `iord_descent_red_zK_crit`
+     (`RedZKDescent:84`) — same factoring check.
+3. **Definability RISK:** `sigma1_order_induction` needs the motive `𝚺₁-Predicate`. The motive is
+   `ZDerivation d → red d = d ∨ (idg (red d) ≤ idg d ∧ icmp (iotil (red d)) (iotil d) = 0 ∧ isNF (iotil
+   (red d)))`. `red`/`idg`/`iotil` are `𝚺₁-Function₁`, `ZDerivation` is `𝚫₁`, `isNF` needs its definability
+   instance checked. Try `definability`; if it aesop-blows-up, unfold `iRedDescent` + build the
+   `Definable` term explicitly (`.comp₂` for `red`-composites, cf. the `definability-aesop-depth-blowup`
+   reference note). This is the one genuine unknown.
+
+Once `iord_descent_red` is sorry-free, the open frontier = the PRIZE (`ZDerivation_red_zK_crit` inversion)
++ validity sorries (`zKValidF_iIndReduct_of_zInd`, splice/axNeg validity) + M2/M3.
+
+
 ## lap 111 — DEEP REFLECTION + disjunctive `iord_descent_red` (atom branch CLOSED; SELECTION INVARIANT named)
 **Build 🟢 green 1326; headline footprint intact + re-verified in-kernel (`[propext, sorryAx, choice,
 Quot.sound]`, 0 math axioms). 2 commits (synthesis + grind).** See `REFLECTION-2026-06-25-lap111.md`.
