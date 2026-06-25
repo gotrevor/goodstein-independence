@@ -503,6 +503,36 @@ lemma quote_univCl_eq_qqAllItr (ψ : SyntacticFormula ℒₒᵣ) :
 
 end FixitrBridge
 
+/-! ## Brick 3 — the recognizer predicate `IsInductionAxiomCode` (lap 80)
+
+The Lean-level predicate the recognizer `ch` will arithmetize: `y` codes an instance of the universal
+induction scheme iff there is a 1-ary semiformula code `p`, an arity `m`, and a `m`-ary fv-free body
+`body` with `y = qqAllItr body m` (an `m`-fold `^∀`-closure), `m` minimal (`m = 0` or `body` not
+`(m-1)`-fv-free — pins `m = fvSup body`), and `subst (fvarSeq m) body = succIndCodeRaw p` (the body,
+once the closure rewrite is undone, is the `succInd`-matrix of `p`). `IsFVFree` is inlined as
+`IsSemiformula ∧ shift = self` so `definability` sees only `𝚫₁` atoms. -/
+
+section Recognizer
+
+open LO.FirstOrder.Arithmetic.Bootstrapping
+open LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+
+/-- The recognizer predicate (over an arbitrary model `V`). -/
+def IsInductionAxiomCode (y : V) : Prop :=
+  ∃ p ≤ y, IsSemiformula ℒₒᵣ 1 p ∧ ∃ m ≤ y, ∃ body ≤ y,
+    y = qqAllItr body m ∧
+    (IsSemiformula ℒₒᵣ m body ∧ shift ℒₒᵣ body = body) ∧
+    (m = 0 ∨ ¬ (IsSemiformula ℒₒᵣ (m - 1) body ∧ shift ℒₒᵣ body = body)) ∧
+    subst ℒₒᵣ (fvarSeq m) body = succIndCodeRaw p
+
+/-- The recognizer predicate is `𝚫₁`-definable. -/
+instance isInductionAxiomCode_definable : 𝚫₁-Predicate (IsInductionAxiomCode : V → Prop) := by
+  unfold IsInductionAxiomCode; definability
+
+end Recognizer
+
 /-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
 `𝗣𝗔⁻ = 𝗘𝗤 ∪ {17 axioms}`, all over the finite-symbol language `ℒₒᵣ`), so the finite-theory
 combinator `Theory.Δ₁.ofFinite` enumerates it into a `𝚫₁.Semisentence 1`. -/
@@ -542,5 +572,6 @@ to `@consistent_unprovable 𝗣𝗔 paDelta1 _ _`, dropping `PA_delta1Definable`
   paMinusDelta1.add inductionSchemeUnivDelta1
 
 end GoodsteinPA
+
 
 
