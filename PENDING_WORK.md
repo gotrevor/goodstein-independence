@@ -1,5 +1,44 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 85 — R1 DISCHARGED + M1a `red` DEFINED + M1b ordinal bridge (5 green commits)
+
+**Build 🟢 1325 jobs, axiom base clean ([propext, Classical.choice, Quot.sound]).** The keystone
+re-point landed and the genuine reduct now exists.
+
+DONE this lap:
+- **R1 (the `ZPhi` re-point)** — `ZPhi`'s `zK` disjunct now carries `zKValidF` (faithful, criticality-free
+  validity). `zDerivation_zK_intro` is a theorem (was `hZPhiK`). `ZDerivation_iCritReductG_of`/
+  `ZDerivation_iRcritG_of` drop the re-point residual. `zKValidF_of_ZDerivation_zK` replaces
+  `zKValid_of_ZDerivation_zK`. Dead iR2-orbit descent now takes an explicit `zKCritical` hyp (honest).
+- **M1a — `red` DEFINED** (`InternalZ`): `iRNextG` (5-case dispatch, K-case = `iRcritG` on correct reduced
+  endsequents), `redTable` PR-recursion, `red := znth (redTable d) d`, 𝚺₁-definable (`redDef`). Per-rule
+  recursion eqs `red_zAtom/zIall/zIneg/zInd/zAxAll/zAxNeg/red_zK`. `fstIdx_red_of_tag_Ind_or_K`. Genuine
+  endsequent ops definable (`seqSetSuccDef`/`seqAddAntDef`). Blueprint `red`/`fstIdx_red` wired to reals
+  (blueprint sorries 6→4).
+- **M1b ordinal bridge** — `iord_iRcritG_eq_iRcrit` (via `iotil_zK`/`idg_zK` conclusion-independence). The
+  ordinal descent on `red`'s K-case = the banked `iRcrit` descent.
+
+NEXT (M1b `redSound`, the cut-elim nut — priority):
+1. **R2 (auxiliary IH)** — discharge the `haux0`/`haux1` hyps of `ZDerivation_iRcritG_of`: the two
+   auxiliaries `zK (seqSetSucc (fstIdx d) A(d)) r (seqUpdate ds i (ρ i))` etc. are `ZDerivation`s. Needs:
+   (a) premises are ZDerivations — unchanged ones from `d`'s ZDerivation; the replaced one `ρ i =
+   zAxReduct (red (znth ds i))` by the `redSound` IH + **`ZDerivation_zAxReduct`** (see ⚠ below);
+   (b) the aux chain is `zKValidF` — the banked `zKValidF_iCritReductSeq`/`isChainInf_iCritReductSeq`
+   threading (Thm 3.4(a)), establishing the recombination from `d`'s validity + criticality.
+2. ⚠ **`zAx1` is TAG 7, NOT a `ZPhi` rule** (tags 0–6). So `zAxReduct` of an axiom premise (tag 5/6 →
+   `zAx1`) is currently NOT a `ZDerivation`. Resolve before R2: either (i) the redex premises are never
+   tag-5/6 axioms (so `zAxReduct` = identity there — likely, the redex i-premise has `tp = isymR` ⟹ I-rule
+   tag 1/2 via `tp_isymR_tag`; the j-premise `tp = isymLk` — CHECK if that forces an L-rule vs an axiom),
+   OR (ii) add a tag-7 disjunct to `ZPhi` for `zAx1` (the atomic identity axiom) and re-bless the Fixpoint.
+3. **`redSound`** = `zDerivation_induction` over `d`; tags 1,2 (I-rules, but never on ⊥) reuse
+   `ZDerivation_iR2_zIall/zIneg` (red=iR2 there); tag 3 (Ind) needs the Ind-reduct `zKValidF` (deep
+   residual, parallels old `ZDerivation_iR2_zInd_of_zKValid` but only `zKValidF` now); tag 4 = `ZDerivation_iRcritG_of` + R2.
+4. **`iord_descent_red`** — provable on CRITICAL chains: `red_zK` + `iord_iRcritG_eq_iRcrit` + banked
+   `iord_descent_iRcrit_of_chain`. ⚠ **GAP: `red` is critical-case-only** (tag-4 always `iRcritG` at
+   `redexCode`). Non-critical chains (no redex pair found) need Buchholz 5.2 splice/replace dispatch —
+   `red` must branch on `zKCritical`. Decide: does a ZDerivesEmpty chain always have a critical redex
+   (positive rank ⟹ L3.1 redex pair)? If yes, critical-only `red` suffices and `iord_descent_red` closes.
+
 ## 📍 Lap 84 (FINAL) — RedSound CRITICAL case reduced to TWO named residuals (12 green commits)
 
 **Build 🟢 green, axiom base untouched.** The genuine critical reduct is now named and its validity
