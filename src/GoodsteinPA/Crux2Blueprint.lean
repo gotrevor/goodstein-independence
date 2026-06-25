@@ -182,6 +182,46 @@ theorem ZDerivation_red_zK_splice {s r ds : V}
           (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)
           (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1))) := sorry
 
+/-- **I∀ non-`Rep` replace — FULLY ASSEMBLED modulo the orbit invariants (lap 99).** The capstone proving
+the validity infrastructure SUFFICES for the hardest non-`Rep` case: when the selected premise `dᵢ = znth ds
+i` is an I∀ node (`zIall sᵢ a p d0`), the genuine reduct `red dᵢ = zsubst d0 a 0` (deriving `Γ→F(0)`) feeds
+`ZDerivation_iCritReplaceReduce_of` to produce the conclusion-reduced chain `zK (tpReduce (tp dᵢ) s 0) r
+(seqUpdate ds i (red dᵢ))`. EVERYTHING is discharged from banked lemmas — `red_zIall_tpReduce` (the I∀
+conclusion-tracking, needs the O3 freshness `hpfresh`/`hΓfresh`), `iperm_tp_fstIdx_of_ZDerivation` +
+`tag_uformula_of_ZDerivation` (the reduct's own well-formedness), `seqAnt_seqSetSucc`/`seqSucc_seqSetSucc`.
+The ONLY un-discharged inputs are the genuine orbit data: O3 freshness (`hpfresh`/`hΓfresh`), the threading/
+rank up to `i` (`hthread`/`hrank`, from `permIdx ≤ j₀`), and the reduced succedent well-formedness
+(`hsucc_wff`) — exactly what the strengthened `redSoundGen` motive must supply (PENDING_WORK lap-99 path A).
+This DE-RISKS the entire non-`Rep` route: the I∀ case is mechanically complete given the invariants. -/
+theorem ZDerivation_zK_replace_zIall_of {s r ds i sᵢ a p d0 : V}
+    (hZ : ZDerivation (zK s r ds)) (hi : i < lh ds)
+    (hdi : znth ds i = zIall sᵢ a p d0)
+    (hZred : ZDerivation (red (zIall sᵢ a p d0)))
+    (hpfresh : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral 0) p = p)
+    (hΓfresh : fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) (seqAnt sᵢ) = seqAnt sᵢ)
+    (hsucc_wff : IsUFormula ℒₒᵣ (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral 0) p))
+    (hthread : ∀ i' ≤ i, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < i, irk (chainAsucc ds i') ≤ r) :
+    ZDerivation (zK (tpReduce (tp (znth ds i)) s 0) r (seqUpdate ds i (red (znth ds i)))) := by
+  have hZdi : ZDerivation (zIall sᵢ a p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 i hi
+  have htrack : fstIdx (red (zIall sᵢ a p d0))
+      = seqSetSucc sᵢ (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral 0) p) := by
+    rw [red_zIall_tpReduce hZdi hpfresh hΓfresh, tp_zIall, fstIdx_zIall, tpReduce_isymR_all]
+  have hchain_i : chainAnt ds i = seqAnt sᵢ := by
+    unfold chainAnt; rw [hdi, fstIdx_zIall]
+  rw [hdi, tp_zIall, tpReduce_isymR_all]
+  refine ZDerivation_iCritReplaceReduce_of hi hZ hZred ?_ ?_ ?_ hthread hrank ?_ ?_ ?_ ?_ ?_ ?_
+  · rw [htrack, seqAnt_seqSetSucc, ← hchain_i]
+  · rw [htrack, seqSucc_seqSetSucc, seqSucc_seqSetSucc]
+  · rw [seqAnt_seqSetSucc]
+  · rw [seqSucc_seqSetSucc]; exact hsucc_wff
+  · exact iperm_tp_fstIdx_of_ZDerivation hZred
+  · exact (tag_uformula_of_ZDerivation hZred).1
+  · exact (tag_uformula_of_ZDerivation hZred).2.1
+  · exact (tag_uformula_of_ZDerivation hZred).2.2.1
+  · exact (tag_uformula_of_ZDerivation hZred).2.2.2
+
 /-- **Residual (K case of Buchholz Thm 3.4 — the cut-elimination core).** The genuine reduct `red` of a
 valid chain `zK s r ds` is again a `ZDerivation`, given that the reduct of every premise is. Dispatches
 (via `red_zK_crit` / `red_zK_rep` / `red_zK_splice`) into the three Buchholz case-5 sub-residuals; each
