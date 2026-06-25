@@ -979,6 +979,94 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
       · rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
         exact inAnt_fvSubstSeq hin
 
+/-! ## `maxEigen` — the largest eigenvariable index in a derivation (Path-X freshness foundation)
+
+`maxEigen d` = the maximum eigenvariable index over all `zIall`/`zInd` nodes of `d` (0 if none). Built by
+the exact `idg` table template (`InternalZ.lean`): `maxEigenNext d s` reads the premise results out of the
+running table `s` and folds in this node's own eigenvariable. The point (lap-92 DECISION): a freshness
+invariant phrased on `maxEigen` is **stable under `zsubst`** (closed-term substitution preserves the
+eigenvariable binders), unlike the code bound `d ≤ a` — so it is maintainable through `red`. -/
+
+noncomputable def maxEigenNext (d s : V) : V :=
+  if zTag d = 1 then max (zIallEig d) (znth s (zIallPrem d))
+  else if zTag d = 2 then znth s (zInegPrem d)
+  else if zTag d = 3 then
+    max (zIndEig d) (max (znth s (zIndPrem0 d)) (znth s (zIndPrem1 d)))
+  else if zTag d = 4 then iseqMaxTab s (zKseq d)
+  else 0
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.maxEigenNextDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ t, !zTagDef t d ∧
+    ( (t = 1 ∧ ∃ ea, !zIallEigDef ea d ∧ ∃ p, !zIallPremDef p d ∧ ∃ v, !znthDef v s p ∧ !max.dfn y ea v)
+    ∨ (t = 2 ∧ ∃ p, !zInegPremDef p d ∧ !znthDef y s p)
+    ∨ (t = 3 ∧ ∃ ie, !zIndEigDef ie d ∧ ∃ p0, !zIndPrem0Def p0 d ∧ ∃ v0, !znthDef v0 s p0 ∧
+        ∃ p1, !zIndPrem1Def p1 d ∧ ∃ v1, !znthDef v1 s p1 ∧ ∃ m, !max.dfn m v0 v1 ∧ !max.dfn y ie m)
+    ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqMaxTabDef y s ds)
+    ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = 0) )”
+
+set_option maxHeartbeats 1000000 in
+instance maxEigenNext_defined : 𝚺₁-Function₂ (maxEigenNext : V → V → V) via maxEigenNextDef :=
+  .mk fun v ↦ by
+    simp [maxEigenNextDef, maxEigenNext, zTag_defined.iff, zIallEig_defined.iff,
+      zIallPrem_defined.iff, zInegPrem_defined.iff, zIndEig_defined.iff, zIndPrem0_defined.iff,
+      zIndPrem1_defined.iff, zKseq_defined.iff, iseqMaxTab_defined.iff, znth_defined.iff,
+      max_defined.iff]
+    by_cases h1 : zTag (v 1) = 1
+    · simp [h1]
+    · by_cases h2 : zTag (v 1) = 2
+      · simp [h1, h2]
+      · by_cases h3 : zTag (v 1) = 3
+        · simp [h1, h2, h3]
+        · by_cases h4 : zTag (v 1) = 4
+          · simp [h1, h2, h3, h4]
+          · simp [h1, h2, h3, h4]
+
+instance maxEigenNext_definable : 𝚺₁-Function₂ (maxEigenNext : V → V → V) :=
+  maxEigenNext_defined.to_definable
+
+/-- Blueprint for the `maxEigen` table. -/
+noncomputable def maxEigenTable.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !mkSeq₁Def y 0”
+  succ := .mkSigma “y ih n. ∃ v, !maxEigenNextDef v (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def maxEigenTable.construction : PR.Construction V maxEigenTable.blueprint where
+  zero := fun _ ↦ !⟦0⟧
+  succ := fun _ n ih ↦ seqCons ih (maxEigenNext (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [maxEigenTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [maxEigenTable.blueprint, maxEigenNext_defined.iff, seqCons_defined.iff]
+
+/-- **The `maxEigen` table**: `maxEigenTable n = ⟨maxEigen 0,…,maxEigen n⟩` (length `n+1`). -/
+noncomputable def maxEigenTable (n : V) : V := maxEigenTable.construction.result ![] n
+
+@[simp] lemma maxEigenTable_zero : maxEigenTable (0 : V) = !⟦0⟧ := by
+  simp [maxEigenTable, maxEigenTable.construction]
+
+@[simp] lemma maxEigenTable_succ (n : V) :
+    maxEigenTable (n + 1) = seqCons (maxEigenTable n) (maxEigenNext (n + 1) (maxEigenTable n)) := by
+  simp [maxEigenTable, maxEigenTable.construction]
+
+/-- **Largest eigenvariable index** `maxEigen d`: the `d`-th entry of the table. -/
+noncomputable def maxEigen (d : V) : V := znth (maxEigenTable d) d
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.maxEigenTableDef : 𝚺₁.Semisentence 2 :=
+  maxEigenTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance maxEigenTable_defined : 𝚺₁-Function₁ (maxEigenTable : V → V) via maxEigenTableDef := .mk
+  fun v ↦ by simp [maxEigenTable.construction.result_defined_iff, maxEigenTableDef]; rfl
+
+instance maxEigenTable_definable : 𝚺₁-Function₁ (maxEigenTable : V → V) :=
+  maxEigenTable_defined.to_definable
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.maxEigenDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ t, !maxEigenTableDef t d ∧ !znthDef y t d”
+
+instance maxEigen_defined : 𝚺₁-Function₁ (maxEigen : V → V) via maxEigenDef := .mk fun v ↦ by
+  simp [maxEigenDef, maxEigen, maxEigenTable_defined.iff, znth_defined.iff]
+
+instance maxEigen_definable : 𝚺₁-Function₁ (maxEigen : V → V) := maxEigen_defined.to_definable
+
 /-! ## Route-B eigensubst reducts, discharged by `ZDerivation_zsubst` under a freshness bound
 
 **Lap-92 corrected decomposition (`ANALYSIS-2026-06-25-lap92-criticality-wall-is-gone.md`).** Buchholz's

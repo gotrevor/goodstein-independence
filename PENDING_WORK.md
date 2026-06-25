@@ -28,13 +28,18 @@ indices**, so a freshness invariant phrased on eigenvariable indices (`maxEigen 
 **stable through `red`** (the code-bound `d≤a` was not). Path C is the fallback only if step 4 below walls.
 
 **NEXT — Path X foundation lemmas (concrete, low-risk, reuse the `idg` recursion template):**
-1. **Define `maxEigen d`** = largest eigenvariable index in `d`, via the EXACT `idg`/`idgNext`/`idgTable`/
-   `PR.Construction` template (`InternalZ.lean`): `maxEigenNext d s` reads premise results `znth s (zIallPrem d)`
-   etc. + `zIallEig`/`zIndEig`; Σ₁-definable by the same mechanical proof as `idgNext_defined`. **← start here.**
-2. **`maxEigen_zsubst : maxEigen (zsubst d a t) = maxEigen d`** (closed `t`) — the substitution-stability crux.
+1. **✅ DONE (lap 92, `Zsubst.lean`, axiom-clean, green 1325):** `maxEigen d` defined + `𝚺₁`-definable
+   (`maxEigenNext`/`maxEigenTable`/`maxEigenDef`) via the `idg`/`PR.Construction` template. `maxEigenNext`
+   folds `zIallEig`/`zIndEig` over the premise table; chains use `iseqMaxTab`.
+2. **← START HERE: recursion equations + stability.** (a) `maxEigen_zIall : maxEigen (zIall s a p d0)
+   = max a (maxEigen d0)` etc. (mirror the `idg` "structural correctness" lemmas after `InternalZ.lean:1920`
+   — they need premises `< d` + table-indexing correctness). (b) **`maxEigen_zsubst : maxEigen (zsubst d a t)
+   = maxEigen d`** (closed `t`) — the substitution-stability crux, by `zDerivation_induction` + the
+   recursion equations + `zsubst_zIall`/`zInd` preserving the binder.
 3. **Reformulate `ZDerivation_zsubst`** from `d ≤ a` to `maxEigen d < a` (body unchanged; `e ≠ a` now from
-   `e ≤ maxEigen d < a`). 4. **O1:** strengthen `zIallWff`/`zIndWff` with `maxEigen d0 < eigenvar`, discharge in
-   M2, prove `red` maintains it. 5. Route-B reducts discharge unconditionally (banked corollaries + `tpReduce`).
+   `e = zIallEig ≤ maxEigen d < a` via the recursion eq). 4. **O1:** strengthen `zIallWff`/`zIndWff` with
+   `maxEigen d0 < eigenvar`, discharge in M2, prove `red` maintains it. 5. Route-B reducts discharge
+   unconditionally (banked corollaries + `tpReduce`).
 2. **(Path X) — ✅ O2 BANKED this lap (`Zsubst.lean`, axiom-clean):** `ZDerivation_zsubst_zIall_premise`
    and `ZDerivation_zsubst_zInd_premise1` discharge the route-B I∀/Ind eigensubst reducts **directly from
    the existing `ZDerivation_zsubst`**, under the freshness bound `d0 ≤ a` / `d1 ≤ π₁ at'`. This
