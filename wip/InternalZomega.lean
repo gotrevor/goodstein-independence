@@ -192,4 +192,109 @@ for the ∀-node and plausibly extends to the chain. But the chain probe is the 
 full commit. **NEXT LAP:** Probe 2 — the ⊥-orbit Ind/chain ω-rule reduct, the direct test of whether the
 ω-rule retires the `redZKReady` motive on the node that actually walls. See `NEXT_STEPS.md`. -/
 
+/-! ## Probe 2 — the ⊥-orbit INDUCTION node under the ω-rule (lap 102, EXECUTED)
+
+The reflection (lap 101) named Probe 2 as the decisive test: does the ω-rule retire the `redZKReady`
+hereditary-Rep motive on the node that actually walls (the chain/Ind ⊥-orbit)? Two halves: (A) does the
+ω-rule view eliminate the chain conclusion-tracking motive, and (B) does the induction ω-node ARITHMETIZE
+(the `iord` question Probe 1 settled for the ∀-node)? This section settles BOTH, with a surprise on (B).
+
+**(A) — the chain motive is retired (already PROVEN, by `Zinfty.lean`).** The meta ω-rule calculus
+`ZinftyF.Deriv` (axiom-clean, 1560 lines) carries out the FULL Gentzen cut-elimination (`cutElimStep` /
+`cutElimPrincipal` / `cutElim`, Towsner §19) over real `ℒₒᵣ` syntax with **no chain rule and no
+`redZKReady`-style conclusion-tracking motive whatsoever**: the only multi-premise rule is `allω`, and
+∀/∃-cuts reduce by premise SELECTION (`cutReduceAll`), exactly as the lap-101 ∀-node spike showed
+arithmetizes (`zOmegaPrem_valid` + `iord_descent_zOmegaPrem`). The repo's finitary `zK` chain is Buchholz's
+device for spreading a finitary cut across an eigenvariable system; the ω-rule has no analogue, so the
+`redZKReady` hereditary-Rep obligation (`Crux2Blueprint.redSoundGen`'s open `sorry`) simply does not arise.
+`Zinfty.lean` IS the in-kernel certificate that ω-rule cut-elimination needs no chain motive. So (A) = YES.
+
+**(B) — the SURPRISE: the induction ω-node's premise ordinals are NOT constant (contrast Probe 1).** Under
+the ω-rule, PA-induction is absorbed: to derive `∀x F` you supply the family `F(0), F(1), F(2), …`, where
+`F(k)` is proved by iterating the (fixed) step `k` times from the base. The repo's FINITARY induction
+reduct already exhibits this iteration: `red (zInd s a p d0 d1) = zK s (irk p) (iIndReductSeq d0 d1 1)`, and
+the `k`-step unfolding `iIndReductSeq d0 d1 k = ⟨d0, d1, …, d1⟩` has õ-ordinal computed below. UNLIKE the
+∀-node (whose premises are eigensubsts, ordinal-PRESERVING, hence `iord_zOmegaPrem_constant`), the induction
+premise ordinals STRICTLY INCREASE in the unfolding depth `k`. So `o(induction-ω-node) = ⨆_k o(premise k)`
+is a GENUINE limit ordinal, not a finite successor — Probe 1's "constant ⟹ finite `iord d0 + 1`" escape
+does NOT extend to the induction node. -/
+
+/-- **The induction `k`-step unfolding's õ-ordinal, in closed form.** `iIndReductSeq d0 d1 k` is the chain
+`⟨d0, d1, …, d1⟩` (base + `k` copies of the step); its õ (the `#`-natural-sum fold `iotil_zK`) is the
+Cantor-normal-form term `ω^{õ d1}·k # ω^{õ d0}`. The coefficient `k` of the `ω^{õ d1}` block is LITERALLY
+the unfolding depth — manifest depth-dependence, the obstruction to a constant-ordinal ω-node. -/
+theorem iotil_zK_iIndReduct (s r d0 d1 k : V) (hk : 0 < k) :
+    iotil (zK s r (iIndReductSeq d0 d1 k))
+      = inadd (ocOadd (iotil d1) k 0) (ocOadd (iotil d0) 1 0) := by
+  rw [iotil_zK _ _ _ (iIndReductSeq_seq d0 d1 k), iseqNaddIdg_iIndReductSeq hk]
+
+/-- **The `ω^e`-coefficient block strictly grows in its multiplier.** `ω^e·k₁ ≺ ω^e·k₂` for `k₁ < k₂`
+(same exponent, no tail): `icmp` reduces to `cmpV k₁ k₂` via `icmp_ocOadd`. The CNF kernel of the induction
+ordinal's depth-dependence. -/
+theorem ocOadd_coeff_strictMono (e k1 k2 : V) (hk : k1 < k2) :
+    icmp (ocOadd e k1 0) (ocOadd e k2 0) = 0 := by
+  rw [icmp_ocOadd, icmp_self e e le_rfl, thenV_one_left, icmp_zero_zero,
+      cmpV_eq_zero.mpr hk]
+  exact thenV_eq_zero.mpr (Or.inl rfl)
+
+/-- **PROBE 2 KEY RESULT — the induction ω-node's premise-family ordinal STRICTLY INCREASES in the
+unfolding depth.** For NF premise ordinals (which `ZDerivation`s carry, via `isNF_iotil`), `k₁ < k₂` ⟹
+`õ(k₁-unfolding) ≺ õ(k₂-unfolding)` — by `inadd_right_mono` on the depth-`k` coefficient block
+(`ocOadd_coeff_strictMono`), the `ω^{õ d0}` summand fixed. **This is the in-kernel REFUTATION of the
+constant-ordinal escape for the induction node:** where the ∀-node spike proved `iord_zOmegaPrem_constant`
+(premises ordinal-uniform ⟹ `iord = iord d0 + 1`, finite), the induction node's premises are ORDINAL-COFINAL
+in the index, so `⨆_k o(premise k) = ω^{õ d1 + 1} # ω^{õ d0}` is a genuine LIMIT. The repo's `iord =
+iotower (iotil) (idg)` is a finite-`#`-fold over the STORED finite premise sequence and has no sup/limit
+operation, so it cannot assign the induction ω-node its ordinal. The standard fix (Buchholz
+operator-controlled derivations) is to STORE the ordinal as node data with the side condition `∀k, o(premise
+k) ≺ stored`, NOT compute it — fully arithmetizable, but REPLACES the computed-`iord` layer. -/
+theorem iotil_zK_iIndReduct_strictMono (s r d0 d1 k1 k2 : V)
+    (hd0 : isNF (iotil d0)) (hd1 : isNF (iotil d1))
+    (hk1 : 0 < k1) (hk : k1 < k2) :
+    icmp (iotil (zK s r (iIndReductSeq d0 d1 k1)))
+         (iotil (zK s r (iIndReductSeq d0 d1 k2))) = 0 := by
+  rw [iotil_zK_iIndReduct s r d0 d1 k1 hk1,
+      iotil_zK_iIndReduct s r d0 d1 k2 (lt_trans hk1 hk)]
+  refine inadd_right_mono ?_ ?_ (ocOadd_coeff_strictMono (iotil d1) k1 k2 hk)
+    (ocOadd (iotil d0) 1 0) (isNF_omega_pow hd0)
+  · exact (isNF_ocOadd _ _ _).mpr ⟨hk1.ne', hd1, isNF_zero, Or.inl rfl⟩
+  · exact (isNF_ocOadd _ _ _).mpr ⟨(lt_trans hk1 hk).ne', hd1, isNF_zero, Or.inl rfl⟩
+
+/-! ## SPIKE VERDICT (lap 102 — Probe 2 EXECUTED, fork SETTLED with refinement)
+
+**Evidence (all axiom-clean, in-kernel).** *∀-node (Probe 1):* `zOmegaPrem_valid`, `zOmegaPrem_concl`,
+`iord_zOmegaPrem_constant`, `iord_descent_zOmegaPrem`, `zIall_realizes_omega`. *Chain/Ind (Probe 2):*
+**(A) chain motive RETIRED** — `Zinfty.lean` proves full ω-rule cut-elimination with no chain, no
+`redZKReady`; the lap-92 selection-dissolves-tracking thesis is CONFIRMED (no chain rule to track).
+**(B) induction ω-node ordinal is a GENUINE LIMIT** (`iotil_zK_iIndReduct_strictMono`): premise ordinals
+strictly increase in depth, so `⨆_k o(premise k) = ω^{õ d1 + 1} # ω^{õ d0}`; the computed `iord` (finite
+`#`-fold, no sup) CANNOT assign it.
+
+**NET CALL (refined — supersedes the lap-101 estimate).** Fork settled IN FAVOUR of Path C, but lap-101's
+cost estimate ("reuse the ordinal engine + `zsubst` + `Zinfty` template") was wrong on one axis: the ω-rule
+retires the chain/`redZKReady` motive (good), but the ORDINAL LAYER must be REPLACED, not reused — the
+induction ω-node's ordinal is a limit the computed `iord` cannot express. Path C = Buchholz
+operator-controlled derivations with **stored** ordinals (`Deriv` carries `o` as data + side condition
+`∀ premise, o(premise) ≺ o(node)`), exactly as `ZinftyF.Deriv`/`o` does at the meta level. MORE
+arithmetizable than computing a sup (no limit operation needed), but a from-scratch ordinal/derivation
+datatype, not a graft onto `InternalZ`'s `iotower`/`iotil`/`idg`.
+- **Path X (finitary) disfavoured AND likely broken:** its linchpin `redZKReady`'s hereditary-Rep invariant
+  does NOT follow from Cor 2.1 down a nested-chain spine — a sub-chain's selected premise is permissible
+  w.r.t. the sub-chain's OWN conclusion `Γᵢ→Aᵢ` (growing antecedent, arbitrary succedent), which CAN be an
+  I-rule/axiom (non-Rep). So `fstIdx (red dᵢ) = fstIdx dᵢ` (the keep-Π replace precondition the repo's `red`
+  COMMITS to for non-critical nested chains) can FAIL ⟹ `red` unfaithful there. Cor 2.1 fires only at the
+  ∅→⊥ TOP node, not hereditarily. The lap-101 worry, now with a concrete reason.
+- **Path C (ω-rule) is the route:** rebuild on `ZinftyF.Deriv`'s shape, arithmetized — stored ordinals,
+  `allω` ω-node (premise family by `zsubst`/iterated-step code), cut-elim by the Tait/Schütte recursion
+  `Zinfty.lean` certifies. crux-2's `false_of_ZDerivesEmpty` becomes: a cut-bearing ⊥-derivation has stored
+  ordinal `< ε₀`; `red` = one `cutElimStep` strictly dropping it; the ⊥-sequent has no cut-free proof, so
+  `red` never terminates ⟹ infinite ε₀-descent ⟹ contradicts PRWO(ε₀). No chain, no `redZKReady`.
+
+**NEXT LAP = begin the Path-C arithmetized datatype.** Define the Σ₁-coded stored-ordinal ω-derivation
+(`zconstruction` tag for `allω`, ordinal carried as data, validity = premise-family code + `∀-premise
+ordinal ≺ node ordinal`), porting `ZinftyF.Deriv`/`o`/`cr` from `Finset Seq`/`Ordinal` to `V`/`iord`-CNF.
+First milestone: arithmetized `allω` node + `iord` AS STORED + the single `cutElimStep` ordinal drop on it,
+reusing this spike's `zOmegaPrem`/`iord_descent_zOmegaPrem` for the ∀-cut case. Keep `InternalZ`/
+`Crux2Blueprint` (Path X) green in `src/` as fallback until Path C reaches `false_of_ZDerivesEmpty`. -/
+
 end GoodsteinPA.InternalZ

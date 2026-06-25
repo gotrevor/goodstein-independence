@@ -1,6 +1,20 @@
 # STATUS — GoodsteinPA 📊
 
-> **⭐⭐⭐ Lap-101 DEEP REFLECTION (read FIRST — current).** Primary deliverable
+> **⭐⭐⭐ Lap-102 — Probe 2 EXECUTED, the fork is SETTLED (read FIRST — current).** Baton
+> `HANDOFF-2026-06-25-lap102.md`; verdict + 3 new axiom-clean lemmas in `wip/InternalZomega.lean`. Build
+> 🟢 green (1325). The lap-101 fork (finitary Path X vs ω-rule Path C) is resolved IN FAVOUR of **Path C**,
+> with a refinement that overturns lap-101's cost estimate: (A) the chain/`redZKReady` motive is RETIRED —
+> `Zinfty.lean` already proves full ω-rule cut-elimination with no chain; (B) **the ordinal layer must be
+> REPLACED, not reused** — `iotil_zK_iIndReduct_strictMono` proves the induction ω-node's premise ordinals
+> strictly increase in unfolding depth, so its ordinal is a genuine LIMIT the computed `iord` (finite
+> `#`-fold, no sup) cannot assign. Path C = **Buchholz operator-controlled derivations with STORED
+> ordinals** (`ZinftyF.Deriv`/`o` shape, arithmetized). Path X disfavoured AND likely broken (hereditary-Rep
+> fails down a nested-chain spine; Cor 2.1 fires only at the ∅→⊥ top node). **NEXT = begin the Path-C
+> arithmetized stored-ordinal datatype** (`NEXT_STEPS.md` PRIORITY 1). `src/` unchanged; headline footprint
+> intact (`peano_not_proves_goodstein` = 0 math axioms, lone `sorryAx` = crux-2). Keep Path X green in
+> `src/` as fallback.
+
+> **⭐⭐⭐ Lap-101 DEEP REFLECTION (historical — see lap-102 box above).** Primary deliverable
 > `REFLECTION-2026-06-25-lap101.md`. Re-verified kernel in-kernel (`lake env lean`, green 1325): headline
 > `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**),
 > `peano_not_proves_consistency = [propext, choice, Quot.sound]` (clean), faithfulness anchor

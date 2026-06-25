@@ -1,4 +1,30 @@
-# NEXT STEPS — corrected priorities (lap 101 DEEP REFLECTION)
+# NEXT STEPS — fork SETTLED (lap 102: Probe 2 executed → Path C, stored ordinals)
+
+> **⭐ LAP-102 UPDATE (read FIRST).** Probe 2 ran in `wip/InternalZomega.lean` (3 new axiom-clean lemmas).
+> Verdict: the ω-rule (Path C) is the route, with a refinement — the chain/`redZKReady` motive is retired
+> (proven by `Zinfty.lean`: full ω-cut-elim, no chain), BUT the ordinal layer must be **REPLACED, not
+> reused**: `iotil_zK_iIndReduct_strictMono` proves the induction ω-node's premise ordinals strictly
+> increase in depth, so its ordinal is a genuine LIMIT the computed `iord` (finite `#`-fold, no sup) cannot
+> assign. Path C = **Buchholz operator-controlled derivations with STORED ordinals** (`ZinftyF.Deriv`/`o`
+> shape, arithmetized). Path X (finitary `redZKReady`) is disfavoured AND likely broken (hereditary-Rep
+> fails down a nested-chain spine — Cor 2.1 fires only at the ∅→⊥ top node). See
+> `HANDOFF-2026-06-25-lap102.md` + the `wip/InternalZomega.lean` Probe-2 verdict.
+
+## ▶ PRIORITY 1 (lap 102) — begin the Path-C arithmetized stored-ordinal ω-derivation
+
+Port `ZinftyF.Deriv`/`o`/`cr` (`src/GoodsteinPA/Zinfty.lean`, the axiom-clean meta cut-elimination) from
+`Finset Seq`/`Ordinal` to `V`/`iord`-CNF. **First milestone:** the arithmetized `allω` node (a
+`zconstruction` Fixpoint tag; premise family materialized by `zsubst`/iterated-step code; **ordinal carried
+as node data**, NOT computed) + `iord` read AS the stored ordinal + the single `cutElimStep` ordinal drop on
+it. Reuse this spike's `zOmegaPrem`/`zOmegaPrem_valid`/`iord_descent_zOmegaPrem` for the ∀-cut case, and
+`Zinfty.cutElimStep`/`cutElimPrincipal` as the proof template. ω-node validity = premise-family code +
+`∀-premise, o(premise) ≺ o(node)` (the stored side condition — fully Σ₁, no limit operation). Build in
+`wip/` until it reaches `false_of_ZDerivesEmpty`, then promote. Keep `InternalZ`/`Crux2Blueprint` (Path X)
+green in `src/` as the fallback meanwhile.
+
+---
+
+## (SUPERSEDED by lap 102 — kept for provenance) lap-101 priorities
 
 > Set by the lap-101 reflection. Supersedes the laps-95–100 "drive the `redZKReady` motive" plan as the
 > default. Rationale: `REFLECTION-2026-06-25-lap101.md`. The destination (`𝗣𝗔 ⊬ Goodstein`, axiom-free) and
