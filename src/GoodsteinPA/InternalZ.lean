@@ -3598,6 +3598,167 @@ lemma zKValidF_iSpliceEnd {s' r' ds j a b : V} (hj : j < lh ds)
       · rw [chainAsucc_seqUpdate_of_ne hne]; exact hcf n hlt
     · rw [heq, chainAsucc_seqCons_seqUpdate_top]; exact hfa_b
 
+/-! ### Concrete ordered-insert coded-sequence op `seqInsert` (case 5.2.1)
+
+The genuine in-place splice `d₀…d_{i−1} a b d_{i+1}…dₗ` as a total `𝚺₁` `PR.Construction` (mirror of
+`seqUpdateAux`): entry `n` = `if n<i then znth ds n else if n=i then a else if n=i+1 then b else znth ds (n−1)`.
+Its read-outs (`znth_seqInsert_{pre,at,at1,suf}`, `seqInsert_lh`) discharge the abstract read-out hypotheses
+of the splice-validity specs below. -/
+
+def seqInsertAux.blueprint : PR.Blueprint 4 where
+  zero := .mkSigma “y ds i a b. y = 0”
+  succ := .mkSigma “y ih n ds i a b.
+    ( (n < i ∧ ∃ c, !znthDef c ds n ∧ !seqConsDef y ih c) ∨
+      (i ≤ n ∧ n = i ∧ !seqConsDef y ih a) ∨
+      (i ≤ n ∧ n ≠ i ∧ n = i + 1 ∧ !seqConsDef y ih b) ∨
+      (i ≤ n ∧ n ≠ i ∧ n ≠ i + 1 ∧ ∃ m, !subDef m n 1 ∧ ∃ c, !znthDef c ds m ∧ !seqConsDef y ih c) )”
+
+noncomputable def seqInsertAux.construction : PR.Construction V seqInsertAux.blueprint where
+  zero := fun _ ↦ ∅
+  succ := fun x n ih ↦ seqCons ih
+    (if n < x 1 then znth (x 0) n else if n = x 1 then x 2 else if n = x 1 + 1 then x 3
+      else znth (x 0) (n - 1))
+  zero_defined := .mk fun v ↦ by simp [seqInsertAux.blueprint, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    by_cases h1 : v 2 < v 4
+    · simp [seqInsertAux.blueprint, h1, not_le.mpr h1, znth_defined.iff, seqCons_defined.iff]
+    · have hle : v 4 ≤ v 2 := not_lt.mp h1
+      by_cases h2 : v 2 = v 4
+      · simp [seqInsertAux.blueprint, h1, hle, h2, seqCons_defined.iff]
+      · by_cases h3 : v 2 = v 4 + 1
+        · simp [seqInsertAux.blueprint, h1, hle, h2, h3, seqCons_defined.iff]
+        · simp [seqInsertAux.blueprint, h1, hle, h2, h3, sub_defined.iff, znth_defined.iff,
+            seqCons_defined.iff]
+
+noncomputable def seqInsertAux (ds i a b n : V) : V := seqInsertAux.construction.result ![ds, i, a, b] n
+
+@[simp] lemma seqInsertAux_zero (ds i a b : V) : seqInsertAux ds i a b 0 = ∅ := by
+  simp [seqInsertAux, seqInsertAux.construction]
+
+@[simp] lemma seqInsertAux_succ (ds i a b n : V) :
+    seqInsertAux ds i a b (n + 1) = seqCons (seqInsertAux ds i a b n)
+      (if n < i then znth ds n else if n = i then a else if n = i + 1 then b else znth ds (n - 1)) := by
+  simp [seqInsertAux, seqInsertAux.construction]
+
+def _root_.LO.FirstOrder.Arithmetic.seqInsertAuxDef : 𝚺₁.Semisentence 6 :=
+  seqInsertAux.blueprint.resultDef.rew (Rew.subst ![#0, #5, #1, #2, #3, #4])
+
+instance seqInsertAux_defined : 𝚺₁-Function₅ (seqInsertAux : V → V → V → V → V → V) via seqInsertAuxDef :=
+  .mk fun v ↦ by simp [seqInsertAux.construction.result_defined_iff, seqInsertAuxDef]; rfl
+
+instance seqInsertAux_definable : (𝚺₁).DefinableFunction₅ (seqInsertAux : V → V → V → V → V → V) :=
+  seqInsertAux_defined.to_definable
+instance seqInsertAux_definable' (Γ) :
+    (Γ-[m + 1]).DefinableFunction₅ (seqInsertAux : V → V → V → V → V → V) :=
+  seqInsertAux_definable.of_sigmaOne
+
+@[simp] lemma seqInsertAux_seq (ds i a b n : V) : Seq (seqInsertAux ds i a b n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using seq_empty
+  case succ n ih => rw [seqInsertAux_succ]; exact ih.seqCons _
+
+@[simp] lemma seqInsertAux_lh (ds i a b n : V) : lh (seqInsertAux ds i a b n) = n := by
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using lh_empty
+  case succ n ih => rw [seqInsertAux_succ, Seq.lh_seqCons _ (seqInsertAux_seq ds i a b n), ih]
+
+/-- Top-entry read-out (freshly-appended entry at index `n`). -/
+lemma znth_seqInsertAux_top (ds i a b n : V) :
+    znth (seqInsertAux ds i a b (n + 1)) n =
+      (if n < i then znth ds n else if n = i then a else if n = i + 1 then b else znth ds (n - 1)) := by
+  rw [seqInsertAux_succ]
+  have := znth_seqCons_self (seqInsertAux_seq ds i a b n)
+    (if n < i then znth ds n else if n = i then a else if n = i + 1 then b else znth ds (n - 1))
+  rwa [seqInsertAux_lh] at this
+
+/-- Reads below the top are stable as the prefix grows. -/
+lemma znth_seqInsertAux_stable {ds i a b : V} (n m : V) (hm : m < n) :
+    znth (seqInsertAux ds i a b (n + 1)) m = znth (seqInsertAux ds i a b n) m := by
+  rw [seqInsertAux_succ,
+    znth_seqCons_of_lt (seqInsertAux_seq ds i a b n) _ (by rw [seqInsertAux_lh]; exact hm)]
+
+/-- Region read-out: `pre` (`k < i`), ite-free. -/
+lemma znth_seqInsertAux_pre {ds i a b k : V} (hki : k < i) :
+    ∀ n, k < n → znth (seqInsertAux ds i a b n) k = znth ds k := by
+  intro n
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro h; exact absurd h (by simp)
+  case succ n ih =>
+    intro hk
+    rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hk) with hkn | hklt
+    · rw [hkn, znth_seqInsertAux_top, if_pos (by rw [← hkn]; exact hki)]
+    · rw [znth_seqInsertAux_stable n k hklt]; exact ih hklt
+
+/-- Region read-out: at the insert index `i`. -/
+lemma znth_seqInsertAux_at {ds i a b : V} : ∀ n, i < n → znth (seqInsertAux ds i a b n) i = a := by
+  intro n
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro h; exact absurd h (by simp)
+  case succ n ih =>
+    intro hi
+    rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hi) with hin | hilt
+    · obtain rfl := hin
+      rw [znth_seqInsertAux_top, if_neg (_root_.lt_irrefl i), if_pos rfl]
+    · rw [znth_seqInsertAux_stable n i hilt]; exact ih hilt
+
+/-- Region read-out: at the second insert index `i+1`. -/
+lemma znth_seqInsertAux_at1 {ds i a b : V} : ∀ n, i + 1 < n → znth (seqInsertAux ds i a b n) (i + 1) = b := by
+  intro n
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro h; exact absurd h (by simp)
+  case succ n ih =>
+    intro hi
+    rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hi) with hin | hilt
+    · obtain rfl := hin
+      rw [znth_seqInsertAux_top, if_neg (not_lt.mpr (le_of_lt (lt_add_one i))),
+        if_neg (ne_of_gt (lt_add_one i)), if_pos rfl]
+    · rw [znth_seqInsertAux_stable n (i + 1) hilt]; exact ih hilt
+
+/-- Region read-out: suffix (`i + 1 < m + 1`, i.e. the original `d_m` for `m > i` sits at `m + 1`). -/
+lemma znth_seqInsertAux_suf {ds i a b m : V} (him : i < m) :
+    ∀ n, m + 1 < n → znth (seqInsertAux ds i a b n) (m + 1) = znth ds m := by
+  intro n
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro h; exact absurd h (by simp)
+  case succ n ih =>
+    intro hm
+    rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hm) with hmn | hmlt
+    · obtain rfl := hmn
+      rw [znth_seqInsertAux_top,
+        if_neg (not_lt.mpr (le_of_lt (lt_trans him (lt_add_one m)))),
+        if_neg (ne_of_gt (lt_trans him (lt_add_one m))),
+        if_neg (fun h => (ne_of_gt him) (add_right_cancel h)),
+        show (m + 1 - 1 : V) = m by simp]
+    · rw [znth_seqInsertAux_stable n (m + 1) hmlt]; exact ih hmlt
+
+/-- The full ordered insert: `d₀…d_{i−1} a b d_{i+1}…dₗ`, length `lh ds + 1`. -/
+noncomputable def seqInsert (ds i a b : V) : V := seqInsertAux ds i a b (lh ds + 1)
+
+@[simp] lemma seqInsert_seq (ds i a b : V) : Seq (seqInsert ds i a b) := seqInsertAux_seq ds i a b _
+
+@[simp] lemma seqInsert_lh (ds i a b : V) : lh (seqInsert ds i a b) = lh ds + 1 := seqInsertAux_lh ds i a b _
+
+lemma znth_seqInsert_pre {ds i a b k : V} (hki : k < i) (hk : k < lh ds) :
+    znth (seqInsert ds i a b) k = znth ds k :=
+  znth_seqInsertAux_pre hki _ (lt_of_lt_of_le hk (le_of_lt (lt_add_one (lh ds))))
+
+lemma znth_seqInsert_at {ds i a b : V} (hi : i < lh ds) : znth (seqInsert ds i a b) i = a :=
+  znth_seqInsertAux_at _ (lt_trans hi (lt_add_one (lh ds)))
+
+lemma znth_seqInsert_at1 {ds i a b : V} (hi : i < lh ds) : znth (seqInsert ds i a b) (i + 1) = b :=
+  znth_seqInsertAux_at1 _ (add_lt_add_of_lt_of_le hi (le_refl 1))
+
+lemma znth_seqInsert_suf {ds i a b m : V} (him : i < m) (hm : m < lh ds) :
+    znth (seqInsert ds i a b) (m + 1) = znth ds m :=
+  znth_seqInsertAux_suf him _ (add_lt_add_of_lt_of_le hm (le_refl 1))
+
+
 /-! ### 5.2.1 ordered-insert splice VALIDITY (the genuine, order-sensitive object)
 
 Buchholz Def 3.2 case 5.2.1 reduct `K^{r'}_Π(i/dᵢ{0},dᵢ{1})` is the ORDERED in-place splice
@@ -3791,6 +3952,55 @@ lemma zKValidF_seqInsert_spec {s r' i ds cs a b : V}
         · have hmlh : m < lh ds := lt_of_add_lt_add_right hn
           have he : chainAsucc cs (m + 1) = chainAsucc ds m := by unfold chainAsucc; rw [hsuf m hmlt hmlh]
           rw [he]; exact hcf m hmlh
+
+/-- **5.2.1 splice `isChainInf` on the concrete `seqInsert`** — the spec read-out hypotheses discharged
+by the `seqInsert` op's read-outs (`znth_seqInsert_{pre,at,at1,suf}`). The genuine order-sensitive
+chain-validity of the case-5.2.1 reduct `K^{r'}_Π(i/dᵢ{0},dᵢ{1})`. -/
+lemma isChainInf_seqInsert {s r r' i j0 ds a b : V}
+    (hj0 : j0 < lh ds) (hij0 : i ≤ j0)
+    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
+    (hthr : ∀ p ≤ j0, ∀ B, inAnt B (chainAnt ds p) →
+        inAnt B (seqAnt s) ∨ ∃ p' < p, B = chainAsucc ds p')
+    (hrk : ∀ p < j0, irk (chainAsucc ds p) ≤ r)
+    (ha_ant : seqAnt (fstIdx a) = chainAnt ds i)
+    (ha_rank : irk (seqSucc (fstIdx a)) ≤ r')
+    (hb_succ : seqSucc (fstIdx b) = chainAsucc ds i)
+    (hb_ant : ∀ B, inAnt B (seqAnt (fstIdx b)) →
+        B = seqSucc (fstIdx a) ∨ inAnt B (chainAnt ds i))
+    (hrr : r ≤ r') :
+    isChainInf s r' (seqInsert ds i a b) := by
+  have hi_lt : i < lh ds := lt_of_le_of_lt hij0 hj0
+  exact isChainInf_seqInsert_spec hj0 hij0 hAj0 hthr hrk (seqInsert_lh ds i a b)
+    (fun k hk => znth_seqInsert_pre hk (lt_trans hk hi_lt))
+    (znth_seqInsert_at hi_lt) (znth_seqInsert_at1 hi_lt)
+    (fun m hm hm2 => znth_seqInsert_suf hm hm2)
+    ha_ant ha_rank hb_succ hb_ant hrr
+
+/-- **5.2.1 splice full `zKValidF` on the concrete `seqInsert`** — the spec read-outs discharged by the
+`seqInsert` op. The validity half (b) of `RedSound`'s case 5.2.1 on the genuine ordered-insert object. -/
+lemma zKValidF_seqInsert {s r' i ds a b : V}
+    (hci : isChainInf s r' (seqInsert ds i a b)) (hi_lt : i < lh ds)
+    (hperm_a : iperm (tp a) (fstIdx a)) (hperm_b : iperm (tp b) (fstIdx b))
+    (hf1_a : zTag a = 1 → IsUFormula ℒₒᵣ (zIallF a)) (hf1_b : zTag b = 1 → IsUFormula ℒₒᵣ (zIallF b))
+    (hf2_a : zTag a = 2 → IsUFormula ℒₒᵣ (zInegF a)) (hf2_b : zTag b = 2 → IsUFormula ℒₒᵣ (zInegF b))
+    (hf5_a : zTag a = 5 → IsUFormula ℒₒᵣ (zAxAllF a)) (hf5_b : zTag b = 5 → IsUFormula ℒₒᵣ (zAxAllF b))
+    (hf6_a : zTag a = 6 → IsUFormula ℒₒᵣ (zAxNegF a)) (hf6_b : zTag b = 6 → IsUFormula ℒₒᵣ (zAxNegF b))
+    (hfa_a : IsUFormula ℒₒᵣ (seqSucc (fstIdx a))) (hfa_b : IsUFormula ℒₒᵣ (seqSucc (fstIdx b)))
+    (hss : IsUFormula ℒₒᵣ (seqSucc s))
+    (hsa : ∀ k < lh (seqAnt s), IsUFormula ℒₒᵣ (znth (seqAnt s) k))
+    (hperm : ∀ k < lh ds, iperm (tp (znth ds k)) (fstIdx (znth ds k)))
+    (hg1 : ∀ k < lh ds, zTag (znth ds k) = 1 → IsUFormula ℒₒᵣ (zIallF (znth ds k)))
+    (hg2 : ∀ k < lh ds, zTag (znth ds k) = 2 → IsUFormula ℒₒᵣ (zInegF (znth ds k)))
+    (hg5 : ∀ k < lh ds, zTag (znth ds k) = 5 → IsUFormula ℒₒᵣ (zAxAllF (znth ds k)))
+    (hg6 : ∀ k < lh ds, zTag (znth ds k) = 6 → IsUFormula ℒₒᵣ (zAxNegF (znth ds k)))
+    (hcf : ∀ k < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds k)) :
+    zKValidF s r' (seqInsert ds i a b) :=
+  zKValidF_seqInsert_spec hci (seqInsert_lh ds i a b)
+    (fun k hk => znth_seqInsert_pre hk (lt_trans hk hi_lt))
+    (znth_seqInsert_at hi_lt) (znth_seqInsert_at1 hi_lt)
+    (fun m hm hm2 => znth_seqInsert_suf hm hm2)
+    hi_lt hperm_a hperm_b hf1_a hf1_b hf2_a hf2_b hf5_a hf5_b hf6_a hf6_b hfa_a hfa_b hss hsa
+    hperm hg1 hg2 hg5 hg6 hcf
 
 /-- The critical auxiliary `d{ν} = K^r(i/v)`: the chain `d` with premise `i` replaced by `v`. -/
 noncomputable def iCritAux (d i v : V) : V := zK (fstIdx d) (zKrank d) (seqUpdate (zKseq d) i v)
