@@ -463,6 +463,23 @@ lemma subst_fvarSeq_fixitr (φ₀ : SyntacticFormula ℒₒᵣ) :
   simp only [Semiformula.val_substs, Semiterm.typed_quote_fvar, fvarSeqVec_val] at hval
   exact hval.symm
 
+/-- **The `univCl`↔`qqAllItr` bridge** (assembly piece 3a). The quote of the universal closure
+`univCl ψ` equals the internal `fvSup`-fold `^∀`-wrap of the quote of the closure-rewritten body
+`fixitr 0 ψ.fvSup ▹ ψ`. Combines `qqAllItr_quote` with `univCl = ∀⁰* (fixitr 0 fvSup ▹ ·)`. -/
+lemma quote_univCl_eq_qqAllItr (ψ : SyntacticFormula ℒₒᵣ) :
+    (⌜Semiformula.univCl ψ⌝ : V)
+      = qqAllItr (⌜Rew.fixitr 0 ψ.fvSup ▹ ψ⌝ : V) (ψ.fvSup : V) := by
+  have h := (qqAllItr_quote (V := V) (φ := Rew.fixitr 0 ψ.fvSup ▹ ψ)).symm
+  have e : ((0 + ψ.fvSup : ℕ) : V) = (ψ.fvSup : V) := by simp
+  rw [e] at h
+  rw [← h]
+  rw [Sentence.quote_def (V := V) (σ := Semiformula.univCl ψ)]
+  congr 1
+  rw [show (Rewriting.emb (Semiformula.univCl ψ) : SyntacticFormula ℒₒᵣ)
+        = ((Semiformula.univCl ψ : Sentence ℒₒᵣ) : SyntacticFormula ℒₒᵣ) from rfl,
+      Semiformula.coe_univCl_eq_univCl']
+  rfl
+
 end FixitrBridge
 
 /-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
@@ -504,3 +521,4 @@ to `@consistent_unprovable 𝗣𝗔 paDelta1 _ _`, dropping `PA_delta1Definable`
   paMinusDelta1.add inductionSchemeUnivDelta1
 
 end GoodsteinPA
+
