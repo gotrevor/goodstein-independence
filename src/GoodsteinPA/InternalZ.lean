@@ -5017,6 +5017,47 @@ lemma red_zK (s r ds : V) :
     simp only [zKseq_zK] <;>
     rw [znth_redTable_eq_red _ _ (hbound _)]
 
+/-! ### The critical-only reduct is NON-critical (lap 86) — the 5.2 dispatch is mandatory
+
+**Gating finding (Buchholz Def 3.2 case 5, validated in-kernel).** Buchholz's reduction of a chain
+`d = K^r_Π d₀…dₗ` splits into critical (5.1) / sub-critical-splice (5.2.1) / non-critical (5.2.2). The
+repo's `red`/`iR2` implement only 5.1 (always `iRcritG`/`iCritReduct`). But the 5.1 reduct
+`K^{r-1}_Π⟨d{0}, d{1}⟩` is itself a chain whose distinguished `⊥`-half `d{1} = K_{A(d),Θ→D} ds1` is a
+`K`-rule (`tp = isymRep`), permissible for the conclusion (`iperm_isymRep`). So the reduct is
+**non-critical** — `zKCritical (fstIdx (red d)) (zKseq (red d))` FAILS. Consequently the iterate-descent
+`iord_iR2_iterate_descends`'s criticality hypothesis `hcrit` is **unsatisfiable** after one reduction
+step: the critical-only reduct cannot drive the infinite descent on its own. The genuine `red` MUST
+dispatch the Buchholz 5.2 cases (splice / replace-premise) on non-critical chains; their ordinal descent
+is already banked (`iord_descent_iCritAux` / `iord_descent_iSpliceEnd`, lap 82). -/
+
+/-- The genuine critical reduct `iCritReductG` produces a NON-critical chain: its distinguished premise
+(index 1, the `A(d),Θ→D` half, succedent `D`) is itself a `K`-chain, so `tp = isymRep`, permissible for
+ANY conclusion (`iperm_isymRep`). Hence `zKCritical` FAILS at index 1. (The in-kernel witness that the
+critical-only reduct is incomplete — the lap-86 analog of `not_zKValid_iCritReduct`.) -/
+lemma not_zKCritical_iCritReductG (s C rOut rIn0 rIn1 ds0 ds1 : V) :
+    ¬ zKCritical (fstIdx (iCritReductG s C rOut rIn0 rIn1 ds0 ds1))
+                 (zKseq (iCritReductG s C rOut rIn0 rIn1 ds0 ds1)) := by
+  rw [fstIdx_iCritReductG, zKseq_iCritReductG]
+  intro hcrit
+  have h1 : (1 : V) <
+      lh (iCritReductSeq (zK (seqSetSucc s C) rIn0 ds0) (zK (seqAddAnt C s) rIn1 ds1)) := by
+    rw [iCritReductSeq_lh]; exact one_lt_two
+  have hbad := hcrit 1 h1
+  rw [znth_iCritReductSeq_one, tp_zK] at hbad
+  exact hbad (iperm_isymRep s)
+
+/-- The reduct `iRcritG d ρ` is a non-critical chain (corollary of `not_zKCritical_iCritReductG`). -/
+lemma not_zKCritical_iRcritG (d : V) (ρ : V → V) :
+    ¬ zKCritical (fstIdx (iRcritG d ρ)) (zKseq (iRcritG d ρ)) := by
+  rw [iRcritG]; exact not_zKCritical_iCritReductG _ _ _ _ _ _ _
+
+/-- **`red` of a `K`-chain is itself a non-critical `K`-chain.** The critical-only reduct produces a
+chain whose `⊥`-premise is a `Rep`, so `zKCritical` fails — the iterate-descent's criticality hypothesis
+is UNSATISFIABLE after one step, forcing the Buchholz 5.2 dispatch onto the genuine `red`. -/
+lemma not_zKCritical_red_zK (s r ds : V) :
+    ¬ zKCritical (fstIdx (red (zK s r ds))) (zKseq (red (zK s r ds))) := by
+  rw [red_zK]; exact not_zKCritical_iRcritG _ _
+
 /-- **`red` preserves the end-sequent on the chain-reduct rules** (`Ind`, `K`): both reducts are chains
 `zK (fstIdx d) …` (`iRInd`/`iRcritG` carry the conclusion sequent verbatim), so `fstIdx (red d) = fstIdx d`.
 (On a ⊥-derivation the visited reducible rules are exactly tags 3,4 — an I-rule never has a `⊥` succedent.) -/

@@ -1,5 +1,34 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 86 (FRESH-MIND REVIEW) — gating criticality question RESOLVED: `red` needs the 5.2 dispatch
+
+**Build 🟢 1325 jobs, axiom base clean. Headline `peano_not_proves_goodstein = [propext, sorryAx,
+choice, Quot.sound]` (0 math axioms, honest sorry).** Resolved the lap-85 NEXT-priority-2 gating
+question (`ANALYSIS-2026-06-25-lap86-criticality-resolved.md`).
+
+**FINDING (in-kernel, axiom-clean):** a `ZDerivesEmpty` K-chain is NOT always critical. The critical-only
+reduct `red (zK s r ds) = iRcritG …` is **itself non-critical** — its `⊥`-half premise (index 1) is a
+`K`-chain (`tp = isymRep`, permissible everywhere). New lemmas in `InternalZ.lean` (after `red_zK`):
+`not_zKCritical_iCritReductG` / `not_zKCritical_iRcritG` / `not_zKCritical_red_zK`. ⟹ The
+iterate-descent's `zKCritical` hypothesis (`iord_iR2_iterate_descends`'s `hcrit`) is **unsatisfiable
+after one step**. So the critical-only `red`/`iR2` (Buchholz Def 3.2 case **5.1 only**) cannot drive the
+descent; the genuine `red` MUST dispatch the **5.2** cases too.
+
+**Two corrections to the lap-85 plan:**
+- Lap-85 priority-1 (`iord (red x) = iord (iR2 x)` unconditional) is necessary but **NOT sufficient** —
+  it inherits `iR2`'s descent, which is itself gated on the now-false criticality. Don't close
+  `iord_descent_red` via it alone.
+- `red`'s tag-4 must DISPATCH 5.1 / 5.2.1 / 5.2.2 (not always `iRcritG`).
+
+**NEXT (the corrected `red` — 5.2 dispatch; descent for each is BANKED, lap-82):**
+1. **Decidability:** establish `zKCritical` (or its `i ≤ j₀` restriction) as a Δ₁/decidable predicate so
+   `iRNextG`'s tag-4 can branch on it. Reconcile `∀ i < lh ds` (repo) vs `∀ i ≤ j₀` (Buchholz).
+2. **5.2.1 splice** — genuine in-place splice object + `zKValidF`; descent = `iord_descent_iSpliceEnd`.
+3. **5.2.2 replace** — `zK (tp(dᵢ)(s,n)) r (seqUpdate ds i (red dᵢ))` + `zKValidF_seqUpdate`; descent =
+   `iord_descent_iCritAux`. Wire the reduced-succedent op `tp(dᵢ)(s,n)`.
+4. **`redSound`** = `zDerivation_induction`, tag-4 split 5.1/5.2.1/5.2.2 → `zKValidF` chain;
+   `iord_descent_red` becomes UNCONDITIONAL. (R2 / `zAx1` tag-7 from lap-85 still apply to the 5.1 case.)
+
 ## 📍 Lap 85 — R1 DISCHARGED + M1a `red` DEFINED + M1b ordinal bridge (5 green commits)
 
 **Build 🟢 1325 jobs, axiom base clean ([propext, Classical.choice, Quot.sound]).** The keystone
