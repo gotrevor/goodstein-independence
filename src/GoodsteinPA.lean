@@ -60,6 +60,10 @@ import GoodsteinPA.FvSubst
 import GoodsteinPA.InternalZ
 -- Eigenvariable substitution on Z-derivations (rung 1 of the RedSound ladder, lap 72).
 import GoodsteinPA.Zsubst
+-- Critical-branch K-case ordinal descent for the GENUINE reduct `red` (lap 108; sorry-free, axiom-clean).
+-- Ports `iord_descent_iR2_zK_of_valid` to the `red`-ρ via the i/j-side `red` bundles + `iord_iRcritG_eq_iRcrit`.
+-- A building block for `iord_descent_red`'s K-case (not yet wired — needs the splice/replace branches + `zKValid`).
+import GoodsteinPA.RedZKDescent
 import GoodsteinPA.InternalCor34
 import GoodsteinPA.IIter
 import GoodsteinPA.BlkRec

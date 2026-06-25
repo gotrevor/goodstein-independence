@@ -9,6 +9,19 @@ diagnosis (which conflated two distinct `red`s):
   `iord_descent_red_zInd`; the residual `sorry` is isolated to exactly the **K/cut case** (tag 4). This is
   the headline-WIRED finitary engine (`InternalZ`, tags 0-6), the real crux-2 obligation.
 
+- **K-case CRITICAL branch descent BANKED (`src/GoodsteinPA/RedZKDescent.lean`, NEW, sorry-free, axiom-clean
+  `[propext, choice, Quot.sound]`, green-gated 1326).** `iord_descent_red_zK_crit`: for a critical
+  (`¬ permIdx < lh ds`) valid `K^r` chain, `icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0`. Ports the
+  banked `iord_descent_iR2_zK_of_valid` (`iR2`-ρ) to the genuine `red`-ρ via two new bundle lemmas
+  (`iRedDescent_zAxReduct_red_of_tp_isymR/_isymLk`) + `iord_iRcritG_eq_iRcrit` (genuine reduct shares `iord`
+  with the ordinal-shadow). The I∀ redex premise's eigensubst (`red = zsubst d0 a 0`) preserves `iotil`/`idg`
+  (`iotil_zsubst`/`idg_zsubst`) so the bundle transfers, costing only the regularity `maxEigen d0 < a`
+  (`maxEigen_lt_of_regular_zIall`, hence the `hreg` hypothesis). **NOT yet wired into `iord_descent_red`'s
+  K-case — two gaps remain:** (a) the **non-critical splice/replace branch descents** (`red_zK_splice`/`_rep`,
+  unbanked — the genuine open ordinal core); (b) **`zKValid` availability from the ∅→⊥ orbit** — the bare
+  `ZDerivation` `zK` disjunct does NOT carry `zKValid` (`InternalZ.lean:7517`), so even the critical branch
+  can't fire from `ZDerivesEmptyR` alone yet (the "wire `zKValid` into `ZPhi`" phase, `InternalZ.lean:7519`).
+
 - **TWO distinct `red`s (lap-107 docs conflated them — corrected here):**
   1. **`src/InternalZ.lean` finitary engine `red` (tags 0-6)** — the HEADLINE-WIRED one
      (`Crux2Blueprint.iord_descent_red`/`redSoundGen`/`false_of_ZDerivesEmpty`/`ZDerivesEmptyR`). Open
