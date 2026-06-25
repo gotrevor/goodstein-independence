@@ -1,5 +1,26 @@
 # Pending work — open obligations & attack paths
 
+## lap 102 — Probe 2 settled the fork → Path C (stored ordinals); brick 1 landed
+**See `HANDOFF-2026-06-25-lap102.md`, `NEXT_STEPS.md` PRIORITY 1.** The crux-2 sub-route fork is resolved
+in favour of **Path C** (ω-rule, Buchholz operator-controlled derivations with STORED ordinals). Path X
+(finitary `redZKReady`) is disfavoured AND likely broken (hereditary-Rep fails down a nested-chain spine).
+Probe 2 lemmas in `wip/InternalZomega.lean` (axiom-clean): `iotil_zK_iIndReduct(_strictMono)`,
+`ocOadd_coeff_strictMono`.
+
+**Path-C brick list (`wip/PathCOmega.lean`):**
+- **Brick 1 — DONE (axiom-clean).** `zAllOmega`/`zAllOmegaValid` (the stored-ordinal ω-∀-node + validity);
+  `zIall_realizes_zAllOmegaValid` (a regular finitary `zIall` realizes it, stored ordinal = the node's own
+  `iord`, descent from banked `iord_descent_zIall`); `zAllOmega_cut_valid`/`_descends` (the ∀-cut invariant).
+- **Brick 2 (NEXT) — `cutElimStep`** (single rank drop, all node shapes; `Zinfty.cutElimStep`/
+  `cutElimPrincipal` template; ∀-cut case = brick 1, others = `cutReduce*` for ∧/∨/atom).
+- **Brick 3 — the induction ω-node** (premise family = iterated step; stored ordinal = the Probe-2 limit
+  `ω^{õ d1 + 1} # ω^{õ d0}` as DATA, side condition `∀k, o(premise k) ≺ stored`).
+- **Brick 4 — `false_of_ZDerivesEmpty` (Path C)**: `red` = one `cutElimStep`; ∅→⊥ has no cut-free proof ⟹
+  stored ordinal descends forever ⟹ infinite ε₀-descent ⟹ contradicts PRWO(ε₀) (crux-1).
+- **Σ₁-definability** of `zAllOmega`/`zAllOmegaValid` (bookkeeping; `⟪…⟫`/`icmp`/`iord` are `𝚺₁`/`𝚫₁`).
+- **Conclusion-tracking conjunct** of `zAllOmegaValid` (the spike's `zOmegaPrem_concl`, needs O3 freshness
+  threaded — deferred from brick 1).
+
 ## Reflection — 2026-06-25 (lap 101 DEEP REFLECTION)
 **See `REFLECTION-2026-06-25-lap101.md` + `NEXT_STEPS.md` (the corrected priority list).** Kernel
 re-verified in-kernel: headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms),
