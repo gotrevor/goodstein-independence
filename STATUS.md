@@ -9,11 +9,26 @@ asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). **Crux 1 (
 (lap 57); crux 2 (`PRWO→Con`, Buchholz-Z ordinal analysis arithmetized in IΣ₁) is the sole remaining math
 content — the 🟡 active frontier, now sharply localized to `RedSound` (InternalZ.lean): the `iR2`-reduct of
 a contradiction derivation must itself be a genuine `ZDerivation` = real internalized cut-elimination.** ·
-**Build**: 🟢 green (`lake build GoodsteinPA`, 1325 jobs) · **Updated**: lap 86 (FRESH-MIND REVIEW —
-direction KEPT; gating criticality question RESOLVED in-kernel: critical-only `red` is non-critical after
-one step, the 5.2 dispatch is mandatory) · 2026-06-25 · `55b8575`+lap86
+**Build**: 🟢 green (`lake build GoodsteinPA`, 1325 jobs) · **Updated**: lap 89 (FRESH-MIND REVIEW —
+direction KEPT; **`PA_delta1Definable` DISCHARGED UPSTREAM** — Foundation now proves `𝗣𝗔.Δ₁` as a real
+`noncomputable instance`, so `peano_not_proves_consistency` is axiom-clean and the headline has exactly
+ONE blocker left: `goodstein_implies_consistency` = crux-2 = `redSound`) · 2026-06-25 · `25bafe6`+lap89
 
-> **⭐ Lap-86 FRESH-MIND REVIEW (read FIRST — current).** Re-verified kernel (real `#print axioms`, build
+> **⭐ Lap-89 FRESH-MIND REVIEW (read FIRST — current).** Re-verified kernel (real `#print axioms`, build
+> green 1325): headline `peano_not_proves_goodstein = [propext, sorryAx, choice, Quot.sound]` (**0 math
+> axioms**, anti-fraud intact). **Direction KEPT.** ⭐ **KEY UPDATE the lap-88 handoff missed:**
+> `peano_not_proves_consistency = [propext, choice, Quot.sound]` — **axiom-clean**. The
+> `PA_delta1Definable` "second front" that laps 74/78/81 sweated over (the whole `src/PADelta1.lean`
+> campaign) is **resolved UPSTREAM**: Foundation discharged it — `PA_delta1Definable : 𝗣𝗔.Δ₁` is now a
+> proven `noncomputable instance` (`Foundation/…/InductionSchemeDelta1.lean:1379`), no longer an axiom.
+> ⟹ **the headline endgame is now SINGLE-FRONT**: `goodstein_implies_consistency` (`Reduction.lean:68`,
+> the lone `sorry`) = crux-1 (DONE, lap 57) ∘ crux-2. Crux-2 = `redSound` = internalized cut-elimination,
+> all three dispatch branches (5.1/5.2.1/5.2.2) now OBJECT-complete (validity + descent + ZDerivation
+> co-located, laps 84–88). Remaining = the tag-4 DISPATCH assembly in `iRNextG` + `redSound`/
+> `iord_descent_red` + wire `Crux2Blueprint` → `false_of_ZDerivesEmpty` → headline. See
+> `HANDOFF-2026-06-25-lap88.md`, `PENDING_WORK.md` lap-88 box.
+
+> **⭐ Lap-86 FRESH-MIND REVIEW (historical — see lap-89 box above).** Re-verified kernel (real `#print axioms`, build
 > green 1325): headline `peano_not_proves_goodstein = [propext, sorryAx, choice, Quot.sound]` (**0 math
 > axioms**, anti-fraud intact). **Direction KEPT.** Resolved the lap-85 gating question (its NEXT priority
 > 2): *does a `ZDerivesEmpty` K-chain always have a critical redex?* **ANSWER: NO** — proved in-kernel
@@ -354,7 +369,21 @@ pure mathlib ordinal arithmetic it is **Aristotle-eligible** (the one piece with
 E **pins which `≺` F may use** (co-design). See newest `HANDOFF`.
 
 ## Where it stands
-**(lap-74 DEEP REFLECTION — CURRENT read.)** Build green **1323**; headline honest `sorry` (real `#print
+**(lap-89 FRESH-MIND REVIEW — CURRENT read.)** Build green **1325**; headline honest `sorry` (real `#print
+axioms = [propext, sorryAx, choice, Quot.sound]`, 0 math axioms, anti-fraud intact). M1 + Phase 1 long done;
+crux 1 (`γ→PRWO`) landed axiom-clean lap 57. **The endgame is now SINGLE-FRONT:** `PA_delta1Definable` is
+discharged UPSTREAM (Foundation proves `𝗣𝗔.Δ₁` as a real instance), so `peano_not_proves_consistency` is
+axiom-clean and the ONLY open headline obligation is `goodstein_implies_consistency` (`Reduction.lean:68`) =
+crux-1 ∘ **crux-2** = `redSound` = real internalized cut-elimination for the V-internal infinitary system Z.
+Laps 84–88 brought all three Buchholz Def-3.2 case-5 dispatch branches to OBJECT-completeness: 5.1 critical
+(`iRcritG`/`ZDerivation_iRcritG_of`/`iord_descent_iRcrit_of_chain`), 5.2.2 replace (`iCritAux`/
+`ZDerivation_iCritAux_of_zK`/`iord_descent_iCritAux`), 5.2.1 splice (`seqInsert`/`ZDerivation_seqInsert_of_zK`/
+`iord_descent_seqInsert'`), plus the dispatch index `permIdx`. **Remaining = ASSEMBLY** (not new descent/
+validity math): rewrite `iRNextG`'s tag-4 to DISPATCH on `zKCritical` (→5.1) / else `permIdx` (→5.2.1 if the
+selected premise is critical, →5.2.2 if not); then `redSound` (`zDerivation_induction`, tag-4 3-way split) +
+unconditional `iord_descent_red` → `iord_red_iterate_descends` → `false_of_ZDerivesEmpty` → `Reduction.lean:68`.
+
+**(lap-74 DEEP REFLECTION — historical read.)** Build green **1323**; headline honest `sorry` (real `#print
 axioms = [propext, sorryAx, choice, Quot.sound]`, 0 math axioms, anti-fraud intact; statement re-audited
 faithful — no transcription drift). M1 + Phase 1 long done; crux 1 (`γ→PRWO`) landed axiom-clean lap 57.
 The single open girder `goodstein_implies_consistency` = crux 1 ∘ **crux 2** (`PRWO→Con`), with crux 2
@@ -568,6 +597,24 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-25 (lap 89 — FRESH-MIND REVIEW):** Re-verified kernel (real `#print axioms`, green 1325): headline
+  `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). **Direction KEPT.** ⭐ **Found the lap-88 handoff
+  missed a major simplification:** `peano_not_proves_consistency` is now **axiom-clean** —
+  `PA_delta1Definable` was discharged UPSTREAM (Foundation proves `𝗣𝗔.Δ₁` as a `noncomputable instance`,
+  `InductionSchemeDelta1.lean:1379`; no longer an axiom). The entire lap-74/78/81 second front (`src/PADelta1.lean`
+  Δ₁-recognizer campaign) is moot. ⟹ **headline endgame is single-front:** only `goodstein_implies_consistency`
+  (`Reduction.lean:68`) remains = crux-2 = `redSound`. Refreshed STATUS header / Where-it-stands / Outstanding /
+  ledger off the stale lap-78 "two fronts, ladder blocked at rung 1→2" framing onto the lap-88 dispatch-assembly
+  reality (all three case-5 branches object-complete; remaining = tag-4 dispatch + `redSound`).
+- **2026-06-25 (laps 79–88 — crux-2 dispatch branches brought to OBJECT-completeness):** After lap-78 found the
+  `zsubst`/criticality ladder architecture-blocked, the work pivoted to the lap-86 finding (`not_zKCritical_red_zK`,
+  in-kernel): the critical-only `red` is itself non-critical after one step ⟹ tag-4 MUST dispatch Buchholz cases
+  5.1/5.2.1/5.2.2. Laps 82–88 then built each branch's reduct OBJECT with co-located validity (`zKValidF`) +
+  descent (`iord_*`) + `ZDerivation` constructor: **5.2.2** `iCritAux` + `ZDerivation_iCritAux_of_zK` +
+  `iord_descent_iCritAux` (lap 86); **5.2.1** the genuine ordered-insert `seqInsert` + `zKValidF_seqInsert` +
+  `ZDerivation_seqInsert_of_zK` + `iord_descent_seqInsert'` (rank-general, laps 87–88); **dispatch index**
+  `permIdx` + `permIdx_lt_of_not_zKCritical` (lap 88); `zKCritical` made Δ₁ (lap 86). All axiom-clean
+  `[propext, choice, Quot.sound]`, build green 1325.
 - **2026-06-24 (lap 78 — FRESH-MIND REVIEW):** Found the crux-2 rung-2 plan is **architecture-blocked**, not a
   one-lap freshness add: `ZDerivation_zsubst` cannot preserve `zKValid` criticality (a formula-*inequality*)
   under numeral substitution (`fvSubst` non-injective) — two explicit counterexamples, one defeating even full
@@ -710,40 +757,28 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 **Route A = Rathjen Cor 3.7 (resolved lap 45→46).** The headline reduces (axiom-clean) to
 `Reduction.goodstein_implies_consistency : 𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)`, a disclosed `sorry` = two deep girders.
 
-### Short-term (mirror PENDING_WORK top) — crux 2 = `RedSound`, Option A genuine reduct ladder, hardest-first
-> **⚠️ LAP-78 UPDATE — the ladder below is BLOCKED at rung 1→2.** `ZDerivation_zsubst` (rung 1) is complete
-> only in the **vacuous `d ≤ a`** form; the non-vacuous generalization rung 2 needs is **impossible as
-> stated** — it cannot preserve `zKValid` criticality (formula-inequality) under numeral substitution
-> (`fvSubst` non-injective), proven by two explicit counterexamples (CE-2 defeats even full Buchholz
-> regularity). The chain-rule criticality DESIGN must be reworked (recommend index/rank-based "structural
-> criticality") — a **deep-reflection decision**, not a grind step. See
-> `ANALYSIS-2026-06-24-lap78-criticality-substitution-wall.md`. **Parallel front now primary:**
-> `PA_delta1Definable` (`src/PADelta1.lean`) — `𝗣𝗔⁻.Δ₁` done axiom-clean; build the
-> `InductionScheme.Δ₁` recognizer next.
-
-Crux 1 (`γ→PRWO`) DONE axiom-clean (lap 57). The single open math obligation is now **`RedSound`**
-(`InternalZ.lean:4703`): `∀ d, ZDerivesEmpty d → ZDerivation (iR2 d)`. Lap 70 refuted Option B in-kernel
-(`not_zKValid_iCritReduct`) and forced **Option A** (a genuine validity-preserving reduct, shape-dispatched
-on the cut formula, à la Bryce–Goré `cut_elim.v`). Ladder (≈ one rung/lap):
-0.5. **PREREQUISITE — strengthen `ZPhi`'s I∀/I¬/Ind disjuncts** with the Buchholz premise-sequent +
-   eigenvariable side conditions (so after substitution the reduct's threading `isChainInf` is provable). A
-   Σ₁/Δ₁ Fixpoint cascade (laps 66/69 pattern). Landed lap 70: `zIallWff`/`zInegWff` + `isChainInf_of_last`.
-   **THIS LAP:** `zIndWff` (decode `at' = ⟪a,t⟫`, build the `Sa` ℒₒᵣ term-code) + Δ₁ instances + wire all
-   three into `ZPhi` (def, `zphi_monotone`/`_strong_finite`/`_iff`, σ/π blueprint cores, `zPhi_definable`,
-   the `rcases zDerivation_iff` sites) → `zDerivation_zInd_inv` hands premise-sequent data.
-1. **`zsubst d a n`** — Σ₁ eigenvariable substitution on Z-derivations (numeral `n` for free var `a`),
-   `ZDerivation`-preserving + `iotil`-invariant + `fstIdx`-computing. Σ₁ recursion over the tree applying
-   Foundation's `substs1`/`Rew` per node. Multi-lap brick.
-2. **Genuine Ind reduct (tag 3) `iRInd'`** = `zK s (irk p) ⟨d0, zsubst d1 a 0, …, zsubst d1 a (k−1)⟩`,
-   `k = ⟦induction term⟧`. Premises are GENUINE sub-derivations (not `Rep`) — the more tractable wall. Prove
-   `zKValid` (the threading is the content) → `RedSound` for tag 3 + re-fit `iord` descent (survives via
-   `iotil_zsubst`).
-3. **Genuine critical/K reduct (tag 4)** = the cut-elimination proper, shape-dispatched
-   (`cut_elimination_atom`/`_neg`/`_lor`). Peel R-redex (`zDerivation_zIall_inv`→`d0`, then `zsubst`) +
-   L-redex (`zDerivation_zAxAll_inv`/`_zAxNeg_inv`), splice into a chain with genuine premises; prove
-   `zKValid` + re-fit `iord`. Hardest.
-4. **`RedSound`** = tag-dispatch on 2+3 ⟹ `iord_iR2_iterate_descends` (already assembled) closes the descent
-   → C0.5 bridge → `Reduction.lean:68`. Then, only if `#print axioms` is clean, discharge the headline.
+### Short-term (mirror PENDING_WORK top) — crux 2 = `redSound`, tag-4 DISPATCH ASSEMBLY, hardest-first
+Crux 1 (`γ→PRWO`) DONE axiom-clean (lap 57). `PA_delta1Definable` DISCHARGED UPSTREAM (lap-89 finding —
+Foundation proves `𝗣𝗔.Δ₁`). **Single open headline obligation = `goodstein_implies_consistency`
+(`Reduction.lean:68`) = crux-1 ∘ crux-2 = `redSound`** (internalized cut-elimination). Lap 86 proved
+(`not_zKCritical_red_zK`, in-kernel) that the critical-only `red` is non-critical after one step, so tag-4
+MUST dispatch Buchholz Def-3.2 case 5. All three branches are now OBJECT-complete (laps 84–88), each with
+co-located validity + descent + `ZDerivation` constructor. **Remaining = ASSEMBLY:**
+1. **Rewrite `iRNextG`'s tag-4 to DISPATCH** (`InternalZ.lean:5905`): `if zKCritical (fstIdx d) (zKseq d)
+   then iRcritG d ρ` (5.1) `else` at `i := permIdx d`, sub-dispatch on whether `znth (zKseq d) i` is itself
+   critical → 5.2.1 `seqInsert`-reduct / 5.2.2 `iCritAux`-reduct. ⚠ LARGE blast radius (`iRNextGDef` Σ₁
+   formula, heartbeat-heavy `iRNextG_defined`, `red_zK`, the lap-86 `not_zKCritical_*` lemmas). Recommended:
+   factor the tag-4 branch into a SEPARATE definable function (e.g. `iRK d s`) to contain the radius, prove
+   its `iRKDef`/definability, then `iRNextG`'s tag-4 just calls `!iRKDef`. NB the 5.2.1 halves `dᵢ{0},dᵢ{1}`
+   are definable as the `iCritReductSeq` auxiliaries of `iRcritG dᵢ ρ'` (`znth … 0`/`1`).
+2. **Wire the genuine halves**: `a=dᵢ{0}, b=dᵢ{1}` from `inference_critical_pair` on the critical premise;
+   discharge `isChainInf_seqInsert` end-sequent hyps + build `iSpliceDescent`. Discharge `r' ≤ dg(zK s r ds)`
+   i.e. `rk(A(dᵢ)) ≤ dg(parent)` (the rank-general 5.2.1 descent obligation, lap-88 ⚠).
+3. **`redSound`** = `zDerivation_induction`, tag-4 split 5.1/5.2.1/5.2.2 → each ZDerivation constructor;
+   then `iord_descent_red` UNCONDITIONAL (drops the now-unsatisfiable `hcrit`) → `iord_red_iterate_descends`
+   → `false_of_ZDerivesEmpty` (`Crux2Blueprint`) → `Reduction.lean:68`. M2 (`foundation_bot_to_Z_empty`,
+   the C0.5 Foundation→Z bridge) + M3 remain as `Crux2Blueprint` leaves. Then, only if `#print axioms` is
+   clean, discharge the headline `Statement.lean:22`.
 
 ### Long-term / banked
 - **Internal Thm 3.5 — COMPLETE (lap 47), route-independent.** `InternalThm35.bbeta_isNF`/`bbeta_C_le`/
@@ -756,20 +791,20 @@ on the cut formula, à la Bryce–Goré `cut_elim.v`). Ladder (≈ one rung/lap)
   threads, off-path. Never delete.
 
 ### To completion
-Headline discharged ⟺ internal Cor 3.4 (slow α) + Gentzen Thm 2.8 (`PRWO→Con(PA)`) + the `PRWO` sentence all
-land and chain through `goodstein_implies_consistency`, AND `#print axioms peano_not_proves_goodstein` is
-`[propext, Classical.choice, Quot.sound]`. **Route-A honesty caveat:** Gödel II for `𝗣𝗔` rides Foundation's
-🟡 `PA_delta1Definable` (Δ₁-definability of `𝗣𝗔`, a true theorem held as a disclosed upstream `axiom`). On
-this route the clean-headline target is `[propext, choice, Quot.sound, PA_delta1Definable]` with that one
-disclosed upstream axiom, OR `PA_delta1Definable` discharged upstream (Foundation pin-bump / burndown — see
-DIRECTION anti-fraud rule #1, which a future call must reconcile against Route A's Gödel-II dependency).
+Headline discharged ⟺ crux-2 (`redSound` = Gentzen Thm 2.8 `PRWO→Con(PA)`, internalized cut-elimination)
+lands and chains through `goodstein_implies_consistency`, AND `#print axioms peano_not_proves_goodstein` is
+`[propext, Classical.choice, Quot.sound]`. **Lap-89 simplification:** the former Route-A honesty caveat
+(Gödel II riding the upstream `PA_delta1Definable` axiom) is **GONE** — Foundation discharged
+`PA_delta1Definable` into a proven instance, so `peano_not_proves_consistency` is already
+`[propext, choice, Quot.sound]`. The endgame is therefore single-front: discharge crux-2 and the headline
+closes axiom-clean with no remaining upstream-axiom reconciliation.
 
 ## Axiom ledger (per headline / landmark theorem — the fidelity spine)
 | theorem | paper claim | `#print axioms` shows | status |
 |---|---|---|---|
 | `peano_not_proves_goodstein` (headline, `Statement.lean`) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` (**lap-71 real, re-verified**) | 🔓 open `sorry` (LOCKED, anti-fraud) — **0** math axioms. Route A: reduces (axiom-clean) to `goodstein_implies_consistency` via `not_proves_of_implies_consistency` + Gödel II. |
-| `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` + `PA_delta1Definable` (disclosed; the one open girder, type already forces the upstream axiom) | 🎯 **THE single open obligation = crux 1 ∘ crux 2.** §3 `γ→PRWO(ε₀)` = **crux 1 — DONE, axiom-clean (lap 57)** via the width-FUNCTION refactor (`BlkRecF`/`StdCor34F`/`crux1_internal_run_F`); in `wip/GentzenCon.lean`. Gentzen Thm 2.8 `PRWO→Con(PA)` = **crux 2, 🟡 ACTIVE FRONTIER**, now localized to the blueprint nut **`redSound`** (`Crux2Blueprint.lean`) = the `red`-reduct of a contradiction derivation is a genuine `ZDerivation` = real internalized cut-elimination; lap 70 forced **Option A** (genuine validity-preserving reduct), lap 82 re-pointed validity to criticality-free `zKValidF`, laps 84–85 DEFINED the genuine reduct `red` (5.1 case). **Lap 86: gating finding (in-kernel, `not_zKCritical_red_zK`) — the critical-only `red` is itself non-critical after one step, so `red`'s tag-4 MUST dispatch Buchholz Def-3.2 cases 5.1/5.2.1/5.2.2** (descent for each banked; new content = dispatch def + 5.2 `zKValidF` validity). Feasibility settled by Bryce–Goré Coq, Feb 2026; must be fully discharged — operator: axiom-free or abandoned. |
-| `not_proves_of_implies_consistency` / `peano_not_proves_consistency` (Phase 1, `src/Reduction`) | meta-reduction + Gödel II for `𝗣𝗔` | `propext, choice, Quot.sound, PA_delta1Definable` (**lap-47 real**) | 🟡 the **Route-A Gödel-II hook** (NO LONGER "rejected" — Route A is the chosen route, lap 46). `PA_delta1Definable` = Δ₁-definability of `𝗣𝗔`, a true theorem held as a disclosed `axiom` in the Foundation pin. **Lap 78: in-repo discharge path opened** (`src/PADelta1.lean`): `paMinusDelta1 : 𝗣𝗔⁻.Δ₁` **axiom-clean** (`ofFinite`), `paDelta1 : 𝗣𝗔.Δ₁` assembled (rfl); the whole residual = `inductionSchemeUnivDelta1 : (InductionScheme ℒₒᵣ Set.univ).Δ₁` (one disclosed `sorry`, internal `succInd`/`univCl` recognizer). **Lap 79–81: recognizer machinery built axiom-clean** — `IsInductionAxiomCode` (the recognizer predicate) is machine-checked `𝚫₁` (`isInductionAxiomCode_definable`), the `qqAllItr`/`fvarSeq`/`subst_fvarSeq_fixitr`/`quote_univCl_eq_qqAllItr` bridges are banked, and **lap 81 added `subst_eq_subst_of`** (formula-subst congruence), the one reusable lemma the mem_iff criticality crux needs. Remaining: mem_iff (criticality via `IsSemiformula.sound`+`subst_eq_subst_of`; inversion) + `ch : 𝚫₁.Semisentence 1` assembly. Once real, rewire `peano_not_proves_consistency` to `@consistent_unprovable 𝗣𝗔 paDelta1` ⟹ axiom drops. |
+| `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` only (**lap-89 real** — `PA_delta1Definable` no longer appears; discharged upstream) | 🎯 **THE single open obligation = crux 1 ∘ crux 2.** §3 `γ→PRWO(ε₀)` = **crux 1 — DONE, axiom-clean (lap 57)** via the width-FUNCTION refactor (`BlkRecF`/`StdCor34F`/`crux1_internal_run_F`); in `wip/GentzenCon.lean`. Gentzen Thm 2.8 `PRWO→Con(PA)` = **crux 2, 🟡 ACTIVE FRONTIER**, now localized to the blueprint nut **`redSound`** (`Crux2Blueprint.lean`) = the `red`-reduct of a contradiction derivation is a genuine `ZDerivation` = real internalized cut-elimination; lap 70 forced **Option A** (genuine validity-preserving reduct), lap 82 re-pointed validity to criticality-free `zKValidF`, laps 84–85 DEFINED the genuine reduct `red` (5.1 case). **Lap 86: gating finding (in-kernel, `not_zKCritical_red_zK`) — the critical-only `red` is itself non-critical after one step, so `red`'s tag-4 MUST dispatch Buchholz Def-3.2 cases 5.1/5.2.1/5.2.2** (descent for each banked; new content = dispatch def + 5.2 `zKValidF` validity). Feasibility settled by Bryce–Goré Coq, Feb 2026; must be fully discharged — operator: axiom-free or abandoned. |
+| `not_proves_of_implies_consistency` / `peano_not_proves_consistency` (Phase 1, `src/Reduction`) | meta-reduction + Gödel II for `𝗣𝗔` | `propext, choice, Quot.sound` (**lap-89 real — axiom-clean**) | 🟢 **CLEAN — the Route-A Gödel-II hook.** ⭐ **Lap 89: `PA_delta1Definable` DISCHARGED UPSTREAM.** Foundation now proves `𝗣𝗔.Δ₁` as a real `noncomputable instance` (`Foundation/FirstOrder/Incompleteness/InductionSchemeDelta1.lean:1379`, no longer an axiom), so `consistent_unprovable 𝗣𝗔` — and hence `peano_not_proves_consistency` and everything chaining through it — carries NO custom axiom. This RETIRES the entire lap-74/78/81 second-front campaign (the `src/PADelta1.lean` Δ₁-recognizer work is now moot/superseded). |
 | `InternalThm35.bbeta_*` / `iwtower_cofinal` (internal Thm 3.5, **lap 47**, `src/InternalThm35`) | Rathjen Thm 3.5: slow α → `β` with tight `C(βᵣ)≤r+1` | `propext, choice, Quot.sound` | 🟢 **CLEAN + COMPLETE** — `bbeta_isNF`/`bbeta_C_le`/`bbeta_desc_exists`; ω-tower cofinality `iwtower_cofinal` discharges the seam. Route-independent; consumed by Lemma 3.6 (`nonterminating_internal`). |
 | `GentzenCon.prwoInstance_faithful` / `prwoInstance_models_iff` / `eval_prec_internal` (PRWO formulation, **lap 50, REBUILT lap 56**, `wip/GentzenCon`) | Rathjen Thm 2.8: PRWO(ε₀) is the `ℒₒᵣ`-sentence "no ε₀-descent" | `propext, choice, Quot.sound` (**lap-56 real** — SHED the F-φ `native_decide` artifact) | 🟢 **CLEAN** — **lap 56:** rebuilt on the TRANSPARENT `prec_internal`/`InternalONote.icmp` (was the opaque `precφ`=`codeOfREPred₂`, std-model-only spec → wall-B opacity in nonstandard `M`). `prwoInstance_models_iff` (`M⊧prwoInstance seq ↔ ¬∀n y z, seq[y,n]→seq[z,n+1]→icmp z y=0`, every `M⊧IΣ₁`) now holds identically in nonstandard models; `_faithful` is its `M=ℕ` corollary. **natCode↔NF bridge DISSOLVED.** **Crux-2 deep core (lap-58 reframe) = `gentzen_descent_of_inconsistent` (per-model semantic form: `¬𝗣𝗔.Consistent M → infinite ε₀-descent`) — 🟡 ACTIVE FRONTIER** (was 🟠 cited eq-5; reclassified lap 62 — feasibility settled by Bryce–Goré Coq, must be fully discharged). The lap-60/61 `wip/InternalZ.lean` engine (idg/iõ/iord + C3 descent templates, axiom-clean) discharges it once the C0 Fixpoint `ZDerivation`, `iR` (C2), and the **C0.5 Foundation→Z bridge** land. The 9 `GentzenCon` axioms: 5 ℕ-meta scaffold (`ord/R/derivesEmpty/...`, not consumed downstream) + 4 per-model (`gentzen_descent_of_inconsistent`/`gentzenDescentφ`/`_dominated`/`_realized` — the real targets). |
 | `peano_not_proves_goodstein_modulo_semantic` / `descentE` / `no_min_descent_absurd_of_goodstein` / `paLX_models_TI_of_PA_provable` (laps 30–44, `src/DescentSemantic`) | the free-X completeness route (Rathjen §3-on-X) | `sorryAx` + native_decide | 🚫 **OFF-PATH (lap 45 obstruction).** The free-X β-wall (`:582`) is the WRONG target — §3-on-X is structurally blocked (`not_dominated_of_diag_le`). Banked, not deleted; `wip/` candidate. NOT wired to `Statement.lean`. |
@@ -801,12 +836,13 @@ DIRECTION anti-fraud rule #1, which a future call must reconcile against Route A
 | `lowerBound_hardy_selfcontained` (M6, **lap 6**) | **full Thm 17.1, only `α.NF`** | `propext, choice, Quot.sound` + 12 `native_decide` base-case `ax_*` | 🟢 clean — the `ax_*` are 🟢 finite Goodstein base-case witnesses (acceptable indefinitely) |
 | `hardy_add_comp`/`_collapse` (lap 8, `src/Hardy`) | `H_{γ+δ}=H_γ∘H_δ` (non-absorbing) | `propext, choice, Quot.sound` | 🟢 clean — banked Hardy infra (was for the dead Zekd thread; still a usable composition law) |
 | `hardy_comp_lt_goodsteinLength` (lap 8, `src/LowerBound`) | `H_α(H_e(m)) < G(m)` eventually | `propext, choice, Quot.sound` + the M6 `native_decide` base-cases | 🟢 clean — banked nested-index domination (reusable if a bridge ever needs a nested control index) |
-Math-axiom count (**lap-78 real, build green 1324**): the **headline** is still an honest `sorry`
+Math-axiom count (**lap-89 real, build green 1325**): the **headline** is still an honest `sorry`
 (`[propext, sorryAx, choice, Quot.sound]`, **0** math axioms). The single open obligation is
-`goodstein_implies_consistency` = **crux 1 (DONE, axiom-clean lap 57) ∘ crux 2 (🟡 active frontier,
-mechanism architecture-blocked lap 78 — needs criticality redesign before rung 2)**. The OTHER headline
-residual `PA_delta1Definable` (Foundation upstream `axiom`) now has an in-repo discharge scaffold
-(`paMinusDelta1` axiom-clean; `inductionSchemeUnivDelta1` the lone open `sorry`).
+`goodstein_implies_consistency` = **crux 1 (DONE, axiom-clean lap 57) ∘ crux 2 (🟡 active frontier — all
+three Buchholz case-5 dispatch branches object-complete laps 84–88; remaining = the tag-4 dispatch
+assembly + `redSound`)**. ⭐ The former OTHER residual `PA_delta1Definable` is **DISCHARGED UPSTREAM** (lap
+89): Foundation proves `𝗣𝗔.Δ₁` as a real instance, so `peano_not_proves_consistency` is axiom-clean and
+the endgame is single-front (crux-2 only).
 **⚠️ ENDPOINT HARDENED (operator directive, 2026-06-23 — supersedes the lap-53 recommendation):** this
 project builds **axiom-free** (trust base `propext, choice, Quot.sound` only) **or is abandoned.** The
 headline may **not** rest on a cited `PRWO→Con` (eq-5) axiom — crux 2 must be **fully discharged** — and
