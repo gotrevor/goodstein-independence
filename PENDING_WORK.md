@@ -1,5 +1,31 @@
 # Pending work — open obligations & attack paths
 
+## lap 104 — ⚠ ENDGAME CORRECTION: the naive `red_iterate_descends` `hinv` is unsatisfiable (in-kernel cert)
+**See `HANDOFF-2026-06-25-lap104.md`, STATUS lap-104 box, `NEXT_STEPS.md`.** Build green 1325; `src/`
+untouched (headline 0 math axioms). Lap 103 packaged crux-2 as `red_iterate_descends {P} (hinv) (hdrop) (hz)`
+and framed `hinv` (`∀ w, P w → P (red w)`) as "tractable via premise selection". **This lap proved that
+framing false in-kernel** (4 new axiom-clean lemmas in `wip/PathCOmega.lean`):
+
+- `zTag_ne_seven_of_ZDerivation` — every engine `ZDerivation` has tag ∈ {0..6}, never the stored-ω-∀ tag 7.
+- `red_redAllEx_eq` — given the ∀-node base premise `d0` is a `ZDerivation`, the ∀/∃-cut reduct `redAllEx`
+  is a `red`-FIXPOINT: its new left premise `zsubst d0 a t` has tag `= zTag d0 ≠ 7` (`zTag_zsubst`), so the
+  `(9,7,10)` dispatch fails and `red` is the identity.
+- `sord_red_iterate_stalls_AllEx` — on a concrete ∀/∃-cut node, `red` fires once then stalls forever, so
+  `sord (red^[n+2] w) = sord (red^[n+1] w)`: the stored ordinal is CONSTANT from step 1 — no infinite descent.
+- `naive_dispatch_P_not_red_closed` — ANY `P` implying the `(9,7,10)` dispatch shape fails `hinv` on the
+  reduct.
+
+**Root cause (the genuine `hinv` content).** Reducing a cut on `∀x F` produces a smaller cut on `F(t)` whose
+premises (`zsubst d0 a t` ⊢ `Γ→F(t)`, `zExPrem dR` ⊢ `Γ→¬F(t)`) need NOT be principal nodes for `F(t)`. To
+keep the orbit reducible, `red` must RE-PRINCIPALIZE them — i.e. apply Schütte/Tait **inversion** operators
+(`redInv∀`/`redInv∧`/`redInv∨`: from any derivation of `Γ, A` extract a derivation of the immediate
+subformula instance, stored ordinal `≼`). Inversion is a recursion over the derivation ⟹ it needs the
+genuine **Path-C derivation predicate** (datatype). So `hinv` = the Hauptsatz (inversion + reduction), the
+irreducible deep content of crux-2. The lap-103 bricks (nodes/`sord`/per-step drops) stay valid; the endgame
+*shape* changes. **CORRECTED NEXT (hardest-first): build the `zcOK` datatype, then inversion, then `red`/`hinv`
+— NOT more `hdrop` cut-shape cases (easy leaves on an unsatisfiable `hinv`).** See `NEXT_STEPS.md` PRIORITY 1
+(updated lap 104).
+
 ## lap 102 — Probe 2 settled the fork → Path C (stored ordinals); brick 1 landed
 **See `HANDOFF-2026-06-25-lap102.md`, `NEXT_STEPS.md` PRIORITY 1.** The crux-2 sub-route fork is resolved
 in favour of **Path C** (ω-rule, Buchholz operator-controlled derivations with STORED ordinals). Path X

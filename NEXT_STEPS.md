@@ -1,6 +1,51 @@
-# NEXT STEPS — fork SETTLED (lap 102: Probe 2 executed → Path C, stored ordinals)
+# NEXT STEPS — Path C (lap 104: endgame CORRECTED — datatype + inversion is `hinv`)
 
-> **⭐ LAP-102 UPDATE (read FIRST).** Probe 2 ran in `wip/InternalZomega.lean` (3 new axiom-clean lemmas).
+> **⭐⭐ LAP-104 CORRECTION (read FIRST — supersedes the lap-102/103 "complete `red` dispatch + `hdrop`"
+> plan).** The lap-103 endgame `red_iterate_descends {P} (hinv) (hdrop) (hz)` is a TRUE conditional, but its
+> `hinv` (orbit invariant `red`-closed) is **unsatisfiable for the naive dispatch-shaped `P`** — proven
+> in-kernel this lap (`wip/PathCOmega.lean`: `naive_dispatch_P_not_red_closed`, `red_redAllEx_eq`,
+> `sord_red_iterate_stalls_AllEx`, `zTag_ne_seven_of_ZDerivation`, all axiom-clean). The ∀/∃-cut reduct's
+> new left premise `zsubst d0 a t` is a *substituted engine derivation* (tag ≤ 6, `zTag_zsubst`), never the
+> stored-ω-∀ tag 7, so `red` is the identity on the reduct → the orbit STALLS after one step → no infinite
+> descent. **The genuine `hinv` is the Hauptsatz**: `red` must RE-PRINCIPALIZE the reduct's premises via
+> Schütte/Tait INVERSION (`redInv∀`/`redInv∧`/`redInv∨`), a recursion over the derivation that requires the
+> genuine Path-C **derivation predicate (the datatype)**. **STOP adding `hdrop` cut-shape cases** (easy leaves
+> on an unsatisfiable `hinv`). **START the datatype + inversion** (PRIORITY 1 below, rewritten). The lap-103
+> bricks (ω-∀/ω-ind/cut/∃ nodes + `sord` Σ₁-def + per-step drops) stay valid and reusable.
+
+## ▶ PRIORITY 1 (lap 104→) — the Path-C derivation predicate (`zcOK`) + inversion → `hinv`
+
+Hardest-first ordering (each a `wip/` milestone; the datatype is the bottleneck — `hinv`, the embedding,
+and arithmetization all need it):
+
+1. **The datatype `zcOK : V → Prop`** — a small isolated Σ₁ `Deriv`-style predicate (NOT a new tag in the
+   8000-line `InternalZ.zconstruction` Fixpoint — keep it isolated). Template: `InternalZ`'s
+   `PR.Blueprint`/`Construction` Fixpoint pattern; rule set: `ZinftyF.Deriv` (the axiom-clean META ω-rule
+   calculus in `src/Zinfty.lean`). Node shapes already coded (lap 102/103): ω-∀ (tag 7), ω-ind (8), cut (9),
+   ∃ (10); ADD ∧/∨ intro + atom-axiom. Validity of a node = premises well-formed `zcOK` + conclusion-tracking
+   + `∀ premise, sord(premise) ≺ sord(node)` (Buchholz operator-control; `sord` is Σ₁-def, lap 103).
+2. **Inversion operators over `zcOK`.** `redInv∀ d t` / `redInv∧ d i` / `redInv∨ d`: from `zcOK d` deriving
+   `Γ, A` (A = ∀x F / B∧C / B∨C) produce `zcOK` deriving the immediate subformula instance, stored ordinal
+   `≼ sord d`. ∀-inv on the ω-∀-node itself = premise selection (banked `zAllOmega_cut_valid` /
+   `zAllOmega_cut_descends`); the GENERAL case recurses through the derivation's last rule (the Schütte
+   inversion lemmas, `Zinfty.lean` §19.2–19.4 are the META template — port the arithmetized version).
+3. **`red` (Buchholz Def 3.2) calling inversion** + **`hinv`** (`red` preserves `zcOK`-of-∅→⊥: the reduct
+   cut on `F(t)` has premises produced BY inversion, hence principal/`zcOK`) + **`hdrop`** (per-step stored-
+   ordinal drop: bricks 1/3 for the principal selection + the inversion ordinal bounds). Then
+   `red_iterate_descends` with the GENUINE `P` = `zcOK ∧ derives ∅→⊥`.
+4. **Embedding (M2 analogue):** a Foundation/`ZDerivation` ⊥-proof yields a `zcOK` ⊥-derivation `z` (`hz`).
+5. **Arithmetize** `red` (`sord`/`imax`/`zsubst`/projections/`zCutOmega` already Σ₁-def — compose) +
+   `gentzenDescentφ` (Σ₁ graph of `n ↦ sord(red^[n] z)`) → discharge `gentzen_descent_of_inconsistent`
+   (`wip/GentzenCon.lean`) from the V-internal descent + crux-1 PRWO. Then wire crux-1 ∘ crux-2 →
+   `Reduction.goodstein_implies_consistency` → headline (ONLY when `#print axioms` clean — anti-fraud).
+
+Build in `wip/` until step 5 lands; keep `InternalZ`/`Crux2Blueprint` (Path X) green in `src/` as fallback.
+
+---
+
+## (SUPERSEDED by lap 104 — lap-102/103 "complete the `red` dispatch" plan, kept for provenance)
+
+> **⭐ LAP-102 UPDATE.** Probe 2 ran in `wip/InternalZomega.lean` (3 new axiom-clean lemmas).
 > Verdict: the ω-rule (Path C) is the route, with a refinement — the chain/`redZKReady` motive is retired
 > (proven by `Zinfty.lean`: full ω-cut-elim, no chain), BUT the ordinal layer must be **REPLACED, not
 > reused**: `iotil_zK_iIndReduct_strictMono` proves the induction ω-node's premise ordinals strictly

@@ -609,6 +609,92 @@ theorem red_iterate_descends {P : V → Prop}
     | succ k ih => rw [Function.iterate_succ_apply']; exact hinv _ ih
   rw [Function.iterate_succ_apply']; exact hdrop _ (hmem n)
 
+/-! ### ⚠ CLOSURE-FAILURE CERTIFICATE (lap 104) — the naive dispatch-shaped `P` is NOT `red`-closed
+
+`red_iterate_descends` is a TRUE conditional: IF the orbit invariant `P` is `red`-closed (`hinv`) and
+`red` drops `sord` on `P` (`hdrop`), the descent follows. The HANDOFF framed `hinv` as "tractable via
+premise selection". **That framing is wrong, and here is the in-kernel proof.**
+
+The dispatch (`red`, above) fires only on a cut node whose left premise is *literally* a stored ω-∀-node
+(`zTag (zCutL w) = 7`) and whose right is an ∃-node (`zTag (zCutR w) = 10`). But the reduct `redAllEx`
+selects the ω-∀-node's BASE premise after substitution, `zsubst d0 a t`, as its new left premise. By
+`zTag_zsubst`, a substituted genuine `ZDerivation` keeps `d0`'s tag, which is one of the seven engine tags
+`0..6` (`zTag_ne_seven_of_ZDerivation`) — **never** the stored-ω-∀ tag `7`. So `red` is the IDENTITY on
+the reduct (`red_redAllEx_eq`): the orbit STALLS after a single step, `sord` is constant from step 1, and
+no infinite descent exists. Hence any `P` requiring the (7,10) dispatch shape is provably not `red`-closed
+(`naive_dispatch_P_not_red_closed`).
+
+**Consequence (the corrected next brick).** The reduct's premises `zsubst d0 a t` / `zExPrem dR` derive
+`Γ→F(t)` / `Γ→¬F(t)` but need NOT be principal nodes for the smaller cut on `F(t)`. To keep the orbit
+reducible, `red` must RE-PRINCIPALIZE them — i.e. it must apply Schütte/Tait INVERSION operators
+(`redInv∀`, `redInv∧`, …: from any Path-C derivation of `Γ, F` extract a derivation of the immediate
+subformula instance, with stored ordinal `≼`). Inversion is a recursion over the derivation, hence needs
+the genuine Path-C derivation predicate (the datatype, NEXT_STEPS step 1). This certificate redirects the
+endgame: `hinv` is the Hauptsatz (inversion + reduction), not naive selection. -/
+
+/-- Every genuine engine `ZDerivation` carries one of the seven engine tags `0..6` — in particular,
+NEVER the stored-ω-∀ tag `7`. (The Path-C ω-nodes `zAllOmega`/`zIndOmega`/`zCutOmega`/`zExOmega`, tags
+`7..10`, are a parallel layer the engine predicate does not recognize.) -/
+theorem zTag_ne_seven_of_ZDerivation {d : V} (hd : ZDerivation d) : zTag d ≠ 7 := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ <;> simp
+
+/-- **The ∀/∃-cut reduct is a `red`-FIXPOINT.** Given the ∀-node base premise `d0` is a genuine
+`ZDerivation`, `redAllEx`'s left premise `zsubst d0 a t` has tag `= zTag d0 ≠ 7`, so the `red` dispatch
+condition fails and `red` is the identity. The orbit cannot fire a second time. -/
+theorem red_redAllEx_eq {s d0 a Cnew dR : V} (hd0 : ZDerivation d0) :
+    red (redAllEx s d0 a Cnew dR) = redAllEx s d0 a Cnew dR := by
+  rw [red, if_neg]
+  rintro ⟨_, hL, _⟩
+  rw [redAllEx, zCutL_zCutOmega, zTag_zsubst hd0] at hL
+  exact zTag_ne_seven_of_ZDerivation hd0 hL
+
+/-- A `red`-fixpoint stays fixed under iteration. -/
+theorem iterate_red_fixed {w : V} (h : red w = w) : ∀ n : ℕ, red^[n] w = w
+  | 0 => rfl
+  | n + 1 => by rw [Function.iterate_succ_apply', iterate_red_fixed h n, h]
+
+/-- **The ∀/∃-cut orbit STALLS after one step** (the in-kernel obstruction). On a concrete ∀/∃-cut node
+`w` with a genuine base premise `d0`, `red w = redAllEx …` fires once, but every further `red` is the
+identity. So `sord (red^[n+1] w) = sord (red^[n] w)` for ALL `n ≥ 1` — the stored ordinal is eventually
+CONSTANT, never an infinite `≺`-descent. This is why the naive dispatch-shaped invariant fails the
+infinite-descent endgame: the reduct's premises are not re-principalized (no inversion). -/
+theorem sord_red_iterate_stalls_AllEx {s s' d0 a αAll α C sE CE tE dE : V}
+    (hd0 : ZDerivation d0) (n : ℕ) :
+    sord (red^[n+2] (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE α CE tE dE) C))
+      = sord (red^[n+1] (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE α CE tE dE) C)) := by
+  set w := zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE α CE tE dE) C with hw
+  have hfire : red w = redAllEx s d0 a C (zExOmega sE α CE tE dE) := by
+    rw [hw, red, if_pos (by simp)]; simp
+  have hfix : red (red w) = red w := by rw [hfire]; exact red_redAllEx_eq hd0
+  -- every iterate from step 1 on equals the single-fired form `red w`
+  have key : ∀ m : ℕ, red^[m + 1] w = red w := by
+    intro m
+    induction m with
+    | zero => rw [Function.iterate_one]
+    | succ j ih => rw [Function.iterate_succ_apply', ih, hfix]
+  show sord (red^[(n + 1) + 1] w) = sord (red^[n + 1] w)
+  rw [key (n + 1), key n]
+
+/-- **The naive dispatch-shaped `P` is NOT `red`-closed.** Any invariant `P` that (i) holds on the
+concrete ∀/∃-cut node and (ii) implies the `red`-dispatch shape `zTag w = 9 ∧ zTag (zCutL w) = 7 ∧
+zTag (zCutR w) = 10` fails `hinv`: `red` of that node is `redAllEx …`, whose left premise has tag `≠ 7`,
+so `P (red w)` cannot hold. Concretely: `hinv` (the `red_iterate_descends` hypothesis) is unsatisfiable
+for such `P`. The genuine `P` must be a derivation predicate whose `red` re-principalizes via inversion. -/
+theorem naive_dispatch_P_not_red_closed {s s' d0 a αAll α C sE CE tE dE : V}
+    (hd0 : ZDerivation d0)
+    (Pshape : V → Prop)
+    (hshape : ∀ w, Pshape w → zTag w = 9 ∧ zTag (zCutL w) = 7 ∧ zTag (zCutR w) = 10) :
+    ¬ Pshape (red (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE α CE tE dE) C)) := by
+  intro hP
+  have hfire : red (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE α CE tE dE) C)
+      = redAllEx s d0 a C (zExOmega sE α CE tE dE) := by
+    rw [red, if_pos (by simp)]; simp
+  obtain ⟨_, hL, _⟩ := hshape _ hP
+  rw [hfire, redAllEx, zCutL_zCutOmega, zTag_zsubst hd0] at hL
+  exact zTag_ne_seven_of_ZDerivation hd0 hL
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
@@ -631,3 +717,4 @@ datatype (each a `wip/` milestone, ported from `ZinftyF.Deriv`/`o`/`cr`):
   `𝚺₁`/`𝚫₁`; this is bookkeeping, deferred until the datatype shape stabilizes). -/
 
 end GoodsteinPA.InternalZ.PathC
+
