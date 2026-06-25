@@ -1,5 +1,32 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 91 — route-B keystone `tpReduce` defined + 𝚺₁-definable
+
+**Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). 2 green commits.**
+
+Lap-90 forced route B (faithful Buchholz reduct with conclusion reduction). Step 1 landed:
+- ✅ **`tpReduce I s n`** (`InternalZ.lean`, after `inAnt_seqAddAnt`) = Buchholz's reduced sequent
+  `I(Π,n)` (from the PDF §2 14.23/14.252): `Rep→Π`, `R_∀xF→Θ→F(n)`, `R_¬A→A,Θ→⊥`,
+  `L^k_∀xF→F(k),Θ→D`, `L^0_¬A→Θ→A`. ∀/¬ dispatch on `π₁(A∸1)=6`; ¬-body via `IsUFormula.neg_neg`.
+  All 5 per-symbol equations proved axiom-clean (`tpReduce_isymRep` is `@[simp]`).
+- ✅ **`tpReduceDef` / `tpReduce_defined` / `_definable` / `_definable'`** (after `seqAddAnt_definable`)
+  — `tpReduce` is `𝚺₁`-definable (subDef peels the qq `+1`).
+
+**NEXT (route-B continuation — the big re-architecture):**
+1. **Rewire `red`'s chain + I-rule branches to emit `tpReduce (tp dᵢ) Π 0`** instead of keeping `Π`.
+   - I∀ (`red zIall = d0`): under route B should derive `Γ→F(0) = tpReduce (R_∀xF) Π 0` — needs the
+     eigen-subst `d₀(a/0)` (`Zsubst.lean`). I¬ (`red zIneg = d0`) already derives `A,Γ→⊥` = `tpReduce (R_¬A) Π 0`.
+   - 5.2.2 (`iRKr`): conclusion `tpReduce (tp dᵢ) Π 0` (was `Π` via `iCritAux`/`seqUpdate`).
+   - Ind (`iIndReductSeq … 1`): conclusion `Γ→F(k)`, `k`=value of `t`, `k` copies of `d1(a/·)` (lap-90:
+     current fixed `k=1` only faithful when `t` evals to 1).
+2. **Prove Thm 3.4(b) invariant** `∀ d, ZDerivation d → ZDerivation (red d) ∧
+   fstIdx (red d) = tpReduce (tp d) (fstIdx d) 0` by PLAIN structural induction (`zDerivation_induction`).
+   Specialise to headline at `tp d = Rep` (`tpReduce_isymRep` ⟹ `fstIdx (red d) = Π`, `ZDerivesEmpty` kept).
+3. Reusable Rep-branch lemmas from lap-90 (`red_zK_rep`/`_splice`, `ZDerivation_red_zK_replace`,
+   `tp_isymRep_of_emptyAnt_botSucc`). New work = the `tp(dᵢ) ≠ Rep` branches + conclusion tracking.
+4. Then `iord_descent_red` (ordinal side unaffected by route B — `iord` endsequent-independent),
+   `false_of_ZDerivesEmpty`, M2 bridge, wire to `Reduction.goodstein_implies_consistency` + headline.
+
 ## 📍 Lap 90 — `redSound` DECOMPOSED + faithfulness finding (`red` faithful only for `Rep`)
 
 **Build 🟢 1325 jobs. Headline still `[propext, sorryAx, choice, Quot.sound]` (0 math axioms).**
