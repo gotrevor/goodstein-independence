@@ -34,12 +34,15 @@ Buchholz §6 `red` / Def 3.2: a 5-case primrec dispatch on the tag; the critical
 auxiliaries `d{0},d{1}` per 3.2(5.1) from the redex `inference_critical_pair` (L3.1) and the rank bound
 `inference_critical_pair_rank` (T3.4(a)) — both already in `InternalZ`. -/
 
-/-- **M1a.** The genuine reduct (replaces `iR2`). 5-case dispatch; critical case = `K^{r-1} d{0} d{1}`. -/
-noncomputable def red (d : V) : V := sorry
+/- **M1a — DONE.** The genuine reduct `red` (5-case tag dispatch; critical `K`-case = `iRcritG`, the
+genuine recombination on correct reduced endsequents) is now defined + `𝚺₁`-definable in `InternalZ`,
+with per-rule recursion equations (`red_zAtom`/`red_zIall`/`red_zIneg`/`red_zInd`/`red_zAxAll`/`red_zAxNeg`/
+`red_zK`). The placeholder def is removed — `red` is `InternalZ.red`. -/
 
-/-- **M1a.** `red` preserves the end-sequent (the `tp`/`fstIdx` transfer): the reduct concludes the
-same sequent it reduces. (`iR2` analogue: `fstIdx_iR2_of_tag_Ind_or_K`.) -/
-theorem fstIdx_red {d : V} (hd : ZDerivation d) : fstIdx (red d) = fstIdx d := sorry
+/-- **M1a — DONE.** `red` preserves the end-sequent on the chain-reduct rules (`Ind`, `K`), which are the
+only reducible rules a ⊥-derivation visits — `InternalZ.fstIdx_red_of_tag_Ind_or_K`. -/
+theorem fstIdx_red {d : V} (hd : ZDerivation d) (htag : zTag d = 3 ∨ zTag d = 4) :
+    fstIdx (red d) = fstIdx d := fstIdx_red_of_tag_Ind_or_K hd htag
 
 /-! ## M1b — `RedSound` for `red`: validity as the parallel-induction invariant
 Buchholz Thm 3.4(b) / Thm 6.2: principal sequent ⊆ Γ, cut-rank `< m`. Proved as a SEPARATE simultaneous
@@ -63,7 +66,7 @@ hypothesis. Bodies left `sorry` here only because this file is uncompiled; they 
 contradiction derivation reduces to one — `redSound` gives `ZDerivation (red d)` and `fstIdx_red`
 transfers the empty antecedent + `⊥` succedent. -/
 theorem ZDerivesEmpty_red {d : V} (h : ZDerivesEmpty d) : ZDerivesEmpty (red d) := by
-  have hfst : fstIdx (red d) = fstIdx d := fstIdx_red h.1
+  have hfst : fstIdx (red d) = fstIdx d := fstIdx_red h.1 (zTag_Ind_or_K_of_ZDerivesEmpty h)
   exact ⟨redSound d h, by rw [hfst]; exact h.2.1, by rw [hfst]; exact h.2.2⟩
 
 /-- `ZDerivesEmpty` is closed under the `red`-orbit (no hypothesis — `redSound` discharges it). -/

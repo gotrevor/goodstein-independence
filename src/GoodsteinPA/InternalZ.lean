@@ -4593,6 +4593,21 @@ instance seqUpdate_defined : 𝚺₁-Function₃ (seqUpdate : V → V → V → 
 instance seqUpdate_definable : 𝚺₁-Function₃ (seqUpdate : V → V → V → V) :=
   seqUpdate_defined.to_definable
 
+/-- `seqSetSucc s C = ⟪seqAnt s, C⟫` (the genuine `Θ→C` endsequent op). -/
+def _root_.LO.FirstOrder.Arithmetic.seqSetSuccDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y s C. ∃ sa, !seqAntDef sa s ∧ !pairDef y sa C”
+instance seqSetSucc_defined : 𝚺₁-Function₂ (seqSetSucc : V → V → V) via seqSetSuccDef := .mk
+  fun v ↦ by simp [seqSetSuccDef, seqSetSucc, mkSeqt, seqAnt_defined.iff, pair_defined.iff]
+instance seqSetSucc_definable : 𝚺₁-Function₂ (seqSetSucc : V → V → V) := seqSetSucc_defined.to_definable
+
+/-- `seqAddAnt A s = ⟪seqCons (seqAnt s) A, seqSucc s⟫` (the genuine `A,Θ→D` endsequent op). -/
+def _root_.LO.FirstOrder.Arithmetic.seqAddAntDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y A s. ∃ sa, !seqAntDef sa s ∧ ∃ c, !seqConsDef c sa A ∧ ∃ ss, !seqSuccDef ss s ∧ !pairDef y c ss”
+instance seqAddAnt_defined : 𝚺₁-Function₂ (seqAddAnt : V → V → V) via seqAddAntDef := .mk
+  fun v ↦ by simp [seqAddAntDef, seqAddAnt, mkSeqt, seqAnt_defined.iff, seqCons_defined.iff,
+    seqSucc_defined.iff, pair_defined.iff]
+instance seqAddAnt_definable : 𝚺₁-Function₂ (seqAddAnt : V → V → V) := seqAddAnt_defined.to_definable
+
 /-- `iCritAux d i v = zK (fstIdx d) (zKrank d) (seqUpdate (zKseq d) i v)` (the critical auxiliary
 `d{ν} = K^r(i/v)`, a chain with premise `i` replaced by `v`). -/
 def _root_.LO.FirstOrder.Arithmetic.iCritAuxDef : 𝚺₁.Semisentence 4 := .mkSigma
@@ -4801,6 +4816,222 @@ instance iR2_defined : 𝚺₁-Function₁ (iR2 : V → V) via iR2Def := .mk fun
   simp [iR2Def, iR2, iRTable_defined.iff, znth_defined.iff]
 instance iR2_definable : 𝚺₁-Function₁ (iR2 : V → V) := iR2_defined.to_definable
 instance iR2_definable' (Γ) : Γ-[m + 1]-Function₁ (iR2 : V → V) := iR2_definable.of_sigmaOne
+
+/-- **The genuine closed critical branch** for `red`'s tag-4 case: `K^{r-1}_Π ⟨d{0}, d{1}⟩` where the cut
+formula is `A(d) = chainAsucc (zKseq d) (redexI d)`, the auxiliaries replace the redex premises `i = redexI d`,
+`j = redexJ d` by their `ρ`-reducts, and carry the reduced endsequents. Closed term; only `ρ` (the N1 IH)
+is abstract. (Soundness `ZDerivation_iRcritG_of` is proved later, after `ZDerivation_iCritReductG_of`.) -/
+noncomputable def iRcritG (d : V) (ρ : V → V) : V :=
+  iCritReductG (fstIdx d) (chainAsucc (zKseq d) (redexI d)) (zKrank d - 1) (zKrank d) (zKrank d)
+    (seqUpdate (zKseq d) (redexI d) (ρ (redexI d)))
+    (seqUpdate (zKseq d) (redexJ d) (ρ (redexJ d)))
+
+@[simp] lemma fstIdx_iRcritG (d : V) (ρ : V → V) : fstIdx (iRcritG d ρ) = fstIdx d := by
+  simp [iRcritG]
+@[simp] lemma zTag_iRcritG (d : V) (ρ : V → V) : zTag (iRcritG d ρ) = 4 := by simp [iRcritG]
+
+/-! ## The GENUINE reduct `red` (Buchholz §6 `red` / Def 3.2) — replaces the dead `iR2`
+
+`red` is the validity-faithful reduct: identical to `iR2` on the I-rules (tags 1,2) and the `Ind` rule
+(tag 3), but its critical `K`-case (tag 4) is `iRcritG` (the genuine recombination on the CORRECT reduced
+endsequents `Θ→A(d)`/`A(d),Θ→D`) instead of `iR2`'s ordinal-shadow `iCritReduct`. Built by the same table
+recursion as `iR2` (`iRNextG`/`redTable`/`red`), so `red` is total + `𝚺₁`-definable. -/
+
+/-- Table step of `red`: dispatch on `zTag d`; tag-4 = the genuine critical branch `iRcritG`, with the
+per-premise reduct supplier `ρ idx = zAxReduct (znth s (znth (zKseq d) idx))` (the table lookup). -/
+noncomputable def iRNextG (d s : V) : V :=
+  if zTag d = 1 then zIallPrem d
+  else if zTag d = 2 then zInegPrem d
+  else if zTag d = 3 then iRInd d
+  else if zTag d = 4 then
+    iRcritG d (fun idx => zAxReduct (znth s (znth (zKseq d) idx)))
+  else d
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iRNextGDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ t, !zTagDef t d ∧
+    ( (t = 1 ∧ !zIallPremDef y d)
+    ∨ (t = 2 ∧ !zInegPremDef y d)
+    ∨ (t = 3 ∧ !iRIndDef y d)
+    ∨ (t = 4 ∧ ∃ f, !fstIdxDef f d ∧ ∃ ds, !zKseqDef ds d ∧
+        ∃ i, !redexIDef i d ∧ ∃ j, !redexJDef j d ∧
+        ∃ C, !chainAsuccDef C ds i ∧ ∃ rk, !zKrankDef rk d ∧ ∃ rk1, !subDef rk1 rk 1 ∧
+        ∃ ai, !znthDef ai ds i ∧ ∃ vi, !znthDef vi s ai ∧ ∃ wi, !zAxReductDef wi vi ∧
+        ∃ aj, !znthDef aj ds j ∧ ∃ vj, !znthDef vj s aj ∧ ∃ wj, !zAxReductDef wj vj ∧
+        ∃ u0, !seqUpdateDef u0 ds i wi ∧ ∃ ss, !seqSetSuccDef ss f C ∧ ∃ d0, !zKGraph d0 ss rk u0 ∧
+        ∃ u1, !seqUpdateDef u1 ds j wj ∧ ∃ sa, !seqAddAntDef sa C f ∧ ∃ d1, !zKGraph d1 sa rk u1 ∧
+        ∃ seq, !iCritReductSeqDef seq d0 d1 ∧ !zKGraph y f rk1 seq)
+    ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = d) )”
+
+set_option maxHeartbeats 1600000 in
+instance iRNextG_defined : 𝚺₁-Function₂ (iRNextG : V → V → V) via iRNextGDef := .mk fun v ↦ by
+  simp [iRNextGDef, iRNextG, iRcritG, iCritReductG, zTag_defined.iff, zIallPrem_defined.iff,
+    zInegPrem_defined.iff, iRInd_defined.iff, fstIdx_defined.iff, zKseq_defined.iff,
+    redexI_defined.iff, redexJ_defined.iff, chainAsucc_defined.iff, zKrank_defined.iff,
+    sub_defined.iff, znth_defined.iff, zAxReduct_defined.iff, seqUpdate_defined.iff,
+    seqSetSucc_defined.iff, seqAddAnt_defined.iff, iCritReductSeq_defined.iff, zK_defined.iff]
+  by_cases h1 : zTag (v 1) = 1
+  · simp [h1]
+  · by_cases h2 : zTag (v 1) = 2
+    · simp [h1, h2]
+    · by_cases h3 : zTag (v 1) = 3
+      · simp [h1, h2, h3]
+      · by_cases h4 : zTag (v 1) = 4
+        · simp [h1, h2, h3, h4]
+        · simp [h1, h2, h3, h4]
+
+instance iRNextG_definable : 𝚺₁-Function₂ (iRNextG : V → V → V) := iRNextG_defined.to_definable
+
+/-- Blueprint for the `red` table. -/
+noncomputable def redTable.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !mkSeq₁Def y 0”
+  succ := .mkSigma “y ih n. ∃ v, !iRNextGDef v (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def redTable.construction : PR.Construction V redTable.blueprint where
+  zero := fun _ ↦ !⟦0⟧
+  succ := fun _ n ih ↦ seqCons ih (iRNextG (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [redTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [redTable.blueprint, iRNextG_defined.iff, seqCons_defined.iff]
+
+/-- **The `red` table**: `redTable n = ⟨red 0,…,red n⟩` (length `n+1`). -/
+noncomputable def redTable (n : V) : V := redTable.construction.result ![] n
+
+@[simp] lemma redTable_zero : redTable (0 : V) = !⟦0⟧ := by simp [redTable, redTable.construction]
+
+@[simp] lemma redTable_succ (n : V) :
+    redTable (n + 1) = seqCons (redTable n) (iRNextG (n + 1) (redTable n)) := by
+  simp [redTable, redTable.construction]
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.redTableDef : 𝚺₁.Semisentence 2 :=
+  redTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance redTable_defined : 𝚺₁-Function₁ (redTable : V → V) via redTableDef := .mk
+  fun v ↦ by simp [redTable.construction.result_defined_iff, redTableDef]; rfl
+instance redTable_definable : 𝚺₁-Function₁ (redTable : V → V) := redTable_defined.to_definable
+instance redTable_definable' (Γ) : Γ-[m + 1]-Function₁ (redTable : V → V) :=
+  redTable_definable.of_sigmaOne
+
+/-- **The genuine reduct** `red d = d[0]`: the `d`-th entry of the table. -/
+noncomputable def red (d : V) : V := znth (redTable d) d
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.redDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ t, !redTableDef t d ∧ !znthDef y t d”
+instance red_defined : 𝚺₁-Function₁ (red : V → V) via redDef := .mk fun v ↦ by
+  simp [redDef, red, redTable_defined.iff, znth_defined.iff]
+instance red_definable : 𝚺₁-Function₁ (red : V → V) := red_defined.to_definable
+instance red_definable' (Γ) : Γ-[m + 1]-Function₁ (red : V → V) := red_definable.of_sigmaOne
+
+/-! ### Structural correctness of the `red` table (mirror `iR2`) -/
+
+private lemma def_redTable {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ redTable (v i)) :=
+  DefinableFunction₁.comp (F := redTable) (DefinableFunction.var i)
+
+private lemma def_red {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ red (v i)) :=
+  DefinableFunction₁.comp (F := red) (DefinableFunction.var i)
+
+@[simp] lemma redTable_seq (n : V) : Seq (redTable n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_redTable 0)
+  case zero => simp
+  case succ n ih => rw [redTable_succ]; exact ih.seqCons _
+
+@[simp] lemma redTable_lh (n : V) : lh (redTable n) = n + 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_redTable 0)) (by definability)
+  case zero => simp
+  case succ n ih => rw [redTable_succ, Seq.lh_seqCons _ (redTable_seq n), ih]
+
+lemma znth_redTable_succ {n k : V} (hk : k < n + 1) :
+    znth (redTable (n + 1)) k = znth (redTable n) k := by
+  rw [redTable_succ]
+  exact znth_seqCons_of_lt (redTable_seq n) _ (by rw [redTable_lh]; exact hk)
+
+lemma znth_redTable_eq_red : ∀ N : V, ∀ k ≤ N, znth (redTable N) k = red k := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_le (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := znth) (def_redTable 1) (DefinableFunction.var 0))
+      (def_red 0)
+  case zero =>
+    intro k hk; rcases (nonpos_iff_eq_zero.mp hk) with rfl; rfl
+  case succ N ih =>
+    intro k hk
+    rcases eq_or_lt_of_le hk with rfl | hlt
+    · rfl
+    · rw [znth_redTable_succ hlt]; exact ih k (le_iff_lt_succ.mpr hlt)
+
+/-- `red c = iRNextG c (redTable (c-1))` for positive codes (the table-reduction unfolding). -/
+lemma red_eq_iRNextG {c : V} (hpos : 0 < c) : red c = iRNextG c (redTable (c - 1)) := by
+  obtain ⟨M, rfl⟩ : ∃ M, c = M + 1 := ⟨c - 1, (sub_add_self_of_le (pos_iff_one_le.mp hpos)).symm⟩
+  have key : znth (redTable (M + 1)) (M + 1) = iRNextG (M + 1) (redTable M) := by
+    rw [redTable_succ]
+    have h := znth_seqCons_self (redTable_seq M) (iRNextG (M + 1) (redTable M))
+    rwa [redTable_lh] at h
+  simp only [red, add_tsub_cancel_right, key]
+
+/-- `iRcritG` depends on `ρ` only at `redexI d`/`redexJ d`. -/
+lemma iRcritG_congr {d : V} {ρ ρ' : V → V} (hi : ρ (redexI d) = ρ' (redexI d))
+    (hj : ρ (redexJ d) = ρ' (redexJ d)) : iRcritG d ρ = iRcritG d ρ' := by
+  simp only [iRcritG, hi, hj]
+
+/-! ### `red` recursion equations (Buchholz Def 3.2, per rule) -/
+
+@[simp] lemma red_zAtom (s : V) : red (zAtom s) = zAtom s := by
+  rw [red_eq_iRNextG (by simp [zAtom]), iRNextG]; simp [zTag_zAtom]
+
+@[simp] lemma red_zIall (s a p d0 : V) : red (zIall s a p d0) = d0 := by
+  rw [red_eq_iRNextG (by simp [zIall]), iRNextG, if_pos (zTag_zIall s a p d0)]
+  simp [zIallPrem_zIall]
+
+@[simp] lemma red_zIneg (s p d0 : V) : red (zIneg s p d0) = d0 := by
+  rw [red_eq_iRNextG (by simp [zIneg]), iRNextG, if_neg (by simp), if_pos (zTag_zIneg s p d0)]
+  simp [zInegPrem_zIneg]
+
+@[simp] lemma red_zInd (s at' p d0 d1 : V) :
+    red (zInd s at' p d0 d1) = iRInd (zInd s at' p d0 d1) := by
+  rw [red_eq_iRNextG (by simp [zInd]), iRNextG, if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zInd s at' p d0 d1)]
+
+@[simp] lemma red_zAxAll (s p k : V) : red (zAxAll s p k) = zAxAll s p k := by
+  rw [red_eq_iRNextG (by simp [zAxAll]), iRNextG]; simp [zTag_zAxAll]
+
+@[simp] lemma red_zAxNeg (s p : V) : red (zAxNeg s p) = zAxNeg s p := by
+  rw [red_eq_iRNextG (by simp [zAxNeg]), iRNextG]; simp [zTag_zAxNeg]
+
+/-- **The K-rule (critical) recursion equation** for the GENUINE reduct (Buchholz Def 3.2 case 5.1):
+`red` of a chain is the genuine critical reduct `iRcritG` at the redex, with the two auxiliaries'
+premise-reducts supplied RECURSIVELY (`red (znth ds (redexI/redexJ ..))`, with the §5 atomic `zAxReduct`).
+The genuine recombination carries the correct reduced endsequents `Θ→A(d)`/`A(d),Θ→D` (unlike `iR2_zK`'s
+ordinal-shadow). Both premise codes `< zK s r ds`, so they sit inside the length-`(zK-1)` table. -/
+lemma red_zK (s r ds : V) :
+    red (zK s r ds) = iRcritG (zK s r ds) (fun n => zAxReduct (red (znth ds n))) := by
+  have hbound : ∀ k : V, znth ds k ≤ zK s r ds - 1 := fun k =>
+    le_trans (znth_le_self ds k) (le_pred_of_lt (ds_lt_zK s r ds))
+  rw [red_eq_iRNextG (by simp [zK]), iRNextG, if_neg (by simp), if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zK s r ds)]
+  refine iRcritG_congr ?_ ?_ <;>
+    simp only [zKseq_zK] <;>
+    rw [znth_redTable_eq_red _ _ (hbound _)]
+
+/-- **`red` preserves the end-sequent on the chain-reduct rules** (`Ind`, `K`): both reducts are chains
+`zK (fstIdx d) …` (`iRInd`/`iRcritG` carry the conclusion sequent verbatim), so `fstIdx (red d) = fstIdx d`.
+(On a ⊥-derivation the visited reducible rules are exactly tags 3,4 — an I-rule never has a `⊥` succedent.) -/
+lemma fstIdx_red_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3 ∨ zTag d = 4) :
+    fstIdx (red d) = fstIdx d := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · simp [zTag_zAtom] at htag
+  · simp [zTag_zIall] at htag
+  · simp [zTag_zIneg] at htag
+  · rw [red_zInd, iRInd_zInd]; simp [fstIdx_zInd]
+  · rw [red_zK]; simp
+  · simp [zTag_zAxAll] at htag
+  · simp [zTag_zAxNeg] at htag
 
 /-! ### Structural correctness of the `iR2` table (mirror `idg`) -/
 
@@ -5549,19 +5780,6 @@ structural IH) is fixed. Unlike `iRcrit` (built on the ordinal-shadow `iCritRedu
 auxiliaries reuse `fstIdx d` and so have the WRONG endsequent), `iRcritG` is built on `iCritReductG`, whose
 auxiliaries carry the cut's reduced endsequents `Θ→A(d)`/`A(d),Θ→D` with cut formula `A(d) = chainAsucc ds i`
 (the succedent of the redex's R-premise `i`). This is the K-case of the genuine reduct `red`. -/
-
-/-- **The genuine closed critical branch** for `red`'s tag-4 case: `K^{r-1}_Π ⟨d{0}, d{1}⟩` where the cut
-formula is `A(d) = chainAsucc (zKseq d) (redexI d)`, the auxiliaries replace the redex premises `i = redexI d`,
-`j = redexJ d` by their `ρ`-reducts, and carry the reduced endsequents. Closed term; only `ρ` (the N1 IH)
-is abstract. -/
-noncomputable def iRcritG (d : V) (ρ : V → V) : V :=
-  iCritReductG (fstIdx d) (chainAsucc (zKseq d) (redexI d)) (zKrank d - 1) (zKrank d) (zKrank d)
-    (seqUpdate (zKseq d) (redexI d) (ρ (redexI d)))
-    (seqUpdate (zKseq d) (redexJ d) (ρ (redexJ d)))
-
-@[simp] lemma fstIdx_iRcritG (d : V) (ρ : V → V) : fstIdx (iRcritG d ρ) = fstIdx d := by
-  simp [iRcritG]
-@[simp] lemma zTag_iRcritG (d : V) (ρ : V → V) : zTag (iRcritG d ρ) = 4 := by simp [iRcritG]
 
 /-- **`iRcritG` is a `ZDerivation`** (R1 done), modulo only R2 — the two genuine auxiliaries
 `d{0} = K^r (seqUpdate ds i (ρ i))` ⊢ `Θ→A(d)`, `d{1} = K^r (seqUpdate ds j (ρ j))` ⊢ `A(d),Θ→D` being
