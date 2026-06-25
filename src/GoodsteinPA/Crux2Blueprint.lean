@@ -124,19 +124,62 @@ theorem ZDerivation_red_zK_crit {s r ds : V}
     (h1 : ¬ permIdx (zK s r ds) < lh ds) :
     ZDerivation (iRcritG (zK s r ds) (fun n => zAxReduct (red (znth ds n)))) := sorry
 
-/-- **5.2.2 replace sub-residual. ⚠ FALSE as stated** (lap-90 finding): needs `tp dᵢ = isymRep` (the
-selected premise is `Rep` — a chain/Ind/atom). Only then does `red dᵢ` keep `dᵢ`'s endsequent
-(`fstIdx (red dᵢ) = fstIdx dᵢ`) and the replace `iCritAux d i (red dᵢ)` stay a valid chain. For
-`tp dᵢ = R_∀xF`/`L^k` the conclusion must reduce to `tp(dᵢ)(Π,0) ≠ Π`. Holds on the ⊥-orbit (all-`Rep`,
-Cor 2.1). Delegates (under the `Rep` restriction) to `ZDerivation_iCritAux_of_zK`. -/
+/-- **`tp` is `Rep` off the I/Ax tags.** `tp d = isymRep` whenever `zTag d ∉ {1,2,5,6}` (i.e. `d` is an
+atom/Ind/chain). -/
+theorem tp_eq_isymRep_of_zTag {d : V}
+    (h : zTag d ≠ 1 ∧ zTag d ≠ 2 ∧ zTag d ≠ 5 ∧ zTag d ≠ 6) : tp d = isymRep := by
+  unfold tp; rw [if_neg h.1, if_neg h.2.1, if_neg h.2.2.1, if_neg h.2.2.2]
+
+/-- **`red` of a `Rep` derivation preserves the endsequent and stays `Rep`.** For `tp v = isymRep`
+(i.e. `v` an atom/Ind/chain), Buchholz's `tp(v) = Rep ⟹ v[0] ⊢ end(v)`: `red v` keeps `fstIdx` and is
+again a `Rep` derivation (atom→atom, Ind→chain, chain→chain). This is the local faithfulness fact behind
+case 5.2.2 keeping the conclusion `Π`. -/
+theorem red_rep_of_tp_isymRep {v : V} (hZ : ZDerivation v) (htp : tp v = isymRep) :
+    fstIdx (red v) = fstIdx v ∧ tp (red v) = isymRep := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
+    ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · exact ⟨by rw [red_zAtom], by rw [red_zAtom, tp_zAtom]⟩
+  · exact absurd htp (by rw [tp_zIall]; exact isymR_ne_isymRep _)
+  · exact absurd htp (by rw [tp_zIneg]; exact isymR_ne_isymRep _)
+  · refine ⟨by rw [red_zInd, iRInd_zInd, fstIdx_zK, fstIdx_zInd], ?_⟩
+    rw [red_zInd, iRInd_zInd, tp_zK]
+  · refine ⟨by rw [red_zK, fstIdx_iRK, fstIdx_zK], ?_⟩
+    rw [red_zK]
+    exact tp_eq_isymRep_of_zTag (by rw [zTag_iRK]; refine ⟨?_, ?_, ?_, ?_⟩ <;> simp)
+  · exact absurd htp (by rw [tp_zAxAll]; exact isymLk_ne_isymRep _ _)
+  · exact absurd htp (by rw [tp_zAxNeg]; exact isymLk_ne_isymRep _ _)
+
+/-- From `tp v = isymRep`, the I/Ax tags are excluded. -/
+theorem zTag_not_iAx_of_tp_isymRep {v : V} (h : tp v = isymRep) :
+    zTag v ≠ 1 ∧ zTag v ≠ 2 ∧ zTag v ≠ 5 ∧ zTag v ≠ 6 := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> intro ht <;> simp only [tp, ht] at h <;> simp at h
+
+/-- **5.2.2 replace sub-residual — PROVED under the `Rep` restriction.** Given the selected premise `dᵢ`
+is `Rep` (`tp dᵢ = isymRep`, lap-90 finding: necessary, holds on the ⊥-orbit by Cor 2.1), replacing it by
+its reduct `red dᵢ` keeps the chain valid — `red dᵢ` keeps `dᵢ`'s endsequent and own-permissibility
+(`red_rep_of_tp_isymRep` ⟹ `iperm isymRep _`), so `ZDerivation_iCritAux_of` applies. The remaining open
+part (selected premise is `Rep`) is the hypothesis `htp`, discharged from the ⊥-orbit invariant in
+`ZDerivation_red_zK`. -/
 theorem ZDerivation_red_zK_replace {s r ds : V}
     (hZ : ZDerivation (zK s r ds))
     (hred : ∀ i < lh ds, ZDerivation (red (znth ds i)))
     (h1 : permIdx (zK s r ds) < lh ds)
     (h2 : permIdx (znth ds (permIdx (zK s r ds)))
-        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+        < lh (zKseq (znth ds (permIdx (zK s r ds)))))
+    (htp : tp (znth ds (permIdx (zK s r ds))) = isymRep) :
     ZDerivation (iCritAux (zK s r ds) (permIdx (zK s r ds))
-      (red (znth ds (permIdx (zK s r ds))))) := sorry
+      (red (znth ds (permIdx (zK s r ds))))) := by
+  set i := permIdx (zK s r ds) with hi_def
+  obtain ⟨_, hmem⟩ := zDerivation_zK_inv hZ
+  have hZdi : ZDerivation (znth ds i) := hmem i h1
+  have hZv : ZDerivation (red (znth ds i)) := hred i h1
+  obtain ⟨hfst, htpr⟩ := red_rep_of_tp_isymRep hZdi htp
+  obtain ⟨hne1, hne2, hne5, hne6⟩ := zTag_not_iAx_of_tp_isymRep htpr
+  exact ZDerivation_iCritAux_of h1 hZ hZv hfst
+    (by rw [htpr]; exact iperm_isymRep _)
+    (fun h => absurd h hne1) (fun h => absurd h hne2)
+    (fun h => absurd h hne5) (fun h => absurd h hne6)
 
 /-- **5.2.1 splice sub-residual. ⚠ FALSE as stated** (lap-90 finding): needs `tp dᵢ = isymRep` AND `dᵢ`
 critical (so `red dᵢ = iRcritG dᵢ …` genuinely has the two reduct-halves `znth (zKseq (red dᵢ)) {0,1}`).
@@ -170,7 +213,12 @@ theorem ZDerivation_red_zK {s r ds : V}
         < lh (zKseq (znth ds (permIdx (zK s r ds))))
     · -- 5.2.2 replace
       rw [red_zK_rep h1 h2]
-      exact ZDerivation_red_zK_replace hZ hred h1 h2
+      refine ZDerivation_red_zK_replace hZ hred h1 h2 ?_
+      -- OPEN (lap-90 narrowed gap): the selected minimal-permissible premise is `Rep`
+      -- (`tp dᵢ = isymRep`). TRUE on the ⊥-orbit (Π = ∅→⊥ ⟹ no axiom/I-rule is permissible,
+      -- Cor 2.1); NOT true for general chains, so it needs the ⊥-orbit invariant threaded
+      -- through the induction (the route-A re-architecture). See PENDING_WORK lap-90.
+      sorry
     · -- 5.2.1 splice
       rw [red_zK_splice h1 h2]
       exact ZDerivation_red_zK_splice hZ hred h1 h2
