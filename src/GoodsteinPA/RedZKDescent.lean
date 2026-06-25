@@ -259,11 +259,11 @@ strictly lowers `õ`, judge §8.3 LH3/N2), the whole `K^r` ordinal strictly desc
 summand (`iotil_zK_lt_replace`, the F1 strict `#`-mono), `idg` doesn't rise (`idg_zK_le_replace`), then
 `iord_descent_le` combines through the tower. Stated against the explicit reduct equation `hred` so a
 single lemma covers both replace dispatches. -/
-lemma iord_descent_red_zK_replace_eq {s s' r ds i : V}
+lemma iRedDescent_red_zK_replace_eq {s s' r ds i : V}
     (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
     (hred : red (zK s r ds) = zK s' r (seqUpdate ds i (red (znth ds i))))
     (hIH : iRedDescent (red (znth ds i)) (znth ds i)) :
-    icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 := by
+    iRedDescent (red (zK s r ds)) (zK s r ds) := by
   have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
     rcases lt_or_ge n (lh ds) with hn | hn
     · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
@@ -282,10 +282,19 @@ lemma iord_descent_red_zK_replace_eq {s s' r ds i : V}
   have hlt : icmp (iotil (znth (seqUpdate ds i (red (znth ds i))) i)) (iotil (znth ds i)) = 0 := by
     rw [znth_seqUpdate_self hi]; exact hIH.otil_lt
   rw [hred]
-  refine iord_descent_of_iRedDescent ⟨?_, ?_, ?_⟩ (isNF_iotil_zK hds (fun n hn => hNF n))
-  · exact idg_zK_le_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hle
-  · exact iotil_zK_lt_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hi hlt heq hNF hNF'
-  · exact isNF_iotil_zK (seqUpdate_seq ds i _) (fun n _ => hNF' n)
+  exact ⟨idg_zK_le_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hle,
+    iotil_zK_lt_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hi hlt heq hNF hNF',
+    isNF_iotil_zK (seqUpdate_seq ds i _) (fun n _ => hNF' n)⟩
+
+/-- **`iord`-descent corollary of the REPLACE bundle** (the form the current `iord_descent_red`
+non-recursive dispatch consumes). -/
+lemma iord_descent_red_zK_replace_eq {s s' r ds i : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hred : red (zK s r ds) = zK s' r (seqUpdate ds i (red (znth ds i))))
+    (hIH : iRedDescent (red (znth ds i)) (znth ds i)) :
+    icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 :=
+  iord_descent_of_iRedDescent (iRedDescent_red_zK_replace_eq hds hmem hi hred hIH)
+    (isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation _ (hmem n hn)))
 
 /-- **The non-critical SPLICE-branch K-case descent (Buchholz Def-3.2 case 5.2.1), conditional on the two
 spliced halves descending below the selected premise.** When the selected premise `dᵢ = znth ds i`
