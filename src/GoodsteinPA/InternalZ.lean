@@ -4830,6 +4830,34 @@ lemma redexAux_found (ds N : V) (h : ∃ c < N, isRedexPair ds c) :
       exact absurd hc (redexAux_eq_self_of_no_redex ds N h' c hcN)
   exact ⟨hlt, redexAux_isRedexPair_of_lt ds N hlt⟩
 
+/-- **First-hit is MINIMAL** — the search returns the least redex code in range: any redex `c < N`
+bounds the result from above. (First-hit scans `0,1,2,…` and stops at the first redex, so it is `≤`
+every redex below the sentinel.) The rank-side companion of `redexAux_found`. -/
+lemma redexAux_min (ds : V) : ∀ N, ∀ c < N, isRedexPair ds c → redexAux ds N ≤ c := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · simp only [isRedexPair]; definability
+  case zero => intro c hc; exact absurd hc (by simp)
+  case succ n ih =>
+    intro c hc hcrx
+    rw [redexAux_succ]
+    by_cases h1 : redexAux ds n < n
+    · rw [if_pos h1]
+      rcases lt_or_eq_of_le (lt_succ_iff_le.mp hc) with hcn | hcn
+      · exact ih c hcn hcrx
+      · rw [hcn]; exact le_of_lt h1
+    · have hn : redexAux ds n = n := le_antisymm (redexAux_le ds n) (not_lt.mp h1)
+      rw [if_neg h1]
+      by_cases h2 : isRedexPair ds n
+      · rw [if_pos h2]
+        rcases lt_or_eq_of_le (lt_succ_iff_le.mp hc) with hcn | hcn
+        · exact absurd hcrx (redexAux_eq_self_of_no_redex ds n hn c hcn)
+        · rw [hcn]
+      · rw [if_neg h2]
+        rcases lt_or_eq_of_le (lt_succ_iff_le.mp hc) with hcn | hcn
+        · exact absurd hcrx (redexAux_eq_self_of_no_redex ds n hn c hcn)
+        · rw [hcn] at hcrx; exact absurd hcrx h2
+
 /-- **The redex code of a chain** = least valid redex pair `⟪i,j⟫` over `ds = zKseq d`, bounded by
 `⟪lh ds, lh ds⟫`. Buchholz Def 3.2 case 5.1's "least such pair (i,j)", now a definable function. -/
 noncomputable def redexCode (d : V) : V :=
@@ -7741,6 +7769,67 @@ lemma redexI_redexJ_lt_of_zKValid {s r ds : V}
   have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
   simp only [zKseq_zK] at hrc
   exact ⟨lt_trans hrc.1 hrc.2.1, hrc.2.1⟩
+
+/-- **T3.4(a) chain-rank invariant — the `redexCode` redex's R-principal has rank `≤ r`.** For a valid
+critical `K`-chain `zK s r ds`, `irk (chainAsucc ds (redexI)) ≤ r`. This is the rank input the
+cut-formula strip needs (`irk_cutFormula_lt` ⟹ `rk(A(d)) < r`), closing the splice/critical degree drop.
+
+**The key step is index-bounding `redexI < j₀`** (the chain exit index, whose rank clause `∀ i < j₀,
+irk (chainAsucc ds i) ≤ r` is the only one in `isChainInf`). It does NOT need `j₀ = lh ds − 1`: the
+`redexCode` redex is the **least** redex code (`redexAux_min`), and the inference pair `⟪i0,j1⟫` (Lemma
+3.1, `i0 < j1 ≤ j₀`) is a redex, so `⟪redexI, redexJ⟫ = redexCode ≤ ⟪i0, j1⟫`. By the contrapositive of
+`pair_lt_pair` (the pairing is jointly strictly monotone), `redexI ≤ i0 ∨ redexJ ≤ j1` — and EITHER
+disjunct forces `redexI < j₀` (`redexI ≤ i0 < j1 ≤ j₀`, or `redexI < redexJ ≤ j1 ≤ j₀`). So the
+un-threaded tail `(j₀, lh ds)` can never hold the minimal redex. -/
+lemma irk_chainAsucc_redexI_le {s r ds : V} (hvalid : zKValid s r ds) :
+    irk (chainAsucc ds (redexI (zK s r ds))) ≤ r := by
+  obtain ⟨hci, hperm0, hnperm0, hf1, hf2, hf5, hf6, _hsucc, _hssf, _hsaf⟩ := hvalid
+  obtain ⟨j0, hj0, hAj0, hchain, hrank⟩ := hci
+  have hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ False :=
+    fun i hi A h => Or.inl (tp_isymR_pos h (hf1 i (lt_of_le_of_lt hi hj0))
+      (hf2 i (lt_of_le_of_lt hi hj0)))
+  have hwfL : ∀ i ≤ j0, ∀ k A, tp (znth ds i) = isymLk k A → 0 < irk A ∨ (A = (^⊥ : V)) :=
+    fun i hi k A h => Or.inl (tp_isymLk_pos h (hf5 i (lt_of_le_of_lt hi hj0))
+      (hf6 i (lt_of_le_of_lt hi hj0)))
+  have hperm : ∀ i ≤ j0, iperm (tp (znth ds i)) (fstIdx (znth ds i)) :=
+    fun i hi => hperm0 i (lt_of_le_of_lt hi hj0)
+  have hnperm : ∀ i ≤ j0, ¬ iperm (tp (znth ds i)) s :=
+    fun i hi => hnperm0 i (lt_of_le_of_lt hi hj0)
+  obtain ⟨i0, j1, k0, hij, hjle, hRi, hLj, hrkpos, hrkr⟩ :=
+    inference_critical_pair_of_chain (Tr := fun _ => False) (Fa := fun A => A = (^⊥ : V))
+      hj0 hAj0 hchain hrank hwfR hwfL hperm hnperm (fun _ h => h.1)
+      (fun A h => by rw [h]; exact irk_falsum) rfl
+  have hjlt : j1 < lh ds := lt_of_le_of_lt hjle hj0
+  have hilt : i0 < lh ds := lt_trans hij hjlt
+  have hredex : isRedexPair ds (⟪i0, j1⟫ : V) := by
+    simp only [isRedexPair, pi₁_pair, pi₂_pair]
+    refine ⟨hij, hjlt, ?_, ?_, ?_⟩
+    · rw [hRi]; simp [isymR]
+    · rw [hLj]; simp [isymLk]
+    · rw [hRi, hLj]; simp [isymR, isymLk]
+  have hex : ∃ c < (⟪lh (zKseq (zK s r ds)), lh (zKseq (zK s r ds))⟫ : V),
+      isRedexPair (zKseq (zK s r ds)) c := by
+    simp only [zKseq_zK]; exact ⟨⟪i0, j1⟫, pair_lt_pair hilt hjlt, hredex⟩
+  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
+  simp only [zKseq_zK] at hrc
+  -- redexCode is the LEAST redex, so `⟪redexI, redexJ⟫ = redexCode ≤ ⟪i0, j1⟫`.
+  have hcode_le : redexCode (zK s r ds) ≤ (⟪i0, j1⟫ : V) := by
+    have hm := redexAux_min ds ⟪lh ds, lh ds⟫ ⟪i0, j1⟫ (pair_lt_pair hilt hjlt) hredex
+    simpa [redexCode, zKseq_zK] using hm
+  have hpair_eq : (⟪redexI (zK s r ds), redexJ (zK s r ds)⟫ : V) = redexCode (zK s r ds) :=
+    pair_unpair (redexCode (zK s r ds))
+  have hpair_le : (⟪redexI (zK s r ds), redexJ (zK s r ds)⟫ : V) ≤ ⟪i0, j1⟫ := by
+    rw [hpair_eq]; exact hcode_le
+  -- Contrapositive of joint monotonicity: `redexI ≤ i0 ∨ redexJ ≤ j1`.
+  have hle_disj : redexI (zK s r ds) ≤ i0 ∨ redexJ (zK s r ds) ≤ j1 := by
+    by_contra h; push_neg at h
+    exact absurd (lt_of_lt_of_le (pair_lt_pair h.1 h.2) hpair_le) (_root_.lt_irrefl _)
+  -- Either disjunct forces `redexI < j₀`; the rank clause then applies.
+  have hI_lt_j0 : redexI (zK s r ds) < j0 := by
+    rcases hle_disj with hle | hle
+    · exact lt_of_le_of_lt hle (lt_of_lt_of_le hij hjle)
+    · exact lt_of_lt_of_le (lt_of_lt_of_le hrc.1 hle) hjle
+  exact hrank _ hI_lt_j0
 
 /-- **Criticality from the `permIdx` sentinel**: `¬ permIdx (zK s r ds) < lh ds` (the `iRK` critical
 branch) ⟹ `zKCritical s ds` (no premise is permissible). The `permIdx = lh ds` sentinel means the

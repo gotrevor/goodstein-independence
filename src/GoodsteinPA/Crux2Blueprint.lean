@@ -529,27 +529,6 @@ theorem iord_descent_red_zInd (d : V) (hd : ZDerivation d) (htag : zTag d = 3) :
   · simp at htag
   · simp at htag
 
-/-- **[OPEN — the chain rank invariant, T3.4(a) input]** For a valid critical `K`-chain `zK s r ds`,
-the `redexCode` redex's R-principal `A_i = chainAsucc ds (redexI)` has rank `≤ r`.
-
-This is the lone residual of the splice `hr'` degree-drop after lap-112's cut-formula strip wired in:
-`irk_cutFormula_lt` gives `rk(A(d)) < rk(A_i) ≤ r` and all the surrounding `idg`/`iseqMaxIdg` arithmetic
-is now PROVEN (`iCrit_halves_descend` 7th conjunct + `iord_descent_red`'s splice branch); the only
-missing fact is this `rk(A_i) ≤ r`.
-
-**Why it is not yet free.** `zKValid`'s chain-rank clause (`isChainInf`) only bounds
-`∀ i < j₀, irk (chainAsucc ds i) ≤ r` for the chain's distinguished exit index `j₀`. To apply it to the
-`redexCode` redex `(redexI, redexJ)` we need `redexI < j₀`. That holds once `redexJ ≤ j₀` (then
-`redexI < redexJ ≤ j₀`), which is true when `j₀ = lh ds - 1` (every premise is threaded) — exactly how
-genuine reducts are built (`isChainInf_of_last`). But `isChainInf` only promises `∃ j₀ < lh ds`, so the
-redex could in principle sit in the un-threaded tail `(j₀, lh ds)` with unbounded cut rank. The faithful
-fix (next lap) is to strengthen the chain-validity invariant so the exit index is the last premise
-(`j₀ = lh ds - 1`), making the rank clause cover every cut; that ripples through `isChainInf`'s
-definability + every reduct's chain-validity proof, so it is its own focused campaign. -/
-lemma irk_chainAsucc_redexI_le {s r ds : V} (hvalid : zKValid s r ds) :
-    irk (chainAsucc ds (redexI (zK s r ds))) ≤ r := by
-  sorry
-
 /-- **M1b (descent re-point, one step).** The banked ordinal descent, restated over `red`. A `∅→⊥`
 derivation has top tag `3` (Ind) or `4` (K/cut) (`zTag_Ind_or_K_of_ZDerivesEmpty`).
 
