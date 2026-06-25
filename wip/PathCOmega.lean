@@ -1206,6 +1206,37 @@ theorem sord_redAllExS_lt {s d0 a Cnew dR αAll αEx : V}
   rw [redAllExS, sord_zCutOmega]
   exact inc_imax_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
 
+/-- **The principal ∀/∃-cut `red`-step, END TO END (axiom-clean).** A `ZcOK` principal cut whose stored
+ordinal is the canonical `max(αAll, αEx) + 1` (the `zcOK_cutS` shape) and whose ω-∀/∃ premises have engine
+`ZDerivation` selected sub-derivations reduces to `redAllExS`, which is BOTH `ZcOK` (hinv) AND has strictly
+smaller `sord` than the parent (hdrop) — the two invariants `red_iterate_descends` consumes, for the
+principal ∀/∃ case, with NO assumed ordinal-control bounds: the premise-level descents are READ from the
+parent's own ω-∀/∃ operator-control (`zcOK_omegaAll_inv`/`zcOK_ex_inv`). This is the principal orbit step
+fully assembled in-kernel; the only remaining endgame work is re-principalizing the reduct's premises (the
+commuting inversion) so the NEXT step fires, and the total `red` dispatch. -/
+theorem redAllExS_orbit_step {s s' d0 a αAll sE αEx CE tE dE C : V}
+    (h : ZcOK (zCutOmega s (inc (imax αAll αEx)) (zAllOmega s' d0 a αAll)
+      (zExOmega sE αEx CE tE dE) C))
+    (htE : IsSemiterm ℒₒᵣ 0 tE)
+    (hLZ : ZDerivation (zsubst d0 a tE)) (hRZ : ZDerivation dE)
+    (hAnf : isNF αAll) (hEnf : isNF αEx) :
+    ZcOK (redAllExS s d0 a C (zExOmega sE αEx CE tE dE)) ∧
+      icmp (sord (redAllExS s d0 a C (zExOmega sE αEx CE tE dE)))
+        (sord (zCutOmega s (inc (imax αAll αEx)) (zAllOmega s' d0 a αAll)
+          (zExOmega sE αEx CE tE dE) C)) = 0 := by
+  obtain ⟨hAll, hEx, _, _⟩ := zcOK_cut_inv h
+  obtain ⟨_, hAlldesc⟩ := zcOK_omegaAll_inv hAll
+  obtain ⟨_, hExdesc⟩ := zcOK_ex_inv hEx
+  refine ⟨zcOK_redAllExS_leaf h htE hLZ hRZ, ?_⟩
+  rw [sord_zCutOmega]
+  have hLlt : icmp (sord (zsubst d0 a (zExTerm (zExOmega sE αEx CE tE dE)))) αAll = 0 := by
+    rw [zExTerm_zExOmega, sord_eq_iord_of_ZDerivation hLZ]; exact hAlldesc tE htE
+  have hRlt : icmp (sord (zExPrem (zExOmega sE αEx CE tE dE))) αEx = 0 := by
+    rw [zExPrem_zExOmega]; exact hExdesc
+  exact sord_redAllExS_lt hLlt hRlt
+    (by rw [zExTerm_zExOmega]; exact isNF_sord_of_ZDerivation hLZ)
+    (by rw [zExPrem_zExOmega]; exact isNF_sord_of_ZDerivation hRZ) hAnf hEnf
+
 /-! ### Brick 5g (lap 105) — `max+1` for the induction node too (the complete resolution is uniform)
 
 The induction-node analogue of brick 5e: `redIndExS` stores `max(o(unfolding), o(∃-prem)) + 1`. Same
