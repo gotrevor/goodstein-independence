@@ -4187,6 +4187,172 @@ lemma iord_descent_iSpliceEnd {s s' r ds j a b : V} (hds : Seq ds) (hj : j < lh 
   iord_descent_le hnf (idg_iSpliceEnd_le hds hj hag hbg)
     (iotil_iSpliceEnd_lt hds hj ha hb hNF hNFa hNFb)
 
+/-! ### LH5 — descent on the GENUINE ordered-insert object `seqInsert ds j a b` (case 5.2.1)
+
+The `iord_descent_iSpliceEnd` above is on the order-independent end-append model
+`seqCons (seqUpdate ds j a) b`; `isChainInf` validity needs the genuine in-place object
+`seqInsert ds j a b` (lap-87 finding). These lemmas re-derive the ordinal descent directly on
+`seqInsert`, bypassing the end-append model entirely (so no permutation/`inadd_assoc` plumbing is
+needed). The `õ`-side is the rotation kernel `icmp_iseqNaddIdg_seqInsert`: the spliced `#`-fold differs
+from `ds`'s only at the distinguished block (entry `dⱼ` replaced by the two halves `a`,`b`), and the
+common suffix folds on top by `inadd_right_mono`, so the comparison reduces to the F2 fact
+`ω^{õa} # ω^{õb} ≼ ω^{õ dⱼ}` (`icmp_omega_pow_nadd_lt`) — exactly as in `iseqNaddIdgAux_splice_lt`, but
+with `b` fixed in place at index `j+1` and the tail riding ON TOP of it. -/
+
+/-- Generic upper bound on the `idg`-fold: if every folded entry's `idg` is `≤ B`, the fold is `≤ B`. -/
+lemma iseqMaxIdgAux_le_of_all {cs B : V} :
+    ∀ J, (∀ n < J, idg (znth cs n) ≤ B) → iseqMaxIdgAux cs J ≤ B := by
+  intro J
+  induction J using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro _; rw [iseqMaxIdgAux_zero]; simp
+  case succ J ih =>
+    intro h
+    rw [iseqMaxIdgAux_succ]
+    exact max_le (ih (fun n hn => h n (lt_trans hn (by simp)))) (h J (by simp))
+
+/-- **The rotation kernel** — `#`-fold of the genuine in-place splice `seqInsert ds j a b` compares
+`= 0` (i.e. `≼`) to `#`-fold of `ds`. Proved by a `J`-shifted induction: the prefix `<j` and the
+distinguished block (`a`,`b` in place of `dⱼ`) give the base case (F2), and each further suffix entry
+`ds[J]` folds identically on both sides (`inadd_right_mono`). The `isNF` of the SI partial fold is
+carried through the induction so no per-entry NF case-bashing is needed. -/
+lemma icmp_iseqNaddIdg_seqInsert {ds j a b : V} (hj : j < lh ds)
+    (ha : icmp (iotil a) (iotil (znth ds j)) = 0) (hb : icmp (iotil b) (iotil (znth ds j)) = 0)
+    (hNF : ∀ n, isNF (iotil (znth ds n))) (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
+    icmp (iseqNaddIdg (seqInsert ds j a b)) (iseqNaddIdg ds) = 0 := by
+  set SI := seqInsert ds j a b with hSI
+  have hpre : iseqNaddIdgAux SI j = iseqNaddIdgAux ds j :=
+    iseqNaddIdgAux_congr_iotil j (fun i hi => by
+      rw [hSI, znth_seqInsert_pre hi (lt_trans hi hj)])
+  have hωa : isNF (ocOadd (iotil a) 1 0) := isNF_omega_pow hNFa
+  have hωb : isNF (ocOadd (iotil b) 1 0) := isNF_omega_pow hNFb
+  have hQ : isNF (iseqNaddIdgAux ds j) := isNF_iseqNaddIdgAux' hNF j
+  -- D(J): the SI fold (length J+1) compares `≼` to ds fold (length J), for j < J ≤ lh ds.
+  have key : ∀ J, j < J → J ≤ lh ds →
+      isNF (iseqNaddIdgAux SI (J + 1)) ∧
+      icmp (iseqNaddIdgAux SI (J + 1)) (iseqNaddIdgAux ds J) = 0 := by
+    intro J
+    induction J using ISigma1.sigma1_succ_induction
+    · definability
+    case zero => intro h; exact absurd h (by simp)
+    case succ J ih =>
+      intro h1 h2
+      rcases (le_iff_lt_succ.mpr h1).lt_or_eq with hlt | heq
+      · -- j < J: inductive step, fold the common suffix entry ds[J] on both sides
+        have hJlt : J < lh ds := lt_of_lt_of_le (lt_add_one J) h2
+        have hJle : J ≤ lh ds := le_of_lt hJlt
+        obtain ⟨hNFih, hih⟩ := ih hlt hJle
+        have hentry : znth SI (J + 1) = znth ds J := by
+          rw [hSI, znth_seqInsert_suf hlt hJlt]
+        rw [show iseqNaddIdgAux SI (J + 1 + 1)
+              = inadd (iseqNaddIdgAux SI (J + 1)) (ocOadd (iotil (znth ds J)) 1 0) from by
+            rw [iseqNaddIdgAux_succ, hentry],
+          iseqNaddIdgAux_succ ds J]
+        refine ⟨isNF_inadd (isNF_omega_pow (hNF J)) _ hNFih, ?_⟩
+        exact inadd_right_mono hNFih (isNF_iseqNaddIdgAux' hNF J) hih
+          _ (isNF_omega_pow (hNF J))
+      · -- J = j: base case. SI(j+2) = inadd (inadd Q ω^õa) ω^õb ; ds(j+1) = inadd Q ω^õ dⱼ
+        subst heq
+        have hSIj : iseqNaddIdgAux SI j = iseqNaddIdgAux ds j := hpre
+        have eSIj1 : iseqNaddIdgAux SI (j + 1)
+            = inadd (iseqNaddIdgAux ds j) (ocOadd (iotil a) 1 0) := by
+          rw [iseqNaddIdgAux_succ, hSIj, hSI, znth_seqInsert_at hj]
+        have eSIj2 : iseqNaddIdgAux SI (j + 1 + 1)
+            = inadd (inadd (iseqNaddIdgAux ds j) (ocOadd (iotil a) 1 0)) (ocOadd (iotil b) 1 0) := by
+          rw [iseqNaddIdgAux_succ, eSIj1, hSI, znth_seqInsert_at1 hj]
+        have eds : iseqNaddIdgAux ds (j + 1)
+            = inadd (iseqNaddIdgAux ds j) (ocOadd (iotil (znth ds j)) 1 0) := by
+          rw [iseqNaddIdgAux_succ]
+        have ereassoc :
+            inadd (inadd (iseqNaddIdgAux ds j) (ocOadd (iotil a) 1 0)) (ocOadd (iotil b) 1 0)
+              = inadd (iseqNaddIdgAux ds j)
+                  (inadd (ocOadd (iotil a) 1 0) (ocOadd (iotil b) 1 0)) := by
+          rw [inadd_comm (ocOadd (iotil b) 1 0) hωb _ (isNF_inadd hωa _ hQ),
+            inadd_pow_front hQ hNFb hNFa,
+            inadd_comm (ocOadd (iotil b) 1 0) hωb (ocOadd (iotil a) 1 0) hωa]
+        refine ⟨?_, ?_⟩
+        · rw [eSIj2]
+          exact isNF_inadd hωb _ (isNF_inadd hωa _ hQ)
+        · rw [eSIj2, eds, ereassoc]
+          exact inadd_left_mono (isNF_inadd hωb _ hωa) (isNF_omega_pow (hNF j))
+            (icmp_omega_pow_nadd_lt ha hb) _ hQ
+  -- instantiate at the top: J = lh ds
+  have hlhSI : lh SI = lh ds + 1 := by rw [hSI]; exact seqInsert_lh ds j a b
+  have hfin := (key (lh ds) hj le_rfl).2
+  show icmp (iseqNaddIdg SI) (iseqNaddIdg ds) = 0
+  unfold iseqNaddIdg
+  rw [hlhSI]
+  exact hfin
+
+/-- **The `idg`-side bound** — the `idg`-fold of `seqInsert ds j a b` does not exceed that of `ds`,
+provided the two halves `a`,`b` have `idg ≤ idg dⱼ`. Same `J`-shifted induction as the rotation kernel,
+on the (commutative-idempotent) `max`-fold. -/
+lemma iseqMaxIdg_seqInsert_le {ds j a b : V} (hj : j < lh ds)
+    (hag : idg a ≤ idg (znth ds j)) (hbg : idg b ≤ idg (znth ds j)) :
+    iseqMaxIdg (seqInsert ds j a b) ≤ iseqMaxIdg ds := by
+  set SI := seqInsert ds j a b with hSI
+  have hpre : iseqMaxIdgAux SI j = iseqMaxIdgAux ds j :=
+    iseqMaxIdgAux_congr j (fun i hi => by rw [hSI, znth_seqInsert_pre hi (lt_trans hi hj)])
+  have key : ∀ J, j < J → J ≤ lh ds →
+      iseqMaxIdgAux SI (J + 1) ≤ iseqMaxIdgAux ds J := by
+    intro J
+    induction J using ISigma1.sigma1_succ_induction
+    · definability
+    case zero => intro h; exact absurd h (by simp)
+    case succ J ih =>
+      intro h1 h2
+      rcases (le_iff_lt_succ.mpr h1).lt_or_eq with hlt | heq
+      · have hJlt : J < lh ds := lt_of_lt_of_le (lt_add_one J) h2
+        have hentry : znth SI (J + 1) = znth ds J := by rw [hSI, znth_seqInsert_suf hlt hJlt]
+        rw [show iseqMaxIdgAux SI (J + 1 + 1) = max (iseqMaxIdgAux SI (J + 1)) (idg (znth ds J)) from by
+            rw [iseqMaxIdgAux_succ, hentry],
+          iseqMaxIdgAux_succ ds J]
+        exact max_le_max (ih hlt (le_of_lt hJlt)) (le_refl _)
+      · subst heq
+        have e1 : iseqMaxIdgAux SI (j + 1) = max (iseqMaxIdgAux ds j) (idg a) := by
+          rw [iseqMaxIdgAux_succ, hpre, hSI, znth_seqInsert_at hj]
+        have e2 : iseqMaxIdgAux SI (j + 1 + 1)
+            = max (max (iseqMaxIdgAux ds j) (idg a)) (idg b) := by
+          rw [iseqMaxIdgAux_succ, e1, hSI, znth_seqInsert_at1 hj]
+        rw [e2, iseqMaxIdgAux_succ]
+        exact max_le (max_le (le_max_left _ _) (le_trans hag (le_max_right _ _)))
+          (le_trans hbg (le_max_right _ _))
+  have hlhSI : lh SI = lh ds + 1 := by rw [hSI]; exact seqInsert_lh ds j a b
+  show iseqMaxIdg SI ≤ iseqMaxIdg ds
+  unfold iseqMaxIdg
+  rw [hlhSI]
+  exact key (lh ds) hj le_rfl
+
+/-- **LH5 `idg`-side at the `K^r` level on the genuine insert object** — `dg(seqInsert) ≤ dg(K^r ds)`
+(same chain rank `r`). -/
+lemma idg_seqInsert_le {s s' r ds j a b : V} (hds : Seq ds) (hj : j < lh ds)
+    (hag : idg a ≤ idg (znth ds j)) (hbg : idg b ≤ idg (znth ds j)) :
+    idg (zK s' r (seqInsert ds j a b)) ≤ idg (zK s r ds) := by
+  rw [idg_zK s' r _ (seqInsert_seq ds j a b), idg_zK s r ds hds]
+  exact max_le_max (le_refl r) (tsub_le_tsub_right (iseqMaxIdg_seqInsert_le hj hag hbg) 1)
+
+/-- **LH5 `õ`-side at the `K^r` level on the genuine insert object** — `õ(seqInsert) ≼ õ(K^r ds)`. -/
+lemma iotil_seqInsert_lt {s s' r r' ds j a b : V} (hds : Seq ds) (hj : j < lh ds)
+    (ha : icmp (iotil a) (iotil (znth ds j)) = 0) (hb : icmp (iotil b) (iotil (znth ds j)) = 0)
+    (hNF : ∀ n, isNF (iotil (znth ds n))) (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
+    icmp (iotil (zK s' r' (seqInsert ds j a b))) (iotil (zK s r ds)) = 0 := by
+  rw [iotil_zK s' r' _ (seqInsert_seq ds j a b), iotil_zK s r ds hds]
+  exact icmp_iseqNaddIdg_seqInsert hj ha hb hNF hNFa hNFb
+
+/-- **LH5 — the splice descent on the GENUINE ordered-insert object** (Buchholz §3.2 case 5.2.1).
+`õ` does not rise (`iotil_seqInsert_lt`) and `idg` does not rise (`idg_seqInsert_le`), so
+`iord_descent_le` gives `o(seqInsert) ≼ o(K^r ds)`. This is the descent on the object the `isChainInf`
+validity (`zKValidF_seqInsert`) actually lives on — replacing the end-append model
+`iord_descent_iSpliceEnd` for the genuine reduct. -/
+lemma iord_descent_seqInsert {s s' r ds j a b : V} (hds : Seq ds) (hj : j < lh ds)
+    (hnf : isNF (iotil (zK s r ds)))
+    (ha : icmp (iotil a) (iotil (znth ds j)) = 0) (hb : icmp (iotil b) (iotil (znth ds j)) = 0)
+    (hag : idg a ≤ idg (znth ds j)) (hbg : idg b ≤ idg (znth ds j))
+    (hNF : ∀ n, isNF (iotil (znth ds n))) (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
+    icmp (iord (zK s' r (seqInsert ds j a b))) (iord (zK s r ds)) = 0 :=
+  iord_descent_le hnf (idg_seqInsert_le hds hj hag hbg)
+    (iotil_seqInsert_lt hds hj ha hb hNF hNFa hNFb)
+
 /-- The full critical reduct `d[0] = K^{r-1}_Π d{0} d{1}` (Buchholz §3.2 case 5.1), as a genuine code:
 auxiliaries `d{0}=K^r(i/v)`, `d{1}=K^r(j/w)` (`iCritAux`), assembled into a rank-`(r-1)` chain over the
 two-element `iCritReductSeq`. -/
