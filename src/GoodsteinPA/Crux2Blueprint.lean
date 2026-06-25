@@ -67,11 +67,12 @@ disjuncts split as:
 This splits the single fat `redSound` `sorry` into exactly the two deep Buchholz-3.4 validity facts. -/
 
 /-- **Residual (Ind case of Buchholz Thm 3.4).** The Ind-reduct chain `zK s (irk p) (iIndReductSeq d₀ d₁ 1)`
-of a valid `Ind` inference is itself a valid `K`-chain. The chain's `Seq` structure and per-premise
-derivability are free (`znth_iIndReductSeq_ZDerivation`); this is the validity-threading obligation. -/
-theorem zKValid_iIndReduct_of_zInd {s at' p d0 d1 : V}
+of a valid `Ind` inference is FAITHFULLY valid (`zKValidF`, no criticality). The chain's `Seq` structure
+and per-premise derivability are free (`znth_iIndReductSeq_ZDerivation`); this is the validity-threading
+obligation. (Stated at `zKValidF` not `zKValid`: the reduct chain need not be critical.) -/
+theorem zKValidF_iIndReduct_of_zInd {s at' p d0 d1 : V}
     (hZ : ZDerivation (zInd s at' p d0 d1)) :
-    zKValid s (irk p) (iIndReductSeq d0 d1 1) := sorry
+    zKValidF s (irk p) (iIndReductSeq d0 d1 1) := sorry
 
 /-- **Residual (K case of Buchholz Thm 3.4 — the cut-elimination core).** The genuine reduct `red` of a
 valid chain `zK s r ds` is again a `ZDerivation`, given that the reduct of every premise is. The
@@ -107,7 +108,7 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZDerivation (red d) := by
       exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
         ⟨s, irk p, iIndReductSeq d0 d1 1, rfl, iIndReductSeq_seq d0 d1 1,
           fun i hi => znth_iIndReductSeq_ZDerivation (hC d0 hd0).1 (hC d1 hd1).1 i hi,
-          zKValidF_of_zKValid (zKValid_iIndReduct_of_zInd hZ)⟩))))
+          zKValidF_iIndReduct_of_zInd hZ⟩))))
     · -- zK: the dispatch; residual supplies validity-preservation
       exact ZDerivation_red_zK
         (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
