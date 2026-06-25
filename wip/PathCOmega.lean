@@ -1439,6 +1439,32 @@ theorem zIall_realizes_ZcDer {s a p d0 : V}
   exact ZcDer.omegaAll (zDerivation_zIall_inv hZ).2.1
     (fun t ht => .leaf (hprem t ht)) hpremC hdesc
 
+/-- **The principal ∀/∃-cut orbit step, on the CONCLUSION-TRACKING layer `ZcDer`.** The lap-105
+`redAllExS_orbit_step` lifted from `ZcOK` to `ZcDer`: a `ZcDer` principal cut (left = ω-∀-node, right =
+∃-node, canonical `max+1` stored ordinal) with engine-`ZDerivation` selected premises reduces to
+`redAllExS`, which is BOTH `ZcDer` (the reduct is again a Path-C derivation: its premises are leaves —
+`.leaf`) AND has strictly smaller `sord` (the descent, READ from the forgetful `ZcOK` step). So the
+principal orbit step lives on the conclusion-tracking layer, the layer the commuting inversion recurses on.
+The descent reuses `redAllExS_orbit_step` via `ZcDer.toZcOK`; the reduct's `ZcDer`-hood is the `max+1`
+operator-control (`lt_imax_inc_left/right`) on leaf premises (NF automatic). -/
+theorem zcDer_redAllExS_orbit_step {s s' d0 a αAll sE αEx CE tE dE C : V}
+    (h : ZcDer (zCutOmega s (inc (imax αAll αEx)) (zAllOmega s' d0 a αAll)
+      (zExOmega sE αEx CE tE dE) C))
+    (htE : IsSemiterm ℒₒᵣ 0 tE)
+    (hLZ : ZDerivation (zsubst d0 a tE)) (hRZ : ZDerivation dE)
+    (hAnf : isNF αAll) (hEnf : isNF αEx) :
+    ZcDer (redAllExS s d0 a C (zExOmega sE αEx CE tE dE)) ∧
+      icmp (sord (redAllExS s d0 a C (zExOmega sE αEx CE tE dE)))
+        (sord (zCutOmega s (inc (imax αAll αEx)) (zAllOmega s' d0 a αAll)
+          (zExOmega sE αEx CE tE dE) C)) = 0 := by
+  obtain ⟨_, hdrop⟩ := redAllExS_orbit_step (ZcDer.toZcOK h) htE hLZ hRZ hAnf hEnf
+  refine ⟨?_, hdrop⟩
+  rw [redAllExS]
+  simp only [zExTerm_zExOmega, zExPrem_zExOmega]
+  exact ZcDer.cut (.leaf hLZ) (.leaf hRZ)
+    (lt_imax_inc_left (isNF_sord_of_ZDerivation hLZ) (isNF_sord_of_ZDerivation hRZ))
+    (lt_imax_inc_right (isNF_sord_of_ZDerivation hLZ) (isNF_sord_of_ZDerivation hRZ))
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
