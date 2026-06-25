@@ -6037,6 +6037,31 @@ instance iRK_defined : 𝚺₁-Function₂ (iRK : V → V → V) via iRKDef := .
 
 instance iRK_definable : 𝚺₁-Function₂ (iRK : V → V → V) := iRK_defined.to_definable
 
+@[simp] lemma fstIdx_iRKr (d s : V) : fstIdx (iRKr d s) = fstIdx d := by simp [iRKr, iCritAux]
+@[simp] lemma fstIdx_iRKs (d s : V) : fstIdx (iRKs d s) = fstIdx d := by simp [iRKs]
+@[simp] lemma zTag_iRKr (d s : V) : zTag (iRKr d s) = 4 := by simp [iRKr, iCritAux]
+@[simp] lemma zTag_iRKs (d s : V) : zTag (iRKs d s) = 4 := by simp [iRKs]
+
+/-- **Dispatch invariant — `iRK` keeps the conclusion sequent.** All three branches (`iRKc`/`iRKr`/`iRKs`)
+are chains `zK (fstIdx d) …`, so the dispatched reduct has the same end-sequent regardless of which case
+fires. -/
+@[simp] lemma fstIdx_iRK (d s : V) : fstIdx (iRK d s) = fstIdx d := by
+  unfold iRK
+  by_cases h1 : permIdx d < lh (zKseq d)
+  · by_cases h2 : permIdx (znth (zKseq d) (permIdx d)) < lh (zKseq (znth (zKseq d) (permIdx d)))
+    · simp [h1, h2]
+    · simp [h1, h2]
+  · simp [h1]
+
+/-- **Dispatch invariant — `iRK` is a `K`-chain (tag 4)** in every branch. -/
+@[simp] lemma zTag_iRK (d s : V) : zTag (iRK d s) = 4 := by
+  unfold iRK
+  by_cases h1 : permIdx d < lh (zKseq d)
+  · by_cases h2 : permIdx (znth (zKseq d) (permIdx d)) < lh (zKseq (znth (zKseq d) (permIdx d)))
+    · simp [h1, h2]
+    · simp [h1, h2]
+  · simp [h1]
+
 /-! ## The GENUINE reduct `red` (Buchholz §6 `red` / Def 3.2) — replaces the dead `iR2`
 
 `red` is the validity-faithful reduct: identical to `iR2` on the I-rules (tags 1,2) and the `Ind` rule
@@ -6044,14 +6069,13 @@ instance iRK_definable : 𝚺₁-Function₂ (iRK : V → V → V) := iRK_define
 endsequents `Θ→A(d)`/`A(d),Θ→D`) instead of `iR2`'s ordinal-shadow `iCritReduct`. Built by the same table
 recursion as `iR2` (`iRNextG`/`redTable`/`red`), so `red` is total + `𝚺₁`-definable. -/
 
-/-- Table step of `red`: dispatch on `zTag d`; tag-4 = the genuine critical branch `iRcritG`, with the
-per-premise reduct supplier `ρ idx = zAxReduct (znth s (znth (zKseq d) idx))` (the table lookup). -/
+/-- Table step of `red`: dispatch on `zTag d`; tag-4 = the genuine Buchholz Def-3.2 case-5 DISPATCH `iRK`
+(5.1 critical / 5.2.1 splice / 5.2.2 replace), reading per-premise reducts from the table `s`. -/
 noncomputable def iRNextG (d s : V) : V :=
   if zTag d = 1 then zIallPrem d
   else if zTag d = 2 then zInegPrem d
   else if zTag d = 3 then iRInd d
-  else if zTag d = 4 then
-    iRcritG d (fun idx => zAxReduct (znth s (znth (zKseq d) idx)))
+  else if zTag d = 4 then iRK d s
   else d
 
 noncomputable def _root_.LO.FirstOrder.Arithmetic.iRNextGDef : 𝚺₁.Semisentence 3 := .mkSigma
@@ -6059,23 +6083,12 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.iRNextGDef : 𝚺₁.Semisente
     ( (t = 1 ∧ !zIallPremDef y d)
     ∨ (t = 2 ∧ !zInegPremDef y d)
     ∨ (t = 3 ∧ !iRIndDef y d)
-    ∨ (t = 4 ∧ ∃ f, !fstIdxDef f d ∧ ∃ ds, !zKseqDef ds d ∧
-        ∃ i, !redexIDef i d ∧ ∃ j, !redexJDef j d ∧
-        ∃ C, !chainAsuccDef C ds i ∧ ∃ rk, !zKrankDef rk d ∧ ∃ rk1, !subDef rk1 rk 1 ∧
-        ∃ ai, !znthDef ai ds i ∧ ∃ vi, !znthDef vi s ai ∧ ∃ wi, !zAxReductDef wi vi ∧
-        ∃ aj, !znthDef aj ds j ∧ ∃ vj, !znthDef vj s aj ∧ ∃ wj, !zAxReductDef wj vj ∧
-        ∃ u0, !seqUpdateDef u0 ds i wi ∧ ∃ ss, !seqSetSuccDef ss f C ∧ ∃ d0, !zKGraph d0 ss rk u0 ∧
-        ∃ u1, !seqUpdateDef u1 ds j wj ∧ ∃ sa, !seqAddAntDef sa C f ∧ ∃ d1, !zKGraph d1 sa rk u1 ∧
-        ∃ seq, !iCritReductSeqDef seq d0 d1 ∧ !zKGraph y f rk1 seq)
+    ∨ (t = 4 ∧ !iRKDef y d s)
     ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = d) )”
 
-set_option maxHeartbeats 1600000 in
 instance iRNextG_defined : 𝚺₁-Function₂ (iRNextG : V → V → V) via iRNextGDef := .mk fun v ↦ by
-  simp [iRNextGDef, iRNextG, iRcritG, iCritReductG, zTag_defined.iff, zIallPrem_defined.iff,
-    zInegPrem_defined.iff, iRInd_defined.iff, fstIdx_defined.iff, zKseq_defined.iff,
-    redexI_defined.iff, redexJ_defined.iff, chainAsucc_defined.iff, zKrank_defined.iff,
-    sub_defined.iff, znth_defined.iff, zAxReduct_defined.iff, seqUpdate_defined.iff,
-    seqSetSucc_defined.iff, seqAddAnt_defined.iff, iCritReductSeq_defined.iff, zK_defined.iff]
+  simp [iRNextGDef, iRNextG, zTag_defined.iff, zIallPrem_defined.iff,
+    zInegPrem_defined.iff, iRInd_defined.iff, iRK_defined.iff]
   by_cases h1 : zTag (v 1) = 1
   · simp [h1]
   · by_cases h2 : zTag (v 1) = 2
@@ -6209,17 +6222,23 @@ lemma iRcritG_congr {d : V} {ρ ρ' : V → V} (hi : ρ (redexI d) = ρ' (redexI
 @[simp] lemma red_zAxNeg (s p : V) : red (zAxNeg s p) = zAxNeg s p := by
   rw [red_eq_iRNextG (by simp [zAxNeg]), iRNextG]; simp [zTag_zAxNeg]
 
-/-- **The K-rule (critical) recursion equation** for the GENUINE reduct (Buchholz Def 3.2 case 5.1):
-`red` of a chain is the genuine critical reduct `iRcritG` at the redex, with the two auxiliaries'
-premise-reducts supplied RECURSIVELY (`red (znth ds (redexI/redexJ ..))`, with the §5 atomic `zAxReduct`).
-The genuine recombination carries the correct reduced endsequents `Θ→A(d)`/`A(d),Θ→D` (unlike `iR2_zK`'s
-ordinal-shadow). Both premise codes `< zK s r ds`, so they sit inside the length-`(zK-1)` table. -/
+/-- **The K-rule recursion equation** for the GENUINE reduct: `red` of a chain is the tag-4 DISPATCH
+`iRK` (Buchholz Def 3.2 case 5: 5.1 critical / 5.2.1 splice / 5.2.2 replace), reading per-premise reducts
+from the table-so-far `redTable (zK s r ds - 1)`. The branch-specific recursion equations
+(`red_zK_crit` / the 5.2 forms) refine this with `znth (redTable …) (znth ds k) = red (znth ds k)`. -/
 lemma red_zK (s r ds : V) :
+    red (zK s r ds) = iRK (zK s r ds) (redTable (zK s r ds - 1)) := by
+  rw [red_eq_iRNextG (by simp [zK]), iRNextG, if_neg (by simp), if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zK s r ds)]
+
+/-- **5.1 critical recursion equation** — when the chain is critical (`permIdx (zK s r ds) = lh ds`, i.e.
+no permissible premise), `red` takes the 5.1 branch `iRKc`, which is the genuine critical reduct `iRcritG`
+with the two auxiliaries' premise-reducts supplied RECURSIVELY (`red (znth ds (redexI/redexJ ..))`). -/
+lemma red_zK_crit {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh ds) :
     red (zK s r ds) = iRcritG (zK s r ds) (fun n => zAxReduct (red (znth ds n))) := by
   have hbound : ∀ k : V, znth ds k ≤ zK s r ds - 1 := fun k =>
     le_trans (znth_le_self ds k) (le_pred_of_lt (ds_lt_zK s r ds))
-  rw [red_eq_iRNextG (by simp [zK]), iRNextG, if_neg (by simp), if_neg (by simp), if_neg (by simp),
-    if_pos (zTag_zK s r ds)]
+  rw [red_zK, iRK, zKseq_zK, if_neg hcrit, iRKc]
   refine iRcritG_congr ?_ ?_ <;>
     simp only [zKseq_zK] <;>
     rw [znth_redTable_eq_red _ _ (hbound _)]
@@ -6258,12 +6277,14 @@ lemma not_zKCritical_iRcritG (d : V) (ρ : V → V) :
     ¬ zKCritical (fstIdx (iRcritG d ρ)) (zKseq (iRcritG d ρ)) := by
   rw [iRcritG]; exact not_zKCritical_iCritReductG _ _ _ _ _ _ _
 
-/-- **`red` of a `K`-chain is itself a non-critical `K`-chain.** The critical-only reduct produces a
-chain whose `⊥`-premise is a `Rep`, so `zKCritical` fails — the iterate-descent's criticality hypothesis
-is UNSATISFIABLE after one step, forcing the Buchholz 5.2 dispatch onto the genuine `red`. -/
-lemma not_zKCritical_red_zK (s r ds : V) :
+/-- **`red` of a CRITICAL `K`-chain is itself a non-critical `K`-chain.** The 5.1 reduct produces a chain
+whose `⊥`-premise is a `Rep`, so `zKCritical` fails — the iterate-descent's criticality hypothesis is
+UNSATISFIABLE after one step (lap-86 finding). This is exactly why the genuine `red` MUST dispatch the
+Buchholz 5.2 cases (`iRK` now does) on the non-critical reducts. (Now hypothesised on the chain being
+critical — the case where `red = iRKc = iRcritG`.) -/
+lemma not_zKCritical_red_zK {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh ds) :
     ¬ zKCritical (fstIdx (red (zK s r ds))) (zKseq (red (zK s r ds))) := by
-  rw [red_zK]; exact not_zKCritical_iRcritG _ _
+  rw [red_zK_crit hcrit]; exact not_zKCritical_iRcritG _ _
 
 /-- **`red` preserves the end-sequent on the chain-reduct rules** (`Ind`, `K`): both reducts are chains
 `zK (fstIdx d) …` (`iRInd`/`iRcritG` carry the conclusion sequent verbatim), so `fstIdx (red d) = fstIdx d`.
