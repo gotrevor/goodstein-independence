@@ -61,6 +61,26 @@ Rep-reduction ∧ the threading (from `isChainInf` + `permIdx ≤ j₀`). The he
 selection bound (ii) are the genuine cut-elimination content left — this is multi-lap. The capstones +
 dispatch + `redZKReady` consolidation mean EVERYTHING downstream of the invariants is now machine-checked.
 
+### ⭐⭐ Lap-100 close: Thm 3.4(b) IS the motive invariant — but the repo `tp` ≠ Buchholz `tp` for CHAINS
+Read `papers/buchholz-on-gentzens…md:98-104`. **Theorem 3.4(b): `d[n] ⊢ tp(d)(Π,n)`** — the reduct derives
+the REDUCED endsequent, proven by simultaneous induction on build-up. This conclusion-tracking IS the motive
+second conjunct: `fstIdx (red d) = ⟨Buchholz-reduced endsequent of d⟩`. **THE key subtlety (settles the
+"hereditary Rep" confusion):** the repo's `tp (zK s r ds) = isymRep` UNCONDITIONALLY (`tp_zK`), but
+Buchholz's `tp(d)` for a non-critical chain (case 5.2.2) is `tp(dᵢ)` — the SELECTED PREMISE's type. So the
+chain reduct's conclusion is `tpReduce (tp dᵢ) (fstIdx d) 0` (reduced by the PREMISE's tp), NOT
+`tpReduce (tp(zK)) … = id`. Confirmed by `red_zK_rep_nonchain`: `fstIdx (red (zK)) = tpReduce (tp dᵢ) s 0`.
+⟹ **the conclusion-tracking is inherently case-split on the selected premise's tag — which is EXACTLY what
+`redZKReady` encodes.** There is no single clean `fstIdx (red d) = f(tp d)` formula; the per-tag structure is
+forced. **Lap-100 banked two motive bricks:** `tp_red_isymRep_of_zTag_4` (chain-Rep tp facts free) +
+`fstIdx_red_zK_of_selected_Rep` (Rep-reduction off ∅→⊥, reduced to "selected premise Rep-or-critical").
+
+**Next-lap concrete plan:** (1) define the motive predicate `redTracks d : Prop := ZDerivation (red d) ∧
+fstIdx (red d) = ⟨per-tag reduced endsequent⟩ ∧ redZKReady-style data`, hereditary; (2) prove its 5 leaf/
+non-chain cases (atom/I∀/I¬/Ind/ax) from the banked `red_z*_tpReduce` tracking lemmas; (3) the K-case
+consumes the IH's tracking at the selected premise to discharge `redZKReady`'s chain-Rep `fstIdx` field
+(`tp dᵢ = Rep ⟹ tpReduce = id`) and routes non-Rep via the capstones — the ONLY genuinely-open inputs left
+being the threading selection bound `permIdx ≤ j₀` (orbit fact) + the per-tag freshness (O3) + axNeg.
+
 ---
 
 ## 📋 Lap 99 — FULL crux-2 sorry inventory + dependency structure (unblock-protocol)
