@@ -1102,6 +1102,18 @@ lemma isChainInf_of_last {s r ds : V} (hlen : 0 < lh ds)
     isChainInf s r ds :=
   ⟨lh ds - 1, tsub_lt_self hlen one_pos, hlast, hthread, hrank⟩
 
+/-- **Chain-validity is a congruence in the end-sequent data.** `isChainInf` reads `ds` only through
+`lh ds` and the per-premise end-sequent projections `chainAsucc ds`/`chainAnt ds`. So two premise
+sequences with the same length and the same pointwise end-sequents have the same chain-validity. The
+general form of `isChainInf_seqUpdate` (same-end-sequent premise replacement) and the splice case
+(Buchholz §3.2 5.2.1) reduce to computing the new `chainAsucc`/`chainAnt` and applying this. -/
+lemma isChainInf_congr {s r ds ds' : V} (hlh : lh ds = lh ds')
+    (hA : ∀ i, chainAsucc ds i = chainAsucc ds' i)
+    (hN : ∀ i, chainAnt ds i = chainAnt ds' i) :
+    isChainInf s r ds ↔ isChainInf s r ds' := by
+  unfold isChainInf
+  simp only [hlh, hA, hN]
+
 /-! ### Σ₁-definability of the sequent layer (`seqAnt`/`seqSucc`/`chainAsucc`/`chainAnt`)
 
 The chain-validity ingredients toward `zKValid`'s arithmetization (the `ZPhi` `zK`-disjunct cascade).
@@ -3185,9 +3197,9 @@ lemma chainAnt_seqUpdate {ds i v : V} (hi : i < lh ds) (hv : fstIdx v = fstIdx (
 /-- **T2/T3 validity-preservation (`isChainInf` core).** Replacing premise `i` of a chain by a reduct
 `v` with the same end-sequent (`fstIdx v = fstIdx (znth ds i)`) preserves chain-validity `isChainInf`. -/
 lemma isChainInf_seqUpdate {s r ds i v : V} (hi : i < lh ds) (hv : fstIdx v = fstIdx (znth ds i)) :
-    isChainInf s r (seqUpdate ds i v) ↔ isChainInf s r ds := by
-  unfold isChainInf
-  simp only [seqUpdate_lh, chainAsucc_seqUpdate hi hv, chainAnt_seqUpdate hi hv]
+    isChainInf s r (seqUpdate ds i v) ↔ isChainInf s r ds :=
+  isChainInf_congr (seqUpdate_lh ds i v)
+    (fun n => chainAsucc_seqUpdate hi hv n) (fun n => chainAnt_seqUpdate hi hv n)
 
 /-- **T2/T3 validity-preservation (full `zKValidF`).** Replacing premise `i` of a faithfully-valid chain
 by a reduct `v` with the same end-sequent (`fstIdx v = fstIdx (znth ds i)`) preserves faithful chain
