@@ -5015,6 +5015,23 @@ lemma permIdx_le_of_isPermPrem {s r ds m : V} (hm : m < lh ds)
   simp only [permIdx, zKseq_zK, fstIdx_zK]
   exact permIdxAux_le_of_isPermPrem ds s (lh ds) m hm hperm
 
+/-- **Threading/rank restriction to a smaller index (Buchholz §5.2 selection bound, wiring piece B).**
+Given the parent chain's threading/rank data held up to `j₀` (`hthr`/`hrk`, the `isChainInf` witness
+conjuncts) and `i ≤ j₀` (the selection bound `permIdx ≤ j₀` from `permIdx_le_of_isPermPrem` together with
+the orbit's permissible-premise-at-`≤j₀` invariant), RESTRICT the threading and rank down to `i` — exactly
+the `hthread`/`hrank` hypotheses the non-`Rep` replace capstones (`ZDerivation_zK_replace_zIall_of` /
+`_zIneg_of`) consume. Pure `le_trans`/`lt_of_lt_of_le` under the binders; the trivial-but-load-bearing glue
+between the parent `isChainInf` and the per-case `ZDerivation_iCritReplaceReduce_of`. -/
+lemma thread_rank_restrict_of_le {s r ds i j0 : V}
+    (hthr : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrk : ∀ i' < j0, irk (chainAsucc ds i') ≤ r)
+    (hij : i ≤ j0) :
+    (∀ i' ≤ i, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'') ∧
+    (∀ i' < i, irk (chainAsucc ds i') ≤ r) :=
+  ⟨fun i' hi' => hthr i' (le_trans hi' hij), fun i' hi' => hrk i' (lt_of_lt_of_le hi' hij)⟩
+
 /-- **`permIdx` is `𝚺₁`-definable** — the dispatch index `permIdx d = permIdxAux (zKseq d) (fstIdx d)
 (lh (zKseq d))` composes the already-definable `zKseq`/`fstIdx`/`lh`/`permIdxAux`. Required so the
 tag-4 `red` dispatch can branch on `permIdx` and stay `𝚺₁`. -/
