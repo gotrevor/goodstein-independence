@@ -29,12 +29,37 @@ cut on `¬A` → cut on `A`), NOT a standalone 5.2.2 replace. **Two attack paths
     side condition + the chain — i.e. follow Buchholz's actual ¬-axiom cut (restructures premises). Read
     `papers/buchholz-on-gentzens…md:80-95` (the `A,Θ→⊥ / Θ→A / Θ→D` triple for `V=¬A`).
 
-### ▶ THE bottleneck remains the motive cascade (next: Path 1 / Path A1)
-With 3/4 capstones + piece B, the validity infra is DONE-enough to consume the invariants. The remaining
-work to CLOSE `Crux2Blueprint`'s two non-Rep sorries is to SUPPLY the invariants via a strengthened
-`redSoundGen` motive (define `ZGood`/`ZFresh` hereditary bundle: Seq-wff conclusion + O3-freshness +
-faithful premise-antecedent + threading; prove `red`-heredity; thread as a second motive conjunct). This is
-the single biggest remaining lever. START here next lap.
+### ▶ THE bottleneck remains the motive cascade — now CONSOLIDATED into `redZKReady` (lap 100 close)
+`ZDerivation_red_zK`'s TWO replace sorries are GONE — its body is sorry-free, both branches discharged
+(chain-Rep via `ZDerivation_red_zK_replace`, non-Rep via `ZDerivation_red_zK_nonRep`). The entire orbit
+obligation is consolidated into ONE named predicate **`redZKReady s r ds`** (Crux2Blueprint, a plain `def`,
+no definability needed) carrying per selected-premise `dᵢ`: (a) chain-Rep conclusion-tracking; (b) Seq-wff
+conclusion; (c) selection-bounded threading/rank; (d) per-tag I∀/I¬/axAll freshness/faithful-ant/wff.
+`redSoundGen`'s K-case now has the SINGLE residual `sorry : redZKReady s r ds`. **This is THE motive.**
+
+**⭐ Lap-100 findings that SHARPEN the motive (consume next lap):**
+- **The `tp` facts in redZKReady's chain-Rep field are FREE** — `tp_zK = isymRep` UNCONDITIONALLY
+  (InternalZ:704), and `red` of a chain is again a chain, so `tp dᵢ = isymRep` and `tp (red dᵢ) = isymRep`
+  need NOT be supplied. **redZKReady's chain-Rep field can be SLIMMED to just `fstIdx (red dᵢ) = fstIdx dᵢ`**
+  (derive the two tp facts inside `ZDerivation_red_zK` from `tp_zK` + chain-shape-of-`red`). TODO next lap:
+  slim the def, derive `htp`/`hredtp` locally via `zTag dᵢ = 4 ⟹ dᵢ = zK …` + `red_zK_rep` form.
+- **The genuine hard residuals are exactly TWO:** (i) `fstIdx (red dᵢ) = fstIdx dᵢ` for a non-critical
+  chain `dᵢ` — TRUE only when `dᵢ` is "Rep-reducing" (its OWN selected premise is Rep, route B `fstIdx_red`);
+  this is HEREDITARY Rep-reduction, the core of Buchholz Thm 3.4's conclusion bookkeeping. (ii) the
+  `permIdx ≤ j₀` selection bound feeding the threading/rank (NOT free even on ∅→⊥: `isChainInf`'s `j₀` is the
+  Buchholz-non-critical top, and repo-`permIdx` is the GLOBAL least permissible; need the orbit fact
+  "∃ permissible premise at index `≤ j₀`", banked half = `permIdx_le_of_isPermPrem`).
+- **On a ∅→⊥ chain the non-Rep tag fields are VACUOUS** (Cor 2.1 `tp_selected_isymRep_of_emptyAnt_botSucc`:
+  selected premise is Rep, so `znth ds permIdx = zIall/zIneg/zAxAll …` is FALSE → those implications hold by
+  contradiction with `tp ≠ isymRep`). And `Seq (seqAnt s) = Seq ∅` is trivial there. So the ∅→⊥ special
+  case of `redZKReady` reduces to JUST residuals (i)+(ii) above — a good first sub-lemma
+  (`redZKReady_of_emptyAnt_botSucc`) to attempt next lap.
+
+**Motive design (next lap, Path 1 refined):** strengthen `redSound`'s induction (NOT `redSoundGen`, which is
+"false in general") to carry, per node, the route-B conclusion-tracking bundle `fstIdx (red d) = …` ∧ chain
+Rep-reduction ∧ the threading (from `isChainInf` + `permIdx ≤ j₀`). The hereditary Rep-reduction (i) and the
+selection bound (ii) are the genuine cut-elimination content left — this is multi-lap. The capstones +
+dispatch + `redZKReady` consolidation mean EVERYTHING downstream of the invariants is now machine-checked.
 
 ---
 
