@@ -238,6 +238,7 @@ noncomputable def sord (d : V) : V :=
   if zTag d = 7 then π₂ (π₂ (zRest d))
   else if zTag d = 8 then π₂ (π₂ (π₂ (π₂ (zRest d))))
   else if zTag d = 9 then π₁ (zRest d)
+  else if zTag d = 10 then π₁ (zRest d)
   else iord d
 
 @[simp] lemma zRest_zAllOmega (s d0 a α : V) : zRest (zAllOmega s d0 a α) = ⟪d0, a, α⟫ := by
@@ -268,7 +269,8 @@ noncomputable def sordDef : 𝚺₁.Semisentence 2 := .mkSigma
     ( (tg = 7 ∧ ∃ a, !pi₂Def a zr ∧ !pi₂Def y a)
     ∨ (tg ≠ 7 ∧ tg = 8 ∧ ∃ a, !pi₂Def a zr ∧ ∃ b, !pi₂Def b a ∧ ∃ e, !pi₂Def e b ∧ !pi₂Def y e)
     ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ tg = 9 ∧ !pi₁Def y zr)
-    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ tg ≠ 9 ∧ !iordDef y d) )”
+    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ tg ≠ 9 ∧ tg = 10 ∧ !pi₁Def y zr)
+    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ tg ≠ 9 ∧ tg ≠ 10 ∧ !iordDef y d) )”
 
 instance sord_defined : 𝚺₁-Function₁ (sord : V → V) via sordDef := .mk fun v ↦ by
   simp [sordDef, sord, zTag_defined.iff, zRest_defined.iff, pi₁_defined.iff, pi₂_defined.iff,
@@ -277,7 +279,9 @@ instance sord_defined : 𝚺₁-Function₁ (sord : V → V) via sordDef := .mk 
   · simp [h7, numeral_eq_natCast]
   · by_cases h8 : zTag (v 1) = 8
     · simp [h7, h8, numeral_eq_natCast]
-    · by_cases h9 : zTag (v 1) = 9 <;> simp [h7, h8, h9, numeral_eq_natCast]
+    · by_cases h9 : zTag (v 1) = 9
+      · simp [h7, h8, h9, numeral_eq_natCast]
+      · by_cases h10 : zTag (v 1) = 10 <;> simp [h7, h8, h9, h10, numeral_eq_natCast]
 
 instance sord_definable : 𝚺₁-Function₁ (sord : V → V) := sord_defined.to_definable
 
@@ -363,6 +367,12 @@ The max trick is the whole point: in ANY linear order, `max(a,b) ≺ α` wheneve
 additive-principality of `α` needed (unlike the natural sum `#`), so the reduct ordinal drops below `α`
 for an arbitrary stored `α`. -/
 
+/-- **Unbounded `≺`-transitivity** (wrapper over the bounded `icmp_trans`, with `a+b+c` as the common
+bound). `a ≺ b → b ≺ c → a ≺ c`. -/
+theorem icmp_trans' {a b c : V} (h1 : icmp a b = 0) (h2 : icmp b c = 0) : icmp a c = 0 :=
+  icmp_trans (a + b + c) a (le_trans (le_self_add) (le_self_add)) b
+    (le_trans (le_add_self) (le_self_add)) c le_add_self h1 h2
+
 /-- **ε₀-code max** via `icmp` (`icmp a b = 0 ⟺ a ≺ b`): `imax a b = b` if `a ≺ b`, else `a`. -/
 noncomputable def imax (a b : V) : V := if icmp a b = 0 then b else a
 
@@ -413,6 +423,66 @@ theorem sord_redCutAll_lt {s d0 a α t Cnew dR_t : V}
     icmp (sord (redCutAll s d0 a t Cnew dR_t)) α = 0 := by
   rw [redCutAll, sord_zCutOmega]
   exact icmp_imax_lt (zAllOmega_cut_descends hAll ht) hR
+
+/-! ### The ∃-introduction node + the self-contained ∀/∃-cut reduction
+
+The ∀-cut's right premise is the `∃x ¬F`-side. In the ω-rule calculus `∃` is a finitary INTRODUCTION:
+`zExOmega s α C t d` (tag 10) derives `Γ → ∃x ¬F` from a single premise `d ⊢ Γ → ¬F(t)` with stored witness
+`t` and stored ordinal `α`. The cut reduction reads `t` and `d` OFF this node (no guesswork), selects the
+∀-node's premise at the SAME `t`, and rebuilds the smaller cut — fully self-contained, the genuine
+Tait/Buchholz ∀/∃ cut reduction. -/
+
+/-- **The Path-C ∃-introduction node** (tag 10). `s` conclusion `Γ→∃x¬F`, `α` stored ordinal, `C` the matrix
+`¬F`, `t` the witness, `d` the premise (`⊢ Γ→¬F(t)`). Stored ordinal is the FIRST payload field. -/
+noncomputable def zExOmega (s α C t d : V) : V := ⟪s, 10, α, C, t, d⟫ + 1
+
+@[simp] lemma zTag_zExOmega (s α C t d : V) : zTag (zExOmega s α C t d) = 10 := by
+  simp [zTag, sndIdx, zExOmega]
+
+@[simp] lemma zRest_zExOmega (s α C t d : V) : zRest (zExOmega s α C t d) = ⟪α, C, t, d⟫ := by
+  simp [zRest, sndIdx, zExOmega]
+
+@[simp] lemma sord_zExOmega (s α C t d : V) : sord (zExOmega s α C t d) = α := by
+  rw [sord, zTag_zExOmega, if_neg (by simp), if_neg (by simp), if_neg (by simp), if_pos rfl,
+    zRest_zExOmega]; simp
+
+/-- The stored witness term of an ∃-node. -/
+noncomputable def zExTerm (d : V) : V := π₁ (π₂ (π₂ (zRest d)))
+/-- The witness premise of an ∃-node (`⊢ Γ→¬F(t)`). -/
+noncomputable def zExPrem (d : V) : V := π₂ (π₂ (π₂ (zRest d)))
+
+@[simp] lemma zExTerm_zExOmega (s α C t d : V) : zExTerm (zExOmega s α C t d) = t := by
+  simp [zExTerm, zRest_zExOmega]
+@[simp] lemma zExPrem_zExOmega (s α C t d : V) : zExPrem (zExOmega s α C t d) = d := by
+  simp [zExPrem, zRest_zExOmega]
+
+/-- **∃-node validity (operator-control).** The witness premise is a `ZDerivation` with stored ordinal
+`≺ α` — the same operator-control shape as the cut/ω-nodes. -/
+def zExOmegaValid (α d : V) : Prop := ZDerivation d ∧ icmp (sord d) α = 0
+
+/-- **The self-contained ∀/∃-cut reduct.** Given the cut formula `∀x F` with the ω-∀-node `zAllOmega s d0 a
+αAll` on the left and the ∃-node `dR = zExOmega …` on the right, the reduct reads the witness `t = zExTerm
+dR`, selects the ∀-node's premise `zsubst d0 a t` (brick 1), takes the ∃-node's premise `zExPrem dR`
+(`⊢ Γ→¬F(t)`), and rebuilds the smaller cut on `Cnew = F(t)` storing the ε₀-max of the two. NO chain, NO
+externally-supplied premise — the witness/premise come from the node data. -/
+noncomputable def redAllEx (s d0 a Cnew dR : V) : V :=
+  zCutOmega s (imax (iord (zsubst d0 a (zExTerm dR))) (sord (zExPrem dR)))
+    (zsubst d0 a (zExTerm dR)) (zExPrem dR) Cnew
+
+/-- **The self-contained ∀/∃-cut reduction STRICTLY drops the stored ordinal.** From the ω-∀-node's
+validity (brick 1: the selected premise `iord ≺ αAll`, evaluated at the witness `t = zExTerm dR`) and the
+∃-node's operator-control (`sord (zExPrem dR) ≺ α`), the reduct's stored ordinal `≺ α`. The genuine,
+self-contained per-step cut-elimination descent — `t` and the right premise read off the ∃-node, no
+external parameter. (For the SAME `α`, take `αAll = α`: the cut's `zCutOmegaValid` gives `sord dL ≺ α`, and
+brick 1 lowers the selected premise further.) -/
+theorem sord_redAllEx_lt {s d0 a αAll Cnew dR α : V}
+    (hAll : zAllOmegaValid s d0 a αAll) (ht : IsSemiterm ℒₒᵣ 0 (zExTerm dR))
+    (hAlllt : icmp αAll α = 0)
+    (hEx : zExOmegaValid α (zExPrem dR)) :
+    icmp (sord (redAllEx s d0 a Cnew dR)) α = 0 := by
+  rw [redAllEx, sord_zCutOmega]
+  -- selected ∀-premise: iord ≺ αAll (brick 1) ≺ α, so ≺ α (transitivity); ∃-premise ≺ α (hEx)
+  exact icmp_imax_lt (icmp_trans' (zAllOmega_cut_descends hAll ht) hAlllt) hEx.2
 
 /-! ## Brick 4 skeleton — the stored-ordinal infinite descent (path-portable)
 
