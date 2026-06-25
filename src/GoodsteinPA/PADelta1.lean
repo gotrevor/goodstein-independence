@@ -531,6 +531,23 @@ def IsInductionAxiomCode (y : V) : Prop :=
 instance isInductionAxiomCode_definable : 𝚫₁-Predicate (IsInductionAxiomCode : V → Prop) := by
   unfold IsInductionAxiomCode; definability
 
+/-- **Term-level substitution congruence.** `termSubst` of a `n`-ary semiterm depends only on the
+first `n` entries of the substitution vector. Mirrors `termSubst_eq_self`. -/
+lemma termSubst_eq_termSubst_of {n w w' t : V} (ht : IsSemiterm ℒₒᵣ n t)
+    (H : ∀ i < n, w.[i] = w'.[i]) :
+    termSubst ℒₒᵣ w t = termSubst ℒₒᵣ w' t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; rw [termSubst_bvar (L := ℒₒᵣ), termSubst_bvar (L := ℒₒᵣ), H z hz]
+  · intro x; simp [termSubst_fvar (L := ℒₒᵣ)]
+  · intro k f v hf hv ih
+    rw [termSubst_func hf hv.isUTerm, termSubst_func hf hv.isUTerm]
+    simp only [qqFunc_inj, true_and]
+    apply nth_ext' k (by rw [len_termSubstVec hv.isUTerm]) (by rw [len_termSubstVec hv.isUTerm])
+    intro i hi
+    rw [nth_termSubstVec hv.isUTerm hi, nth_termSubstVec hv.isUTerm hi, ih i hi]
+
+
 /-- The closure-rewritten body `fixitr 0 ψ'.fvSup ▹ ψ'` has no free variables (the `fixitr` closure
 binds every free variable of `ψ'`). -/
 lemma freeVariables_fixitr_eq_empty (ψ' : SyntacticFormula ℒₒᵣ) :
@@ -604,6 +621,7 @@ to `@consistent_unprovable 𝗣𝗔 paDelta1 _ _`, dropping `PA_delta1Definable`
   paMinusDelta1.add inductionSchemeUnivDelta1
 
 end GoodsteinPA
+
 
 
 

@@ -29,9 +29,25 @@ REMAINING (the genuine wall — DEEP Foundation-internal reflection):
    `subst (fvarSeq m) body = subst (fvarSeq(m-1)) body` so result lacks free var m-1, contradicting
    `succInd ψ` having free var m-1 — but this ALSO needs a `subst`-ext-on-first-n lemma +
    free-var-occurrence reflection, equally deep).
+   **⭐ KEY UNLOCK FOUND (lap 80): `IsSemiformula.sound`** (`Formula/Coding.lean:323`):
+   `IsSemiformula L n (φ:ℕ) → ∃ F : SyntacticSemiformula L n, ⌜F⌝ = φ` — internal semiformula codes
+   at ℕ ARE quotes. **Criticality route via sound** (avoids building `bvQuote` from scratch):
+   work at V=ℕ. Suppose `IsSemiformula ℒₒᵣ (m-1) ⌜φ''⌝` (φ''=fixitr 0 m ▹ succInd ψ, m=fvSup>0).
+   `sound` ⟹ ∃ F:(m-1)-ary, `⌜F⌝ = ⌜φ''⌝` (ℕ). Apply internal `subst ℒₒᵣ (fvarSeq m)` to both:
+   RHS = `⌜succInd ψ⌝` (subst_fvarSeq_fixitr). LHS: F is (m-1)-ary so the length-m vector's entry m-1
+   is unread ⟹ `subst (fvarSeq m) ⌜F⌝ = subst (fvarSeq(m-1)) ⌜F⌝` [**needs subst-congruence lemma**,
+   below] `= ⌜F ⇜ (fun i:Fin(m-1)↦&i)⌝` (typed_quote_substs + fvarSeqVec_val). So syntactically
+   `succInd ψ = F ⇜ (&·)`; but the opened (m-1)-ary F has free vars ⊆ {0..m-2} ⟹ `(succInd ψ).fvSup
+   ≤ m-1 = fvSup-1`, contradicting fvSup>0. The ONE reusable lemma to build:
+   **`subst_eq_subst_of` (formula subst congruence)**: `IsSemiformula ℒₒᵣ n p → (∀ i<n, w.[i]=w'.[i])
+   → subst ℒₒᵣ w p = subst ℒₒᵣ w' p` — mirror `subst_eq_self` (`Functions.lean:710`,
+   `IsSemiformula.pi1_structural_induction`); needs a term-level `termSubst_eq_termSubst_of` too
+   (mirror `termSubst_eq_self`, `Term/Functions.lean:145`). Plus `freeVariables (F⇜(&·)) ⊆ {0..m-2}`
+   (free vars of an open of an (m-1)-ary formula by &0..&(m-2)) — likely via `Rew`/`freeVariables`
+   structural simp on `⇜`.
 2. **mem_iff (⇒)**: decode p,m,body; from `subst (fvarSeq m) body = ⌜succInd ψ⌝` + body fv-free m-ary +
    criticality ⟹ body = ⌜fixitr 0 m ▹ succInd ψ⌝ and m=fvSup (fixitr-inversion injectivity). Uses
-   `subst_fvarSeq_fixitr` (banked) + the same bv/fv reflection as (1).
+   `subst_fvarSeq_fixitr` (banked) + `IsSemiformula.sound` (same unlock) + `subst_eq_subst_of`.
 3. **`ch : 𝚫₁.Semisentence 1`** + `Defined IsInductionAxiomCode ch`: INDEPENDENT of (1)/(2) — build via
    the `HierarchySymbol.Semiformula` combinators `bexs`/`ball`/`⋏` (have `ProperOn.bexs/.ball/.and` +
    `val_bexs/...` for free ProperOn+eval) over the component graphs (`succIndCodeRawGraph`,
