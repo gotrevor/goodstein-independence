@@ -81,6 +81,42 @@ theorem zAllOmega_cut_valid {s d0 a α t : V}
     ZDerivation (zsubst d0 a t) :=
   hvalid.1 t ht
 
+/-! ## Brick 3 kernel — the INDUCTION ω-node's stored ordinal (the limit case)
+
+Probe 2 (`wip/InternalZomega.lean`) showed the induction ω-node's premise ordinals strictly increase in
+the unfolding depth, so its ordinal is a genuine LIMIT the computed `iord` cannot reach. The stored design
+sidesteps this: assign the node a FIXED ordinal `α` that provably dominates the whole premise family, and
+require `∀k, o(premise k) ≺ α` as data. Here we DISCHARGE that side-condition in-kernel — the limit is
+assignable as a fixed code and dominates every finite unfolding. -/
+
+/-- **The induction ω-node's stored ordinal** = `ω_{dg}(ω^{õ d1 + 1} # ω^{õ d0})`, where `dg = idg (zInd s
+at' p d0 d1)` is the unfolding's (k-independent) degree. The õ-part is the `k→∞` limit of the depth-`k`
+unfolding's õ `ω^{õ d1}·k # ω^{õ d0}` (Probe 2) — the smallest CNF code dominating the whole family. -/
+noncomputable def indOmegaStoredOrd (s at' p d0 d1 : V) : V :=
+  iotower (inadd (ocOadd (iadd (iotil d1) (ocOadd 0 1 0)) 1 0) (ocOadd (iotil d0) 1 0))
+    (idg (zInd s at' p d0 d1))
+
+/-- **Brick 3 kernel — the stored ordinal BOUNDS every induction premise (iord level), uniformly in `k`.**
+For NF premise õs, the depth-`k` unfolding's ordinal `iord (zK s' (irk p) (iIndReductSeq d0 d1 k)) ≺
+indOmegaStoredOrd …` for ALL `k > 0`. Proof: the degree is constant (`idg_zK_iIndReduct`), so the
+comparison lifts (`icmp_iotower_mono`) from the õ-bound `ω^{õ d1}·k # ω^{õ d0} ≺ ω^{õ d1 + 1} # ω^{õ d0}`,
+which is `inadd_right_mono` applied to the banked `icmp_term_lt_omega_succ` (`ω^β·k ≺ ω^{β+1}`, all finite
+`k`). This is the Buchholz operator-control side-condition for the induction ω-node, DISCHARGED — the limit
+Probe 2 showed `iord` can't compute, assigned as a fixed code that provably dominates the family. -/
+theorem iord_iIndReduct_lt_storedBound {s s' at' p d0 d1 k : V} (hk : 0 < k)
+    (hd0 : isNF (iotil d0)) (hd1 : isNF (iotil d1)) :
+    icmp (iord (zK s' (irk p) (iIndReductSeq d0 d1 k)))
+      (indOmegaStoredOrd s at' p d0 d1) = 0 := by
+  rw [indOmegaStoredOrd, iord, iotil_zK _ _ _ (iIndReductSeq_seq d0 d1 k),
+      iseqNaddIdg_iIndReductSeq hk, idg_zK_iIndReduct (s := s) (s' := s') (at' := at') hk]
+  exact icmp_iotower_mono
+    (inadd_right_mono
+      ((isNF_ocOadd _ _ _).mpr ⟨hk.ne', hd1, isNF_zero, Or.inl rfl⟩)
+      ((isNF_ocOadd _ _ _).mpr ⟨(by simp), isNF_iadd_one_right hd1, isNF_zero, Or.inl rfl⟩)
+      (icmp_term_lt_omega_succ (iotil d1) k)
+      (ocOadd (iotil d0) 1 0) (isNF_omega_pow hd0))
+    (idg (zInd s at' p d0 d1))
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
@@ -89,9 +125,10 @@ datatype (each a `wip/` milestone, ported from `ZinftyF.Deriv`/`o`/`cr`):
 - **Brick 2 — `cutElimStep` (the single rank drop).** The full Schütte/Tait reduction over all node shapes
   (`Zinfty.cutElimStep`/`cutElimPrincipal`, Towsner §19.7): a rank-`c+1` derivation reduces to rank-`c` with
   stored ordinal `α ↦ ω^α`. The ∀-cut case = brick 1; the ∧/∨/atom cases are the other `cutReduce*`.
-- **Brick 3 — the induction ω-node.** Tag-7-style node whose premise family is the iterated step
-  (`F(0),F(1),…`); its stored ordinal is the limit `ω^{õ d1 + 1} # ω^{õ d0}` (Probe 2), assigned as DATA
-  with `∀k, o(premise k) ≺ stored`. The non-constant-ordinal case the computed `iord` can't do.
+- **Brick 3 — the induction ω-node.** Kernel DONE above (`indOmegaStoredOrd` + `iord_iIndReduct_lt_storedBound`):
+  the stored limit ordinal provably dominates every finite unfolding's `iord`, uniformly in `k`. Remaining:
+  package it as a node + validity (premise-family `ZDerivation`s via `znth_iIndReductSeq_ZDerivation`, the
+  conclusion-tracking `F(k)`, the Σ₁ side-condition), mirroring `zAllOmega`/`zAllOmegaValid`.
 - **Brick 4 — `false_of_ZDerivesEmpty` (Path C).** `red` = one `cutElimStep`; the ∅→⊥ sequent has no
   cut-free proof, so `red` never terminates ⟹ the stored ordinal strictly descends forever ⟹ infinite
   ε₀-descent ⟹ contradicts PRWO(ε₀) (crux-1). No chain, no `redZKReady`.

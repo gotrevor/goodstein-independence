@@ -13,8 +13,11 @@ Probe 2 lemmas in `wip/InternalZomega.lean` (axiom-clean): `iotil_zK_iIndReduct(
   `iord`, descent from banked `iord_descent_zIall`); `zAllOmega_cut_valid`/`_descends` (the ∀-cut invariant).
 - **Brick 2 (NEXT) — `cutElimStep`** (single rank drop, all node shapes; `Zinfty.cutElimStep`/
   `cutElimPrincipal` template; ∀-cut case = brick 1, others = `cutReduce*` for ∧/∨/atom).
-- **Brick 3 — the induction ω-node** (premise family = iterated step; stored ordinal = the Probe-2 limit
-  `ω^{õ d1 + 1} # ω^{õ d0}` as DATA, side condition `∀k, o(premise k) ≺ stored`).
+- **Brick 3 — the induction ω-node.** KERNEL DONE (axiom-clean): `indOmegaStoredOrd` (the stored limit
+  ordinal `ω_{dg}(ω^{õd1+1} # ω^{õd0})`) + `iord_iIndReduct_lt_storedBound` (it dominates every finite
+  unfolding's `iord`, uniformly in `k` — the side-condition the computed `iord` can't compute, discharged).
+  Remaining: package as node + validity (premise `ZDerivation`s via `znth_iIndReductSeq_ZDerivation`,
+  conclusion-tracking `F(k)`, Σ₁ side-condition), mirroring `zAllOmega`/`zAllOmegaValid`.
 - **Brick 4 — `false_of_ZDerivesEmpty` (Path C)**: `red` = one `cutElimStep`; ∅→⊥ has no cut-free proof ⟹
   stored ordinal descends forever ⟹ infinite ε₀-descent ⟹ contradicts PRWO(ε₀) (crux-1).
 - **Σ₁-definability** of `zAllOmega`/`zAllOmegaValid` (bookkeeping; `⟪…⟫`/`icmp`/`iord` are `𝚺₁`/`𝚫₁`).
