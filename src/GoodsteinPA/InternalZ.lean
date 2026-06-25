@@ -702,6 +702,10 @@ noncomputable def tp (d : V) : V :=
 @[simp] lemma tp_zAxNeg (s p : V) : tp (zAxNeg s p) = isymLk 0 (inegF p) := by simp [tp]
 @[simp] lemma tp_zAtom (s : V) : tp (zAtom s) = isymRep := by simp [tp]
 @[simp] lemma tp_zK (s r ds : V) : tp (zK s r ds) = isymRep := by simp [tp]
+/-- `tp (Ax^1_{·→C}) = Rep` (tag 7 is off the I/Ax tags, so the `tp` dispatch falls through to `isymRep`).
+The §5 logical-axiom reduct is a `Rep` node — exactly Buchholz's `tp(Ax^1_Π) ∈ {R_C, L^0_C}` collapsing to
+the repetition symbol once it sits as a replaced premise inside a critical reduct chain. -/
+@[simp] lemma tp_zAx1 (s C : V) : tp (zAx1 s C) = isymRep := by simp [tp]
 
 /-- **`tp`-trichotomy**: every `tp d` is one of the three inference symbols `R_A`/`L^k_A`/`Rep`
 (it dispatches on `zTag d`). The structural source of the `π₁`-discriminant shape lemmas below. -/

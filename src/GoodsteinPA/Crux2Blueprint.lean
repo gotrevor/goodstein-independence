@@ -149,6 +149,49 @@ theorem ZDerivation_corrected_haux0 {s r ds sᵢ a p d0 : V}
   · exact (tag_uformula_of_ZDerivation hZred).2.2.1
   · exact (tag_uformula_of_ZDerivation hZred).2.2.2
 
+/-- **`haux1` — the corrected inversion's L-side half (Buchholz Thm 3.4(a), ∀-case), ASSEMBLED modulo the
+two genuine §5 obligations.** The L-redex `dⱼ = znth ds (redexJ d)` is an `axAll` left-axiom `Ax^{∀p,k}`
+(`hdj`). Buchholz §5 case 2.1: its critical reduct is `dⱼ[0] = Ax^1_{F(k),Γⱼ→F(k)}` — the §5 **logical
+axiom** `Ax^1` (tag 7), whose antecedent GAINS the cut instance `F(k) = cutFormula d` and whose succedent
+is `F(k)` (so it is a genuine logical axiom, succedent ∈ antecedent). In the engine this is
+`v = zAx1 (seqAddAnt (cutFormula d) sⱼ) C`. Replacing premise `redexJ` of the critical chain by `v` and
+growing the conclusion antecedent by `cutFormula d` (`seqAddAnt`) yields a `ZDerivation` — discharged via
+`ZDerivation_iCritReplaceReduce_general` (the antecedent-growth replace constructor, exactly as the I¬
+replace `ZDerivation_zK_replace_zIneg_of` uses), with all tag-formula conjuncts vacuous (`tp v = isymRep`,
+`zTag v = 7`). The TWO genuine residuals are isolated as hypotheses: **(O-L1)** `hZredL` — that the §5 logical
+axiom `zAx1 …` is itself a `ZDerivation` (tag 7 is NOT yet a `ZPhi` disjunct; this is the L-side analogue of
+the R-side `ZDerivation_zsubst_zIall_premise`, and the genuine next prerequisite), and **(O-L2)** `hci` — the
+threading reconstruction `isChainInf` for the grown-antecedent chain at the corrected reduct (the L-side
+analogue of `haux0`'s `hthread`/`hrank`; built from the parent `isChainInf` restricted to `≤ j₀` with the
+`F(k)`-weakened antecedent, lap-113 `irk_chainAsucc_redexJ` reasoning). This proves the L-half is sound for
+the re-principalized reduct: the inversion's L-side reduces to making `zAx1` a sound derivation + the
+threading datum — NOT new deep machinery. Exact analogue of `ZDerivation_corrected_haux0` on the L-side. -/
+theorem ZDerivation_corrected_haux1 {s r ds sⱼ p k' C : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxAll sⱼ p k')
+    (hSeqs : Seq (seqAnt s))
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hZredL : ZDerivation (zAx1 (seqAddAnt (cutFormula (zK s r ds)) sⱼ) C))
+    (hci : isChainInf (seqAddAnt (cutFormula (zK s r ds)) s) r
+        (seqUpdate ds (redexJ (zK s r ds))
+          (zAx1 (seqAddAnt (cutFormula (zK s r ds)) sⱼ) C))) :
+    ZDerivation (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+      (seqUpdate ds (redexJ (zK s r ds))
+        (zAx1 (seqAddAnt (cutFormula (zK s r ds)) sⱼ) C))) := by
+  obtain ⟨_, _, _, _, _, _, hcf, hss, hsa⟩ := zKValidF_of_ZDerivation_zK hZ
+  -- the L-redex's succedent `seqSucc sⱼ = chainAsucc ds (redexJ d)` is a `UFormula` (chain field 7)
+  have hsuccj : IsUFormula ℒₒᵣ (seqSucc sⱼ) := by
+    have := hcf (redexJ (zK s r ds)) hj
+    rwa [chainAsucc, hdj, fstIdx_zAxAll] at this
+  refine ZDerivation_iCritReplaceReduce_general hj hZ hZredL hci
+    (by rw [seqSucc_seqAddAnt]; exact hss)
+    (by rw [seqAnt_seqAddAnt]; exact forall_IsUFormula_seqCons hSeqs hsa hCwff)
+    (by rw [fstIdx_zAx1, seqSucc_seqAddAnt]; exact hsuccj)
+    (by rw [tp_zAx1, fstIdx_zAx1]; exact iperm_isymRep _)
+    (fun h => by simp at h) (fun h => by simp at h)
+    (fun h => by simp at h) (fun h => by simp at h)
+
 /-- **5.1 critical sub-residual — THE cut-elimination prize.** When the chain is critical, `red = iRcritG
 d ρ` with `ρ` the recursive premise reducts; delegates to `ZDerivation_iRcritG_of`, which reduces it to the
 two stripped half-derivations `haux0` (`Γ → cutFormula d`) / `haux1` (Buchholz Thm 3.4(a) inversion).
