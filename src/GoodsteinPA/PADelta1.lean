@@ -703,6 +703,30 @@ lemma subst_fvarSeq_succ {k F : V} (hF : IsSemiformula ℒₒᵣ k F) :
     subst ℒₒᵣ (fvarSeq (k + 1)) F = subst ℒₒᵣ (fvarSeq k) F :=
   subst_fvarSeq_le hF le_self_add
 
+/-! ### Code-size bounds for the recognizer's bounded existentials -/
+
+/-- `qqAll` strictly increases the code (`qqAll x = ⟪6,x⟫ + 1 > x`). -/
+lemma lt_qqAll (x : V) : x < qqAll x := by
+  rw [qqAll]; exact le_iff_lt_succ.mp (le_pair_right 6 x)
+
+/-- The wrapped body is `≤` the iterated `^∀`-closure code: `body ≤ qqAllItr body m`. -/
+lemma self_le_qqAllItr (p k : V) : p ≤ qqAllItr p k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => rw [qqAllItr_succ]; exact le_trans ih (le_of_lt (lt_qqAll _))
+
+/-- The iteration count is `≤` the iterated `^∀`-closure code: `m ≤ qqAllItr body m`
+(each `^∀` step grows the code by at least one). -/
+lemma count_le_qqAllItr (p k : V) : k ≤ qqAllItr p k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih =>
+    rw [qqAllItr_succ, qqAll]
+    have h : k ≤ ⟪(6 : V), qqAllItr p k⟫ := le_trans ih (le_pair_right 6 _)
+    simpa [add_comm] using add_le_add_right h 1
+
 /-- **The criticality crux** (the math heart of `mem_iff`). For `ψ` with a free variable
 (`0 < ψ.fvSup`), the closure-rewritten body `⌜fixitr 0 ψ.fvSup ▹ ψ⌝` is NOT
 `(ψ.fvSup - 1)`-ary-*and*-fv-free. This pins `m = ψ.fvSup` in the recognizer (`IsInductionAxiomCode`'s
