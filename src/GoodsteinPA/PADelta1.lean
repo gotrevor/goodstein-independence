@@ -531,6 +531,26 @@ def IsInductionAxiomCode (y : V) : Prop :=
 instance isInductionAxiomCode_definable : 𝚫₁-Predicate (IsInductionAxiomCode : V → Prop) := by
   unfold IsInductionAxiomCode; definability
 
+/-- The closure-rewritten body `fixitr 0 ψ'.fvSup ▹ ψ'` has no free variables (the `fixitr` closure
+binds every free variable of `ψ'`). -/
+lemma freeVariables_fixitr_eq_empty (ψ' : SyntacticFormula ℒₒᵣ) :
+    (Rew.fixitr 0 ψ'.fvSup ▹ ψ').freeVariables = ∅ := by
+  have h := Semiformula.fvarList_univCl' (L := ℒₒᵣ) ψ'
+  rwa [Semiformula.univCl', Semiformula.freeVariables_allClosure] at h
+
+/-- Internal `shift` fixes the quote of the fv-free closure-rewritten body. -/
+lemma shift_quote_fixitr (ψ' : SyntacticFormula ℒₒᵣ) :
+    Bootstrapping.shift ℒₒᵣ (⌜Rew.fixitr 0 ψ'.fvSup ▹ ψ'⌝ : V)
+      = (⌜Rew.fixitr 0 ψ'.fvSup ▹ ψ'⌝ : V) := by
+  rw [← Semiformula.quote_shift (V := V) (φ := Rew.fixitr 0 ψ'.fvSup ▹ ψ')]
+  congr 1
+  have hfv := freeVariables_fixitr_eq_empty ψ'
+  show (Rew.shift ▹ (Rew.fixitr 0 ψ'.fvSup ▹ ψ')) = _
+  apply Semiformula.rew_eq_self_of
+  · simp
+  · intro x hx
+    exact absurd hx (by simp [Semiformula.FVar?, hfv])
+
 end Recognizer
 
 /-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
