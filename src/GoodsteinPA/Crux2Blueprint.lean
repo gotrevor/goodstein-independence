@@ -155,6 +155,34 @@ theorem zTag_not_iAx_of_tp_isymRep {v : V} (h : tp v = isymRep) :
     zTag v ≠ 1 ∧ zTag v ≠ 2 ∧ zTag v ≠ 5 ∧ zTag v ≠ 6 := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> intro ht <;> simp only [tp, ht] at h <;> simp at h
 
+/-- **The Rep-selection fact for ⊥-sequents (Buchholz Cor 2.1 core).** A permissible premise of a chain
+whose conclusion is `∅→⊥` (empty antecedent, `⊥` succedent) is necessarily `Rep`: an I-rule (`isymR`)
+would need succedent `⊥` (impossible — I-rules introduce `∀`/`¬`), an axiom (`isymLk`) would need a
+formula in the empty antecedent (impossible). This is THE fact that, threaded through the ⊥-orbit, makes
+the repo's `red` faithful (selected premise always `Rep` ⟹ conclusion stays `Π`). Reusable for both
+re-architecture routes. -/
+theorem tp_isymRep_of_emptyAnt_botSucc {s d : V} (hZ : ZDerivation d)
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hperm : iperm (tp d) s) : tp d = isymRep := by
+  rcases zDerivation_iff.mp hZ with ⟨s', rfl, _⟩ | ⟨s', a, p, d0, rfl, _, _⟩ | ⟨s', p, d0, rfl, _, _⟩ |
+    ⟨s', at', p, d0, d1, rfl, _, _⟩ | ⟨s', r, ds, rfl, _, _, _⟩ |
+    ⟨s', p, k, rfl, _, _⟩ | ⟨s', p, rfl, _, _⟩
+  · rw [tp_zAtom]
+  · rw [tp_zIall] at hperm
+    rw [iperm_isymR_iff, hsucc] at hperm
+    exact absurd hperm (by simp [qqAll, qqFalsum])
+  · rw [tp_zIneg] at hperm
+    rw [iperm_isymR_iff, hsucc] at hperm
+    exact absurd hperm (by simp [inegF, qqFalsum, qqOr])
+  · rw [tp_zInd]
+  · rw [tp_zK]
+  · rw [tp_zAxAll] at hperm
+    rw [iperm_isymLk_iff, hant] at hperm
+    exact absurd hperm (by simp [inAnt, lh_empty])
+  · rw [tp_zAxNeg] at hperm
+    rw [iperm_isymLk_iff, hant] at hperm
+    exact absurd hperm (by simp [inAnt, lh_empty])
+
 /-- **5.2.2 replace sub-residual — PROVED under the `Rep` restriction.** Given the selected premise `dᵢ`
 is `Rep` (`tp dᵢ = isymRep`, lap-90 finding: necessary, holds on the ⊥-orbit by Cor 2.1), replacing it by
 its reduct `red dᵢ` keeps the chain valid — `red dᵢ` keeps `dᵢ`'s endsequent and own-permissibility
