@@ -5239,20 +5239,22 @@ def ZPhi (C : Set V) (d : V) : Prop :=
   (∃ s at' p d0 d1, d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ zIndWff d) ∨
   (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValidF s r ds) ∨
   (∃ s p k, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s)) ∨
-  (∃ s p, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s))
+  (∃ s p, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s)) ∨
+  (∃ s C, d = zAx1 s C ∧ inAnt (seqSucc s) (seqAnt s))
 
 /-- `ZPhi` is monotone in the premise set `C` (a `Fixpoint.Construction.monotone` field). -/
 lemma zphi_monotone {C C' : Set V} (h : C ⊆ C') {d : V} : ZPhi C d → ZPhi C' d := by
   rintro (hd | ⟨s, a, p, d0, rfl, hd, hsc, hwff⟩ | ⟨s, p, d0, rfl, hd, hsc, hwff⟩ |
     ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ | ⟨s, r, ds, rfl, hseq, hall, hvalid⟩ |
-    ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩)
+    ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ | ⟨s, C, rfl, hin⟩)
   · exact Or.inl hd
   · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h hd, hsc, hwff⟩)
   · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h hd, hsc, hwff⟩))
   · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h h0, h h1, hwff⟩)))
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, fun i hi => h (hall i hi), hvalid⟩))))
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp, hin⟩)))))
-  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, p, rfl, hp, hin⟩)))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩))))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, C, rfl, hin⟩))))))
 
 /-- `ZPhi` is strongly finite: every premise of `d` is `< d`, so the rule fires already over
 `{y ∈ C | y < d}` (a `Fixpoint.Construction.StrongFinite` field). The K^r case uses
@@ -5261,7 +5263,7 @@ lemma zphi_strong_finite {C : Set V} {d : V} :
     ZPhi C d → ZPhi {y | y ∈ C ∧ y < d} d := by
   rintro (hd | ⟨s, a, p, d0, rfl, hd, hsc, hwff⟩ | ⟨s, p, d0, rfl, hd, hsc, hwff⟩ |
     ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ | ⟨s, r, ds, rfl, hseq, hall, hvalid⟩ |
-    ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩)
+    ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ | ⟨s, C, rfl, hin⟩)
   · exact Or.inl hd
   · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, ⟨hd, by simp⟩, hsc, hwff⟩)
   · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, ⟨hd, by simp⟩, hsc, hwff⟩))
@@ -5270,7 +5272,8 @@ lemma zphi_strong_finite {C : Set V} {d : V} :
       ⟨s, r, ds, rfl, hseq, fun i hi => ⟨hall i hi, ?_⟩, hvalid⟩))))
     exact lt_trans (lt_of_mem_rng (hseq.znth hi)) (ds_lt_zK s r ds)
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp, hin⟩)))))
-  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, p, rfl, hp, hin⟩)))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩))))))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, C, rfl, hin⟩))))))
 
 /-- Bounded-quantifier form of `ZPhi` (every existential is `< d`), the shape the arithmetized
 `blueprint` core matches. Mirrors Foundation `Theory.Derivation.phi_iff`. -/
@@ -5286,11 +5289,12 @@ private lemma zphi_iff (C d : V) :
       (∃ s < d, ∃ r < d, ∃ ds < d,
         d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValidF s r ds) ∨
       (∃ s < d, ∃ p < d, ∃ k < d, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s)) ∨
-      (∃ s < d, ∃ p < d, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s)) ) := by
+      (∃ s < d, ∃ p < d, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s)) ∨
+      (∃ s < d, ∃ C < d, d = zAx1 s C ∧ inAnt (seqSucc s) (seqAnt s)) ) := by
   constructor
   · rintro (⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, h, hsc, hwff⟩ | ⟨s, p, d0, rfl, h, hsc, hwff⟩ |
       ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ | ⟨s, r, ds, rfl, hseq, hall, hvalid⟩ |
-      ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩)
+      ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ | ⟨s, C, rfl, hin⟩)
     · exact Or.inl ⟨s, by simp, rfl, hin⟩
     · exact Or.inr (Or.inl ⟨s, by simp, a, by simp, p, by simp, d0, by simp, rfl, h, hsc, hwff⟩)
     · exact Or.inr (Or.inr (Or.inl ⟨s, by simp, p, by simp, d0, by simp, rfl, h, hsc, hwff⟩))
@@ -5300,20 +5304,23 @@ private lemma zphi_iff (C d : V) :
         ⟨s, by simp, r, by simp, ds, by simp, rfl, hseq, hall, hvalid⟩))))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
         ⟨s, by simp, p, by simp, k, by simp, rfl, hp, hin⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨s, by simp, p, by simp, rfl, hp, hin⟩)))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨s, by simp, p, by simp, rfl, hp, hin⟩))))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        ⟨s, by simp, C, by simp, rfl, hin⟩))))))
   · rintro (⟨s, _, rfl, hin⟩ | ⟨s, _, a, _, p, _, d0, _, rfl, h, hsc, hwff⟩ |
       ⟨s, _, p, _, d0, _, rfl, h, hsc, hwff⟩ |
       ⟨s, _, at', _, p, _, d0, _, d1, _, rfl, h0, h1, hwff⟩ |
       ⟨s, _, r, _, ds, _, rfl, hseq, hall, hvalid⟩ |
-      ⟨s, _, p, _, k, _, rfl, hp, hin⟩ | ⟨s, _, p, _, rfl, hp, hin⟩)
+      ⟨s, _, p, _, k, _, rfl, hp, hin⟩ | ⟨s, _, p, _, rfl, hp, hin⟩ | ⟨s, _, C, _, rfl, hin⟩)
     · exact Or.inl ⟨s, rfl, hin⟩
     · exact Or.inr (Or.inl ⟨s, a, p, d0, rfl, h, hsc, hwff⟩)
     · exact Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, h, hsc, hwff⟩))
     · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩)))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, r, ds, rfl, hseq, hall, hvalid⟩))))
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, k, rfl, hp, hin⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, p, rfl, hp, hin⟩)))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩))))))
+    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, C, rfl, hin⟩))))))
 
 open LO.FirstOrder.Arithmetic in
 /-- Arithmetized `𝚫₁` core for the Z-derivation `Fixpoint` (mirrors Foundation
@@ -5337,7 +5344,9 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ p < d, ∃ k < d, !zAxAllGraph d s p k ∧ !(isUFormula ℒₒᵣ).sigma p ∧
         ∃ ap, !qqAllDef ap p ∧ ∃ sa, !seqAntDef sa s ∧ !inAntDef ap sa) ∨
       (∃ s < d, ∃ p < d, !zAxNegGraph d s p ∧ !(isUFormula ℒₒᵣ).sigma p ∧
-        ∃ nb, !inegFDef nb p ∧ ∃ sa, !seqAntDef sa s ∧ !inAntDef nb sa) )”)
+        ∃ nb, !inegFDef nb p ∧ ∃ sa, !seqAntDef sa s ∧ !inAntDef nb sa) ∨
+      (∃ s < d, ∃ cc < d, !zAx1Graph d s cc ∧
+        ∃ ss, !seqSuccDef ss s ∧ ∃ sa, !seqAntDef sa s ∧ !inAntDef ss sa) )”)
   (.mkPi “d C.
     ( (∃ s < d, !zAtomGraph d s ∧
         ∀ ss, !seqSuccDef ss s → ∀ sa, !seqAntDef sa s → !inAntDef ss sa) ∨
@@ -5355,14 +5364,16 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ p < d, ∃ k < d, !zAxAllGraph d s p k ∧ !(isUFormula ℒₒᵣ).pi p ∧
         ∀ ap, !qqAllDef ap p → ∀ sa, !seqAntDef sa s → !inAntDef ap sa) ∨
       (∃ s < d, ∃ p < d, !zAxNegGraph d s p ∧ !(isUFormula ℒₒᵣ).pi p ∧
-        ∀ nb, !inegFDef nb p → ∀ sa, !seqAntDef sa s → !inAntDef nb sa) )”)⟩
+        ∀ nb, !inegFDef nb p → ∀ sa, !seqAntDef sa s → !inAntDef nb sa) ∨
+      (∃ s < d, ∃ cc < d, !zAx1Graph d s cc ∧
+        ∀ ss, !seqSuccDef ss s → ∀ sa, !seqAntDef sa s → !inAntDef ss sa) )”)⟩
 
 lemma zPhi_definable :
     𝚫₁.Defined (fun v : Fin 2 → V ↦ ZPhi {x | x ∈ v 1} (v 0)) zblueprint.core := .mk <| by
   constructor
   · intro v; simp [zblueprint]
   · intro v; simp [zphi_iff, zblueprint, zAtom_defined.iff, zIall_defined.iff, zIneg_defined.iff,
-      zInd_defined.iff, zK_defined.iff, zAxAll_defined.iff, zAxNeg_defined.iff,
+      zInd_defined.iff, zK_defined.iff, zAxAll_defined.iff, zAxNeg_defined.iff, zAx1_defined.iff,
       seq_defined.iff, lh_defined.iff, znth_defined.iff,
       seqSucc_defined.iff, seqAnt_defined.iff, inAnt_defined.iff,
       qqForall_defined.iff, inegF_defined.iff, zInegWff_defined.iff, zIallWff_defined.iff,
@@ -5419,7 +5430,7 @@ theorem isNF_iotil_of_ZDerivation : ∀ d : V, ZDerivation d → isNF (iotil d) 
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, hd0, _⟩ |
       ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ | ⟨s, r, ds, rfl, hds, hmem, _⟩ |
-      ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+      ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
     · exact isNF_iotil_zAtom s
     · exact isNF_iotil_zIall (hC d0 hd0).2
     · exact isNF_iotil_zIneg (hC d0 hd0).2
@@ -5427,6 +5438,7 @@ theorem isNF_iotil_of_ZDerivation : ∀ d : V, ZDerivation d → isNF (iotil d) 
     · exact isNF_iotil_zK hds (fun i hi => (hC (znth ds i) (hmem i hi)).2)
     · exact isNF_iotil_zAxAll hp
     · exact isNF_iotil_zAxNeg hp
+    · exact isNF_iotil_zAx1 s C
 
 /-- **Structural descent over `ZDerivation` for the I-rules** (Buchholz Thm 4.2, cases 2–3 = LH1/LH2):
 for any Z-derivation `d` built by `I^a_∀xF` or `I_¬A` (`zTag d ∈ {1,2}`), the reduct strictly lowers
@@ -5443,10 +5455,11 @@ theorem iord_iR_descent_I :
   · intro C _ d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
       ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
     · rintro (h | h) <;> simp at h
     · rintro _; exact iord_descent_iR_zIall s a p d0
     · rintro _; exact iord_descent_iR_zIneg s p d0
+    · rintro (h | h) <;> simp at h
     · rintro (h | h) <;> simp at h
     · rintro (h | h) <;> simp at h
     · rintro (h | h) <;> simp at h
@@ -5492,12 +5505,13 @@ theorem iord_descent_iRInd_of_ZDerivation (d : V) (hd : ZDerivation d) (htag : z
     icmp (iord (iRInd d)) (iord d) = 0 := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp at htag
   · simp at htag
   · simp at htag
   · exact iord_descent_iRInd_zInd s at' p d0 d1
       (isNF_iotil_of_ZDerivation d0 hd0) (isNF_iotil_of_ZDerivation d1 hd1)
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -5519,13 +5533,14 @@ lemma zDerivation_zK_inv {s r ds : V} (hZ : ZDerivation (zK s r ds)) :
     Seq ds ∧ ∀ i < lh ds, ZDerivation (znth ds i) := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a, p, d0, h, _⟩ | ⟨s', p, d0, h, _⟩ |
     ⟨s', at', p, d0, d1, h, _, _⟩ | ⟨s', r', ds', h, hds', hmem', _⟩ |
-    ⟨s', p, k, h, _⟩ | ⟨s', p, h, _⟩
+    ⟨s', p, k, h, _⟩ | ⟨s', p, h, _⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · obtain rfl : ds = ds' := by simpa using congrArg zKseq h
     exact ⟨hds', fun i hi => hmem' i hi⟩
+  · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
 
@@ -5542,7 +5557,7 @@ lemma tag_uformula_of_ZDerivation {v : V} (hZ : ZDerivation v) :
     (zTag v = 6 → IsUFormula ℒₒᵣ (zAxNegF v)) := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+    ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
   · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
   · exact ⟨fun _ => by rw [zIallF_zIall]; exact hwff.2.2.isUFormula,
       fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
@@ -5554,6 +5569,7 @@ lemma tag_uformula_of_ZDerivation {v : V} (hZ : ZDerivation v) :
       fun _ => by rw [zAxAllF_zAxAll]; exact hp, fun h => by simp at h⟩
   · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h,
       fun _ => by rw [zAxNegF_zAxNeg]; exact hp⟩
+  · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
 
 /-- **Faithful chain validity from a `ZDerivation`**: after the re-point, the `ZPhi` `zK` disjunct carries
 `zKValidF` (Buchholz's genuine criticality-free `K^r` validity, §3 clause 5), so a `ZDerivation` of a chain
@@ -5562,7 +5578,7 @@ property the *reduction* (Def 3.2 case 5) supplies at the reduction site. -/
 lemma zKValidF_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) : zKValidF s r ds := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a, p, d0, h, _⟩ | ⟨s', p, d0, h, _⟩ |
     ⟨s', at', p, d0, d1, h, _, _⟩ | ⟨s', r', ds', h, hds', hmem', hvalid'⟩ |
-    ⟨s', p, k, h, _⟩ | ⟨s', p, h, _⟩
+    ⟨s', p, k, h, _⟩ | ⟨s', p, h, _⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -5571,6 +5587,7 @@ lemma zKValidF_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) : z
     obtain rfl : r = r' := by simpa using congrArg zKrank h
     obtain rfl : ds = ds' := by simpa using congrArg zKseq h
     exact hvalid'
+  · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
 
@@ -5594,7 +5611,7 @@ lemma iperm_tp_fstIdx_of_ZDerivation {d : V} (hZ : ZDerivation d) :
     iperm (tp d) (fstIdx d) := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, hsc, _⟩ |
     ⟨s, p, d0, rfl, _, hsc, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩
+    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩ | ⟨s, C, rfl, _⟩
   · rw [tp_zAtom]; exact iperm_isymRep _
   · rw [fstIdx_zIall]; exact iperm_tp_zIall hsc
   · rw [fstIdx_zIneg]; exact iperm_tp_zIneg hsc
@@ -5602,6 +5619,7 @@ lemma iperm_tp_fstIdx_of_ZDerivation {d : V} (hZ : ZDerivation d) :
   · rw [tp_zK]; exact iperm_isymRep _
   · rw [fstIdx_zAxAll]; exact iperm_tp_zAxAll hin
   · rw [fstIdx_zAxNeg]; exact iperm_tp_zAxNeg hin
+  · rw [tp_zAx1]; exact iperm_isymRep _
 
 /-- **All-`n` premise NF** of a `ZDerivation` chain: in-range premises are NF (`isNF_iotil_of_ZDerivation`),
 out-of-range default `0` is NF (`isNF_iotil_zero`). Discharges the `hNF : ∀ n` side condition. -/
@@ -6052,7 +6070,7 @@ lemma iRedDescent_iR_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDerivat
     iRedDescent (iR d) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, hd0, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · rw [iR_zIall]; exact iRedDescent_zIall (isNF_iotil_of_ZDerivation d0 hd0)
   · rw [iR_zIneg]; exact iRedDescent_zIneg (isNF_iotil_of_ZDerivation d0 hd0)
@@ -6060,6 +6078,7 @@ lemma iRedDescent_iR_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDerivat
   · rw [tp_zK] at htp; exact absurd htp (by simp)
   · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
   · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
+  · rw [tp_zAx1] at htp; exact absurd htp (by simp)
 
 /-! ## C0.5 — the Foundation→Z bridge (NEXT milestone, lap-62 reflection)
 
@@ -6544,7 +6563,7 @@ lemma tp_isymR_form_wff {d A : V} (hZ : ZDerivation d) (h : tp d = isymR A) :
     (∃ p, A = (^∀ p : V) ∧ IsSemiformula ℒₒᵣ 1 p) ∨ (∃ p, A = inegF p ∧ IsUFormula ℒₒᵣ p) := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [tp_zAtom] at h; exact absurd h (by simp)
   · rw [tp_zIall] at h; exact Or.inl ⟨p, ((isymR_inj _ _).mp h).symm, hwff.2.2⟩
   · rw [tp_zIneg] at h; exact Or.inr ⟨p, ((isymR_inj _ _).mp h).symm, hwff.2.2⟩
@@ -6552,6 +6571,7 @@ lemma tp_isymR_form_wff {d A : V} (hZ : ZDerivation d) (h : tp d = isymR A) :
   · rw [tp_zK] at h; exact absurd h (by simp)
   · rw [tp_zAxAll] at h; exact absurd h (by simp)
   · rw [tp_zAxNeg] at h; exact absurd h (by simp)
+  · rw [tp_zAx1] at h; exact absurd h (by simp)
 
 /-- **T3.4(a) strict rank bound for the stripped cut formula — fully self-contained.** From the R-redex
 premise `dᵢ` being a `ZDerivation` (`hZi`) with `tp dᵢ = R_{A_i}` (`hRi`, `A_i = chainAsucc …`) of rank
@@ -6962,6 +6982,8 @@ noncomputable def zsubstNext (d s a t : V) : V :=
     zAxAll (fvSubstSeqt a t (fstIdx d)) (fvSubst ℒₒᵣ a t (zAxAllF d)) (zAxAllK d)
   else if zTag d = 6 then
     zAxNeg (fvSubstSeqt a t (fstIdx d)) (fvSubst ℒₒᵣ a t (zAxNegF d))
+  else if zTag d = 7 then
+    zAx1 (fvSubstSeqt a t (fstIdx d)) (zAx1F d)
   else d
 
 noncomputable def _root_.LO.FirstOrder.Arithmetic.zsubstNextDef : 𝚺₁.Semisentence 5 := .mkSigma
@@ -6982,7 +7004,8 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zsubstNextDef : 𝚺₁.Semise
     ∨ (tg = 5 ∧ ∃ pf, !zAxAllFDef pf d ∧ ∃ sp, !(fvSubstGraph ℒₒᵣ) sp a t pf ∧
         ∃ kk, !zAxAllKDef kk d ∧ !zAxAllGraph y s' sp kk)
     ∨ (tg = 6 ∧ ∃ pf, !zAxNegFDef pf d ∧ ∃ sp, !(fvSubstGraph ℒₒᵣ) sp a t pf ∧ !zAxNegGraph y s' sp)
-    ∨ (tg ≠ 0 ∧ tg ≠ 1 ∧ tg ≠ 2 ∧ tg ≠ 3 ∧ tg ≠ 4 ∧ tg ≠ 5 ∧ tg ≠ 6 ∧ y = d) )”
+    ∨ (tg = 7 ∧ ∃ pf, !zAx1FDef pf d ∧ !zAx1Graph y s' pf)
+    ∨ (tg ≠ 0 ∧ tg ≠ 1 ∧ tg ≠ 2 ∧ tg ≠ 3 ∧ tg ≠ 4 ∧ tg ≠ 5 ∧ tg ≠ 6 ∧ tg ≠ 7 ∧ y = d) )”
 
 set_option maxHeartbeats 1000000 in
 instance zsubstNext_defined : 𝚺₁-Function₄ (zsubstNext : V → V → V → V → V) via zsubstNextDef :=
@@ -6994,7 +7017,8 @@ instance zsubstNext_defined : 𝚺₁-Function₄ (zsubstNext : V → V → V �
       (termFvSubst.defined (L := ℒₒᵣ)).iff, zIndP_defined.iff, zIndPrem0_defined.iff,
       zIndPrem1_defined.iff, zInd_defined.iff, zKrank_defined.iff, zKseq_defined.iff,
       tblMapSeq_defined.iff, zK_defined.iff, zAxAllF_defined.iff, zAxAllK_defined.iff,
-      zAxAll_defined.iff, zAxNegF_defined.iff, zAxNeg_defined.iff]
+      zAxAll_defined.iff, zAxNegF_defined.iff, zAxNeg_defined.iff, zAx1F_defined.iff,
+      zAx1_defined.iff]
     by_cases h0 : zTag (v 1) = 0
     · simp [h0]
     · by_cases h1 : zTag (v 1) = 1
@@ -7009,7 +7033,9 @@ instance zsubstNext_defined : 𝚺₁-Function₄ (zsubstNext : V → V → V �
               · simp [h0, h1, h2, h3, h4, h5]
               · by_cases h6 : zTag (v 1) = 6
                 · simp [h0, h1, h2, h3, h4, h5, h6]
-                · simp [h0, h1, h2, h3, h4, h5, h6]
+                · by_cases h7 : zTag (v 1) = 7
+                  · simp [h0, h1, h2, h3, h4, h5, h6, h7]
+                  · simp [h0, h1, h2, h3, h4, h5, h6, h7]
 
 instance zsubstNext_definable : 𝚺₁-Function₄ (zsubstNext : V → V → V → V → V) :=
   zsubstNext_defined.to_definable
@@ -7219,6 +7245,9 @@ lemma iRcritG_congr {d : V} {ρ ρ' : V → V} (hi : ρ (redexI d) = ρ' (redexI
 @[simp] lemma red_zAxNeg (s p : V) : red (zAxNeg s p) = zAxNeg s p := by
   rw [red_eq_iRNextG (by simp [zAxNeg]), iRNextG]; simp [zTag_zAxNeg]
 
+@[simp] lemma red_zAx1 (s C : V) : red (zAx1 s C) = zAx1 s C := by
+  rw [red_eq_iRNextG (by simp [zAx1]), iRNextG]; simp [zTag_zAx1]
+
 /-- **The K-rule recursion equation** for the GENUINE reduct: `red` of a chain is the tag-4 DISPATCH
 `iRK` (Buchholz Def 3.2 case 5: 5.1 critical / 5.2.1 splice / 5.2.2 replace), reading per-premise reducts
 from the table-so-far `redTable (zK s r ds - 1)`. The branch-specific recursion equations
@@ -7292,7 +7321,7 @@ lemma tp_isymRep_of_emptyAnt_botSucc {s d : V} (hZ : ZDerivation d)
     (hperm : iperm (tp d) s) : tp d = isymRep := by
   rcases zDerivation_iff.mp hZ with ⟨s', rfl, _⟩ | ⟨s', a, p, d0, rfl, _, _⟩ | ⟨s', p, d0, rfl, _, _⟩ |
     ⟨s', at', p, d0, d1, rfl, _, _⟩ | ⟨s', r, ds, rfl, _, _, _⟩ |
-    ⟨s', p, k, rfl, _, _⟩ | ⟨s', p, rfl, _, _⟩
+    ⟨s', p, k, rfl, _, _⟩ | ⟨s', p, rfl, _, _⟩ | ⟨s', C, rfl, _⟩
   · rw [tp_zAtom]
   · rw [tp_zIall] at hperm
     rw [iperm_isymR_iff, hsucc] at hperm
@@ -7308,6 +7337,7 @@ lemma tp_isymRep_of_emptyAnt_botSucc {s d : V} (hZ : ZDerivation d)
   · rw [tp_zAxNeg] at hperm
     rw [iperm_isymLk_iff, hant] at hperm
     exact absurd hperm (by simp [inAnt, lh_empty])
+  · rw [tp_zAx1]
 
 /-- **The selected premise of a `∅→⊥` chain is `Rep`.** For a chain `zK s r ds` deriving `∅→⊥` whose
 least-permissible premise index is in range (`permIdx < lh ds`), that premise has `tp = Rep` (Cor 2.1
@@ -7336,7 +7366,7 @@ lemma fstIdx_red_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3
     fstIdx (red d) = fstIdx d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp [zTag_zAtom] at htag
   · simp [zTag_zIall] at htag
   · simp [zTag_zIneg] at htag
@@ -7347,6 +7377,7 @@ lemma fstIdx_red_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3
     simpa only [zKseq_zK] using this
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
+  · simp [zTag_zAx1] at htag
 
 set_option maxHeartbeats 800000 in
 /-- **`red` keeps the `∅→⊥` conclusion on the ⊥-orbit.** Discharges `fstIdx_red_of_tag_Ind_or_K`'s `hsel`
@@ -7358,7 +7389,7 @@ lemma fstIdx_red_of_emptyAnt_botSucc {d : V} (hZ : ZDerivation d)
     (htag : zTag d = 3 ∨ zTag d = 4) : fstIdx (red d) = fstIdx d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp [zTag_zAtom] at htag
   · simp [zTag_zIall] at htag
   · simp [zTag_zIneg] at htag
@@ -7370,6 +7401,7 @@ lemma fstIdx_red_of_emptyAnt_botSucc {d : V} (hZ : ZDerivation d)
     exact tp_selected_isymRep_of_emptyAnt_botSucc hZ hant hsucc h1
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
+  · simp [zTag_zAx1] at htag
 
 /-- **`red` keeps the chain conclusion when the selected premise is `Rep` (the GENERAL Rep-reduction, lap
 100).** Generalizes `fstIdx_red_of_emptyAnt_botSucc`'s K-case OFF the `∅→⊥` hypothesis: `fstIdx (red (zK s r
@@ -7546,7 +7578,7 @@ lemma iRedDescent_iR2_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDeriva
     iRedDescent (iR2 d) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, hd0, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · rw [iR2_zIall]; exact iRedDescent_zIall (isNF_iotil_of_ZDerivation d0 hd0)
   · rw [iR2_zIneg]; exact iRedDescent_zIneg (isNF_iotil_of_ZDerivation d0 hd0)
@@ -7554,6 +7586,7 @@ lemma iRedDescent_iR2_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ : ZDeriva
   · rw [tp_zK] at htp; exact absurd htp (by simp)
   · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
   · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
+  · rw [tp_zAx1] at htp; exact absurd htp (by simp)
 
 /-! ### j-side §5 atomic-axiom reduct bundle (the K-case's L-premise descent, lap 66)
 
@@ -7607,7 +7640,7 @@ lemma iRedDescent_zAxReduct_of_iRedDescent {e d : V} (he : ZDerivation e)
     (h : iRedDescent e d) : iRedDescent (zAxReduct e) d := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+    ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
   · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zAtom]) (by simp [zTag_zAtom])]
   · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zIall]) (by simp [zTag_zIall])]
   · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zIneg]) (by simp [zTag_zIneg])]
@@ -7625,6 +7658,7 @@ lemma iRedDescent_zAxReduct_of_iRedDescent {e d : V} (he : ZDerivation e)
       _ (le_max_left _ _) _ (le_trans (le_max_left _ _) (le_max_right _ _))
       _ (le_trans (le_max_right _ _) (le_max_right _ _))
       (icmp_iotil_zAx1_zAxNeg hp) h.otil_lt
+  · rwa [zAxReduct_eq_self_of_ne (by simp [zTag_zAx1]) (by simp [zTag_zAx1])]
 
 /-- **i-side ρ-fact** (R-redex premise): for an I-rule premise `d` (`tp d = R_A`), the wrapped recursive
 reduct `zAxReduct (iR2 d)` satisfies the `iRedDescent` bundle. `iR2 d` is the I-rule's sub-derivation
@@ -7636,7 +7670,7 @@ lemma iRedDescent_zAxReduct_iR2_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ
   have hZred : ZDerivation (iR2 d) := by
     rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, hd0, _⟩ |
       ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
     · rw [tp_zAtom] at htp; exact absurd htp (by simp)
     · rw [iR2_zIall]; exact hd0
     · rw [iR2_zIneg]; exact hd0
@@ -7644,6 +7678,7 @@ lemma iRedDescent_zAxReduct_iR2_of_tp_isymR {d A : V} (htp : tp d = isymR A) (hZ
     · rw [tp_zK] at htp; exact absurd htp (by simp)
     · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
     · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
+    · rw [tp_zAx1] at htp; exact absurd htp (by simp)
   exact iRedDescent_zAxReduct_of_iRedDescent hZred hbase
 
 /-- **j-side ρ-fact** (L-axiom redex premise): for a §5 atomic-axiom premise `d` (`tp d = L^k_A`),
@@ -7654,7 +7689,7 @@ lemma iRedDescent_zAxReduct_iR2_of_tp_isymLk {d k A : V} (htp : tp d = isymLk k 
     (hZ : ZDerivation d) : iRedDescent (zAxReduct (iR2 d)) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k', rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+    ⟨s, p, k', rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · rw [tp_zIall] at htp; exact absurd htp (by simp)
   · rw [tp_zIneg] at htp; exact absurd htp (by simp)
@@ -7662,6 +7697,7 @@ lemma iRedDescent_zAxReduct_iR2_of_tp_isymLk {d k A : V} (htp : tp d = isymLk k 
   · rw [tp_zK] at htp; exact absurd htp (by simp)
   · rw [iR2_zAxAll]; exact iRedDescent_zAxReduct_zAxAll hp
   · rw [iR2_zAxNeg]; exact iRedDescent_zAxReduct_zAxNeg hp
+  · rw [tp_zAx1] at htp; exact absurd htp (by simp)
 
 /-! ### The tag-4 (K-rule) descent, conditional on chain validity
 
@@ -7862,7 +7898,7 @@ lemma iord_descent_iR2_struct (d : V) (hd : ZDerivation d)
     icmp (iord (iR2 d)) (iord d) = 0 := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, h0, h1, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp [zTag_zAtom] at htag
   · rw [iR2_zIall]; exact iord_descent_zIall s a p d0
   · rw [iR2_zIneg]; exact iord_descent_zIneg s p d0
@@ -7877,6 +7913,7 @@ lemma iord_descent_iR2_struct (d : V) (hd : ZDerivation d)
       (zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid, hcr⟩)
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
+  · simp [zTag_zAx1] at htag
 
 /-! ## C1 — `ZDerivesEmpty` and the per-step descent on a contradiction derivation
 
@@ -7903,7 +7940,7 @@ lemma zTag_reducible_of_emptyAnt {d : V} (hZ : ZDerivation d)
     zTag d = 1 ∨ zTag d = 2 ∨ zTag d = 3 ∨ zTag d = 4 := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩
+    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩ | ⟨s, C, rfl, hin⟩
   · exfalso; rw [fstIdx_zAtom] at hemp; rw [hemp] at hin; simp [inAnt, lh_empty] at hin
   · exact Or.inl (by simp)
   · exact Or.inr (Or.inl (by simp))
@@ -7911,6 +7948,7 @@ lemma zTag_reducible_of_emptyAnt {d : V} (hZ : ZDerivation d)
   · exact Or.inr (Or.inr (Or.inr (by simp)))
   · exfalso; rw [fstIdx_zAxAll] at hemp; rw [hemp] at hin; simp [inAnt, lh_empty] at hin
   · exfalso; rw [fstIdx_zAxNeg] at hemp; rw [hemp] at hin; simp [inAnt, lh_empty] at hin
+  · exfalso; rw [fstIdx_zAx1] at hemp; rw [hemp] at hin; simp [inAnt, lh_empty] at hin
 
 /-- **One descent step on an empty-sequent derivation.** Combining leaf-soundness
 (`zTag_reducible_of_emptyAnt`) with the capstone `iord_descent_iR2_struct`: every `iR2`-step of a
@@ -7938,7 +7976,7 @@ lemma fstIdx_iR2_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3
     fstIdx (iR2 d) = fstIdx d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp [zTag_zAtom] at htag
   · simp [zTag_zIall] at htag
   · simp [zTag_zIneg] at htag
@@ -7946,6 +7984,7 @@ lemma fstIdx_iR2_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3
   · simp only [iR2_zK, iCritReduct, fstIdx_zK]
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
+  · simp [zTag_zAx1] at htag
 
 /-- The `iR2`-reduct of an `Ind`/`K` derivation is a `Rep`-tagged chain `zK (fstIdx d) …` (`iRInd` for
 `Ind`, `iCritReduct` for `K`). The shape that makes its principal-formula well-formedness automatic. -/
@@ -7953,7 +7992,7 @@ lemma iR2_eq_zK_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3 
     ∃ r ds, iR2 d = zK (fstIdx d) r ds := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp [zTag_zAtom] at htag
   · simp [zTag_zIall] at htag
   · simp [zTag_zIneg] at htag
@@ -7961,6 +8000,7 @@ lemma iR2_eq_zK_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3 
   · exact ⟨_, _, by rw [iR2_zK, iCritReduct, fstIdx_zK]⟩
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
+  · simp [zTag_zAx1] at htag
 
 /-- The `iR2`-reduct of an `Ind`/`K` derivation is tag-4 (`zK`). -/
 lemma zTag_iR2_of_tag_Ind_or_K {d : V} (hZ : ZDerivation d) (htag : zTag d = 3 ∨ zTag d = 4) :
@@ -8002,7 +8042,7 @@ lemma zTag_Ind_or_K_of_ZDerivesEmpty {d : V} (h : ZDerivesEmpty d) : zTag d = 3 
   obtain ⟨hZ, hant, hsucc⟩ := h
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, _, hsc, _⟩ |
     ⟨s, p, d0, rfl, _, hsc, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩
+    ⟨s, p, k, rfl, _, hin⟩ | ⟨s, p, rfl, _, hin⟩ | ⟨s, C, rfl, hin⟩
   · exfalso; rw [fstIdx_zAtom] at hant; rw [hant] at hin; simp [inAnt, lh_empty] at hin
   · rw [fstIdx_zIall] at hsucc
     exact absurd (hsucc.symm.trans hsc) (by simp [qqAll, qqFalsum])
@@ -8012,6 +8052,7 @@ lemma zTag_Ind_or_K_of_ZDerivesEmpty {d : V} (h : ZDerivesEmpty d) : zTag d = 3 
   · exact Or.inr (by simp)
   · exfalso; rw [fstIdx_zAxAll] at hant; rw [hant] at hin; simp [inAnt, lh_empty] at hin
   · exfalso; rw [fstIdx_zAxNeg] at hant; rw [hant] at hin; simp [inAnt, lh_empty] at hin
+  · exfalso; rw [fstIdx_zAx1] at hant; rw [hant] at hin; simp [inAnt, lh_empty] at hin
 
 /-- **`iR2` preserves `ZDerivesEmpty`, modulo reduction-soundness.** A contradiction derivation reduces
 to a contradiction derivation: its tag is `Ind`/`K` (`zTag_Ind_or_K_of_ZDerivesEmpty`), so `iR2 d` is a
@@ -8039,7 +8080,7 @@ lemma zDerivation_zInd_inv {s at' p d0 d1 : V} (hZ : ZDerivation (zInd s at' p d
     ZDerivation d0 ∧ ZDerivation d1 ∧ zIndWff (zInd s at' p d0 d1) := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a, p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, hd0, hd1, hwff⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
+    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -8049,6 +8090,7 @@ lemma zDerivation_zInd_inv {s at' p d0 d1 : V} (hZ : ZDerivation (zInd s at' p d
     obtain rfl : d0 = d0' := by simpa using congrArg zIndPrem0 h
     obtain rfl : d1 = d1' := by simpa using congrArg zIndPrem1 h
     exact ⟨hd0, hd1, hwff⟩
+  · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -8068,13 +8110,14 @@ lemma zDerivation_zIall_inv {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0)) :
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, hd0, hsc, hwff⟩ |
     ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
+    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · obtain rfl : s = s' := by simpa using congrArg fstIdx h
     obtain rfl : a = a' := by simpa using congrArg (fun d => π₁ (zRest d)) h
     obtain rfl : p = p' := by simpa using congrArg zIallF h
     obtain rfl : d0 = d0' := by simpa using congrArg zIallPrem h
     exact ⟨hd0, hsc, hwff⟩
+  · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -8089,13 +8132,14 @@ lemma zDerivation_zIneg_inv {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ |
     ⟨s', p', d0', h, hd0, hsc, hwff⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩
+    ⟨s', p', k, h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · obtain rfl : s = s' := by simpa using congrArg fstIdx h
     obtain rfl : p = p' := by simpa using congrArg zInegF h
     obtain rfl : d0 = d0' := by simpa using congrArg zInegPrem h
     exact ⟨hd0, hsc, hwff⟩
+  · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -8122,7 +8166,7 @@ lemma zDerivation_zAxAll_inv {s p k : V} (hZ : ZDerivation (zAxAll s p k)) :
     IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s) := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-    ⟨s', p', k', h, hp, hin⟩ | ⟨s', p', h, _, _⟩
+    ⟨s', p', k', h, hp, hin⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -8132,6 +8176,7 @@ lemma zDerivation_zAxAll_inv {s p k : V} (hZ : ZDerivation (zAxAll s p k)) :
     obtain rfl : p = p' := by simpa using congrArg zAxAllF h
     exact ⟨hp, hin⟩
   · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
 
 /-- **§5 ¬-axiom inversion**: a `ZDerivation` of the left-axiom `zAxNeg s p` carries the matrix's
 formula-hood and the side condition `¬p ∈ Γ`. Peels the L-redex premise (the `inegF p` cut formula). -/
@@ -8139,7 +8184,7 @@ lemma zDerivation_zAxNeg_inv {s p : V} (hZ : ZDerivation (zAxNeg s p)) :
     IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s) := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, hp, hin⟩
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, hp, hin⟩ | ⟨s', C, h, _⟩
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
@@ -8149,6 +8194,7 @@ lemma zDerivation_zAxNeg_inv {s p : V} (hZ : ZDerivation (zAxNeg s p)) :
   · obtain rfl : s = s' := by simpa using congrArg fstIdx h
     obtain rfl : p = p' := by simpa using congrArg zAxNegF h
     exact ⟨hp, hin⟩
+  · exact absurd (congrArg zTag h) (by simp)
 
 /-- **Conclusion-tracking, §5 ∀-axiom (L-rule replace, completes frontier item 1).** The reduced
 conclusion for an axAll selected premise: `tp(Ax^{∀p,k}) = L^k_{∀p}`, so `tpReduce (tp (zAxAll s p k)) s 0
@@ -8176,7 +8222,7 @@ lemma zDerivation_zAtom_inv {s : V} (hZ : ZDerivation (zAtom s)) :
     inAnt (seqSucc s) (seqAnt s) := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, hin⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C, h, _⟩
   · obtain rfl : s = s' := by simpa using congrArg fstIdx h
     exact hin
   · exact absurd (congrArg zTag h) (by simp)
@@ -8185,6 +8231,34 @@ lemma zDerivation_zAtom_inv {s : V} (hZ : ZDerivation (zAtom s)) :
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+
+/-- **§5 logical-axiom introduction (`Ax^1`, rule 1, Buchholz `:844`).** The §5 logical axiom `Γ→C` with
+`C∈Γ` is a genuine `ZDerivation`: it is the 8th `ZPhi` disjunct, whose only side condition is that the
+succedent lies in the antecedent. This discharges the L-side inversion residual `(O-L1)` — the corrected
+critical-cut reduct `zAx1 (seqAddAnt (cutFormula d) sⱼ) C` is a `ZDerivation` because the just-adjoined
+cut-instance `F(k)` is both the new succedent and a member of the grown antecedent. -/
+lemma zDerivation_zAx1_intro {s C : V} (hin : inAnt (seqSucc s) (seqAnt s)) :
+    ZDerivation (zAx1 s C) :=
+  zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))
+
+/-- **§5 logical-axiom inversion (`Ax^1`).** Dual of `zDerivation_zAx1_intro`: a `ZDerivation` of `zAx1 s C`
+forces its succedent into its antecedent (`C∈Γ`, the rule's side condition). Mirror of
+`zDerivation_zAtom_inv`. -/
+lemma zDerivation_zAx1_inv {s C : V} (hZ : ZDerivation (zAx1 s C)) :
+    inAnt (seqSucc s) (seqAnt s) := by
+  rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, hin⟩
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · exact absurd (congrArg zTag h) (by simp)
+  · obtain rfl : s = s' := by simpa using congrArg fstIdx h
+    exact hin
 
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
 

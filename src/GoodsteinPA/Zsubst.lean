@@ -132,6 +132,13 @@ lemma zsubst_eq_zsubstNext (a t : V) {c : V} (hpos : 0 < c) :
     if_neg (by simp), if_neg (by simp), if_neg (by simp), if_neg (by simp), if_pos (zTag_zAxNeg s p)]
   simp only [fstIdx_zAxNeg, zAxNegF_zAxNeg]
 
+@[simp] lemma zsubst_zAx1 (s C a t : V) :
+    zsubst (zAx1 s C) a t = zAx1 (fvSubstSeqt a t s) C := by
+  rw [zsubst_eq_zsubstNext a t (by simp [zAx1]), zsubstNext, if_neg (by simp), if_neg (by simp),
+    if_neg (by simp), if_neg (by simp), if_neg (by simp), if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zAx1 s C)]
+  simp only [fstIdx_zAx1, zAx1F_zAx1]
+
 /-! ### `fstIdx_zsubst` — the end-sequent of the substituted derivation computes (rung-1 step 1)
 
 For any genuine Z-derivation `d`, the reduct's end-sequent is the substituted end-sequent. Proven by
@@ -141,7 +148,7 @@ lemma fstIdx_zsubst {d : V} (a t : V) (hZ : ZDerivation d) :
     fstIdx (zsubst d a t) = fvSubstSeqt a t (fstIdx d) := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [zsubst_zAtom, fstIdx_zAtom, fstIdx_zAtom]
   · rw [zsubst_zIall, fstIdx_zIall, fstIdx_zIall]
   · rw [zsubst_zIneg, fstIdx_zIneg, fstIdx_zIneg]
@@ -149,6 +156,7 @@ lemma fstIdx_zsubst {d : V} (a t : V) (hZ : ZDerivation d) :
   · rw [zsubst_zK, fstIdx_zK, fstIdx_zK]
   · rw [zsubst_zAxAll, fstIdx_zAxAll, fstIdx_zAxAll]
   · rw [zsubst_zAxNeg, fstIdx_zAxNeg, fstIdx_zAxNeg]
+  · rw [zsubst_zAx1, fstIdx_zAx1, fstIdx_zAx1]
 
 /-! ## Substitution-commutation substrate for `ZDerivation_zsubst` (rung-1 step 2)
 
@@ -265,7 +273,7 @@ rebuilds the same Z-rule, so `zTag` is unchanged. Feeds the tag-gated formula-ho
     zTag (zsubst d a t) = zTag d := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [zsubst_zAtom]; simp
   · rw [zsubst_zIall]; simp
   · rw [zsubst_zIneg]; simp
@@ -273,6 +281,7 @@ rebuilds the same Z-rule, so `zTag` is unchanged. Feeds the tag-gated formula-ho
   · rw [zsubst_zK]; simp
   · rw [zsubst_zAxAll]; simp
   · rw [zsubst_zAxNeg]; simp
+  · rw [zsubst_zAx1]; simp
 
 /-- **Permissibility (`iperm`, Lemma 3.3) transfers under `fvSubst`.** For a genuine Z-derivation `d`,
 if its rule symbol `tp d` permits a sequent `q`, then the substituted symbol `tp (zsubst d a t)` permits
@@ -287,7 +296,7 @@ lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : 
     (h : iperm (tp d) q) : iperm (tp (zsubst d a t)) (fvSubstSeqt a t q) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
   · rw [zsubst_zAtom, tp_zAtom]; exact iperm_isymRep _
   · rw [zsubst_zIall, tp_zIall]; rw [tp_zIall] at h
     refine iperm_isymR_iff.mpr ?_
@@ -306,6 +315,7 @@ lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : 
     refine iperm_isymLk_iff.mpr ?_
     rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
     exact inAnt_fvSubstSeq (iperm_isymLk_iff.mp h)
+  · rw [zsubst_zAx1, tp_zAx1]; exact iperm_isymRep _
 
 /-- **`isChainInf` transfers under eigenvariable substitution** (the chain-structure conjunct of
 `zKValid`). Given a chain `s r ds` whose premises are Z-derivations and whose succedents are genuine
@@ -372,7 +382,7 @@ lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDeri
     tp (zsubst d a t) = tp d := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
   · simp only [zsubst_zAtom, tp_zAtom]
   · rw [zsubst_zIall, tp_zIall, tp_zIall,
       fvSubst_eq_self_of_le hwff.2.2.isUFormula (le_of_lt (lt_of_lt_of_le (p_lt_zIall s e p d0) hda))]
@@ -385,6 +395,7 @@ lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDeri
       fvSubst_eq_self_of_le hp (le_of_lt (lt_of_lt_of_le (p_lt_zAxAll s p k) hda))]
   · rw [zsubst_zAxNeg, tp_zAxNeg, tp_zAxNeg,
       fvSubst_eq_self_of_le hp (le_of_lt (lt_of_lt_of_le (p_lt_zAxNeg s p) hda))]
+  · simp only [zsubst_zAx1, tp_zAx1]
 
 /-- **Permissibility against an `a`-free well-formed conclusion reflects through substitution.** If the
 substituted symbol `I` permits the substituted conclusion `fvSubstSeqt a t s` and `s ≤ a` is a genuine
@@ -408,9 +419,10 @@ lemma zIallF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 1) :
     zIallF (zsubst d a t) = fvSubst ℒₒᵣ a t (zIallF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp at h
   · rw [zsubst_zIall]; simp
+  · simp at h
   · simp at h
   · simp at h
   · simp at h
@@ -422,10 +434,11 @@ lemma zInegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 2) :
     zInegF (zsubst d a t) = fvSubst ℒₒᵣ a t (zInegF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp at h
   · simp at h
   · rw [zsubst_zIneg]; simp
+  · simp at h
   · simp at h
   · simp at h
   · simp at h
@@ -436,7 +449,7 @@ lemma zAxAllF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 5) :
     zAxAllF (zsubst d a t) = fvSubst ℒₒᵣ a t (zAxAllF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp at h
   · simp at h
   · simp at h
@@ -444,13 +457,14 @@ lemma zAxAllF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 5) :
   · simp at h
   · rw [zsubst_zAxAll]; simp
   · simp at h
+  · simp at h
 
 /-- Principal-formula read-out under substitution (tag 6): `zAxNegF` commutes with `zsubst`. -/
 lemma zAxNegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 6) :
     zAxNegF (zsubst d a t) = fvSubst ℒₒᵣ a t (zAxNegF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp at h
   · simp at h
   · simp at h
@@ -458,6 +472,7 @@ lemma zAxNegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 6) :
   · simp at h
   · simp at h
   · rw [zsubst_zAxNeg]; simp
+  · simp at h
 
 
 /-! ## `maxEigen` — the largest eigenvariable index in a derivation (Path-X freshness foundation)
@@ -768,7 +783,7 @@ theorem maxEigen_zsubst (a t : V) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
     -- atom
     · simp [zsubst_zAtom]
     -- zIall (eigenvariable `e` preserved)
@@ -791,9 +806,10 @@ theorem maxEigen_zsubst (a t : V) :
         exact (hC _ (hmem i hi)).2
       simp only [iseqMaxEigen]
       rw [iseqMaxEigenAux_congr hpt _ (le_refl _), hlh]
-    -- zAxAll / zAxNeg
+    -- zAxAll / zAxNeg / zAx1
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
+    · simp [zsubst_zAx1]
 
 /-! ### `iord_zsubst` — the eigensubst preserves the ordinal assignment (route-B I∀ bridge, lap 96)
 
@@ -854,7 +870,7 @@ theorem idg_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, idg_zIall, idg_zIall, (hC d0 hd0).2]
     · rw [zsubst_zIneg, idg_zIneg, idg_zIneg, (hC d0 hd0).2]
@@ -875,6 +891,7 @@ theorem idg_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
       rw [iseqMaxIdgAux_congr_val hpt _ (le_refl _), hlh]
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
+    · simp [zsubst_zAx1]
 
 /-- **`iotil` (pre-ordinal `õ`) is invariant under the eigensubst.** Needs `IsUTerm t` for the axiom
 cases (`õ(Ax) = oAtomLk` reads the principal formula's `irk`, invariant under `fvSubst` of a real term). -/
@@ -885,7 +902,7 @@ theorem iotil_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, iotil_zIall, iotil_zIall, (hC d0 hd0).2]
     · rw [zsubst_zIneg, iotil_zIneg, iotil_zIneg, (hC d0 hd0).2]
@@ -910,6 +927,8 @@ theorem iotil_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
       have hirk : irk (inegF (fvSubst ℒₒᵣ a t p) : V) = irk (inegF p : V) := by
         rw [irk_inegF (IsUFormula.fvSubst ht hp), irk_inegF hp, irk_fvSubst ht hp]
       rw [zsubst_zAxNeg, iotil_zAxNeg, iotil_zAxNeg, oAtomLk, oAtomLk, hirk]
+    · -- zAx1: õ = oAtom1 C reads only the unsubstituted ordinal-payload C, so it is invariant
+      simp [zsubst_zAx1]
 
 /-- **The eigensubst preserves the ordinal `iord`** (route-B I∀ bridge). With this, rewiring
 `red (zIall) = d0(a/n)` keeps the ε₀-descent (`iord (zsubst d0 e n) = iord d0`, so the banked
@@ -1208,7 +1227,7 @@ theorem zReg_zsubst (a t : V) : ∀ d, ZDerivation d → zReg (zsubst d a t) = z
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, zReg_zIall, zReg_zIall, (hC d0 hd0).2,
         maxEigen_zsubst a t d0 (hC d0 hd0).1]
@@ -1230,6 +1249,7 @@ theorem zReg_zsubst (a t : V) : ∀ d, ZDerivation d → zReg (zsubst d a t) = z
       rw [iseqRegAux_congr hpt _ (le_refl _), hlh]
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
+    · simp [zsubst_zAx1]
 
 /-! ## `red` preserves `ZRegular` — the structural and Ind cases (Path-X O1, lap 93)
 
@@ -1296,7 +1316,7 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
   unfold ZRegular at hreg ⊢
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [red_zAtom]; simpa using hreg
   · rw [red_zIall, zReg_zsubst _ _ _ hd0]; rw [zReg_zIall] at hreg
     exact nonpos_iff_eq_zero.mp (hreg ▸ le_max_right _ _)
@@ -1310,6 +1330,7 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
   · exact absurd (zTag_zK s r ds) hnK
   · rw [red_zAxAll]; simpa using hreg
   · rw [red_zAxNeg]; simpa using hreg
+  · rw [red_zAx1]; simpa using hreg
 
 /-! ### Reusable building blocks for the `zK` chain case (5.1/5.2.1/5.2.2)
 
@@ -1625,7 +1646,7 @@ lemma ZRegular_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
   -- reconstruct the selected premise dᵢ as a chain `zK s' r' ds'`
   rcases zDerivation_iff.mp hchain with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _⟩ |
     ⟨s', p, d0, heq, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _⟩ |
-    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩
+    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -1639,6 +1660,7 @@ lemma ZRegular_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
     refine ZRegular_red_zK_splice hds hreg h1 h2 htag ?_ ?_
     · rw [heq, red_zK_crit hcrit]; exact ZRegular_iRcritG_premise hregred zero_lt_two
     · rw [heq, red_zK_crit hcrit]; exact ZRegular_iRcritG_premise hregred one_lt_two
+  · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
 
@@ -1689,7 +1711,8 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
     · intro C hC d hphi hreg
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
-        ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩
+        ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ |
+        ⟨s, C, rfl, hin⟩
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hreg (by simp [zTag_zAtom])
       · exact ZRegular_red_of_not_zK
@@ -1711,7 +1734,10 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
             (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))) hreg (by simp [zTag_zAxAll])
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-            (Or.inr ⟨s, p, rfl, hp, hin⟩))))))) hreg (by simp [zTag_zAxNeg])
+            (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩)))))))) hreg (by simp [zTag_zAxNeg])
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+            (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hreg (by simp [zTag_zAx1])
   exact key
 
 /-! ### ✅ The `hseltag` leaf — RESOLVED (lap 95) by the gated `iRK` dispatch
@@ -1768,7 +1794,8 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, hatom⟩ | ⟨s, e, p, d0, rfl, hd0, hsc, hwff⟩ |
       ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩
+      ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ |
+      ⟨s, C, rfl, hin⟩
     -- atom
     · intro _
       rw [zsubst_zAtom]
@@ -1910,11 +1937,18 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     -- zAxNeg
     · intro _
       rw [zsubst_zAxNeg]
-      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, rfl, ?_, ?_⟩))))))
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, rfl, ?_, ?_⟩)))))))
       · exact IsUFormula.fvSubst ht.isUTerm hp
       · rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
         exact inAnt_fvSubstSeq hin
+    -- zAx1
+    · intro _
+      rw [zsubst_zAx1]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        ⟨fvSubstSeqt a t s, C, rfl, ?_⟩)))))))
+      rw [seqSucc_fvSubstSeqt, seqAnt_fvSubstSeqt]
+      exact inAnt_fvSubstSeq hin
 
 /-! ## Route-B eigensubst reducts, discharged by `ZDerivation_zsubst` under a freshness bound
 

@@ -236,7 +236,7 @@ theorem tp_red_isymRep_of_zTag_4 {d : V} (hZ : ZDerivation d) (htag : zTag d = 4
   · rw [htag]; simp
   · rcases zDerivation_iff.mp hZ with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _, _⟩ |
       ⟨s', p, d0, heq, _, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _, _⟩ | ⟨s', r', ds', heq, _, _, _⟩ |
-      ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩
+      ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
     · exact absurd (heq ▸ htag) (by rw [zTag_zAtom]; simp)
     · exact absurd (heq ▸ htag) (by rw [zTag_zIall]; simp)
     · exact absurd (heq ▸ htag) (by rw [zTag_zIneg]; simp)
@@ -244,6 +244,7 @@ theorem tp_red_isymRep_of_zTag_4 {d : V} (hZ : ZDerivation d) (htag : zTag d = 4
     · rw [heq, red_zK]; exact tp_eq_isymRep_of_zTag (by rw [zTag_iRK]; refine ⟨?_, ?_, ?_, ?_⟩ <;> simp)
     · exact absurd (heq ▸ htag) (by rw [zTag_zAxAll]; simp)
     · exact absurd (heq ▸ htag) (by rw [zTag_zAxNeg]; simp)
+    · exact absurd (heq ▸ htag) (by rw [zTag_zAx1]; simp)
 
 /-- **`red` of a `Rep` derivation preserves the endsequent and stays `Rep`.** For `tp v = isymRep`
 (i.e. `v` an atom/Ind/chain), Buchholz's `tp(v) = Rep ⟹ v[0] ⊢ end(v)`: `red v` keeps `fstIdx` and is
@@ -256,7 +257,7 @@ theorem red_rep_of_tp_isymRep {v : V} (hZ : ZDerivation v) (htp : tp v = isymRep
     fstIdx (red v) = fstIdx v ∧ tp (red v) = isymRep := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · exact ⟨by rw [red_zAtom], by rw [red_zAtom, tp_zAtom]⟩
   · exact absurd htp (by rw [tp_zIall]; exact isymR_ne_isymRep _)
   · exact absurd htp (by rw [tp_zIneg]; exact isymR_ne_isymRep _)
@@ -268,6 +269,7 @@ theorem red_rep_of_tp_isymRep {v : V} (hZ : ZDerivation v) (htp : tp v = isymRep
       exact tp_eq_isymRep_of_zTag (by rw [zTag_iRK]; refine ⟨?_, ?_, ?_, ?_⟩ <;> simp)
   · exact absurd htp (by rw [tp_zAxAll]; exact isymLk_ne_isymRep _ _)
   · exact absurd htp (by rw [tp_zAxNeg]; exact isymLk_ne_isymRep _ _)
+  · exact ⟨by rw [red_zAx1], by rw [red_zAx1, tp_zAx1]⟩
 
 /-- From `tp v = isymRep`, the I/Ax tags are excluded. -/
 theorem zTag_not_iAx_of_tp_isymRep {v : V} (h : tp v = isymRep) :
@@ -506,7 +508,7 @@ theorem ZDerivation_red_zK_nonRep {s r ds : V}
   have hdiZ : ZDerivation (znth ds (permIdx (zK s r ds))) := (zDerivation_zK_inv hZ).2 _ h1
   rcases zDerivation_iff.mp hdiZ with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _, _⟩ |
     ⟨s', p, d0, heq, _, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _, _⟩ | ⟨s', r', ds', heq, _, _, _⟩ |
-    ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩
+    ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
   · exact absurd (by rw [heq]; exact tp_zAtom s') htp
   · obtain ⟨hpfresh, hΓfresh, hsucc_wff⟩ := hIall s' a p d0 heq
     exact ZDerivation_zK_replace_zIall_of hZ h1 heq (heq ▸ hred _ h1)
@@ -518,6 +520,7 @@ theorem ZDerivation_red_zK_nonRep {s r ds : V}
   · exact ZDerivation_zK_replace_zAxAll_of hZ h1 heq hSeqs (hAxAll s' p k heq)
   · -- axNeg (Path C residual): succedent-replacement `Γ→p`, needs Buchholz's ¬-axiom cut. OPEN.
     sorry
+  · exact absurd (by rw [heq]; exact tp_zAx1 s' C) htp
 
 /-- **Residual (K case of Buchholz Thm 3.4 — the cut-elimination core).** The genuine reduct `red` of a
 valid chain `zK s r ds` is again a `ZDerivation`, given that the reduct of every premise is. Dispatches
@@ -577,7 +580,7 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZRegular d → ZDerivation (r
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsucc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsucc, hwff⟩ |
         ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
-        ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩
+        ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ | ⟨s, C, rfl, hin⟩
       · -- zAtom: red = identity
         rw [red_zAtom]; exact zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)
       · -- zIall: red = zsubst d0 a (numeral 0); regularity ⟹ maxEigen d0 < a ⟹ ZDerivation_zsubst.
@@ -612,7 +615,10 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZRegular d → ZDerivation (r
           (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))
       · -- zAxNeg: red = identity
         rw [red_zAxNeg]; exact zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-          (Or.inr ⟨s, p, rfl, hp, hin⟩))))))
+          (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩)))))))
+      · -- zAx1: red = identity
+        rw [red_zAx1]; exact zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+          (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))
   exact key
 
 /-- **The regular ⊥-orbit predicate.** Route B threads eigenvariable regularity (`ZRegular`, O1) alongside
@@ -636,11 +642,12 @@ theorem iord_descent_red_zInd (d : V) (hd : ZDerivation d) (htag : zTag d = 3) :
     icmp (iord (red d)) (iord d) = 0 := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · simp at htag
   · simp at htag
   · simp at htag
   · rw [red_zInd]; exact iord_descent_iRInd_of_ZDerivation _ hd htag
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -662,7 +669,7 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) :
   · -- K/cut (tag 4): dispatch on the `permIdx` criticality sentinel.
     rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
       ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
-      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
     · simp at htag
     · simp at htag
     · simp at htag
@@ -680,7 +687,8 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) :
         have hdiZ : ZDerivation (znth ds (permIdx (zK s r ds))) := hmem _ hcrit
         rcases zDerivation_iff.mp hdiZ with ⟨s', heq, _⟩ | ⟨s', a', p', d0, heq, hd0, _⟩ |
           ⟨s', p', d0, heq, hd0, _⟩ | ⟨s', at'', p', d0, d1, heq, hd0, hd1, _⟩ |
-          ⟨s', r', ds', heq, hds', hmem', hvalid'⟩ | ⟨s', p', k, heq, _, _⟩ | ⟨s', p', heq, _, _⟩
+          ⟨s', r', ds', heq, hds', hmem', hvalid'⟩ | ⟨s', p', k, heq, _, _⟩ | ⟨s', p', heq, _, _⟩ |
+          ⟨s', C', heq, _⟩
         · -- atom (tag 0): `red dᵢ = dᵢ` (`zAtom` is `red`-normal, `tp = isymRep`, Rep-reduce is the
           -- identity), so the WHOLE node is a genuine `red`-FIXPOINT. The disjunctive descent closes
           -- on the LEFT — `red_zK_fixpoint_of_atom_selected` (lap 109, banked). No descent needed.
@@ -762,10 +770,14 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) :
           have hrep := tp_selected_isymRep_of_emptyAnt_botSucc hd.1.1 hant hsucc hcrit
           rw [heq, tp_zAxNeg] at hrep
           exact isymLk_ne_isymRep _ _ hrep
+        · -- zAx1 (tag 7): `red dᵢ = dᵢ` (`red_zAx1`, `tp = isymRep`), so the whole node is a
+          -- `red`-FIXPOINT — descent closes on the LEFT (mirror of the atom case).
+          exact Or.inl (red_zK_fixpoint_of_zAx1_selected hds hcrit heq)
       · -- CRITICAL (5.1): `red (zK s r ds) = iRcritG …`, banked descent. Criticality is supplied by the
         -- `permIdx = lh ds` sentinel (`zKCritical_of_not_permIdx_lt`), so the full `zKValid` is in hand.
         exact Or.inr (iord_descent_red_zK_crit hcrit hds hmem hreg
           (zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid, zKCritical_of_not_permIdx_lt hcrit⟩))
+    · simp at htag
     · simp at htag
     · simp at htag
 
