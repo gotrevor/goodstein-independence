@@ -803,6 +803,54 @@ theorem zcOK_ex_inv {s α C t d : V} (h : ZcOK (zExOmega s α C t d)) :
     subst hd0 hα; exact ⟨hprem, hdesc⟩
   · exact absurd (congrArg zTag heq) (by simp)
 
+/-! ### Brick 5b — principal ∀/∃-cut `hinv`: the STRUCTURAL closure (clean) + the ordinal obligation (isolated)
+
+`hinv` (`red` preserves `ZcOK`) on a PRINCIPAL ∀/∃-cut (left = ω-∀-node, right = ∃-node) splits cleanly:
+- **Structural half (PROVED, `zcOK_redAllEx_premises`):** the reduct's two premises (`zsubst d0 a tE` and the
+  ∃-premise `dE`) are themselves `ZcOK` — `zcOK_cut_inv` ⟶ `zcOK_omegaAll_inv` (premise family at the witness)
+  + `zcOK_ex_inv`. This is the genuine cut-elimination soundness content for the principal case: the reduct's
+  premises are valid derivations. (For the GENERAL case where the left is not literally a ω-∀-node, this is
+  where ∀-INVERSION `redInv∀` replaces premise selection — the next brick.)
+- **Ordinal half (ISOLATED, `zcOK_redAllEx_of_ctrl`):** to repackage the reduct as a `ZcOK` cut, its stored
+  ordinal must STRICTLY dominate both reduced premises. **⚠ Lap-104 finding: the lap-103 `imax` choice is
+  insufficient here.** The reduct stores `imax (sord dL') (sord dR')`, but the `cut` constructor needs
+  `sord premise ≺ stored`, and the max-ACHIEVING premise EQUALS `imax` (never `≺` — `icmp` is irreflexive).
+  So `hLctrl`/`hRctrl` below cannot both hold for the naive `imax`. The genuine fix is Gentzen's RANK-AWARE
+  ordinal assignment (`o(cut) = ω^{rank} ⊕ …`, strictly above premises AND ≺ the parent), which also carries
+  the single-step DESCENT — the deep Gentzen-Hauptsatz content of crux-2. `imax` worked for the parent-cut
+  *descent* (`sord_redAllEx_lt`) but not for the reduct's own *operator-control*; these need the same
+  rank-aware `sord`. This isolates the remaining deep obligation to the ORDINAL assignment alone. -/
+
+/-- **Principal ∀/∃-cut `hinv` — the STRUCTURAL closure (axiom-clean).** The reduct of a `ZcOK` cut whose
+left premise is an ω-∀-node and right is an ∃-node has BOTH its reduced premises `ZcOK`: the witness premise
+`zsubst d0 a tE` (the ω-∀-node's premise family at `tE`) and the ∃-premise `dE`. The genuine soundness
+content; the reduct cut is then `ZcOK` once its stored ordinal strictly dominates these
+(`zcOK_redAllEx_of_ctrl` — the isolated ordinal obligation). -/
+theorem zcOK_redAllEx_premises {s α s' d0 a αAll sE αEx CE tE dE C : V}
+    (h : ZcOK (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE αEx CE tE dE) C))
+    (htE : IsSemiterm ℒₒᵣ 0 tE) :
+    ZcOK (zsubst d0 a tE) ∧ ZcOK dE := by
+  obtain ⟨hL, hR, _, _⟩ := zcOK_cut_inv h
+  obtain ⟨hprem, _⟩ := zcOK_omegaAll_inv hL
+  obtain ⟨hdE, _⟩ := zcOK_ex_inv hR
+  exact ⟨hprem tE htE, hdE⟩
+
+/-- **Principal ∀/∃-cut `hinv` — full closure GIVEN the reduct's operator-control.** With the structural
+closure (`zcOK_redAllEx_premises`) and the two ordinal-control bounds (`hLctrl`/`hRctrl` — the reduct's
+premises strictly below its stored ordinal), the reduct `redAllEx …` is `ZcOK`. This exhibits EXACTLY the
+remaining obligation: a stored ordinal strictly above both reduced premises. The naive `imax` cannot supply
+it (max-achiever equals it); Gentzen's rank-aware assignment can — the isolated deep crux-2 content. -/
+theorem zcOK_redAllEx_of_ctrl {s α s' d0 a αAll sE αEx CE tE dE C : V}
+    (h : ZcOK (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE αEx CE tE dE) C))
+    (htE : IsSemiterm ℒₒᵣ 0 tE)
+    (hLctrl : icmp (sord (zsubst d0 a tE)) (imax (iord (zsubst d0 a tE)) (sord dE)) = 0)
+    (hRctrl : icmp (sord dE) (imax (iord (zsubst d0 a tE)) (sord dE)) = 0) :
+    ZcOK (redAllEx s d0 a C (zExOmega sE αEx CE tE dE)) := by
+  obtain ⟨hZl, hZr⟩ := zcOK_redAllEx_premises h htE
+  rw [redAllEx]
+  simp only [zExTerm_zExOmega, zExPrem_zExOmega]
+  exact ZcOK.cut hZl hZr hLctrl hRctrl
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
@@ -825,5 +873,6 @@ datatype (each a `wip/` milestone, ported from `ZinftyF.Deriv`/`o`/`cr`):
   `𝚺₁`/`𝚫₁`; this is bookkeeping, deferred until the datatype shape stabilizes). -/
 
 end GoodsteinPA.InternalZ.PathC
+
 
 

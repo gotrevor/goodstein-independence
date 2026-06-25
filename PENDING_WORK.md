@@ -34,8 +34,20 @@ inductive-over-`V` `cases` dependent-elim wall is handled exactly as the engine 
 Landed `zcOK_cut_inv` / `zcOK_omegaAll_inv` / `zcOK_ex_inv` (node inversions, `zTag`-discriminated) +
 `zTag_ne_nine/ten_of_ZDerivation`. This is the prototype on which inversion (`redInv∀`/…) + `red` + `hinv`
 get developed; the Σ₁-`Fixpoint` port (so the descent is V-internal for PRWO) is the deferred final brick.
-**NEXT: the ∀-inversion operator `redInv∀ : V → V → V` + `ZcOK d → ZcOK (redInv∀ d t)` (the recursion that
-re-principalizes; principal ω-∀ case = `zcOK_omegaAll_inv`).**
+**Brick 5b (axiom-clean):** principal ∀/∃-cut `hinv`, split clean — `zcOK_redAllEx_premises` (the
+STRUCTURAL closure: the reduct's two premises `zsubst d0 a tE` / `dE` are `ZcOK`, the genuine soundness
+content) + `zcOK_redAllEx_of_ctrl` (full closure GIVEN the reduct's ordinal control). **⚠ 2nd lap-104
+finding (in-kernel): the lap-103 `imax` stored-ordinal is INSUFFICIENT for the cut node.** The `cut`
+constructor needs `sord premise ≺ stored`, but the reduct stores `imax (sord dL') (sord dR')` and the
+max-achieving premise EQUALS `imax` (never `≺`, `icmp` irreflexive). `imax` worked for the parent-cut
+*descent* (`sord_redAllEx_lt`) but NOT for the reduct's own *operator-control*. The genuine fix is Gentzen's
+RANK-AWARE ordinal assignment (`o(cut) = ω^{rank} ⊕ …`, strictly above premises AND ≺ parent, carrying the
+single-step descent) — the deep Gentzen-Hauptsatz content, now isolated to the ORDINAL assignment alone.
+
+**NEXT (two fronts):** (a) the ∀-inversion operator `redInv∀ : V → V → V` + `ZcOK d → ZcOK (redInv∀ d t)`
+(the recursion that re-principalizes the GENERAL — non-ω-∀-node — left premise; principal case =
+`zcOK_omegaAll_inv`); (b) the rank-aware `sord` (replace `imax`) so the cut node's operator-control + the
+single-step descent hold together (`zcOK_redAllEx_of_ctrl`'s `hLctrl`/`hRctrl` + `sord_redAllEx_lt`).
 
 ## lap 102 — Probe 2 settled the fork → Path C (stored ordinals); brick 1 landed
 **See `HANDOFF-2026-06-25-lap102.md`, `NEXT_STEPS.md` PRIORITY 1.** The crux-2 sub-route fork is resolved
