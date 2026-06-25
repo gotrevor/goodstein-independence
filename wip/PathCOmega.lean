@@ -237,6 +237,7 @@ elsewhere. -/
 noncomputable def sord (d : V) : V :=
   if zTag d = 7 then π₂ (π₂ (zRest d))
   else if zTag d = 8 then π₂ (π₂ (π₂ (π₂ (zRest d))))
+  else if zTag d = 9 then π₁ (zRest d)
   else iord d
 
 @[simp] lemma zRest_zAllOmega (s d0 a α : V) : zRest (zAllOmega s d0 a α) = ⟪d0, a, α⟫ := by
@@ -266,13 +267,17 @@ noncomputable def sordDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y d. ∃ tg, !zTagDef tg d ∧ ∃ zr, !zRestDef zr d ∧
     ( (tg = 7 ∧ ∃ a, !pi₂Def a zr ∧ !pi₂Def y a)
     ∨ (tg ≠ 7 ∧ tg = 8 ∧ ∃ a, !pi₂Def a zr ∧ ∃ b, !pi₂Def b a ∧ ∃ e, !pi₂Def e b ∧ !pi₂Def y e)
-    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ !iordDef y d) )”
+    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ tg = 9 ∧ !pi₁Def y zr)
+    ∨ (tg ≠ 7 ∧ tg ≠ 8 ∧ tg ≠ 9 ∧ !iordDef y d) )”
 
 instance sord_defined : 𝚺₁-Function₁ (sord : V → V) via sordDef := .mk fun v ↦ by
-  simp [sordDef, sord, zTag_defined.iff, zRest_defined.iff, pi₂_defined.iff, iord_defined.iff]
+  simp [sordDef, sord, zTag_defined.iff, zRest_defined.iff, pi₁_defined.iff, pi₂_defined.iff,
+    iord_defined.iff]
   by_cases h7 : zTag (v 1) = 7
   · simp [h7, numeral_eq_natCast]
-  · by_cases h8 : zTag (v 1) = 8 <;> simp [h7, h8, numeral_eq_natCast]
+  · by_cases h8 : zTag (v 1) = 8
+    · simp [h7, h8, numeral_eq_natCast]
+    · by_cases h9 : zTag (v 1) = 9 <;> simp [h7, h8, h9, numeral_eq_natCast]
 
 instance sord_definable : 𝚺₁-Function₁ (sord : V → V) := sord_defined.to_definable
 
@@ -295,6 +300,55 @@ theorem sord_drop_zIndOmega {s at' p d0 d1 α s' k : V}
     (hvalid : zIndOmegaValid p d0 d1 α) (hk : 0 < k) :
     icmp (iord (zK s' (irk p) (iIndReductSeq d0 d1 k))) (sord (zIndOmega s at' p d0 d1 α)) = 0 := by
   rw [sord_zIndOmega]; exact hvalid.2 s' k hk
+
+/-! ### Brick 2 — the Path-C cut node (where the cut-elimination ordinal drop lives)
+
+The ω-nodes (∀, ind) are the *premise providers*; the genuinely-new content of the ω-rule calculus is the
+explicit binary **cut node** (Towsner `ZinftyF.Deriv`'s `Cut` constructor / Buchholz Def 3.2's cut). It is
+the only node the ⊥-orbit's `red` reduces, and the only place a chain is NOT used (premise SELECTION, lap
+102 (A)). A Path-C cut node `zCutOmega s α dL dR C` (tag 9) stores: conclusion `s`, **stored ordinal** `α`,
+the two premises `dL`/`dR` (deriving the cut formula `C` and its negation), and `C`. Its validity
+(`zCutOmegaValid`) is Buchholz's operator-control side-condition: both premises valid AND each premise's
+stored ordinal `≺ α`. The reduction `red` on a cut against an ω-∀-node SELECTS the witness premise (brick
+1) and rebuilds a smaller cut whose stored ordinal — bounded by the premises' (each `≺ α`) — is `≺ α`; the
+drop is read off `zCutOmegaValid` directly, NO whole-chain `zKValid` reduct (the Path-X wall). -/
+
+/-- **The Path-C cut node** (tag 9). `s` conclusion, `α` STORED ordinal, `dL`/`dR` the two cut premises,
+`C` the cut formula. The stored ordinal is the FIRST payload field (`π₁ (zRest …)`), read by `sord`. -/
+noncomputable def zCutOmega (s α dL dR C : V) : V := ⟪s, 9, α, dL, dR, C⟫ + 1
+
+@[simp] lemma zTag_zCutOmega (s α dL dR C : V) : zTag (zCutOmega s α dL dR C) = 9 := by
+  simp [zTag, sndIdx, zCutOmega]
+
+@[simp] lemma zRest_zCutOmega (s α dL dR C : V) :
+    zRest (zCutOmega s α dL dR C) = ⟪α, dL, dR, C⟫ := by
+  simp [zRest, sndIdx, zCutOmega]
+
+@[simp] lemma sord_zCutOmega (s α dL dR C : V) : sord (zCutOmega s α dL dR C) = α := by
+  rw [sord, zTag_zCutOmega, if_neg (by simp), if_neg (by simp), if_pos rfl, zRest_zCutOmega]; simp
+
+/-- **Cut-node validity (Buchholz operator-control).** Both cut premises are `ZDerivation`s, and each
+premise's STORED ordinal (`sord`) is strictly below the cut's stored `α`. The second/third conjuncts are the
+operator-control side-condition that makes cut-elimination DROP the ordinal: the reduct cut, rebuilt from
+these premises, inherits a stored ordinal bounded by them, hence `≺ α`. Σ₁ (no ordinal-sup), read off the
+node data — the whole point of the stored design. -/
+def zCutOmegaValid (α dL dR : V) : Prop :=
+  ZDerivation dL ∧ ZDerivation dR ∧ icmp (sord dL) α = 0 ∧ icmp (sord dR) α = 0
+
+/-- **The cut-reduction left-premise drop, in `sord` form.** A cut-elimination step on `zCutOmega s α dL dR
+C` reduces toward `dL` (the cut-formula side); `dL`'s stored ordinal is `≺` the cut's stored `sord = α` —
+the `hdrop`-shaped fact for the cut step, read straight off `zCutOmegaValid`. (Brick 1's ∀-witness selection
+supplies a premise of exactly this form when `dL` is a `zAllOmega`.) -/
+theorem sord_drop_zCutOmega_left {s α dL dR C : V} (hvalid : zCutOmegaValid α dL dR) :
+    icmp (sord dL) (sord (zCutOmega s α dL dR C)) = 0 := by
+  rw [sord_zCutOmega]; exact hvalid.2.2.1
+
+/-- **The cut-reduction right-premise drop, in `sord` form.** Symmetric to `sord_drop_zCutOmega_left`:
+`dR`'s stored ordinal is `≺` the cut's stored `sord = α`. Together they bound the reduct cut's stored
+ordinal below `α` — the strict descent the ⊥-orbit iteration needs. -/
+theorem sord_drop_zCutOmega_right {s α dL dR C : V} (hvalid : zCutOmegaValid α dL dR) :
+    icmp (sord dR) (sord (zCutOmega s α dL dR C)) = 0 := by
+  rw [sord_zCutOmega]; exact hvalid.2.2.2
 
 /-! ## Brick 4 skeleton — the stored-ordinal infinite descent (path-portable)
 
