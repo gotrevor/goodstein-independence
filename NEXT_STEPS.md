@@ -10,17 +10,39 @@
 > fails down a nested-chain spine — Cor 2.1 fires only at the ∅→⊥ top node). See
 > `HANDOFF-2026-06-25-lap102.md` + the `wip/InternalZomega.lean` Probe-2 verdict.
 
-## ▶ PRIORITY 1 (lap 102) — begin the Path-C arithmetized stored-ordinal ω-derivation
+## ▶ PRIORITY 1 (lap 102→) — the Path-C arithmetized stored-ordinal ω-derivation
 
-Port `ZinftyF.Deriv`/`o`/`cr` (`src/GoodsteinPA/Zinfty.lean`, the axiom-clean meta cut-elimination) from
-`Finset Seq`/`Ordinal` to `V`/`iord`-CNF. **First milestone:** the arithmetized `allω` node (a
-`zconstruction` Fixpoint tag; premise family materialized by `zsubst`/iterated-step code; **ordinal carried
-as node data**, NOT computed) + `iord` read AS the stored ordinal + the single `cutElimStep` ordinal drop on
-it. Reuse this spike's `zOmegaPrem`/`zOmegaPrem_valid`/`iord_descent_zOmegaPrem` for the ∀-cut case, and
-`Zinfty.cutElimStep`/`cutElimPrincipal` as the proof template. ω-node validity = premise-family code +
-`∀-premise, o(premise) ≺ o(node)` (the stored side condition — fully Σ₁, no limit operation). Build in
-`wip/` until it reaches `false_of_ZDerivesEmpty`, then promote. Keep `InternalZ`/`Crux2Blueprint` (Path X)
-green in `src/` as the fallback meanwhile.
+**Foundations LANDED this lap (`wip/PathCOmega.lean`, all axiom-clean):**
+- Brick 1 (full): `zAllOmega`/`zAllOmegaValidFull` (ω-∀-node + complete validity) +
+  `zIall_realizes_zAllOmegaValidFull` (existing I∀ embedding realizes it, stored ord = its own `iord`).
+- Brick 3 (kernel): `indOmegaStoredOrd` + `iord_iIndReduct_lt_storedBound` (the induction limit ordinal
+  dominates every finite unfolding — the case the computed `iord` can't do).
+- Brick 4 (skeleton): `stored_ord_iterate_descends` (the infinite descent from a per-step drop).
+- **Endgame design fixed:** Path C uses Buchholz's single-step ordinal-DROPPING `red` (Def 3.2) + infinite
+  ε₀-descent + PRWO(ε₀) — NOT Zinfty `cutElimStep` (raises the ordinal; meta-only). Bricks 1/3 ARE the
+  per-node drops. This is the SAME descent shape as the finitary `Crux2Blueprint.iord_red_iterate_descends`,
+  so the GentzenCon endgame (`gentzen_descent_of_inconsistent` ← `ord`/`R`/`ord_R_descends`) is the target.
+
+**The remaining BUILD (deliberate, multi-lap) — the Σ₁ datatype + `red` + arithmetization:**
+1. **Datatype.** The cleanest scope: the only genuinely-new node is the induction-as-ω-rule (the existing
+   `zIall` already serves as the ω-∀-node — brick 1). Decide: (a) add ONE ω-node tag to the existing
+   `InternalZ.zconstruction` Fixpoint (central, ripples through 8000 lines), vs (b) a fresh small Fixpoint
+   for a Path-C derivation carrying stored ordinals as data. Lean toward (b) for isolation — a `Deriv`-style
+   Σ₁ predicate `zcOK d` with node shapes {ω-∀, ω-ind, cut, axiom} each storing its ordinal, validity =
+   premise codes + `∀-premise, sord(premise) ≺ sord(node)`. Template: `InternalZ`'s `PR.Blueprint`/
+   `Construction` Fixpoint pattern; `ZinftyF.Deriv` for the rule set.
+2. **`red` (Buchholz Def 3.2) on the datatype** — the single-step ordinal-dropping reduction. ∀-cut case =
+   brick 1 (select witness, `zAllOmega_cut_descends`); induction case = brick 3 (unfold one step, ordinal
+   drops by the limit bound). `sord` = the stored-ordinal projection.
+3. **`ord_R_descends`** = assemble the per-node drops into `∀ d, ⊥-orbit d → icmp (sord (red d)) (sord d) =
+   0`. Feeds `stored_ord_iterate_descends` (brick 4) → the infinite descent.
+4. **Arithmetize `gentzenDescentφ`** (the Σ₁ graph `n ↦ sord (red^[n] d₀)`) + discharge the GentzenCon
+   axiom `gentzen_descent_of_inconsistent` (`wip/GentzenCon.lean`) from the V-internal descent + crux-1
+   PRWO. Then `gentzen_prwo_implies_consistency` (already proven modulo that axiom) closes crux-2.
+5. **Wire** crux-1 ∘ crux-2 → `Reduction.goodstein_implies_consistency` → headline (only when `#print
+   axioms` clean — anti-fraud).
+
+Build in `wip/` until step 4 lands; keep `InternalZ`/`Crux2Blueprint` (Path X) green in `src/` as fallback.
 
 ---
 
