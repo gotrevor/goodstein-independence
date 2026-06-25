@@ -4631,6 +4631,141 @@ lemma redexCode_isRedexPair {d : V}
     (h : ∃ c < (⟪lh (zKseq d), lh (zKseq d)⟫ : V), isRedexPair (zKseq d) c) :
     isRedexPair (zKseq d) (redexCode d) := (redexAux_found (zKseq d) _ h).2
 
+/-! ### The minimal permissible-premise index finder (Buchholz Def 3.2 case 5.2 dispatch index)
+
+When a `K`-chain `zK s r ds` is NON-critical (`¬ zKCritical s ds`, i.e. some premise `dᵢ` has
+`tp(dᵢ) ◁ s`), Buchholz's case 5.2 reduces at the **least** such `i` (`tp(dᵢ) ◁ Π`). This first-hit
+bounded search `permIdxAux` — the single-index analogue of `redexAux` — returns that least `i` (or the
+sentinel `lh ds` if none, i.e. the chain is critical). Its condition `iperm (tp (znth ds i)) s` is the
+exact `¬`-conjunct of `zKCritical`. -/
+
+/-- **Permissible-premise test**: premise `n` of chain `ds` is `◁`-permissible w.r.t. conclusion `s`. -/
+def isPermPrem (ds s n : V) : Prop := iperm (tp (znth ds n)) s
+
+noncomputable def permIdxAux.blueprint : PR.Blueprint 2 where
+  zero := .mkSigma “y ds s. y = 0”
+  succ := .mkSigma “y ih n ds s.
+    (ih < n ∧ y = ih) ∨
+    (n ≤ ih ∧ ∃ d, !znthDef d ds n ∧ ∃ t, !tpDef t d ∧
+      ( (!ipermDef t s ∧ y = n) ∨ (¬(!ipermDef t s) ∧ y = n + 1) ) )”
+
+noncomputable def permIdxAux.construction : PR.Construction V permIdxAux.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun x n ih ↦ if ih < n then ih else if isPermPrem (x 0) (x 1) n then n else n + 1
+  zero_defined := .mk fun v ↦ by simp [permIdxAux.blueprint]
+  succ_defined := .mk fun v ↦ by
+    by_cases h1 : v 1 < v 2
+    · simp [permIdxAux.blueprint, h1]
+    · have hle : v 2 ≤ v 1 := not_lt.mp h1
+      by_cases h2 : isPermPrem (v 3) (v 4) (v 2)
+      · simp only [permIdxAux.blueprint, isPermPrem] at h2 ⊢
+        simp [h1, h2, hle, znth_defined.iff, tp_defined.iff, iperm_defined.iff]
+      · simp only [permIdxAux.blueprint, isPermPrem] at h2 ⊢
+        simp [h1, h2, hle, znth_defined.iff, tp_defined.iff, iperm_defined.iff]
+
+/-- `permIdxAux ds s n` = the least `i < n` with `isPermPrem ds s i`, or `n` if none. -/
+noncomputable def permIdxAux (ds s n : V) : V := permIdxAux.construction.result ![ds, s] n
+
+@[simp] lemma permIdxAux_zero (ds s : V) : permIdxAux ds s 0 = 0 := by
+  simp [permIdxAux, permIdxAux.construction]
+
+@[simp] lemma permIdxAux_succ (ds s n : V) :
+    permIdxAux ds s (n + 1) =
+      (if permIdxAux ds s n < n then permIdxAux ds s n
+       else if isPermPrem ds s n then n else n + 1) := by
+  simp [permIdxAux, permIdxAux.construction]
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.permIdxAuxDef : 𝚺₁.Semisentence 4 :=
+  permIdxAux.blueprint.resultDef.rew (Rew.subst ![#0, #3, #1, #2])
+
+instance permIdxAux_defined : 𝚺₁-Function₃ (permIdxAux : V → V → V → V) via permIdxAuxDef :=
+  .mk fun v ↦ by simp [permIdxAux.construction.result_defined_iff, permIdxAuxDef]; rfl
+
+instance permIdxAux_definable : 𝚺₁-Function₃ (permIdxAux : V → V → V → V) :=
+  permIdxAux_defined.to_definable
+instance permIdxAux_definable' (Γ) : Γ-[m + 1]-Function₃ (permIdxAux : V → V → V → V) :=
+  permIdxAux_definable.of_sigmaOne
+
+/-- **First-hit ≤ sentinel**. -/
+lemma permIdxAux_le (ds s : V) : ∀ N, permIdxAux ds s N ≤ N := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ n ih =>
+    rw [permIdxAux_succ]
+    by_cases h1 : permIdxAux ds s n < n
+    · rw [if_pos h1]; exact le_of_lt (lt_trans h1 (le_iff_lt_succ.mp (le_refl n)))
+    · rw [if_neg h1]
+      by_cases h2 : isPermPrem ds s n
+      · rw [if_pos h2]; exact le_of_lt (le_iff_lt_succ.mp (le_refl n))
+      · simp [h2]
+
+/-- **First-hit is valid** — a returned index `< N` is permissible. -/
+lemma permIdxAux_isPermPrem_of_lt (ds s : V) :
+    ∀ N, permIdxAux ds s N < N → isPermPrem ds s (permIdxAux ds s N) := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · simp only [isPermPrem]; definability
+  case zero => intro h; exact absurd h (by simp)
+  case succ n ih =>
+    intro hlt
+    rw [permIdxAux_succ] at hlt ⊢
+    by_cases h1 : permIdxAux ds s n < n
+    · rw [if_pos h1] at hlt ⊢; exact ih h1
+    · rw [if_neg h1] at hlt ⊢
+      by_cases h2 : isPermPrem ds s n
+      · rw [if_pos h2] at hlt ⊢; exact h2
+      · rw [if_neg h2] at hlt; exact absurd hlt (by simp)
+
+/-- **No-hit sentinel** — if the search returns `N`, no `i < N` is permissible (chain is critical). -/
+lemma permIdxAux_eq_self_of_none (ds s : V) :
+    ∀ N, permIdxAux ds s N = N → ∀ i < N, ¬ isPermPrem ds s i := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · simp only [isPermPrem]; definability
+  case zero => intro _ i hi; exact absurd hi (by simp)
+  case succ n ih =>
+    intro heq i hi
+    rw [permIdxAux_succ] at heq
+    by_cases h1 : permIdxAux ds s n < n
+    · rw [if_pos h1] at heq
+      exact absurd (le_iff_lt_succ.mp (le_refl n)) (lt_asymm (heq ▸ h1))
+    · rw [if_neg h1] at heq
+      by_cases h2 : isPermPrem ds s n
+      · rw [if_pos h2] at heq; exact absurd heq (le_iff_lt_succ.mp (le_refl n)).ne
+      · rw [if_neg h2] at heq
+        have hn : permIdxAux ds s n = n := le_antisymm (permIdxAux_le ds s n) (not_lt.mp h1)
+        rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with hin | hin
+        · exact ih hn i hin
+        · rw [hin]; exact h2
+
+/-- **First-hit found** — when a permissible premise exists below `N`, the search returns one. -/
+lemma permIdxAux_found (ds s N : V) (h : ∃ i < N, isPermPrem ds s i) :
+    permIdxAux ds s N < N ∧ isPermPrem ds s (permIdxAux ds s N) := by
+  have hlt : permIdxAux ds s N < N := by
+    rcases lt_or_eq_of_le (permIdxAux_le ds s N) with h' | h'
+    · exact h'
+    · obtain ⟨i, hiN, hi⟩ := h
+      exact absurd hi (permIdxAux_eq_self_of_none ds s N h' i hiN)
+  exact ⟨hlt, permIdxAux_isPermPrem_of_lt ds s N hlt⟩
+
+/-- **The 5.2 dispatch index of a chain** = least permissible premise index, sentinel `lh (zKseq d)`. -/
+noncomputable def permIdx (d : V) : V := permIdxAux (zKseq d) (fstIdx d) (lh (zKseq d))
+
+/-- **`permIdx` spec, non-critical chain** — if `zK s r ds` is non-critical (some premise permissible),
+`permIdx` lands on the least permissible index `< lh ds`. -/
+lemma permIdx_lt_of_not_zKCritical {s r ds : V} (h : ¬ zKCritical s ds) :
+    permIdx (zK s r ds) < lh ds ∧ isPermPrem ds s (permIdx (zK s r ds)) := by
+  have hex : ∃ i < lh ds, isPermPrem ds s i := by
+    unfold zKCritical at h
+    push_neg at h
+    obtain ⟨i, hi, hperm⟩ := h
+    exact ⟨i, hi, hperm⟩
+  have hf := permIdxAux_found ds s (lh ds) hex
+  simp only [permIdx, zKseq_zK, fstIdx_zK]
+  exact hf
+
 /-! ## `iRcrit` — the CLOSED iR critical branch (Buchholz Def 3.2 case 5.1)
 
 The redex finder (`redexCode`/`redexI`/`redexJ`) is now a total definable function of the chain, so the
