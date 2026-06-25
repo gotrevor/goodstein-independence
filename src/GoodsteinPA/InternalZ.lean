@@ -7713,6 +7713,26 @@ lemma zDerivation_zAxNeg_inv {s p : V} (hZ : ZDerivation (zAxNeg s p)) :
     obtain rfl : p = p' := by simpa using congrArg zAxNegF h
     exact ⟨hp, hin⟩
 
+/-- **Conclusion-tracking, §5 ∀-axiom (L-rule replace, completes frontier item 1).** The reduced
+conclusion for an axAll selected premise: `tp(Ax^{∀p,k}) = L^k_{∀p}`, so `tpReduce (tp (zAxAll s p k)) s 0
+= F(k),Γ→D` (`seqAddAnt (substs1 (numeral k) p) s`) — the cut-formula instance `F(k)` adjoined to the
+conclusion antecedent. The reduct itself is the identity (`red (zAxAll s p k) = zAxAll s p k`), so the
+wiring into `ZDerivation_zK_seqAddAnt` uses `A = substs1 (numeral k) p`. -/
+lemma tpReduce_tp_zAxAll (s p k : V) :
+    tpReduce (tp (zAxAll s p k)) (fstIdx (zAxAll s p k)) 0
+      = seqAddAnt (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral k) p) s := by
+  rw [tp_zAxAll, fstIdx_zAxAll, tpReduce_isymLk_all]
+
+/-- **Conclusion-tracking, §5 ¬-axiom (L-rule replace, completes frontier item 1).** The reduced
+conclusion for an axNeg selected premise: `tp(Ax^{¬p,0}) = L⁰_{¬p}`, so `tpReduce (tp (zAxNeg s p)) s 0
+= Γ→p` (`seqSetSucc s p`) — the cut formula `p` becomes the new succedent, the antecedent unchanged.
+Unlike axAll (an antecedent weakening), this is a succedent REPLACEMENT, so its dispatch needs a distinct
+constructor (the premise `red dᵢ = dᵢ` keeps succedent `seqSucc s`, not `p`). The `IsUFormula p` side
+condition comes from `zDerivation_zAxNeg_inv`. -/
+lemma tpReduce_tp_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) :
+    tpReduce (tp (zAxNeg s p)) (fstIdx (zAxNeg s p)) 0 = seqSetSucc s p := by
+  rw [tp_zAxNeg, fstIdx_zAxNeg, tpReduce_isymLk_neg]; exact hp
+
 /-- **Atom inversion**: a `ZDerivation` of the identity axiom `zAtom s` has its succedent in its
 antecedent (`C ∈ Γ`). The leaf side condition that rules out an empty-antecedent atom. -/
 lemma zDerivation_zAtom_inv {s : V} (hZ : ZDerivation (zAtom s)) :
