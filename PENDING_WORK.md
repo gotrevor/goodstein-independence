@@ -1,5 +1,50 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 97 — ⛔ THE WALL IS ARCHITECTURAL: `red` cannot do the eigenvariable substitution
+
+**Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). `ZRegular_red` banked
+(axiom-clean) — full O1 regularity-preservation, `Zsubst.lean`.**
+
+### The precise diagnosis (settles laps 90–96's stalled route-B)
+The genuine cut-elimination residual is `ZDerivation_red_zK` **case 2** (non-chain selected premise,
+`Crux2Blueprint.lean:256`). When the selected premise `dᵢ` is an **I∀ node** (the ∀-principal-cut), Buchholz
+reduces the conclusion to `Θ→F(0)` (`tpReduce (isymR ∀p) s 0`, `InternalZ.lean:1084`) AND must instantiate
+the eigenvariable in the premise: the replacement at position `i` must be **`zsubst d0 a (numeral 0)`**
+(`d0(a/0)`), NOT `d0`. But the repo's `red` puts `red(zIall …) = d0` (deriving `Γ→F(a)`, eigenvar `a`),
+so `red (chain)` = `zK (Θ→F(0)) r (seqUpdate ds i d0)` is **genuinely unsound** (d0 derives F(a)≠F(0)).
+No downstream proof can fix a wrong VALUE — `red`'s value itself must change to do the eigensubst.
+
+### Why it can't be fixed in place (the lap-96 plan is dead)
+`red`/`iRNextG`/`iRKr` live in **`InternalZ.lean`**; `zsubst` lives in **`Zsubst.lean`** (imports InternalZ,
+strictly downstream). So `iRNextG` literally cannot name `zsubst`. And `red`'s definition block is **tangled**
+through InternalZ's tail (lines 6190–7409) with `iR2`, `ZDerivesEmpty` (def at 6935), and the
+`zDerivation_*_inv` lemmas — NOT a clean cut to relocate. This is why ~18 laps stalled.
+
+### Heredity check (done, by reasoning): hereditary Cor 2.1 is FALSE
+On the ⊥-orbit the TOP chain's selected premise is Rep (Cor 2.1, `tpReduce isymRep = id`), but `red`
+recurses into that Rep premise's OWN selected premise, which is permissible for *its* (non-⊥) conclusion —
+where I∀/axiom (non-Rep) selected premises DO occur. So the eigensubst case is genuinely reachable.
+
+### ▶ The three resolution options (next lap must pick — this is a real pivot)
+1. **(Recommended) Relocate the reduct downstream.** Move `red`/`iRNextG`/`redTable`/`iRK`/`iRKr` + the
+   red-lemmas out of InternalZ into a NEW module after Zsubst (or into Zsubst), changing the tag-1 case to
+   `zsubst (zIallPrem d) (zIallEig d) (numeral 0)`. `iord_zsubst` (lap 96, axiom-clean) then transfers the
+   banked ordinal descent unchanged (iord is conclusion-independent). Cost: disentangle ~1200 lines of
+   InternalZ tail (red vs iR2 vs ZDerivesEmpty vs inv-lemmas); keep iR2/ZDerivesEmpty/inv in InternalZ,
+   move ONLY red-block + red-lemmas. Large but mechanical; the payoff is the I∀ principal-cut becomes sound.
+2. **Build a PARALLEL downstream reduct `redC`** in Zsubst/Crux2Blueprint (don't touch InternalZ `red`):
+   same table recursion but tag-1 = eigensubst. Redo the descent/regularity for `redC` (reuse iord_zsubst,
+   ZRegular via zReg_zsubst). Cleaner isolation, but duplicates the table machinery.
+3. **Confine the headline to a fragment without ∀-cuts** — almost certainly too weak for the PA embedding
+   (M2 needs full PA; ∀-cuts are unavoidable). Not recommended.
+
+### What lap 97 banked
+- `ZRegular_red` (`Zsubst.lean`): `∀ d, ZDerivation d → ZRegular d → ZRegular (red d)`, axiom-clean — the
+  full O1 half, ready to transfer to the relocated/parallel reduct (regularity is conclusion-independent;
+  `zReg_zsubst` already covers the eigensubst case).
+
+---
+
 ## 📍 Lap 95 — FRESH-MIND REVIEW: the wall is a SURGICAL dispatch gate (confirms Path X)
 
 **Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms), re-verified in-kernel.**
