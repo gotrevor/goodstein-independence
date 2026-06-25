@@ -3758,6 +3758,31 @@ lemma znth_seqInsert_suf {ds i a b m : V} (him : i < m) (hm : m < lh ds) :
     znth (seqInsert ds i a b) (m + 1) = znth ds m :=
   znth_seqInsertAux_suf him _ (add_lt_add_of_lt_of_le hm (le_refl 1))
 
+/-- **Every entry of `seqInsert ds i a b` satisfies any predicate the halves and `ds`-entries do.**
+The pointwise companion to the validity `key`: handles the suffix-shift predecessor decomposition once,
+so downstream lemmas (e.g. the premise-`ZDerivation` of the 5.2.1 reduct) need no index bashing. -/
+lemma forall_znth_seqInsert {ds i a b : V} {P : V → Prop} (hi : i < lh ds)
+    (ha : P a) (hb : P b) (hP : ∀ k < lh ds, P (znth ds k)) :
+    ∀ n < lh ds + 1, P (znth (seqInsert ds i a b) n) := by
+  intro n hn
+  rcases lt_trichotomy n i with hlt | heq | hgt
+  · rw [znth_seqInsert_pre hlt (lt_trans hlt hi)]; exact hP n (lt_trans hlt hi)
+  · subst heq; rw [znth_seqInsert_at hi]; exact ha
+  · rcases eq_or_ne n (i + 1) with rfl | hne
+    · rw [znth_seqInsert_at1 hi]; exact hb
+    · -- i < n, n ≠ i+1 ⟹ i+1 < n; write n = (i+d)+1 with 0 < d
+      have hi1le : i + 1 ≤ n := succ_le_iff_lt.mpr hgt
+      have hi1n : i + 1 < n := lt_of_le_of_ne hi1le (Ne.symm hne)
+      obtain ⟨d, hd⟩ := le_iff_exists_add.mp (le_of_lt hi1n)
+      have hdpos : 0 < d := by
+        have h0 : i + 1 + 0 < i + 1 + d := by rw [add_zero, ← hd]; exact hi1n
+        exact lt_of_add_lt_add_left h0
+      have hnm : n = (i + d) + 1 := by rw [hd]; exact add_right_comm i 1 d
+      have him : i < i + d := lt_add_of_pos_right i hdpos
+      have hclt : i + d < lh ds := by
+        have : (i + d) + 1 < lh ds + 1 := by rw [← hnm]; exact hn
+        exact lt_of_add_lt_add_right this
+      rw [hnm, znth_seqInsert_suf him hclt]; exact hP (i + d) hclt
 
 /-! ### 5.2.1 ordered-insert splice VALIDITY (the genuine, order-sensitive object)
 
@@ -5162,6 +5187,52 @@ lemma ZDerivation_iCritAux_of_zK {s r ds i sv rv dsv : V} (hi : i < lh ds)
   · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
   · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
   · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
+
+/-- **5.2.1 splice-premise validity (the genuine ordered-insert reduct)** — the analogue of
+`ZDerivation_iCritAux_of` for case 5.2.1: splicing a critical premise's two halves `a`,`b` in place at
+index `i` of a valid chain (instead of replacing one premise) yields a genuine `ZDerivation`, GIVEN the
+two halves are derivable, the spliced `isChainInf` threading holds (`isChainInf_seqInsert`), and the
+per-half well-formedness. The conclusion keeps the parent's end-sequent `s`; the rank may rise to `r'`.
+Premise-membership is discharged by `forall_znth_seqInsert`; the per-`ds` well-formedness is read off the
+parent chain's `zKValidF`. -/
+lemma ZDerivation_seqInsert_of {s r r' ds i a b : V} (hi : i < lh ds)
+    (hZ : ZDerivation (zK s r ds)) (hZa : ZDerivation a) (hZb : ZDerivation b)
+    (hci : isChainInf s r' (seqInsert ds i a b))
+    (hperm_a : iperm (tp a) (fstIdx a)) (hperm_b : iperm (tp b) (fstIdx b))
+    (hf1_a : zTag a = 1 → IsUFormula ℒₒᵣ (zIallF a)) (hf1_b : zTag b = 1 → IsUFormula ℒₒᵣ (zIallF b))
+    (hf2_a : zTag a = 2 → IsUFormula ℒₒᵣ (zInegF a)) (hf2_b : zTag b = 2 → IsUFormula ℒₒᵣ (zInegF b))
+    (hf5_a : zTag a = 5 → IsUFormula ℒₒᵣ (zAxAllF a)) (hf5_b : zTag b = 5 → IsUFormula ℒₒᵣ (zAxAllF b))
+    (hf6_a : zTag a = 6 → IsUFormula ℒₒᵣ (zAxNegF a)) (hf6_b : zTag b = 6 → IsUFormula ℒₒᵣ (zAxNegF b))
+    (hfa_a : IsUFormula ℒₒᵣ (seqSucc (fstIdx a))) (hfa_b : IsUFormula ℒₒᵣ (seqSucc (fstIdx b))) :
+    ZDerivation (zK s r' (seqInsert ds i a b)) := by
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  obtain ⟨_, hperm, hg1, hg2, hg5, hg6, hcf, hss, hsa⟩ := zKValidF_of_ZDerivation_zK hZ
+  refine zDerivation_zK_intro (seqInsert_seq ds i a b) ?_
+    (zKValidF_seqInsert hci hi hperm_a hperm_b hf1_a hf1_b hf2_a hf2_b hf5_a hf5_b hf6_a hf6_b
+      hfa_a hfa_b hss hsa hperm hg1 hg2 hg5 hg6 hcf)
+  intro n hn
+  rw [seqInsert_lh] at hn
+  exact forall_znth_seqInsert hi hZa hZb (fun k hk => hmem k hk) n hn
+
+/-- **5.2.1, dispatch-ready (`zK`-halves) specialization.** In the genuine `red` dispatch the two halves
+`a = dⱼ{0}`, `b = dⱼ{1}` are themselves `K`-chains (tag 4), so own-permissibility is automatic
+(`iperm_isymRep`), the I/Ax tag-gated formula-hoods are vacuous, and the half end-sequent formula-hoods
+come from the halves' own validity. No side hypotheses beyond the two half derivations + the spliced
+`isChainInf`. -/
+lemma ZDerivation_seqInsert_of_zK {s r r' ds i sa ra dsa sb rb dsb : V} (hi : i < lh ds)
+    (hZ : ZDerivation (zK s r ds))
+    (hZa : ZDerivation (zK sa ra dsa)) (hZb : ZDerivation (zK sb rb dsb))
+    (hci : isChainInf s r' (seqInsert ds i (zK sa ra dsa) (zK sb rb dsb))) :
+    ZDerivation (zK s r' (seqInsert ds i (zK sa ra dsa) (zK sb rb dsb))) := by
+  refine ZDerivation_seqInsert_of hi hZ hZa hZb hci
+    (by rw [tp_zK]; exact iperm_isymRep _) (by rw [tp_zK]; exact iperm_isymRep _)
+    (fun h => absurd (zTag_zK sa ra dsa ▸ h) (by simp)) (fun h => absurd (zTag_zK sb rb dsb ▸ h) (by simp))
+    (fun h => absurd (zTag_zK sa ra dsa ▸ h) (by simp)) (fun h => absurd (zTag_zK sb rb dsb ▸ h) (by simp))
+    (fun h => absurd (zTag_zK sa ra dsa ▸ h) (by simp)) (fun h => absurd (zTag_zK sb rb dsb ▸ h) (by simp))
+    (fun h => absurd (zTag_zK sa ra dsa ▸ h) (by simp)) (fun h => absurd (zTag_zK sb rb dsb ▸ h) (by simp))
+    ?_ ?_
+  · rw [fstIdx_zK]; exact (zKValidF_of_ZDerivation_zK hZa).2.2.2.2.2.2.2.1
+  · rw [fstIdx_zK]; exact (zKValidF_of_ZDerivation_zK hZb).2.2.2.2.2.2.2.1
 
 /-! ### The reduct-descent IH interface `iRedDescent` (Buchholz Lemma 4.1 (a)+(b)(i)+NF closure)
 
