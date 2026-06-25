@@ -3423,6 +3423,19 @@ lemma znth_seqUpdate_of_ne {ds i v m : V} (h : m ≠ i) :
   · exact znth_seqUpdateAux_of_ne h (lh ds) hm
   · rw [znth_prop_not (Or.inr (by rw [seqUpdate_lh]; exact hm)), znth_prop_not (Or.inr hm)]
 
+/-- **Updating a premise with its own value is the identity.** `seqUpdate ds i (znth ds i) = ds` for a
+`Seq ds` and in-range `i` — the L-rule replace (`red dᵢ = dᵢ`) leaves the premise sequence untouched, so
+the dispatch goal `seqUpdate ds i (red dᵢ)` collapses to `ds`. Via `Seq.lh_ext`: same length, and at every
+index `seqUpdate` reads `znth ds`. -/
+lemma seqUpdate_znth_self {ds i : V} (hds : Seq ds) (hi : i < lh ds) :
+    seqUpdate ds i (znth ds i) = ds := by
+  refine Seq.lh_ext (seqUpdate_seq ds i (znth ds i)) hds (seqUpdate_lh ds i (znth ds i)) ?_
+  intro j x₁ x₂ h₁ h₂
+  rw [← (seqUpdate_seq ds i (znth ds i)).znth_eq_of_mem h₁, ← hds.znth_eq_of_mem h₂]
+  rcases eq_or_ne j i with rfl | hne
+  · rw [znth_seqUpdate_self hi]
+  · rw [znth_seqUpdate_of_ne hne]
+
 /-! ### Splice read-outs (Buchholz §3.2 case 5.2.1): `seqCons (seqUpdate ds j a) b`
 
 The sub-critical splice reduct expands premise `j` to two auxiliaries: `a = dⱼ{0}` replaces premise `j`
