@@ -9,12 +9,35 @@ asset, OFF the headline path** (free-X-TI ⊢ PRWO, wrong direction). **Crux 1 (
 (lap 57); crux 2 (`PRWO→Con`, Buchholz-Z ordinal analysis arithmetized in IΣ₁) is the sole remaining math
 content — the 🟡 active frontier, now sharply localized to `RedSound` (InternalZ.lean): the `iR2`-reduct of
 a contradiction derivation must itself be a genuine `ZDerivation` = real internalized cut-elimination.** ·
-**Build**: 🟢 green (`lake build GoodsteinPA`, 1325 jobs) · **Updated**: lap 89 (FRESH-MIND REVIEW —
+**Build**: 🟢 green (`lake build GoodsteinPA`, 1325 jobs) · **Updated**: lap 92 (DEEP REFLECTION — direction
+KEPT, **sub-route PIVOT recommended**: arithmetize the **ω-rule** system, not the finitary-eigenvariable one;
+see `REFLECTION-2026-06-25-lap92.md`) · earlier lap 89 (FRESH-MIND REVIEW —
 direction KEPT; **`PA_delta1Definable` DISCHARGED UPSTREAM** — Foundation now proves `𝗣𝗔.Δ₁` as a real
 `noncomputable instance`, so `peano_not_proves_consistency` is axiom-clean and the headline has exactly
 ONE blocker left: `goodstein_implies_consistency` = crux-2 = `redSound`) · 2026-06-25 · `25bafe6`+lap89
 
-> **⭐ Lap-89 FRESH-MIND REVIEW (read FIRST — current).** Re-verified kernel (real `#print axioms`, build
+> **⭐⭐⭐ Lap-92 DEEP REFLECTION (read FIRST — current).** See `REFLECTION-2026-06-25-lap92.md` (primary
+> deliverable). Re-verified kernel (real `#print axioms`, green 1325): headline `[propext, sorryAx, choice,
+> Quot.sound]` (0 math axioms), `peano_not_proves_consistency` clean, faithfulness anchor
+> `goodsteinSentence_faithful` clean (statement re-audited vs paper — no drift). **Direction KEPT; sub-route
+> PIVOT recommended (route C).** The altitude finding: crux-2 `redSound` is the right target, but the
+> arithmetized engine (`InternalZ.lean`) was built on Buchholz's **finitary system Z with eigenvariables**,
+> and that choice is the direct cause of the wall that has held laps 78–91 (~13 laps). Route A (keep-Π `red`)
+> refuted lap-90; route B (`tpReduce` conclusion-reducing reduct, laps 90–91) **still needs validity-preserving
+> eigenvariable substitution** (lap-90 lines 127–130/145–148) = the O2 / lap-78 wall, with **no validity-free
+> bypass** (lap-90 lines 132–143). **The fix = arithmetize the infinitary ω-rule system** (Buchholz §6 `Z^∞` /
+> Schütte `PA_ω`), as the repo's *own meta engine* `Zinfty.lean` already does axiom-clean and as Bryce–Goré's
+> complete Coq `Con(PA)` does. In an ω-rule node `∀xF` comes from a premise family `{dₙ ⊢ Γ→F(n)}`; a critical
+> cut *selects* `dₙ` (already deriving `Γ→F(n)`) instead of substituting an eigenvariable ⟹ **O1 (freshness),
+> O2 (eigen-subst), and route-B's `tpReduce` conclusion-tracking all collapse at once**. Reused unchanged: the
+> axiom-clean `iord`/`icmp`/`idg`/`iõ`/ω-tower engine + `Zinfty` as template; recursion on `iord<ε₀` is licensed
+> by the PRWO hypothesis itself. Risk (named, honest): the ω-rule's IΣ₁ arithmetization (premise-n as a Σ₁
+> recursive notation, Buchholz §6 `Z*`; cut-elim by `iord`-recursion) is new and could have its own wall.
+> **NEXT (de-risked): a `wip/InternalZomega.lean` SPIKE** that defines the internal ω-rule ∀-node + its
+> critical-cut reduct and *confirms by elaboration* the reduct is substitution-free, BEFORE committing the
+> ~2–3k-line pivot. **STOP** investing in finitary `tpReduce`/`Zsubst` eigenvariable substitution.
+
+> **⭐ Lap-89 FRESH-MIND REVIEW (historical — see lap-92 box above).** Re-verified kernel (real `#print axioms`, build
 > green 1325): headline `peano_not_proves_goodstein = [propext, sorryAx, choice, Quot.sound]` (**0 math
 > axioms**, anti-fraud intact). **Direction KEPT.** ⭐ **KEY UPDATE the lap-88 handoff missed:**
 > `peano_not_proves_consistency = [propext, choice, Quot.sound]` — **axiom-clean**. The
@@ -369,7 +392,21 @@ pure mathlib ordinal arithmetic it is **Aristotle-eligible** (the one piece with
 E **pins which `≺` F may use** (co-design). See newest `HANDOFF`.
 
 ## Where it stands
-**(lap-89 FRESH-MIND REVIEW — CURRENT read.)** Build green **1325**; headline honest `sorry` (real `#print
+**(lap-92 DEEP REFLECTION — CURRENT read.)** Build green **1325**; headline honest `sorry` (0 math axioms,
+faithfulness anchor clean, anti-fraud intact — all re-verified). Single open obligation =
+`goodstein_implies_consistency` = crux-1 (DONE) ∘ **crux-2** = `redSound` = internalized cut-elimination.
+**The reflection's call: the target is right, the sub-route is not.** crux-2 has been pursued inside
+Buchholz's *finitary eigenvariable* system, where cut-elimination needs `d₀(a/n)` substitution that preserves
+validity — the O2/lap-78 wall that has held laps 78–91 (route A refuted lap-90, route B `tpReduce` still hits
+it, no validity-free bypass). **Recommended pivot (route C): arithmetize the infinitary ω-rule system instead**
+(Buchholz §6 `Z^∞`; the repo's `Zinfty.lean` meta engine + Bryce–Goré's Coq both use it). A critical cut then
+*selects* the witness premise `dₙ` rather than substituting — dissolving O1+O2+`tpReduce` together. The
+ordinal engine (`iord`/`icmp`/`idg`/`iõ`, axiom-clean) is reused unchanged; recursion on `iord<ε₀` is licensed
+by PRWO. **NEXT (de-risked): `wip/InternalZomega.lean` spike** to confirm the internal ω-rule reduct is
+substitution-free before the ~2–3k-line rebuild. STOP the finitary `tpReduce`/`Zsubst` thread. See
+`REFLECTION-2026-06-25-lap92.md`.
+
+**(lap-89 FRESH-MIND REVIEW — historical read.)** Build green **1325**; headline honest `sorry` (real `#print
 axioms = [propext, sorryAx, choice, Quot.sound]`, 0 math axioms, anti-fraud intact). M1 + Phase 1 long done;
 crux 1 (`γ→PRWO`) landed axiom-clean lap 57. **The endgame is now SINGLE-FRONT:** `PA_delta1Definable` is
 discharged UPSTREAM (Foundation proves `𝗣𝗔.Δ₁` as a real instance), so `peano_not_proves_consistency` is
@@ -597,6 +634,16 @@ choice, but it is Towsner-specific and now OFF the critical path (banked, not de
 escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
 
 ## What's happened (newest first)
+- **2026-06-25 (lap 92 — DEEP REFLECTION):** Re-verified kernel (green 1325, headline 0 math axioms, faithfulness
+  anchor clean, statement re-audited vs paper — no drift). **Direction KEPT; recommended a sub-route PIVOT.**
+  Diagnosed the laps-78–91 stall as an *artifact of the finitary-eigenvariable presentation*: route A refuted
+  (lap-90), route B `tpReduce` still needs validity-preserving eigenvariable substitution (O2/lap-78), no
+  validity-free bypass (lap-90). Gathered three independent evidences that the **ω-rule** is the fix —
+  Bryce–Goré's complete Coq `Con(PA)` (`PA_omega.v`, no eigenvariables), the repo's own axiom-clean meta engine
+  `Zinfty.lean` (ω-rule `allω`), and Buchholz §6 `Z^∞` (embeds finitary→infinitary *to* do cut-elimination).
+  The ω-rule *selects* the witness premise `dₙ` instead of substituting ⟹ dissolves O1+O2+`tpReduce`. NEXT:
+  a `wip/InternalZomega.lean` de-risk spike before the rebuild. STOP the finitary `tpReduce`/`Zsubst` thread.
+  See `REFLECTION-2026-06-25-lap92.md`. (No proof code committed this lap — synthesis is the deliverable.)
 - **2026-06-25 (lap 89 — FRESH-MIND REVIEW):** Re-verified kernel (real `#print axioms`, green 1325): headline
   `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). **Direction KEPT.** ⭐ **Found the lap-88 handoff
   missed a major simplification:** `peano_not_proves_consistency` is now **axiom-clean** —
@@ -803,7 +850,7 @@ closes axiom-clean with no remaining upstream-axiom reconciliation.
 | theorem | paper claim | `#print axioms` shows | status |
 |---|---|---|---|
 | `peano_not_proves_goodstein` (headline, `Statement.lean`) | uncond. (Kirby–Paris) | `propext, sorryAx, choice, Quot.sound` (**lap-71 real, re-verified**) | 🔓 open `sorry` (LOCKED, anti-fraud) — **0** math axioms. Route A: reduces (axiom-clean) to `goodstein_implies_consistency` via `not_proves_of_implies_consistency` + Gödel II. |
-| `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` only (**lap-89 real** — `PA_delta1Definable` no longer appears; discharged upstream) | 🎯 **THE single open obligation = crux 1 ∘ crux 2.** §3 `γ→PRWO(ε₀)` = **crux 1 — DONE, axiom-clean (lap 57)** via the width-FUNCTION refactor (`BlkRecF`/`StdCor34F`/`crux1_internal_run_F`); in `wip/GentzenCon.lean`. Gentzen Thm 2.8 `PRWO→Con(PA)` = **crux 2, 🟡 ACTIVE FRONTIER**, now localized to the blueprint nut **`redSound`** (`Crux2Blueprint.lean`) = the `red`-reduct of a contradiction derivation is a genuine `ZDerivation` = real internalized cut-elimination; lap 70 forced **Option A** (genuine validity-preserving reduct), lap 82 re-pointed validity to criticality-free `zKValidF`, laps 84–85 DEFINED the genuine reduct `red` (5.1 case). **Lap 86: gating finding (in-kernel, `not_zKCritical_red_zK`) — the critical-only `red` is itself non-critical after one step, so `red`'s tag-4 MUST dispatch Buchholz Def-3.2 cases 5.1/5.2.1/5.2.2** (descent for each banked; new content = dispatch def + 5.2 `zKValidF` validity). Feasibility settled by Bryce–Goré Coq, Feb 2026; must be fully discharged — operator: axiom-free or abandoned. |
+| `goodstein_implies_consistency` (Route-A girder, `src/Reduction`) | Rathjen Cor 3.7: `𝗣𝗔⊢γ → 𝗣𝗔⊢Con(𝗣𝗔)` | `sorryAx` only (**lap-89 real** — `PA_delta1Definable` no longer appears; discharged upstream) | 🎯 **THE single open obligation = crux 1 ∘ crux 2.** §3 `γ→PRWO(ε₀)` = **crux 1 — DONE, axiom-clean (lap 57)** via the width-FUNCTION refactor (`BlkRecF`/`StdCor34F`/`crux1_internal_run_F`); in `wip/GentzenCon.lean`. Gentzen Thm 2.8 `PRWO→Con(PA)` = **crux 2, 🟡 ACTIVE FRONTIER**, now localized to the blueprint nut **`redSound`** (`Crux2Blueprint.lean`) = the `red`-reduct of a contradiction derivation is a genuine `ZDerivation` = real internalized cut-elimination; lap 70 forced **Option A** (genuine validity-preserving reduct), lap 82 re-pointed validity to criticality-free `zKValidF`, laps 84–85 DEFINED the genuine reduct `red` (5.1 case). **Lap 86: gating finding (in-kernel, `not_zKCritical_red_zK`) — the critical-only `red` is itself non-critical after one step, so `red`'s tag-4 MUST dispatch Buchholz Def-3.2 cases 5.1/5.2.1/5.2.2** (descent for each banked; new content = dispatch def + 5.2 `zKValidF` validity). Feasibility settled by Bryce–Goré Coq, Feb 2026; must be fully discharged — operator: axiom-free or abandoned. **Lap-92 DEEP REFLECTION: sub-route PIVOT recommended (route C).** laps 86–91 then dispatched/refined `red` (5.1/5.2.1/5.2.2) and built `tpReduce` (route B, conclusion-reducing), but route A is refuted and route B still needs validity-preserving *eigenvariable substitution* (O2/lap-78 wall, no bypass). The architectural fix is to arithmetize the **infinitary ω-rule** system (Buchholz §6 `Z^∞`, as `Zinfty.lean`/Bryce–Goré do): a critical cut *selects* premise `dₙ` instead of substituting ⟹ O1+O2+`tpReduce` collapse. De-risk via `wip/InternalZomega.lean` spike first; reuse the axiom-clean `iord` engine. See `REFLECTION-2026-06-25-lap92.md`. |
 | `not_proves_of_implies_consistency` / `peano_not_proves_consistency` (Phase 1, `src/Reduction`) | meta-reduction + Gödel II for `𝗣𝗔` | `propext, choice, Quot.sound` (**lap-89 real — axiom-clean**) | 🟢 **CLEAN — the Route-A Gödel-II hook.** ⭐ **Lap 89: `PA_delta1Definable` DISCHARGED UPSTREAM.** Foundation now proves `𝗣𝗔.Δ₁` as a real `noncomputable instance` (`Foundation/FirstOrder/Incompleteness/InductionSchemeDelta1.lean:1379`, no longer an axiom), so `consistent_unprovable 𝗣𝗔` — and hence `peano_not_proves_consistency` and everything chaining through it — carries NO custom axiom. This RETIRES the entire lap-74/78/81 second-front campaign (the `src/PADelta1.lean` Δ₁-recognizer work is now moot/superseded). |
 | `InternalThm35.bbeta_*` / `iwtower_cofinal` (internal Thm 3.5, **lap 47**, `src/InternalThm35`) | Rathjen Thm 3.5: slow α → `β` with tight `C(βᵣ)≤r+1` | `propext, choice, Quot.sound` | 🟢 **CLEAN + COMPLETE** — `bbeta_isNF`/`bbeta_C_le`/`bbeta_desc_exists`; ω-tower cofinality `iwtower_cofinal` discharges the seam. Route-independent; consumed by Lemma 3.6 (`nonterminating_internal`). |
 | `GentzenCon.prwoInstance_faithful` / `prwoInstance_models_iff` / `eval_prec_internal` (PRWO formulation, **lap 50, REBUILT lap 56**, `wip/GentzenCon`) | Rathjen Thm 2.8: PRWO(ε₀) is the `ℒₒᵣ`-sentence "no ε₀-descent" | `propext, choice, Quot.sound` (**lap-56 real** — SHED the F-φ `native_decide` artifact) | 🟢 **CLEAN** — **lap 56:** rebuilt on the TRANSPARENT `prec_internal`/`InternalONote.icmp` (was the opaque `precφ`=`codeOfREPred₂`, std-model-only spec → wall-B opacity in nonstandard `M`). `prwoInstance_models_iff` (`M⊧prwoInstance seq ↔ ¬∀n y z, seq[y,n]→seq[z,n+1]→icmp z y=0`, every `M⊧IΣ₁`) now holds identically in nonstandard models; `_faithful` is its `M=ℕ` corollary. **natCode↔NF bridge DISSOLVED.** **Crux-2 deep core (lap-58 reframe) = `gentzen_descent_of_inconsistent` (per-model semantic form: `¬𝗣𝗔.Consistent M → infinite ε₀-descent`) — 🟡 ACTIVE FRONTIER** (was 🟠 cited eq-5; reclassified lap 62 — feasibility settled by Bryce–Goré Coq, must be fully discharged). The lap-60/61 `wip/InternalZ.lean` engine (idg/iõ/iord + C3 descent templates, axiom-clean) discharges it once the C0 Fixpoint `ZDerivation`, `iR` (C2), and the **C0.5 Foundation→Z bridge** land. The 9 `GentzenCon` axioms: 5 ℕ-meta scaffold (`ord/R/derivesEmpty/...`, not consumed downstream) + 4 per-model (`gentzen_descent_of_inconsistent`/`gentzenDescentφ`/`_dominated`/`_realized` — the real targets). |

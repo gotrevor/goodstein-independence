@@ -1,5 +1,35 @@
 # Pending work — open obligations & attack paths
 
+## 📍 Lap 92 — DEEP REFLECTION: ω-rule pivot (route C) recommended
+
+**Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). No proof code — synthesis lap.**
+Primary deliverable: `REFLECTION-2026-06-25-lap92.md`. STATUS lap-92 box + HANDOFF-lap92 updated.
+
+**The call.** crux-2 `redSound` is the right target; the *finitary eigenvariable* sub-route is not. Route A
+refuted (lap-90); route B (`tpReduce`, laps 90–91) still needs validity-preserving eigenvariable substitution
+(O2/lap-78 wall), no validity-free bypass (lap-90 lines 132–143). **Pivot: arithmetize the infinitary ω-rule
+system** (Buchholz §6 `Z^∞`), as `Zinfty.lean` (meta, axiom-clean) + Bryce–Goré's Coq `Con(PA)` do. A critical
+cut *selects* premise `dₙ` (already deriving `Γ→F(n)`) instead of substituting ⟹ O1+O2+`tpReduce` collapse.
+
+**NEXT — de-risked, three attack paths for the spike `wip/InternalZomega.lean`:**
+1. **Define the ω-rule ∀-node + critical reduct, confirm substitution-free.** `zAllOmega s g` with premise-n
+   `= appPrem g n` (`appPrem`: a Σ₁ application of premise-notation `g` to index `n`, reusing
+   `zK`/`zKseq`/`iIndReductSeq`/`iRepeatSeq`). State the critical-cut reduct on `∀xF` and elaborate-check it is
+   `appPrem g n` with no `substs1`/`zsubst` obligation. RISKIEST ASSUMPTION — probe FIRST. Aristotle-fodder.
+2. **Σ₁-definability of `appPrem`** (the premise selector). If (1)'s notation encoding makes `appPrem`
+   Σ₁-definable cheaply (it is a bounded lookup into a notation code), the ω-rule node is Σ₁-definable and
+   `zDerivation_induction` can be re-cast as `iord`-recursion. Probe second.
+3. **Port the ordinal engine + `Zinfty` cut-elim cases onto the internal ω-rule.** Only after (1)+(2) pass:
+   `iord`/`icmp`/`idg`/`iõ`/ω-tower reused unchanged; each `Zinfty.lean` reduction case (`orInv`/`allInv`/
+   `cutElimStep`) is a worked meta template for the internal version. This is the ~2–3k-line rebuild.
+
+**STOP:** finitary `tpReduce` conclusion-tracking + new `Zsubst`/`ZDerivation_zsubst` eigenvariable lemmas.
+**KEEP (reusable under route C):** `red_zK_rep/_splice`, `tp_*`, `red_rep_of_tp_isymRep`,
+`tp_isymRep_of_emptyAnt_botSucc` (the `tp`-dispatch survives; only substitution → selection changes); the
+axiom-clean `iord` engine; `Zinfty.lean` as template.
+
+---
+
 ## 📍 Lap 91 — route-B keystone `tpReduce` defined + 𝚺₁-definable
 
 **Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). 2 green commits.**
