@@ -6479,26 +6479,41 @@ lemma cutFormula_neg {d p : V} (hp : IsUFormula ℒₒᵣ p)
   rw [hA, if_neg (by simp [inegF, qqOr])]
   simp [inegF, qqOr, hp.neg_neg]
 
-/-- **T3.4(a) strict rank bound for the stripped cut formula.** From the `L^k_{A_i}` redex symbol
-(`hLj`), the principal being a sentence (`hsf : closed`) of rank `≤ r` (`hrank`), the stripped cut
-formula has rank **strictly** below `r` — `rk(F(k)) < rk(∀xF) ≤ r` / `rk(A) < rk(¬A) ≤ r`. This is the
+/-- **The R-redex premise carries the cut formula's well-formedness.** A genuine `ZDerivation` whose
+`tp` is a right symbol `R_A` introduces `A` by an `I∀` (tag 1) or `I¬` (tag 2) rule, so `A = ∀xF` with
+the matrix `IsSemiformula ℒₒᵣ 1 F` (from `zIallWff`) or `A = ¬B = inegF B` with `IsUFormula B` (from
+`zInegWff`). This is where the **closedness** the substitution rank lemma needs comes from — it is
+NOT in the (`IsUFormula`-only) chain validity, but in the I-rule premise's side condition. -/
+lemma tp_isymR_form_wff {d A : V} (hZ : ZDerivation d) (h : tp d = isymR A) :
+    (∃ p, A = (^∀ p : V) ∧ IsSemiformula ℒₒᵣ 1 p) ∨ (∃ p, A = inegF p ∧ IsUFormula ℒₒᵣ p) := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, hwff⟩ |
+    ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+  · rw [tp_zAtom] at h; exact absurd h (by simp)
+  · rw [tp_zIall] at h; exact Or.inl ⟨p, ((isymR_inj _ _).mp h).symm, hwff.2.2⟩
+  · rw [tp_zIneg] at h; exact Or.inr ⟨p, ((isymR_inj _ _).mp h).symm, hwff.2.2⟩
+  · rw [tp_zInd] at h; exact absurd h (by simp)
+  · rw [tp_zK] at h; exact absurd h (by simp)
+  · rw [tp_zAxAll] at h; exact absurd h (by simp)
+  · rw [tp_zAxNeg] at h; exact absurd h (by simp)
+
+/-- **T3.4(a) strict rank bound for the stripped cut formula — fully self-contained.** From the R-redex
+premise `dᵢ` being a `ZDerivation` (`hZi`) with `tp dᵢ = R_{A_i}` (`hRi`, `A_i = chainAsucc …`) of rank
+`≤ r` (`hrank`), the stripped cut formula has rank **strictly** below `r`: `rk(F(k)) < rk(∀xF) ≤ r` /
+`rk(A) < rk(¬A) ≤ r`. The matrix closedness (`IsSemiformula 1`) needed for the `∀`-case substitution
+rank invariance is supplied by `tp_isymR_form_wff` (the I∀ premise's `zIallWff`), NOT by any external
+hypothesis — so this dissolves the lap-110/112 closedness gap on the descent context. This is the
 degree drop the principal cut formula (`≤ r`, non-strict) fails to give (lap-110 root cause). -/
-lemma irk_cutFormula_lt {d k r : V}
-    (hLj : tp (znth (zKseq d) (redexJ d)) = isymLk k (chainAsucc (zKseq d) (redexI d)))
-    (hsf : IsSemiformula ℒₒᵣ 0 (chainAsucc (zKseq d) (redexI d)))
+lemma irk_cutFormula_lt {d r : V}
+    (hZi : ZDerivation (znth (zKseq d) (redexI d)))
+    (hRi : tp (znth (zKseq d) (redexI d)) = isymR (chainAsucc (zKseq d) (redexI d)))
     (hrank : irk (chainAsucc (zKseq d) (redexI d)) ≤ r) :
     irk (cutFormula d) < r := by
-  rcases tp_isymLk_form hLj with ⟨p, hp⟩ | ⟨p, hp⟩
-  · -- `A_i = ∀xF`, cut formula `F(k)`: `rk(F(k)) < rk(∀xF) ≤ r`.
+  rcases tp_isymR_form_wff hZi hRi with ⟨p, hp, hsfp⟩ | ⟨p, hp, hUfp⟩
+  · -- `A_i = ∀xF`, cut formula `F(k)`: `rk(F(k)) < rk(∀xF) ≤ r` (matrix `IsSemiformula 1` from I∀).
     rw [cutFormula_all hp]
-    have hsfp : IsSemiformula ℒₒᵣ 1 p := by
-      have h := (IsSemiformula.all (L := ℒₒᵣ)).mp
-        (show IsSemiformula ℒₒᵣ 0 (^∀ p) by rw [← hp]; exact hsf)
-      simpa using h
     exact irk_cut_lt_rank_forall (m := 0) hsfp (by simp) (hp ▸ hrank)
   · -- `A_i = ¬A = inegF A`, cut formula `A`: `rk(A) < rk(¬A) ≤ r`.
-    have hUf : IsUFormula ℒₒᵣ (inegF p) := by rw [← hp]; exact hsf.isUFormula
-    have hUfp : IsUFormula ℒₒᵣ p := by rw [inegF] at hUf; simpa using hUf
     rw [cutFormula_neg hUfp hp]
     exact irk_cut_lt_rank_neg hUfp (hp ▸ hrank)
 
