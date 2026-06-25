@@ -903,7 +903,7 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     -- zK: rebuild the chain on the substituted premises; validity transfers because `d ≤ a` makes
     -- every premise/conclusion `^&a`-free, so `isChainInf`/`iperm`/criticality all carry over.
     · intro hda
-      obtain ⟨hci, hperm, hncrit, hf1, hf2, hf5, hf6, hcf, hssf, hsaf⟩ := hvalid
+      obtain ⟨hci, hperm, hf1, hf2, hf5, hf6, hcf, hssf, hsaf⟩ := hvalid
       have hsa : s ≤ a := le_of_lt (lt_of_lt_of_le (seq_lt_zK s r ds) hda)
       have hZpr : ∀ i < lh ds, ZDerivation (znth ds i) := fun i hi => (hC _ (hmem i hi)).1
       have hprle : ∀ i < lh ds, znth ds i ≤ a := fun i hi =>
@@ -922,16 +922,11 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
         rw [hlh] at hi
         rw [hmap i hi]
         exact (hC _ (hmem i hi)).2 (hprle i hi)
-      · refine ⟨isChainInf_zsubst ht.isUTerm hlh hZpr hmap hcf hci, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+      · refine ⟨isChainInf_zsubst ht.isUTerm hlh hZpr hmap hcf hci, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
         · intro i hi
           rw [hlh] at hi
           rw [hmap i hi, fstIdx_zsubst a t (hZpr i hi)]
           exact iperm_tp_zsubst ht (hZpr i hi) (hperm i hi)
-        · intro i hi hcon
-          rw [hlh] at hi
-          rw [hmap i hi] at hcon
-          exact hncrit i hi (tp_zsubst_eq ht (hZpr i hi) (hprle i hi) ▸
-            iperm_zsubst_conclusion hsa hssf hsaf hcon)
         · intro i hi htag
           rw [hlh] at hi
           rw [hmap i hi] at htag ⊢

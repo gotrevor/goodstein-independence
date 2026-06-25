@@ -4024,7 +4024,7 @@ def ZPhi (C : Set V) (d : V) : Prop :=
   (∃ s a p d0, d = zIall s a p d0 ∧ d0 ∈ C ∧ seqSucc s = (^∀ p : V) ∧ zIallWff s a p d0) ∨
   (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0) ∨
   (∃ s at' p d0 d1, d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ zIndWff d) ∨
-  (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValid s r ds) ∨
+  (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValidF s r ds) ∨
   (∃ s p k, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s)) ∨
   (∃ s p, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s))
 
@@ -4071,7 +4071,7 @@ private lemma zphi_iff (C d : V) :
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ zIndWff d) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
-        d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValid s r ds) ∨
+        d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValidF s r ds) ∨
       (∃ s < d, ∃ p < d, ∃ k < d, d = zAxAll s p k ∧ IsUFormula ℒₒᵣ p ∧ inAnt (^∀ p : V) (seqAnt s)) ∨
       (∃ s < d, ∃ p < d, d = zAxNeg s p ∧ IsUFormula ℒₒᵣ p ∧ inAnt (inegF p : V) (seqAnt s)) ) := by
   constructor
@@ -4120,7 +4120,7 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ r < d, ∃ ds < d,
         !zKGraph d s r ds ∧ !seqDef ds ∧
           (∃ l, !lhDef l ds ∧ ∀ i < l, ∃ z, !znthDef z ds i ∧ z ∈ C) ∧
-          !(zKValidDef.sigma) s r ds) ∨
+          !(zKValidFDef.sigma) s r ds) ∨
       (∃ s < d, ∃ p < d, ∃ k < d, !zAxAllGraph d s p k ∧ !(isUFormula ℒₒᵣ).sigma p ∧
         ∃ ap, !qqAllDef ap p ∧ ∃ sa, !seqAntDef sa s ∧ !inAntDef ap sa) ∨
       (∃ s < d, ∃ p < d, !zAxNegGraph d s p ∧ !(isUFormula ℒₒᵣ).sigma p ∧
@@ -4138,7 +4138,7 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ r < d, ∃ ds < d,
         !zKGraph d s r ds ∧ !seqDef ds ∧
           (∀ l, !lhDef l ds → ∀ i < l, ∀ z, !znthDef z ds i → z ∈ C) ∧
-          !(zKValidDef.pi) s r ds) ∨
+          !(zKValidFDef.pi) s r ds) ∨
       (∃ s < d, ∃ p < d, ∃ k < d, !zAxAllGraph d s p k ∧ !(isUFormula ℒₒᵣ).pi p ∧
         ∀ ap, !qqAllDef ap p → ∀ sa, !seqAntDef sa s → !inAntDef ap sa) ∨
       (∃ s < d, ∃ p < d, !zAxNegGraph d s p ∧ !(isUFormula ℒₒᵣ).pi p ∧
@@ -4316,10 +4316,11 @@ lemma zDerivation_zK_inv {s r ds : V} (hZ : ZDerivation (zK s r ds)) :
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
 
-/-- **Chain validity from a `ZDerivation`**: the refined `ZPhi` `zK` disjunct now carries `zKValid`,
-so a `ZDerivation` of a chain hands you the Buchholz `K^r` side conditions directly. This is what makes
-the tag-4 descent UNCONDITIONAL. -/
-lemma zKValid_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) : zKValid s r ds := by
+/-- **Faithful chain validity from a `ZDerivation`**: after the re-point, the `ZPhi` `zK` disjunct carries
+`zKValidF` (Buchholz's genuine criticality-free `K^r` validity, §3 clause 5), so a `ZDerivation` of a chain
+hands you the faithful side conditions directly. Criticality is NOT part of being a derivation — it is a
+property the *reduction* (Def 3.2 case 5) supplies at the reduction site. -/
+lemma zKValidF_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) : zKValidF s r ds := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a, p, d0, h, _⟩ | ⟨s', p, d0, h, _⟩ |
     ⟨s', at', p, d0, d1, h, _, _⟩ | ⟨s', r', ds', h, hds', hmem', hvalid'⟩ |
     ⟨s', p, k, h, _⟩ | ⟨s', p, h, _⟩
@@ -4333,6 +4334,16 @@ lemma zKValid_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) : zK
     exact hvalid'
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
+
+/-- **The `K^r` chain introduction** (the post-re-point `ZPhi` `zK` disjunct, packaged): a `Seq` premise
+sequence of `ZDerivation`s that is `zKValidF`-valid (Buchholz's faithful, criticality-free `K^r` validity)
+builds a `ZDerivation` of the chain `zK s r ds`. This is the `hZPhiK` residual of `ZDerivation_iCritReductG_of`
+— now a theorem rather than a hypothesis, because criticality is no longer baked into `ZDerivation`. -/
+lemma zDerivation_zK_intro {s r ds : V} (hseq : Seq ds)
+    (hmem : ∀ i < lh ds, ZDerivation (znth ds i)) (hvalid : zKValidF s r ds) :
+    ZDerivation (zK s r ds) :=
+  zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+    ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩)))))
 
 /-- **All-`n` premise NF** of a `ZDerivation` chain: in-range premises are NF (`isNF_iotil_of_ZDerivation`),
 out-of-range default `0` is NF (`isNF_iotil_zero`). Discharges the `hNF : ∀ n` side condition. -/
@@ -5098,7 +5109,8 @@ their closed reducts, and the K-rule (tag 4) via `iord_descent_iR2_zK_of_valid` 
 never arise on a ⊥-derivation), so they stay excluded by `htag`. This is the capstone that turns the
 descent MATH into a single hypothesis-free fact about `ZDerivation`s. -/
 lemma iord_descent_iR2_struct (d : V) (hd : ZDerivation d)
-    (htag : zTag d = 1 ∨ zTag d = 2 ∨ zTag d = 3 ∨ zTag d = 4) :
+    (htag : zTag d = 1 ∨ zTag d = 2 ∨ zTag d = 3 ∨ zTag d = 4)
+    (hcrit : zTag d = 4 → zKCritical (fstIdx d) (zKseq d)) :
     icmp (iord (iR2 d)) (iord d) = 0 := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, h0, h1, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
@@ -5109,8 +5121,12 @@ lemma iord_descent_iR2_struct (d : V) (hd : ZDerivation d)
   · rw [iR2_zInd]
     exact iord_descent_iRInd_zInd s at' p d0 d1
       (isNF_iotil_of_ZDerivation d0 h0) (isNF_iotil_of_ZDerivation d1 h1)
-  · -- tag 4 (K-rule): the refined `ZPhi` now hands us `zKValid`, so the descent is unconditional.
-    exact iord_descent_iR2_zK_of_valid hds hmem hvalid
+  · -- tag 4 (K-rule): after the re-point `ZPhi` carries only the faithful validity `zKValidF`; the
+    -- iR2 critical-reduct descent additionally needs the chain to be *critical* (lap-83 finding — iR2 is
+    -- the ordinal-first dead reduct, superseded by the genuine `red`). Criticality is supplied here.
+    have hcr : zKCritical s ds := by have := hcrit (by simp); simpa using this
+    exact iord_descent_iR2_zK_of_valid hds hmem
+      (zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid, hcr⟩)
   · simp [zTag_zAxAll] at htag
   · simp [zTag_zAxNeg] at htag
 
@@ -5154,14 +5170,16 @@ Z-derivation of an empty-antecedent sequent strictly lowers the ordinal `iord`. 
 hypothesis-free per-step fact iterated by the no-infinite-descent argument; it remains to show `iR2`
 *preserves* `ZDerivesEmpty` (reduction-soundness + end-sequent invariance), the next interface. -/
 lemma iord_descent_iR2_of_emptyAnt {d : V} (hZ : ZDerivation d)
-    (hemp : seqAnt (fstIdx d) = (∅ : V)) :
+    (hemp : seqAnt (fstIdx d) = (∅ : V))
+    (hcrit : zTag d = 4 → zKCritical (fstIdx d) (zKseq d)) :
     icmp (iord (iR2 d)) (iord d) = 0 :=
-  iord_descent_iR2_struct d hZ (zTag_reducible_of_emptyAnt hZ hemp)
+  iord_descent_iR2_struct d hZ (zTag_reducible_of_emptyAnt hZ hemp) hcrit
 
 /-- **One descent step on a `ZDerivesEmpty` code** (the packaged form). -/
-lemma iord_descent_iR2_of_ZDerivesEmpty {d : V} (h : ZDerivesEmpty d) :
+lemma iord_descent_iR2_of_ZDerivesEmpty {d : V} (h : ZDerivesEmpty d)
+    (hcrit : zTag d = 4 → zKCritical (fstIdx d) (zKseq d)) :
     icmp (iord (iR2 d)) (iord d) = 0 :=
-  iord_descent_iR2_of_emptyAnt h.1 h.2.1
+  iord_descent_iR2_of_emptyAnt h.1 h.2.1 hcrit
 
 /-- **`iR2` preserves the end-sequent on the `Rep`-tagged reducible rules (Ind, K).** Both reducts are
 chains `zK (fstIdx d) …` (`iRInd`/`iCritReduct` carry the conclusion sequent verbatim), so
@@ -5470,7 +5488,7 @@ lemma ZDerivation_iR2_zInd_of_zKValid {s at' p d0 d1 : V}
   rw [iR2_zInd, iRInd_zInd, zDerivation_iff]
   exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
     ⟨s, irk p, iIndReductSeq d0 d1 1, rfl, iIndReductSeq_seq d0 d1 1,
-      fun i hi => znth_iIndReductSeq_ZDerivation h0 h1 i hi, hvalid⟩))))
+      fun i hi => znth_iIndReductSeq_ZDerivation h0 h1 i hi, zKValidF_of_zKValid hvalid⟩))))
 
 /-- Both premises of the critical-reduct sequence `iCritReductSeq d0 d1 = ⟨d0,d1⟩` are `ZDerivation`s
 when `d0`,`d1` are. -/
@@ -5501,20 +5519,17 @@ lemma ZDerivation_iCritReduct_of {d i j v w : V}
   rw [iCritReduct, zDerivation_iff]
   exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
     ⟨fstIdx d, zKrank d - 1, iCritReductSeq (iCritAux d i v) (iCritAux d j w), rfl,
-      iCritReductSeq_seq _ _, fun n hn => znth_iCritReductSeq_ZDerivation ha hb n hn, hvalid⟩))))
+      iCritReductSeq_seq _ _, fun n hn => znth_iCritReductSeq_ZDerivation ha hb n hn,
+      zKValidF_of_zKValid hvalid⟩))))
 
-/-- **The genuine critical reduct is a `ZDerivation`, modulo the re-pointed chain constructor.** Given
-the re-pointed `K`-rule introduction `hZPhiK` (a `Seq` premise sequence of `ZDerivation`s that is
-`zKValidF`-valid builds a `ZDerivation` of the chain — the swap `zKValid → zKValidF` in `ZPhi`'s `zK`
-disjunct, lap-82 blast radius ~6 sites), and the two genuine auxiliaries being `ZDerivation`s of their
-reduced endsequents `Θ→A(d)`/`A(d),Θ→D` (the recursive Thm 3.4(a)), the recombination `iCritReductG` is a
+/-- **The genuine critical reduct is a `ZDerivation`** (R1 DISCHARGED — re-point landed). The `ZPhi` `zK`
+disjunct now carries the faithful, criticality-free validity `zKValidF`, so the chain introduction
+`zDerivation_zK_intro` is a theorem and the former `hZPhiK` residual is gone. Given only the two genuine
+auxiliaries being `ZDerivation`s of their reduced endsequents `Θ→A(d)`/`A(d),Θ→D` (the recursive Thm 3.4(a)
+— **R2**, the one remaining residual of the critical case), the recombination `iCritReductG` is a
 `ZDerivation`. Its validity threading is automatic via `zKValidF_iCritReductGen`; only the cut-rank drop
-`rk(A(d)) ≤ rOut` (Thm 3.4(a), banked `irk_cut_lt_rank_*`) and the conclusion formula-hood are supplied.
-This isolates the two genuine residuals of `RedSound`'s critical case: the `ZPhi` re-point (`hZPhiK`) and
-the auxiliaries' validity (the structural IH). -/
+`rk(A(d)) ≤ rOut` (Thm 3.4(a), banked `irk_cut_lt_rank_*`) and the conclusion formula-hood are supplied. -/
 lemma ZDerivation_iCritReductG_of {s C rOut rIn0 rIn1 ds0 ds1 : V}
-    (hZPhiK : ∀ {s' r' ds' : V}, Seq ds' → (∀ i < lh ds', ZDerivation (znth ds' i)) →
-        zKValidF s' r' ds' → ZDerivation (zK s' r' ds'))
     (haux0 : ZDerivation (zK (seqSetSucc s C) rIn0 ds0))
     (haux1 : ZDerivation (zK (seqAddAnt C s) rIn1 ds1))
     (hsAnt : Seq (seqAnt s)) (hCrk : irk C ≤ rOut) (hCUf : IsUFormula ℒₒᵣ C)
@@ -5522,7 +5537,7 @@ lemma ZDerivation_iCritReductG_of {s C rOut rIn0 rIn1 ds0 ds1 : V}
     (hsaUf : ∀ k < lh (seqAnt s), IsUFormula ℒₒᵣ (znth (seqAnt s) k)) :
     ZDerivation (iCritReductG s C rOut rIn0 rIn1 ds0 ds1) := by
   rw [iCritReductG]
-  refine hZPhiK (iCritReductSeq_seq _ _)
+  refine zDerivation_zK_intro (iCritReductSeq_seq _ _)
     (fun n hn => znth_iCritReductSeq_ZDerivation haux0 haux1 n hn) ?_
   exact zKValidF_iCritReductGen hsAnt hCrk hCUf hssUf hsaUf
 
@@ -5553,9 +5568,11 @@ lemma ZDerivesEmpty_iterate (hRS : RedSound (V := V)) {z : V} (hz : ZDerivesEmpt
 reduction-soundness the ordinals `n ↦ iord (iR2^[n] z)` strictly `≺`-descend at every step
 (`icmp (·(n+1)) (·n) = 0`). An infinite primitive-recursive `ε₀`-descent — exactly what `PRWO(ε₀)`
 forbids, giving the Gentzen contradiction `¬Con(𝗣𝗔) → False` once `z` is produced by the C0.5 bridge. -/
-lemma iord_iR2_iterate_descends (hRS : RedSound (V := V)) {z : V} (hz : ZDerivesEmpty z) (n : ℕ) :
+lemma iord_iR2_iterate_descends (hRS : RedSound (V := V)) {z : V} (hz : ZDerivesEmpty z)
+    (hcrit : ∀ n : ℕ, zTag (iR2^[n] z) = 4 →
+      zKCritical (fstIdx (iR2^[n] z)) (zKseq (iR2^[n] z))) (n : ℕ) :
     icmp (iord (iR2^[n+1] z)) (iord (iR2^[n] z)) = 0 := by
   rw [Function.iterate_succ_apply']
-  exact iord_descent_iR2_of_ZDerivesEmpty (ZDerivesEmpty_iterate hRS hz n)
+  exact iord_descent_iR2_of_ZDerivesEmpty (ZDerivesEmpty_iterate hRS hz n) (hcrit n)
 
 end GoodsteinPA.InternalZ
