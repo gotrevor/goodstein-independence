@@ -1,5 +1,32 @@
 # Pending work — open obligations & attack paths
 
+## Reflection — 2026-06-25 (lap 101 DEEP REFLECTION)
+**See `REFLECTION-2026-06-25-lap101.md` + `NEXT_STEPS.md` (the corrected priority list).** Kernel
+re-verified in-kernel: headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms),
+`peano_not_proves_consistency` clean, faithfulness anchor clean, statement re-audited vs paper — no drift.
+
+**Direction call.** Destination KEEP (`𝗣𝗔 ⊬ Goodstein`, axiom-free, Rathjen/Gentzen). crux-2 target KEEP
+(`redSound`). **Sub-route fork REOPENED.** The lap-92 reflection recommended the ω-rule pivot (Path C) with
+a de-risk spike to run FIRST; lap-95 overruled to Path X (finitary) **without running the spike** (it was
+never written — `find` confirms). Laps 95–100 made real mechanical progress (the `iRK` gate, the
+I∀/I¬/axAll non-Rep replace cases) but the wall *relocated* (eigensubst O2 → the `redZKReady`
+hereditary-all-Rep motive), exactly the conclusion-tracking the ω-rule retires for free. And the motive's
+hard core is shaky: ∅→⊥ chain premises have growing antecedents `{A₀..A_{i-1}}→Dᵢ`, so Cor 2.1 does NOT
+reapply down the selected-premise spine ⟹ "hereditary all-Rep" may not hold as stated.
+
+**KEEP:** crux-2 = `redSound` target; the ordinal engine + `zsubst` + `Zinfty` meta template as reusable
+assets; `#print axioms`-gated bare-`sorry` headline discipline.
+**STOP:** sinking laps into the `redZKReady` motive / axNeg ¬-cut until the spike's verdict — these are
+exactly what the ω-rule would retire.
+**HIGHEST-VALUE NEXT:** the skipped de-risk spike `wip/InternalZomega.lean` — internal ω-rule ∀-node
+(premise family via `zsubst h x (numeral n)`) + substitution-free critical-cut reduct + `iord` assignment
+probe. Elaborates clean → PIVOT to Path C (retires the whole finitary obligation list at once; math
+doubly-proven by Bryce–Goré + the repo's own axiom-clean meta `Zinfty.lean`). Walls on Σ₁-arithmetization
+→ commit to Path X with evidence. Either way the fork stops being re-litigated each reflection lap. Path X
+infra stays in `src/` (green, fallback). **Full spike spec + decision rule: `NEXT_STEPS.md` PRIORITY 1.**
+
+---
+
 ## 📍 Lap 100 — 3/4 non-Rep replace capstones ASSEMBLED + wiring piece B banked
 **Build 🟢 1325. Headline `[propext, sorryAx, choice, Quot.sound]` (0 math axioms).** This lap banked,
 all axiom-clean `[propext, choice, Quot.sound]`:
