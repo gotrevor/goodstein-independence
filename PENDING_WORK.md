@@ -64,13 +64,24 @@ indices**, so a freshness invariant phrased on eigenvariable indices (`maxEigen 
    `ZRegular_zK_of_premises` (a chain all of whose premises are regular IS regular; via `iseqReg_eq_zero_of`)
    and `ZRegular_zAxReduct` (the per-premise atomic reduct preserves regularity — it returns `zAx1`/identity).
    All three `iRK` branches produce a chain over regular reducts, so these are the shared closing lemmas.
-7. **← START HERE: finish the `zK` case** — for each `iRK` branch (5.1 `iRcritG`=`iCritReductG`, 5.2.1 splice
-   `iRKs`, 5.2.2 replace `iRKr`), show its premise sequence has all-regular entries, then close with
-   `ZRegular_zK_of_premises`. The reduct premises are chains over `seqUpdate (zKseq d) idx (zAxReduct (red
-   premise))` / `iCritReductSeq` / `seqInsert`; need `znth_seqUpdate`/`znth_iCritReductSeq` (exist) + the
-   redTable IH `znth (redTable …) (znth ds i) = red (znth ds i)` + `ZRegular_zAxReduct` + `ZRegular_zK_of_premises`.
-   This is best framed as the `redTable` course-of-values induction (`red`-preserves-`ZRegular`, full). Then
-   embedding ⟹ `ZRegular`, then route-B reducts discharge via `maxEigen_lt_of_regular_zIall`/`_zInd`.
+7. **`zK`-case reduct-regularity helpers DONE (lap 93, axiom-clean, green 1325):** `le_iseqReg`,
+   `ZRegular_zK_premise` (premise of a regular chain is regular), `ZRegular_zK_of_seqUpdate` (5.2.2 `iRKr`
+   + each half of 5.1 `iRKc`), `ZRegular_zK_of_iCritReductSeq` (5.1 `iRKc` outer chain). The `iRKr`/`iRKc`
+   branches close from these (premises regular via `ZRegular_zK_premise` + IH `ZRegular (red premise)` via
+   `znth_redTable_eq_red`; the per-premise reduct regular via `ZRegular_zAxReduct`).
+8. **⚠ STRUCTURAL FINDING (lap 93): `red`-preserves-`ZRegular` for the `zK` case is NOT standalone — it needs
+   `zKValidF`.** The 5.2.1 splice `iRKs` reads `a,b = znth (zKseq (red dᵢ)) 0/1` where `dᵢ = znth ds permIdx`.
+   `zReg a ≤ zReg (red dᵢ)` holds ONLY when `red dᵢ` is a genuine `K`-chain (tag 4) — which requires
+   `zTag dᵢ = 4`, a fact that only holds for *valid* derivations (`zKValidF`'s `isChainInf`/criticality
+   data), NOT from `ZDerivation`+`ZRegular` alone (a pathological non-tag-4 `dᵢ` would take the `iRKs` branch
+   and produce junk halves). **⟹ regularity preservation belongs INSIDE the `redSound` induction** (where
+   `zKValidF` is in scope), not as a separate `red_preserves_ZRegular`. The lap-93 helpers are exactly the
+   tools that induction will use.
+9. **← START HERE: `redSound` with regularity threaded.** Prove "red of a VALID, regular contradiction
+   derivation is a valid, regular ZDerivation" by the `redTable`/`zDerivation_induction`, using `zKValidF`
+   to pin `zTag dᵢ = 4` in the `iRKs` branch + the lap-93 helpers + the route-B bridges
+   (`maxEigen_lt_of_regular_zIall`/`_zInd`) at the I∀/Ind validity steps. Then embedding ⟹ regular, then
+   `false_of_ZDerivesEmpty` → headline. Inspect existing `redSound`/`RedSound` scaffolding first (laps 82-90).
 2. **(Path X) — ✅ O2 BANKED this lap (`Zsubst.lean`, axiom-clean):** `ZDerivation_zsubst_zIall_premise`
    and `ZDerivation_zsubst_zInd_premise1` discharge the route-B I∀/Ind eigensubst reducts **directly from
    the existing `ZDerivation_zsubst`**, under the freshness bound `d0 ≤ a` / `d1 ≤ π₁ at'`. This

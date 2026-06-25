@@ -1584,6 +1584,48 @@ lemma ZRegular_zAxReduct {x : V} (h : ZRegular x) : ZRegular (zAxReduct x) := by
     · rw [if_neg h5, if_pos h6]; unfold ZRegular; exact zReg_zAx1 _ _
     · rw [if_neg h5, if_neg h6]; exact h
 
+/-- Every premise's `zReg` is dominated by the chain fold (mirror `le_iseqMaxEigen`). -/
+lemma le_iseqRegAux {ds : V} : ∀ j : V, ∀ i < j, zReg (znth ds i) ≤ iseqRegAux ds j := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_lt (by definability) ?_
+    apply Definable.comp₂ <;> definability
+  case zero => intro i hi; exact absurd hi (by simp)
+  case succ j ih =>
+    intro i hi
+    rw [iseqRegAux_succ]
+    rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hi) with h | h
+    · subst h; exact le_max_right _ _
+    · exact le_trans (ih i h) (le_max_left _ _)
+
+lemma le_iseqReg {ds i : V} (hi : i < lh ds) : zReg (znth ds i) ≤ iseqReg ds := le_iseqRegAux _ i hi
+
+/-- **A premise of a regular chain is regular** (the converse of `ZRegular_zK_of_premises`; needed to
+extract the splice halves' regularity in the 5.2.1 case). -/
+lemma ZRegular_zK_premise {s r ds i : V} (hds : Seq ds) (h : ZRegular (zK s r ds)) (hi : i < lh ds) :
+    ZRegular (znth ds i) := by
+  unfold ZRegular at h ⊢
+  rw [zReg_zK s r ds hds] at h
+  exact nonpos_iff_eq_zero.mp (h ▸ le_iseqReg hi)
+
+/-- **Regularity of a `seqUpdate` chain** (5.2.2 replace `iRKr`, and each half of 5.1 `iRKc`): replacing
+one premise by a regular reduct keeps the chain regular. -/
+lemma ZRegular_zK_of_seqUpdate {s' r' ds i v : V}
+    (hall : ∀ m < lh ds, ZRegular (znth ds m)) (hv : ZRegular v) :
+    ZRegular (zK s' r' (seqUpdate ds i v)) := by
+  refine ZRegular_zK_of_premises (seqUpdate_seq ds i v) ?_
+  intro m hm
+  rw [seqUpdate_lh] at hm
+  rcases eq_or_ne m i with rfl | hne
+  · rw [znth_seqUpdate_self hm]; exact hv
+  · rw [znth_seqUpdate_of_ne hne]; exact hall m hm
+
+/-- **Regularity of an `iCritReductSeq` chain** (5.1 critical `iRcritG`/`iRKc`): the two-element chain
+`⟨d0, d1⟩` is regular when both halves are. -/
+lemma ZRegular_zK_of_iCritReductSeq {s' r' d0 d1 : V} (h0 : ZRegular d0) (h1 : ZRegular d1) :
+    ZRegular (zK s' r' (iCritReductSeq d0 d1)) :=
+  ZRegular_zK_of_premises (iCritReductSeq_seq d0 d1) (forall_lt_iCritReductSeq h0 h1)
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d` whose every
