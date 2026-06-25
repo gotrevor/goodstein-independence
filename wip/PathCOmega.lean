@@ -729,6 +729,29 @@ theorem zTag_ne_ten_of_ZDerivation {d : V} (hd : ZDerivation d) : zTag d ≠ 10 
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
     ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ <;> simp
 
+/-- A `ZDerivation` never carries the induction ω-node tag `8`. -/
+theorem zTag_ne_eight_of_ZDerivation {d : V} (hd : ZDerivation d) : zTag d ≠ 8 := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ <;> simp
+
+/-- **A leaf's `sord` is its computed `iord`.** A `ZDerivation` carries an engine tag `0..6`, so the
+`sord` dispatch (tags 7/8/9/10) falls through to the `iord` fallback. -/
+theorem sord_eq_iord_of_ZDerivation {d : V} (hd : ZDerivation d) : sord d = iord d := by
+  rw [sord, if_neg (zTag_ne_seven_of_ZDerivation hd), if_neg (zTag_ne_eight_of_ZDerivation hd),
+    if_neg (zTag_ne_nine_of_ZDerivation hd), if_neg (zTag_ne_ten_of_ZDerivation hd)]
+
+/-- **A leaf's computed ordinal is NF.** `iord d = iotower (iotil d) (idg d)`; `iotil d` is NF for a
+`ZDerivation` (`isNF_iotil_of_ZDerivation`), and `iotower` preserves NF (`isNF_iotower`). -/
+theorem isNF_iord_of_ZDerivation {d : V} (hd : ZDerivation d) : isNF (iord d) := by
+  rw [iord_eq]; exact isNF_iotower (isNF_iotil_of_ZDerivation d hd) (idg d)
+
+/-- **A leaf's `sord` is NF** — unconditional (no positivity). Discharges the `isNF (sord premise)`
+hypotheses of the cut-reduct bricks (5c/5d/5e) for any engine-derivation premise (the embedding's image
+and the cut-free sub-derivations). -/
+theorem isNF_sord_of_ZDerivation {d : V} (hd : ZDerivation d) : isNF (sord d) := by
+  rw [sord_eq_iord_of_ZDerivation hd]; exact isNF_iord_of_ZDerivation hd
+
 /-- **One-step `ZcOK` rule predicate** — the disjunction characterizing each node, the analogue of the
 engine's `ZPhi`. `C` is the recursion set (the premise sub-derivations). -/
 def ZcPhi (C : V → Prop) (d : V) : Prop :=
@@ -1091,6 +1114,17 @@ theorem zcOK_redAllExS {s α s' d0 a αAll sE αEx CE tE dE C : V}
   refine ZcOK.cut hZl hZr ?_ ?_
   · exact lt_imax_inc_left hLnf hRnf
   · exact lt_imax_inc_right hLnf hRnf
+
+/-- **Principal ∀/∃-cut `hinv` — COMPLETE closure for LEAF premises (zero side conditions).** When the
+two reduced premises are engine `ZDerivation`s (the embedding's image / cut-free sub-derivations), their
+`sord` NF is automatic (`isNF_sord_of_ZDerivation`), so the `max+1`-stored reduct is `ZcOK` with NO NF and
+NO positivity hypothesis — the cleanest statement of the principal ∀/∃ operator-control. -/
+theorem zcOK_redAllExS_leaf {s α s' d0 a αAll sE αEx CE tE dE C : V}
+    (h : ZcOK (zCutOmega s α (zAllOmega s' d0 a αAll) (zExOmega sE αEx CE tE dE) C))
+    (htE : IsSemiterm ℒₒᵣ 0 tE)
+    (hLZ : ZDerivation (zsubst d0 a tE)) (hRZ : ZDerivation dE) :
+    ZcOK (redAllExS s d0 a C (zExOmega sE αEx CE tE dE)) :=
+  zcOK_redAllExS h htE (isNF_sord_of_ZDerivation hLZ) (isNF_sord_of_ZDerivation hRZ)
 
 /-- **The `max+1`-stored ∀/∃-cut reduction STRICTLY drops the stored ordinal — against an ARBITRARY
 `max+1`-stored parent.** From the reduct premises each `≺` the parent's corresponding premise ordinals,
