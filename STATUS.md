@@ -1,9 +1,27 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 114 · 2026-06-25 (inversion prize reframed: feasible)
-· Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**,
-re-verified in-kernel lap 114). The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 115 · 2026-06-25 (inversion: BOTH halves proven; gate = zAx1-as-ZDerivation)
+· Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
+The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+
+> **⭐⭐⭐ Lap-115 — the inversion's L-half PROVEN; remaining gate = make `zAx1` a sound ZDerivation (read FIRST — current).**
+> Both halves of the corrected critical-cut inversion are now axiom-clean: R-half `ZDerivation_corrected_haux0`
+> (lap 114) + **L-half `ZDerivation_corrected_haux1`** (`Crux2Blueprint`, this lap). Grounded the L-side in
+> **Buchholz §5 case 2.1** (scratchpad `buchholz-gentzen.txt:903`): the L-redex `axAll` axiom `Ax^{∀p,k}` (which
+> has succedent `F(k)`) reduces to the §5 **logical axiom** `dⱼ[0] = Ax^1_{F(k),Γⱼ→F(k)}` — antecedent GAINS
+> `F(k)=cutFormula d`, succedent `F(k)` (so it IS a genuine logical axiom, succedent ∈ antecedent). Engine
+> `v = zAx1 (seqAddAnt (cutFormula d) sⱼ) C`. `haux1` is discharged via `ZDerivation_iCritReplaceReduce_general`
+> (antecedent-growth replace; `tp v=isymRep`, `zTag v=7` ⟹ all tag conjuncts vacuous) modulo **two named §5
+> residuals**: (O-L1) `hZredL` — that `zAx1 …` is itself a `ZDerivation`; (O-L2) `hci` — the threading
+> reconstruction `isChainInf`. **THE crux finding (extends lap-114 to the L-side):** the engine's L-redex reduct
+> `zAxReduct (zAxAll sⱼ p k') = zAx1 sⱼ p` is unfaithful in THREE ways — payload `p` vs `F(k)`, sequent `sⱼ` vs
+> `seqAddAnt F(k) sⱼ`, AND **`zAx1` (tag 7) is NOT a `ZPhi` disjunct, so it is not a `ZDerivation` at all**.
+> **NEXT (the gate for BOTH halves → the inversion):** make `zAx1 s C` a sound ZDerivation leaf — the §5 `Ax^1`
+> logical axiom, validity `inAnt (seqSucc s) (seqAnt s)` (succedent ∈ antecedent, mirroring `zAtom`). This is an
+> 8th `ZPhi` disjunct (ripples: `zphi_monotone`/`_strong_finite`/`zphi_iff`/`zblueprint` σ+π/`zPhi_definable`
+> + ~64 `rcases zDerivation_iff.mp` sites, each +1 trailing tag-7 arm). Then `hZredL`/(O-L1) discharges; `hci`/
+> (O-L2) is the lap-113 `irk_chainAsucc` threading at `redexJ`. See `HANDOFF-2026-06-25-lap115.md`.
 
 > **⭐⭐⭐ Lap-114 FRESH-MIND REVIEW — the cut-elimination PRIZE is FEASIBLE (re-principalization), not a multi-year wall (read FIRST — current).**
 > Baton `ANALYSIS-2026-06-25-lap114-inversion-instance-mismatch.md`. Build 🟢 green (1326); headline footprint

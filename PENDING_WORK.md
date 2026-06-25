@@ -1,5 +1,29 @@
 # Pending work — open obligations & attack paths
 
+## lap 115 — the inversion's L-half PROVEN; gate = make `zAx1` a sound ZDerivation
+**Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math
+axioms). 1 commit (L-half + finding). No sorries added.** See `HANDOFF-2026-06-25-lap115.md`.
+
+**BOTH inversion halves now proven** (axiom-clean): R-half `ZDerivation_corrected_haux0` (lap 114) +
+**L-half `ZDerivation_corrected_haux1`** (this lap). Grounded the L-side in verbatim **Buchholz §5 case 2.1**
+(scratchpad `buchholz-gentzen.txt:903` — the missing source): the L-redex `axAll` axiom `Ax^{∀p,k}` (succedent
+`F(k)`) reduces to the §5 **logical axiom** `dⱼ[0] = Ax^1_{F(k),Γⱼ→F(k)}` (antecedent gains `F(k)=cutFormula
+d`). Engine reduct `v = zAx1 (seqAddAnt (cutFormula d) sⱼ) C`; `haux1` via `ZDerivation_iCritReplaceReduce_general`
+(tag-7 ⟹ tag conjuncts vacuous), modulo two named §5 residuals — (O-L1) `hZredL` = `zAx1 …` is a ZDerivation;
+(O-L2) `hci` = threading `isChainInf`.
+
+**CRUX FINDING (extends lap-114 to L-side):** the engine reduct `zAxReduct (zAxAll sⱼ p k') = zAx1 sⱼ p` is
+unfaithful in THREE ways — payload `p` vs `F(k)`, sequent `sⱼ` vs `seqAddAnt F(k) sⱼ`, and **`zAx1` (tag 7)
+is not a `ZPhi` disjunct ⟹ not a ZDerivation at all**. All descent-invariant (why it hid through 108–113).
+
+**NEXT-LAP TARGET (hardest-first — the gate for the whole inversion):** make `zAx1 s C` a sound ZDerivation
+leaf — 8th `ZPhi` disjunct `(∃ s C, d = zAx1 s C ∧ inAnt (seqSucc s) (seqAnt s))`, mirroring `zAtom`. Ripple:
+`ZPhi`/`zphi_monotone`/`_strong_finite`/`zphi_iff`/`zblueprint` σ+π (mirror `zAxNeg`, `zAx1Graph` exists)/
+`zPhi_definable`; ~64 `rcases zDerivation_iff.mp` sites (mostly trailing tag-mismatch arms); +
+`zDerivation_zAx1_intro`/`_inv`. Then (O-L1) closes; (O-L2) = lap-113 threading; THEN re-key `red`'s tag-4
+critical branch to emit the corrected reducts (R: `numeral k`, L: `zAx1 (seqAddAnt F(k) sⱼ) (F(k))`) and
+assemble `ZDerivation_red_zK_crit = ZDerivation_iRcritG_of haux0 haux1`. Full step list in the handoff.
+
 ## lap 114 — FRESH-MIND REVIEW: the inversion PRIZE is feasible (re-principalization), not a multi-year wall
 **Build 🟢 green 1326; headline footprint intact + re-verified in-kernel (`[propext, sorryAx, choice,
 Quot.sound]`, 0 math axioms). 1 commit (building block + finding).** See
