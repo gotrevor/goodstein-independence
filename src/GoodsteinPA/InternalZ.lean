@@ -4378,6 +4378,31 @@ lemma iord_descent_seqInsert {s s' r ds j a b : V} (hds : Seq ds) (hj : j < lh d
   iord_descent_le hnf (idg_seqInsert_le hds hj hag hbg)
     (iotil_seqInsert_lt hds hj ha hb hNF hNFa hNFb)
 
+/-- **`idg`-side bound, RANK-GENERAL** — the genuine 5.2.1 reduct has rank `r' = max{rk(A(dⱼ)), r}`,
+which may exceed `r`. The `idg` bound still holds **provided the new rank does not exceed the parent's
+degree** (`hr' : r' ≤ idg (zK s r ds)`) — which is the faithful situation, since `dg(d) = max(r, …)`
+already absorbs every cut rank in the chain. -/
+lemma idg_seqInsert_le' {s s' r r' ds j a b : V} (hds : Seq ds) (hj : j < lh ds)
+    (hr' : r' ≤ idg (zK s r ds))
+    (hag : idg a ≤ idg (znth ds j)) (hbg : idg b ≤ idg (znth ds j)) :
+    idg (zK s' r' (seqInsert ds j a b)) ≤ idg (zK s r ds) := by
+  rw [idg_zK s' r' _ (seqInsert_seq ds j a b)]
+  refine max_le hr' ?_
+  rw [idg_zK s r ds hds] at hr' ⊢
+  exact le_trans (tsub_le_tsub_right (iseqMaxIdg_seqInsert_le hj hag hbg) 1) (le_max_right _ _)
+
+/-- **LH5 splice descent, RANK-GENERAL** (Buchholz §3.2 case 5.2.1 with the genuine reduct rank
+`r' = max{rk(A(dⱼ)), r}`). `õ` is rank-free (`iotil_seqInsert_lt`); `idg` is bounded via
+`idg_seqInsert_le'` under `r' ≤ dg(parent)`. This is the descent the dispatch's 5.2.1 case invokes. -/
+lemma iord_descent_seqInsert' {s s' r r' ds j a b : V} (hds : Seq ds) (hj : j < lh ds)
+    (hnf : isNF (iotil (zK s r ds))) (hr' : r' ≤ idg (zK s r ds))
+    (ha : icmp (iotil a) (iotil (znth ds j)) = 0) (hb : icmp (iotil b) (iotil (znth ds j)) = 0)
+    (hag : idg a ≤ idg (znth ds j)) (hbg : idg b ≤ idg (znth ds j))
+    (hNF : ∀ n, isNF (iotil (znth ds n))) (hNFa : isNF (iotil a)) (hNFb : isNF (iotil b)) :
+    icmp (iord (zK s' r' (seqInsert ds j a b))) (iord (zK s r ds)) = 0 :=
+  iord_descent_le hnf (idg_seqInsert_le' hds hj hr' hag hbg)
+    (iotil_seqInsert_lt hds hj ha hb hNF hNFa hNFb)
+
 /-- The full critical reduct `d[0] = K^{r-1}_Π d{0} d{1}` (Buchholz §3.2 case 5.1), as a genuine code:
 auxiliaries `d{0}=K^r(i/v)`, `d{1}=K^r(j/w)` (`iCritAux`), assembled into a rank-`(r-1)` chain over the
 two-element `iCritReductSeq`. -/
@@ -5500,6 +5525,21 @@ lemma iord_descent_seqInsert_of_iSpliceDescent {s s' r ds j a b : V}
     icmp (iord (zK s' r (seqInsert ds j a b))) (iord (zK s r ds)) = 0 :=
   iord_descent_seqInsert_of_ZDerivation hZ hj hd.a_otil_lt hd.b_otil_lt hd.a_dg_le hd.b_dg_le
     hd.a_nf hd.b_nf
+
+/-- **RANK-GENERAL splice step over `ZDerivation`** — the genuine 5.2.1 reduct rank `r'` (= `max{rk(A(dⱼ)),
+r}`) is handled given `r' ≤ dg(parent)`; the descent's NF side conditions come from the chain's
+`ZDerivation` (`iSpliceDescent` for the auxiliary N1 IH). This is the form the tag-4 dispatch actually
+calls in case 5.2.1, where the reduct rank rises to `r'`. -/
+lemma iord_descent_seqInsert'_of_iSpliceDescent {s s' r r' ds j a b : V}
+    (hZ : ZDerivation (zK s r ds)) (hj : j < lh ds) (hr' : r' ≤ idg (zK s r ds))
+    (hd : iSpliceDescent a b (znth ds j)) :
+    icmp (iord (zK s' r' (seqInsert ds j a b))) (iord (zK s r ds)) = 0 := by
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  have hNFall := isNF_iotil_znth_of_ZDerivation_zK hZ
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation (znth ds n) (hmem n hn))
+  exact iord_descent_seqInsert' hds hj hnf hr' hd.a_otil_lt hd.b_otil_lt hd.a_dg_le hd.b_dg_le
+    hNFall hd.a_nf hd.b_nf
 
 /-! ### `tp`-inversion + concrete discharge of the critical R-redex premise's IH
 
