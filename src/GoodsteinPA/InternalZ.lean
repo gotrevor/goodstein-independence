@@ -1263,6 +1263,56 @@ instance zKValid_defined : 𝚫₁-Relation₃ (zKValid : V → V → V → Prop
 instance zKValid_definable : 𝚫₁-Relation₃ (zKValid : V → V → V → Prop) :=
   zKValid_defined.to_definable
 
+/-! ### Decoupling criticality from validity — the genuine-reduct redesign (lap 82)
+
+**Root-cause of the `RedSound` wall (validated against Buchholz, both papers).** `zKValid` bakes the
+*criticality* conjunct `(∀ i < lh ds, ¬ iperm (tp (znth ds i)) s)` into the validity of EVERY chain
+node. But Buchholz's chain-rule validity (§3 clause 5 / `isChainInf`: ∃ j₀ with `A_{j₀} ∈ {C,⊥}`,
+threading `Γᵢ ⊆ Γ,A₀…A_{i−1}`, `rk(Aᵢ) ≤ r`) carries **no** criticality condition. Criticality (`d` is
+*critical* iff `∀ i ≤ j₀, tp(dᵢ) ⋪ Π`, Def 3.2 case 5) is a property the *reduction* uses to pick its
+clause (5.1 critical vs 5.2 non-critical) — NOT a validity requirement. Baking it into `zKValid`
+over-constrains `ZDerivation` to *only critical* chains, which is exactly why the genuine reduct (whose
+recombined premises `d{0},d{1}` are `Rep`-tagged chains, permissible everywhere — `not_zKValid_iCritReduct`)
+spuriously fails validity. The fix (multi-lap): re-point `ZPhi`'s `zK` disjunct onto `zKValidF` (faithful
+validity, no criticality), supply `zKCritical` only at reduction sites where Buchholz case 5 establishes
+it, and prove descent by the critical/non-critical split (Lemma 4.1 a/b) over the genuine Def-3.2 reduct.
+These defs + the decomposition lemma are the load-bearing bridge that makes that swap mechanical. -/
+
+/-- **The criticality conjunct**, decoupled from validity: Buchholz's `d` is *critical*
+(`∀ i ≤ j₀, tp(dᵢ) ⋪ Π`), here over all premises. Used by the *reduction* (Def 3.2 case 5) to find the
+redex (`inference_critical_pair`), NOT by chain validity. -/
+def zKCritical (s ds : V) : Prop := ∀ i < lh ds, ¬ iperm (tp (znth ds i)) s
+
+/-- **Faithful chain validity** = `zKValid` minus the spurious criticality conjunct. This is Buchholz's
+genuine `K^r` chain-rule validity (§3 clause 5): `isChainInf` (j₀/threading/rank) + each premise's
+own-permissibility `tp(dᵢ) ◁ Πᵢ` (Lemma 3.3, automatic) + the §5 formula-hood bookkeeping. The redesign
+re-points `ZPhi`'s `zK` disjunct onto this so the genuine reduct validates. -/
+def zKValidF (s r ds : V) : Prop :=
+  isChainInf s r ds ∧
+  (∀ i < lh ds, iperm (tp (znth ds i)) (fstIdx (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 1 → IsUFormula ℒₒᵣ (zIallF (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 2 → IsUFormula ℒₒᵣ (zInegF (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 5 → IsUFormula ℒₒᵣ (zAxAllF (znth ds i))) ∧
+  (∀ i < lh ds, zTag (znth ds i) = 6 → IsUFormula ℒₒᵣ (zAxNegF (znth ds i))) ∧
+  (∀ i < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds i)) ∧
+  IsUFormula ℒₒᵣ (seqSucc s) ∧
+  (∀ k < lh (seqAnt s), IsUFormula ℒₒᵣ (znth (seqAnt s) k))
+
+/-- **`zKValid` decomposes as faithful validity ∧ criticality.** The redesign keeps `zKValidF` in the
+validity layer and supplies `zKCritical` only where Buchholz case 5 has established it. -/
+lemma zKValid_iff_zKValidF_and_zKCritical {s r ds : V} :
+    zKValid s r ds ↔ zKValidF s r ds ∧ zKCritical s ds := by
+  unfold zKValid zKValidF zKCritical
+  constructor
+  · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
+    exact ⟨⟨h1, h2, h4, h5, h6, h7, h8, h9, h10⟩, h3⟩
+  · rintro ⟨⟨h1, h2, h4, h5, h6, h7, h8, h9, h10⟩, h3⟩
+    exact ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩
+
+/-- The faithful-validity layer of any (currently over-strong) `zKValid` chain. -/
+lemma zKValidF_of_zKValid {s r ds : V} (h : zKValid s r ds) : zKValidF s r ds :=
+  (zKValid_iff_zKValidF_and_zKCritical.mp h).1
+
 /-! ### Rung-0.5 premise-sequent side conditions (for a rule-faithful `ZPhi`)
 
 The bare `ZPhi` I∀/I¬/Ind disjuncts pin only the *conclusion* succedent, not the premise sequents — so a

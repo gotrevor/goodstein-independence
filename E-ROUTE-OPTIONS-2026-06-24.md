@@ -87,6 +87,18 @@ ordinal-faithful reduct.** This unblocks crux-2 with no route change. (Details: 
    false summit*, switch to meta/growth-rate (Castéran's Coq Hydra has reusable ε₀/Hardy machinery — see
    `papers/casteran-hydra-battles-in-coq.md`).
 
+## Parallelization decision (operator, 2026-06-24) — split the two fronts
+The two headline blockers are **independent** (lap-81 HANDOFF) and **file-disjoint** (front 2 writes only
+`PADelta1.lean`; crux-2 writes `InternalZ.lean`/`Zsubst.lean`/`FvSubst.lean`; no import coupling). So:
+- **Accept `PA_delta1Definable` as the Foundation `axiom` it already is** on the main line — a *tracked,
+  actively-discharged* rest-point, NOT a permanent one. This is **consistent with the anti-cop-out
+  directive**: the forbidden cop-out is axiomatizing the *ε₀-strength core* (crux-2 / the ordinal analysis);
+  `PA_delta1Definable` is a mundane recursion-theoretic fact (PA's induction scheme is Δ₁), it's Foundation's
+  own axiom, it's disclosed, and a dedicated box is discharging it — so it **drops at merge** and the
+  destination (fully axiom-free) is unchanged. Operator has used this split on other Foundation axioms before.
+- **Main box → crux-2** (Buchholz-unblocked); **parallel worktree box → `inductionSchemeUnivDelta1`**
+  (`PADelta1.lean:681`). ~2× on the combined timeline, clean merge.
+
 ## Validation / how this could be wrong
 - B's "materially cheaper" rests on Wainer's classification being more mathlib-tractable than IΣ₁
   internalization. **Wainer has never been formalized in Lean** — it's a Bryce–Goré-scale build; "cheaper"

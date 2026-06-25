@@ -1,5 +1,36 @@
 # Pending work — open obligations & attack paths
 
+## ⭐⭐ Lap 82 (OPERATOR REDIRECT) — crux-2 unblocked: criticality ≠ chain-validity
+
+**Build 🟢 green.** Operator moved Front 2 (`PA_delta1Definable`) to a parallel box — it's a tracked
+rest-point; STOP touching `PADelta1.lean` (it merges later). Drive **crux 2 (`RedSound`)** only.
+(Lap-82 also banked 3 axiom-clean `PADelta1.lean` code-size bounds before the redirect: `lt_qqAll`,
+`self_le_qqAllItr`, `count_le_qqAllItr` — harmless, stay.)
+
+**ROOT CAUSE found + validated against Buchholz (both papers).** `zKValid` bakes a spurious *criticality*
+conjunct `(∀ i < lh ds, ¬ iperm (tp (znth ds i)) s)` into chain-validity. Buchholz's `K^r` validity
+(§3 clause 5 = `isChainInf`: j₀ + threading + rank) carries NO criticality; criticality is a *reduction*
+property (Def 3.2 case 5), not a validity one. Baking it in → `ZDerivation` = only-critical chains →
+the genuine reduct's `Rep`-tagged recombined premises fail validity → `RedSound`-on-`iR2` false. See
+`ANALYSIS-2026-06-25-lap82-criticality-not-validity.md`.
+
+DONE this lap (axiom-clean, `InternalZ.lean` after `zKValid_definable`):
+- `zKCritical s ds` (decoupled criticality), `zKValidF s r ds` (faithful validity = `zKValid` − criticality),
+  `zKValid_iff_zKValidF_and_zKCritical` (in-kernel: criticality IS a separable conjunct),
+  `zKValidF_of_zKValid`.
+
+REDESIGN (multi-lap, hardest-first):
+1. Re-point `ZPhi`'s `zK` disjunct (`InternalZ.lean:3644,3691`) `zKValid` → `zKValidF`. Lone hard fallout
+   = K-descent (`iord_descent_*` ~4657) loses free criticality.
+2. Repair K-descent with the critical/non-critical split (Buchholz Lemma 4.1):
+   - critical: existing redex route, now gated on `zKCritical` supplied at the reduction site.
+   - non-critical (Def 3.2 case 5.2.2): NEW — `d[n] := K^r_{tp(d)(Π,n)}(i/dᵢ[n])`; descent 4.1(a) via
+     natural-sum strict monotonicity in one summand's ω-exponent (reusable `iord`/`õ` lemma to build).
+3. Build genuine reduct = Def 3.2 case 5 dispatch (long-notes `red`, Thm 6.6; align `h[ι]↔d[n]`). Do NOT
+   retrofit `iR2`; re-point `RedSound`+descent onto the new reduct if needed.
+4. Prove `RedSound` = Thm 3.4(b)/D₁ as the parallel validity invariant (carry `zKValidF`).
+Fallback: Siders' Howard vector (`papers/siders-gentzen-consistency-proofs-arithmetic.md`, cross-check only).
+
 ## ⭐ Lap 81 (FRESH-MIND REVIEW) — criticality crux `not_criticality_aux` PROVED (axiom-clean)
 
 **Build 🟢 green (1324 jobs). Direction KEPT (Δ₁ thread is the actively-movable front; crux 2 stays
