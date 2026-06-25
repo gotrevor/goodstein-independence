@@ -752,6 +752,29 @@ and the cut-free sub-derivations). -/
 theorem isNF_sord_of_ZDerivation {d : V} (hd : ZDerivation d) : isNF (sord d) := by
   rw [sord_eq_iord_of_ZDerivation hd]; exact isNF_iord_of_ZDerivation hd
 
+/-! ### Inversion's ordinal-soundness in the `sord` measure (engine peeling → orbit measure)
+
+When the structural `hinv` (re-principalization) peels an engine leaf — an I∀-node `zIall` or an I¬-node
+`zIneg` — to extract its premise (the subformula instance), the orbit's measure `sord` must NOT increase.
+The engine already proves the COMPUTED descent (`iord_descent_zIall`/`iord_descent_zIneg`, unconditional);
+these bridge it to `sord` (= `iord` on leaves, brick 5f), so the peeling is `sord`-sound. These are the
+ordinal halves of the I∀/I¬ inversion steps the genuine `hinv` recursion will compose with the `max+1`
+cut descent. -/
+
+/-- **I∀-peel decreases `sord`.** Peeling an I∀-node `zIall s a p d0` to its premise `d0` strictly drops
+the orbit measure (`iord_descent_zIall` bridged to `sord` via brick 5f). -/
+theorem sord_descent_zIall {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0)) :
+    icmp (sord d0) (sord (zIall s a p d0)) = 0 := by
+  rw [sord_eq_iord_of_ZDerivation (zDerivation_zIall_inv hZ).1, sord_eq_iord_of_ZDerivation hZ]
+  exact iord_descent_zIall s a p d0
+
+/-- **I¬-peel decreases `sord`.** Peeling an I¬-node `zIneg s p d0` to its premise `d0` strictly drops the
+orbit measure (`iord_descent_zIneg` bridged to `sord`). -/
+theorem sord_descent_zIneg {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
+    icmp (sord d0) (sord (zIneg s p d0)) = 0 := by
+  rw [sord_eq_iord_of_ZDerivation (zDerivation_zIneg_inv hZ).1, sord_eq_iord_of_ZDerivation hZ]
+  exact iord_descent_zIneg s p d0
+
 /-- **One-step `ZcOK` rule predicate** — the disjunction characterizing each node, the analogue of the
 engine's `ZPhi`. `C` is the recursion set (the premise sub-derivations). -/
 def ZcPhi (C : V → Prop) (d : V) : Prop :=
