@@ -43,6 +43,40 @@ half is `irk C ≤ idg(parent)`:
      reflected (the splice rank should track the halves' reduced degrees, not `dⱼ`'s full pre-reduction rank).
   This shares the cut-rank/degree-drop bookkeeping with `redZKReady`'s motive (`Crux2Blueprint:340/493`).
 
+### ⭐ ROOT CAUSE (lap-110, see `ANALYSIS-2026-06-25-lap110-iCritReductG-cut-formula-strip.md`)
+`hr'` AND the critical-case soundness `ZDerivation_red_zK_crit` (`Crux2Blueprint:100`, `hCrk : irk C ≤
+zKrank d - 1`) have a SHARED root cause: `iCritReductG`/`iRcritG` cut on the redex **PRINCIPAL** `C =
+chainAsucc(redexI)` (`= Aᵢ`), but Buchholz Thm 3.4(a) (`buchholz-gentzen.txt:690/705/808`) cuts on the
+**STRIPPED** subformula `A(d)` with `rk(A(d)) < r` STRICT (`= rk(Aᵢ) - 1`). `irk_cut_lt_rank_forall`/`_neg`
+(`InternalZ:409/415`) supply the strict drop for the stripped formula. **Fix = redefine `iCritReductG`'s cut
+formula to the stripped `A(d)`** (def `cutFormula d` by cases on `Aᵢ = ∀xF`/`¬A` from the redex, via
+`substs1 k`/negand). The ordinal-DESCENT lemmas (`iord_descent_red_zK_crit`, `iCrit_halves_descend`) are
+IMMUNE — `iotil`/`idg` read only the premise sequence, never `C` — so only `ZRegular`/`ZDerivation` (end-sequent
+readers) and the splice rank `irk C` change. **`hr'` closes with ONLY the stripped rank bound (no inversion);
+full `ZDerivation_red_zK_crit` additionally needs the ∀/¬-inversion `d{0}⊢Θ→A(d)`/`d{1}⊢A(d),Θ→D` (the deep
+cut-elim, blueprint `wip/PathCInf.lean` `Zinfty.allInv`).** NEXT LAP: strip `iCritReductG`'s cut formula →
+close `hr'`.
+
+### Full open-sorry inventory (lap-110, headline-path; 3 paths each)
+- **`hr'` splice rank** (`Crux2:608`): (1) strip `iCritReductG` cut formula [most promising, above]; (2)
+  strict chain-rank-vs-degree invariant from `zKValidF`; (3) measure refinement.
+- **chain-REPLACE IH** (`Crux2:594`): (1) `permIdx`/`isPermPrem` engine refinement skipping atom premises
+  [lap-109 path 1]; (2) atom-free embedding invariant; (3) secondary lex descent measure.
+- **atom/axAll/axNeg fixpoints** (`Crux2:568/610/612`): same atom-fixpoint wall as chain-REPLACE; (1) engine
+  refinement; (2) prove ⊥-orbit never selects a normal-form leaf; (3) route atom-selected node to critical.
+- **`ZDerivation_red_zK_crit`** (`Crux2:100`): (1) strip cut formula + ∀/¬-inversion [shared root cause];
+  (2) port `Zinfty.allInv`/`andInv`/`orInv` from `wip/PathCInf.lean`; (3) abstract the inversions as a
+  bundled hypothesis fed by the embedding.
+- **`redZKReady` motive** (`Crux2:493`): (1) strengthen the `zDerivation_induction` motive to carry the
+  7-field bundle hereditarily; (2) per-node orbit-invariant lemmas; (3) the localized `axNeg` residual
+  (`Crux2:404`) needs Buchholz's genuine ¬-axiom cut.
+- **`zKValidF_iIndReduct_of_zInd`** (`Crux2:81`): likely FALSE-as-stated (shadow reduct `[d1,d0]` doesn't
+  thread to conclusion `F(t)`); (1) confirm vacuity/refute; (2) restate over the genuine eigensubst reduct;
+  (3) drop if vestigial.
+- **`false_of_ZDerivesEmpty`** (`Crux2:673`) / **`foundation_bot_to_Z_empty`** (`Crux2:661`): the terminal
+  PRWO-internalization + Foundation⊥→Z embedding (need `prwoInstance`/Foundation coded-provability API).
+- **`goodstein_implies_consistency`** (`Reduction:68`): both Rathjen girders (γ→PRWO + PRWO→Con).
+
 ## lap 109 — K-case branch-descent TRIO banked; the recursion wall CHARACTERIZED in-kernel
 **Build 🟢 green 1326; headline footprint intact (`peano_not_proves_goodstein = [propext, sorryAx, choice,
 Quot.sound]`).** 4 commits: critical sub-branch wired in place (`9e86a26`), replace descent (`8138b91`),
