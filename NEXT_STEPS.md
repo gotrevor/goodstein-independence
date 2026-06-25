@@ -46,15 +46,27 @@ the full Towsner §19 cut-elimination). The spike arithmetizes what `Zinfty` doe
   `= iord d0`, so the ω-node's `iord = iord d0 + 1` is finite — no sup-over-infinite-family primitive. The
   arithmetization-risk concern is retired.
 
-**NET CALL: the evidence now favours the Path-C pivot.** The two ω-node hard properties (motive-free
-validity, finite ordinal) are in-kernel on the EXISTING engine, and they are exactly what the finitary
-route turns into the open `redZKReady` motive + `iord_descent_red` K-case. **NEXT = Probe 2 / the pivot
-decision:** the ω-rule cut-elimination STEP needs the ω-node DATATYPE (new tag 7 `zAllω` in the
-`zconstruction` Fixpoint) + `ZPhi`/`iord`/`tp` extension — the ~2–3k-line but TEMPLATED rebuild
-(`Zinfty.lean` = meta template; the two hardest sub-questions answered above). Recommended next lap: build a
-minimal `zAllω` datatype + its `red`/`iord` recursion equations as the final de-risk, then commit to the
-pivot. If that minimal datatype walls (Fixpoint `StrongFinite` issues for an infinite-premise node — the
-lap-92-flagged risk), THAT is the signal to commit to Path X instead.
+- `iord_descent_zOmegaPrem` — the ω-rule ∀-cut reduction strictly descends (`iord d0 ≺ iord (zIall …)`),
+  UNIFORMLY in the witness `t`; with `zOmegaPrem_valid` = the full per-step cut-elimination invariant
+  (validity + descent) on the existing nodes.
+- `zIall_realizes_omega` — capstone: a regular `zIall` realizes the full ω-node (premise family valid +
+  conclusion-tracked + uniform ordinal), so the existing I∀ embedding is reused wholesale.
+
+**NET CALL: the evidence favours the Path-C pivot — EVERY load-bearing sub-question is now answered
+in-kernel** (premise validity motive-free, conclusion computed, ordinal finite, node realizable, per-step
+∀-cut descent), all on the existing engine, all axiom-clean. These are exactly what the finitary route
+turns into the open `redZKReady` motive + `iord_descent_red` K-case. The ω-node carries the SAME finite data
+as `zIall` (premise-`t` computed on demand) — no `Fixpoint.StrongFinite` obstruction.
+
+**NEXT = COMMIT to the pivot (Probe 2 / the rebuild).** Start the `zAllω` datatype: tag 7 in the
+`zconstruction` Fixpoint, data `⟪s, 7, a, p, d0⟫ + 1` (same shape as `zIall`), with `ZPhi` disjunct =
+the ω-rule validity (`∀ t closed, ZDerivation (zsubst d0 a t) ∧ fstIdx … = Γ→F(t)` — derivable via
+`zIall_realizes_omega`), `iord (zAllω …) = iord d0 + 1`, and `red`/cut-elimination by the Schütte/Tait
+recursion (template: `Zinfty.lean`). The per-step ∀-cut reduction is `iord_descent_zOmegaPrem`. Replace the
+chain (`zK`) machinery's role in the embedding with the ω-rule directly. This retires the finitary
+`redZKReady` motive + axNeg + the K-case ordinal descent. ~2–3k-line templated rebuild; if the Fixpoint
+extension genuinely walls, THAT is the signal to fall back to Path X — but the de-risk evidence says it
+won't.
 
 ## ▶ PRIORITY 2 — Path X fallback (ONLY if the spike walls)
 

@@ -114,6 +114,17 @@ theorem iord_zOmegaPrem_constant {d0 a t₁ t₂ : V}
     iord (zOmegaPrem d0 a t₁) = iord (zOmegaPrem d0 a t₂) := by
   rw [iord_zOmegaPrem ht₁ hZ, iord_zOmegaPrem ht₂ hZ]
 
+/-- **The ω-rule ∀-cut REDUCTION strictly descends — for EVERY witness, uniformly (Probe 2's ordinal
+half).** Selecting the premise `zOmegaPrem d0 a t` for cut witness `t` drops the ordinal strictly below the
+∀-node: `iord (selected) = iord d0 ≺ iord (zIall …)` (the banked `iord_descent_zIall`, composed with
+`iord_zOmegaPrem`). This is the heart of why ω-rule cut-elimination terminates on ∀-cuts — the reduction's
+ordinal recursion is well-founded, UNIFORMLY in the witness, with NO chain machinery. Combined with
+`zOmegaPrem_valid` (selected premise valid) it shows the ∀-cut reduction is both validity-preserving and
+ordinal-decreasing — exactly the cut-elimination invariant, in-kernel on the existing nodes. -/
+theorem iord_descent_zOmegaPrem {s a p d0 t : V} (ht : IsUTerm ℒₒᵣ t) (hZ : ZDerivation d0) :
+    icmp (iord (zOmegaPrem d0 a t)) (iord (zIall s a p d0)) = 0 := by
+  rw [iord_zOmegaPrem ht hZ]; exact iord_descent_zIall s a p d0
+
 /-! ## Capstone — the ω-rule ∀-node is REALIZABLE from a regular finitary I∀ node
 
 The decisive structural point: a (would-be) ω-node `zAllω s a p d0` carries the SAME finite data as the
@@ -152,15 +163,20 @@ theorem zIall_realizes_omega {s a p d0 : V}
   ω-node's `iord` is the finite `iord d0 + 1` (no sup-over-infinite-family primitive needed). Probe 1's
   arithmetization-risk concern is RETIRED.
 
-**The single remaining open question (Probe 2 — the ω-rule cut-elimination STEP):** a cut with R-premise an
-ω-node `∀x F` and L-premise its dual reduces to a cut on `F(t)` against `zOmegaPrem d0 a t` (premise
-selection) — the Schütte/Tait reduction `Zinfty.lean` does at the META level. The arithmetized step
-recurses on `iord` (now known finite, Probe 1); the selected premise's validity is `zOmegaPrem_valid`
-(already discharged), so the reduction introduces NO new substitution-validity obligation. What it DOES need
-is the ω-node datatype (a new tag in the `zconstruction` Fixpoint) + extending `ZPhi`/`iord`/`tp` to it —
-the ~2–3k-line rebuild. That is the genuine cost of the pivot, but it is now ENGINEERING against a settled
-template (`Zinfty.lean`), with the two hardest sub-questions (premise validity, ordinal assignment) already
-answered above.
+**The ω-rule ∀-cut reduction's CORE invariant is now in-kernel.** `iord_descent_zOmegaPrem`: selecting the
+premise for witness `t` strictly drops the ordinal (`iord d0 ≺ iord (zIall …)`), UNIFORMLY in `t`; with
+`zOmegaPrem_valid` (selected premise valid) this is the full cut-elimination invariant for the ∀-cut —
+validity-preserving AND ordinal-decreasing — proven on the existing nodes, no chain machinery.
+
+**The single remaining open piece (Probe 2 — assembling the cut-elimination RECURSION):** wrap the per-step
+∀-cut reduction (above) into the full Schütte/Tait cut-elimination by recursion on `iord` + cut-rank — the
+reduction `Zinfty.lean` does at the META level. This needs the ω-node DATATYPE (a new tag in the
+`zconstruction` Fixpoint) + extending `ZPhi`/`iord`/`tp` to it — the ~2–3k-line rebuild. That is the genuine
+remaining cost of the pivot, but every load-bearing sub-question is now answered in-kernel: premise validity
+(`zOmegaPrem_valid`), conclusion-tracking (`zOmegaPrem_concl`), ordinal assignment (`iord_zOmegaPrem_constant`,
+finite), node realizability (`zIall_realizes_omega`), and the per-step descent (`iord_descent_zOmegaPrem`).
+The ω-node carries the SAME finite data as `zIall` (no `StrongFinite` issue). What remains is ENGINEERING
+against a settled template, not unsolved mathematics.
 
 **NET CALL (updated by this spike):** the evidence runs in favour of the Path-C pivot — both the validity
 (`zOmegaPrem_valid`, motive-free) and the ordinal (`iord_zOmegaPrem_constant`, finite) of the ω-node are
