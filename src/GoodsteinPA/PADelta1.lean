@@ -156,6 +156,101 @@ lemma qqAllItr_quote {n : ℕ} (φ : Semiformula ℒₒᵣ ℕ n) :
 
 end QQAllItr
 
+/-! ## Brick 2b — internal free→bound rewrite `freeToBound` (the `Rew.fixitr 0 m` analog, lap 79)
+
+`Rew.fixitr 0 m ▹ φ` (`Basic/Syntax/Rew.lean:639`) sends a free variable `&i` (with `i < m`) occurring
+at binder-depth `d` to the bound variable `#(i + d)` and leaves local bound vars in place. We arithmetize
+this as `freeToBound d p` (formula) / `termFreeToBound d t` (term): the leaf rewrites every `^&x` to
+`^#(x + d)`, and the recursion increments the depth `d ↦ d + 1` under each `^∀`/`^∃`. Both are `𝚺₁`
+functions via `TermRec`/`UformulaRec1`, mirroring `termSubst`/`subst`. -/
+
+section FreeToBound
+
+open LO.FirstOrder.Arithmetic.Bootstrapping
+open LO.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+namespace TermFreeToBound
+
+def blueprint : Language.TermRec.Blueprint 1 where
+  bvar := .mkSigma “y z d. !qqBvarDef y z”
+  fvar := .mkSigma “y x d. !qqBvarDef y (x + d)”
+  func := .mkSigma “y k f v v' d. !qqFuncDef y k f v'”
+
+noncomputable def construction : Language.TermRec.Construction V blueprint where
+  bvar (_ z)        := ^#z
+  fvar (param x)    := ^#(x + param 1)
+  func (_ k f _ v') := ^func k f v'
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by simp [blueprint]
+
+end TermFreeToBound
+
+section
+
+open TermFreeToBound
+
+variable (L)
+
+/-- Internal term free→bound: `termFreeToBound d t` sends `^&x ↦ ^#(x+d)`, fixes `^#z`. -/
+noncomputable def termFreeToBound (d t : V) : V := construction.result L ![d] t
+
+noncomputable def termFreeToBoundVec (k d v : V) : V := construction.resultVec L ![d] k v
+
+noncomputable def termFreeToBoundGraph : 𝚺₁.Semisentence 3 :=
+  (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
+
+noncomputable def termFreeToBoundVecGraph : 𝚺₁.Semisentence 4 :=
+  (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
+
+variable {L}
+
+@[simp] lemma termFreeToBound_bvar (d z : V) :
+    termFreeToBound L d ^#z = ^#z := by simp [termFreeToBound, construction]
+
+@[simp] lemma termFreeToBound_fvar (d x : V) :
+    termFreeToBound L d ^&x = ^#(x + d) := by simp [termFreeToBound, construction]
+
+@[simp] lemma termFreeToBound_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    termFreeToBound L d (^func k f v) = ^func k f (termFreeToBoundVec L k d v) := by
+  simp [termFreeToBound, termFreeToBoundVec, construction, hkf, hv]
+
+instance termFreeToBound.defined : 𝚺₁-Function₂ termFreeToBound (V := V) L via termFreeToBoundGraph L :=
+  .mk fun v ↦ by
+    simpa [termFreeToBoundGraph, termFreeToBound, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+      using construction.result_defined.defined ![v 0, v 2, v 1]
+
+instance termFreeToBound.definable : 𝚺₁-Function₂ termFreeToBound (V := V) L :=
+  termFreeToBound.defined.to_definable
+
+instance termFreeToBound.definable' : Γ-[k + 1]-Function₂ termFreeToBound (V := V) L :=
+  termFreeToBound.definable.of_sigmaOne
+
+instance termFreeToBoundVec.defined : 𝚺₁-Function₃ termFreeToBoundVec (V := V) L via termFreeToBoundVecGraph L :=
+  .mk fun v ↦ by
+    simpa [termFreeToBoundVecGraph, termFreeToBoundVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+      using construction.resultVec_defined.defined ![v 0, v 1, v 3, v 2]
+
+instance termFreeToBoundVec.definable : 𝚺₁-Function₃ termFreeToBoundVec (V := V) L :=
+  termFreeToBoundVec.defined.to_definable
+
+instance termFreeToBoundVec.definable' : Γ-[i + 1]-Function₃ termFreeToBoundVec (V := V) L :=
+  termFreeToBoundVec.definable.of_sigmaOne
+
+@[simp] lemma len_termFreeToBoundVec {k ts : V} (hts : IsUTermVec L k ts) :
+    len (termFreeToBoundVec L k d ts) = k := construction.resultVec_lh L _ hts
+
+@[simp] lemma nth_termFreeToBoundVec {k ts i : V} (hts : IsUTermVec L k ts) (hi : i < k) :
+    (termFreeToBoundVec L k d ts).[i] = termFreeToBound L d ts.[i] :=
+  construction.nth_resultVec L _ hts hi
+
+end
+
+end FreeToBound
+
 /-- **`𝗣𝗔⁻` is Δ₁-definable** (axiom-clean). `𝗣𝗔⁻` is a finite theory (`PeanoMinus.finite`:
 `𝗣𝗔⁻ = 𝗘𝗤 ∪ {17 axioms}`, all over the finite-symbol language `ℒₒᵣ`), so the finite-theory
 combinator `Theory.Δ₁.ofFinite` enumerates it into a `𝚫₁.Semisentence 1`. -/
