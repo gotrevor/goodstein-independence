@@ -19,6 +19,7 @@ M1a → M1b → M2 → M3. Deliberately NOT imported by `GoodsteinPA.lean`, so i
 -/
 import GoodsteinPA.InternalZ
 import GoodsteinPA.Zsubst
+import GoodsteinPA.RedZKDescent
 import GoodsteinPA.Reduction
 
 namespace GoodsteinPA.InternalZ
@@ -541,8 +542,26 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
   rcases zTag_Ind_or_K_of_ZDerivesEmpty hd.1 with htag | htag
   · -- Ind (tag 3): `red d = iRInd d`, banked descent. PROVEN.
     exact iord_descent_red_zInd d hd.1.1 htag
-  · -- K/cut (tag 4): the dispatched `iRK` cut-reduct's ordinal descent — the genuine open core.
-    sorry
+  · -- K/cut (tag 4): dispatch on the `permIdx` criticality sentinel.
+    rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
+      ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · -- the genuine K-rule node `zK s r ds`
+      have hreg : ∀ i < lh ds, ZRegular (znth ds i) :=
+        fun i hi => ZRegular_zK_premise hds hd.2 hi
+      by_cases hcrit : permIdx (zK s r ds) < lh ds
+      · -- non-critical: splice (5.2.1) / replace (5.2.2) — the genuine open ordinal-analysis core.
+        sorry
+      · -- CRITICAL (5.1): `red (zK s r ds) = iRcritG …`, banked descent. Criticality is supplied by the
+        -- `permIdx = lh ds` sentinel (`zKCritical_of_not_permIdx_lt`), so the full `zKValid` is in hand.
+        exact iord_descent_red_zK_crit hcrit hds hmem hreg
+          (zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid, zKCritical_of_not_permIdx_lt hcrit⟩)
+    · simp at htag
+    · simp at htag
 
 /-! ## Connectives — PROVEN from the leaves (this is the "no wiring step" demonstration)
 With `redSound` in hand, `ZDerivesEmpty` is closed under the whole `red`-orbit and the ε₀-descent is
