@@ -1,5 +1,30 @@
 # Pending work — open obligations & attack paths
 
+## ⭐ Lap 79 — `PA_delta1Definable` front A: brick 2a (`qqAllItr`) DONE; next = free→bound rewrite
+
+Front A (`inductionSchemeUnivDelta1`) decomposes the internal `univCl'` recognizer `closeAll` into
+TWO independent pieces. **`closeAll p = qqAllItr (freeToBound m p) m` where `m = fvSup p`**, mirroring
+`univCl' φ = ∀⁰* (Rew.fixitr 0 φ.fvSup ▹ φ)` (`Basic/Syntax/Rew.lean:420`).
+
+- ✅ **brick 2a DONE (lap 79, axiom-clean): `qqAllItr p k = ^∀^[k] p`** — PR.Construction, `𝚺₁-Function₂`,
+  `qqAllItr_succ'` (front-peel) + `qqAllItr_quote` (`qqAllItr ⌜φ⌝ n = ⌜∀⁰* φ⌝`). `PADelta1.lean §Brick 2a`.
+- ⏳ **brick 2b (NEXT) = internal `freeToBound`** (the `Rew.fixitr 0 m` analog): rewrite a code `p`,
+  sending every free var `^&i` (i<m) to bound `^#(i+depth)` (depth = enclosing-binder count). Build via
+  `UformulaRec1.Construction` paralleling `shift` (`Functions.lean §shift`): param = depth `k`,
+  `allChanges/exsChanges := k+1`, leaf rewrites the term-vector's `^&i`→`^#(i+k)`. Then quote-correctness
+  `freeToBound m ⌜φ⌝ = ⌜Rew.fixitr 0 m ▹ φ⌝` (structural induction matching the internal recursion vs
+  external `Rew.fixitr`, using `fixitr_fvar`/`fixitr_bvar`, `Rew.q` lifting). NB term-level: need an
+  internal term `fixitr`-rewrite too (free term var `^&i`→`^#(i+k)`); check `Term/Functions.lean` for an
+  existing free-var term map first (there is `termShift`, `termBShift`).
+- ⏳ **brick 2c = internal `fvSup`** (max free-var index + 1): `UformulaRec1` returning `max(...)+1` over
+  `^&i` leaves; needed to PIN `m` (else vacuous-extra-∀ variants get falsely recognized, breaking
+  `mem_iff`). Σ₁ function.
+- ⏳ **brick 2d = assembly**: `closeAll`, `ch(y) := ∃ p ≤ y, IsSemiformula 1 p ∧ y = closeAll (succIndCodeRaw p)`
+  (bounded ∃ ⟹ Δ₁), `mem_iff` (via `succIndCodeRaw_quote` + `closeAll`-quote), `isDelta1`
+  (`ProvablyProperOn.ofProperOn` + properness of bounded ∃). Then rewire `Reduction.lean` to `paDelta1`.
+
+Front B (crux-2 criticality redesign) stays DEEP-REFLECTION-blocked — see lap-78 box below.
+
 ## ⭐⭐⭐ Lap 78 (FRESH-MIND REVIEW) — crux-2 rung-2 is ARCHITECTURE-BLOCKED; pivot to `PA_delta1Definable`
 
 **Read `ANALYSIS-2026-06-24-lap78-criticality-substitution-wall.md` FIRST.** The lap-77 plan ("front A:
