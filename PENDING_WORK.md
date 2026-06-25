@@ -25,10 +25,21 @@ TWO independent pieces. **`closeAll p = qqAllItr (freeToBound m p) m` where `m =
     `subst_comp_fixitr` (`Basic/Syntax/Rew.lean:412`, `(fixitr 0 m ▹ φ)⇜(&·) = φ`). Soundness: `body`
     fv-free m-ary ⟹ `subst (fvarSeq·)` is injective (inverse of fixitr), so `body` is pinned.
   · `IsFVFree`-pin replaces the need for an internal `fvSup` function (m forced = fvSup, max bound +1).
-  NEXT pieces: (1) internal `fvarSeq m` (`⟨^&0..^&(m-1)⟩`, PR over m) + quote-correctness
-  `fvarSeq m = ⌜fun i:Fin m ↦ &i⌝`; (2) the two bridge lemmas above; (3) build `ch : 𝚫₁.Semisentence 1`
-  (bounded ∃ over the Σ₁/Δ₁ graphs); (4) `mem_iff` at ℕ; (5) `isDelta1` (`ProvablyProperOn.ofProperOn`).
-  Then rewire `Reduction.lean` to `paDelta1`.
+  DONE pieces (lap 79, all axiom-clean): (1) ✅ `fvarSeq` (brick 2c) `.[i]=^&i`, `IsSemitermVec`;
+  (2) ✅ `subst_fvarSeq_fixitr` (brick 2d) = `subst ℒₒᵣ (fvarSeq m) ⌜fixitr 0 m ▹ φ⌝ = ⌜φ⌝` via
+  `fvarSeqVec_val` + `typed_quote_substs` + `subst_comp_fixitr`. **THE crux bridge is banked.**
+  REMAINING assembly pieces:
+  · (3a) the univCl↔qqAllItr bridge: `(⌜univCl ψ⌝ : V) = qqAllItr ⌜Rew.fixitr 0 ψ.fvSup ▹ ψ⌝ ψ.fvSup`
+    — combine `qqAllItr_quote` (`qqAllItr ⌜φ'⌝ n = ⌜∀⁰* φ'⌝`) with `coe_univCl_eq_univCl'`
+    (`(univCl ψ : SyntacticFormula) = univCl' ψ = ∀⁰* (fixitr 0 ψ.fvSup ▹ ψ)`) + `Sentence.quote_def`.
+  · (3b) build `ch : 𝚫₁.Semisentence 1` as the bounded-∃ recognizer (see ch formula above; uses
+    `succIndCodeRaw`, `subst ℒₒᵣ (fvarSeq ·)`, `qqAllItr`, `IsFVFree`/`IsSemiformula`-pin graphs).
+  · (4) `mem_iff` at ℕ. (⇐) χ=univCl(succInd ψ): witness p=⌜ψ⌝, m=fvSup, body=⌜fixitr..⌝, close with
+    (3a)+(3b)+`succIndCodeRaw_quote`+`subst_fvarSeq_fixitr`. (⇒) decode p=⌜ψ⌝ (IsSemiformula 1), m,body;
+    from `subst (fvarSeq m) body = ⌜succInd ψ⌝` + body fv-free m-ary ⟹ body=⌜fixitr 0 m ▹ succInd ψ⌝
+    (injectivity / inverse — the one nontrivial sub-argument left), then y=⌜univCl(succInd ψ)⌝∈scheme.
+  · (5) `isDelta1` (`ProvablyProperOn.ofProperOn` + properness of the bounded ∃).
+  Then rewire `Reduction.lean`: `peano_not_proves_consistency := @consistent_unprovable 𝗣𝗔 paDelta1 _ _`.
 
 Front B (crux-2 criticality redesign) stays DEEP-REFLECTION-blocked — see lap-78 box below.
 
