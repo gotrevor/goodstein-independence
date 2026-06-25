@@ -563,7 +563,7 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
         have hdiZ : ZDerivation (znth ds (permIdx (zK s r ds))) := hmem _ hcrit
         rcases zDerivation_iff.mp hdiZ with ⟨s', heq, _⟩ | ⟨s', a', p', d0, heq, hd0, _⟩ |
           ⟨s', p', d0, heq, hd0, _⟩ | ⟨s', at'', p', d0, d1, heq, hd0, hd1, _⟩ |
-          ⟨s', r', ds', heq, _, _, _⟩ | ⟨s', p', k, heq, _, _⟩ | ⟨s', p', heq, _, _⟩
+          ⟨s', r', ds', heq, hds', hmem', hvalid'⟩ | ⟨s', p', k, heq, _, _⟩ | ⟨s', p', heq, _, _⟩
         · -- atom (tag 0): `red dᵢ = dᵢ`, FIXPOINT — no `iord` descent (engine defect).
           sorry
         · -- I∀ (tag 1): `red dᵢ = zsubst d0 a 0`, banked `iRedDescent_red_zIall` (eigensubst-invariant
@@ -592,15 +592,20 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
           · -- `dᵢ` non-critical → REPLACE; residual = the premise IH `iRedDescent (red dᵢ) dᵢ`.
             refine iord_descent_red_zK_chain_replace hds hmem hcrit h2 ?_
             sorry
-          · -- `dᵢ` critical → SPLICE; residual = the two halves' `õ`/`idg` bounds + rank bound.
-            refine iord_descent_red_zK_chain_splice hds hmem hcrit h2 htag4 ?_ ?_ ?_ ?_ ?_ ?_ ?_
-            · sorry
-            · sorry
-            · sorry
-            · sorry
-            · sorry
-            · sorry
-            · sorry
+          · -- `dᵢ` critical → SPLICE; the two halves' `õ`/`idg`/NF bounds are supplied by the banked
+            -- `iCrit_halves_descend` (the critical reduct's halves reduce `dᵢ`'s OWN premise sequence at
+            -- the redex, so each fold descends below `dᵢ`); only the rank bound `hr'` remains residual.
+            have hcrit' : ¬ permIdx (zK s' r' ds') < lh ds' := by
+              have h2c := h2; rw [heq, zKseq_zK] at h2c; exact h2c
+            have hreg' : ∀ i < lh ds', ZRegular (znth ds' i) := fun i hi =>
+              ZRegular_zK_premise hds' (heq ▸ hreg (permIdx (zK s r ds)) hcrit) hi
+            have hvalidZ : zKValid s' r' ds' :=
+              zKValid_iff_zKValidF_and_zKCritical.mpr ⟨hvalid', zKCritical_of_not_permIdx_lt hcrit'⟩
+            obtain ⟨ha, hb, hag, hbg, hNFa, hNFb⟩ :=
+              iCrit_halves_descend hcrit' hds' hmem' hreg' hvalidZ
+            rw [← heq] at ha hb hag hbg hNFa hNFb
+            refine iord_descent_red_zK_chain_splice hds hmem hcrit h2 htag4 ?_ ha hb hag hbg hNFa hNFb
+            sorry
         · -- axAll (tag 5): `red dᵢ = dᵢ`, FIXPOINT (axiom normal form).
           sorry
         · -- axNeg (tag 6): `red dᵢ = dᵢ`, FIXPOINT (axiom normal form).

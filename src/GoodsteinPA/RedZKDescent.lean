@@ -132,6 +132,107 @@ lemma iord_descent_red_zK_crit {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh
     (fun A h => by rw [h]; exact irk_falsum) rfl hNF
     hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
 
+/-- **Critical-reduct halves descend below the chain — the splice sub-fact (lap 110).** For a valid
+critical `K^r` chain `dᵢ = zK s r ds` (`¬ permIdx < lh ds`), `red dᵢ = iRcritG dᵢ ρ` whose two
+premise-halves `a,b = znth (zKseq (red dᵢ)) {0,1}` are `K`-chains over `seqUpdate ds (redexI/J) (red·)` —
+i.e. `dᵢ`'s OWN premise sequence with the redex-`R`/`L` premise replaced by its strictly-descending genuine
+reduct. So each half's `õ`/`idg`-fold lies (strictly/weakly) below `dᵢ`'s and is NF — **the `õ`-jump of the
+critical 5.1 reduct is in the OUTER `K^{r-1}` rank-drop, NOT in the individual halves' premise folds.**
+This extracts exactly the per-half `ha`/`hb`/`hag`/`hbg`/`hNFa`/`hNFb` that `iord_descent_red_zK_chain_splice`
+consumes for the parent chain-splice (Buchholz Def-3.2 case 5.2.1); the rank bound `hr'` remains the
+documented residual (the cut-rank `rk(A(dᵢ))` degree-drop bookkeeping). Mirrors the redex extraction of
+`iord_descent_red_zK_crit`, then applies the `iCritAux` fold-monotonicity lemmas (`iotil_iCritAux_lt`,
+`idg_iCritAux_le`) since `iotil`/`idg` ignore the half's reset conclusion/rank. -/
+lemma iCrit_halves_descend {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh ds)
+    (hds : Seq ds) (hmem : ∀ i < lh ds, ZDerivation (znth ds i))
+    (hreg : ∀ i < lh ds, ZRegular (znth ds i)) (hvalid : zKValid s r ds) :
+    icmp (iotil (znth (zKseq (red (zK s r ds))) 0)) (iotil (zK s r ds)) = 0 ∧
+    icmp (iotil (znth (zKseq (red (zK s r ds))) 1)) (iotil (zK s r ds)) = 0 ∧
+    idg (znth (zKseq (red (zK s r ds))) 0) ≤ idg (zK s r ds) ∧
+    idg (znth (zKseq (red (zK s r ds))) 1) ≤ idg (zK s r ds) ∧
+    isNF (iotil (znth (zKseq (red (zK s r ds))) 0)) ∧
+    isNF (iotil (znth (zKseq (red (zK s r ds))) 1)) := by
+  obtain ⟨hci, hperm0, hnperm0, hf1, hf2, hf5, hf6, _hsucc, _hssf, _hsaf⟩ := hvalid
+  obtain ⟨j0, hj0, hAj0, hchain, hrank⟩ := hci
+  have hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ False :=
+    fun i hi A h => Or.inl (tp_isymR_pos h (hf1 i (lt_of_le_of_lt hi hj0))
+      (hf2 i (lt_of_le_of_lt hi hj0)))
+  have hwfL : ∀ i ≤ j0, ∀ k A, tp (znth ds i) = isymLk k A → 0 < irk A ∨ (A = (^⊥ : V)) :=
+    fun i hi k A h => Or.inl (tp_isymLk_pos h (hf5 i (lt_of_le_of_lt hi hj0))
+      (hf6 i (lt_of_le_of_lt hi hj0)))
+  have hperm : ∀ i ≤ j0, iperm (tp (znth ds i)) (fstIdx (znth ds i)) :=
+    fun i hi => hperm0 i (lt_of_le_of_lt hi hj0)
+  have hnperm : ∀ i ≤ j0, ¬ iperm (tp (znth ds i)) s :=
+    fun i hi => hnperm0 i (lt_of_le_of_lt hi hj0)
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := by
+    intro n
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  obtain ⟨i0, j1, k0, hij, hjle, hRi, hLj, hrkpos, hrkr⟩ :=
+    inference_critical_pair_of_chain (Tr := fun _ => False) (Fa := fun A => A = (^⊥ : V))
+      hj0 hAj0 hchain hrank hwfR hwfL hperm hnperm (fun _ h => h.1)
+      (fun A h => by rw [h]; exact irk_falsum) rfl
+  have hjlt : j1 < lh ds := lt_of_le_of_lt hjle hj0
+  have hilt : i0 < lh ds := lt_trans hij hjlt
+  have hredex : isRedexPair ds (⟪i0, j1⟫ : V) := by
+    simp only [isRedexPair, pi₁_pair, pi₂_pair]
+    refine ⟨hij, hjlt, ?_, ?_, ?_⟩
+    · rw [hRi]; simp [isymR]
+    · rw [hLj]; simp [isymLk]
+    · rw [hRi, hLj]; simp [isymR, isymLk]
+  have hex : ∃ c < (⟪lh (zKseq (zK s r ds)), lh (zKseq (zK s r ds))⟫ : V),
+      isRedexPair (zKseq (zK s r ds)) c := by
+    simp only [zKseq_zK]; exact ⟨⟪i0, j1⟫, pair_lt_pair hilt hjlt, hredex⟩
+  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
+  simp only [zKseq_zK] at hrc
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hrc.1 hrc.2.1
+  have hJlt : redexJ (zK s r ds) < lh ds := hrc.2.1
+  obtain ⟨hRedI, hRedJ⟩ := redexPair_tp hrc
+  have hbI := iRedDescent_zAxReduct_red_of_tp_isymR hRedI (hmem _ hIlt) (hreg _ hIlt)
+  have hbJ := iRedDescent_zAxReduct_red_of_tp_isymLk hRedJ (hmem _ hJlt)
+  -- The two halves, computed from `red_zK_crit` + `iRcritG`/`iCritReductSeq` read-outs. `iotil`/`idg`
+  -- ignore the reset conclusion/rank, so each half's fold equals the corresponding `iCritAux` fold.
+  set vI : V := zAxReduct (red (znth ds (redexI (zK s r ds)))) with hvI
+  set vJ : V := zAxReduct (red (znth ds (redexJ (zK s r ds)))) with hvJ
+  have e0 : znth (zKseq (red (zK s r ds))) 0
+      = zK (seqSetSucc s (chainAsucc ds (redexI (zK s r ds)))) r
+          (seqUpdate ds (redexI (zK s r ds)) vI) := by
+    rw [red_zK_crit hcrit, iRcritG]
+    simp only [fstIdx_zK, zKseq_zK, zKrank_zK, zKseq_iCritReductG, znth_iCritReductSeq_zero, hvI]
+  have e1 : znth (zKseq (red (zK s r ds))) 1
+      = zK (seqAddAnt (chainAsucc ds (redexI (zK s r ds))) s) r
+          (seqUpdate ds (redexJ (zK s r ds)) vJ) := by
+    rw [red_zK_crit hcrit, iRcritG]
+    simp only [fstIdx_zK, zKseq_zK, zKrank_zK, zKseq_iCritReductG, znth_iCritReductSeq_one, hvJ]
+  have hiotil0 : iotil (znth (zKseq (red (zK s r ds))) 0)
+      = iotil (iCritAux (zK s r ds) (redexI (zK s r ds)) vI) := by
+    rw [e0, iCritAux_zK, iotil_zK _ _ _ (seqUpdate_seq ds _ vI), iotil_zK _ _ _ (seqUpdate_seq ds _ vI)]
+  have hiotil1 : iotil (znth (zKseq (red (zK s r ds))) 1)
+      = iotil (iCritAux (zK s r ds) (redexJ (zK s r ds)) vJ) := by
+    rw [e1, iCritAux_zK, iotil_zK _ _ _ (seqUpdate_seq ds _ vJ), iotil_zK _ _ _ (seqUpdate_seq ds _ vJ)]
+  have hidg0 : idg (znth (zKseq (red (zK s r ds))) 0)
+      = idg (iCritAux (zK s r ds) (redexI (zK s r ds)) vI) := by
+    rw [e0, iCritAux_zK, idg_zK _ _ _ (seqUpdate_seq ds _ vI), idg_zK _ _ _ (seqUpdate_seq ds _ vI)]
+  have hidg1 : idg (znth (zKseq (red (zK s r ds))) 1)
+      = idg (iCritAux (zK s r ds) (redexJ (zK s r ds)) vJ) := by
+    rw [e1, iCritAux_zK, idg_zK _ _ _ (seqUpdate_seq ds _ vJ), idg_zK _ _ _ (seqUpdate_seq ds _ vJ)]
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [hiotil0]; exact iotil_iCritAux_lt hds hIlt hbI.otil_lt hNF hbI.nf
+  · rw [hiotil1]; exact iotil_iCritAux_lt hds hJlt hbJ.otil_lt hNF hbJ.nf
+  · rw [hidg0]; exact idg_iCritAux_le hds hIlt hbI.dg_le
+  · rw [hidg1]; exact idg_iCritAux_le hds hJlt hbJ.dg_le
+  · rw [hiotil0, iCritAux_zK]
+    exact isNF_iotil_zK (seqUpdate_seq ds _ vI) (fun n _ => by
+      rcases eq_or_ne n (redexI (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hIlt]; exact hbI.nf
+      · rw [znth_seqUpdate_of_ne hne]; exact hNF n)
+  · rw [hiotil1, iCritAux_zK]
+    exact isNF_iotil_zK (seqUpdate_seq ds _ vJ) (fun n _ => by
+      rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hJlt]; exact hbJ.nf
+      · rw [znth_seqUpdate_of_ne hne]; exact hNF n)
+
 /-- **The non-critical REPLACE-branch K-case descent (Buchholz Def-3.2 case 5.2.2), conditional on the
 selected premise's reduct descending.** Both replace dispatches (`red_zK_rep` chain-`dᵢ`-non-critical and
 `red_zK_rep_nonchain` non-chain `dᵢ`) produce the SAME reduct shape `red (zK s r ds) = K^r(i/red dᵢ)` —
