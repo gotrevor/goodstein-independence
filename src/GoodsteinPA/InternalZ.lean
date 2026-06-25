@@ -4421,6 +4421,23 @@ lemma ZDerivation_iCritAux_of {s r ds i v : V} (hi : i < lh ds)
   · rw [znth_seqUpdate_self hi]; exact hZv
   · rw [znth_seqUpdate_of_ne hne]; exact hmem n hn
 
+/-- **5.2.2 replace-premise validity, K-chain reduct specialization (the dispatch-ready form).** In the
+genuine `red` dispatch the reduct `v = red dᵢ` of any reducible premise is a `K`-chain (`zK …`, via
+`iRcritG`/`iRInd`), so its own-permissibility is automatic (`tp = isymRep`, `iperm_isymRep`) and the
+tag-gated I/Ax formula-hood conjuncts are vacuous (`zTag = 4`). Hence replacing premise `i` of a valid
+chain by a valid `zK`-reduct of the same end-sequent preserves derivation-validity with NO side
+hypotheses beyond the end-sequent match `fstIdx v = fstIdx (znth ds i)`. -/
+lemma ZDerivation_iCritAux_of_zK {s r ds i sv rv dsv : V} (hi : i < lh ds)
+    (hZ : ZDerivation (zK s r ds)) (hZv : ZDerivation (zK sv rv dsv))
+    (hv : fstIdx (zK sv rv dsv) = fstIdx (znth ds i)) :
+    ZDerivation (iCritAux (zK s r ds) i (zK sv rv dsv)) := by
+  refine ZDerivation_iCritAux_of hi hZ hZv hv ?_ ?_ ?_ ?_ ?_
+  · rw [tp_zK]; exact iperm_isymRep _
+  · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
+  · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
+  · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
+  · intro h; rw [zTag_zK] at h; exact absurd h (by simp)
+
 /-! ### The reduct-descent IH interface `iRedDescent` (Buchholz Lemma 4.1 (a)+(b)(i)+NF closure)
 
 The Thm-4.2 structural induction (still upstream, gated on the recursive `iR`) feeds the chain case one

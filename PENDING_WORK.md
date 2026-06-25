@@ -26,7 +26,13 @@ descent; the genuine `red` MUST dispatch the **5.2** cases too.
    branch on `zKCritical (fstIdx d) (zKseq d)` and stay Σ₁. ⚠ Still to reconcile: `∀ i < lh ds` (repo)
    vs Buchholz's `∀ i ≤ j₀` — the `j₀`-restricted form is the faithful branch; decide whether the
    stronger `∀ i < lh ds` mis-classifies any Buchholz-critical chain (if some i > j₀ has tp(dᵢ) ◁ Π).
-2. **5.2.1 splice** — genuine in-place splice object + `zKValidF`; descent = `iord_descent_iSpliceEnd`.
+2. **5.2.1 splice** — `red d = zK s r' (seqCons (seqUpdate ds i dᵢ{1}) dᵢ{0})`. Descent banked
+   (`iord_descent_iSpliceEnd`). ⚠ **The VALIDITY is the next hard piece**: only read-outs are banked
+   (`znth_seqCons_seqUpdate_top`/`_lt`, `lh_seqCons_seqUpdate`) — NO `isChainInf`/`zKValidF` for the
+   spliced shape yet. Needs the spliced-chain threading proof (the new chain re-establishes `isChainInf`:
+   `j₀`, `Γᵢ ⊆ Γ,A₀…` threading with the two spliced halves, rank `≤ r'`). Required because for a CRITICAL
+   `dᵢ` the pre-ordinal `õ(red dᵢ)` BLOWS UP (Lemma 4.1(b)), so 5.2.2-replace cannot be used (its descent
+   needs `õ(v) ≺ õ(dᵢ)`) — the splice incorporates `dᵢ`'s halves (smaller `õ`) directly.
 3. **5.2.2 replace — VALIDITY DONE (lap 86):** `ZDerivation_iCritAux_of` (axiom-clean, next to
    `iord_descent_iCritAux_of_ZDerivation`): replacing premise `i` of a valid chain by a same-end-sequent
    reduct `v` that is a `ZDerivation` (+ its own well-formedness) gives `ZDerivation (iCritAux …)`. With
