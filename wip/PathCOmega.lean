@@ -940,6 +940,54 @@ theorem sord_redAllExN_lt {s d0 a Cnew dR αAll αEx : V}
   rw [redAllExN, sord_zCutOmega]
   exact inadd_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
 
+/-! ### Brick 5d (lap 105) — the `#`-resolution is UNIFORM: the induction/∃-cut reduct too
+
+The natural-sum resolution is not special to the ∀/∃ cut — it applies verbatim to the OTHER ω-node,
+the INDUCTION node (PA's genuinely-specific rule). The induction/∃ cut reduces by selecting the depth-`k`
+unfolding `zK s' (irk p) (iIndReductSeq d0 d1 t)` (`t = zExTerm dR`, deriving `F(t)`; brick 3) against the
+∃-premise; the `#`-stored reduct is `ZcOK` and strictly drops the stored ordinal against a `#`-stored
+parent — by the SAME `lt_inadd_self_*`/`inadd_strict_mono` argument as `redAllExN`. This confirms the
+lap-105 insight is structural to the cut node, not to one cut-formula shape. (The premises' `ZcOK`-hood is
+taken as hypotheses: the unfolding is an engine `ZDerivation` ⟹ `ZcOK.leaf`, the ∃-premise from the cut's
+right-inversion — same provenance as `zcOK_redAllExN`, now via the brick-3 induction node once that
+constructor lands in `ZcOK`.) -/
+
+/-- **The `#`-stored induction/∃-cut reduct** (induction analogue of `redAllExN`). Stores the natural
+SUM of the selected depth-`zExTerm dR` unfolding's `sord` and the ∃-premise's `sord`. -/
+noncomputable def redIndExN (s s' at' p d0 d1 Cnew dR : V) : V :=
+  zCutOmega s
+    (inadd (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))) (sord (zExPrem dR)))
+    (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR))) (zExPrem dR) Cnew
+
+/-- **Induction/∃-cut `hinv` — full closure, `imax`-free (axiom-clean).** Given both reduced premises
+`ZcOK` (the depth-`k` unfolding + the ∃-premise) and positive/NF `sord`s, the `#`-stored induction/∃-cut
+reduct is `ZcOK` — operator-control discharged by `lt_inadd_self_right`/`_left`, exactly as the ∀/∃ case. -/
+theorem zcOK_redIndExN {s s' at' p d0 d1 Cnew dR : V}
+    (hL : ZcOK (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR))))
+    (hR : ZcOK (zExPrem dR))
+    (hLnf : isNF (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))))
+    (hRnf : isNF (sord (zExPrem dR)))
+    (hLpos : icmp 0 (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))) = 0)
+    (hRpos : icmp 0 (sord (zExPrem dR)) = 0) :
+    ZcOK (redIndExN s s' at' p d0 d1 Cnew dR) := by
+  rw [redIndExN]
+  refine ZcOK.cut hL hR ?_ ?_
+  · exact lt_inadd_self_right hLnf hRnf hRpos
+  · exact lt_inadd_self_left hLnf hRnf hLpos
+
+/-- **The `#`-stored induction/∃-cut reduction STRICTLY drops the stored ordinal — against a `#`-stored
+parent.** Induction analogue of `sord_redAllExN_lt`: from the unfolding's `sord ≺ αInd` (brick 3's stored
+limit) and the ∃-premise's `sord ≺ αEx`, the reduct's `#`-stored ordinal is `≺ αInd # αEx`. Same
+strict-monotonicity argument; no additive-principality of the parent needed. -/
+theorem sord_redIndExN_lt {s s' at' p d0 d1 Cnew dR αInd αEx : V}
+    (hLlt : icmp (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))) αInd = 0)
+    (hRlt : icmp (sord (zExPrem dR)) αEx = 0)
+    (hLnf : isNF (sord (zK s' (irk p) (iIndReductSeq d0 d1 (zExTerm dR)))))
+    (hRnf : isNF (sord (zExPrem dR))) (hAnf : isNF αInd) (hEnf : isNF αEx) :
+    icmp (sord (redIndExN s s' at' p d0 d1 Cnew dR)) (inadd αInd αEx) = 0 := by
+  rw [redIndExN, sord_zCutOmega]
+  exact inadd_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
+
 /-! ## NEXT BRICKS (Path C, `sorry`-disclosed milestones — PENDING_WORK lap 102)
 
 Brick 1 above pins the ω-∀-node design + its cut invariant on the existing engine. The remaining Path-C
