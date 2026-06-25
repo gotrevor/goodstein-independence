@@ -1206,6 +1206,21 @@ theorem sord_redAllExS_lt {s d0 a Cnew dR αAll αEx : V}
   rw [redAllExS, sord_zCutOmega]
   exact inc_imax_strict_mono hLnf hAnf hRnf hEnf hLlt hRlt
 
+/-- **The reduct's stored ordinal is NF** — so the `red`-orbit lives in valid ε₀-codes, the domain where
+PRWO(ε₀) bites. `sord (redAllExS …) = inc (imax …)`, and both `inc` and `imax` preserve NF. Without this
+the descent could leave the CNF codes and `icmp`/PRWO would not apply. -/
+theorem isNF_sord_redAllExS {s d0 a Cnew dR : V}
+    (hLnf : isNF (sord (zsubst d0 a (zExTerm dR)))) (hRnf : isNF (sord (zExPrem dR))) :
+    isNF (sord (redAllExS s d0 a Cnew dR)) := by
+  rw [redAllExS, sord_zCutOmega]; exact isNF_inc (isNF_imax hLnf hRnf)
+
+/-- **NF of the reduct ordinal for LEAF premises (zero side conditions).** When the reduced premises are
+engine `ZDerivation`s, their `sord` NF is automatic, so the reduct's stored ordinal is NF unconditionally. -/
+theorem isNF_sord_redAllExS_leaf {s d0 a Cnew dR : V}
+    (hLZ : ZDerivation (zsubst d0 a (zExTerm dR))) (hRZ : ZDerivation (zExPrem dR)) :
+    isNF (sord (redAllExS s d0 a Cnew dR)) :=
+  isNF_sord_redAllExS (isNF_sord_of_ZDerivation hLZ) (isNF_sord_of_ZDerivation hRZ)
+
 /-- **The principal ∀/∃-cut `red`-step, END TO END (axiom-clean).** A `ZcOK` principal cut whose stored
 ordinal is the canonical `max(αAll, αEx) + 1` (the `zcOK_cutS` shape) and whose ω-∀/∃ premises have engine
 `ZDerivation` selected sub-derivations reduces to `redAllExS`, which is BOTH `ZcOK` (hinv) AND has strictly
