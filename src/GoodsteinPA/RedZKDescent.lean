@@ -194,4 +194,29 @@ lemma iord_descent_red_zK_splice_eq {s r ds i a b s' r' : V}
   rw [hred]
   exact iord_descent_seqInsert' hds hi hnf hr' ha hb hag hbg hNF hNFa hNFb
 
+/-- **The atom-selection FIXPOINT defect, formalized (lap 109).** If the selected (least-permissible)
+premise of a non-critical chain is a bare identity-atom `zAtom sᵢ` (`zTag = 0`, a `red`-normal form), the
+genuine reduct is a **FIXPOINT**: `red (zK s r ds) = zK s r ds`. Because the non-chain replace dispatch
+(`red_zK_rep_nonchain`) swaps premise `i` for `red dᵢ = dᵢ` (atoms are normal, `red_zAtom`) and reduces the
+conclusion by `tpReduce (tp dᵢ) s 0 = tpReduce isymRep s 0 = s` (Rep-reduce is the identity,
+`tpReduce_isymRep`), so `seqUpdate ds i dᵢ = ds` (`seqUpdate_znth_self`) leaves the whole node unchanged.
+
+This pins the kernel obstruction to the descent recursion (PENDING_WORK lap-109): when `permIdx` selects an
+atom, `iord (red (zK s r ds)) = iord (zK s r ds)` — NO strict descent, the orbit STALLS. The `isymRep` tag
+conflates atoms (normal forms) with reducible Ind/chains, and `iperm isymRep` is unconditionally true
+(`iperm_isymRep`), so an atom CAN be the first permissible premise. The fix is an `isPermPrem`/`permIdx`
+engine refinement that excludes atom premises (so the selected premise is always reducible), OR an embedding
+(`foundation_bot_to_Z_empty`) that produces atom-free chains. -/
+lemma red_zK_fixpoint_of_atom_selected {s r ds sᵢ : V}
+    (hds : Seq ds) (h1 : permIdx (zK s r ds) < lh ds)
+    (hatom : znth ds (permIdx (zK s r ds)) = zAtom sᵢ) :
+    red (zK s r ds) = zK s r ds := by
+  have htag : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [hatom]; simp
+  rw [red_zK_rep_nonchain h1 htag,
+    show red (znth ds (permIdx (zK s r ds))) = znth ds (permIdx (zK s r ds)) from by
+      rw [hatom, red_zAtom],
+    seqUpdate_znth_self hds h1,
+    show tp (znth ds (permIdx (zK s r ds))) = isymRep from by rw [hatom, tp_zAtom],
+    tpReduce_isymRep]
+
 end GoodsteinPA.InternalZ
