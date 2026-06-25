@@ -554,7 +554,14 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) : icmp (iord (red d)) (
       have hreg : ∀ i < lh ds, ZRegular (znth ds i) :=
         fun i hi => ZRegular_zK_premise hds hd.2 hi
       by_cases hcrit : permIdx (zK s r ds) < lh ds
-      · -- non-critical: splice (5.2.1) / replace (5.2.2) — the genuine open ordinal-analysis core.
+      · -- NON-critical: `red (zK s r ds) = K^r(i/red dᵢ)` (replace, 5.2.2) or splices `dᵢ`'s halves
+        -- (splice, 5.2.1), `i = permIdx`. The REPLACE descent is banked as
+        -- `iord_descent_red_zK_replace_eq` (RedZKDescent) — it reduces to the premise IH
+        -- `iRedDescent (red dᵢ) dᵢ`. Wiring needs `iord_descent_red` restructured as a strong induction
+        -- on the derivation code to supply that IH for the structurally-smaller premise `dᵢ < zK s r ds`
+        -- (and the splice branch's two-half IH). The lone genuine subtlety: a selected (permissible)
+        -- premise must be reducible for the IH's STRICT `otil_lt` to hold (a normal-form leaf would
+        -- stall) — guaranteed by the `zKValidF`/`isChainInf` chain structure, the open obligation.
         sorry
       · -- CRITICAL (5.1): `red (zK s r ds) = iRcritG …`, banked descent. Criticality is supplied by the
         -- `permIdx = lh ds` sentinel (`zKCritical_of_not_permIdx_lt`), so the full `zKValid` is in hand.

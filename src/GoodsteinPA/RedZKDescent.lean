@@ -132,4 +132,41 @@ lemma iord_descent_red_zK_crit {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh
     (fun A h => by rw [h]; exact irk_falsum) rfl hNF
     hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
 
+/-- **The non-critical REPLACE-branch K-case descent (Buchholz Def-3.2 case 5.2.2), conditional on the
+selected premise's reduct descending.** Both replace dispatches (`red_zK_rep` chain-`dᵢ`-non-critical and
+`red_zK_rep_nonchain` non-chain `dᵢ`) produce the SAME reduct shape `red (zK s r ds) = K^r(i/red dᵢ)` —
+a `seqUpdate` of `ds` at `i = permIdx` swapping premise `dᵢ` for its reduct `red dᵢ`, same rank `r`. Given
+the premise IH `iRedDescent (red dᵢ) dᵢ` (the recursive descent: `red dᵢ` doesn't raise the degree and
+strictly lowers `õ`, judge §8.3 LH3/N2), the whole `K^r` ordinal strictly descends — `iotil` drops one
+summand (`iotil_zK_lt_replace`, the F1 strict `#`-mono), `idg` doesn't rise (`idg_zK_le_replace`), then
+`iord_descent_le` combines through the tower. Stated against the explicit reduct equation `hred` so a
+single lemma covers both replace dispatches. -/
+lemma iord_descent_red_zK_replace_eq {s s' r ds i : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hred : red (zK s r ds) = zK s' r (seqUpdate ds i (red (znth ds i))))
+    (hIH : iRedDescent (red (znth ds i)) (znth ds i)) :
+    icmp (iord (red (zK s r ds))) (iord (zK s r ds)) = 0 := by
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hNF' : ∀ n, isNF (iotil (znth (seqUpdate ds i (red (znth ds i))) n)) := fun n => by
+    rcases eq_or_ne n i with rfl | hne
+    · rw [znth_seqUpdate_self hi]; exact hIH.nf
+    · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+  have hle : ∀ n, idg (znth (seqUpdate ds i (red (znth ds i))) n) ≤ idg (znth ds n) := fun n => by
+    rcases eq_or_ne n i with rfl | hne
+    · rw [znth_seqUpdate_self hi]; exact hIH.dg_le
+    · rw [znth_seqUpdate_of_ne hne]
+  have heq : ∀ n, n ≠ i →
+      iotil (znth (seqUpdate ds i (red (znth ds i))) n) = iotil (znth ds n) :=
+    fun n hne => by rw [znth_seqUpdate_of_ne hne]
+  have hlt : icmp (iotil (znth (seqUpdate ds i (red (znth ds i))) i)) (iotil (znth ds i)) = 0 := by
+    rw [znth_seqUpdate_self hi]; exact hIH.otil_lt
+  rw [hred]
+  refine iord_descent_of_iRedDescent ⟨?_, ?_, ?_⟩ (isNF_iotil_zK hds (fun n hn => hNF n))
+  · exact idg_zK_le_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hle
+  · exact iotil_zK_lt_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hi hlt heq hNF hNF'
+  · exact isNF_iotil_zK (seqUpdate_seq ds i _) (fun n _ => hNF' n)
+
 end GoodsteinPA.InternalZ
