@@ -3598,6 +3598,200 @@ lemma zKValidF_iSpliceEnd {s' r' ds j a b : V} (hj : j < lh ds)
       · rw [chainAsucc_seqUpdate_of_ne hne]; exact hcf n hlt
     · rw [heq, chainAsucc_seqCons_seqUpdate_top]; exact hfa_b
 
+/-! ### 5.2.1 ordered-insert splice VALIDITY (the genuine, order-sensitive object)
+
+Buchholz Def 3.2 case 5.2.1 reduct `K^{r'}_Π(i/dᵢ{0},dᵢ{1})` is the ORDERED in-place splice
+`d₀…d_{i−1} dᵢ{0} dᵢ{1} d_{i+1}…dₗ` (paper abbreviation: `K^r_{Π'}(i/d'ᵢ…d'_m) := d₀…d_{i−1} d'ᵢ…d'_m d_{i+1}…dₗ`).
+Unlike the order-independent end-append model `seqCons (seqUpdate ds i a) b` used for the `#`-fold ordinal
+descent (`iord_descent_iSpliceEnd`), `isChainInf` validity is ORDER-SENSITIVE (threads each antecedent only
+to strictly-earlier succedents), so validity must be proved on this ordered object. Stated abstractly over
+the insert read-outs (`hpre`/`hai`/`hbi`/`hsuf`) — the concrete `seqInsert` op + descent transfer are the
+remaining 5.2.1 plumbing (see `ANALYSIS-2026-06-25-lap87-splice-order-sensitivity.md`). -/
+
+/-- **5.2.1 ordered-insert splice — `isChainInf` (abstract spec).** -/
+lemma isChainInf_seqInsert_spec {s r r' i j0 ds cs a b : V}
+    -- unpacked original-chain validity at its distinguished `j0` (with `i ≤ j0 < lh ds`):
+    (hj0 : j0 < lh ds) (hij0 : i ≤ j0)
+    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
+    (hthr : ∀ p ≤ j0, ∀ B, inAnt B (chainAnt ds p) →
+        inAnt B (seqAnt s) ∨ ∃ p' < p, B = chainAsucc ds p')
+    (hrk : ∀ p < j0, irk (chainAsucc ds p) ≤ r)
+    -- read-outs of the ordered insert `cs = d₀…d_{i−1} a b d_{i+1}…dₗ`:
+    (hlh : lh cs = lh ds + 1)
+    (hpre : ∀ k, k < i → znth cs k = znth ds k)
+    (hai : znth cs i = a)
+    (hbi : znth cs (i + 1) = b)
+    (hsuf : ∀ m, i < m → m < lh ds → znth cs (m + 1) = znth ds m)
+    -- Thm-3.4(a) genuine half end-sequents:
+    (ha_ant : seqAnt (fstIdx a) = chainAnt ds i)
+    (ha_rank : irk (seqSucc (fstIdx a)) ≤ r')
+    (hb_succ : seqSucc (fstIdx b) = chainAsucc ds i)
+    (hb_ant : ∀ B, inAnt B (seqAnt (fstIdx b)) →
+        B = seqSucc (fstIdx a) ∨ inAnt B (chainAnt ds i))
+    (hrr : r ≤ r') :
+    isChainInf s r' cs := by
+  -- region read-outs for chainAsucc/chainAnt on `cs`.
+  have eA_pre : ∀ k, k < i → chainAsucc cs k = chainAsucc ds k := fun k hk => by
+    unfold chainAsucc; rw [hpre k hk]
+  have eN_pre : ∀ k, k < i → chainAnt cs k = chainAnt ds k := fun k hk => by
+    unfold chainAnt; rw [hpre k hk]
+  have eA_i : chainAsucc cs i = seqSucc (fstIdx a) := by unfold chainAsucc; rw [hai]
+  have eN_i : chainAnt cs i = seqAnt (fstIdx a) := by unfold chainAnt; rw [hai]
+  have eA_i1 : chainAsucc cs (i + 1) = seqSucc (fstIdx b) := by unfold chainAsucc; rw [hbi]
+  have eN_i1 : chainAnt cs (i + 1) = seqAnt (fstIdx b) := by unfold chainAnt; rw [hbi]
+  have eA_suf : ∀ m, i < m → m < lh ds → chainAsucc cs (m + 1) = chainAsucc ds m := fun m hm hm2 => by
+    unfold chainAsucc; rw [hsuf m hm hm2]
+  have eN_suf : ∀ m, i < m → m < lh ds → chainAnt cs (m + 1) = chainAnt ds m := fun m hm hm2 => by
+    unfold chainAnt; rw [hsuf m hm hm2]
+  have hi_lt : i < lh ds := lt_of_le_of_lt hij0 hj0
+  refine ⟨j0 + 1, by rw [hlh]; exact add_lt_add_of_lt_of_le hj0 (le_refl 1), ?_, ?_, ?_⟩
+  · -- (A) distinguished succedent
+    rcases eq_or_lt_of_le hij0 with hij | hij
+    · -- i = j0
+      rw [← hij, eA_i1, hb_succ]; rw [hij]; exact hAj0
+    · -- i < j0
+      rw [eA_suf j0 hij hj0]; exact hAj0
+  · -- (B) threading, ∀ p ≤ j0+1
+    intro p hp B hB
+    rcases lt_or_ge p i with hpi | hpi
+    · -- p < i
+      rw [eN_pre p hpi] at hB
+      rcases hthr p (le_trans (le_of_lt hpi) hij0) B hB with h | ⟨p', hp', hp'eq⟩
+      · exact Or.inl h
+      · exact Or.inr ⟨p', hp', by rw [eA_pre p' (lt_trans hp' hpi)]; exact hp'eq⟩
+    · rcases eq_or_lt_of_le hpi with hpe | hpgt
+      · -- p = i
+        rw [← hpe, eN_i, ha_ant] at hB
+        rcases hthr i hij0 B hB with h | ⟨p', hp', hp'eq⟩
+        · exact Or.inl h
+        · refine Or.inr ⟨p', by rw [← hpe]; exact hp', ?_⟩
+          rw [eA_pre p' hp']; exact hp'eq
+      · -- p > i
+        obtain ⟨m, rfl⟩ : ∃ m, p = m + 1 :=
+          ⟨p - 1, (sub_add_self_of_le (pos_iff_one_le.mp (lt_of_le_of_lt (show (0:V) ≤ i by simp) hpgt))).symm⟩
+        have him : i < m + 1 := hpgt
+        rcases eq_or_lt_of_le (le_iff_lt_succ.mpr him) with hime | himlt
+        · -- m+1 = i+1, i.e. p = i+1
+          rw [← hime, eN_i1] at hB
+          rcases hb_ant B hB with hba | hba
+          · exact Or.inr ⟨i, by rw [← hime]; exact lt_add_one i, by rw [eA_i]; exact hba⟩
+          · rcases hthr i hij0 B hba with h | ⟨p', hp', hp'eq⟩
+            · exact Or.inl h
+            · exact Or.inr ⟨p', by rw [← hime]; exact lt_trans hp' (lt_add_one i),
+                by rw [eA_pre p' hp']; exact hp'eq⟩
+        · -- p = m+1, i < m
+          have hilm : i < m := himlt
+          have hm_le_j0 : m ≤ j0 := by
+            have : m + 1 ≤ j0 + 1 := hp
+            exact le_of_add_le_add_right this
+          have hm_lt : m < lh ds := lt_of_le_of_lt hm_le_j0 hj0
+          rw [eN_suf m hilm hm_lt] at hB
+          rcases hthr m hm_le_j0 B hB with h | ⟨p', hp', hp'eq⟩
+          · exact Or.inl h
+          · -- map p' < m to a cs-position < m+1
+            rcases lt_or_ge p' i with hp'i | hp'i
+            · exact Or.inr ⟨p', lt_trans hp'i (lt_trans hilm (lt_add_one m)),
+                by rw [eA_pre p' hp'i]; exact hp'eq⟩
+            · rcases eq_or_lt_of_le hp'i with hp'e | hp'gt
+              · -- p' = i: lands on b's succedent at i+1
+                refine Or.inr ⟨i + 1, add_lt_add_of_lt_of_le hilm (le_refl 1), ?_⟩
+                rw [eA_i1, hb_succ, hp'e]; exact hp'eq
+              · -- i < p' < m: lands at p'+1
+                refine Or.inr ⟨p' + 1, add_lt_add_of_lt_of_le hp' (le_refl 1), ?_⟩
+                rw [eA_suf p' hp'gt (lt_trans hp' hm_lt)]; exact hp'eq
+  · -- (C) rank, ∀ p < j0+1
+    intro p hp
+    have hp' : p ≤ j0 := le_iff_lt_succ.mpr hp
+    rcases lt_or_ge p i with hpi | hpi
+    · rw [eA_pre p hpi]; exact le_trans (hrk p (lt_of_lt_of_le hpi hij0)) hrr
+    · rcases eq_or_lt_of_le hpi with hpe | hpgt
+      · rw [← hpe, eA_i]; exact ha_rank
+      · obtain ⟨m, rfl⟩ : ∃ m, p = m + 1 :=
+          ⟨p - 1, (sub_add_self_of_le (pos_iff_one_le.mp (lt_of_le_of_lt (show (0:V) ≤ i by simp) hpgt))).symm⟩
+        have him : i < m + 1 := hpgt
+        rcases eq_or_lt_of_le (le_iff_lt_succ.mpr him) with hime | himlt
+        · -- p = i+1
+          rw [← hime, eA_i1, hb_succ]
+          have hij : i < j0 := by
+            have h1 : i + 1 ≤ j0 := by rw [hime]; exact hp'
+            exact lt_of_lt_of_le (lt_add_one i) h1
+          exact le_trans (hrk i hij) hrr
+        · have hilm : i < m := himlt
+          have hm_lt_j0 : m < j0 := lt_of_add_lt_add_right hp
+          rw [eA_suf m hilm (lt_trans hm_lt_j0 hj0)]
+          exact le_trans (hrk m hm_lt_j0) hrr
+
+/-- **5.2.1 ordered-insert splice — full `zKValidF` (abstract spec).** -/
+lemma zKValidF_seqInsert_spec {s r' i ds cs a b : V}
+    (hci : isChainInf s r' cs)
+    (hlh : lh cs = lh ds + 1)
+    (hpre : ∀ k, k < i → znth cs k = znth ds k)
+    (hai : znth cs i = a)
+    (hbi : znth cs (i + 1) = b)
+    (hsuf : ∀ m, i < m → m < lh ds → znth cs (m + 1) = znth ds m)
+    (hi_lt : i < lh ds)
+    (hperm_a : iperm (tp a) (fstIdx a)) (hperm_b : iperm (tp b) (fstIdx b))
+    (hf1_a : zTag a = 1 → IsUFormula ℒₒᵣ (zIallF a)) (hf1_b : zTag b = 1 → IsUFormula ℒₒᵣ (zIallF b))
+    (hf2_a : zTag a = 2 → IsUFormula ℒₒᵣ (zInegF a)) (hf2_b : zTag b = 2 → IsUFormula ℒₒᵣ (zInegF b))
+    (hf5_a : zTag a = 5 → IsUFormula ℒₒᵣ (zAxAllF a)) (hf5_b : zTag b = 5 → IsUFormula ℒₒᵣ (zAxAllF b))
+    (hf6_a : zTag a = 6 → IsUFormula ℒₒᵣ (zAxNegF a)) (hf6_b : zTag b = 6 → IsUFormula ℒₒᵣ (zAxNegF b))
+    (hfa_a : IsUFormula ℒₒᵣ (seqSucc (fstIdx a))) (hfa_b : IsUFormula ℒₒᵣ (seqSucc (fstIdx b)))
+    (hss : IsUFormula ℒₒᵣ (seqSucc s))
+    (hsa : ∀ k < lh (seqAnt s), IsUFormula ℒₒᵣ (znth (seqAnt s) k))
+    (hperm : ∀ k < lh ds, iperm (tp (znth ds k)) (fstIdx (znth ds k)))
+    (hg1 : ∀ k < lh ds, zTag (znth ds k) = 1 → IsUFormula ℒₒᵣ (zIallF (znth ds k)))
+    (hg2 : ∀ k < lh ds, zTag (znth ds k) = 2 → IsUFormula ℒₒᵣ (zInegF (znth ds k)))
+    (hg5 : ∀ k < lh ds, zTag (znth ds k) = 5 → IsUFormula ℒₒᵣ (zAxAllF (znth ds k)))
+    (hg6 : ∀ k < lh ds, zTag (znth ds k) = 6 → IsUFormula ℒₒᵣ (zAxNegF (znth ds k)))
+    (hcf : ∀ k < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds k)) :
+    zKValidF s r' cs := by
+  have key : ∀ {P : V → Prop} (n : V), n < lh ds + 1 → P a → P b →
+      (∀ k, k < i → P (znth ds k)) → (∀ m, i < m → m < lh ds → P (znth ds m)) → P (znth cs n) := by
+    intro P n hn ha hb hpreP hsufP
+    rcases lt_or_ge n i with hni | hni
+    · rw [hpre n hni]; exact hpreP n hni
+    · rcases eq_or_lt_of_le hni with hne | hngt
+      · rw [← hne, hai]; exact ha
+      · obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 :=
+          ⟨n - 1, (sub_add_self_of_le (pos_iff_one_le.mp
+            (lt_of_le_of_lt (show (0:V) ≤ i by simp) hngt))).symm⟩
+        rcases eq_or_lt_of_le (le_iff_lt_succ.mpr (hngt : i < m + 1)) with hme | hmlt
+        · rw [← hme, hbi]; exact hb
+        · have hmlh : m < lh ds := lt_of_add_lt_add_right hn
+          rw [hsuf m hmlt hmlh]; exact hsufP m hmlt hmlh
+  refine ⟨hci, ?_, ?_, ?_, ?_, ?_, ?_, hss, hsa⟩
+  · intro n hn; rw [hlh] at hn
+    exact key (P := fun x => iperm (tp x) (fstIdx x)) n hn hperm_a hperm_b
+      (fun k hk => hperm k (lt_trans hk hi_lt)) (fun m _ hm => hperm m hm)
+  · intro n hn; rw [hlh] at hn
+    exact key (P := fun x => zTag x = 1 → IsUFormula ℒₒᵣ (zIallF x)) n hn hf1_a hf1_b
+      (fun k hk => hg1 k (lt_trans hk hi_lt)) (fun m _ hm => hg1 m hm)
+  · intro n hn; rw [hlh] at hn
+    exact key (P := fun x => zTag x = 2 → IsUFormula ℒₒᵣ (zInegF x)) n hn hf2_a hf2_b
+      (fun k hk => hg2 k (lt_trans hk hi_lt)) (fun m _ hm => hg2 m hm)
+  · intro n hn; rw [hlh] at hn
+    exact key (P := fun x => zTag x = 5 → IsUFormula ℒₒᵣ (zAxAllF x)) n hn hf5_a hf5_b
+      (fun k hk => hg5 k (lt_trans hk hi_lt)) (fun m _ hm => hg5 m hm)
+  · intro n hn; rw [hlh] at hn
+    exact key (P := fun x => zTag x = 6 → IsUFormula ℒₒᵣ (zAxNegF x)) n hn hf6_a hf6_b
+      (fun k hk => hg6 k (lt_trans hk hi_lt)) (fun m _ hm => hg6 m hm)
+  · intro n hn; rw [hlh] at hn
+    rcases lt_or_ge n i with hni | hni
+    · have he : chainAsucc cs n = chainAsucc ds n := by unfold chainAsucc; rw [hpre n hni]
+      rw [he]; exact hcf n (lt_trans hni hi_lt)
+    · rcases eq_or_lt_of_le hni with hne | hngt
+      · have he : chainAsucc cs n = seqSucc (fstIdx a) := by unfold chainAsucc; rw [← hne, hai]
+        rw [he]; exact hfa_a
+      · obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 :=
+          ⟨n - 1, (sub_add_self_of_le (pos_iff_one_le.mp
+            (lt_of_le_of_lt (show (0:V) ≤ i by simp) hngt))).symm⟩
+        rcases eq_or_lt_of_le (le_iff_lt_succ.mpr (hngt : i < m + 1)) with hme | hmlt
+        · have he : chainAsucc cs (m + 1) = seqSucc (fstIdx b) := by unfold chainAsucc; rw [← hme, hbi]
+          rw [he]; exact hfa_b
+        · have hmlh : m < lh ds := lt_of_add_lt_add_right hn
+          have he : chainAsucc cs (m + 1) = chainAsucc ds m := by unfold chainAsucc; rw [hsuf m hmlt hmlh]
+          rw [he]; exact hcf m hmlh
+
 /-- The critical auxiliary `d{ν} = K^r(i/v)`: the chain `d` with premise `i` replaced by `v`. -/
 noncomputable def iCritAux (d i v : V) : V := zK (fstIdx d) (zKrank d) (seqUpdate (zKseq d) i v)
 
