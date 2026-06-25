@@ -1953,6 +1953,45 @@ lemma ZRegular_red_zK {s r ds : V} (hds : Seq ds)
     obtain ⟨hI, hJ⟩ := redexI_redexJ_lt_of_zKValid hvalid
     exact ZRegular_red_zK_crit hds hreg (hred _ hI) (hred _ hJ) h1
 
+/-- **`red` preserves `ZRegular` — the full structural theorem (O1, UNCONDITIONAL).** The eigenvariable
+freshness (Buchholz's side-condition, tracked by `zReg`) is hereditarily preserved by the genuine reduct
+`red`. Assembled by `zDerivation_induction`: every non-chain node delegates to `ZRegular_red_of_not_zK`
+(structural / Ind / axiom cases, with the I-rule eigenvar-strip kept fresh by `zReg_zIall`/`zReg_zIneg`);
+the chain (`zK`) node delegates to the unconditional `ZRegular_red_zK`, feeding the per-premise IH
+`ZRegular (red dᵢ)` (each premise regular by `ZRegular_zK_premise`). This is the O1 half of "red preserves
+valid + regular" — the validity half (`ZDerivation_red_zK`, Crux2Blueprint) is the remaining frontier. -/
+theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red d) := by
+  have key : ∀ d : V, ZDerivation d → (ZRegular d → ZRegular (red d)) := by
+    apply zDerivation_induction (P := fun d => ZRegular d → ZRegular (red d))
+    · definability
+    · intro C hC d hphi hreg
+      rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
+        ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
+        ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hreg (by simp [zTag_zAtom])
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inl ⟨s, a, p, d0, rfl, (hC d0 hd0).1, hsc, hwff⟩)))
+          hreg (by simp [zTag_zIall])
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, (hC d0 hd0).1, hsc, hwff⟩))))
+          hreg (by simp [zTag_zIneg])
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inl
+            ⟨s, at', p, d0, d1, rfl, (hC d0 h0).1, (hC d1 h1).1, hwff⟩)))))
+          hreg (by simp [zTag_zInd])
+      · refine ZRegular_red_zK hds
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+            ⟨s, r, ds, rfl, hds, fun i hi => (hC (znth ds i) (hmem i hi)).1, hvalid⟩))))))
+          hreg (fun i hi => (hC (znth ds i) (hmem i hi)).2 (ZRegular_zK_premise hds hreg hi))
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+            (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))) hreg (by simp [zTag_zAxAll])
+      · exact ZRegular_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+            (Or.inr ⟨s, p, rfl, hp, hin⟩))))))) hreg (by simp [zTag_zAxNeg])
+  exact key
+
 /-! ### ✅ The `hseltag` leaf — RESOLVED (lap 95) by the gated `iRK` dispatch
 
 **Historical (lap 94 obstruction, now fixed).** The former `ZRegular_red_zK` leaf `hseltag` claimed the
