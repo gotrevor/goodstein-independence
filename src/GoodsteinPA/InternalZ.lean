@@ -1045,6 +1045,15 @@ lemma inAnt_seqAddAnt {A s B : V} (hs : Seq (seqAnt s)) :
     inAnt B (seqAnt (seqAddAnt A s)) ↔ B = A ∨ inAnt B (seqAnt s) := by
   rw [seqAnt_seqAddAnt]; exact inAnt_seqCons hs
 
+/-- **Sequent-wellformedness preserved by antecedent-add.** `Seq (seqAnt s) → Seq (seqAnt (seqAddAnt A s))`
+— prepending a formula to the antecedent keeps it a `Seq` (`Seq.seqCons`). The `seqSetSucc` case is the
+`@[simp] seqAnt_seqSetSucc` identity (`seqAnt (seqSetSucc s C) = seqAnt s`), so both `tpReduce` antecedent
+shapes (I¬/axAll grow the antecedent, I∀/axNeg keep it) preserve `Seq (seqAnt …)`. The conclusion-side rung
+of the sequent-wellformedness cascade (PENDING_WORK lap-99 path A). -/
+@[simp] lemma Seq_seqAnt_seqAddAnt {A s : V} (hs : Seq (seqAnt s)) :
+    Seq (seqAnt (seqAddAnt A s)) := by
+  rw [seqAnt_seqAddAnt]; exact hs.seqCons A
+
 /-! ### `tpReduce` — Buchholz's reduced sequent `I(Π,n)` (Def 3.2 / §2 13.2, 13.5)
 
 **Route-B keystone (lap 91).** Lap-90 found the repo's `red` keeps the chain conclusion `Π`, so it
