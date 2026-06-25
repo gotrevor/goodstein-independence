@@ -2946,6 +2946,48 @@ lemma isChainInf_iCritReductSeq {s r d0 d1 : V}
     obtain rfl := lt_one_iff_eq_zero.mp hi
     rw [eA0]; exact hrank0
 
+/-- A predicate holding on both `d0` and `d1` holds on every premise of `⟨d0, d1⟩`. -/
+lemma forall_lt_iCritReductSeq {P : V → Prop} {d0 d1 : V} (h0 : P d0) (h1 : P d1) :
+    ∀ i < lh (iCritReductSeq d0 d1), P (znth (iCritReductSeq d0 d1) i) := by
+  intro i hi
+  rcases lt_or_ge i 1 with hlt | hge
+  · obtain rfl := lt_one_iff_eq_zero.mp hlt; rw [znth_iCritReductSeq_zero]; exact h0
+  · have hi2 : i < 1 + 1 := by rw [iCritReductSeq_lh, ← one_add_one_eq_two] at hi; exact hi
+    obtain rfl : i = 1 := le_antisymm (le_iff_lt_succ.mpr hi2) hge
+    rw [znth_iCritReductSeq_one]; exact h1
+
+/-- **Full faithful validity of the critical recombination chain** (Buchholz §3.2 case 5.1 + Thm 3.4).
+`zK s r ⟨d{0}, d{1}⟩` is `zKValidF` given: the two auxiliaries are `Rep`-tagged chains
+(`tp = isymRep`, `zTag = 4`, so own-permissibility is automatic and the I/Ax formula-hood conjuncts are
+vacuous), the Thm-3.4(a) cut-threading (`isChainInf_iCritReductSeq`), the auxiliaries' succedent
+formula-hood, and the conclusion-sequent formula-hood. The validity half (`RedSound`'s D₁) of the
+critical case, isolated as a hypothesis interface for the genuine reduct to discharge. -/
+lemma zKValidF_iCritReductSeq {s r d0 d1 : V}
+    (htp0 : tp d0 = isymRep) (htp1 : tp d1 = isymRep)
+    (htag0 : zTag d0 = 4) (htag1 : zTag d1 = 4)
+    (hsucc1 : seqSucc (fstIdx d1) = seqSucc s)
+    (hthread0 : ∀ B, inAnt B (seqAnt (fstIdx d0)) → inAnt B (seqAnt s))
+    (hthread1 : ∀ B, inAnt B (seqAnt (fstIdx d1)) →
+        inAnt B (seqAnt s) ∨ B = seqSucc (fstIdx d0))
+    (hrank0 : irk (seqSucc (fstIdx d0)) ≤ r)
+    (hUf0 : IsUFormula ℒₒᵣ (seqSucc (fstIdx d0)))
+    (hUf1 : IsUFormula ℒₒᵣ (seqSucc (fstIdx d1)))
+    (hss : IsUFormula ℒₒᵣ (seqSucc s))
+    (hsa : ∀ k < lh (seqAnt s), IsUFormula ℒₒᵣ (znth (seqAnt s) k)) :
+    zKValidF s r (iCritReductSeq d0 d1) := by
+  refine ⟨isChainInf_iCritReductSeq hsucc1 hthread0 hthread1 hrank0, ?_, ?_, ?_, ?_, ?_, ?_, hss, hsa⟩
+  · exact forall_lt_iCritReductSeq (P := fun x => iperm (tp x) (fstIdx x))
+      (by rw [htp0]; exact iperm_isymRep _) (by rw [htp1]; exact iperm_isymRep _)
+  · exact forall_lt_iCritReductSeq (P := fun x => zTag x = 1 → IsUFormula ℒₒᵣ (zIallF x))
+      (fun hc => by rw [htag0] at hc; simp at hc) (fun hc => by rw [htag1] at hc; simp at hc)
+  · exact forall_lt_iCritReductSeq (P := fun x => zTag x = 2 → IsUFormula ℒₒᵣ (zInegF x))
+      (fun hc => by rw [htag0] at hc; simp at hc) (fun hc => by rw [htag1] at hc; simp at hc)
+  · exact forall_lt_iCritReductSeq (P := fun x => zTag x = 5 → IsUFormula ℒₒᵣ (zAxAllF x))
+      (fun hc => by rw [htag0] at hc; simp at hc) (fun hc => by rw [htag1] at hc; simp at hc)
+  · exact forall_lt_iCritReductSeq (P := fun x => zTag x = 6 → IsUFormula ℒₒᵣ (zAxNegF x))
+      (fun hc => by rw [htag0] at hc; simp at hc) (fun hc => by rw [htag1] at hc; simp at hc)
+  · exact forall_lt_iCritReductSeq (P := fun x => IsUFormula ℒₒᵣ (seqSucc (fstIdx x))) hUf0 hUf1
+
 /-- `õ`-fold of the critical reduct sequence: `ω^{õ d{0}} # ω^{õ d{1}}` (N3b's left side). -/
 lemma iseqNaddIdg_iCritReductSeq (d0 d1 : V) :
     iseqNaddIdg (iCritReductSeq d0 d1) =
