@@ -3252,6 +3252,29 @@ lemma znth_seqUpdate_of_ne {ds i v m : V} (h : m ≠ i) :
   · exact znth_seqUpdateAux_of_ne h (lh ds) hm
   · rw [znth_prop_not (Or.inr (by rw [seqUpdate_lh]; exact hm)), znth_prop_not (Or.inr hm)]
 
+/-! ### Splice read-outs (Buchholz §3.2 case 5.2.1): `seqCons (seqUpdate ds j a) b`
+
+The sub-critical splice reduct expands premise `j` to two auxiliaries: `a = dⱼ{0}` replaces premise `j`
+in place, `b = dⱼ{1}` is appended at the end (index `lh ds`). These read-outs give the spliced premise
+at every index, the prerequisite for the splice's `isChainInf` validity (the threading of the appended
+`b`). -/
+
+/-- The appended premise `b` sits at index `lh ds`. -/
+lemma znth_seqCons_seqUpdate_top (ds j a b : V) :
+    znth (seqCons (seqUpdate ds j a) b) (lh ds) = b := by
+  have h := znth_seqCons_self (seqUpdate_seq ds j a) b
+  rwa [seqUpdate_lh] at h
+
+/-- Below the appended slot, the spliced sequence is the in-place update `seqUpdate ds j a`. -/
+lemma znth_seqCons_seqUpdate_lt {ds j a b k : V} (hk : k < lh ds) :
+    znth (seqCons (seqUpdate ds j a) b) k = znth (seqUpdate ds j a) k :=
+  znth_seqCons_of_lt (seqUpdate_seq ds j a) b (by rw [seqUpdate_lh]; exact hk)
+
+/-- Length of the splice: one more than the original. -/
+@[simp] lemma lh_seqCons_seqUpdate (ds j a b : V) :
+    lh (seqCons (seqUpdate ds j a) b) = lh ds + 1 := by
+  rw [Seq.lh_seqCons _ (seqUpdate_seq ds j a), seqUpdate_lh]
+
 /-! ### T2/T3 — `isChainInf` is preserved by replacing a premise with a same-end-sequent reduct
 
 Buchholz's reduction (Thm 3.4(a) / `E-CRUX2-DECOMPOSITION §8` leaf T2/T3): the validity *structure* of a
