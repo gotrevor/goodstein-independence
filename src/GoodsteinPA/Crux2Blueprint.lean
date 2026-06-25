@@ -74,14 +74,104 @@ theorem zKValidF_iIndReduct_of_zInd {s at' p d0 d1 : V}
     (hZ : ZDerivation (zInd s at' p d0 d1)) :
     zKValidF s (irk p) (iIndReductSeq d0 d1 1) := sorry
 
+/-! ### Branch recursion equations for the tag-4 dispatch (table lookups resolved to `red dᵢ`)
+
+`red (zK s r ds) = iRK (zK s r ds) (redTable …)` dispatches on two `permIdx` sentinels. These three
+equations resolve the `redTable` lookups to `red dᵢ` (via `znth_redTable_eq_red`, exactly as `red_zK_crit`
+does for the 5.1 branch), so each branch is stated over the genuine per-premise reduct the IH supplies. -/
+
+/-- **5.2.2 replace recursion equation.** Non-critical chain (`permIdx d < lh ds`) whose least-permissible
+premise `dᵢ` is itself non-critical (`permIdx dᵢ < lh (zKseq dᵢ)`): `red` replaces premise `i` by its
+reduct `red dᵢ`. -/
+lemma red_zK_rep {s r ds : V} (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    red (zK s r ds)
+      = iCritAux (zK s r ds) (permIdx (zK s r ds))
+          (red (znth ds (permIdx (zK s r ds)))) := by
+  have hbound : znth ds (permIdx (zK s r ds)) ≤ zK s r ds - 1 :=
+    le_trans (znth_le_self ds _) (le_pred_of_lt (ds_lt_zK s r ds))
+  rw [red_zK, iRK]
+  simp only [zKseq_zK]
+  rw [if_pos h1, if_pos h2, iRKr, zKseq_zK, znth_redTable_eq_red _ _ hbound]
+
+/-- **5.2.1 splice recursion equation.** Non-critical chain whose least-permissible premise `dᵢ` is itself
+*critical* (`permIdx dᵢ = lh (zKseq dᵢ)`, i.e. `¬ permIdx dᵢ < lh (zKseq dᵢ)`): `red` splices `dᵢ`'s two
+reduct-halves `znth (zKseq (red dᵢ)) {0,1}` in place at `i`, rank rising to `max(rk(A), r)`. -/
+lemma red_zK_splice {s r ds : V} (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    red (zK s r ds)
+      = zK s
+          (max (irk (seqSucc (fstIdx
+            (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)))) r)
+          (seqInsert ds (permIdx (zK s r ds))
+            (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)
+            (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1)) := by
+  have hbound : znth ds (permIdx (zK s r ds)) ≤ zK s r ds - 1 :=
+    le_trans (znth_le_self ds _) (le_pred_of_lt (ds_lt_zK s r ds))
+  rw [red_zK, iRK]
+  simp only [zKseq_zK]
+  rw [if_pos h1, if_neg h2, iRKs, zKseq_zK, znth_redTable_eq_red _ _ hbound,
+    fstIdx_zK, zKrank_zK]
+
+/-- **5.1 critical sub-residual.** When the chain is critical, `red = iRcritG d ρ` with `ρ` the recursive
+premise reducts; delegates to `ZDerivation_iRcritG_of` (R2 = the two genuine auxiliaries are derivations
+of their reduced endsequents). -/
+theorem ZDerivation_red_zK_crit {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hred : ∀ i < lh ds, ZDerivation (red (znth ds i)))
+    (h1 : ¬ permIdx (zK s r ds) < lh ds) :
+    ZDerivation (iRcritG (zK s r ds) (fun n => zAxReduct (red (znth ds n)))) := sorry
+
+/-- **5.2.2 replace sub-residual.** Delegates to `ZDerivation_iCritAux_of_zK`: the selected premise `dᵢ`
+and its reduct `red dᵢ` are both chains with matching end-sequent. -/
+theorem ZDerivation_red_zK_replace {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hred : ∀ i < lh ds, ZDerivation (red (znth ds i)))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    ZDerivation (iCritAux (zK s r ds) (permIdx (zK s r ds))
+      (red (znth ds (permIdx (zK s r ds))))) := sorry
+
+/-- **5.2.1 splice sub-residual.** Delegates to `ZDerivation_seqInsert_of_zK`: the two reduct-halves are
+genuine derivations and the spliced `isChainInf` threading holds at rank `max(rk(A), r)`. -/
+theorem ZDerivation_red_zK_splice {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hred : ∀ i < lh ds, ZDerivation (red (znth ds i)))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    ZDerivation (zK s
+        (max (irk (seqSucc (fstIdx
+          (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)))) r)
+        (seqInsert ds (permIdx (zK s r ds))
+          (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0)
+          (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1))) := sorry
+
 /-- **Residual (K case of Buchholz Thm 3.4 — the cut-elimination core).** The genuine reduct `red` of a
-valid chain `zK s r ds` is again a `ZDerivation`, given that the reduct of every premise is. The
-dispatch (`iRK`: 5.1 critical / 5.2.1 splice / 5.2.2 replace) is already wired into `red`
-(`red_zK`/`red_zK_crit`); this lemma supplies the validity-preservation across the dispatch. -/
+valid chain `zK s r ds` is again a `ZDerivation`, given that the reduct of every premise is. Dispatches
+(via `red_zK_crit` / `red_zK_rep` / `red_zK_splice`) into the three Buchholz case-5 sub-residuals; each
+delegates to a banked validity constructor (`ZDerivation_iRcritG_of` / `ZDerivation_iCritAux_of_zK` /
+`ZDerivation_seqInsert_of_zK`). -/
 theorem ZDerivation_red_zK {s r ds : V}
     (hZ : ZDerivation (zK s r ds))
     (hred : ∀ i < lh ds, ZDerivation (red (znth ds i))) :
-    ZDerivation (red (zK s r ds)) := sorry
+    ZDerivation (red (zK s r ds)) := by
+  by_cases h1 : permIdx (zK s r ds) < lh ds
+  · -- non-critical chain: dispatch on the selected premise's criticality
+    by_cases h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))
+    · -- 5.2.2 replace
+      rw [red_zK_rep h1 h2]
+      exact ZDerivation_red_zK_replace hZ hred h1 h2
+    · -- 5.2.1 splice
+      rw [red_zK_splice h1 h2]
+      exact ZDerivation_red_zK_splice hZ hred h1 h2
+  · -- 5.1 critical
+    rw [red_zK_crit h1]
+    exact ZDerivation_red_zK_crit hZ hred h1
 
 /-- **`redSound`, general form.** The `red`-reduct of ANY genuine `ZDerivation` is again a `ZDerivation`
 (full cut-elimination soundness). Structural induction over `ZDerivation`; the two deep cases delegate to
