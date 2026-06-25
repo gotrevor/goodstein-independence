@@ -538,6 +538,18 @@ lemma freeVariables_fixitr_eq_empty (ψ' : SyntacticFormula ℒₒᵣ) :
   have h := Semiformula.fvarList_univCl' (L := ℒₒᵣ) ψ'
   rwa [Semiformula.univCl', Semiformula.freeVariables_allClosure] at h
 
+/-- **`fvSup` is tight**: when `φ` has a free variable (`fvSup > 0`), the variable `fvSup - 1` is
+itself free in `φ` (it is the maximum free variable). The witness that the closure `fixitr 0 fvSup`
+genuinely binds the top slot — feeds the criticality conjunct of the recognizer. -/
+lemma fvar?_fvSup_pred {n} {φ : SyntacticSemiformula ℒₒᵣ n} (h : 0 < φ.fvSup) :
+    φ.FVar? (φ.fvSup - 1) := by
+  rcases hmax : φ.freeVariables.max with _ | s
+  · rw [Semiformula.fvSup, hmax] at h; exact absurd h (_root_.lt_irrefl 0)
+  · have hmem : s ∈ φ.freeVariables := Finset.mem_of_max hmax
+    have hfs : φ.fvSup = s + 1 := by rw [Semiformula.fvSup, hmax]; rfl
+    show (φ.fvSup - 1) ∈ φ.freeVariables
+    simpa [hfs] using hmem
+
 /-- Internal `shift` fixes the quote of the fv-free closure-rewritten body. -/
 lemma shift_quote_fixitr (ψ' : SyntacticFormula ℒₒᵣ) :
     Bootstrapping.shift ℒₒᵣ (⌜Rew.fixitr 0 ψ'.fvSup ▹ ψ'⌝ : V)
