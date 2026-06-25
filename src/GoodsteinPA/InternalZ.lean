@@ -5717,6 +5717,45 @@ instance iRKr_defined : 𝚺₁-Function₂ (iRKr : V → V → V) via iRKrDef :
 
 instance iRKr_definable : 𝚺₁-Function₂ (iRKr : V → V → V) := iRKr_defined.to_definable
 
+/-! ## The 5.2.1 splice-reduct dispatch helper `iRKs` (Buchholz Def 3.2 case 5.2.1)
+
+When the chain `d` is non-critical and the least permissible premise `dᵢ` (`i = permIdx d`) is *itself*
+critical, Buchholz splices `dᵢ`'s two critical-reduction halves `dᵢ{0}, dᵢ{1}` in place at index `i`.
+Again the halves are ALREADY tabulated: `red dᵢ = znth s dᵢ` is (for critical `dᵢ`) the `iRcritG`
+recombination `K_Π⟨dᵢ{0}, dᵢ{1}⟩`, so `dᵢ{0} = znth (zKseq (red dᵢ)) 0`, `dᵢ{1} = znth (zKseq (red dᵢ)) 1`
+(the two `iCritReductSeq` entries). The reduct rank is `r' = max(rk(A(dᵢ)), r)` (Buchholz, paper md line 25)
+— and `rk(A(dᵢ)) = irk(seqSucc(fstIdx dᵢ{0}))` because half `dᵢ{0}` concludes `Θ→A(dᵢ)`. This is EXACTLY the
+minimal `r'` the validity object `isChainInf_seqInsert` requires (`irk(seqSucc(fstIdx a)) ≤ r'` ∧ `r ≤ r'`).
+Closed definable term, no existential. -/
+
+/-- **5.2.1 splice-reduct** — the chain with its least-permissible (and itself-critical) premise
+`i = permIdx d` replaced *in place* by the two halves `dᵢ{0}, dᵢ{1}` of that premise's already-tabulated
+critical reduct `red dᵢ = znth s (znth (zKseq d) i)`. Rank `r' = max(irk(seqSucc(fstIdx dᵢ{0})), zKrank d)`
+= Buchholz's `max(rk(A(dᵢ)), r)`. -/
+noncomputable def iRKs (d s : V) : V :=
+  zK (fstIdx d)
+    (max (irk (seqSucc (fstIdx (znth (zKseq (znth s (znth (zKseq d) (permIdx d)))) 0)))) (zKrank d))
+    (seqInsert (zKseq d) (permIdx d)
+      (znth (zKseq (znth s (znth (zKseq d) (permIdx d)))) 0)
+      (znth (zKseq (znth s (znth (zKseq d) (permIdx d)))) 1))
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iRKsDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ i, !permIdxDef i d ∧ ∃ ds, !zKseqDef ds d ∧ ∃ di, !znthDef di ds i ∧
+    ∃ vi, !znthDef vi s di ∧ ∃ dsv, !zKseqDef dsv vi ∧
+    ∃ a, !znthDef a dsv 0 ∧ ∃ b, !znthDef b dsv 1 ∧
+    ∃ fa, !fstIdxDef fa a ∧ ∃ ssa, !seqSuccDef ssa fa ∧ ∃ rA, !irkDef rA ssa ∧
+    ∃ rk, !zKrankDef rk d ∧ ∃ r', !max.dfn r' rA rk ∧
+    ∃ f, !fstIdxDef f d ∧ ∃ l, !lhDef l ds ∧ ∃ u, !seqInsertAuxDef u ds i a b (l + 1) ∧
+    !zKGraph y f r' u”
+
+set_option maxHeartbeats 800000 in
+instance iRKs_defined : 𝚺₁-Function₂ (iRKs : V → V → V) via iRKsDef := .mk fun v ↦ by
+  simp [iRKsDef, iRKs, seqInsert, permIdx_defined.iff, zKseq_defined.iff, znth_defined.iff,
+    fstIdx_defined.iff, seqSucc_defined.iff, irk_defined.iff, zKrank_defined.iff,
+    max_defined.iff, lh_defined.iff, seqInsertAux_defined.iff, zK_defined.iff]
+
+instance iRKs_definable : 𝚺₁-Function₂ (iRKs : V → V → V) := iRKs_defined.to_definable
+
 /-- `redexCode d = redexAux (zKseq d) ⟪lh(zKseq d), lh(zKseq d)⟫` (the least valid redex pair). -/
 noncomputable def _root_.LO.FirstOrder.Arithmetic.redexCodeDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y d. ∃ ds, !zKseqDef ds d ∧ ∃ l, !lhDef l ds ∧ ∃ b, !pairDef b l l ∧ !redexAuxDef y ds b”
@@ -5928,6 +5967,75 @@ noncomputable def iRcritG (d : V) (ρ : V → V) : V :=
 @[simp] lemma fstIdx_iRcritG (d : V) (ρ : V → V) : fstIdx (iRcritG d ρ) = fstIdx d := by
   simp [iRcritG]
 @[simp] lemma zTag_iRcritG (d : V) (ρ : V → V) : zTag (iRcritG d ρ) = 4 := by simp [iRcritG]
+
+/-! ## The 5.1 critical-reduct dispatch helper `iRKc` (Buchholz Def 3.2 case 5.1)
+
+The standalone 5.1 case — exactly the (table-supplied) critical reduct the original `iRNextG` tag-4
+inlined: `iRcritG d ρ` with `ρ idx = zAxReduct (znth s (znth (zKseq d) idx))` (the per-premise reduct
+read from the table `s`). Extracted as a definable function so the dispatched `iRK` is three clean
+function-application atoms (`iRKc` / `iRKs` / `iRKr`). -/
+noncomputable def iRKc (d s : V) : V :=
+  iRcritG d (fun idx => zAxReduct (znth s (znth (zKseq d) idx)))
+
+@[simp] lemma fstIdx_iRKc (d s : V) : fstIdx (iRKc d s) = fstIdx d := by simp [iRKc]
+@[simp] lemma zTag_iRKc (d s : V) : zTag (iRKc d s) = 4 := by simp [iRKc]
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iRKcDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ f, !fstIdxDef f d ∧ ∃ ds, !zKseqDef ds d ∧
+    ∃ i, !redexIDef i d ∧ ∃ j, !redexJDef j d ∧
+    ∃ C, !chainAsuccDef C ds i ∧ ∃ rk, !zKrankDef rk d ∧ ∃ rk1, !subDef rk1 rk 1 ∧
+    ∃ ai, !znthDef ai ds i ∧ ∃ vi, !znthDef vi s ai ∧ ∃ wi, !zAxReductDef wi vi ∧
+    ∃ aj, !znthDef aj ds j ∧ ∃ vj, !znthDef vj s aj ∧ ∃ wj, !zAxReductDef wj vj ∧
+    ∃ u0, !seqUpdateDef u0 ds i wi ∧ ∃ ss, !seqSetSuccDef ss f C ∧ ∃ d0, !zKGraph d0 ss rk u0 ∧
+    ∃ u1, !seqUpdateDef u1 ds j wj ∧ ∃ sa, !seqAddAntDef sa C f ∧ ∃ d1, !zKGraph d1 sa rk u1 ∧
+    ∃ seq, !iCritReductSeqDef seq d0 d1 ∧ !zKGraph y f rk1 seq”
+
+set_option maxHeartbeats 1600000 in
+instance iRKc_defined : 𝚺₁-Function₂ (iRKc : V → V → V) via iRKcDef := .mk fun v ↦ by
+  simp [iRKcDef, iRKc, iRcritG, iCritReductG, fstIdx_defined.iff, zKseq_defined.iff,
+    redexI_defined.iff, redexJ_defined.iff, chainAsucc_defined.iff, zKrank_defined.iff,
+    sub_defined.iff, znth_defined.iff, zAxReduct_defined.iff, seqUpdate_defined.iff,
+    seqSetSucc_defined.iff, seqAddAnt_defined.iff, iCritReductSeq_defined.iff, zK_defined.iff]
+
+instance iRKc_definable : 𝚺₁-Function₂ (iRKc : V → V → V) := iRKc_defined.to_definable
+
+/-! ## The tag-4 DISPATCH `iRK` (Buchholz Def 3.2 case 5: 5.1 / 5.2.1 / 5.2.2)
+
+The genuine tag-4 reduct dispatches on criticality (lap-86 finding `not_zKCritical_red_zK`: the
+critical-only reduct is itself non-critical after one step, so the dispatch is mandatory). We branch on
+the **sentinel comparison `permIdx d < lh (zKseq d)`** rather than the Δ₁ relation `zKCritical`:
+`permIdx d = lh (zKseq d)` ⟺ no permissible premise ⟺ the chain is critical (`permIdxAux_eq_self_of_none`),
+and `permIdx d < lh (zKseq d)` ⟺ non-critical with `permIdx d` the least permissible premise
+(`permIdxAux_isPermPrem_of_lt`). A Δ₀ comparison of definable values — far cleaner to make `𝚺₁` than
+embedding `zKCriticalDef`. The sub-dispatch (5.2.1 splice vs 5.2.2 replace) tests the same sentinel on
+the *selected premise* `dᵢ = znth (zKseq d) (permIdx d)`: `dᵢ` critical → 5.2.1 (`iRKs`), else 5.2.2 (`iRKr`). -/
+noncomputable def iRK (d s : V) : V :=
+  if permIdx d < lh (zKseq d) then
+    (if permIdx (znth (zKseq d) (permIdx d)) < lh (zKseq (znth (zKseq d) (permIdx d)))
+     then iRKr d s else iRKs d s)
+  else iRKc d s
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.iRKDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ p, !permIdxDef p d ∧ ∃ ds, !zKseqDef ds d ∧ ∃ l, !lhDef l ds ∧
+    ( ( p < l ∧
+        ∃ di, !znthDef di ds p ∧ ∃ pdi, !permIdxDef pdi di ∧ ∃ dsi, !zKseqDef dsi di ∧
+          ∃ li, !lhDef li dsi ∧
+          ( ( pdi < li ∧ !iRKrDef y d s )
+          ∨ ( li ≤ pdi ∧ !iRKsDef y d s ) ) )
+    ∨ ( l ≤ p ∧ !iRKcDef y d s ) )”
+
+set_option maxHeartbeats 800000 in
+instance iRK_defined : 𝚺₁-Function₂ (iRK : V → V → V) via iRKDef := .mk fun v ↦ by
+  simp [iRKDef, iRK, permIdx_defined.iff, zKseq_defined.iff, lh_defined.iff, znth_defined.iff,
+    iRKr_defined.iff, iRKs_defined.iff, iRKc_defined.iff]
+  by_cases h1 : permIdx (v 1) < lh (zKseq (v 1))
+  · by_cases h2 : permIdx (znth (zKseq (v 1)) (permIdx (v 1)))
+        < lh (zKseq (znth (zKseq (v 1)) (permIdx (v 1))))
+    · simp [h1, h2, not_le.mpr h1, not_le.mpr h2]
+    · simp [h1, h2, not_le.mpr h1, not_lt.mp h2]
+  · simp [h1, not_lt.mp h1]
+
+instance iRK_definable : 𝚺₁-Function₂ (iRK : V → V → V) := iRK_defined.to_definable
 
 /-! ## The GENUINE reduct `red` (Buchholz §6 `red` / Def 3.2) — replaces the dead `iR2`
 
