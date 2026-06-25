@@ -27,11 +27,16 @@ the ordinal packaging, not the validity object.
   well-formedness, via the `forall`-premise `key` over the four insert regions.
 Both take the insert read-outs `hpre`/`hai`/`hbi`/`hsuf` as hypotheses (abstract spec).
 
-**NEXT (remaining 5.2.1 plumbing — discharge the abstract spec's read-out hypotheses):**
-1. **`seqInsert ds i a b := d₀…d_{i−1} a b d_{i+1}…dₗ`** (length `lh ds + 1`) — concrete `PR.Construction`
-   coded-sequence op (mirror `seqUpdateAux`, ~100 lines: `Seq`/`lh`/`znth` read-outs + `𝚺₁`-def). Entry at
-   index `n` = `if n<i then znth ds n else if n=i then a else if n=i+1 then b else znth ds (n−1)` (use
-   `subDef` for `n−1`, cf. `idgNextDef`). Discharges `hlh`/`hpre`/`hai`/`hbi`/`hsuf` of the specs.
+**DONE (lap 87, concrete op, axiom-clean):**
+- ✅ **`seqInsertAux`/`seqInsert`** (`PR.Construction`, `𝚺₁-Function₅`, mirror `seqUpdateAux`) +
+  read-outs `seqInsert_lh`, `znth_seqInsert_{pre,at,at1,suf}` (ite-free). NB: `Function₅` Definable
+  instance via the explicit `(Γ-[m+1]).DefinableFunction₅` dot form (Foundation lacks bare
+  `Γ-Function₅` notation).
+- ✅ **`isChainInf_seqInsert`** / **`zKValidF_seqInsert`** — the specs instantiated on the concrete
+  `seqInsert` (read-out hyps discharged, given `i < lh ds`). The genuine 5.2.1 reduct's chain-validity +
+  faithful validity are now usable object-level facts.
+
+**NEXT (remaining 5.2.1 — connect to the descent + the `red` dispatch):**
 2. **Descent transfer**: `õ(seqInsert ds i a b) = õ(seqCons (seqUpdate ds i a) b)` (same `#`-multiset,
    `iseqNaddIdg` permutation-invariant) ⟹ inherit banked `iord_descent_iSpliceEnd`. (Or direct `iord`
    descent on the insert object mirroring `iotil_iSpliceEnd_lt`.)
