@@ -25,18 +25,29 @@ On the ⊥-orbit the TOP chain's selected premise is Rep (Cor 2.1, `tpReduce isy
 recurses into that Rep premise's OWN selected premise, which is permissible for *its* (non-⊥) conclusion —
 where I∀/axiom (non-Rep) selected premises DO occur. So the eigensubst case is genuinely reachable.
 
-### ▶ The three resolution options (next lap must pick — this is a real pivot)
-1. **(Recommended) Relocate the reduct downstream.** Move `red`/`iRNextG`/`redTable`/`iRK`/`iRKr` + the
-   red-lemmas out of InternalZ into a NEW module after Zsubst (or into Zsubst), changing the tag-1 case to
-   `zsubst (zIallPrem d) (zIallEig d) (numeral 0)`. `iord_zsubst` (lap 96, axiom-clean) then transfers the
-   banked ordinal descent unchanged (iord is conclusion-independent). Cost: disentangle ~1200 lines of
-   InternalZ tail (red vs iR2 vs ZDerivesEmpty vs inv-lemmas); keep iR2/ZDerivesEmpty/inv in InternalZ,
-   move ONLY red-block + red-lemmas. Large but mechanical; the payoff is the I∀ principal-cut becomes sound.
-2. **Build a PARALLEL downstream reduct `redC`** in Zsubst/Crux2Blueprint (don't touch InternalZ `red`):
-   same table recursion but tag-1 = eigensubst. Redo the descent/regularity for `redC` (reuse iord_zsubst,
-   ZRegular via zReg_zsubst). Cleaner isolation, but duplicates the table machinery.
-3. **Confine the headline to a fragment without ∀-cuts** — almost certainly too weak for the PA embedding
-   (M2 needs full PA; ∀-cuts are unavoidable). Not recommended.
+### ▶ Resolution options (next lap executes — this is a real pivot)
+**⭐ RECOMMENDED (NEW, de-risked lap-97): move the `zsubst` DEFINITION upstream, then rewire `iRNextG` in
+place.** KEY enabler: **`FvSubst.lean` is independent of `InternalZ`** (imports only Foundation; the 2
+"InternalZ/zIall" refs are comments). So `InternalZ` CAN `import GoodsteinPA.FvSubst`. Then:
+  - Add `import GoodsteinPA.FvSubst` to InternalZ (line 21 area).
+  - Move the zsubst DEFINITIONAL block `Zsubst.lean:34–~400` UP into InternalZ, placed BEFORE `red`
+    (line 6190) and after the zIall/zK accessors: `fvSubstSeqAux`/`fvSubstSeq`/`fvSubstSeqt`,
+    `tblMapSeqAux`/`tblMapSeq`, `zIallEig`/`zAxAllK` + the per-tag accessors (`zIallF`/`zInegF`/`zIndP`/
+    `zIndEig`/`zIndTerm`), `zsubstNext`/`zsubstTable`/`zsubst` + their `*Def`/`*_defined` instances. These
+    are DEFINITIONS (+ definability), NOT proofs — low tactic-fragility. The hard THEOREMS
+    (`ZDerivation_zsubst`/`iord_zsubst`/`zReg_zsubst`, `Zsubst.lean:1281+/2003+`) STAY in Zsubst and now
+    reference the upstream def.
+  - Rewire `iRNextG` tag-1 = `zsubst (zIallPrem d) (zIallEig d) (numeral 0)`; re-prove `iRNextG_defined`
+    (add `zsubst_defined.iff`/`zIallEig_defined.iff`/`numeralGraph`), `red_zIall = zsubst d0 a (numeral 0)`.
+  - Fix the 3 consumers: `ZRegular_red_of_not_zK` zIall case (use `zReg_zsubst _ _ _ hd0`); `redSoundGen`
+    zIall case → thread `ZRegular` so `ZDerivation_zsubst` gives `maxEigen d0 < a`; `red_zIall`'s simp uses.
+  This is the cleanest path: ~370 lines of DEFINITIONS move up (vs ~1200 tangled lines of red+proofs down).
+  Banked `iord_zsubst`/`ZRegular_red`/`zReg_zsubst` transfer unchanged (descent + regularity are
+  conclusion-independent). **⚠ scope: a full lap; do NOT leave InternalZ red across a turn — land green or
+  stash to wip/.**
+
+Fallbacks (only if the move proves intractable): a PARALLEL downstream reduct `redC` (duplicates the table);
+or confine to a ∀-cut-free fragment (too weak for the PA embedding — rejected).
 
 ### What lap 97 banked
 - `ZRegular_red` (`Zsubst.lean`): `∀ d, ZDerivation d → ZRegular d → ZRegular (red d)`, axiom-clean — the
