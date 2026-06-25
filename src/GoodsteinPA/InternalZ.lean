@@ -5468,6 +5468,32 @@ lemma zDerivation_zK_inv {s r ds : V} (hZ : ZDerivation (zK s r ds)) :
   · exact absurd (congrArg zTag h) (by simp)
   · exact absurd (congrArg zTag h) (by simp)
 
+/-- **Tag-gated principal-formula well-formedness of a `ZDerivation`** (the uniform discharge of the
+`hf1_v`…`hf6_v` obligations in every replace constructor). Any genuine `ZDerivation` `v` has its principal
+formula a `UFormula` whenever `v` is an I-rule / §5-axiom node: I∀/I¬ from the `zIallWff`/`zInegWff`
+`IsSemiformula`/`IsUFormula` side conditions (`IsSemiformula.isUFormula`), the §5 axioms from their
+`IsUFormula` side condition. This packages the four tag-implications that `ZDerivation_iCritAux_of` /
+`ZDerivation_iCritReplaceReduce_general` consume for the replaced premise `v = red dᵢ`. -/
+lemma tag_uformula_of_ZDerivation {v : V} (hZ : ZDerivation v) :
+    (zTag v = 1 → IsUFormula ℒₒᵣ (zIallF v)) ∧
+    (zTag v = 2 → IsUFormula ℒₒᵣ (zInegF v)) ∧
+    (zTag v = 5 → IsUFormula ℒₒᵣ (zAxAllF v)) ∧
+    (zTag v = 6 → IsUFormula ℒₒᵣ (zAxNegF v)) := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, hwff⟩ |
+    ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩
+  · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
+  · exact ⟨fun _ => by rw [zIallF_zIall]; exact hwff.2.2.isUFormula,
+      fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun _ => by rw [zInegF_zIneg]; exact hwff.2.2,
+      fun h => by simp at h, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun h => by simp at h,
+      fun _ => by rw [zAxAllF_zAxAll]; exact hp, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h,
+      fun _ => by rw [zAxNegF_zAxNeg]; exact hp⟩
+
 /-- **Faithful chain validity from a `ZDerivation`**: after the re-point, the `ZPhi` `zK` disjunct carries
 `zKValidF` (Buchholz's genuine criticality-free `K^r` validity, §3 clause 5), so a `ZDerivation` of a chain
 hands you the faithful side conditions directly. Criticality is NOT part of being a derivation — it is a
