@@ -1804,6 +1804,40 @@ lemma ZRegular_red_zK {s r ds : V} (hds : Seq ds)
     obtain ⟨hI, hJ⟩ := redexI_redexJ_lt_of_zKValid hvalid
     exact ZRegular_red_zK_crit hds hreg (hred _ hI) (hred _ hJ) h1
 
+/-! ### ⛔ The `hseltag` leaf is FALSE — the `iRK` splice dispatch is unfaithful (lap-94 obstruction)
+
+The last `ZRegular_red_zK` leaf `hseltag` claims the splice-branch selected premise `dᵢ` is a chain
+(`zTag dᵢ = 4`). **This is false.** `iRK`'s inner sentinel `permIdx dᵢ < lh (zKseq dᵢ)` routes to *replace*
+(5.2.2) when true and *splice* (5.2.1) when false. For a NON-chain `dᵢ` (atom/I-rule/axiom) `zKseq dᵢ` is
+junk of length `0`, so the sentinel is `0 < 0 = false` → the **splice branch fires by default**, even
+though `dᵢ` is not a chain. So the splice branch does NOT imply `zTag dᵢ = 4`; on the contrary it is
+entered for every non-chain selected premise (then `red dᵢ`'s "halves" `znth (zKseq (red dᵢ)) {0,1}` are
+junk). The witness below (atom case) is the concrete refutation — the regularity analog of
+`not_zKValid_iCritReduct`. **Consequence:** the genuine fix is the route-B dispatch on `tp dᵢ` (Buchholz
+Def 3.2 case 5.2 branches on the inference SYMBOL of `dᵢ`, not on a chain-criticality sentinel) — a
+selected atom/I-rule/axiom is Buchholz case 5.2.2 (replace + conclusion reduction `tp(dᵢ)(Π,n)`), never the
+5.2.1 splice. Both the regularity-half (`hseltag`) and the validity-half (`ZDerivation_red_zK_splice`,
+Crux2Blueprint sorry) are blocked at this same point. -/
+
+/-- **`zKseq` of a non-chain atom node is the empty code** (`length 0`). -/
+@[simp] lemma zKseq_zAtom (s : V) : zKseq (zAtom s) = 0 := by
+  simp [zKseq, zRest, sndIdx, zAtom, pi₂_zero]
+
+/-- The atom node's premise-sequence length is `0`. -/
+@[simp] lemma lh_zKseq_zAtom (s : V) : lh (zKseq (zAtom s)) = 0 := by
+  rw [zKseq_zAtom]
+  conv_lhs => rw [← emptyset_def]
+  exact lh_empty
+
+/-- **⛔ Obstruction witness: an atom selected premise hits the 5.2.1 SPLICE branch.** `lh (zKseq (zAtom
+s)) = 0`, so the replace-branch sentinel `permIdx (zAtom s) < lh (zKseq (zAtom s))` is `0 < 0 = false` and
+`iRK` dispatches to the splice — refuting `hseltag` (the splice branch does NOT force `zTag dᵢ = 4`). The
+in-kernel proof that the repo's `iRK` chain-criticality dispatch is Buchholz-unfaithful for non-chain
+selected premises, so `ZRegular_red_zK`'s final leaf cannot be closed against the current `red`/`iRK`; the
+route-B `tp`-driven dispatch is required. -/
+lemma not_permIdx_lt_zKseq_zAtom (s : V) : ¬ permIdx (zAtom s) < lh (zKseq (zAtom s)) := by
+  rw [lh_zKseq_zAtom]; simp
+
 /-! ## `ZDerivation_zsubst` — eigenvariable substitution preserves Z-derivability (rung-1 step C)
 
 Substituting the closed term `t` for the free variable `^&a` throughout a Z-derivation `d` whose every
