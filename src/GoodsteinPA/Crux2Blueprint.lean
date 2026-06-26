@@ -393,8 +393,8 @@ theorem ZDerivation_iRcritGNeg_critReductNeg {s r ds sᵢ sⱼ p d0 : V}
     ZDerivation (iRcritGNeg (zK s r ds) (critReductNeg (zK s r ds))) := by
   refine ZDerivation_iRcritGNeg_corrected_neg (sᵢ := sᵢ) (sⱼ := sⱼ) (p := p) (d0 := d0)
     hZ hi hj hIJ hdi hdj ?_ ?_ hcut hd0ant hCwff hSeqs hSeqsi hthread hrank hrankI
-  · -- hρI: `critReductNeg` at `redexI` → the `I¬` child `red dᵢ = d₀`
-    rw [critReductNeg_redexI (ne_of_lt hIJ), zKseq_zK, hdi, red_zIneg]
+  · -- hρI: `critReductNeg` at `redexI` → the `I¬` child `zInegPrem dᵢ = d₀`
+    rw [critReductNeg_redexI (ne_of_lt hIJ), zKseq_zK, hdi, zInegPrem_zIneg]
   · -- hρJ: `critReductNeg` at `redexJ` → the §5 axNeg reduct `Ax^1_{Γⱼ→A}`
     rw [critReductNeg_redexJ, zKseq_zK, hdj, fstIdx_zAxNeg, hcut]
 

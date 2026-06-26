@@ -7360,17 +7360,20 @@ Buchholz Def 3.2 case 5.1, ¬-subcase, plus §5 Lemma 5.1 case 2.2:
   `Ax^1_{Γⱼ→A}` (succedent SET to the cut formula `A = cutFormula d`, antecedent `Γⱼ` kept; the §5 reduct
   `dⱼ[0]` of `Ax^{¬A,0}`). Note: `seqSetSucc` (REPLACE succedent), NOT `seqAddAnt` — the ¬-axiom reduct
   replaces the succedent, where the ∀-axiom reduct grows the antecedent.
-- **R-redex** (`n = redexI d`, the `I¬` rule): `red dᵢ` — the `I¬` child `dᵢ[0] = d₀` (deriving `A,Γᵢ→⊥`);
-  `red (zIneg sᵢ A d0) = d0` (`red_zIneg`), so the recursive engine reduct already lands the child, with NO
+- **R-redex** (`n = redexI d`, the `I¬` rule): `zInegPrem dᵢ` — the `I¬` child `dᵢ[0] = d₀` (deriving
+  `A,Γᵢ→⊥`), read as the DIRECT 𝚺₁ accessor `zInegPrem (zIneg sᵢ A d0) = d0` (`zInegPrem_zIneg`), which equals
+  the recursive `red (zIneg sᵢ A d0) = d0` (`red_zIneg`) but is **red-free** — so `critReductNeg` is fully
+  arithmetizable (the engine `iRKc` graph cannot call `red`; the I¬ child is an accessor, not a reduct). No
   re-principalization (unlike the ∀ R-redex, which needs the `numeral k` instance).
-- elsewhere: the engine reduct `zAxReduct (red dₙ)` (irrelevant; `iRcritGNeg` reads `ρ` only at the redexes).
+- elsewhere: irrelevant (`iRcritGNeg` reads `ρ` only at the redexes); kept as `zAxReduct (red dₙ)` to mirror
+  `critReductCorr`'s dead else-branch.
 The two read-offs (`critReductNeg d (redexI d)`/`(redexJ d)`) feed `hρI`/`hρJ` of
 `ZDerivation_iRcritGNeg_corrected_neg` directly. -/
 noncomputable def critReductNeg (d n : V) : V :=
   if n = redexJ d then
     zAx1 (seqSetSucc (fstIdx (znth (zKseq d) n)) (cutFormula d)) (cutFormula d)
   else if n = redexI d then
-    red (znth (zKseq d) n)
+    zInegPrem (znth (zKseq d) n)
   else zAxReduct (red (znth (zKseq d) n))
 
 /-- `critReductNeg` at the L-redex `redexJ`: the §5 axNeg reduct `Ax^1_{Γⱼ→A}`. -/
@@ -7379,9 +7382,9 @@ lemma critReductNeg_redexJ (d : V) :
       zAx1 (seqSetSucc (fstIdx (znth (zKseq d) (redexJ d))) (cutFormula d)) (cutFormula d) := by
   rw [critReductNeg, if_pos rfl]
 
-/-- `critReductNeg` at the R-redex `redexI` (when `redexI ≠ redexJ`): the `I¬` child `red dᵢ = d₀`. -/
+/-- `critReductNeg` at the R-redex `redexI` (when `redexI ≠ redexJ`): the `I¬` child `zInegPrem dᵢ = d₀`. -/
 lemma critReductNeg_redexI {d : V} (h : redexI d ≠ redexJ d) :
-    critReductNeg d (redexI d) = red (znth (zKseq d) (redexI d)) := by
+    critReductNeg d (redexI d) = zInegPrem (znth (zKseq d) (redexI d)) := by
   rw [critReductNeg, if_neg h, if_pos rfl]
 
 /-! ### The critical-only reduct is NON-critical (lap 86) — the 5.2 dispatch is mandatory
