@@ -30,7 +30,33 @@ Verified IN-KERNEL during the feasibility pass:
 - `inegF p ≠ ^⊥` always (`inegF_ne_falsum`) ⟹ on `∅→⊥` a permissible premise is EXACTLY an `isymRep` node
   (`zInd`/`zK`/`zAtom`/`zAx1`), confirming non-critical = "has an `isymRep` premise" (lap-129 picture exact).
 
-### 🎯 CONCRETE NEXT ATTACK (the genuine drop, next lap) — generalize the descent step to `Γ→⊥`, strong-induct
+### ✅ ALSO this lap — DECOUPLED the `iRKcCrit` engine from CRITICALITY (commit 2/2)
+Verified in-kernel that `iRKcCrit` soundness (`ZDerivation_iRKcCrit_all`/`_neg_botOrbit`), descent
+(`iord_descent_iRcrit_of_redex` :5313), and invariants (`ZRegular/ZFresh/ZSeqAnt_iRKcCrit`) are ALL
+criticality-free GIVEN the redex data — criticality enters ONLY at `isRedexPair_redexCode_of_zKValid` →
+`inference_critical_pair_of_chain` (to prove a redex exists). Landed the criticality-free replacements
+(`Crux2Blueprint`, after `descent_step_K_critical`): `isRedexPair_redexCode_of_exists`,
+`redexI_lt_of_redexPair` (pair-monotone bound `redexI<j0` from any in-region redex pair),
+`redZKReady_of_zKValidF_exists` (the redZKReady ∀/¬ disjunction from `zKValidF`+redex-existence, no crit).
+
+### 🎯 NEXT (wire the decoupling) — assemble `descent_step_K_hasRedex`, then split `axMajor`
+Build the criticality-free critical reduct lemma (mirrors `descent_step_K_critical_all`/`_neg` but redex
+supplied, not from crit):
+  `descent_step_K_hasRedex (hd : ZDerivesEmptyR (zK s r ds)) (hant) (hsucc) (hj0 : j0 < lh ds)
+     (threading/rank/⊥-exit up to j0 from isChainInf) (hredexlt : redexI < j0)
+     (hex : ∃ c < ⟪lh ds,lh ds⟫, isRedexPair ds c) : ∃ d', ZDerivesEmptyR d' ∧ icmp ... = 0`
+Pieces: redex data via `redZKReady_of_zKValidF_exists` (✓ landed); SOUNDNESS via `ZDerivation_iRKcCrit_all`
+(∀, threading up to redexI from isChainInf) / `ZDerivation_iRKcCrit_neg_botOrbit` (¬, tip-j0 form,
+`redexJ≤j0`-free); DESCENT — build `iord_descent_iRcritG_critReductCorr_of_redex` / `…Neg…_of_redex`
+mirroring `RedZKDescent:457`/`:515` but calling `iord_descent_iRcrit_of_redex` (not `_of_chain'`) with `hex`
++ `hr:1≤r` (from `irk(∀p)≥1`, `irk(chainAsucc redexI)≤r`) + the criticality-free `hbI`/`hbJ` bundles;
+INVARIANTS via `ZRegular/ZFresh/ZSeqAnt_iRKcCrit` (the no-`_of_zK` forms, redex data from `hex`).
+Then `descent_step_K_noncrit_axMajor`: from `majorPrem_*_cutPartner` get `i'<majorIdx`, `chainAsucc i'=∀p`;
+CASE on whether `znth ds i'` is a direct `zIall`/`zIneg` (R-intro): if yes, `(i',majorIdx)` is a redex pair
+(`majorIdx ≤ j0` since first ⊥-exit) ⟹ `descent_step_K_hasRedex`; if no (`i'` a chain/leaf) ⟹ the recursion
+residual (the general `Γ→⊥` reduction below). `repMajor` (tag 3/4) is purely the general reduction.
+
+### 🎯 DEEPER (the full drop) — generalize the descent step to `Γ→⊥`, strong-induct
 The natural closure is **Buchholz Theorem 2.1 / Corollary 2.1** as ONE generalized lemma proved by strong
 `iord`-induction (each premise has strictly smaller `iord`):
 

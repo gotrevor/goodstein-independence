@@ -2238,6 +2238,92 @@ lemma redZKReady_of_zKValidF_exists {s r ds : V}
         cutFormula_neg (d := zK s r ds) hpUf (by rw [zKseq_zK]; exact hChA)
       exact ⟨sᵢ, sⱼ, p, d0, hdi, hppp ▸ hdj, hcut, hpUf⟩
 
+/-- **`iRKcCrit` DESCENDS — ∀-case, criticality-free** (the `iord_descent_iRKcCrit_corr` twin with the redex
+SUPPLIED via `hex` instead of derived from criticality). Routes through `iord_descent_iRcrit_of_redex`
+(criticality-free) rather than `iord_descent_iRcrit_of_chain'`; the per-redex bundles `hbI`/`hbJ` are
+identical (they never used criticality). `hr : 1 ≤ r` replaces the rank fact `chainInf` gave for free. -/
+lemma iord_descent_iRKcCrit_corr_of_redex {s r ds sᵢ sⱼ a p pj k' d0 : V}
+    (hds : Seq ds) (hmem : ∀ i < lh ds, ZDerivation (znth ds i)) (hr : 1 ≤ r)
+    (hex : ∃ c < (⟪lh ds, lh ds⟫ : V), isRedexPair ds c)
+    (hIlt : redexI (zK s r ds) < lh ds) (hJlt : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k')
+    (hirk : irk (^∀ pj : V) = irk (cutFormula (zK s r ds)) + 1) :
+    icmp (iord (iRKcCrit (zK s r ds))) (iord (zK s r ds)) = 0 := by
+  have h1 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) = 1 := by
+    rw [zKseq_zK, hdi]; exact zTag_zIall _ _ _ _
+  rw [iRKcCrit_eq_corr h1 (ne_of_lt hIJ)]
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun i hi => isNF_iotil_of_ZDerivation _ (hmem i hi))
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := by
+    intro n; rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hbI : iRedDescent (critReductCorr (zK s r ds) (redexI (zK s r ds)))
+      (znth ds (redexI (zK s r ds))) := by
+    rw [critReductCorr, if_neg (ne_of_lt hIJ), if_pos rfl, zKseq_zK, hdi,
+      zIallPrem_zIall, zIallEig_zIall]
+    exact iRedDescent_zsubst_zIall
+      (by simp : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))) : V)).isUTerm (hdi ▸ hmem _ hIlt)
+  have hbJ : iRedDescent (critReductCorr (zK s r ds) (redexJ (zK s r ds)))
+      (znth ds (redexJ (zK s r ds))) := by
+    rw [critReductCorr, if_pos rfl]
+    simp only [zKseq_zK, hdj, fstIdx_zAxAll]
+    exact iRedDescent_zAx1_zAxAll_of_irk hirk
+  rw [iord_iRcritG_eq_iRcrit]
+  exact iord_descent_iRcrit_of_redex hds hnf hr (by simpa only [zKseq_zK] using hex) hNF
+    hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
+
+/-- **`iRKcCrit` DESCENDS — ¬-case, criticality-free** (the `iord_descent_iRKcCrit_neg` twin, redex SUPPLIED).
+Same decoupling as `iord_descent_iRKcCrit_corr_of_redex`, plus the two reduct-fold NF facts `hNFI`/`hNFJ`
+that `iord_iRcritGNeg_eq_iRcrit` needs. -/
+lemma iord_descent_iRKcCrit_neg_of_redex {s r ds sᵢ sⱼ p d0 : V}
+    (hds : Seq ds) (hmem : ∀ i < lh ds, ZDerivation (znth ds i)) (hr : 1 ≤ r)
+    (hex : ∃ c < (⟪lh ds, lh ds⟫ : V), isRedexPair ds c)
+    (hIlt : redexI (zK s r ds) < lh ds) (hJlt : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hcut : cutFormula (zK s r ds) = p) (hp : IsUFormula ℒₒᵣ p) :
+    icmp (iord (iRKcCrit (zK s r ds))) (iord (zK s r ds)) = 0 := by
+  have h1 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) ≠ 1 := by
+    rw [zKseq_zK, hdi, zTag_zIneg]; simp
+  rw [iRKcCrit_eq_neg h1 (ne_of_lt hIJ)]
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun i hi => isNF_iotil_of_ZDerivation _ (hmem i hi))
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := by
+    intro n; rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hbI : iRedDescent (critReductNeg (zK s r ds) (redexI (zK s r ds)))
+      (znth ds (redexI (zK s r ds))) := by
+    rw [critReductNeg_redexI (ne_of_lt hIJ), zKseq_zK, hdi, zInegPrem_zIneg]
+    exact iRedDescent_zIneg
+      (isNF_iotil_of_ZDerivation d0 (zDerivation_zIneg_inv (hdi ▸ hmem _ hIlt)).1)
+  have hbJ : iRedDescent (critReductNeg (zK s r ds) (redexJ (zK s r ds)))
+      (znth ds (redexJ (zK s r ds))) := by
+    rw [critReductNeg_redexJ, zKseq_zK, hdj, fstIdx_zAxNeg, hcut]
+    exact iRedDescent_zAx1_zAxNeg_gen hp
+  have hNFI : isNF (iseqNaddIdg (seqUpdate (zKseq (zK s r ds)) (redexI (zK s r ds))
+      (critReductNeg (zK s r ds) (redexI (zK s r ds))))) := by
+    rw [zKseq_zK]
+    exact isNF_iseqNaddIdg (fun n _ => by
+      rcases eq_or_ne n (redexI (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hIlt]; exact hbI.nf
+      · rw [znth_seqUpdate_of_ne hne]; exact hNF n)
+  have hNFJ : isNF (iseqNaddIdg (seqUpdate (zKseq (zK s r ds)) (redexJ (zK s r ds))
+      (critReductNeg (zK s r ds) (redexJ (zK s r ds))))) := by
+    rw [zKseq_zK]
+    exact isNF_iseqNaddIdg (fun n _ => by
+      rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hJlt]; exact hbJ.nf
+      · rw [znth_seqUpdate_of_ne hne]; exact hNF n)
+  rw [iord_iRcritGNeg_eq_iRcrit (zK s r ds) (critReductNeg (zK s r ds)) hNFI hNFJ]
+  exact iord_descent_iRcrit_of_redex hds hnf hr (by simpa only [zKseq_zK] using hex) hNF
+    hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
+
 /-! ### `descent_step_K_majorIdx` — DECOMPOSED critical / non-critical (lap 141, Buchholz §3.2 case 5)
 
 **Reframed from the lap-140 major-premise-tag split** (which walled on tag-5/6 "the major premise's cut
@@ -2249,73 +2335,166 @@ dispatcher case-splits on the `permIdx` criticality sentinel:
   hands back the principal pair from criticality alone);
 - non-critical (`permIdx < lh ds`) → `descent_step_K_noncritical`, Buchholz case 5.2 (the one open leaf). -/
 
-/-! ### Non-critical K-step (Buchholz §3.2 case 5.2) — DECOMPOSED on the MAJOR-premise tag (lap 147)
-
-**The lap-129/130 major-premise machinery, finally WIRED into the live path** (it was banked but UNUSED — the
-"bank, don't wire" anti-pattern). Buchholz's faithful reduction (§14.25) acts NOT on the `permIdx`-permissible
-premise (whose first hit can be an atom/`Ax¹` LEAF → the lap-129 `red`-STALL) but on the **major premise** =
-the first `⊥`-exit (`majorIdx`). On a regular `∅→⊥` chain `majorPrem_tag_mem` pins that premise's tag ∈
-{3,4,5,6}: never an atom/`Ax¹` leaf (0/7, `majorIdx_botOrbit_reducible`), never an `I∀`/`I¬` R-intro (1/2,
-whose succedent is `^∀p`/`inegF p ≠ ^⊥`). So the §5.2 reduction splits on EXACTLY two Buchholz cases:
-
-- **`repMajor` (tag 3/4, §14.254)** — the major premise is a `zInd` (3) or sub-`zK` (4), a `Rep` node. Buchholz
-  reduces it by REPLACING it with its own reduct (Ind unfolding / sub-chain reduction). On the ⊥-orbit the
-  major premise derives `Γₘ→⊥` with `Γₘ ⊆ {A₀,…,A_{m−1}}` (threading), possibly NONEMPTY — so this is the
-  genuine GENERAL reduction (recursion on a smaller-`iord` premise), the one piece `red`/`redSound` was for.
-- **`axMajor` (tag 5/6, §14.253 principal case)** — the major premise is an L-axiom `zAxAll` (5) / `zAxNeg` (6),
-  a `red`-FIXPOINT. Its active L-formula (`^∀p`/`inegF p`) is the succedent of a STRICTLY EARLIER premise `i′`
-  (`majorPrem_zAxAll_cutPartner` / `majorPrem_zAxNeg_cutPartner`) — the principal CUT partner. The reduct is the
-  genuine critical cut `iRKcCrit` against `(i′, m)`. NOT cleanly the lap-143/144 critical machinery: that keys
-  the redex off `redexCode` via `inference_critical_pair_of_chain`, which needs CRITICALITY (`hnperm`), absent
-  here; and the cut-partner `i′` need only have SUCCEDENT `^∀p`, not be a direct R-intro (it can be a chain) —
-  so this is also recursive in general. Concrete next attack: derive `redexI < j₀` from the cut-partner redex
-  alone (the `chainInf_redexI_data` pair-monotone bound, but with redex existence supplied by the cut-partner,
-  bypassing criticality), then feed `ZDerivation_iRKcCrit_all`/`_neg` the `isChainInf` threading.
-
-Both halves bottom out in the GENERAL Z-derivation reduction (premises with nonempty antecedents); the natural
-closure is a strong induction on `iord` generalized to "regular `Γ→⊥`, not in endform ⟹ ∃ same-sequent
-descending reduct" (= Buchholz Theorem 2.1 / Corollary 2.1). See `PENDING_WORK.md` lap-147. -/
-
-/-- **§14.254 — `Rep` major premise (tag 3/4): GENERAL reduction (named sub-`sorry`).** The major premise of
-the `∅→⊥` chain is a `zInd` (3) or sub-`zK` (4) deriving `Γₘ→⊥` (`Γₘ` possibly nonempty). Buchholz reduces by
-REPLACING it with its own strictly-`iord`-descending reduct (Ind unfolding for `zInd`; sub-chain
-reduction/splice for `zK`), keeping the chain valid (same end-sequents, `isChainInf_congr`). The genuine
-GENERAL Z-derivation reduction — closure via strong `iord`-induction on a `Γ→⊥`-generalized descent step. -/
-theorem descent_step_K_noncrit_repMajor {s r ds : V}
+/-- **The critical-cut reduct descends from a REDEX, no criticality (lap 147).** A regular `∅→⊥` chain
+with the `isChainInf` exit data (`j0`/⊥-exit/threading/rank) and ANY in-region redex pair `⟪i0,j1⟫`
+(`i0 < j1 ≤ j0`) has the genuine `iRKcCrit` reduct as a strictly-`iord`-descending `ZDerivesEmptyR`. This
+WIRES the lap-147 decoupling: redex via `redZKReady_of_zKValidF_exists`, bound via `redexI_lt_of_redexPair`,
+soundness via `ZDerivation_iRKcCrit_all`/`_neg_botOrbit` (criticality-free), descent via
+`iord_descent_iRKcCrit_corr_of_redex`/`_neg_of_redex`, invariants via the no-`_of_zK` `ZRegular/ZFresh/
+ZSeqAnt_iRKcCrit`. **Subsumes `descent_step_K_critical` (which sources the redex from criticality) and is the
+engine for `descent_step_K_noncrit_axMajor`'s has-redex sub-case (cut-partner an R-intro).** -/
+theorem descent_step_K_hasRedex {s r ds i0 j1 j0 : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
-    (htag : zTag (znth ds (majorIdx (zK s r ds))) = 3 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 4) :
-    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+    (hj0 : j0 < lh ds) (hbot0 : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hij : i0 < j1) (hj1 : j1 ≤ j0) (hpair : isRedexPair ds (⟪i0, j1⟫ : V)) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  have hvalidF : zKValidF s r ds := zKValidF_of_ZDerivation_zK hZ
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  have hjlt : j1 < lh ds := lt_of_le_of_lt hj1 hj0
+  have hilt0 : i0 < lh ds := lt_trans hij hjlt
+  have hex : ∃ c < (⟪lh ds, lh ds⟫ : V), isRedexPair ds c :=
+    ⟨⟪i0, j1⟫, pair_lt_pair hilt0 hjlt, hpair⟩
+  have hIlt_j0 : redexI (zK s r ds) < j0 := redexI_lt_of_redexPair hij hj1 hj0 hpair
+  obtain ⟨hIJ, hJlt, hcase⟩ := redZKReady_of_zKValidF_exists hZ hvalidF hex
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  have hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r := hrank0 _ hIlt_j0
+  have hca : ∀ i < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds i) := hvalidF.2.2.2.2.2.2.1
+  rcases hcase with ⟨sᵢ, sⱼ, a, p, pj, k', d0, hdi, hdj, hirk, hsj⟩ |
+      ⟨sᵢ, sⱼ, p, d0, hdi, hdj, hcut, hpUf⟩
+  · -- ∀-redex
+    have hZdi : ZDerivation (zIall sᵢ a p d0) := hdi ▸ hmem _ hIlt
+    obtain ⟨_, hssi, hwff⟩ := zDerivation_zIall_inv hZdi
+    have hpwff : IsUFormula ℒₒᵣ p := hwff.2.2.isUFormula
+    have hregI : ZRegular (zIall sᵢ a p d0) := hdi ▸ ZRegular_zK_premise hds hd.2.1 hIlt
+    have heig : maxEigen d0 < a := maxEigen_lt_of_regular_zIall hregI
+    have hSeqsj : Seq (seqAnt sⱼ) := by
+      have h := seq_seqAnt_zK_premise hds hd.2.2.2 hJlt (hmem _ hJlt) (by rw [hdj]; simp)
+      rwa [hdj, fstIdx_zAxAll] at h
+    have hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)) := by
+      have h := hca _ hJlt; rw [chainAsucc, hdj, fstIdx_zAxAll, hsj] at h; exact h
+    have hChAI : chainAsucc ds (redexI (zK s r ds)) = (^∀ p : V) := by
+      rw [chainAsucc, hdi, fstIdx_zIall]; exact hssi
+    have hr : 1 ≤ r := by
+      have h1 : (1 : V) ≤ irk (chainAsucc ds (redexI (zK s r ds))) := by
+        rw [hChAI, irk_all hpwff]; exact self_le_add_left 1 (irk p)
+      exact le_trans h1 hrankI
+    refine ⟨iRKcCrit (zK s r ds),
+      ⟨⟨ZDerivation_iRKcCrit_all hZ hIlt hJlt hIJ hdi hdj heig hd.2.2.1 hpwff hCwff
+          (by rw [hant]; exact seq_empty) hSeqsj hsj
+          (fun i' hi' => hthread0 i' (le_of_lt (lt_of_le_of_lt hi' hIlt_j0)))
+          (fun i' hi' => hrank0 i' (lt_trans hi' hIlt_j0)) hrankI, ?_, ?_⟩,
+        ?_, ?_, ?_⟩, ?_⟩
+    · rw [fstIdx_iRKcCrit]; exact hd.1.2.1
+    · rw [fstIdx_iRKcCrit]; exact hd.1.2.2
+    · refine ZRegular_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZRegular_zK_premise hds hd.2.1 hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZRegular_zK_premise hds hd.2.1 hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inl (zTag_zIall _ _ _ _)
+    · refine ZFresh_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZFresh_zK_premise hds hd.2.2.1 hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZFresh_zK_premise hds hd.2.2.1 hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inl (zTag_zIall _ _ _ _)
+    · refine ZSeqAnt_iRKcCrit ?_ ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZSeqAnt_zK_premise hds hd.2.2.2 hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZSeqAnt_zK_premise hds hd.2.2.2 hIlt
+      · rw [zKseq_zK, hdj, fstIdx_zAxAll]; exact hSeqsj
+      · rw [zKseq_zK, hdi]; exact Or.inl (zTag_zIall _ _ _ _)
+    · exact iord_descent_iRKcCrit_corr_of_redex hds hmem hr hex hIlt hJlt hIJ hdi hdj hirk
+  · -- ¬-redex (botOrbit form: `redexJ ≤ j0`-free)
+    have hZdi : ZDerivation (zIneg sᵢ p d0) := hdi ▸ hmem _ hIlt
+    obtain ⟨_, hssi, _, hSeqsi, hd0ant⟩ := zDerivation_zIneg_inv hZdi
+    have hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)) := hcut ▸ hpUf
+    have hChAI : chainAsucc ds (redexI (zK s r ds)) = (inegF p : V) := by
+      rw [chainAsucc, hdi, fstIdx_zIneg]; exact hssi
+    have hr : 1 ≤ r := by
+      have h1 : (1 : V) ≤ irk (chainAsucc ds (redexI (zK s r ds))) := by
+        rw [hChAI, irk_inegF hpUf]; exact self_le_add_left 1 (irk p)
+      exact le_trans h1 hrankI
+    refine ⟨iRKcCrit (zK s r ds),
+      ⟨⟨ZDerivation_iRKcCrit_neg_botOrbit hZ hIlt hJlt hIJ hdi hdj hcut hd0ant hCwff
+          (by rw [hant]; exact seq_empty) hSeqsi hIlt_j0 hj0 hbot0 hthread0 hrank0, ?_, ?_⟩,
+        ?_, ?_, ?_⟩, ?_⟩
+    · rw [fstIdx_iRKcCrit]; exact hd.1.2.1
+    · rw [fstIdx_iRKcCrit]; exact hd.1.2.2
+    · refine ZRegular_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZRegular_zK_premise hds hd.2.1 hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZRegular_zK_premise hds hd.2.1 hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inr (zTag_zIneg _ _ _)
+    · refine ZFresh_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZFresh_zK_premise hds hd.2.2.1 hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZFresh_zK_premise hds hd.2.2.1 hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inr (zTag_zIneg _ _ _)
+    · refine ZSeqAnt_iRKcCrit ?_ ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZSeqAnt_zK_premise hds hd.2.2.2 hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZSeqAnt_zK_premise hds hd.2.2.2 hIlt
+      · rw [zKseq_zK]
+        have h := seq_seqAnt_zK_premise hds hd.2.2.2 hJlt (hmem _ hJlt) (by rw [hdj]; simp)
+        rwa [hdj] at h ⊢
+      · rw [zKseq_zK, hdi]; exact Or.inr (zTag_zIneg _ _ _)
+    · exact iord_descent_iRKcCrit_neg_of_redex hds hmem hr hex hIlt hJlt hIJ hdi hdj hcut hpUf
 
-/-- **§14.253 (principal case) — L-axiom major premise (tag 5/6): critical cut vs the upstream R-partner
-(named sub-`sorry`).** The major premise is `zAxAll`/`zAxNeg` (a `red`-FIXPOINT); its active L-formula is the
-succedent of a strictly earlier premise `i′` (`majorPrem_zAxAll_cutPartner`/`majorPrem_zAxNeg_cutPartner`),
-forming the principal cut `(i′, m)`. The reduct is the genuine `iRKcCrit` cut. Attack: redex bound `redexI < j₀`
-from the cut-partner (not criticality) ⟹ `ZDerivation_iRKcCrit_all`/`_neg` + `iord_descent_iRKcCrit_*`. -/
-theorem descent_step_K_noncrit_axMajor {s r ds : V}
+/-! ### Non-critical K-step (Buchholz §3.2 case 5.2) — SPLIT on has-redex-below-the-exit (lap 147)
+
+The lap-147 criticality decoupling (`descent_step_K_hasRedex`) refines the §5.2 obligation into a clean
+dichotomy on whether the chain has a redex pair `⟪i0,j1⟫` BELOW the `isChainInf` exit `j0`:
+
+- **has bounded redex** → `descent_step_K_hasRedex` (PROVEN, criticality-free `iRKcCrit` cut). This is the
+  Buchholz §14.253 principal case realized off `red` — and it now covers the non-critical chains too, the
+  half the lap-141 critical/non-critical split left open. Note `majorIdx ≤ j0` (first ⊥-exit), so a tag-5/6
+  major premise with a DIRECT R-intro cut-partner lands here.
+- **no bounded redex** → `descent_step_K_noncrit_recurse` (the lone residual). By `majorPrem_tag_mem` the
+  major premise is then a `Rep` node (`zInd`/sub-`zK`, tag 3/4) — Buchholz §14.254 REPLACE — or a tag-5/6
+  L-axiom whose cut-partner is itself a chain (no direct R-intro). Both REDUCE THE MAJOR PREMISE (a derivation
+  of `Γₘ→⊥`, `Γₘ` possibly nonempty) — the GENERAL `Γ→⊥` Z-derivation reduction, closure via strong
+  `iord`-induction (Buchholz Thm 2.1 / Cor 2.1). The one genuinely deep remaining piece. -/
+
+/-- **§5.2 residual — no redex below the exit ⟹ REDUCE the (Rep / chain-partnered) major premise (named
+sub-`sorry`).** When the `∅→⊥` chain has NO redex pair below the `isChainInf` exit `j0`, the faithful major
+premise (first ⊥-exit, `majorIdx ≤ j0`) is a `Rep` node (`zInd`/sub-`zK`) or a tag-5/6 L-axiom whose
+cut-partner is a chain — in all cases Buchholz reduces by REPLACING the major premise with its own
+strictly-`iord`-descending reduct (same `Γₘ→⊥` end-sequent, `isChainInf_congr` keeps the chain valid). This is
+the GENERAL Z-derivation reduction (the major premise's antecedent `Γₘ` is possibly nonempty, so it is NOT a
+`ZDerivesEmptyR` and the ⊥-orbit collapses of `descent_step_Ind`/`_K_critical` do not apply); closure = a
+strong-`iord`-induction-generalized descent step on `Γ→⊥` (Buchholz Theorem 2.1 / Corollary 2.1). -/
+theorem descent_step_K_noncrit_recurse {s r ds j0 : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
-    (htag : zTag (znth ds (majorIdx (zK s r ds))) = 5 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 6) :
+    (hj0 : j0 < lh ds) (hbot0 : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
 
-/-- **Non-critical case (Buchholz §3.2 case 5.2) — sorry-FREE major-premise DISPATCHER (lap 147).** On a
-regular `∅→⊥` chain `majorPrem_tag_mem` forces the major premise's tag ∈ {3,4,5,6}: routes tag-3/4 (`Rep`
-major) → `descent_step_K_noncrit_repMajor` (§14.254 general reduction), tag-5/6 (L-axiom major) →
-`descent_step_K_noncrit_axMajor` (§14.253 principal cut). This wires the banked `majorIdx` machinery into the
-live path, dissolving the lap-129 `permIdx` atom/`Ax¹` STALL (the major premise is never a leaf). The
-non-criticality hypothesis `hncrit` is not consumed — the major-premise dispatch is faithful for any ⊥-orbit
-chain — but is kept to match the `descent_step_K_majorIdx` split. -/
+/-- **Non-critical case (Buchholz §3.2 case 5.2) — sorry-FREE has-redex/no-redex DISPATCHER (lap 147).**
+Extracts the `isChainInf` exit `j0` (with threading/rank/⊥-exit) from `zKValidF`, then case-splits on whether
+a redex pair exists below `j0`: YES → `descent_step_K_hasRedex` (PROVEN, the criticality-free `iRKcCrit` cut);
+NO → `descent_step_K_noncrit_recurse` (the general-reduction residual). The has-redex half — Buchholz's §14.253
+principal cut — is now DISCHARGED for non-critical chains, leaving only the §14.254 major-premise recursion.
+`hncrit` is unused (the split is faithful for any ⊥-orbit chain) but kept to match `descent_step_K_majorIdx`. -/
 theorem descent_step_K_noncritical {s r ds : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
     (hncrit : permIdx (zK s r ds) < lh ds) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
   have hZ : ZDerivation (zK s r ds) := hd.1.1
-  rcases majorPrem_tag_mem hZ hant hsucc with h | h | h | h
-  · exact descent_step_K_noncrit_repMajor hd hant hsucc (Or.inl h)
-  · exact descent_step_K_noncrit_repMajor hd hant hsucc (Or.inr h)
-  · exact descent_step_K_noncrit_axMajor hd hant hsucc (Or.inl h)
-  · exact descent_step_K_noncrit_axMajor hd hant hsucc (Or.inr h)
+  obtain ⟨j0, hj0, hAj0, hthread0, hrank0⟩ := (zKValidF_of_ZDerivation_zK hZ).1
+  have hbot0 : chainAsucc ds j0 = (^⊥ : V) := hAj0.elim (fun h => h.trans hsucc) id
+  by_cases hlow : ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)
+  · obtain ⟨i0, j1, hij, hj1, hpair⟩ := hlow
+    exact descent_step_K_hasRedex hd hant hsucc hj0 hbot0 hthread0 hrank0 hij hj1 hpair
+  · exact descent_step_K_noncrit_recurse hd hant hsucc hj0 hbot0 hthread0 hrank0 hlow
 
 /-- **NAMED sub-`sorry` #1 — the per-step K-case math, a sorry-FREE critical/non-critical DISPATCHER
 (lap 141).** A regular `∅→⊥` K-node has a SOUND, strictly-`iord`-descending reduct. Case-splits on the
