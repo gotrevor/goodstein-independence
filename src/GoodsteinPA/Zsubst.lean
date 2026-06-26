@@ -2232,6 +2232,49 @@ theorem zSeqAnt_zsubst (a t : V) : ∀ d, ZDerivation d → zSeqAnt (zsubst d a 
     · simp [zsubst_zAxNeg]
     · simp [zsubst_zAx1]
 
+/-! ## `red` preserves `ZSeqAnt` — structural + Ind cases (lap 133, mirror `ZFresh_red_of_not_zK`)
+
+The structural rules strip to a premise (`red_zIneg = d0`, hereditary) or substitute (`red_zIall =
+zsubst d0 a 0`, antecedent-`Seq` UNCONDITIONALLY by `zSeqAnt_zsubst`); the `Ind` reduct is a chain over
+`⟨d1,…,d0⟩` (premises hereditary + the Ind node's own conclusion `Seq (seqAnt s)` from its head flag);
+atoms/axioms are `red`-identities. The `zK` chain dispatch (the reduct-conclusion `Seq` obligations) is
+the remaining frontier. -/
+
+/-- Every premise of the Ind reduct sequence `⟨d1,…,d1,d0⟩` is `zSeqAnt`-clean when `d0,d1` are. -/
+lemma zSeqAnt_iIndReductSeq {d0 d1 k : V} (h0 : zSeqAnt d0 = 0) (h1 : zSeqAnt d1 = 0) :
+    ∀ i < lh (iIndReductSeq d0 d1 k), zSeqAnt (znth (iIndReductSeq d0 d1 k) i) = 0 := by
+  intro i hi
+  rw [iIndReductSeq] at hi ⊢
+  rw [Seq.lh_seqCons _ (iRepeatSeq_seq d1 k)] at hi
+  rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hi) with heq | hlt
+  · rw [heq, znth_seqCons_self (iRepeatSeq_seq d1 k) d0]; exact h0
+  · rw [znth_seqCons_of_lt (iRepeatSeq_seq d1 k) d0 hlt,
+      znth_iRepeatSeq i (by rwa [iRepeatSeq_lh] at hlt)]
+    exact h1
+
+/-- **`red` preserves `ZSeqAnt` (structural + Ind cases).** The chain (`zK`) case is the remaining
+frontier (the reduct-conclusion `Seq` obligations from the K-node own flag). -/
+lemma ZSeqAnt_red_of_not_zK {d : V} (hZ : ZDerivation d) (hsa : ZSeqAnt d)
+    (hnK : zTag d ≠ 4) : ZSeqAnt (red d) := by
+  unfold ZSeqAnt at hsa ⊢
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+  · rw [red_zAtom]; exact hsa
+  · rw [red_zIall]; exact zSeqAnt_zsubst a (Bootstrapping.Arithmetic.numeral 0) d0 hd0
+  · rw [red_zIneg]; rw [zSeqAnt_zIneg] at hsa
+    exact nonpos_iff_eq_zero.mp (hsa ▸ le_max_right _ _)
+  · rw [zSeqAnt_zInd] at hsa
+    rw [red_zInd, iRInd_zInd]
+    refine zSeqAnt_zK_of (iIndReductSeq_seq d0 d1 1)
+      (seqAntSeqFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp (hsa ▸ le_max_left _ _)))
+      (zSeqAnt_iIndReductSeq (nonpos_iff_eq_zero.mp (hsa ▸ (le_max_left _ _).trans (le_max_right _ _)))
+        (nonpos_iff_eq_zero.mp (hsa ▸ (le_max_right _ _).trans (le_max_right _ _))))
+  · exact absurd (zTag_zK s r ds) hnK
+  · rw [red_zAxAll]; exact hsa
+  · rw [red_zAxNeg]; exact hsa
+  · rw [red_zAx1]; exact hsa
+
 /-! ### Regularity of the corrected-reduct premises (engine re-key prerequisite, lap 119)
 
 The re-keyed tag-4 critical reduct `iRKcCrit` (`InternalZ`) replaces each redex premise by its genuine
