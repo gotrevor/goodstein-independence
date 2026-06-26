@@ -2156,13 +2156,51 @@ theorem descent_step_K_majorIdx {s r ds : V}
   · exact descent_step_K_noncritical hd hant hsucc hcrit
   · exact descent_step_K_critical hd hcrit
 
+/-- **Ind root (Buchholz §3.2 case 4 / Def 3.2 clause `Ind`) — the RED-FREE existence-form reduct (lap 144,
+named sub-`sorry`).** A `∅→⊥` Ind node `zInd s at' p d0 d1` has a sound, strictly-`iord`-descending
+`ZDerivesEmptyR` reduct WITHOUT `red`. The genuine witness is the **corrected substituted chain**
+`zK s (irk p) (iIndReductSeqG d0 d1 a k)` (lap-136), `a = π₁ at'` the eigenvariable and `k = value of the
+Ind term t = π₂ at'`: premises `⟨d0, d1[a:=0], …, d1[a:=k-1]⟩`, exit premise `k` carrying `F(k) = F(t) = ⊥`.
+This REPLACES the lap-141 regression `⟨red d, ZDerivesEmptyR_red hd, …⟩`, whose soundness `ZDerivesEmptyR_red`
+routes through the kernel-FALSE `redSoundGen` (:1471) → `zKValidF_iIndReduct_of_zInd` (:80, the lap-136
+obstruction: the `k=1` shadow `⟨d1,d0⟩` is NOT valid). Wiring this drops the LAST `red`-soundness dependence
+on the live `false_of_ZDerivesEmpty` path (K-case already off `red`, laps 143/144).
+
+**Residual / next-attack (the genuine Buchholz/term-value content):**
+1. **Soundness** `ZDerivesEmptyR (zK s (irk p) (iIndReductSeqG d0 d1 a k))`: the chain-validity `zKValidF`
+   is `isChainInf_telescope` (banked) fed the per-premise read-offs `chainAnt_/chainAsucc_iIndReductSeqG_*`
+   (banked) — base antecedent `= Γ` (`d0`'s, `zIndWff`), step antecedent `Γ,F(i)` threading `F(i) =
+   chainAsucc i`, rank `irk (F(i)) = irk p` (substitution-invariant). The **`hexit` clause needs `F(k) =
+   F(t)` i.e. `k = value(t)`** — the lone genuine prerequisite: an internal term-evaluation `k = ⟦t⟧`
+   matching `numeral k`'s value to the closed Ind term `t` (`substs1 (numeral k) p = substs1 t p = ⊥`).
+   Plus the orbit invariants `ZRegular/ZFresh/ZSeqAnt` of the reduct (premise-hereditary like the K-case).
+2. **Descent** `icmp (iord (zK s (irk p) (iIndReductSeqG …))) (iord (zInd …)) = 0`: from
+   `iord_descent_iIndReduct` (InternalZ, the ordinal-shadow descent, real `irk`, degree-preserving) via the
+   `iotil`/`idg` congruence `iIndReductSeqG ≅ iIndReductSeq` (corresponding premises share `iotil`/`idg`,
+   substitution being ordinal-invariant — the same fact that makes `iord_descent_red` survive 0→k). -/
+theorem descent_step_Ind {s at' p d0 d1 : V} (hd : ZDerivesEmptyR (zInd s at' p d0 d1)) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zInd s at' p d0 d1)) = 0 := sorry
+
 /-- **(E') the existence-form one-step descent.** Every regular ⊥-orbit code has a sound, strictly-
-descending reduct — Ind root PROVEN (`iord_descent_red_zInd`), K root reduces to `descent_step_K_majorIdx`.
-No fixpoint/cut-free dispatch (a cut-free `∅→⊥` is absurd; `majorIdx` always finds a reducible premise). -/
+descending reduct — Ind root via `descent_step_Ind` (RED-FREE, lap 144), K root via `descent_step_K_majorIdx`
+(critical off `red`, laps 143/144). NO `red` anywhere on this path: the dispatch is the `zTag = 3 (Ind)` /
+`= 4 (K)` split, both witnessed by genuine reducts. (A cut-free `∅→⊥` is absurd; `majorIdx`/`iIndReductSeqG`
+always supply a reducible step.) -/
 theorem ZDerivesEmptyR_descent_step {d : V} (hd : ZDerivesEmptyR d) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0 := by
   rcases zTag_Ind_or_K_of_ZDerivesEmpty hd.1 with htag | htag
-  · exact ⟨red d, ZDerivesEmptyR_red hd, iord_descent_red_zInd d hd.1.1 htag⟩
+  · -- Ind root (zTag = 3): witness with the corrected `iIndReductSeqG` reduct, NOT `red`
+    rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
+      ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · exact descent_step_Ind hd
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · simp at htag
   · rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
       ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
       ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
