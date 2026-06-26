@@ -7535,6 +7535,43 @@ lemma iord_iRcritG_eq_iRcrit (d : V) (ρ : V → V) :
     iord (iRcritG d ρ) = iord (iRcrit d ρ) := by
   rw [iord_eq, iord_eq, iotil_iRcritG_eq_iRcrit, idg_iRcritG_eq_iRcrit]
 
+/-! ### The ¬-case constructor `iRcritGNeg` shares `iord` with `iRcrit` too (the swap is `#`/`max`-commutative)
+
+`iRcritGNeg` is `iRcritG` with the two `seqUpdate` halves at `redexI`/`redexJ` SWAPPED (Buchholz's
+polarity swap for `Aᵢ=¬A`). Since `iotil(iCritReductG …) = ω^{õ ds0} # ω^{õ ds1}` (`inadd`, commutative on
+NF args) and `idg(…) = max(idg ds0)(idg ds1)` (commutative unconditionally), the swap leaves `iord`
+INVARIANT. So the descent twin for the engine re-key's ¬-branch reuses the banked `iord` descent on `iRcrit`
+verbatim — the ordinal side is polarity-blind (the `#`/`max` are symmetric), exactly as the lap-117 handoff
+predicted. The `iotil` half needs the two folds NF (the `hNF`/`hρNF` data already threaded at the descent
+call site `iord_descent_iRcrit_of_chain`); the `idg` half is unconditional. -/
+lemma idg_iRcritGNeg_eq_iRcrit (d : V) (ρ : V → V) :
+    idg (iRcritGNeg d ρ) = idg (iRcrit d ρ) := by
+  rw [iRcritGNeg, iCritReductG, iRcrit, iCritReduct, iCritAux, iCritAux,
+    idg_zK _ _ _ (iCritReductSeq_seq _ _), idg_zK _ _ _ (iCritReductSeq_seq _ _),
+    iseqMaxIdg_iCritReductSeq, iseqMaxIdg_iCritReductSeq]
+  nth_rewrite 2 [max_comm]
+  rw [idg_zK _ _ _ (seqUpdate_seq _ _ _), idg_zK _ _ _ (seqUpdate_seq _ _ _),
+    idg_zK _ _ _ (seqUpdate_seq _ _ _), idg_zK _ _ _ (seqUpdate_seq _ _ _)]
+
+lemma iotil_iRcritGNeg_eq_iRcrit (d : V) (ρ : V → V)
+    (hNFI : isNF (iseqNaddIdg (seqUpdate (zKseq d) (redexI d) (ρ (redexI d)))))
+    (hNFJ : isNF (iseqNaddIdg (seqUpdate (zKseq d) (redexJ d) (ρ (redexJ d))))) :
+    iotil (iRcritGNeg d ρ) = iotil (iRcrit d ρ) := by
+  rw [iRcritGNeg, iCritReductG, iRcrit, iCritReduct, iCritAux, iCritAux,
+    iotil_zK _ _ _ (iCritReductSeq_seq _ _), iotil_zK _ _ _ (iCritReductSeq_seq _ _),
+    iseqNaddIdg_iCritReductSeq, iseqNaddIdg_iCritReductSeq,
+    iotil_zK _ _ _ (seqUpdate_seq _ _ _), iotil_zK _ _ _ (seqUpdate_seq _ _ _),
+    iotil_zK _ _ _ (seqUpdate_seq _ _ _), iotil_zK _ _ _ (seqUpdate_seq _ _ _)]
+  exact inadd_comm _ (isNF_omega_pow hNFI) _ (isNF_omega_pow hNFJ)
+
+/-- **The ¬-case reduct's K-case has the same ordinal as the ordinal-shadow `iRcrit`** (the `iRcritGNeg`
+twin of `iord_iRcritG_eq_iRcrit`; the engine re-key's ¬-branch descent re-point). -/
+lemma iord_iRcritGNeg_eq_iRcrit (d : V) (ρ : V → V)
+    (hNFI : isNF (iseqNaddIdg (seqUpdate (zKseq d) (redexI d) (ρ (redexI d)))))
+    (hNFJ : isNF (iseqNaddIdg (seqUpdate (zKseq d) (redexJ d) (ρ (redexJ d))))) :
+    iord (iRcritGNeg d ρ) = iord (iRcrit d ρ) := by
+  rw [iord_eq, iord_eq, iotil_iRcritGNeg_eq_iRcrit d ρ hNFI hNFJ, idg_iRcritGNeg_eq_iRcrit]
+
 /-! ### Structural correctness of the `iR2` table (mirror `idg`) -/
 
 private lemma def_iRTable {k} (i : Fin k) :
