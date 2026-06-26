@@ -1,11 +1,27 @@
 # Pending work — open obligations & attack paths
 
-## lap 135 (latest) — ⚖️ SPIKE SETTLED: existence-form = **PIVOT**, crux decomposed to 2 named obligations
-**Build 🟢 1326 (src untouched). `wip/ExistenceEndgame.lean` elaborates (exit 0).** Ran the operator-mandated
-lap-132 existence-form spike to decision. **No src sorry dropped** — the crux is a genuine multi-lap wall
-(see "what it KEEPS" below); this lap's deliverable is the decisive settlement + a clean crux decomposition.
+## lap 135 (latest) — ✅ existence-form PIVOT **PORTED TO SRC**: monolithic `false_of_ZDerivesEmpty` DECOMPOSED
+**Build 🟢 1326. Headline axiom footprint UNCHANGED** (`[propext, sorryAx, Classical.choice, Quot.sound]` —
+faithful, no new axioms). Ran the operator-mandated lap-132 existence-form spike to decision (PIVOT), then
+ported the decomposition into `src/GoodsteinPA/Crux2Blueprint.lean`:
 
-### VERDICT: PIVOT (the existence form is the right endgame), with precise scoping
+- **`false_of_ZDerivesEmpty` is NO LONGER a sorry** — it is a sorry-FREE composition of the existence step
+  (E') `ZDerivesEmptyR_descent_step` with `prwo_forbids_existence_descent`.
+- **(E') `ZDerivesEmptyR_descent_step` PROVEN** modulo the K case: Ind root proven (`iord_descent_red_zInd`),
+  K root reduces to `descent_step_K_majorIdx`.
+- **NEW named sub-`sorry` #1 `descent_step_K_majorIdx`** (Crux2Blueprint:1398) — the per-step K-case math
+  (tag-3 descent proven; tag-5/6 = cutPartner principal cut + hAll; tag-4 = structural recursion).
+- **NEW named sub-`sorry` #2 `prwo_forbids_existence_descent`** (Crux2Blueprint:1430) — the M3 PRWO plumbing.
+- **SORRY-FREE infrastructure landed in src:** `iRedDescent_zK_replace_explicit` + `iord_descent_zK_replace_explicit`
+  (index-generic `red`-free REPLACE descent kernel, works at `majorIdx`) + `descent_K_majorIdx_Ind_descends`
+  (tag-3 Ind-major descent).
+
+**Net src count 11 → 12** (the monolithic `false_of_ZDerivesEmpty` split into 2 named sub-sorries). Per the
+lap-135 DIRECTION update this is PROGRESS, not regress — a monolithic sorry is worse than named, individually-
+attackable ones. `wip/ExistenceEndgame.lean` REMOVED (content now in src, verified green). The lap-132 spike
+`descent_step_Kcrit_of_bundle` exploration is preserved in git history (commit 8f77bb3..d2f8610).
+
+### VERDICT (why PIVOT) — precise scoping derived from the actual code
 The spike's question was whether the existence / least-descending-reduct form **sheds** or merely **relocates**
 the stall. Answer (derived from the actual code, not the lap-132 hope):
 
@@ -26,7 +42,7 @@ the stall. Answer (derived from the actual code, not the lap-132 hope):
   NON-EMPTY antecedent (chain threading), so plain `ZDerivesEmptyR` IH does not apply. This is the deep core.
 - `prwo_forbids_existence_descent` — M3 plumbing, needed either way.
 
-### Decomposition LANDED in `wip/ExistenceEndgame.lean` (the concrete PIVOT form)
+### Decomposition LANDED in `src/GoodsteinPA/Crux2Blueprint.lean` (the concrete PIVOT form, now in src)
 `ZDerivesEmptyR_descent_step` (E') is now **PROVEN modulo one named lemma** (the reduction is real, no sorry):
 - Ind (tag 3) → `⟨red d, ZDerivesEmptyR_red, iord_descent_red_zInd⟩`, PROVEN.
 - K (tag 4) → reduces cleanly to **`descent_step_K_majorIdx`** (the lone math residual).
@@ -79,9 +95,10 @@ major premise `dⱼ = znth ds (majorIdx (zK s r ds))`'s tag (∈{3,4,5,6}, BANKE
 2. Then tag-5/6 via `cutPartner` + the shared `hAll` (lap-134 sub-steps 1-2 below — still on-path).
 3. Then the tag-4 structural recursion: state the GENERALIZED (E') over Z-derivations with non-empty
    antecedent (the chain threading), inducting on `<`. This is the deep core that both routes share.
-4. M3 `prwo_forbids_existence_descent` (now UNFORBIDDEN — spike decided): realize `redLeast` as the Σ₁
-   least-witness over (E')'s predicate, wire `gentzenDescentφ`/`prwoInstance` (reused `wip/GentzenCon`).
-5. Port (E') + the endgame composition to `src`, replacing `false_of_ZDerivesEmpty`'s bare sorry.
+4. M3 `prwo_forbids_existence_descent` (Crux2Blueprint:1430, now UNFORBIDDEN — spike decided): realize
+   `redLeast` as the Σ₁ least-witness over (E')'s predicate, wire `gentzenDescentφ`/`prwoInstance` (reused
+   `wip/GentzenCon`).
+5. ✅ DONE (lap 135) — (E') + endgame composition ported to src; `false_of_ZDerivesEmpty` proven.
 
 ## lap 134 (latest) — ✅ `hNeg` DROPPED from the soundness front; NEXT = `hAll` via `redZKReady` strengthening
 **Build 🟢 1326.** `hNeg` removed from `ZDerivation_iRKcCrit_of_zKValid`/`_of_isChainInf`/`_botOrbit` — the I¬

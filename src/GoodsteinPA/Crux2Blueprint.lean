@@ -1308,9 +1308,133 @@ discharges the deep axiom `GentzenCon.gentzen_descent_of_inconsistent`; the exis
 + `GentzenCon` scaffolding carries it the rest of the way to `goodstein_implies_consistency` and the
 headline — no new top-level wiring. -/
 
-/-- **M3.** From a `ZDerivesEmpty` witness, the unconditional ε₀-descent contradicts well-foundedness of
-the internal ordinal order — the Gentzen `False`. (Internalize `n ↦ iord (red^[n] z)` as the `Σ₁` graph
-`gentzenDescentφ`; the descent is `iord_red_iterate_descends`.) -/
-theorem false_of_ZDerivesEmpty {z : V} (hz : ZDerivesEmptyR z) : False := sorry
+/-! ### Existence-form endgame (lap-135 PIVOT) — the monolithic `false_of_ZDerivesEmpty` DECOMPOSED
+
+The lap-129 refutation ("`red`-fixpoint ⟹ cut-free" is FALSE for the `permIdx` engine) blocked the direct
+proof of `false_of_ZDerivesEmpty` via the `iord_red_iterate_descends` dichotomy (its fixpoint branch is a
+non-cut-free STALL). The lap-132/135 reframe replaces the deterministic engine with the EXISTENCE of a
+descending reduct (`ZDerivesEmptyR_descent_step`, E') + the `𝚺₁` least-witness `redLeast` against
+`PRWO(ε₀)` (`prwo_forbids_existence_descent`). The fixpoint branch DISAPPEARS — `majorIdx` never stalls on
+the ⊥-orbit (`majorIdx_botOrbit_reducible`). This block decomposes the single monolithic termination
+`sorry` into TWO named, individually-attackable sub-`sorry`s (`descent_step_K_majorIdx` = the per-step
+math; `prwo_forbids_existence_descent` = the M3 PRWO plumbing) plus SORRY-FREE descent infrastructure. -/
+
+/-- **Explicit-reduct REPLACE descent kernel (index-generic, `red`-free), SORRY-FREE.** The termination
+half the existence form needs at `majorIdx`. `iRedDescent_red_zK_replace_eq` proves the same bundle but
+keys its conclusion to `red (zK s r ds)` via an `hred` true only at `permIdx`; here the reduct is the
+EXPLICIT `zK s r (seqUpdate ds i v)`. Proof = that kernel's body with `red (znth ds i) ↦ v`, final
+`rw [hred]` dropped (`iotil`/`idg` are conclusion-label & `red`-agnostic — read only the premise seq). -/
+theorem iRedDescent_zK_replace_explicit {s r ds i v : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hIH : iRedDescent v (znth ds i)) :
+    iRedDescent (zK s r (seqUpdate ds i v)) (zK s r ds) := by
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hNF' : ∀ n, isNF (iotil (znth (seqUpdate ds i v) n)) := fun n => by
+    rcases eq_or_ne n i with rfl | hne
+    · rw [znth_seqUpdate_self hi]; exact hIH.nf
+    · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+  have hle : ∀ n, idg (znth (seqUpdate ds i v) n) ≤ idg (znth ds n) := fun n => by
+    rcases eq_or_ne n i with rfl | hne
+    · rw [znth_seqUpdate_self hi]; exact hIH.dg_le
+    · rw [znth_seqUpdate_of_ne hne]
+  have heq : ∀ n, n ≠ i →
+      iotil (znth (seqUpdate ds i v) n) = iotil (znth ds n) :=
+    fun n hne => by rw [znth_seqUpdate_of_ne hne]
+  have hlt : icmp (iotil (znth (seqUpdate ds i v) i)) (iotil (znth ds i)) = 0 := by
+    rw [znth_seqUpdate_self hi]; exact hIH.otil_lt
+  exact ⟨idg_zK_le_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hle,
+    iotil_zK_lt_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hi hlt heq hNF hNF',
+    isNF_iotil_zK (seqUpdate_seq ds i _) (fun n _ => hNF' n)⟩
+
+/-- **`iord`-descent corollary** of `iRedDescent_zK_replace_explicit` (the form the existence step
+consumes — strict `iord` drop of the explicit `majorIdx`-replace reduct). SORRY-FREE. -/
+theorem iord_descent_zK_replace_explicit {s r ds i v : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hIH : iRedDescent v (znth ds i)) :
+    icmp (iord (zK s r (seqUpdate ds i v))) (iord (zK s r ds)) = 0 :=
+  iord_descent_of_iRedDescent (iRedDescent_zK_replace_explicit hds hmem hi hIH)
+    (isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation _ (hmem n hn)))
+
+/-- **tag-3 (Ind major premise) DESCENT, SORRY-FREE** — the termination half of `descent_step_K_majorIdx`'s
+Ind case. `red dⱼ = iRInd dⱼ` (`red_zInd`) descends below `dⱼ` (`iRedDescent_zInd`), fed to the explicit
+kernel. The tag-3 residual of `descent_step_K_majorIdx` is then PURELY the soundness witness. -/
+theorem descent_K_majorIdx_Ind_descends {s r ds : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n))
+    (hmlt : majorIdx (zK s r ds) < lh ds)
+    (hind : zTag (znth ds (majorIdx (zK s r ds))) = 3) :
+    icmp (iord (zK s r (seqUpdate ds (majorIdx (zK s r ds))
+            (red (znth ds (majorIdx (zK s r ds)))))))
+         (iord (zK s r ds)) = 0 := by
+  have hjZ : ZDerivation (znth ds (majorIdx (zK s r ds))) := hmem _ hmlt
+  have hIH : iRedDescent (red (znth ds (majorIdx (zK s r ds))))
+      (znth ds (majorIdx (zK s r ds))) := by
+    rcases zDerivation_iff.mp hjZ with ⟨s', heq, _⟩ | ⟨s', a', p', d0', heq, _, _⟩ |
+      ⟨s', p', d0', heq, _, _⟩ | ⟨s', at'', p', d0', d1', heq, _, _, _⟩ |
+      ⟨s', r', ds', heq, _, _, _⟩ | ⟨s', p', k', heq, _, _⟩ | ⟨s', p', heq, _, _⟩ | ⟨s', C', heq, _⟩
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq, red_zInd]
+      obtain ⟨hd0Z, hd1Z, _⟩ := zDerivation_zInd_inv (heq ▸ hjZ)
+      exact iRedDescent_zInd (isNF_iotil_of_ZDerivation _ hd0Z) (isNF_iotil_of_ZDerivation _ hd1Z)
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+  exact iord_descent_zK_replace_explicit hds hmem hmlt hIH
+
+/-- **NAMED sub-`sorry` #1 — the per-step K-case math.** A regular `∅→⊥` K-node has a SOUND, strictly-
+`iord`-descending reduct. Dispatch on the faithful major premise `dⱼ = znth ds (majorIdx (zK s r ds))`
+(BANKED `majorIdx_botOrbit_reducible`: in range, succedent `⊥`, `zTag ∉ {0,7}`, so `∈{3,4,5,6}`):
+* **tag 3 (Ind)** — replace `dⱼ ↦ red dⱼ`; DESCENT is `descent_K_majorIdx_Ind_descends` (proven above);
+  residual = the soundness witness (`zKValidF_iIndReduct_of_zInd` + replace-preservation).
+* **tag 5/6 (∀/¬-axiom)** — the PRINCIPAL CUT at `(i', majorIdx)` with `i'` the upstream R-intro PINNED by
+  `majorPrem_zAx{All,Neg}_cutPartner` (BANKED); `iRKcCrit`-style, soundness = the shared `hAll` bridge.
+* **tag 4 (chain)** — the relocated structural `<`-recursion (generalized over premises w/ non-empty
+  antecedent). The deep core. -/
+theorem descent_step_K_majorIdx {s r ds : V}
+    (hZ : ZDerivation (zK s r ds)) (hreg : ZRegular (zK s r ds)) (hfr : ZFresh (zK s r ds))
+    (hsa : ZSeqAnt (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V)) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+
+/-- **(E') the existence-form one-step descent.** Every regular ⊥-orbit code has a sound, strictly-
+descending reduct — Ind root PROVEN (`iord_descent_red_zInd`), K root reduces to `descent_step_K_majorIdx`.
+No fixpoint/cut-free dispatch (a cut-free `∅→⊥` is absurd; `majorIdx` always finds a reducible premise). -/
+theorem ZDerivesEmptyR_descent_step {d : V} (hd : ZDerivesEmptyR d) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0 := by
+  rcases zTag_Ind_or_K_of_ZDerivesEmpty hd.1 with htag | htag
+  · exact ⟨red d, ZDerivesEmptyR_red hd, iord_descent_red_zInd d hd.1.1 htag⟩
+  · rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
+      ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · have hant : seqAnt s = (∅ : V) := by have h := hd.1.2.1; rwa [fstIdx_zK] at h
+      have hsucc : seqSucc s = (^⊥ : V) := by have h := hd.1.2.2; rwa [fstIdx_zK] at h
+      exact descent_step_K_majorIdx hd.1.1 hd.2.1 hd.2.2.1 hd.2.2.2 hant hsucc
+    · simp at htag
+    · simp at htag
+    · simp at htag
+
+/-- **NAMED sub-`sorry` #2 — the M3 PRWO plumbing.** Given the existence step, the `𝚺₁` least-witness
+`redLeast d := μ d'. [ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0]` yields an infinite `𝚺₁`-definable
+`iord`-descent (`gentzenDescentφ`), forbidden by `PRWO(ε₀)` (crux 1). The `𝚺₁`-ness is load-bearing
+(`iord` is not internally well-founded in nonstandard `V` — only `𝚺₁` descents are forbidden). This is the
+existing M3 endgame with the iterator `red ↦ redLeast` (reused `wip/GentzenCon` `gentzenDescentφ`/`prwoInstance`). -/
+theorem prwo_forbids_existence_descent
+    (hstep : ∀ d : V, ZDerivesEmptyR d → ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0)
+    {z : V} (hz : ZDerivesEmptyR z) : False := sorry
+
+/-- **M3 — the Gentzen `False`, now a sorry-FREE composition** of the existence step (E') with the PRWO
+obligation. (Was a bare `sorry`; the lap-135 PIVOT decomposes it into `descent_step_K_majorIdx` +
+`prwo_forbids_existence_descent`, both named above.) -/
+theorem false_of_ZDerivesEmpty {z : V} (hz : ZDerivesEmptyR z) : False :=
+  prwo_forbids_existence_descent (fun _ hd => ZDerivesEmptyR_descent_step hd) hz
 
 end GoodsteinPA.InternalZ
