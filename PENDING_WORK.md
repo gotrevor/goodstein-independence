@@ -1,5 +1,24 @@
 # Pending work — open obligations & attack paths
 
+## lap 118 — ¬-case inversion's `hpmem` residual DISCHARGED; capstone now unconditional
+**Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
+1 commit (4aa7a44). No sorries added.** See `HANDOFF-2026-06-26-lap118.md`.
+
+**Discharged the lap-117 ¬-side residual** `hpmem : inAnt A (seqAnt sⱼ)` (Buchholz 2.2's `A,¬A∈Γ`) by
+**strengthening the `zAxNeg` (tag-6) ZPhi disjunct** with a 4th conjunct `inAnt p (seqAnt s)` — faithful to
+Buchholz §5 case 2.2 (`Ax^{¬A,0}` genuinely carries both `A,¬A∈Γ`; `buchholz-gentzen.txt:903`). Full ZPhi
+ripple done (`ZPhi`/`zphi_monotone`/`_strong_finite`/`zphi_iff`/`zblueprint` σ+π/`zPhi_definable` + rcases/
+construction sites in `Crux2Blueprint`/`Zsubst`/`InternalZ`). `zDerivation_zAxNeg_inv` now returns both
+memberships; `ZDerivation_corrected_haux0_neg` recovers `hpmem` in-proof; **`ZDerivation_iRcritGNeg_corrected_neg`
+drops the `hpmem` hypothesis** (axiom-clean `[propext, choice, Quot.sound]`). The ¬-side twin of lap-115's
+`zAx1` 8th-disjunct discharge.
+
+**NEXT (hardest-first):** the engine re-key — re-key `iRKc` (`InternalZ:6656`) to DISPATCH on redex polarity
+(`zTag dᵢ=1` → `iRcritG`+`critReductCorr`; I¬ → `iRcritGNeg`+ρ_neg). Both soundness capstones are now
+hypothesis-light, so `ZDerivation_red_zK_crit` closes via `red_zK_crit` + the two capstones; the ¬-branch's
+call site needs one fewer orbit datum (`hpmem` is free now). Descent re-points via `iord_iRcritG_eq_iRcrit` +
+an `iord_iRcritGNeg_eq_iRcrit` twin. Full step list in HANDOFF lap-118.
+
 ## lap 117 — ¬-case critical-cut inversion SOUNDNESS proven; BOTH critical sub-cases complete
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
 1 commit (9507db8). No sorries added; the ¬-case lemmas are axiom-clean `[propext, choice, Quot.sound]`.**

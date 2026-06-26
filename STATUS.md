@@ -1,9 +1,23 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 117 · 2026-06-26 (¬-case inversion soundness proven; BOTH critical sub-cases now done)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 118 · 2026-06-26 (¬-case `hpmem` residual DISCHARGED; capstone now unconditional)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+
+> **⭐⭐⭐ Lap-118 — the ¬-case inversion's last residual DISCHARGED; capstone now UNCONDITIONAL (read FIRST — current).**
+> Lap 117 proved the ¬-case critical-cut inversion SOUND but carried one orbit hypothesis `hpmem : inAnt A
+> (seqAnt sⱼ)` (Buchholz 2.2's `A,¬A∈Γ`). This lap discharges it by **strengthening the `zAxNeg` (tag-6) ZPhi
+> disjunct** with a 4th conjunct `inAnt p (seqAnt s)` — making the repo's ¬-axiom faithful to Buchholz §5 case
+> 2.2, where `Ax^{¬A,0}` genuinely carries BOTH `A,¬A∈Γ` (scratchpad `buchholz-gentzen.txt:903`). Ripple done
+> (ZPhi/`zphi_monotone`/`_strong_finite`/`zphi_iff`/`zblueprint` σ+π/`zPhi_definable` + the rcases sites);
+> `zDerivation_zAxNeg_inv` now returns both memberships. `ZDerivation_corrected_haux0_neg` recovers `hpmem`
+> in-proof (`zDerivation_zK_inv` + `zDerivation_zAxNeg_inv`), so **`ZDerivation_iRcritGNeg_corrected_neg` drops
+> the `hpmem` hypothesis** — all axiom-clean `[propext, Classical.choice, Quot.sound]`, build 1326. This is the
+> ¬-side twin of lap-115's `zAx1` 8th-disjunct discharge (which closed the ∀ L-half's `hZredL`). **NEXT (the
+> engine re-key, now fully de-risked on BOTH polarities):** re-key `red`'s tag-4 critical branch (`iRKc`,
+> `InternalZ:6656`) to DISPATCH on redex polarity and emit `iRcritG`+`critReductCorr` (∀) / `iRcritGNeg`+ρ_neg
+> (¬). Both soundness capstones are now hypothesis-light. See `HANDOFF-2026-06-26-lap118.md`.
 
 > **⭐⭐⭐ Lap-117 — the ¬-case critical-cut inversion SOUNDNESS PROVEN; BOTH critical sub-cases now complete (read FIRST — current).**
 > The lap-116 ∀-case (`iRcritG`/`critReductCorr`) had a documented CAVEAT: it handled only the I∀ R-redex; the
