@@ -2727,6 +2727,77 @@ theorem ZFresh_red : ∀ d : V, ZDerivation d → ZFresh d → ZFresh (red d) :=
             (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hfresh (by simp [zTag_zAx1])
   exact key
 
+/-! ## `ZFresh_iRKcCrit` — the re-keyed critical reduct preserves freshness (O3 front of the engine swap)
+
+The O3 (freshness) analogue of the landed `ZRegular_iRKcCrit` (O1). The engine swap re-keys `red`'s tag-4
+critical branch to emit `iRKcCrit d` (the re-principalized corrected reduct); this proves that reduct
+preserves `ZFresh`, additively, before the atomic swap. The reduct's two `iCritReductSeq` halves are
+`seqUpdate`s of the chain's premise sequence swapping one redex premise for its §3.2-case-5.1 corrected
+reduct — the I∀ slot via `ZFresh_zsubst_zIallPrem` (`zFresh_zsubst` on the I∀ child), the I¬ slot via
+`ZFresh_zInegPrem` (hereditary `zFresh_zIneg`), the L-redex `zAx1` slots free (`zFresh_zAx1`). -/
+
+/-- **The ∀ R-redex's corrected-reduct premise is fresh** (O3 analogue of `ZRegular_zsubst_zIallPrem`).
+The §3.2-case-5.1 ∀-reduct is `zsubst d0 aᵢ (numeral k)` (re-principalized at the L-instance `k`); its
+freshness is the downward `zFresh_zsubst` applied to the I∀ child `d0 = zIallPrem e`. -/
+lemma ZFresh_zsubst_zIallPrem {e k : V} (he : ZDerivation e) (hfresh : ZFresh e) (htag : zTag e = 1) :
+    ZFresh (zsubst (zIallPrem e) (zIallEig e) (Bootstrapping.Arithmetic.numeral k)) := by
+  rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+  · simp at htag
+  · rw [zIallPrem_zIall, zIallEig_zIall]
+    exact zFresh_zsubst a k d0 hd0 (zfresh_zIallPrem hfresh)
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+
+/-- **The ¬ R-redex's corrected-reduct premise is fresh** (O3 analogue of `ZRegular_zInegPrem`). The
+I¬ child `d0 = zInegPrem e` is fresh hereditarily (`zFresh_zIneg`). -/
+lemma ZFresh_zInegPrem {e : V} (he : ZDerivation e) (hfresh : ZFresh e) (htag : zTag e = 2) :
+    ZFresh (zInegPrem e) := by
+  rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+  · simp at htag
+  · simp at htag
+  · rw [zInegPrem_zIneg]
+    unfold ZFresh at hfresh ⊢
+    rwa [zFresh_zIneg] at hfresh
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+
+/-- **The re-keyed critical reduct `iRKcCrit` preserves `ZFresh`** — O3 front of the engine swap, CLOSED
+additively (mirror of `ZRegular_iRKcCrit`). Each of the two `iCritReductSeq` halves is a `seqUpdate` of the
+chain's premise sequence swapping one redex premise for its corrected reduct; fresh when (a) every original
+premise is (`hprem`, from the chain's own `ZFresh`) and (b) the swapped reduct is — the I∀ slot via
+`ZFresh_zsubst_zIallPrem`, the I¬ slot via `ZFresh_zInegPrem`, the L-redex `zAx1` slots free. -/
+lemma ZFresh_iRKcCrit {d : V}
+    (hprem : ∀ m < lh (zKseq d), ZFresh (znth (zKseq d) m))
+    (hdI : ZDerivation (znth (zKseq d) (redexI d)))
+    (hfreshI : ZFresh (znth (zKseq d) (redexI d)))
+    (htagI : zTag (znth (zKseq d) (redexI d)) = 1 ∨ zTag (znth (zKseq d) (redexI d)) = 2) :
+    ZFresh (iRKcCrit d) := by
+  have hax : ∀ a b : V, ZFresh (zAx1 a b) := fun a b => zFresh_zAx1 a b
+  rw [iRKcCrit]
+  split
+  case isTrue h1 =>
+    rw [iCritReductG]
+    exact ZFresh_zK_of_iCritReductSeq
+      (ZFresh_zK_of_seqUpdate hprem (ZFresh_zsubst_zIallPrem hdI hfreshI h1))
+      (ZFresh_zK_of_seqUpdate hprem (hax _ _))
+  case isFalse h1 =>
+    have h2 : zTag (znth (zKseq d) (redexI d)) = 2 := htagI.resolve_left h1
+    rw [iCritReductG]
+    exact ZFresh_zK_of_iCritReductSeq
+      (ZFresh_zK_of_seqUpdate hprem (hax _ _))
+      (ZFresh_zK_of_seqUpdate hprem (ZFresh_zInegPrem hdI hfreshI h2))
+
 /-! ### ✅ The `hseltag` leaf — RESOLVED (lap 95) by the gated `iRK` dispatch
 
 **Historical (lap 94 obstruction, now fixed).** The former `ZRegular_red_zK` leaf `hseltag` claimed the
