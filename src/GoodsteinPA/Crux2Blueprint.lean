@@ -347,6 +347,107 @@ does for the 5.1 branch), so each branch is stated over the genuine per-premise 
 -- the former local copies here were removed to avoid duplicate declarations once Crux2Blueprint imports
 -- `GoodsteinPA.Zsubst` for the route-B regularity threading.)
 
+/-! ### Explicit-pair generalization of the critical-cut reduct (the EXISTENCE-form tag-5/6 key)
+
+The lap-129 refutation forced the engine STALL onto a deterministic redex finder (`redexI`/`redexJ`). The
+lap-135 existence-form pivot says: at a ⊥-chain K-node we are free to PICK the cut pair `(i,j)` (e.g.
+`(cutPartner, majorIdx)`) one-shot, with no threaded finder. The critical-cut SOUNDNESS is already
+pair-parametric at the `iCritReductG` level (`ZDerivation_iCritReductG_of` takes the two modified premise
+sequences explicitly — InternalZ:9736), and the REPLACE workhorse `ZDerivation_iCritReplaceReduce_of`/`_general`
+is parametric in the replaced index. The lone obstruction to building the principal cut at an ARBITRARY pair
+without the engine re-key was that `cutFormula d` (InternalZ:6648) reads `redexI d`/`redexJ d`. `cutFormulaAt`
+abstracts those to explicit indices `i` (the R-redex) and `j` (the L-redex), with `cutFormula d =
+cutFormulaAt (redexI d) (redexJ d) d` by `rfl`. The two half-derivation lemmas (`ZDerivation_corrected_haux0`
+etc.) then generalize to explicit pairs (`_at` twins below). This dissolves the tag-5/6 dependence on the
+forbidden engine re-key (`redexI/redexJ = (cutPartner, majorIdx)`), leaving only the descent + the
+cutPartner-is-principal-R-intro datum. -/
+
+/-- **Explicit-pair cut formula** — `cutFormula` with the redex pair `(redexI d, redexJ d)` abstracted to an
+arbitrary R-index `i` and L-index `j`. `cutFormula d = cutFormulaAt (redexI d) (redexJ d) d` definitionally
+(`cutFormula_eq_cutFormulaAt`). -/
+noncomputable def _root_.GoodsteinPA.InternalZ.cutFormulaAt (i j d : V) : V :=
+  if π₁ (chainAsucc (zKseq d) i - 1) = 6 then
+    substs1 ℒₒᵣ
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) j)))))
+      (π₂ (chainAsucc (zKseq d) i - 1))
+  else
+    neg ℒₒᵣ (π₁ (π₂ (chainAsucc (zKseq d) i - 1)))
+
+/-- `cutFormula d = cutFormulaAt (redexI d) (redexJ d) d` — the explicit pair `(redexI d, redexJ d)`
+recovers the finder-keyed `cutFormula`. -/
+@[simp] lemma cutFormulaAt_redex (d : V) :
+    cutFormulaAt (redexI d) (redexJ d) d = cutFormula d := rfl
+
+/-- `∀`-case readout (explicit pair): when the R-redex's principal is `∀F`, the stripped cut formula is the
+`L^k`-instance `F(k)` of the L-redex `j`. The pair-parametric twin of `cutFormula_all`. -/
+lemma cutFormulaAt_all {i j d p : V} (hA : chainAsucc (zKseq d) i = (^∀ p : V)) :
+    cutFormulaAt i j d = substs1 ℒₒᵣ
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) j))))) p := by
+  unfold cutFormulaAt
+  rw [hA, if_pos (by simp [qqAll])]
+  simp [qqAll]
+
+/-- `¬`-case readout (explicit pair): when the R-redex's principal is `¬A = inegF A`, the stripped cut
+formula is `A`. The pair-parametric twin of `cutFormula_neg`. -/
+lemma cutFormulaAt_neg {i j d p : V} (hp : IsUFormula ℒₒᵣ p)
+    (hA : chainAsucc (zKseq d) i = inegF p) :
+    cutFormulaAt i j d = p := by
+  unfold cutFormulaAt
+  rw [hA, if_neg (by simp [inegF, qqOr])]
+  simp [inegF, qqOr, hp.neg_neg]
+
+/-- **`haux0_at` — the EXPLICIT-PAIR R-side half (Buchholz Thm 3.4(a), ∀-case).** `ZDerivation_corrected_haux0`
+with the redex pair abstracted to an arbitrary R-index `i` (the `I∀` premise) and L-index `j` (supplying the
+`L^k`-instance `k = π₁(π₂(tp dⱼ))`). The cut formula is `cutFormulaAt i j (zK s r ds)`. This is the genuine
+EXISTENCE-form supplier: the descent picks `(i,j) = (cutPartner, majorIdx)` directly. `ZDerivation_corrected_haux0`
+is the `(redexI, redexJ)` instance (`cutFormulaAt_redex`). The proof is `ZDerivation_iCritReplaceReduce_of` (the
+index-parametric REPLACE workhorse) on the re-principalized reduct `zsubst d0 a (numeral k)`. -/
+theorem ZDerivation_corrected_haux0_at {s r ds i j sᵢ a p d0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : i < lh ds)
+    (hdi : znth ds i = zIall sᵢ a p d0)
+    (hfresh_eig : maxEigen d0 < a)
+    (hpfresh : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds j))))) p = p)
+    (hΓfresh : fvSubstSeq a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds j))))) (seqAnt sᵢ) = seqAnt sᵢ)
+    (hsucc_wff : IsUFormula ℒₒᵣ (cutFormulaAt i j (zK s r ds)))
+    (hthread : ∀ i' ≤ i, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < i, irk (chainAsucc ds i') ≤ r) :
+    ZDerivation (zK (seqSetSucc s (cutFormulaAt i j (zK s r ds))) r
+      (seqUpdate ds i
+        (zsubst d0 a (Bootstrapping.Arithmetic.numeral
+          (π₁ (π₂ (tp (znth ds j)))))))) := by
+  have hst : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral
+      (π₁ (π₂ (tp (znth ds j)))) : V) := by simp
+  have hZdi : ZDerivation (zIall sᵢ a p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 _ hi
+  have hZred : ZDerivation (zsubst d0 a (Bootstrapping.Arithmetic.numeral
+      (π₁ (π₂ (tp (znth ds j)))))) :=
+    ZDerivation_zsubst_zIall_premise hst hZdi hfresh_eig
+  have htrack : fstIdx (zsubst d0 a (Bootstrapping.Arithmetic.numeral
+      (π₁ (π₂ (tp (znth ds j)))))) =
+        seqSetSucc sᵢ (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral
+          (π₁ (π₂ (tp (znth ds j))))) p) :=
+    fstIdx_zsubst_zIall_premise hst hZdi hpfresh hΓfresh
+  have hchain_i : chainAnt ds i = seqAnt sᵢ := by
+    unfold chainAnt; rw [hdi, fstIdx_zIall]
+  have hA : chainAsucc (zKseq (zK s r ds)) i = (^∀ p : V) := by
+    rw [zKseq_zK]; unfold chainAsucc; rw [hdi, fstIdx_zIall]; exact (zDerivation_zIall_inv hZdi).2.1
+  have hcut : substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral
+      (π₁ (π₂ (tp (znth ds j))))) p = cutFormulaAt i j (zK s r ds) := by
+    rw [cutFormulaAt_all hA, zKseq_zK]
+  refine ZDerivation_iCritReplaceReduce_of hi hZ hZred ?_ ?_ ?_ hthread hrank ?_ ?_ ?_ ?_ ?_ ?_
+  · rw [htrack, seqAnt_seqSetSucc, hchain_i]
+  · rw [htrack, seqSucc_seqSetSucc, seqSucc_seqSetSucc, hcut]
+  · rw [seqAnt_seqSetSucc]
+  · rw [seqSucc_seqSetSucc]; exact hsucc_wff
+  · exact iperm_tp_fstIdx_of_ZDerivation hZred
+  · exact (tag_uformula_of_ZDerivation hZred).1
+  · exact (tag_uformula_of_ZDerivation hZred).2.1
+  · exact (tag_uformula_of_ZDerivation hZred).2.2.1
+  · exact (tag_uformula_of_ZDerivation hZred).2.2.2
+
 /-- **`haux0` — the corrected inversion's R-side half (Buchholz Thm 3.4(a), ∀-case), DISCHARGED.** The exact
 analogue of `ZDerivation_zK_replace_zIall_of` at the cut INSTANCE `k` instead of `0`: replacing the R-redex
 premise `zIall sᵢ a p d0` of a critical chain by the re-principalized reduct `zsubst d0 a (numeral k)`
@@ -376,35 +477,9 @@ theorem ZDerivation_corrected_haux0 {s r ds sᵢ a p d0 : V}
     ZDerivation (zK (seqSetSucc s (cutFormula (zK s r ds))) r
       (seqUpdate ds (redexI (zK s r ds))
         (zsubst d0 a (Bootstrapping.Arithmetic.numeral
-          (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))))))) := by
-  have hst : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral
-      (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))) : V) := by simp
-  have hZdi : ZDerivation (zIall sᵢ a p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 _ hi
-  have hZred : ZDerivation (zsubst d0 a (Bootstrapping.Arithmetic.numeral
-      (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))))) :=
-    ZDerivation_zsubst_zIall_premise hst hZdi hfresh_eig
-  have htrack : fstIdx (zsubst d0 a (Bootstrapping.Arithmetic.numeral
-      (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))))) =
-        seqSetSucc sᵢ (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral
-          (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds))))))) p) :=
-    fstIdx_zsubst_zIall_premise hst hZdi hpfresh hΓfresh
-  have hchain_i : chainAnt ds (redexI (zK s r ds)) = seqAnt sᵢ := by
-    unfold chainAnt; rw [hdi, fstIdx_zIall]
-  have hA : chainAsucc (zKseq (zK s r ds)) (redexI (zK s r ds)) = (^∀ p : V) := by
-    rw [zKseq_zK]; unfold chainAsucc; rw [hdi, fstIdx_zIall]; exact (zDerivation_zIall_inv hZdi).2.1
-  have hcut : substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral
-      (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds))))))) p = cutFormula (zK s r ds) := by
-    rw [cutFormula_all hA, zKseq_zK]
-  refine ZDerivation_iCritReplaceReduce_of hi hZ hZred ?_ ?_ ?_ hthread hrank ?_ ?_ ?_ ?_ ?_ ?_
-  · rw [htrack, seqAnt_seqSetSucc, hchain_i]
-  · rw [htrack, seqSucc_seqSetSucc, seqSucc_seqSetSucc, hcut]
-  · rw [seqAnt_seqSetSucc]
-  · rw [seqSucc_seqSetSucc]; exact hsucc_wff
-  · exact iperm_tp_fstIdx_of_ZDerivation hZred
-  · exact (tag_uformula_of_ZDerivation hZred).1
-  · exact (tag_uformula_of_ZDerivation hZred).2.1
-  · exact (tag_uformula_of_ZDerivation hZred).2.2.1
-  · exact (tag_uformula_of_ZDerivation hZred).2.2.2
+          (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))))))) :=
+  -- the `(redexI, redexJ)` instance of the explicit-pair `_at` lemma (`cutFormulaAt_redex`, a `rfl`-bridge)
+  ZDerivation_corrected_haux0_at hZ hi hdi hfresh_eig hpfresh hΓfresh hsucc_wff hthread hrank
 
 /-- **`haux1` — the corrected inversion's L-side half (Buchholz Thm 3.4(a), ∀-case), ASSEMBLED modulo the
 two genuine §5 obligations.** The L-redex `dⱼ = znth ds (redexJ d)` is an `axAll` left-axiom `Ax^{∀p,k}`
