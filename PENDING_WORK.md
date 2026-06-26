@@ -1,6 +1,43 @@
 # Pending work — open obligations & attack paths
 
-## lap 138 (latest) — (B0) iteration linchpin DISCHARGED via the repo's own `IIter`; Σ₁-orbit half VALIDATED
+## lap 139 (latest) — critical-cut half-derivation layer made PAIR-PARAMETRIC (dissolves the tag-5/6 engine re-key)
+**Build 🟢 1326. Headline footprint UNCHANGED.** 3 green commits (`bde9e72`→`a4076c6`→`d5e9e44`). **No src sorry
+dropped — none was feasible.** Advance = a structural unlock + the decisive primary/secondary reconciliation.
+
+### ⚖️ DIRECTION reconciliation — the primary (A) and the secondary `descent_step_K_majorIdx` are the SAME content
+DIRECTION.md (lap-137) = hardest-first **(A) `exists_sigma1_descending_step`** (the Σ₁ ε₀-descent), secondary =
+`descent_step_K_majorIdx`. This lap settled they're coupled:
+- **(A) via `redLeast` μ-min is BLOCKED on a wrong-polarity witness bound.** The μ graph is `𝚫₁`, but a TOTAL
+  `g : V → V` (IIter/(B0) needs it) requires off-orbit completion whose graph has a Π₁ disjunct (`¬∃d', P(w,d')`,
+  unbounded) ⟹ `g`'s graph is `Σ₁ ∨ Π₁`, not `Σ₁`. Needs a primrec witness bound `∃ d' ≤ B(w), P(w,d')`. Unbuilt.
+- **(A) via the concrete `redStep`:** total `𝚺₁` PR.Construction ⟹ `gDef` FREE; its descent clause IS
+  `descent_step_K_majorIdx`. ⟹ **the secondary front is the tractable path to the primary.** Crux-1 delivers the
+  SEQUENCE-form `InternalPRWO` (not ε₀-LNP), so a least-element restructure can't shed (A) either. The
+  existence-form reframe does NOT obviate the deep content (re-confirmed, fresh angles).
+
+### ⭐ THE advance — full pair-parametric critical-cut half-derivation layer (Crux2Blueprint)
+Soundness was already pair-parametric at the `iCritReductG` level (`ZDerivation_iCritReductG_of`, takes modified
+premise seqs explicitly); REPLACE workhorse index-parametric. Lone obstruction to an ARBITRARY-pair principal cut
+(no engine re-key): `cutFormula d` reads `redexI/redexJ`. **Landed (proven, axiom-clean, 0 new sorries):**
+- `cutFormulaAt i j d` + `cutFormulaAt_redex` (`= cutFormula` by `rfl`) + `cutFormulaAt_all`/`_neg` readouts.
+- All FOUR halves as explicit-pair `_at` twins (originals delegate as `(redex,…)` instances):
+  `haux0_at {i j}`, `haux1_at {j Cc}`, `haux1_neg_at {i Cc}`, `haux0_neg_at {j Cc}` — full tag-5/6 soundness
+  supply at any cut pair, NO `redexI/redexJ`.
+
+### NEXT (the tag-5/6 existence-form assembly) — concrete, ordered
+1. **Explicit-pair `iCritReductG` soundness** at an arbitrary pair: assemble the `_at` halves via
+   `ZDerivation_iCritReductG_of` directly (NOT `iRcritG`, which bakes `redexI/redexJ`). Thread the cut-rank drop
+   `irk (cutFormulaAt i j d) ≤ zKrank d − 1` (∀: `irk_cutFormula_lt`-style on `cutFormulaAt_all` + `irk_substs1`).
+2. **Wire `(cutPartner, majorIdx)`** via banked `majorPrem_zAx{All,Neg}_cutPartner`. ⚠️ **GENUINE GAP:** the
+   cutPartner `i'` has SUCCEDENT `^∀p`/`inegF p` but `haux0_at` needs `znth ds i' = zIall…` (a PRINCIPAL R-intro).
+   Proving the cutPartner is a principal R-intro is the deep tag-5/6 residual now (Buchholz criticality).
+3. **Descent:** `iord_descent_iRcrit_of_chain'` is already pair-parametric (six bundle facts); re-key callers off
+   `redexI/redexJ` to `(i', majorIdx)`.
+4. Then `descent_step_K_majorIdx` tag-5/6 = (1+2)+(3); (A) via concrete `redStep` (Ind=`red d`; K tag-5/6=this;
+   tag-3=`iIndReductSeqG`; tag-4=recursion).
+⚠️ Do NOT re-key the engine, do NOT chase `redLeast`/μ without a witness bound.
+
+## lap 138 — (B0) iteration linchpin DISCHARGED via the repo's own `IIter`; Σ₁-orbit half VALIDATED
 **Build 🟢 1326. Headline footprint UNCHANGED** (`[propext, sorryAx, Classical.choice, Quot.sound]`, 0 math axioms).
 
 ### THE advance (a real src `sorry` dropped on the termination path)
