@@ -1,5 +1,60 @@
 # Pending work — open obligations & attack paths
 
+## lap 135 (latest) — ⚖️ SPIKE SETTLED: existence-form = **PIVOT**, crux decomposed to 2 named obligations
+**Build 🟢 1326 (src untouched). `wip/ExistenceEndgame.lean` elaborates (exit 0).** Ran the operator-mandated
+lap-132 existence-form spike to decision. **No src sorry dropped** — the crux is a genuine multi-lap wall
+(see "what it KEEPS" below); this lap's deliverable is the decisive settlement + a clean crux decomposition.
+
+### VERDICT: PIVOT (the existence form is the right endgame), with precise scoping
+The spike's question was whether the existence / least-descending-reduct form **sheds** or merely **relocates**
+the stall. Answer (derived from the actual code, not the lap-132 hope):
+
+**What it BUYS (real):**
+- Removes the BLOCKING "fixpoint ⟹ cut-free" obstruction (the lap-129 refutation that forced laps 120-131).
+  In the existence form a fixpoint = "no descending reduct", and (E') makes that impossible on the ⊥-orbit.
+- Removes the requirement that `red` be a TOTAL DETERMINISTIC Σ₁ function with a faithful selector threaded
+  through the whole orbit + every invariant fold. (E') needs only ONE-SHOT `∃` per node.
+- **The critical/non-critical split DISSOLVES into one selector `majorIdx`.** `firstBotPrem`/
+  `majorIdx_botOrbit_reducible`/`majorPrem_zAx{All,Neg}_cutPartner` (ALL BANKED) survive only as one-shot
+  `∃`-facts, NOT as a threaded engine. `majorIdx` never stalls on the ⊥-orbit (no leaf, `zTag ∉ {0,7}`).
+
+**What it KEEPS (does NOT shed — the genuine residual):**
+- The `hAll` cutFormula bridge (`seqSucc sⱼ = cutFormula`) — needed for tag-5/6 principal-cut soundness AND
+  the critical case. SHARED with the engine route (lap-134 was already on it). The reframe does NOT avoid it.
+- The **tag-4 structural RECURSION** — relocated from "prove `red` total+descending" to a `<`-induction on
+  the derivation (premise `dⱼ < zK s r ds`). Genuinely open: the generalized IH must cover a premise with
+  NON-EMPTY antecedent (chain threading), so plain `ZDerivesEmptyR` IH does not apply. This is the deep core.
+- `prwo_forbids_existence_descent` — M3 plumbing, needed either way.
+
+### Decomposition LANDED in `wip/ExistenceEndgame.lean` (the concrete PIVOT form)
+`ZDerivesEmptyR_descent_step` (E') is now **PROVEN modulo one named lemma** (the reduction is real, no sorry):
+- Ind (tag 3) → `⟨red d, ZDerivesEmptyR_red, iord_descent_red_zInd⟩`, PROVEN.
+- K (tag 4) → reduces cleanly to **`descent_step_K_majorIdx`** (the lone math residual).
+`false_of_ZDerivesEmpty_existence` = sorry-FREE composition of (E') + `prwo_forbids_existence_descent`.
+
+`descent_step_K_majorIdx {s r ds}` (regular `∅→⊥` K-node ⟹ ∃ descending sound reduct) dispatches on the
+major premise `dⱼ = znth ds (majorIdx (zK s r ds))`'s tag (∈{3,4,5,6}, BANKED via `majorIdx_botOrbit_reducible`):
+- **tag 3 (Ind major)** — `replace`-at-`majorIdx`; descent via the INDEX-GENERIC kernel
+  `iotil_zK_lt_replace`/`idg_zK_le_replace` + `iRedDescent_zInd`; soundness via the §5.2.2 wrapper
+  (`ZDerivation_iCritAux_of`). **Likely-bankable — the next concrete attack (see below).**
+- **tag 5/6 (∀/¬-axiom major)** — NOT a replace (`red dⱼ = dⱼ`): the PRINCIPAL CUT at `(i', majorIdx)` with
+  `i'` the upstream R-intro PINNED by `majorPrem_zAx{All,Neg}_cutPartner` (BANKED). `iRKcCrit`-style;
+  soundness = the shared `hAll` bridge, descent = banked `iord_descent_iRcritG_*`.
+- **tag 4 (chain major)** — the relocated structural recursion (deep core, above).
+
+### NEXT ATTACK (concrete, ordered)
+1. **Prove `descent_step_K_majorIdx`'s tag-3 (Ind major) sub-case** as a real lemma — the bankable one
+   (no `hAll`, no recursion). Construct the reduct `zK s' r (seqUpdate ds (majorIdx) (red dⱼ))`, prove its
+   descent off the index-generic kernel and soundness off the §5.2.2 wrapper. ⚠️ Check the tp-permissibility
+   of `dⱼ` at `majorIdx` (the wrapper needs it; Cor 2.1 gives it only for `permIdx` — derive afresh for
+   `majorIdx`). This is a genuine sub-lemma of the crux.
+2. Then tag-5/6 via `cutPartner` + the shared `hAll` (lap-134 sub-steps 1-2 below — still on-path).
+3. Then the tag-4 structural recursion: state the GENERALIZED (E') over Z-derivations with non-empty
+   antecedent (the chain threading), inducting on `<`. This is the deep core that both routes share.
+4. M3 `prwo_forbids_existence_descent` (now UNFORBIDDEN — spike decided): realize `redLeast` as the Σ₁
+   least-witness over (E')'s predicate, wire `gentzenDescentφ`/`prwoInstance` (reused `wip/GentzenCon`).
+5. Port (E') + the endgame composition to `src`, replacing `false_of_ZDerivesEmpty`'s bare sorry.
+
 ## lap 134 (latest) — ✅ `hNeg` DROPPED from the soundness front; NEXT = `hAll` via `redZKReady` strengthening
 **Build 🟢 1326.** `hNeg` removed from `ZDerivation_iRKcCrit_of_zKValid`/`_of_isChainInf`/`_botOrbit` — the I¬
 antecedent shape + `Seq` are read off the redex premise by `zDerivation_zIneg_inv (hdi ▸ hmem _ hIlt)`

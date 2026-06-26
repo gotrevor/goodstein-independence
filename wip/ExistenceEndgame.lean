@@ -68,46 +68,81 @@ theorem descent_step_Kcrit_of_bundle {s r ds : V}
     (hsucc : seqSucc (fstIdx (iRKcCrit (zK s r ds))) = (^⊥ : V))
     (hreg : ZRegular (iRKcCrit (zK s r ds)))
     (hfr : ZFresh (iRKcCrit (zK s r ds)))
+    (hsa : ZSeqAnt (iRKcCrit (zK s r ds)))
     (hdesc : icmp (iord (iRKcCrit (zK s r ds))) (iord (zK s r ds)) = 0) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 :=
-  ⟨iRKcCrit (zK s r ds), ⟨⟨hsound, hant, hsucc⟩, hreg, hfr⟩, hdesc⟩
+  ⟨iRKcCrit (zK s r ds), ⟨⟨hsound, hant, hsucc⟩, hreg, hfr, hsa⟩, hdesc⟩
 
-/-- **(E') THE existence-form crux — the UNCONDITIONAL one-step descent.** Every regular ⊥-orbit code
-has a SOUND, strictly-`iord`-descending reduct. There is NO cut-free/fixpoint case to dispatch on:
+/-- **THE existence-form K-case crux, via the FAITHFUL one-shot `majorIdx` selector** (lap-135 spike
+verdict: this is the precise form the PIVOT takes). For a regular `∅→⊥` K-node, a descending sound
+reduct is obtained by reducing the **first `⊥`-exit major premise** `dⱼ = znth ds (majorIdx (zK s r ds))`,
+which `majorIdx_botOrbit_reducible` (`InternalZ:9155`, BANKED) proves is in range, has succedent `⊥`,
+and is NOT a `red`-normal leaf (`zTag ∉ {0,7}`). So `majorIdx` lands on tag `∈ {3,4,5,6}` and the reduct
+dispatch is:
 
-* a `∅→⊥` derivation is never an axiom leaf — `zTag_reducible_of_emptyAnt` (empty antecedent rules out
-  every axiom scheme), and its root is `Ind`/`K` — `zTag_Ind_or_K_of_ZDerivesEmpty` (`InternalZ:8636`);
-* **Ind** (tag 3) → the `iRInd` reduct is sound and descends (`iord_descent_red_zInd`,
-  `Crux2Blueprint:1116`);
-* **K critical** (`zKCritical s ds = ∀ i < lh ds, ¬ iperm (tp (znth ds i)) s`, i.e. no permissible
-  premise) → the genuine cut reduct `iRKcCrit` is SOUND (laps 112-119, `ZDerivation_iRKcCrit_all` +
-  ¬-twin) and DESCENDS (`iord_descent_iRKcCrit_corr`/`_neg`, `RedZKDescent:580/597`);
-* **K non-critical** (a permissible premise exists — possibly a leaf atom, the laps-104-131 STALL case)
-  → reduce the FAITHFUL major premise (first `⊥`-exit, Buchholz §14.25), which `firstBotPrem_reducible`
-  (`InternalZ:8957`) proves is NEVER a leaf (`zTag ∉ {0,7}`), hence reducible + descending.
+* **tag 3 (Ind major)** → the `iRInd dⱼ` reduct in place at `majorIdx`: a `replace` whose descent kernel
+  (`iotil_zK_lt_replace`/`idg_zK_le_replace`, banked, INDEX-GENERIC) + `iRedDescent_zInd` give strict
+  descent; soundness is `ZDerivation`-of-replace (`ZDerivation_iCritAux_of` / the §5.2.2 wrapper).
+* **tag 4 (chain major)** → `replace` with `dⱼ`'s OWN descending reduct: the relocated RECURSION — in the
+  existence form this is a STRUCTURAL `<`-induction on the derivation (premise `dⱼ < zK s r ds`), NOT the
+  engine's "total `red` descends" claim (which forced the no-stall campaign). The generalized IH must
+  cover a premise with non-empty antecedent (the chain threading) — the genuine open recursion core.
+* **tag 5/6 (∀/¬-axiom major)** → NOT a `replace` (`red dⱼ = dⱼ`, fixpoint): the PRINCIPAL CUT at the
+  redex pair `(i', majorIdx)` where `i'` is the upstream R-introduction of the axiom's active formula,
+  PINNED by `majorPrem_zAxAll_cutPartner` / `majorPrem_zAxNeg_cutPartner` (`InternalZ:9217/9245`,
+  BANKED). The reduct is `iRcritG`-style (the `iRKcCrit` machinery, laps 112-119) at THIS pair — its
+  soundness needs the same `hAll` cutFormula bridge as the critical case (SHARED blocker), its descent
+  the banked `iord_descent_iRcritG_*`.
 
-Regularity/freshness preservation (`ZRegular_red`/`ZFresh_red` + the pending `seqAntSeq` fold) keep the
-reduct inside `ZDerivesEmptyR`. **This single lemma is the entire remaining crux-2 content.** It
-REPLACES `iord_descent_red`'s fixpoint dichotomy, the "fixpoint ⟹ cut-free" obligation, AND the
-`permIdx`→`majorIdx` engine swap: the major premise is chosen here as a ONE-SHOT `∃`, never as a total
-Σ₁ engine threaded through the orbit + every invariant fold. -/
+**Why this settles the spike (PIVOT).** The critical/non-critical split DISSOLVES into one selector
+(`majorIdx`); `firstBotPrem`/`majorIdx_botOrbit_reducible`/the `cutPartner` lemmas survive only as
+ONE-SHOT `∃`-facts (all BANKED), NEVER as a threaded total engine. The fixpoint-⟹-cut-free obstruction
+(lap-129 refutation) is GONE — `majorIdx` never stalls on the ⊥-orbit (no leaf). What the reframe does
+NOT shed: the `hAll` cutFormula bridge (tag-5/6 + critical, shared) and the tag-4 structural recursion
+(relocated to `<`-induction). See `PENDING_WORK.md` lap-135 for the verdict + attack. -/
+theorem descent_step_K_majorIdx {s r ds : V}
+    (hZ : ZDerivation (zK s r ds)) (hreg : ZRegular (zK s r ds)) (hfr : ZFresh (zK s r ds))
+    (hsa : ZSeqAnt (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V)) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  -- The faithful major premise is reducible (no leaf stall) — BANKED, the linchpin the reframe reuses.
+  obtain ⟨hmlt, hmbot, hm0, hm7⟩ := majorIdx_botOrbit_reducible hZ hant hsucc
+  -- Dispatch on `dⱼ`'s tag (∈ {3,4,5,6} since `≠ 0,7`); see docstring. The tag-3 case is banked-clean,
+  -- tag-5/6 routes through the `cutPartner` principal cut + `hAll`, tag-4 is the structural recursion.
+  sorry
+
+/-- **(E') THE existence-form crux — the UNCONDITIONAL one-step descent.** Every regular ⊥-orbit code has
+a SOUND, strictly-`iord`-descending reduct; NO fixpoint/cut-free case to dispatch (a cut-free `∅→⊥` is
+absurd by Cor 2.1, so `majorIdx` always finds a reducible major premise). Reduces cleanly to the two
+roots a `∅→⊥` derivation can have (`zTag_Ind_or_K_of_ZDerivesEmpty`, `InternalZ:8643`):
+
+* **Ind** (tag 3) → `red d = iRInd d`, sound + strictly descends (`iord_descent_red_zInd`,
+  `Crux2Blueprint:1116`) — PROVEN here, no residual;
+* **K** (tag 4) → `descent_step_K_majorIdx` (the lone remaining content, above).
+
+**This REPLACES** `iord_descent_red`'s fixpoint dichotomy, the "fixpoint ⟹ cut-free" obligation, AND the
+`permIdx`→`majorIdx` total-engine swap: the major premise is chosen as a ONE-SHOT `∃`, never threaded. -/
 theorem ZDerivesEmptyR_descent_step {d : V} (hd : ZDerivesEmptyR d) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0 := by
   rcases zTag_Ind_or_K_of_ZDerivesEmpty hd.1 with htag | htag
   · -- **Ind (tag 3): PROVEN from banked lemmas.** `red d = iRInd d` preserves `ZDerivesEmptyR`
     -- (`ZDerivesEmptyR_red`) and STRICTLY descends (`iord_descent_red_zInd`, no fixpoint case for Ind).
     exact ⟨red d, ZDerivesEmptyR_red hd, iord_descent_red_zInd d hd.1.1 htag⟩
-  · -- **K (tag 4): the single remaining content.** Two one-shot existence choices (NOT a total engine):
-    -- • critical (`zKCritical s ds`, no permissible premise) → the genuine cut reduct `iRKcCrit` —
-    --   sound (`ZDerivation_iRKcCrit_all` + ¬-twin, laps 112-119), descends
-    --   (`iord_descent_iRKcCrit_corr`/`_neg`), preserves regularity/freshness (`ZRegular_iRKcCrit`/
-    --   `ZFresh_iRKcCrit`); the `Seq(seqAnt)` bundle is the lap-131 `seqAntSeq`-fold residual.
-    -- • non-critical (a permissible premise exists, possibly a leaf atom — the laps-104-131 STALL) →
-    --   reduce the FAITHFUL major premise (first `⊥`-exit), which `firstBotPrem_reducible` proves is
-    --   NEVER a leaf (`zTag ∉ {0,7}`), hence reducible + descending.
-    -- This is where the existence form's leverage lives: the major premise is chosen HERE, once, as an
-    -- `∃`-witness — not as a `permIdx`/`majorIdx` engine that must be threaded through the orbit.
-    sorry
+  · -- **K (tag 4): reduces to `descent_step_K_majorIdx`.** Destructure `d = zK s r ds`, supply the
+    -- regular `∅→⊥` data off `hd`; the major-premise dispatch is the lone open content.
+    rcases zDerivation_iff.mp hd.1.1 with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
+      ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
+      ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · simp at htag
+    · have hant : seqAnt s = (∅ : V) := by have h := hd.1.2.1; rwa [fstIdx_zK] at h
+      have hsucc : seqSucc s = (^⊥ : V) := by have h := hd.1.2.2; rwa [fstIdx_zK] at h
+      exact descent_step_K_majorIdx hd.1.1 hd.2.1 hd.2.2.1 hd.2.2.2 hant hsucc
+    · simp at htag
+    · simp at htag
+    · simp at htag
 
 /-- **Reused M3 plumbing (UNCHANGED by the reframing except the iterator).** Given (E') as a hypothesis,
 realize the `𝚺₁` LEAST-WITNESS iterator `redLeast d := μ d'. [ZDerivesEmptyR d' ∧ icmp (iord d') (iord d)
