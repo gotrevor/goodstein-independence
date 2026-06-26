@@ -1,12 +1,23 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 140 · 2026-06-26 · `f9190ee`
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 141 · 2026-06-26 · `3ca3221`
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**,
-re-verified in-kernel lap-140 `lake env lean`); `goodsteinSentence_faithful` axiom-clean. The lone `sorryAx`
+re-verified in-kernel lap-141 `lake env lean`); `goodsteinSentence_faithful` axiom-clean. The lone `sorryAx`
 traces to crux-2 (the internalized cut-elimination).
 
-> **⭐⭐⭐ Lap-140 ALTITUDE REVIEW — crux-2 termination collapses to ONE lemma; lap-137 directive RETIRED (read FIRST — current).**
+> **⭐⭐⭐ Lap-141 — SPIKE DECIDED: existence/critical-pair reframe OBVIATES the tag-5/6 wall (read FIRST — current).**
+> The operator-mandated existence-form reframe spike was RUN and DECIDED in-kernel: `descent_step_K_critical`
+> (sorry-FREE, compiles green) proves the reframe **does** obviate the tag-5/6 "cutPartner-is-principal-R-intro"
+> residual — overturning lap-139 for that sub-case. Buchholz §3.2 splits the K-reduction CRITICAL/NON-CRITICAL
+> (Def 3.2 5.1/5.2), NOT by major-premise tag; in the critical case **Lemma 3.1 hands back a PRINCIPAL pair for
+> free** (no producer-principal proof), and the critical DESCENT is already banked
+> (`iord_descent_iR2_zK_of_validF_critUpTo`). Restructured `descent_step_K_majorIdx` onto the split: the four
+> `descent_step_K_tag{3,4,5,6}` sorries → two (`descent_step_K_critical_soundness` + `descent_step_K_noncritical`),
+> producer-principal wall GONE. **The remaining crux-2 termination wall is now ONE obligation: `RedSound`
+> (Buchholz Thm 3.4 simultaneous induction).** See `HANDOFF-2026-06-26-lap141.md`, `PENDING_WORK.md` lap-141.
+
+> **⭐⭐⭐ Lap-140 ALTITUDE REVIEW — crux-2 termination collapses to ONE lemma; lap-137 directive RETIRED [SUPERSEDED by lap-141].**
 > Build re-verified 🟢 green (1326); headline re-verified `[propext, sorryAx, Classical.choice, Quot.sound]` (0
 > math axioms), `goodsteinSentence_faithful` clean — no drift. **The altitude call:** laps 138-139 made the
 > lap-137 CURRENT DIRECTIVE materially stale and it has been corrected in `DIRECTION.md`. Two stale mandates

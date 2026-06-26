@@ -1,6 +1,51 @@
 # Pending work — open obligations & attack paths
 
-## lap 140 (latest) — ALTITUDE REVIEW: directive corrected + `descent_step_K_majorIdx` DECOMPOSED by tag
+## lap 141 (latest) — SPIKE DECIDED: existence/critical-pair reframe OBVIATES the tag-5/6 wall; K-step restructured
+**Build 🟢 1326. Headline footprint UNCHANGED** (`[propext, sorryAx, Classical.choice, Quot.sound]`). Commit `3ca3221`.
+
+### The operator-mandated existence-form reframe spike — RUN, validated IN-KERNEL, decided
+`descent_step_K_critical` (Crux2Blueprint, sorry-FREE, compiles green) is the kernel proof that the existence /
+critical-pair reframe **DOES obviate** the tag-5/6 "cutPartner-is-a-principal-R-intro" residual — **overturning
+lap-139's "the reframe does not obviate the deep content" FOR that sub-case.**
+
+**Why it works (Buchholz §3.2 ground truth, `scratchpad/buchholz-gentzen.txt:648-745`):** Buchholz's K-reduction
+splits on **CRITICAL vs NON-CRITICAL** (Def 3.2 case 5.1/5.2), NOT on the major premise's tag. The lap-140
+tag-{3,4,5,6} decomposition was a NON-Buchholz framing, and its tag-5/6 wall (prove the major premise's partner
+is a principal R-intro) is an ARTIFACT of reducing AT the major premise. In Buchholz's critical case (5.1),
+Lemma 3.1 (`inference_critical_pair`, banked) returns a PRINCIPAL pair `(i,j)` with `tp dᵢ = R_{Aᵢ}` automatically
+— principality FALLS OUT of criticality, no separate proof. The critical-case DESCENT is already fully banked:
+`iord_descent_iR2_zK_of_validF_critUpTo` (`InternalZ:8193`, sorry-free), needing only criticality UP TO `j0`.
+
+**This sidesteps the lap-140 `redZKReady_of_zKValid` refutation:** that shortcut failed because it needs GLOBAL
+`zKCritical` (∀ i < lh ds), false on the ⊥-orbit. The reframe instead CASE-SPLITS on criticality-up-to-`j0`:
+when it holds → critical reduct; when it fails (major premise is Rep tag-3/4, or an earlier Rep-permissible
+premise) → non-critical case 5.2. No global-criticality requirement.
+
+### THE advance — `descent_step_K_majorIdx` restructured critical/non-critical; K-step 4 sorries → 2
+- **`descent_step_K_critical`** (sorry-FREE): critical case = `iR2` reduct, descent banked, modulo soundness.
+- **`descent_step_K_critical_soundness`** (sorry): `ZDerivesEmptyR (iR2 …)` for a critical chain = Buchholz Thm
+  3.4(b) / `RedSound` restricted. Recursive (the two `iCritReductG` auxiliaries are ZDerivations of their reduced
+  endsequents — `ZDerivation_iCritReductG_of` recombines once they're supplied).
+- **`descent_step_K_noncritical`** (sorry): Buchholz case 5.2 — replace/splice the minimal Π-permissible premise
+  (5.2.2 replace via banked `iord_descent_zK_replace_explicit`; 5.2.1 splice). Structural recursion on `dᵢ`.
+- Dispatcher `descent_step_K_majorIdx` now sorry-FREE: reads `j0` off `isChainInf`, `by_cases` on criticality.
+- DROPPED the four `descent_step_K_tag{3,4,5,6}` sorries; the producer-principal wall (laps 139/140) is GONE.
+
+### ⟹ The remaining crux-2 termination wall is now ONE clean obligation: `RedSound` (Buchholz Thm 3.4)
+Both new K-step sorries collapse into the recursive reduction-soundness `RedSound : ∀ d, ZDerivesEmpty d →
+ZDerivation (iR2 d)` (`InternalZ:9805`, the historically-named "sole remaining InternalZ obligation") + the
+non-critical 5.2 recursion (which under `RedSound` for sub-premises is the replace/splice). This is the STANDARD
+textbook residual, not a novel obstruction. **NEXT ATTACK:** set up the Buchholz Thm 3.4(a)+(b) **simultaneous
+induction on the build-up of `d`** that proves `RedSound` — the auxiliaries `d{0}`/`d{1}` of the critical reduct
+get their soundness from IH(a) (`ZDerivation_iCritReductG_of` then recombines), the non-critical splice/replace
+from IH(b). The §5 atomic-reduction (`zAxReduct`/`zAx1`, banked descent bundles `iRedDescent_zAx1_zAx{All,Neg}`)
+is what genuinely dissolves the lap-129 atom/`Ax¹`-leaf stall in the 5.2 case. ⚠️ This induction is the multi-lap
+deep core; decompose `RedSound` into the per-case ZDerivation obligations (atomic / I-rule / Ind / critical /
+non-critical) as named src sub-`sorry`s next.
+
+## lap 140 — ALTITUDE REVIEW: directive corrected + `descent_step_K_majorIdx` DECOMPOSED by tag
+**[SUPERSEDED by lap-141: the tag-{3,4,5,6} decomposition is replaced by critical/non-critical. The tag-5/6
+producer-principal residual described below is OBVIATED — kept for the in-kernel refutations it records.]**
 **Build 🟢 1326. Headline footprint UNCHANGED** (`[propext, sorryAx, Classical.choice, Quot.sound]`, 0 math axioms;
 `goodsteinSentence_faithful` clean). Commit covers the review (DIRECTION/STATUS) + the decomposition.
 
