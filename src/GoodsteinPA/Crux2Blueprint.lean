@@ -365,6 +365,39 @@ theorem ZDerivation_iRcritGNeg_corrected_neg {s r ds sᵢ sⱼ p d0 : V} {ρ : V
   · -- hsaUf
     rw [fstIdx_zK]; exact hsa
 
+/-- **The ¬-case critical reduct is SOUND — concrete-`ρ` specialization** (the `critReductNeg` twin of
+`ZDerivation_iRcritG_critReductCorr`). `ZDerivation (iRcritGNeg d (critReductNeg d))` for the genuine
+¬-case reduct supplier, given the orbit data. The two emission equations `hρI`/`hρJ` of
+`ZDerivation_iRcritGNeg_corrected_neg` discharge by read-off from `critReductNeg`'s definition
+(`critReductNeg_redexI`/`_redexJ`): at `redexI` the `I¬` child `red dᵢ = d₀` (`red_zIneg`), at `redexJ` the
+§5 axNeg reduct `Ax^1_{Γⱼ→A}` (`fstIdx_zAxNeg = sⱼ`, `cutFormula d = A`). This is exactly the object the
+re-keyed `red` should produce at a critical chain whose R-redex is `I¬` — soundness PROVEN, modulo only the
+engine re-keying (`red_zK_crit` ↦ polarity dispatch) and the orbit invariants. Together with
+`ZDerivation_iRcritG_critReductCorr` (∀-case), the two polarity-specific reduct suppliers are now both
+soundness-certified against their concrete engine `ρ`. -/
+theorem ZDerivation_iRcritGNeg_critReductNeg {s r ds sᵢ sⱼ p d0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : redexI (zK s r ds) < lh ds)
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hcut : cutFormula (zK s r ds) = p)
+    (hd0ant : seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hSeqs : Seq (seqAnt s)) (hSeqsi : Seq (seqAnt sᵢ))
+    (hthread : ∀ i' ≤ redexJ (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < redexJ (zK s r ds), irk (chainAsucc ds i') ≤ r)
+    (hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r) :
+    ZDerivation (iRcritGNeg (zK s r ds) (critReductNeg (zK s r ds))) := by
+  refine ZDerivation_iRcritGNeg_corrected_neg (sᵢ := sᵢ) (sⱼ := sⱼ) (p := p) (d0 := d0)
+    hZ hi hj hIJ hdi hdj ?_ ?_ hcut hd0ant hCwff hSeqs hSeqsi hthread hrank hrankI
+  · -- hρI: `critReductNeg` at `redexI` → the `I¬` child `red dᵢ = d₀`
+    rw [critReductNeg_redexI (ne_of_lt hIJ), zKseq_zK, hdi, red_zIneg]
+  · -- hρJ: `critReductNeg` at `redexJ` → the §5 axNeg reduct `Ax^1_{Γⱼ→A}`
+    rw [critReductNeg_redexJ, zKseq_zK, hdj, fstIdx_zAxNeg, hcut]
+
 /-- **THE corrected critical-cut inversion — SOUNDNESS PROVEN for the re-principalized reduct.** This is
 the assembly the lap-114 crux finding pointed to: for ANY reduct function `ρ` that emits the CORRECTED
 critical reducts at the two redexes

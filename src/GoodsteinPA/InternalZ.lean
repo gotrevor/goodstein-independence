@@ -7353,6 +7353,37 @@ noncomputable def critReductCorr (d n : V) : V :=
       (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d))))))
   else zAxReduct (red (znth (zKseq d) n))
 
+/-- **The genuine critical reduct supplier for the ¬-case** (the `critReductCorr` twin for `Aᵢ = ¬A`). This
+is the concrete `ρ` the re-keyed tag-4 critical branch emits when the R-redex is an `I¬` rule (`zTag dᵢ = 2`).
+Buchholz Def 3.2 case 5.1, ¬-subcase, plus §5 Lemma 5.1 case 2.2:
+- **L-redex** (`n = redexJ d`, the `axNeg` axiom): `zAx1 (seqSetSucc sⱼ A) A` — the §5 logical axiom
+  `Ax^1_{Γⱼ→A}` (succedent SET to the cut formula `A = cutFormula d`, antecedent `Γⱼ` kept; the §5 reduct
+  `dⱼ[0]` of `Ax^{¬A,0}`). Note: `seqSetSucc` (REPLACE succedent), NOT `seqAddAnt` — the ¬-axiom reduct
+  replaces the succedent, where the ∀-axiom reduct grows the antecedent.
+- **R-redex** (`n = redexI d`, the `I¬` rule): `red dᵢ` — the `I¬` child `dᵢ[0] = d₀` (deriving `A,Γᵢ→⊥`);
+  `red (zIneg sᵢ A d0) = d0` (`red_zIneg`), so the recursive engine reduct already lands the child, with NO
+  re-principalization (unlike the ∀ R-redex, which needs the `numeral k` instance).
+- elsewhere: the engine reduct `zAxReduct (red dₙ)` (irrelevant; `iRcritGNeg` reads `ρ` only at the redexes).
+The two read-offs (`critReductNeg d (redexI d)`/`(redexJ d)`) feed `hρI`/`hρJ` of
+`ZDerivation_iRcritGNeg_corrected_neg` directly. -/
+noncomputable def critReductNeg (d n : V) : V :=
+  if n = redexJ d then
+    zAx1 (seqSetSucc (fstIdx (znth (zKseq d) n)) (cutFormula d)) (cutFormula d)
+  else if n = redexI d then
+    red (znth (zKseq d) n)
+  else zAxReduct (red (znth (zKseq d) n))
+
+/-- `critReductNeg` at the L-redex `redexJ`: the §5 axNeg reduct `Ax^1_{Γⱼ→A}`. -/
+lemma critReductNeg_redexJ (d : V) :
+    critReductNeg d (redexJ d) =
+      zAx1 (seqSetSucc (fstIdx (znth (zKseq d) (redexJ d))) (cutFormula d)) (cutFormula d) := by
+  rw [critReductNeg, if_pos rfl]
+
+/-- `critReductNeg` at the R-redex `redexI` (when `redexI ≠ redexJ`): the `I¬` child `red dᵢ = d₀`. -/
+lemma critReductNeg_redexI {d : V} (h : redexI d ≠ redexJ d) :
+    critReductNeg d (redexI d) = red (znth (zKseq d) (redexI d)) := by
+  rw [critReductNeg, if_neg h, if_pos rfl]
+
 /-! ### The critical-only reduct is NON-critical (lap 86) — the 5.2 dispatch is mandatory
 
 **Gating finding (Buchholz Def 3.2 case 5, validated in-kernel).** Buchholz's reduction of a chain
