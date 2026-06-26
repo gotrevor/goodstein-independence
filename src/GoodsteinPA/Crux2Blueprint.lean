@@ -2246,19 +2246,20 @@ Witness pinned to `k = 1`: `zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1) = 
    equals the ordinal shadow `iIndReductSeq d0 d1 1 = ⟨d1,d0⟩`'s (single `inadd`/`max` commute — both
    2-element over the same premise-ordinal multiset, `idg/iotil` substitution-invariant; **no `inadd_assoc`**,
    which the repo lacks for general `k`), so the banked shadow LH4 descent `iord_descent_iIndReduct` transfers.
-3. **SOUNDNESS BLOCKED — `zIndWff` antecedent-shape GAP (lap-145 finding, the real obstruction).**
-   `ZDerivesEmptyR (zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1))` needs the chain `⟨d0, d1[a:=0]⟩` to thread
-   (`isChainInf`): every formula in `d1[a:=0]`'s antecedent must be `∈ Γ = ∅` or `= chainAsucc 0 = ⊥`, i.e.
-   `seqAnt(fstIdx d1) ⊆ {⊥}`. But **`zIndWff` only gives `inAnt (F(a)) (seqAnt(fstIdx d1))` (MEMBERSHIP, not
-   shape)** — so a lax Ind node can have `d1` = e.g. a `zAtom` deriving `{⊥,X}→⊥` (valid: `⊥ ∈` antecedent),
-   for which the reduct is NOT a valid chain. So the soundness goal is genuinely FALSE for lax nodes, NOT just
-   unprovable. **FIX = strengthen the `zIndWff` step clause to pin `seqAnt(fstIdx d1) = seqAddAnt (F(a)) Γ`**
-   (the faithful Buchholz Ind rule: step premise antecedent EXACTLY `Γ,F(a)`), a faithfulness ripple exactly
-   like lap-115 (`zAx1` 8th disjunct) / lap-118 (`zAxNeg` 4th conjunct): ZPhi Ind disjunct + `zphi_monotone`/
-   `_strong_finite`/`zphi_iff`/`zblueprint` σ+π/`zPhi_definable` + the `rcases zDerivation_iff` sites. After it,
-   `seqAnt(fstIdx d1) = {F(a)} = {⊥}` (Γ=∅, p=⊥), the telescope `hstep` holds, and the soundness closes
-   (`zDerivation_zK_intro` + `isChainInf_telescope` + premise `ZDerivation`s via `ZDerivation_zsubst` using
-   `maxEigen d1 < a` from `ZRegular`). The descent (2) is ALREADY proven for that witness. -/
+3. **SOUNDNESS — `zIndWff` antecedent-shape gap CLOSED (lap 146, commit `a2b2a3a`).** The lap-145 finding
+   (the step clause was MEMBERSHIP `inAnt (F(a)) (seqAnt(fstIdx d1))`, admitting unsound lax nodes whose reduct
+   does not thread) has been FIXED: `zIndWff`'s step clause is now SHAPE
+   `Seq (seqAnt (fstIdx d)) ∧ seqAnt(fstIdx prem1) = seqCons (seqAnt(fstIdx d)) (F(a))` (faithful Buchholz Ind
+   rule; `Seq` bundled like lap-118 `zInegAntWff` for self-preservation under eigensubst). So
+   `zDerivation_zInd_inv` now yields, on the ⊥-orbit (Γ=∅, p=⊥ via `eq_falsum_of_substs1_falsum`):
+   `seqAnt(fstIdx d1) = seqCons ∅ ⊥ = {⊥}` EXACTLY. **REMAINING = the soundness ASSEMBLY** (the genuine
+   remaining work, ~one focused lap). Witness `zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1)`. Mirror the
+   `descent_step_K_critical_all` (:2034) template: ZDerivesEmptyR = ⟨⟨ZDerivation via `zDerivation_zK_intro`
+   (`hseq=iIndReductSeqG_seq`, premise `ZDerivation`s = d0 + `ZDerivation_zsubst d1` with `maxEigen d1 < π₁ at'`
+   from `ZRegular`, `zKValidF` = `isChainInf_telescope` :169 + per-premise iperm `iperm_tp_fstIdx_of_ZDerivation`
+   :5784 + the tag-{1,2,5,6} UFormula conds), fstIdx=∅→⊥⟩, `ZRegular_zK_of_premises`, `zfresh_zK_of`,
+   `zSeqAnt_zK_of`⟩ + DESCENT `iord_descent_iIndReductSeqG_one` (banked). On the ⊥-orbit the telescope collapses
+   (all antecedents `{⊥}`, succedents `⊥`, exit `j0=1` at `⊥`). See `PENDING_WORK.md` lap-146. -/
 theorem descent_step_Ind {s at' p d0 d1 : V} (hd : ZDerivesEmptyR (zInd s at' p d0 d1)) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zInd s at' p d0 d1)) = 0 := sorry
 

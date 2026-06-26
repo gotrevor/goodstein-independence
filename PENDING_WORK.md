@@ -1,9 +1,50 @@
 # Pending work — open obligations & attack paths
 
-## lap 146 (latest, FRESH-MIND REVIEW) — direction KEPT + SHARPENED; live path down to THREE genuine sorries; EXECUTE the `zIndWff` ripple
+## lap 146 (latest) — REVIEW + `zIndWff` ripple LANDED; remaining `descent_step_Ind` work = the ASSEMBLY only
 **Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms) — no drift.**
-This is a review lap: no proof code changed, but the lap-145 direction was validated in-kernel and the ripple
-scoped to an executable plan. The deliverable is the sharpened direction below (mirrored in `DIRECTION.md`).
+Two commits: review (direction KEPT+SHARPENED, validated below) + **the `zIndWff` strengthening LANDED**
+(`a2b2a3a`). The step-premise clause is now SHAPE not membership (+ bundled `Seq`), closing the latent
+soundness gap. `descent_step_Ind` (:2262) is STILL sorry'd, but its sole prerequisite (the antecedent shape)
+is now AVAILABLE from `zDerivation_zInd_inv` — the remaining work is purely the **soundness assembly**.
+
+### ✅ DONE this lap — `zIndWff` membership→shape ripple (commit `a2b2a3a`)
+New `zIndWff` step clause (`InternalZ:1684`): `Seq (seqAnt (fstIdx d)) ∧ seqAnt (fstIdx prem1) =
+seqCons (seqAnt (fstIdx d)) (substs1 (qqFvar (eig)) p) ∧ <succ>` (Seq bundled exactly like lap-118
+`zInegAntWff`, so the shape is self-preserving under eigensubst via `fvSubstSeq_seqCons`). Edits: body +
+`zIndWffDef` σ/π (`seqConsDef`+`seqDef`, `sas` already bound) + `zIndWff_defined` simp (`seqCons_defined.iff`,
+`seq_defined.iff`) + `zsubst` preservation (`Zsubst` zInd case: new `Seq` goal `fvSubstSeq_seq` + shape via
+`fvSubstSeq_seqCons h2seq`) + triple-destructure fixes (`Crux2Blueprint:146` `⟨_,_,h0succ⟩`, `:329`
+`⟨_,_,h1succ⟩`). Build green, no axiom drift, live sorries unchanged.
+
+### 🎯 NEXT (the DROP) — assemble `descent_step_Ind` (`Crux2Blueprint:2262`) from the now-available shape
+Witness = `zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1)` (= `⟨d0, d1[a:=0]⟩`). Need `ZDerivesEmptyR` of it +
+`icmp (iord …) (iord (zInd …)) = 0`. The DESCENT is banked (`iord_descent_iIndReductSeqG_one`). For
+soundness: from `zDerivation_zInd_inv hZ` get `ZDerivation d0`, `ZDerivation d1`, `zIndWff (zInd …)`; the
+strengthened `zIndWff` now yields `Seq (seqAnt s)` + `seqAnt(fstIdx d1) = seqCons (seqAnt s) (F(a))`. On the
+⊥-orbit `seqAnt s = ∅`, `p = ⊥` (`eq_falsum_of_substs1_falsum` via `hsucc : seqSucc s = ⊥` + the zIndWff concl
+clause) ⟹ `F(a) = substs1 _ ⊥ = ⊥` ⟹ `seqAnt(fstIdx d1) = seqCons ∅ ⊥ = {⊥}`, and `seqAnt(fstIdx (d1[a:=0])) =
+{⊥}` too (subst-invariant on `⊥`). Then the chain `⟨d0, d1[a:=0]⟩` threads (`isChainInf_telescope` :169 +
+`chainAnt_/chainAsucc_iIndReductSeqG_*` :287-315), `ZDerivesEmptyR` via `zDerivation_zK_intro` + premise
+`ZDerivation`s (`ZDerivation_zsubst` with `maxEigen d1 < π₁ at'` from `ZRegular (zInd …)`) + the reduct
+invariants `ZRegular/ZFresh/ZSeqAnt` (premise-hereditary). All structural building blocks VERIFIED to exist
+(lap 146): `zDerivation_zK_intro` (InternalZ:5772, takes `zKValidF` — NO criticality), `isChainInf_telescope`
+(:169), `iperm_tp_fstIdx_of_ZDerivation` (:5784, uniform iperm), `ZRegular_zK_of_premises` (Zsubst:2423),
+`zfresh_zK_of` (:1859), `zSeqAnt_zK_of` (:2195); zsubst-preserves-invariants `zReg_zsubst` (:1480, =zReg d),
+`zFresh_zsubst` (:1925, needs `numeral n`), `zSeqAnt_zsubst` (:2214, =0); premise extraction via `zReg_zInd`/
+`zFresh_zInd`/`zSeqAnt_zInd` simp + `ltFlag_eq_zero_iff` (:1221) for `maxEigen d1 < π₁ at'`; descent
+`iord_descent_iIndReductSeqG_one` (banked).
+⚠️ **THE one concrete uncertainty for the assembly** = building `zKValidF` for a FRESH chain: `zKValidF`
+(InternalZ:1415) = `isChainInf ∧ (∀ premise, iperm) ∧ (tag-{1,2,5,6} ⟹ IsUFormula (zIallF/zInegF/zAxAllF/
+zAxNegF))`. iperm is uniform (`iperm_tp_fstIdx_of_ZDerivation`), but there is **no `zKValidF_of_premises`
+packaging** — the 4 `IsUFormula` side-conditions need either a NEW uniform lemma
+`zKValidF_leafconds_of_ZDerivation : ZDerivation d → (zTag d = 1 → IsUFormula (zIallF d)) ∧ … ` (extract from
+each premise's Wff — d0 + d1[a:=0], both ZDerivations) OR per-premise case work. **NEXT-LAP step 1 = prove
+that extraction lemma**, then the `zKValidF` + the rest of the assembly is mechanical (telescope collapses on
+the ⊥-orbit: all antecedents `{⊥}`, succedents `⊥`, exit `j0=1` at `⊥`; `substs1 _ ⊥ = ⊥` via the `substs_*`
+family). If it stays long, decompose `descent_step_Ind` into a named `zKValidF (iIndReductSeqG …)` sub-sorry +
+the (provable) ZRegular/ZFresh/ZSeqAnt/descent wrapper, dropping the wrapper around the one hard sub-sorry.
+
+### Review findings (what makes the direction SOUND — kept for provenance)
 
 ### Live-path inventory (the ONLY sorries reachable from `false_of_ZDerivesEmpty`)
 `false_of_ZDerivesEmpty` (:2412, sorry-free) → `prwo_forbids_existence_descent` → `exists_sigma1_descent_of_step`
