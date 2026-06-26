@@ -237,6 +237,111 @@ lemma termFvSubst_succVar {a t e : V} (he : e ≠ a) :
   exact (IsSemiterm.func (L := ℒₒᵣ)).mpr ⟨hf,
     (IsSemitermVec.doubleton (L := ℒₒᵣ)).mpr ⟨IsSemiterm.fvar 0 e, by simp⟩⟩
 
+/-! ## Free-variable non-occurrence: transferring `fvSubst a (numeral m) p = p` across the target
+
+The cut-elimination ∀-inversion (`ZDerivation_iRcritG_critReductCorr`, `Crux2Blueprint`) needs the
+eigenvariable-condition facts `fvSubst a (numeral k') p = p` and `fvSubstSeq a (numeral k') Γ = Γ` at the
+critical I∀ node, for the **cut instance** `k'` — which is *not* known at the I∀ node. The storable,
+`𝚫₁`, `red`/`zsubst`-stable witness of "`a` does not occur free in `p`" is the single equation
+`fvSubst a (numeral 0) p = p` (substituting any `a`-free closed term — here `numeral 0` — fixes `p` iff
+`^&a ∉ FV p`). These lemmas transfer it to *any* numeral target, via the **double-substitution-collapses**
+identity: a numeral contains no `^&a`, so after `^&a ↦ numeral m` no `^&a` remains, and re-substituting
+`^&a ↦ s` is a no-op. This is the substrate that lets a standalone freshness invariant (à la `zReg`,
+lap-93 additive O1) supply the inversion's `hpfresh`/`hΓfresh` — *without* baking freshness into
+`zIallWff`/`ZPhi` (which would shrink the `ZDerivation` fixpoint and force the embedding to re-prove it,
+lap-93 architecture note above) and *without* a code bound (`p ≤ a` is not `zsubst`-stable, lap-92). -/
+
+/-- **Term-level collapse.** Substituting `^&a ↦ s` after `^&a ↦ numeral m` is a no-op: the inner
+substitution already replaced every `^&a` by the `a`-free numeral `m`. -/
+lemma termFvSubst_numeral_idem {a s m : V} {u : V} (hu : IsUTerm ℒₒᵣ u) :
+    termFvSubst ℒₒᵣ a s (termFvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) u)
+      = termFvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) u := by
+  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ u hu
+  · definability
+  · intro z; simp
+  · intro x
+    by_cases h : x = a
+    · subst h; rw [termFvSubst_fvar_self (L := ℒₒᵣ), termFvSubst_numeral]
+    · rw [termFvSubst_fvar_ne (L := ℒₒᵣ) h, termFvSubst_fvar_ne (L := ℒₒᵣ) h]
+  · intro k f v hkf hv ih
+    have hvf : IsUTermVec ℒₒᵣ k (termFvSubstVec ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) k v) :=
+      IsUTermVec.termFvSubst (by simp) hv
+    rw [termFvSubst_func hkf hv, termFvSubst_func hkf hvf]
+    simp only [qqFunc_inj, true_and]
+    apply nth_ext' k (by rw [len_termFvSubstVec hvf]) (by rw [len_termFvSubstVec hv])
+    intro i hi
+    rw [nth_termFvSubstVec hvf hi, nth_termFvSubstVec hv hi, ih i hi]
+
+/-- **Term-vector collapse** (the `rel`/`nrel` ingredient of the formula collapse). -/
+lemma termFvSubstVec_numeral_idem {a s m k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+    termFvSubstVec ℒₒᵣ a s k (termFvSubstVec ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) k v)
+      = termFvSubstVec ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) k v := by
+  have hvf : IsUTermVec ℒₒᵣ k (termFvSubstVec ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) k v) :=
+    IsUTermVec.termFvSubst (by simp) hv
+  apply nth_ext' k (by rw [len_termFvSubstVec hvf]) (by rw [len_termFvSubstVec hv])
+  intro i hi
+  rw [nth_termFvSubstVec hvf hi, nth_termFvSubstVec hv hi, termFvSubst_numeral_idem (hv.2 i hi)]
+
+/-- **Formula-level collapse.** `fvSubst a s (fvSubst a (numeral m) p) = fvSubst a (numeral m) p`. -/
+lemma fvSubst_numeral_idem {a s m : V} {p : V} (hp : IsUFormula ℒₒᵣ p) :
+    fvSubst ℒₒᵣ a s (fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) p)
+      = fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) p := by
+  have hnum : IsUTerm ℒₒᵣ (Bootstrapping.Arithmetic.numeral m : V) := by simp
+  apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
+  · definability
+  · intro k r v hr hv
+    rw [fvSubst_rel hr hv, fvSubst_rel hr (IsUTermVec.termFvSubst hnum hv),
+      termFvSubstVec_numeral_idem hv]
+  · intro k r v hr hv
+    rw [fvSubst_nrel hr hv, fvSubst_nrel hr (IsUTermVec.termFvSubst hnum hv),
+      termFvSubstVec_numeral_idem hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq
+    rw [fvSubst_and hp hq,
+      fvSubst_and (IsUFormula.fvSubst (a := a) hnum hp) (IsUFormula.fvSubst (a := a) hnum hq), ihp, ihq]
+  · intro p q hp hq ihp ihq
+    rw [fvSubst_or hp hq,
+      fvSubst_or (IsUFormula.fvSubst (a := a) hnum hp) (IsUFormula.fvSubst (a := a) hnum hq), ihp, ihq]
+  · intro p hp ihp
+    rw [fvSubst_all hp, fvSubst_all (IsUFormula.fvSubst (a := a) hnum hp), ihp]
+  · intro p hp ihp
+    rw [fvSubst_ex hp, fvSubst_ex (IsUFormula.fvSubst (a := a) hnum hp), ihp]
+
+/-- **Freshness transfer (formula).** From the storable witness `fvSubst a (numeral m) p = p`
+(non-occurrence of `^&a`), the substitution `^&a ↦ numeral k` is the identity for *any* `k`. This is
+exactly the form `ZDerivation_iRcritG_critReductCorr`'s `hpfresh` needs at the cut instance `k`. -/
+lemma fvSubst_numeral_transfer {a m k : V} {p : V} (hp : IsUFormula ℒₒᵣ p)
+    (h : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral m) p = p) :
+    fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral k) p = p := by
+  have hidem := fvSubst_numeral_idem (a := a) (s := Bootstrapping.Arithmetic.numeral k) (m := m) hp
+  rw [h] at hidem; exact hidem
+
+/-- **Sequence-level collapse.** `fvSubstSeq a s (fvSubstSeq a (numeral m) Γ) = fvSubstSeq a (numeral m) Γ`
+when every entry of `Γ` is a `UFormula`. -/
+lemma fvSubstSeq_numeral_idem {a s m Γ : V}
+    (hΓ : ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i)) :
+    fvSubstSeq a s (fvSubstSeq a (Bootstrapping.Arithmetic.numeral m) Γ)
+      = fvSubstSeq a (Bootstrapping.Arithmetic.numeral m) Γ := by
+  refine Seq.lh_ext (fvSubstSeq_seq _ _ _) (fvSubstSeq_seq _ _ _)
+    (by rw [fvSubstSeq_lh, fvSubstSeq_lh]) ?_
+  intro j x₁ x₂ h₁ h₂
+  have hj : j < lh Γ := by
+    have hjm := (fvSubstSeq_seq a (Bootstrapping.Arithmetic.numeral m) Γ).lt_lh_of_mem h₂
+    rwa [fvSubstSeq_lh] at hjm
+  rw [← (fvSubstSeq_seq _ _ _).znth_eq_of_mem h₁, ← (fvSubstSeq_seq _ _ _).znth_eq_of_mem h₂,
+    znth_fvSubstSeq (by rw [fvSubstSeq_lh]; exact hj), znth_fvSubstSeq hj,
+    fvSubst_numeral_idem (hΓ j hj)]
+
+/-- **Freshness transfer (sequence).** The `hΓfresh` analogue of `fvSubst_numeral_transfer` for the
+antecedent sequence `Γ = seqAnt sᵢ`. -/
+lemma fvSubstSeq_numeral_transfer {a m k Γ : V}
+    (hΓ : ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i))
+    (h : fvSubstSeq a (Bootstrapping.Arithmetic.numeral m) Γ = Γ) :
+    fvSubstSeq a (Bootstrapping.Arithmetic.numeral k) Γ = Γ := by
+  have hidem := fvSubstSeq_numeral_idem (a := a) (s := Bootstrapping.Arithmetic.numeral k) (m := m) hΓ
+  rw [h] at hidem; exact hidem
+
 /-! ## Substitution-invariants for the `zK` chain-validity transfer (rung-1 step C.zK groundwork)
 
 `zKValid` subst-invariance reads the chain through `irk`/`tp`/`iperm`/`isChainInf`; the foundational

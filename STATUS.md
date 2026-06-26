@@ -1,11 +1,29 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 120 · 2026-06-26 (DEEP REFLECTION — the genuine open crux is the SELECTION/STALL defect, not the inversion)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 126 · 2026-06-26 (FRESH-MIND REVIEW — freshness substrate LANDED; the lap-125 ZPhi-ripple mechanism COURSE-CORRECTED to a standalone `zFresh` invariant)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
 
-> **⭐⭐⭐ Lap-120 DEEP REFLECTION — the genuine open crux is the SELECTION/STALL defect; the inversion is a solved side-problem (read FIRST — current).**
+> **⭐⭐⭐ Lap-126 FRESH-MIND REVIEW — direction KEPT, MECHANISM corrected; the eigenvariable-freshness transfer substrate is LANDED (read FIRST — current).**
+> Re-verified in-kernel (real `#print axioms`, green 1326): headline `peano_not_proves_goodstein =
+> [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**); the 4 new transfer lemmas
+> axiom-clean `[propext, choice, Quot.sound]`. **Direction KEPT** (close the LEFT-branch ∀-soundness gap =
+> the I∀ eigenvariable condition `hpfresh`/`hΓfresh`, lap-125's pin). **MECHANISM course-corrected:** the
+> lap-125 baton proposed strengthening the `ZPhi` I∀ disjunct (64-site ripple) — but that **contradicts the
+> repo's own lap-93 additive-O1 architecture** (`Zsubst.lean:947`: do NOT bake freshness into `zIallWff` —
+> it shrinks the `ZDerivation` fixpoint + forces the embedding to re-prove it) and would break the proven
+> `ZDerivation_zsubst` (a code bound is not `zsubst`-stable, lap-92). **The principled fix = a standalone
+> `zFresh` invariant** (exact parallel of `zReg`), storing the `𝚫₁`, `zsubst`-stable *semantic*
+> non-occurrence `fvSubst a (numeral 0) p = p`. **LANDED this lap (`Zsubst.lean`):** the
+> double-substitution-collapses substrate `termFvSubst_numeral_idem` / `termFvSubstVec_numeral_idem` /
+> `fvSubst_numeral_idem` + the transfers `fvSubst_numeral_transfer` (`fvSubst a (numeral m) p = p → fvSubst
+> a (numeral k) p = p`) and `fvSubstSeq_numeral_idem`/`fvSubstSeq_numeral_transfer` — which plug DIRECTLY
+> into `ZDerivation_iRcritG_critReductCorr`'s `hpfresh`/`hΓfresh` at the cut instance `k`. **NEXT:** define
+> the standalone `zFresh` (mirror `zReg`) + per-node extraction + `zFresh_zsubst` stability + thread into
+> `ZDerivesEmptyR`. See `PENDING_WORK.md` lap-126, `HANDOFF-2026-06-26-lap126.md`.
+
+> **⭐⭐⭐ Lap-120 DEEP REFLECTION — the genuine open crux is the SELECTION/STALL defect; the inversion is a solved side-problem (historical).**
 > Primary deliverable `REFLECTION-2026-06-26-lap120.md`. Build re-verified green (1326); headline + girder
 > re-verified in-kernel (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms); statement re-audited vs
 > paper — no drift. **THE finding:** the endgame `false_of_ZDerivesEmpty` (`Crux2Blueprint:1144`, bare sorry)

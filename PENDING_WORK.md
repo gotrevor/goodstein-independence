@@ -1,5 +1,50 @@
 # Pending work — open obligations & attack paths
 
+## lap 126 — FRESH-MIND REVIEW: freshness substrate LANDED; mechanism COURSE-CORRECTED (no ZPhi ripple)
+**Build 🟢 (Zsubst + crux-2 stack rebuilt); 4 new transfer lemmas axiom-clean `[propext, choice, Quot.sound]`.**
+
+**⭐ The lap-125 plan's MECHANISM is wrong — corrected.** Lap 125 pinned the LEFT-branch ∀-soundness
+residual to the eigenvariable condition (`hpfresh`/`hΓfresh`) and proposed *strengthening the `ZPhi` I∀
+disjunct* (a 64-site atomic ripple). **That contradicts the repo's own lap-93 additive-O1 architecture**
+(`Zsubst.lean:947`, verbatim): "rather than baking freshness into `zIallWff` (which would shrink the
+`ZDerivation` fixpoint and force the embedding to re-prove it), `zReg` is a standalone `𝚺₁` function
+threaded *alongside* `ZDerivation`." Baking freshness into `zIallWff`/`ZPhi` would ALSO break the proven
+load-bearing `ZDerivation_zsubst` (a code-bound `p ≤ a` is NOT `zsubst`-stable — lap-92; and even the
+semantic form forces re-proving the fixpoint's `𝚫₁` definability + every `rcases` site). **The principled
+fix = a standalone `zFresh` invariant** (exact parallel of `zReg`), threaded into `ZDerivesEmptyR`.
+
+**Why the SEMANTIC non-occurrence form (not the code bound).** `a ∉ FV(p)` ⟺ `fvSubst a (numeral 0) p = p`
+is `𝚫₁` (storable) AND `red`/`zsubst`-stable: substituting a *different* var `a''` by a *closed* numeral
+introduces no new `^&a`, so non-occurrence is preserved (the code bound `p ≤ a` is not — lap-92). This is
+why `zFresh` must store the substitution-identity, not an ordering.
+
+**✅ LANDED this lap — the transfer substrate (`Zsubst.lean`, after `isSemiterm_succVar`).** The storable
+witness is at `numeral 0` but the consumer needs it at the *cut instance* `numeral k'` (unknown at the I∀
+node). Bridged by the **double-substitution-collapses** identity (a numeral has no `^&a`):
+- `termFvSubst_numeral_idem`, `termFvSubstVec_numeral_idem`, `fvSubst_numeral_idem` — `fvSubst a s (fvSubst
+  a (numeral m) ·) = fvSubst a (numeral m) ·` (collapse).
+- **`fvSubst_numeral_transfer`** : `IsUFormula p → fvSubst a (numeral m) p = p → fvSubst a (numeral k) p = p`.
+- **`fvSubstSeq_numeral_idem` / `fvSubstSeq_numeral_transfer`** : the `seqAnt`-sequence analogues (entries
+  `IsUFormula`).
+These plug DIRECTLY into `ZDerivation_iRcritG_critReductCorr` (Crux2Blueprint:470): `hpfresh` =
+`fvSubst_numeral_transfer hp h0`, `hΓfresh` = `fvSubstSeq_numeral_transfer hΓ h0Γ`, where `k` = the
+consumer's `π₁(π₂(tp(znth ds redexJ)))` and `h0`/`h0Γ` are the `numeral 0` witnesses from `zFresh`.
+
+**NEXT-LAP TARGETS (in order) — REPLACES lap-125's ZPhi-ripple plan:**
+1. **Define the standalone `zFresh` invariant** (mirror `zReg`, `Zsubst.lean:940+`): `zFreshNext`/
+   `zFreshTable`/`zFresh` via the `maxEigen`/`idg` table template; per-I∀-node violation flag = `0` iff
+   `fvSubst a (numeral 0) p = p ∧ fvSubstSeq a (numeral 0) (seqAnt s) = seqAnt s` (both `𝚫₁`, function-graph
+   equalities). Recursion eqns (`zFresh_zIall`/`zFresh_zK`/…), `𝚫₁`-definability (template = `zRegNext_defined`),
+   `ZFresh d := zFresh d = 0`, and the per-node extraction `fvSubst_numeral_eq_self_of_zfresh_zIall` (the
+   `maxEigen_lt_of_regular_zIall` analogue) → feeds the transfer lemmas → `hpfresh`/`hΓfresh`.
+2. **`zFresh_zsubst` stability** (mirror `zReg_zsubst`, Zsubst:1224): non-occurrence is preserved by
+   closed-term substitution of a different variable. → `red`-stability (`ZFresh_red`).
+3. Add `∧ ZFresh d` to `ZDerivesEmptyR` (Crux2Blueprint:933); the embedding `foundation_bot_to_Z_empty`
+   supplies it (choose eigenvariables fresh). Then the LEFT-branch ∀-soundness closes via
+   `ZDerivation_iRcritG_critReductCorr`; assemble the LEFT successor + restructure `false_of_ZDerivesEmpty`
+   off the `red`-orbit onto the dichotomy successor + WF(`iord`) (lap-124 plan unchanged below).
+4. ¬-case (`iRcritGNeg`, lap-117) needs the same freshness; the transfer substrate already covers it.
+
 ## lap 124 — the stall-bypassing DESCENT is built; the `red`-fixpoint defect is now ROUTED AROUND
 **Build 🟢 1326; both new theorems axiom-clean `[propext, choice, Quot.sound]`** (RedZKDescent, after
 `iord_descent_red_zK_crit`).
