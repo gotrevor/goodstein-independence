@@ -1,5 +1,32 @@
 # Pending work — open obligations & attack paths
 
+## lap 134 (latest) — ✅ `hNeg` DROPPED from the soundness front; NEXT = `hAll` via `redZKReady` strengthening
+**Build 🟢 1326.** `hNeg` removed from `ZDerivation_iRKcCrit_of_zKValid`/`_of_isChainInf`/`_botOrbit` — the I¬
+antecedent shape + `Seq` are read off the redex premise by `zDerivation_zIneg_inv (hdi ▸ hmem _ hIlt)`
+(destructure `⟨_, _, _, hSeqsi, hd0ant⟩`). **The soundness front now carries ONLY `hAll`.**
+
+**TURNKEY NEXT — discharge `hAll` (`maxEigen d0 < a ∧ IsUFormula p ∧ seqSucc sⱼ = cutFormula`), two sub-steps:**
+1. **Strengthen `redZKReady_of_zKValid`'s ∀-pair** (`InternalZ:8341`) to ALSO export
+   `seqSucc sⱼ = cutFormula (zK s r ds) ∧ IsUFormula ℒₒᵣ p`. ALL pieces are ALREADY proven inside that proof
+   (lines 8366-8387): `hpjp : pj = p`, `hsf : IsSemiformula 1 p` (→ `.isUFormula`), `hcut : cutFormula =
+   substs1 (numeral (π₁(π₂(tp (znth ds redexJ))))) p`. The new `seqSucc sⱼ = cutFormula`:
+   ```
+   have haxinv := zDerivation_zAxAll_inv (hdj ▸ hZj)   -- haxinv.2.2 : seqSucc sⱼ = substs1 (numeral k') pj
+   have hk : π₁ (π₂ (tp (znth ds (redexJ (zK s r ds))))) = k' := by rw [hdj, tp_zAxAll]; simp [isymLk]
+   rw [haxinv.2.2, hcut, hk, hpjp]    -- both sides substs1 (numeral k') p
+   ```
+   Ripple: the `rcases hcase` consumer at `Crux2Blueprint:595` (`⟨sᵢ,sⱼ,a,p,pj,k',d0, hdi, hdj, _hirk⟩`) +
+   the one at `InternalZ:9346` gain 2 binders. Then in the all-case `hsj`/`hpwff` come from `hcase` directly,
+   so **`hAll` shrinks to `maxEigen d0 < a` only.**
+2. **Thread `ZRegular` to kill the `maxEigen` remainder.** `hAll`'s `maxEigen d0 < a` needs regularity (it is
+   NOT in `zIallWff` — `zIallWff` has `seqAnt/seqSucc(fstIdx d0)` + `IsSemiformula 1 p`, no eigen bound). Add
+   `hZReg : ZRegular (zK s r ds)` to the soundness front (the ⊥-orbit has it via `ZDerivesEmptyR.2.1`); derive
+   `maxEigen d0 < a` from `ZRegular_zK_premise hds hZReg hIlt` then `ZRegular (zIall …) → maxEigen d0 < a`
+   (pattern at `Crux2Blueprint:1077-1079`: `rw [ZRegular, zReg_zIall]; ltFlag_eq_zero_iff.mp …`). Then **drop
+   `hAll` entirely** — the soundness front (`ZDerivation_iRKcCrit_botOrbit`) becomes hypothesis-free (modulo
+   `hthread`/`hrank`, which are the `isChainInf` tip data), ready to assemble into `false_of_ZDerivesEmpty`
+   or the existence form.
+
 ## lap 134 (late) — ✅ ZPhi `zIneg`-disjunct STRENGTHENED with `zInegAntWff` (I¬ exact-shape; the `hNeg` residual)
 **Build 🟢 1326, footprint unchanged (no new axioms).** Wired the exact I¬ premise-antecedent shape into the
 fixpoint skeleton, mirroring the lap-130/131 `zAxAllSuccWff` precedent:
