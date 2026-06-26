@@ -1,9 +1,19 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 127 · 2026-06-26 (`zFresh_zsubst` PROVEN — freshness survives closed substitution; `ZFresh_red` structural+Ind cases done; antecedent-wff gap CLOSED by folding `seqWffFlag` into `freshFlag`)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 128 · 2026-06-26 (`ZFresh_red` PROVEN COMPLETE — `red` preserves the freshness invariant, full `zK` chain dispatch; axiom-clean `[propext, choice, Quot.sound]`)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+
+> **⭐⭐⭐ Lap-128 — `ZFresh_red` PROVEN COMPLETE (read FIRST — current).** The downward red-stability of
+> the freshness invariant — `ZDerivation d → ZFresh d → ZFresh (red d)` — is now FULLY proven (lap-127
+> closed only the structural + Ind cases; this lap closed the `zK` chain dispatch). Because `zFresh(zK)` is
+> a pure premise max-fold (no own flag), the chain family (`ZFresh_red_zK` + replace/crit/splice/
+> splice_of_chain + the seqUpdate/iCritReductSeq/seqInsert blocks + `ZFresh_zAxReduct` /
+> `ZFresh_iRcritG_premise`) mirrored `ZRegular_red_zK` line-for-line. **NEXT:** thread `∧ ZFresh d` into
+> `ZDerivesEmptyR` (`Crux2Blueprint:933`, mechanical 3rd-conjunct ripple) → close LEFT-branch ∀-soundness
+> via `ZDerivation_iRcritG_critReductCorr`'s `hpfresh`/`hΓfresh`. See `HANDOFF-2026-06-26-lap128.md`,
+> `PENDING_WORK.md` lap-128.
 
 > **⭐⭐⭐ Lap-127 — `zFresh_zsubst` PROVEN; `ZFresh_red` half-done (read FIRST — current).** The freshness
 > invariant `zFresh` (lap 126) is now shown preserved by closed substitution: `ZFresh d → ZFresh (zsubst d a

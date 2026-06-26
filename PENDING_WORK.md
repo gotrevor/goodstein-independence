@@ -1,5 +1,23 @@
 # Pending work — open obligations & attack paths
 
+## lap 128 — `ZFresh_red` PROVEN COMPLETE (red-stability of the freshness invariant)
+**Build 🟢 1326; `ZFresh_red` + the full `zK`-dispatch family axiom-clean `[propext, choice, Quot.sound]` (Zsubst).**
+
+`theorem ZFresh_red : ∀ d, ZDerivation d → ZFresh d → ZFresh (red d)` — closed (lap 127 had only the
+structural + Ind cases). The `zK` chain dispatch (`ZFresh_red_zK` + `_replace`/`_crit`/`_splice`/
+`_splice_of_chain` + structural blocks `ZFresh_zK_of_seqUpdate`/`_iCritReductSeq`/`_seqInsert`,
+`ZFresh_zAxReduct`, `ZFresh_iRcritG_premise`) mirrors `ZRegular_red_zK` line-for-line. Key simplification:
+`zFresh(zK)` is the pure premise max-fold (`zFresh_zK`), so every branch reduces to "every reduct premise is
+`ZFresh`", closed by `zfresh_zK_of`.
+
+**NEXT (target 2): thread `∧ ZFresh d` into `ZDerivesEmptyR`** (`Crux2Blueprint:933`). Mechanical 3rd-conjunct
+ripple — `ZDerivesEmptyR_red` adds `ZFresh_red d h.1.1 h.2.2`; re-index every `ZRegular`-slot projection from
+`.2` to `.2.1` across Crux2Blueprint + RedZKDescent; widen `foundation_bot_to_Z_empty`'s `∃ z` target. Then
+**target 3:** feed the now-orbit-invariant `ZFresh` (via `zfresh_zK_premise` +
+`fvSubst_numeral_eq_self_of_zfresh_zIall` + `fvSubst_numeral_transfer`) into
+`ZDerivation_iRcritG_critReductCorr`'s `hpfresh`/`hΓfresh` to close LEFT-branch ∀-soundness. See
+`HANDOFF-2026-06-26-lap128.md`.
+
 ## lap 127 — `zFresh_zsubst` SUBSTRATE landed (commutation + node-level preservation); the gap is now ONE wff invariant
 **Build 🟢 1326; 5 new lemmas axiom-clean `[propext, choice, Quot.sound]` (Zsubst).**
 
