@@ -9047,6 +9047,52 @@ theorem iord_descent_iRcrit_of_chain_reroute {s r ds j0 : V} {Tr Fa : V → Prop
   exact iord_descent_iRcrit_of_redex hds hnf hr hex hNF
     hρlt_i hρlt_j hρg_i hρg_j hρNF_i hρNF_j
 
+set_option maxHeartbeats 800000 in
+/-- **Leaf-stall redex existence for a genuine ⊥-chain** (lap 122 — the consolidation). A
+`ZDerivation (zK s r ds)` with empty antecedent and `⊥` succedent always contains the genuine
+`(R_A, L^k_A)` redex pair (with `0 < rk A ≤ r`), **provided every permissible (`isymRep`) premise is a
+LEAF** (`hleaves`, the atom/`zAx1` stall shapes). All of the redex-finder's bookkeeping is discharged
+internally from `ZDerivation`:
+* `zKValidF` (`zKValidF_of_ZDerivation_zK`) ⟹ `isChainInf` (j0/threading/rank), own-permissibility,
+  and the §5 principal-formula well-formedness ⟹ `hwfR`/`hwfL` (via `tp_isymR_pos`/`tp_isymLk_pos`,
+  `Tr := ⊥`, `Fa := (· = ⊥)`);
+* **`hnperm2` is FREE for a ⊥-chain** — `tp = R_⊥` is impossible (`tp_isymR_pos` forces `0 < rk ⊥ = 0`),
+  and the `L`-at-`Γmain` clause is vacuous (`seqAnt s = ∅`, nothing is in the empty antecedent);
+* `hreroute` from `hreroute_of_leaves` (the leaf branch) + per-premise `ZDerivation` (`zDerivation_zK_inv`).
+So the ENTIRE leaf-stall case (Buchholz Def 3.2 case 5.1, the documented atom/`zAx1` `red`-stall) reduces to
+the single structural hypothesis `hleaves`. The chain/Ind (`tp_zK`/`tp_zInd`) `isymRep` residual is the
+NON-critical case 5.2 (the splice), handled by separate machinery — NOT a gap in this finder. -/
+theorem inference_critical_pair_of_botChain {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hleaves : ∀ i < lh ds, tp (znth ds i) = isymRep →
+      (∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck)) :
+    ∃ i j k, i < j ∧ j < lh ds ∧ tp (znth ds i) = isymR (chainAsucc ds i) ∧
+      tp (znth ds j) = isymLk k (chainAsucc ds i) ∧
+      0 < irk (chainAsucc ds i) ∧ irk (chainAsucc ds i) ≤ r := by
+  obtain ⟨hci, hperm, hf1, hf2, hf5, hf6, _, _, _⟩ := zKValidF_of_ZDerivation_zK hZ
+  obtain ⟨_, hmem⟩ := zDerivation_zK_inv hZ
+  obtain ⟨j0, hj0, hAj0, hthread, hrk⟩ := hci
+  have hlt : ∀ i, i ≤ j0 → i < lh ds := fun i hi => lt_of_le_of_lt hi hj0
+  have hnperm2 : ∀ i ≤ j0, ¬ (tp (znth ds i) = isymR (seqSucc s) ∨
+      (∃ k A, tp (znth ds i) = isymLk k A ∧ inAnt A (seqAnt s))) := by
+    intro i hi hcon
+    rcases hcon with hR | ⟨k, A, _, hAmem⟩
+    · rw [hsucc] at hR
+      have hpos := tp_isymR_pos hR (fun ht => hf1 i (hlt i hi) ht) (fun ht => hf2 i (hlt i hi) ht)
+      rw [irk_falsum] at hpos; exact absurd hpos (by simp)
+    · rw [hant] at hAmem; simp [inAnt, lh_empty] at hAmem
+  obtain ⟨i, j, k, hij, hjle, hRi, hLj, hpos, hler⟩ :=
+    inference_critical_pair_of_chain_reroute (Tr := fun _ => False) (Fa := fun A => A = (^⊥ : V))
+      hj0 hAj0 hthread hrk
+      (fun i hi A h => Or.inl (tp_isymR_pos h (fun ht => hf1 i (hlt i hi) ht) (fun ht => hf2 i (hlt i hi) ht)))
+      (fun i hi k A h => Or.inl (tp_isymLk_pos h (fun ht => hf5 i (hlt i hi) ht) (fun ht => hf6 i (hlt i hi) ht)))
+      (fun i hi => hperm i (hlt i hi)) hnperm2
+      (hreroute_of_leaves hant hthread (fun i hi => hmem i (hlt i hi))
+        (fun i hi hr => hleaves i (hlt i hi) hr))
+      (fun _ h => h.1) (fun A h => by rw [h]; exact irk_falsum) rfl
+  exact ⟨i, j, k, hij, lt_of_le_of_lt hjle hj0, hRi, hLj, hpos, hler⟩
+
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
 
 `RedSound` (`iR2 d` is a genuine `ZDerivation` for `ZDerivesEmpty d`) is **FALSE** for the current
@@ -9265,4 +9311,5 @@ lemma iord_iR2_iterate_descends (hRS : RedSound (V := V)) {z : V} (hz : ZDerives
   exact iord_descent_iR2_of_ZDerivesEmpty (ZDerivesEmpty_iterate hRS hz n) (hcrit n)
 
 end GoodsteinPA.InternalZ
+
 
