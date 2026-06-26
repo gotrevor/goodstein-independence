@@ -1650,20 +1650,46 @@ the termination half provable — see the `⚠️ TYPE-CORRECTED` note on `prwo_
 def InternalPRWO : Prop :=
   ∀ f : V → V, (𝚺₁-Function₁ f) → (∀ n : V, isNF (f n)) → ¬ (∀ n : V, icmp (f (n + 1)) (f n) = 0)
 
-/-- **NAMED sub-`sorry` #2′ (lap 137) — the genuine remaining termination content.** From the existence
-step (E'), build a `𝚺₁`-definable infinite `ε₀`-descent. The construction: the `𝚺₁` least-witness
-`redLeast d := μ d'. [ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0]` (well-defined because
-`ZDerivesEmptyR` is `𝚫₁` — `ZDerivation` `𝚫₁`, `ZRegular`/`ZFresh`/`ZSeqAnt` are `zReg`/`zFresh`/`zSeqAnt`
-`= 0` of `𝚺₁`-functions — and `iord` is `𝚺₁`); its internal `𝚺₁` orbit `n ↦ redLeast^[n] z` (course-of-
-values recursion); and `f n := iord (orbit n)`, which is `𝚺₁`, NF (`isNF_iotower`+`isNF_iotil_of_ZDerivation`),
-and `icmp`-descends (`hstep` at each orbit point, kept in `ZDerivesEmptyR` by `ZDerivesEmptyR`-closure).
-This is the V-internal analog of `iord_iR2_iterate_descends` (`InternalZ:9816`) with the EXTERNAL-ℕ
-iteration internalized as a `𝚺₁` graph — exactly the "remaining internalization" that note flags. -/
+/-- **(A) NAMED sub-`sorry` (lap 137) — the descending `𝚺₁` STEP function.** From the existence step (E'),
+a *total* `𝚺₁`-definable `g : V → V` that, on every `ZDerivesEmptyR` point `w`, returns a strictly-`iord`-
+descending `ZDerivesEmptyR`-reduct `g w`. This is the deterministic carrier the orbit iterates.
+
+⚠️ **DEFINABILITY crux (lap-137 finding):** the natural witness `g w := μ d'. [ZDerivesEmptyR d' ∧
+icmp (iord d') (iord w) = 0]` has a `𝚫₁` matrix (`ZDerivesEmptyR` `𝚫₁`; `iord` `𝚺₁`; `icmp _ = 0` `𝚫₁`), so
+its *minimality* clause `∀ z < d', ¬P w z` is `𝚫₁` — BUT the *totality guard* `∃ d', P w d'` is `𝚺₁`
+(unbounded witness; reducts can be larger codes than `w`), which is the wrong polarity for a `𝚺₁` graph.
+**Fix = a primrec WITNESS BOUND** `∃ d' ≤ B(w), P w d'` (then bounded-`μ` is `𝚫₁`-total; see `wip/WitnessBound.lean`),
+OR derive `g` deterministically once `ZDerivesEmptyR_descent_step`/`descent_step_K_majorIdx` give a *constructive*
+reduct (Ind = `red d`; K = the critical reduct) rather than a bare `∃`. -/
+theorem exists_sigma1_descending_step
+    (hstep : ∀ d : V, ZDerivesEmptyR d → ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0) :
+    ∃ g : V → V, (𝚺₁-Function₁ g) ∧
+      (∀ w : V, ZDerivesEmptyR w → ZDerivesEmptyR (g w) ∧ icmp (iord (g w)) (iord w) = 0) := sorry
+
+/-- **(B) NAMED sub-`sorry` (lap 137) — the internal `𝚺₁` ORBIT of a descending step.** Given a total
+`𝚺₁` step `g` that descends on `ZDerivesEmptyR`, build the `𝚺₁` `ε₀`-descent. Construction (mirror
+`zRegTable`, `Zsubst:1264`): `redOrbit z : V → V`, `redOrbit z n := g^[n] z`, via a `PR.Construction`
+(`zero := z`, `succ := g`) — a course-of-values recursion over internal `n : V`; then `f n := iord (redOrbit z n)`.
+`f` is `𝚺₁` (`iord ∘ 𝚺₁`); NF via `isNF_iotower`+`isNF_iotil_of_ZDerivation` (each orbit point is
+`ZDerivesEmptyR` ⟹ `ZDerivation`, by `𝚺₁`-induction with `hg_step`); descends by `hg_step` at each point.
+This internalizes the EXTERNAL-ℕ `iord_iR2_iterate_descends` (`InternalZ:9816`) over internal `n : V`. -/
+theorem exists_sigma1_descent_of_sigma1_step
+    {z : V} (hz : ZDerivesEmptyR z) (g : V → V) (hg : 𝚺₁-Function₁ g)
+    (hg_step : ∀ w : V, ZDerivesEmptyR w → ZDerivesEmptyR (g w) ∧ icmp (iord (g w)) (iord w) = 0) :
+    ∃ f : V → V, (𝚺₁-Function₁ f) ∧ (∀ n : V, isNF (f n)) ∧
+      (∀ n : V, icmp (f (n + 1)) (f n) = 0) := sorry
+
+/-- **NAMED sub-`sorry` #2′ (lap 137) — the genuine remaining termination content**, now a sorry-FREE
+composition of the descending `𝚺₁` step (A) with the internal `𝚺₁` orbit (B). From the existence step (E'),
+build a `𝚺₁`-definable infinite `ε₀`-descent. This is the V-internal analog of `iord_iR2_iterate_descends`
+(`InternalZ:9816`) with the EXTERNAL-ℕ iteration internalized as a `𝚺₁` orbit. -/
 theorem exists_sigma1_descent_of_step
     (hstep : ∀ d : V, ZDerivesEmptyR d → ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0)
     {z : V} (hz : ZDerivesEmptyR z) :
     ∃ f : V → V, (𝚺₁-Function₁ f) ∧ (∀ n : V, isNF (f n)) ∧
-      (∀ n : V, icmp (f (n + 1)) (f n) = 0) := sorry
+      (∀ n : V, icmp (f (n + 1)) (f n) = 0) := by
+  obtain ⟨g, hg, hg_step⟩ := exists_sigma1_descending_step hstep
+  exact exists_sigma1_descent_of_sigma1_step hz g hg hg_step
 
 /-- **⚠️ TYPE-CORRECTED (lap 137) — the M3 PRWO contradiction, now with the PRWO hypothesis it needs.**
 The lap-135 statement concluded `False` in bare `[V ⊧ₘ* 𝗜𝚺₁]` with NO `PRWO`/`γ` hypothesis — and is

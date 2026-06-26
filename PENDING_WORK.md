@@ -24,10 +24,23 @@ Ind-reduct redesign while this structural hole sat undiagnosed → crux-neglect 
 - **`exists_sigma1_descent_of_step (hstep) (hz) : ∃ f, (𝚺₁-Function₁ f) ∧ (∀ n, isNF (f n)) ∧ (∀ n : V, icmp (f(n+1)) (f n)=0)`**
   — the NEW named sub-sorry = the genuine remaining termination content (build the `𝚺₁` `ε₀`-descent).
 
-### NEXT (PRIMARY, hardest-first) — discharge `exists_sigma1_descent_of_step`
-The never-built **M3 internalization**: `iord_iR2_iterate_descends` (`InternalZ:9816`) already builds the descent as
-an EXTERNAL-ℕ iteration (`n : ℕ`, `iord (iR2^[n] z)`); the gap is internalizing it as a `𝚺₁` function over INTERNAL
-`n : V`. Decompose in `src/`:
+### NEXT (PRIMARY, hardest-first) — discharge `exists_sigma1_descent_of_step` — DECOMPOSED into (A)+(B) (lap 137, green)
+`exists_sigma1_descent_of_step` is now a **sorry-FREE composition** of two named sub-sorries:
+- **(A) `exists_sigma1_descending_step`** — a *total* `𝚺₁` step `g : V→V` that descends on `ZDerivesEmptyR`.
+  ⚠️ **THE definability crux (lap-137 finding):** `g w := μ d'. [ZDerivesEmptyR d' ∧ icmp(iord d')(iord w)=0]`
+  has a `𝚫₁` matrix (so *minimality* `∀z<d', ¬P` is `𝚫₁`), but the *totality guard* `∃d', P w d'` is `𝚺₁`
+  (unbounded witness — reducts can be LARGER codes), the wrong polarity for a `𝚺₁` graph. **Two attacks:**
+  (a) a primrec **WITNESS BOUND** `∃d' ≤ B(w), P w d'` ⟹ bounded-`μ` is `𝚫₁`-total (see `wip/WitnessBound.lean`);
+  (b) make `ZDerivesEmptyR_descent_step`/`descent_step_K_majorIdx` yield a **constructive** reduct (Ind=`red d`,
+  K=critical reduct) instead of a bare `∃`, then `g` = that function directly (no minimization). (b) ties (A)
+  to the secondary front but kills the definability problem outright — likely the cleaner route.
+- **(B) `exists_sigma1_descent_of_sigma1_step`** — given such a `𝚺₁` `g`, build the `𝚺₁` orbit. The MECHANICAL
+  piece (mirror `zRegTable`, `Zsubst:1264`): `redOrbit z n := g^[n] z` via `PR.Construction` (`Blueprint 1`,
+  param `z`; cf. `iseqMaxEigenAux`), `f n := iord(redOrbit z n)`; `𝚺₁` (iord∘`𝚺₁`); NF via `isNF_iotower`+
+  `isNF_iotil_of_ZDerivation`; descends via `hg_step` + `𝚺₁`-induction (`sigma1_pos_succ_induction`) that each
+  orbit point stays in `ZDerivesEmptyR`. NO definability subtlety — attack (B) FIRST (independent of (A)).
+
+Original decomposition note (the `iord_iR2_iterate_descends` `InternalZ:9816` internalization), now realized as (A)+(B):
 1. **`redLeast : V → V`** — `μ d'. [ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0]`. Well-defined & `𝚺₁` because the
    matrix is `𝚫₁`: `ZDerivesEmptyR` = `ZDerivation` (`𝚫₁`, `InternalZ:5542`) ∧ `seqAnt=∅` ∧ `seqSucc=⊥` ∧ `ZRegular`/
    `ZFresh`/`ZSeqAnt` (= `zReg`/`zFresh`/`zSeqAnt` `= 0`, each a `𝚺₁`-`Function₁` — `Zsubst:1298` etc.); `iord` is
