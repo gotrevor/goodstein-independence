@@ -8853,6 +8853,26 @@ lemma exit_nonRep_of_reroute {s ds j0 : V}
     obtain ⟨i', hi'lt, hi'eq⟩ := hreroute j hj_le hRep
     exact hmin i' hi'lt ⟨hi'eq.trans hAj, le_of_lt (lt_of_lt_of_le hi'lt hj_le)⟩
 
+/-- **`hreroute` from an all-leaves hypothesis** (lap 122, target #1 leaf branch). Packages
+`chainAsucc_threaded_of_leaf` into exactly the `hreroute` shape that `inference_critical_pair_of_chain_reroute`
+/ `iord_descent_iRcrit_of_chain_reroute` consume. Reduces the open `hreroute` obligation to `hleaves`:
+**every `isymRep` premise `≤ j0` is a LEAF** (`zAtom`/`zAx1`, tags 0/7). For the leaf case the succedent
+sits in the premise's own antecedent, and the ⊥-chain threading (`seqAnt s = ∅`) routes it to a strictly
+earlier premise. This wires the leaf branch of the threaded-atom stall completely; the residual is now the
+single named structural fact `hleaves` (a `red`-stall selects an atom/`zAx1` leaf by construction —
+`red_zK_fixpoint_of_atom_selected`/`_zAx1_selected`; the chain/Ind `isymRep` residual is path α). -/
+lemma hreroute_of_leaves {s ds j0 : V}
+    (hant : seqAnt s = (∅ : V))
+    (hchain : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+      inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hZ : ∀ i ≤ j0, ZDerivation (znth ds i))
+    (hleaves : ∀ i ≤ j0, tp (znth ds i) = isymRep →
+      (∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck)) :
+    ∀ i ≤ j0, tp (znth ds i) = isymRep →
+      ∃ i' < i, chainAsucc ds i' = chainAsucc ds i := by
+  intro i hi hRep
+  exact chainAsucc_threaded_of_leaf (hZ i hi) (hleaves i hi hRep) hant hchain hi
+
 set_option maxHeartbeats 1000000 in
 /-- **The generalized redex finder for a re-routing chain** (lap 122 — the genuine fix for the threaded-atom
 stall, Sub-lemmas A+B assembled). `inference_critical_pair_of_chain` needs FULL criticality `hnperm`
