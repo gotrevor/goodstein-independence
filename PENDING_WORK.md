@@ -1,6 +1,51 @@
 # Pending work — open obligations & attack paths
 
-## lap 143 (latest) — DEEP REFLECTION: FINISH the existence-form pivot (witness with genuine reducts, NEVER `red`)
+## lap 144 (latest) — CRITICAL ¬-case CLOSED RED-FREE (`descent_step_K_critical_neg` sorry DROPS)
+**Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms).**
+`descent_step_K_critical_neg` + the dispatcher `descent_step_K_critical` are now `#print axioms`-clean
+`[propext, Classical.choice, Quot.sound]` (sorry-FREE, off `red`). Executes DIRECTION lap-143 step 2.
+
+### THE advance — the lap-142 `redexJ ≤ j0` obstruction is DISSOLVED (route (b))
+The ¬-case soundness `ZDerivation_iRKcCrit_neg`'s succedent half (`haux0_neg`, replaces premise `redexJ` =
+the `zAxNeg` axiom, sets conclusion succedent to `A`) needed chain-threading **up to `redexJ`** — free only
+when `redexJ ≤ j0` (the `chainInf_redexI_data` tip). When `redexJ > j0`, **`isChainInf_reduceR_keepTip`**
+(new, InternalZ) rebuilds chain-validity at the UNCHANGED tip `j0`: on a ⊥-orbit `j0` carries `⊥`, so the
+new `isChainInf` uses the `⊥`-exit disjunct, and the replaced premise (above the tip) never enters the
+tip-bounded threading/rank. So only threading up to `j0` is needed. `ZDerivation_corrected_haux0_neg_botOrbit`
+dispatches `redexJ ≤ j0` (standard) vs `>` (keep-tip).
+
+### New lemmas (all `#print axioms`-clean)
+- **InternalZ:** `isChainInf_reduceR_keepTip`; `chainInf_redexI_data` extended to also return the tip exit
+  `chainAsucc ds j0 = seqSucc s ∨ = ⊥` (callers `irk_chainAsucc_redexI_le`, `ZDerivation_iRKcCrit_critical_all`
+  updated with trailing `_`).
+- **Crux2Blueprint:** `ZDerivation_corrected_haux0_neg_keepTip` / `_botOrbit`,
+  `ZDerivation_iRcritGNeg_corrected_neg_botOrbit`, `ZDerivation_iRKcCrit_neg_botOrbit`; `descent_step_K_critical_neg`
+  WIRED (soundness `_neg_botOrbit`, descent `iord_descent_iRKcCrit_neg`, invariants `ZRegular_/ZFresh_/ZSeqAnt_iRKcCrit_of_zK`).
+
+### On-path sorry inventory after lap-144 (the live `false_of_ZDerivesEmpty` chain)
+| sorry | live via | disposition |
+|---|---|---|
+| Ind branch of `ZDerivesEmptyR_descent_step` = `⟨red d, ZDerivesEmptyR_red, iord_descent_red_zInd⟩` | **STILL `red`** → `redSoundGen` :1471 (zInd→FALSE :80) | **THE last `red` use — switch to `iIndReductSeqG`** |
+| `redSoundGen` :1471, `zKValidF_iIndReduct_of_zInd` :80, `ZDerivation_red_zK_crit` :1108, `_splice` :1211, `_nonRep` :1384 | only via the Ind branch now (critical-K is off them) | DEAD — drop when the Ind witness switches → relocate to `wip/` |
+| `descent_step_K_noncritical` :2138 | live (non-critical K) | GENUINE — Buchholz 5.2 atomic reduct |
+| `exists_sigma1_descending_step` :2208 (A) | live (gDef packaging) | GENUINE — concrete `redStep`/witness-bound |
+
+### NEXT (hardest-first) — re-witness the Ind branch with `iIndReductSeqG`
+This is the FINAL step that takes the whole live path off `red`'s false soundness (the critical-K case
+already is, lap-143/144). Needs Ind soundness `ZDerivesEmptyR (iIndReductSeqG d0 d1 a k)` from
+`ZDerivesEmptyR (zInd s at' p d0 d1)` + descent. The lap-136 `iIndReductSeqG` chain is the soundness shell
+(`iIndReductSeqG_zero/_succ`, `znth_iIndReductSeqG_zero/_step`, `chainA*_iIndReductSeqG_*`,
+`isChainInf_iIndReduct_exit`, `isChainInf_telescope` banked); `iord_descent_iIndReduct` (InternalZ:3056) the
+descent at the modeled count. After the Ind switch, relocate {:80,:1108,:1211,:1384,:1471} to `wip/`.
+
+### FORBIDDEN (unchanged from lap-143)
+Witnessing ANY `ZDerivesEmptyR_descent_step` branch with `red` (incl. the Ind branch — switch it); attacking
+:80/:1108/:1211/:1384/:1471 as stated (all FALSE/dead); the `redLeast`/μ-min (A) route; the major-premise-tag
+{3,4,5,6} split; `zReg`/`zFresh`/`zSeqAnt` folds as a goal; off-critical-path easy sorries; M2 / M4 wiring.
+
+---
+
+## lap 143 — DEEP REFLECTION: FINISH the existence-form pivot (witness with genuine reducts, NEVER `red`)
 **Build 🟢 green (1326). Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms), faithfulness clean,
 statement re-audited — no drift.** This is an altitude lap; deliverable = `REFLECTION-2026-06-26-lap143.md` + the binding
 `DIRECTION.md` CURRENT DIRECTIVE (lap-143). Summary below.

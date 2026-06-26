@@ -1,11 +1,22 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 143 (DEEP REFLECTION) · 2026-06-26
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 144 · 2026-06-26
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**);
 `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean. The lone `sorryAx` traces to crux-2.
 
-> **🧘 Lap-143 DEEP REFLECTION — direction KEPT; the existence-form pivot was half-ABANDONED, FINISH THE WIRING (read FIRST — current).**
+> **⭐⭐⭐ Lap-144 — CRITICAL ¬-case CLOSED RED-FREE (executes DIRECTION lap-143 step 2; a src sorry DROPS — read FIRST).**
+> `descent_step_K_critical_neg` is now sorry-FREE + `#print axioms`-clean `[propext, Classical.choice, Quot.sound]`,
+> and the whole dispatcher `descent_step_K_critical` is axiom-clean for BOTH polarities (∀ lap-143 + ¬ lap-144) —
+> the critical-K case is FULLY off `red`/`redSoundGen`/false-:80/:1108. **The lap-142 `redexJ ≤ j0` obstruction is
+> dissolved** via route (b): new `isChainInf_reduceR_keepTip` (InternalZ) rebuilds chain-validity at the UNCHANGED
+> ⊥-orbit tip `j0` when the §5 axNeg reduct lands above it (`j0 < redexJ`, uses the `⊥`-exit disjunct) — so the
+> ¬-case `haux0` needs threading only up to `j0`, never `redexJ`. New: `ZDerivation_corrected_haux0_neg_botOrbit`
+> (the `redexJ ≤ j0` dispatcher), `ZDerivation_iRcritGNeg_corrected_neg_botOrbit`, `ZDerivation_iRKcCrit_neg_botOrbit`.
+> **NEXT (the LAST `red` on the live path):** re-witness the Ind branch of `ZDerivesEmptyR_descent_step` with
+> `iIndReductSeqG` (lap-136), not `red d`. See `HANDOFF-2026-06-26-lap144.md`, `PENDING_WORK.md` lap-144.
+
+> **🧘 Lap-143 DEEP REFLECTION — direction KEPT; the existence-form pivot was half-ABANDONED, FINISH THE WIRING.**
 > Re-verified in-kernel (green 1326): headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms),
 > `goodsteinSentence_faithful`/`peano_not_proves_consistency` clean, statement re-audited — no drift. **The finding:**
 > the lap-132 existence-form pivot (witness the bare-`∃` step with GENUINE reducts, NEVER `red`) was the right call —
