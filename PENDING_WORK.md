@@ -31,16 +31,18 @@ sorry-free, axiom-clean) is BANKED BUT UNWIRED → zero false-dependence dropped
 | ¬-case `redexJ ≤ j0` (after the split) | live (critical ¬) | GENUINE — pin `j0 = lh ds−1` on ⊥-orbit |
 
 ### MANDATED next move (assemble, don't bank — `DIRECTION.md` lap-143)
-1. **Derive `ZSeqAnt_iRKcCrit`** — the ONE missing support lemma. (`ZRegular_iRKcCrit_of_zK` `Zsubst:2516`,
-   `ZFresh_iRKcCrit` `Zsubst:3344`, `fstIdx_iRKcCrit` `InternalZ:7564`, `iord_descent_iRKcCrit_corr`/`_neg`
-   `RedZKDescent:580/597` all EXIST.) Mirror `ZFresh_iRKcCrit`.
-2. **Split `descent_step_K_critical` (:1891) into ∀ + ¬** on `hAcase` (the R-redex shape). Wire the ∀-case to
-   `iRKcCrit` (`ZDerivation_iRKcCrit_critical_all` + the support lemmas + `iord_descent_iRKcCrit_corr`). Leave the ¬-case
-   as a NEW named sorry `descent_step_K_critical_neg` (honest residual = `redexJ ≤ j0`). RAISES src count = PROGRESS; the
-   dominant ∀-sub-case goes genuinely red-free (drops :80/:1108 dependence).
-3. **Re-witness the Ind branch** of `ZDerivesEmptyR_descent_step` (:1946) with the corrected-Ind reduct `iIndReductSeqG`
-   (lap-136), not `red d`, dropping its `redSoundGen`/:80 dependence.
-4. AFTER the live path no longer references them, relocate the DEAD `red`-soundness sorries {:80,:1108,:1211,:1384,:1471}
+1. ✅ **DONE (lap-143).** `ZSeqAnt_iRKcCrit` + `ZSeqAnt_iRKcCrit_of_zK` + `ZFresh_iRKcCrit_of_zK` + helpers
+   `ZSeqAnt_zsubst_zIallPrem`/`ZSeqAnt_zInegPrem` (Zsubst.lean), mirroring `ZRegular_/ZFresh_iRKcCrit`.
+2. ✅ **DONE (lap-143).** `descent_step_K_critical` SPLIT into `descent_step_K_critical_all` (I∀ — witnesses with
+   `iRKcCrit`, `#print axioms` = `[propext, Classical.choice, Quot.sound]`, **sorry-free, NO false :1108/:80**) +
+   `descent_step_K_critical_neg` (I¬ — NEW named sorry, residual = `redexJ ≤ j0`) + a polarity dispatcher. The dominant
+   critical sub-case is now genuinely red-free. Build 🟢 1326.
+3. **NEXT — re-witness the Ind branch** of `ZDerivesEmptyR_descent_step` (:1946) with the corrected-Ind reduct
+   `iIndReductSeqG` (lap-136), not `red d`, dropping its `redSoundGen`/:80 dependence. (Currently `⟨red d, ZDerivesEmptyR_red hd, iord_descent_red_zInd …⟩`.)
+4. **NEXT — close the ¬-case** `descent_step_K_critical_neg`: pin `j0 = lh ds − 1` for genuine ⊥-orbit chains
+   (`isChainInf_of_last`) ⟹ `redexJ < lh ds = j0+1`; or weaken `ZDerivation_corrected_haux0_neg` to thread only up to
+   `min(redexJ, j0)`. Then `ZDerivation_iRKcCrit_neg` discharges the ¬-soundness (descent = `iord_descent_iRKcCrit_neg`).
+5. AFTER the live path no longer references them, relocate the DEAD `red`-soundness sorries {:80,:1108,:1211,:1384,:1471}
    to `wip/` (abandoned route — NOT before, that games the count).
 
 ### FORBIDDEN
