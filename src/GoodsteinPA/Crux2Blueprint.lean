@@ -533,6 +533,35 @@ theorem ZDerivation_iRKcCrit_all {s r ds sᵢ sⱼ a p pj k' d0 : V}
   exact ZDerivation_iRcritG_critReductCorr hZ hi hj hIJ hdi hdj hfresh_eig hpfresh hΓfresh
     hCwff hSeqs hSeqsj hsj hthread hrank hrankI
 
+/-- **The re-keyed critical reduct `iRKcCrit` is SOUND — ¬-case** (the `ZDerivation_iRKcCrit_all` twin for
+an `I¬` R-redex, `zTag dᵢ = 2 ≠ 1`). No freshness is involved: the §3.2-case-5.1 ¬-reduct is the red-free
+`I¬` child `zInegPrem dᵢ = d0` plus the §5 `axNeg` axiom `Ax^1_{Γⱼ→A}` (succedent SET). Delegates to the
+PROVEN `ZDerivation_iRcritGNeg_critReductNeg` through `iRKcCrit_eq_neg`. Together with
+`ZDerivation_iRKcCrit_all` this covers both polarities of the engine swap's `ZDerivation_red_zK_crit`
+re-proof; the bundle is the non-freshness chain-validity plumbing (`hcut`/`hd0ant`/`hSeqs`/`hSeqsi`/
+threading/rank), all derivable from `isChainInf` (`PENDING_WORK` lap-128 step 2). -/
+theorem ZDerivation_iRKcCrit_neg {s r ds sᵢ sⱼ p d0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : redexI (zK s r ds) < lh ds)
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hcut : cutFormula (zK s r ds) = p)
+    (hd0ant : seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hSeqs : Seq (seqAnt s)) (hSeqsi : Seq (seqAnt sᵢ))
+    (hthread : ∀ i' ≤ redexJ (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < redexJ (zK s r ds), irk (chainAsucc ds i') ≤ r)
+    (hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r) :
+    ZDerivation (iRKcCrit (zK s r ds)) := by
+  have htag2 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) ≠ 1 := by
+    rw [zKseq_zK, hdi, zTag_zIneg]; simp
+  rw [iRKcCrit_eq_neg htag2 (ne_of_lt hIJ)]
+  exact ZDerivation_iRcritGNeg_critReductNeg hZ hi hj hIJ hdi hdj hcut hd0ant
+    hCwff hSeqs hSeqsi hthread hrank hrankI
+
 /-- **5.1 critical sub-residual — THE cut-elimination prize.** When the chain is critical, `red = iRcritG
 d ρ` with `ρ` the recursive premise reducts; delegates to `ZDerivation_iRcritG_of`, which reduces it to the
 two stripped half-derivations `haux0` (`Γ → cutFormula d`) / `haux1` (Buchholz Thm 3.4(a) inversion).
