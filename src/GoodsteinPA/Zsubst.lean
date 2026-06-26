@@ -2509,6 +2509,202 @@ lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
   · rw [red_zAxNeg]; simpa using hfresh
   · rw [red_zAx1]; simpa using hfresh
 
+/-! ## `red` preserves `ZFresh` — the `zK` chain dispatch (freshness analogue of `ZRegular_red_zK`)
+
+Mirrors the `ZRegular_red_zK_*` family. Since `zFresh (zK s r ds)` is purely the premise max-fold (the
+chain node carries NO own freshness flag — `zFresh_zK`), each branch reduces to "every reduct premise is
+`ZFresh`", closed by `zfresh_zK_of`. The replace/crit/splice reduct shapes are the same
+`seqUpdate`/`iCritReductSeq`/`seqInsert` of `ds` as for regularity, so the structural-block lemmas below
+are line-for-line analogues of `ZRegular_zK_of_seqUpdate`/`_iCritReductSeq`/`_seqInsert`. -/
+
+/-- **`zAxReduct` preserves `ZFresh`.** On atomic axioms it returns a `zAx1` node (`zFresh = 0`);
+otherwise it is the identity. -/
+lemma ZFresh_zAxReduct {x : V} (h : ZFresh x) : ZFresh (zAxReduct x) := by
+  unfold zAxReduct
+  by_cases h5 : zTag x = 5
+  · rw [if_pos h5]; show zFresh (zAx1 _ _) = 0; exact zFresh_zAx1 _ _
+  · by_cases h6 : zTag x = 6
+    · rw [if_neg h5, if_pos h6]; show zFresh (zAx1 _ _) = 0; exact zFresh_zAx1 _ _
+    · rw [if_neg h5, if_neg h6]; exact h
+
+/-- A chain all of whose premises are fresh is fresh (`ZFresh` wrapper of `zfresh_zK_of`). -/
+lemma ZFresh_zK_of_premises {s r ds : V} (hds : Seq ds)
+    (h : ∀ i < lh ds, ZFresh (znth ds i)) : ZFresh (zK s r ds) :=
+  zfresh_zK_of hds h
+
+/-- A premise of a fresh chain is fresh (`ZFresh` wrapper of `zfresh_zK_premise`). -/
+lemma ZFresh_zK_premise {s r ds i : V} (hds : Seq ds) (h : ZFresh (zK s r ds)) (hi : i < lh ds) :
+    ZFresh (znth ds i) :=
+  zfresh_zK_premise hds h hi
+
+/-- **`ZFresh` of a `seqUpdate` chain** (5.2.2 replace / each half of 5.1 critical). -/
+lemma ZFresh_zK_of_seqUpdate {s' r' ds i v : V}
+    (hall : ∀ m < lh ds, ZFresh (znth ds m)) (hv : ZFresh v) :
+    ZFresh (zK s' r' (seqUpdate ds i v)) := by
+  refine ZFresh_zK_of_premises (seqUpdate_seq ds i v) ?_
+  intro m hm
+  rw [seqUpdate_lh] at hm
+  rcases eq_or_ne m i with rfl | hne
+  · rw [znth_seqUpdate_self hm]; exact hv
+  · rw [znth_seqUpdate_of_ne hne]; exact hall m hm
+
+/-- **`ZFresh` of an `iCritReductSeq` chain** (5.1 critical `iRcritG`). -/
+lemma ZFresh_zK_of_iCritReductSeq {s' r' d0 d1 : V} (h0 : ZFresh d0) (h1 : ZFresh d1) :
+    ZFresh (zK s' r' (iCritReductSeq d0 d1)) :=
+  ZFresh_zK_of_premises (iCritReductSeq_seq d0 d1) (forall_lt_iCritReductSeq h0 h1)
+
+/-- **`ZFresh` of a `seqInsert` chain** (5.2.1 splice). -/
+lemma ZFresh_zK_of_seqInsert {s' r' ds i a b : V} (hi : i < lh ds)
+    (hall : ∀ m < lh ds, ZFresh (znth ds m)) (ha : ZFresh a) (hb : ZFresh b) :
+    ZFresh (zK s' r' (seqInsert ds i a b)) := by
+  refine ZFresh_zK_of_premises (seqInsert_seq ds i a b) ?_
+  intro n hn
+  rw [seqInsert_lh] at hn
+  exact forall_znth_seqInsert (P := ZFresh) hi ha hb hall n hn
+
+/-- **Premise extraction from a critical reduct `iRcritG d ρ`** (freshness analogue of
+`ZRegular_iRcritG_premise`). -/
+lemma ZFresh_iRcritG_premise {d ρk : V} {ρ : V → V} (h : ZFresh (iRcritG d ρ)) (hk : ρk < 2) :
+    ZFresh (znth (zKseq (iRcritG d ρ)) ρk) := by
+  rw [iRcritG, iCritReductG] at h ⊢
+  rw [zKseq_zK]
+  exact ZFresh_zK_premise (iCritReductSeq_seq _ _) h (by rw [iCritReductSeq_lh]; exact hk)
+
+/-- **5.2.2 replace branch — `ZFresh` preserved (unconditional).** -/
+lemma ZFresh_red_zK_replace {s r ds : V} (hds : Seq ds)
+    (hfresh : ZFresh (zK s r ds))
+    (hred : ∀ i < lh ds, ZFresh (red (znth ds i)))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds))))) :
+    ZFresh (red (zK s r ds)) := by
+  rw [red_zK_rep h1 h2]
+  exact ZFresh_zK_of_seqUpdate
+    (fun m hm => ZFresh_zK_premise hds hfresh hm) (hred _ h1)
+
+/-- **5.1 critical branch — `ZFresh` preserved.** -/
+lemma ZFresh_red_zK_crit {s r ds : V} (hds : Seq ds)
+    (hfresh : ZFresh (zK s r ds))
+    (hI : ZFresh (red (znth ds (redexI (zK s r ds)))))
+    (hJ : ZFresh (red (znth ds (redexJ (zK s r ds)))))
+    (hcrit : ¬ permIdx (zK s r ds) < lh ds) :
+    ZFresh (red (zK s r ds)) := by
+  rw [red_zK_crit hcrit, iRcritG]
+  simp only [fstIdx_zK, zKseq_zK, zKrank_zK, iCritReductG]
+  refine ZFresh_zK_of_iCritReductSeq ?_ ?_
+  · exact ZFresh_zK_of_seqUpdate
+      (fun m hm => ZFresh_zK_premise hds hfresh hm) (ZFresh_zAxReduct hI)
+  · exact ZFresh_zK_of_seqUpdate
+      (fun m hm => ZFresh_zK_premise hds hfresh hm) (ZFresh_zAxReduct hJ)
+
+/-- **5.2.1 splice branch — `ZFresh` preserved, given the halves are fresh.** -/
+lemma ZFresh_red_zK_splice {s r ds : V} (hds : Seq ds)
+    (hfresh : ZFresh (zK s r ds))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds)))))
+    (htag : zTag (znth ds (permIdx (zK s r ds))) = 4)
+    (ha : ZFresh (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 0))
+    (hb : ZFresh (znth (zKseq (red (znth ds (permIdx (zK s r ds))))) 1)) :
+    ZFresh (red (zK s r ds)) := by
+  rw [red_zK_splice h1 h2 htag]
+  exact ZFresh_zK_of_seqInsert h1
+    (fun m hm => ZFresh_zK_premise hds hfresh hm) ha hb
+
+/-- **5.2.1 splice branch — `ZFresh` preserved, from the selected premise being a CHAIN.** Mirror of
+`ZRegular_red_zK_splice_of_chain`: the splice halves' freshness is *derived* from `zTag dᵢ = 4` + the IH
+`ZFresh (red dᵢ)` (`red dᵢ = iRcritG dᵢ …` is a two-premise critical reduct, halves are premises of a fresh
+chain via `ZFresh_iRcritG_premise`). -/
+lemma ZFresh_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
+    (hfresh : ZFresh (zK s r ds))
+    (hred : ∀ i < lh ds, ZFresh (red (znth ds i)))
+    (h1 : permIdx (zK s r ds) < lh ds)
+    (h2 : ¬ permIdx (znth ds (permIdx (zK s r ds)))
+        < lh (zKseq (znth ds (permIdx (zK s r ds)))))
+    (hchain : ZDerivation (znth ds (permIdx (zK s r ds))))
+    (htag : zTag (znth ds (permIdx (zK s r ds))) = 4) :
+    ZFresh (red (zK s r ds)) := by
+  rcases zDerivation_iff.mp hchain with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _⟩ |
+    ⟨s', p, d0, heq, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _⟩ |
+    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
+  · rw [heq] at htag; simp at htag
+  · rw [heq] at htag; simp at htag
+  · rw [heq] at htag; simp at htag
+  · rw [heq] at htag; simp at htag
+  · have hcrit : ¬ permIdx (zK s' r' ds') < lh ds' := by
+      rw [heq, zKseq_zK] at h2; exact h2
+    have hfreshred : ZFresh (iRcritG (zK s' r' ds') (fun n => zAxReduct (red (znth ds' n)))) := by
+      have h := hred (permIdx (zK s r ds)) h1
+      rwa [heq, red_zK_crit hcrit] at h
+    refine ZFresh_red_zK_splice hds hfresh h1 h2 htag ?_ ?_
+    · rw [heq, red_zK_crit hcrit]; exact ZFresh_iRcritG_premise hfreshred zero_lt_two
+    · rw [heq, red_zK_crit hcrit]; exact ZFresh_iRcritG_premise hfreshred one_lt_two
+  · rw [heq] at htag; simp at htag
+  · rw [heq] at htag; simp at htag
+  · rw [heq] at htag; simp at htag
+
+/-- **`red` preserves `ZFresh` — the full `zK` chain case.** Same gated `iRK` dispatch as
+`ZRegular_red_zK`: chain-selected non-critical → replace; chain-selected critical → splice; non-chain →
+conclusion-replace; fully-critical → critical reduct (redex bounds from the chain's own validity). -/
+lemma ZFresh_red_zK {s r ds : V} (hds : Seq ds)
+    (hZ : ZDerivation (zK s r ds)) (hfresh : ZFresh (zK s r ds))
+    (hred : ∀ i < lh ds, ZFresh (red (znth ds i))) :
+    ZFresh (red (zK s r ds)) := by
+  by_cases h1 : permIdx (zK s r ds) < lh ds
+  · by_cases htag : zTag (znth ds (permIdx (zK s r ds))) = 4
+    · by_cases h2 : permIdx (znth ds (permIdx (zK s r ds)))
+          < lh (zKseq (znth ds (permIdx (zK s r ds))))
+      · exact ZFresh_red_zK_replace hds hfresh hred h1 h2
+      · exact ZFresh_red_zK_splice_of_chain hds hfresh hred h1 h2
+          ((zDerivation_zK_inv hZ).2 _ h1) htag
+    · rw [red_zK_rep_nonchain h1 htag]
+      exact ZFresh_zK_of_seqUpdate
+        (fun m hm => ZFresh_zK_premise hds hfresh hm) (hred _ h1)
+  · have hvalid : zKValid s r ds := zKValid_iff_zKValidF_and_zKCritical.mpr
+      ⟨zKValidF_of_ZDerivation_zK hZ, zKCritical_of_not_permIdx_lt h1⟩
+    obtain ⟨hI, hJ⟩ := redexI_redexJ_lt_of_zKValid hvalid
+    exact ZFresh_red_zK_crit hds hfresh (hred _ hI) (hred _ hJ) h1
+
+/-- **`red` preserves `ZFresh` — the full structural theorem (downward).** The I∀ eigenvariable-condition
+freshness invariant is preserved by the genuine reduct `red`. Assembled by `zDerivation_induction`: every
+non-chain node delegates to `ZFresh_red_of_not_zK`; the chain (`zK`) node delegates to `ZFresh_red_zK`,
+feeding the per-premise IH `ZFresh (red dᵢ)` (each premise fresh by `ZFresh_zK_premise`). -/
+theorem ZFresh_red : ∀ d : V, ZDerivation d → ZFresh d → ZFresh (red d) := by
+  have key : ∀ d : V, ZDerivation d → (ZFresh d → ZFresh (red d)) := by
+    apply zDerivation_induction (P := fun d => ZFresh d → ZFresh (red d))
+    · definability
+    · intro C hC d hphi hfresh
+      rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
+        ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
+        ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ |
+        ⟨s, C, rfl, hin⟩
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hfresh (by simp [zTag_zAtom])
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inl ⟨s, a, p, d0, rfl, (hC d0 hd0).1, hsc, hwff⟩)))
+          hfresh (by simp [zTag_zIall])
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inl ⟨s, p, d0, rfl, (hC d0 hd0).1, hsc, hwff⟩))))
+          hfresh (by simp [zTag_zIneg])
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inl
+            ⟨s, at', p, d0, d1, rfl, (hC d0 h0).1, (hC d1 h1).1, hwff⟩)))))
+          hfresh (by simp [zTag_zInd])
+      · refine ZFresh_red_zK hds
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+            ⟨s, r, ds, rfl, hds, fun i hi => (hC (znth ds i) (hmem i hi)).1, hvalid⟩))))))
+          hfresh (fun i hi => (hC (znth ds i) (hmem i hi)).2 (ZFresh_zK_premise hds hfresh hi))
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+            (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))) hfresh (by simp [zTag_zAxAll])
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+            (Or.inr (Or.inl ⟨s, p, rfl, hp, hin, hin2⟩)))))))) hfresh (by simp [zTag_zAxNeg])
+      · exact ZFresh_red_of_not_zK
+          (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+            (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hfresh (by simp [zTag_zAx1])
+  exact key
+
 /-! ### ✅ The `hseltag` leaf — RESOLVED (lap 95) by the gated `iRK` dispatch
 
 **Historical (lap 94 obstruction, now fixed).** The former `ZRegular_red_zK` leaf `hseltag` claimed the
