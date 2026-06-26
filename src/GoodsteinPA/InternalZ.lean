@@ -1248,6 +1248,8 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.chainAsuccDef : 𝚺₁.Semise
 instance chainAsucc_defined : 𝚺₁-Function₂ (chainAsucc : V → V → V) via chainAsuccDef := .mk
   fun v ↦ by simp [chainAsuccDef, chainAsucc, znth_defined.iff, fstIdx_defined.iff, seqSucc_defined.iff]
 instance chainAsucc_definable : 𝚺₁-Function₂ (chainAsucc : V → V → V) := chainAsucc_defined.to_definable
+instance chainAsucc_definable' (Γ) : Γ-[m + 1]-Function₂ (chainAsucc : V → V → V) :=
+  chainAsucc_definable.of_sigmaOne
 
 /-- `chainAnt ds i = seqAnt (fstIdx (znth ds i))`. -/
 noncomputable def _root_.LO.FirstOrder.Arithmetic.chainAntDef : 𝚺₁.Semisentence 3 := .mkSigma
@@ -8816,6 +8818,40 @@ lemma chainAsucc_threaded_of_leaf {s ds j0 k : V}
   rcases hchain k hk _ hin with h | h
   · rw [hant] at h; simp [inAnt, lh_empty] at h
   · obtain ⟨i', hi', heq⟩ := h; exact ⟨i', hi', heq.symm⟩
+
+/-- **The least chain exit is NOT an `isymRep` leaf** (lap 121, Sub-lemma A of the generalized redex
+finder). The `isChainInf` exit `j0` (`chainAsucc ds j0 ∈ {seqSucc s, ⊥}`) need not be unique. If every
+`isymRep` premise `≤ j0` re-routes its succedent to a STRICTLY earlier premise (`hreroute`, supplied by
+`chainAsucc_threaded_of_leaf` on the ⊥-orbit), then the LEAST-indexed exit `j'` is forced to be
+NON-`isymRep`: were it `isymRep`, re-routing would hand back a smaller exit `i' < j'`, contradicting
+minimality. This lets `inference_critical_pair`'s Step A (the exit symbol is a left symbol) run from a
+genuine non-leaf exit even when the chain carries threaded atoms — the redex finder's `isymRep`-killing
+use of `hnperm` at the exit, recovered structurally. -/
+lemma exit_nonRep_of_reroute {s ds j0 : V}
+    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
+    (hreroute : ∀ i ≤ j0, tp (znth ds i) = isymRep →
+      ∃ i' < i, chainAsucc ds i' = chainAsucc ds i) :
+    ∃ j', j' ≤ j0 ∧ (chainAsucc ds j' = seqSucc s ∨ chainAsucc ds j' = (^⊥ : V)) ∧
+      tp (znth ds j') ≠ isymRep := by
+  -- Search for the LEAST index whose succedent matches the exit value `c = chainAsucc ds j0`
+  -- (single equality, `c` opaque); re-routing keeps it in `{seqSucc s, ⊥}`.
+  set c := chainAsucc ds j0 with hc
+  clear_value c
+  have hQdef : 𝚺₁-Predicate (fun x : V => chainAsucc ds x = c ∧ x ≤ j0) := by
+    apply Definable.and ?_ (by definability)
+    exact DefinableRel.comp (by definability)
+      (DefinableFunction₂.comp (F := chainAsucc)
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction.const c)
+  obtain ⟨j, ⟨hAj, hj_le⟩, hmin⟩ :=
+    InductionOnHierarchy.least_number 𝚺 1 hQdef ⟨hc.symm, le_rfl⟩
+  refine ⟨j, hj_le, ?_, ?_⟩
+  · rcases hAj0 with h | h
+    · exact Or.inl (hAj.trans h)
+    · exact Or.inr (hAj.trans h)
+  · intro hRep
+    obtain ⟨i', hi'lt, hi'eq⟩ := hreroute j hj_le hRep
+    exact hmin i' hi'lt ⟨hi'eq.trans hAj, le_of_lt (lt_of_lt_of_le hi'lt hj_le)⟩
 
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
 
