@@ -1711,7 +1711,7 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
     · intro C hC d hphi hreg
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
-        ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ |
+        ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ |
         ⟨s, C, rfl, hin⟩
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hreg (by simp [zTag_zAtom])
@@ -1734,7 +1734,7 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
             (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))) hreg (by simp [zTag_zAxAll])
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-            (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩)))))))) hreg (by simp [zTag_zAxNeg])
+            (Or.inr (Or.inl ⟨s, p, rfl, hp, hin, hin2⟩)))))))) hreg (by simp [zTag_zAxNeg])
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
             (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hreg (by simp [zTag_zAx1])
@@ -1794,7 +1794,7 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, hatom⟩ | ⟨s, e, p, d0, rfl, hd0, hsc, hwff⟩ |
       ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ |
+      ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ |
       ⟨s, C, rfl, hin⟩
     -- atom
     · intro _
@@ -1938,10 +1938,12 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     · intro _
       rw [zsubst_zAxNeg]
       refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, rfl, ?_, ?_⟩)))))))
+        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, rfl, ?_, ?_, ?_⟩)))))))
       · exact IsUFormula.fvSubst ht.isUTerm hp
       · rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
         exact inAnt_fvSubstSeq hin
+      · rw [seqAnt_fvSubstSeqt]
+        exact inAnt_fvSubstSeq hin2
     -- zAx1
     · intro _
       rw [zsubst_zAx1]

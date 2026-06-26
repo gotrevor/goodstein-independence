@@ -272,18 +272,17 @@ reduct `zAx1 (seqSetSucc sⱼ A) A` derives `Γⱼ→A` and the conclusion succe
 (antecedent KEPT). This is the ¬-side analogue of the ∀ R-half `ZDerivation_corrected_haux0`, via the
 KEEP-antecedent/set-succedent constructor `ZDerivation_iCritReplaceReduce_of`.
 
-**The one genuine §5 residual** is `hpmem : inAnt A (seqAnt sⱼ)` — that the matrix `A` itself lies in the
-axNeg axiom's antecedent (Buchholz 2.2's side condition `A,¬A ∈ Γ`). The repo's `zAxNeg` ZPhi disjunct
-pins only `¬A ∈ Γ` (`zDerivation_zAxNeg_inv`), so this is supplied here as an orbit hypothesis — exactly the
-L-side analogue of the ∀ halves' freshness/threading data, and the residual to discharge by strengthening
-the `zAxNeg` side condition (the §5 ¬-axiom genuinely carries both `A,¬A`) or deriving `A∈Γⱼ` from the
-redex-pair chain context. -/
+**The §5 residual `hpmem : inAnt A (seqAnt sⱼ)` is now DISCHARGED (lap 118).** Buchholz 2.2's side
+condition `A,¬A ∈ Γ` for the axNeg axiom is now carried by the strengthened `zAxNeg` ZPhi disjunct (the 7th
+disjunct's 4th conjunct `inAnt p (seqAnt s)`), so `zDerivation_zAxNeg_inv` returns BOTH `¬A∈Γ` AND `A∈Γ`.
+The membership is recovered in-proof from the axNeg premise's own derivation (`zDerivation_zK_inv` +
+`zDerivation_zAxNeg_inv`), so the orbit hypothesis is gone — the ¬-side analogue of lap-115's `zAx1`
+8th-disjunct discharge of the L-half. -/
 theorem ZDerivation_corrected_haux0_neg {s r ds sⱼ p : V}
     (hZ : ZDerivation (zK s r ds))
     (hj : redexJ (zK s r ds) < lh ds)
     (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
     (hcut : cutFormula (zK s r ds) = p)
-    (hpmem : inAnt p (seqAnt sⱼ))
     (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
     (hthread : ∀ i' ≤ redexJ (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
         inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
@@ -291,6 +290,8 @@ theorem ZDerivation_corrected_haux0_neg {s r ds sⱼ p : V}
     ZDerivation (zK (seqSetSucc s (cutFormula (zK s r ds))) r
       (seqUpdate ds (redexJ (zK s r ds)) (zAx1 (seqSetSucc sⱼ p) p))) := by
   set j := redexJ (zK s r ds) with hjdef
+  have hpmem : inAnt p (seqAnt sⱼ) :=
+    (zDerivation_zAxNeg_inv (hdj ▸ (zDerivation_zK_inv hZ).2 _ hj)).2.2
   have hZv : ZDerivation (zAx1 (seqSetSucc sⱼ p) p) :=
     zDerivation_zAx1_intro (by rw [seqSucc_seqSetSucc, seqAnt_seqSetSucc]; exact hpmem)
   have hchain_j : chainAnt ds j = seqAnt sⱼ := by unfold chainAnt; rw [hdj, fstIdx_zAxNeg]
@@ -316,10 +317,10 @@ SWAPPED-half reduct `iRcritGNeg d ρ` is a genuine `ZDerivation` for any `ρ` em
 Both stripped halves (`ZDerivation_corrected_haux0_neg`/`_haux1_neg`) feed `ZDerivation_iRcritGNeg_of`; the
 cut-rank drop `rk(cutFormula d) ≤ r−1` is `irk_cutFormula_lt`'s ¬-branch (`rk(A) < rk(¬A) ≤ r`), and the
 conclusion well-formedness from the parent chain validity. **This is the genuine mathematical content of the
-¬-case inversion — the second (and last) critical sub-case after the lap-116 ∀-case** — and it is sound,
-modulo the single documented §5 residual `hpmem : inAnt A (seqAnt sⱼ)` (Buchholz 2.2's `A,¬A∈Γ` side
-condition; see `ZDerivation_corrected_haux0_neg`) and the engine re-keying (`red`'s tag-4 critical branch
-must dispatch ∀/¬ and emit `iRcritGNeg` here). -/
+¬-case inversion — the second (and last) critical sub-case after the lap-116 ∀-case** — and it is now
+UNCONDITIONALLY sound (the lap-117 `hpmem` residual was discharged lap 118 by strengthening the `zAxNeg`
+ZPhi disjunct to carry `A∈Γ`; see `ZDerivation_corrected_haux0_neg`). What remains is purely the engine
+re-keying (`red`'s tag-4 critical branch must dispatch ∀/¬ and emit `iRcritGNeg` here). -/
 theorem ZDerivation_iRcritGNeg_corrected_neg {s r ds sᵢ sⱼ p d0 : V} {ρ : V → V}
     (hZ : ZDerivation (zK s r ds))
     (hi : redexI (zK s r ds) < lh ds)
@@ -330,7 +331,6 @@ theorem ZDerivation_iRcritGNeg_corrected_neg {s r ds sᵢ sⱼ p d0 : V} {ρ : V
     (hρI : ρ (redexI (zK s r ds)) = d0)
     (hρJ : ρ (redexJ (zK s r ds)) = zAx1 (seqSetSucc sⱼ p) p)
     (hcut : cutFormula (zK s r ds) = p)
-    (hpmem : inAnt p (seqAnt sⱼ))
     (hd0ant : seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p)
     (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
     (hSeqs : Seq (seqAnt s)) (hSeqsi : Seq (seqAnt sᵢ))
@@ -346,7 +346,7 @@ theorem ZDerivation_iRcritGNeg_corrected_neg {s r ds sᵢ sⱼ p d0 : V} {ρ : V
   refine ZDerivation_iRcritGNeg_of (d := zK s r ds) (ρ := ρ) ?_ ?_ ?_ ?_ hCwff ?_ ?_
   · -- haux0 (¬ succedent half): redexJ ↦ §5 axNeg reduct `Ax^1_{Γⱼ→A}`
     rw [hρJ]; simp only [fstIdx_zK, zKrank_zK, zKseq_zK]
-    exact ZDerivation_corrected_haux0_neg hZ hj hdj hcut hpmem hCwff hthread hrank
+    exact ZDerivation_corrected_haux0_neg hZ hj hdj hcut hCwff hthread hrank
   · -- haux1 (¬ antecedent half): redexI ↦ I¬ child `d0`
     rw [hρI]; simp only [fstIdx_zK, zKrank_zK, zKseq_zK]
     exact ZDerivation_corrected_haux1_neg hZ hi hdi hcut hCwff hSeqs hSeqsi hd0ant
@@ -852,7 +852,7 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZRegular d → ZDerivation (r
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsucc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsucc, hwff⟩ |
         ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ | ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ |
-        ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin⟩ | ⟨s, C, rfl, hin⟩
+        ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ | ⟨s, C, rfl, hin⟩
       · -- zAtom: red = identity
         rw [red_zAtom]; exact zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)
       · -- zIall: red = zsubst d0 a (numeral 0); regularity ⟹ maxEigen d0 < a ⟹ ZDerivation_zsubst.
@@ -887,7 +887,7 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZRegular d → ZDerivation (r
           (Or.inl ⟨s, p, k, rfl, hp, hin⟩))))))
       · -- zAxNeg: red = identity
         rw [red_zAxNeg]; exact zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-          (Or.inr (Or.inl ⟨s, p, rfl, hp, hin⟩)))))))
+          (Or.inr (Or.inl ⟨s, p, rfl, hp, hin, hin2⟩)))))))
       · -- zAx1: red = identity
         rw [red_zAx1]; exact zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
           (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))
