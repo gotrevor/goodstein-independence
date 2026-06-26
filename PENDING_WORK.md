@@ -34,11 +34,19 @@ Ind-reduct redesign while this structural hole sat undiagnosed → crux-neglect 
   (b) make `ZDerivesEmptyR_descent_step`/`descent_step_K_majorIdx` yield a **constructive** reduct (Ind=`red d`,
   K=critical reduct) instead of a bare `∃`, then `g` = that function directly (no minimization). (b) ties (A)
   to the secondary front but kills the definability problem outright — likely the cleaner route.
-- **(B) `exists_sigma1_descent_of_sigma1_step`** — given such a `𝚺₁` `g`, build the `𝚺₁` orbit. The MECHANICAL
-  piece (mirror `zRegTable`, `Zsubst:1264`): `redOrbit z n := g^[n] z` via `PR.Construction` (`Blueprint 1`,
-  param `z`; cf. `iseqMaxEigenAux`), `f n := iord(redOrbit z n)`; `𝚺₁` (iord∘`𝚺₁`); NF via `isNF_iotower`+
-  `isNF_iotil_of_ZDerivation`; descends via `hg_step` + `𝚺₁`-induction (`sigma1_pos_succ_induction`) that each
-  orbit point stays in `ZDerivesEmptyR`. NO definability subtlety — attack (B) FIRST (independent of (A)).
+- **(B) `exists_sigma1_descent_of_sigma1_step`** — given such a `𝚺₁` `g`, build the `𝚺₁` orbit.
+  **✅ lap-137: FULLY PROVEN modulo the single iteration linchpin (B0).** The descent (`horbit_succ`+`hg_step`),
+  NF (`isNF_iotower`∘`isNF_iotil_of_ZDerivation`), membership-induction (`ISigma1.sigma1_succ_induction`),
+  and BOTH definability side-goals (`ZDerivesEmptyR∘orbit` `𝚺₁`-Predicate; `iord∘orbit` `𝚺₁`-Function₁, via
+  `definability` after `unfold`+orbit-instance) are all closed. (B) ⟹ (B0).
+- **(B0) `exists_sigma1_iterate`** — the reusable "internal `𝚺₁` iteration of a `𝚺₁` function is `𝚺₁`" lemma
+  (`𝚺₁-Function₁ g → ∃ orbit, 𝚺₁-Function₁ orbit ∧ orbit 0 = z ∧ ∀ n:V, orbit(n+1)=g(orbit n)`). Manual
+  `PR.Construction` (`iotower`/`zRegTable` template). **⚠️ lap-137 finding:** `PR.Blueprint.succ` is a
+  PARAMETER-FREE `Semisentence`, but `𝚺₁-Function₁ g` (`Definable`) gives only a PARAMETRIZED `Semiformula V k`.
+  So abstract-`g` iteration doesn't go through directly — **fix: strengthen the hyp to parameter-free
+  `DefinedFunction₁ g φ` (explicit `φ : 𝚺₁.Semisentence 2`), supplied by the concrete (A) step (iord/icmp/
+  ZDerivesEmptyR are all param-free), then `Blueprint.succ := φ` rewired.** No generic Foundation iteration
+  combinator exists (HFS checked). ATTACK (B0) next (the Foundation-engineering linchpin).
 
 Original decomposition note (the `iord_iR2_iterate_descends` `InternalZ:9816` internalization), now realized as (A)+(B):
 1. **`redLeast : V → V`** — `μ d'. [ZDerivesEmptyR d' ∧ icmp (iord d') (iord d) = 0]`. Well-defined & `𝚺₁` because the

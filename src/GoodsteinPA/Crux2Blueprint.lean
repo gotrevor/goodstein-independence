@@ -1669,9 +1669,16 @@ theorem exists_sigma1_descending_step
 /-- **(B0) NAMED sub-`sorry` (lap 137) — the reusable internal-iteration linchpin.** Any `𝚺₁`-definable
 `g : V → V` has a `𝚺₁`-definable internal iteration `orbit : V → V` with `orbit 0 = z`, `orbit (n+1) = g (orbit n)`
 over INTERNAL `n : V`. (META `Function.iterate` only takes `n : ℕ`; the internal `n : V` orbit is a
-`PR.Construction` — `iotower`/`zRegTable` template, `Blueprint 1` param `z`, `succ := g`, the `succ`
-Semisentence obtained from `hg`.) This is the genuine Foundation-level gap of the termination internalization;
-once banked it serves any descending step from (A). -/
+`PR.Construction` — `iotower`/`zRegTable` template, `Blueprint 1` param `z`, `succ := g`.) This is the
+genuine Foundation-level gap of the termination internalization; once banked it serves any descending step from (A).
+
+⚠️ **(B0) SUBTLETY (lap-137 finding, do FIRST next lap):** `PR.Blueprint.succ` is a *parameter-free*
+`𝚺₁.Semisentence (k+2)`, but `𝚺₁-Function₁ g` (`= Definable …`) only provides a *parametrized*
+`Semiformula V k` (params from `V` allowed). So the manual `PR.Construction` for a *fully-abstract* `g`
+doesn't go through directly. **Fix:** EITHER strengthen the hypothesis to a parameter-free `DefinedFunction₁ g φ`
+(an explicit `φ : 𝚺₁.Semisentence 2`) — which the CONCRETE step from (A) (built from `iord`/`icmp`/`ZDerivesEmptyR`,
+all parameter-free) supplies — and build the `Blueprint` `succ := φ` rewired; OR specialize (B0) to that concrete
+step. No generic Foundation iteration combinator exists (checked: HFS has none). -/
 theorem exists_sigma1_iterate (g : V → V) (hg : 𝚺₁-Function₁ g) (z : V) :
     ∃ orbit : V → V, (𝚺₁-Function₁ orbit) ∧ orbit 0 = z ∧ (∀ n : V, orbit (n + 1) = g (orbit n)) := sorry
 
