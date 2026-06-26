@@ -8764,6 +8764,33 @@ lemma zDerivation_zAx1_inv {s C : V} (hZ : ZDerivation (zAx1 s C)) :
   · obtain rfl : s = s' := by simpa using congrArg fstIdx h
     exact hin
 
+/-- **A threaded atom/`Ax¹` leaf premise's cut formula is produced upstream** (lap 121). If premise
+`k ≤ j0` of a ⊥-chain (`seqAnt s = ∅`) is an identity-axiom LEAF — `znth ds k = zAtom sₖ` or
+`zAx1 sₖ Cₖ`, the two irreducible `tp = isymRep` shapes that cause the `red`-stall — then its succedent
+`chainAsucc ds k` is the succedent of a STRICTLY EARLIER premise: `∃ i' < k, chainAsucc ds i' =
+chainAsucc ds k`. (Atom/`Ax¹` validity puts the succedent in the antecedent; chain threading with
+`seqAnt s = ∅` then forces it to be an earlier cut formula, since the antecedent has no open-assumption
+source.) This PINS the axiom-cut redex pair `(i', k)` that genuine §-cut elimination eliminates — the
+precise object the deferred stall fix (lap-120 prescription, scoped to the threaded-atom-≤-j0 core in
+lap-121) consumes. In particular `k > 0`, so a stall leaf is never premise 0. -/
+lemma chainAsucc_threaded_of_leaf {s ds j0 k : V}
+    (hZk : ZDerivation (znth ds k))
+    (hleaf : (∃ sk, znth ds k = zAtom sk) ∨ (∃ sk Ck, znth ds k = zAx1 sk Ck))
+    (hant : seqAnt s = (∅ : V))
+    (hchain : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+      inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hk : k ≤ j0) :
+    ∃ i' < k, chainAsucc ds i' = chainAsucc ds k := by
+  have hin : inAnt (chainAsucc ds k) (chainAnt ds k) := by
+    rcases hleaf with ⟨sk, hsk⟩ | ⟨sk, Ck, hsk⟩
+    · have := zDerivation_zAtom_inv (s := sk) (by rw [← hsk]; exact hZk)
+      simpa only [chainAsucc, chainAnt, hsk, fstIdx_zAtom] using this
+    · have := zDerivation_zAx1_inv (s := sk) (C := Ck) (by rw [← hsk]; exact hZk)
+      simpa only [chainAsucc, chainAnt, hsk, fstIdx_zAx1] using this
+  rcases hchain k hk _ hin with h | h
+  · rw [hant] at h; simp [inAnt, lh_empty] at h
+  · obtain ⟨i', hi', heq⟩ := h; exact ⟨i', hi', heq.symm⟩
+
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
 
 `RedSound` (`iR2 d` is a genuine `ZDerivation` for `ZDerivesEmpty d`) is **FALSE** for the current
