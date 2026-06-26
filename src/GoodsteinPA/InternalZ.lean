@@ -7647,6 +7647,20 @@ lemma iRedDescent_zAx1_zAxNeg {s p : V} (hp : IsUFormula ℒₒᵣ p) :
     iRedDescent (zAx1 s p) (zAxNeg s p) :=
   ⟨by simp, icmp_iotil_zAx1_zAxNeg hp, isNF_iotil_zAx1 s p⟩
 
+/-- **The CORRECTED critical L-reduct's descent bundle (sequent- and payload-general).** The §5 critical
+reduct of an `axAll` redex is `zAx1 S C` for an arbitrary sequent `S` (the cut-instance-grown antecedent)
+and payload `C` (the cut formula `F(k)`, NOT the open matrix `p`). Since `iRedDescent` reads the reduct only
+through `iotil (zAx1 S C) = oAtom1 C` (`@[simp] iotil_zAx1`) and `idg (zAx1 S C) = 0` — both INDEPENDENT of
+the sequent `S` — the descent bundle holds for any `S` provided the payload sits one rank below the principal
+`∀p` (`irk (∀p) = irk C + 1`). For the genuine reduct `C = cutFormula d`: `irk (cutFormula d) = irk p` (by
+`irk_substs1`/`cutFormula_all`), so `irk (∀p) = irk p + 1 = irk (cutFormula d) + 1`. This is the L-side
+descent fact the re-keyed `red` (`critReductCorr`) needs, generalising `iRedDescent_zAx1_zAxAll` (the engine
+reduct `zAx1 s p`, payload `= p`) to the corrected payload. -/
+lemma iRedDescent_zAx1_zAxAll_of_irk {S C s p k : V}
+    (hC : irk (^∀ p : V) = irk C + 1) :
+    iRedDescent (zAx1 S C) (zAxAll s p k) :=
+  ⟨by simp, by rw [iotil_zAx1, iotil_zAxAll]; exact icmp_oAtom1_oAtomLk hC, isNF_iotil_zAx1 S C⟩
+
 /-- **j-side bundle via `zAxReduct`, ∀-axiom case**: the reduct `zAxReduct (Ax^{∀p,k})` satisfies the
 `iRedDescent` bundle (the K-case nut's j-side fact, packaged on the genuine reduct function). -/
 lemma iRedDescent_zAxReduct_zAxAll {s p k : V} (hp : IsUFormula ℒₒᵣ p) :
