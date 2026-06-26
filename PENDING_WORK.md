@@ -33,11 +33,19 @@ the atomic change is confined to (a) `iRK` def + `iRKDef` arith, (b) the reduct-
 (now on `majorIdx`-selected tags, with the tag-5/6 critical dispatch above). The 365 `permIdx` mentions are
 mostly selection-property lemmas mirrored by the already-banked `majorIdxAux_*` family.
 
-**NEXT:** (1) prove `majorIdx`-selected tag ∈ {3,4,5,6} on the ⊥-orbit (exclude 1,2 via succedent≠⊥ —
-`seqSucc (zIall) = ^∀…`, `seqSucc (zIneg) = inegF…`, both ≠ `^⊥`); (2) build the tag-5/6 critical reduct that
-cuts `dⱼ` against the `i'` R-partner (reuse `iRcritG`/`iRKc` machinery, now indexed at `(i', majorIdx)`);
-(3) the atomic `iRK` swap. Then `iord_descent_red` has NO fixpoint branch ⟹ `iord_red_iterate_descends` is a
-strict descent ⟹ feed PRWO(ε₀) in `false_of_ZDerivesEmpty`.
+**✅ NEXT-(1) DONE — `majorPrem_tag_mem`** (`InternalZ.lean`, axiom-clean): on a `∅→⊥` chain, the major
+premise tag ∈ {3,4,5,6}. Excludes 0,7 (`majorIdx_botOrbit_reducible`) and now 1,2 (a `zIall`/`zIneg` node's
+succedent is `^∀p`/`inegF p ≠ ^⊥`, but the major premise's succedent IS `^⊥`). Helpers `qqAll_ne_falsum` /
+`inegF_ne_falsum` banked. This is the exact tag dichotomy the re-keyed `iRK` dispatch case-splits on.
+
+**NEXT:** (2) build the tag-5/6 critical reduct that cuts `dⱼ` against the `i'` R-partner (reuse
+`iRcritG`/`iRKc` machinery, now indexed at `(i', majorIdx)` — the redex pair is `(i', majorIdx)` with
+`tp (znth ds i') = isymR (^∀p / inegF p)` and `dⱼ` the L-axiom; check `iRKc`/`iRcritG` already take the
+redex indices via `redexI`/`redexJ` and whether `majorIdx` ⟹ those match); (3) the atomic `iRK` swap
+(`permIdx ↦ majorIdx` in def + `red_zK_rep`/`_rep_nonchain`/`_splice` + `iord_descent_red` case split on
+`majorPrem_tag_mem`: tag 3 → `iRedDescent_zInd`, tag 4 → chain recursion, tags 5/6 → critical via the
+cut-partner). Then `iord_descent_red` has NO fixpoint branch ⟹ `iord_red_iterate_descends` is a strict
+descent ⟹ feed PRWO(ε₀) in `false_of_ZDerivesEmpty`.
 
 ## lap 129 — FRESH-MIND REVIEW: the `red`-STALL is the crux; no-stall linchpin landed
 **Build 🟢 1326.** Landed (axiom-clean, additive): **`firstBotPrem_reducible`** (`InternalZ.lean`) — the

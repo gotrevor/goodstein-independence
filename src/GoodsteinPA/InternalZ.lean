@@ -9195,6 +9195,51 @@ lemma majorPrem_zAxNeg_cutPartner {s r ds p : V} (hZ : ZDerivation (zK s r ds))
   · rw [hant] at h; simp [inAnt, lh_empty] at h
   · obtain ⟨i', hi', heq⟩ := h; exact ⟨i', hi', heq.symm⟩
 
+/-- `^∀ p ≠ ^⊥` — the universal-quantifier code and the falsum code have different head tags
+(`qqAll p = ⟪6,p⟫+1`, `qqFalsum = ⟪3,0⟫+1`). -/
+lemma qqAll_ne_falsum (p : V) : (^∀ p : V) ≠ (^⊥ : V) := by
+  simp [qqAll, qqFalsum]
+
+/-- `inegF p ≠ ^⊥` — `inegF p = (∼p) ⋎ ⊥` is an or-code (head tag 7), distinct from falsum. -/
+lemma inegF_ne_falsum (p : V) : (inegF p : V) ≠ (^⊥ : V) := by
+  simp [inegF, qqOr, qqFalsum]
+
+/-- **The ⊥-orbit major premise tag ∈ {3,4,5,6}.** Strengthens `majorIdx_botOrbit_reducible`: the faithful
+major premise of a `∅→⊥` chain is a `zInd` (3) / `zK` (4) / `zAxAll` (5) / `zAxNeg` (6) node. Tags 0,7 are
+the atom/`Ax¹` leaves (`majorIdx_botOrbit_reducible`); tags 1,2 are excluded because a `zIall`/`zIneg`
+node's succedent is an R-principal formula (`^∀p` / `inegF p`), which is `≠ ^⊥`, whereas the major
+premise's succedent IS `^⊥`. This is the precise tag dichotomy the re-keyed `iRK` dispatch case-splits on:
+**3,4 → replace/recurse** (`red_zInd` descends; `zK` recurses), **5,6 → critical cut** against the upstream
+R-partner (pinned by `majorPrem_zAxAll_cutPartner` / `majorPrem_zAxNeg_cutPartner`). -/
+lemma majorPrem_tag_mem {s r ds : V} (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V)) :
+    zTag (znth ds (majorIdx (zK s r ds))) = 3 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 4 ∨
+    zTag (znth ds (majorIdx (zK s r ds))) = 5 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 6 := by
+  obtain ⟨hlt, hbot, hne0, hne7⟩ := majorIdx_botOrbit_reducible hZ hant hsucc
+  have hmemZ : ZDerivation (znth ds (majorIdx (zK s r ds))) := (zDerivation_zK_inv hZ).2 _ hlt
+  -- `chainAsucc ds (majorIdx) = seqSucc (fstIdx (znth ds (majorIdx))) = ^⊥`
+  have hsucc' : seqSucc (fstIdx (znth ds (majorIdx (zK s r ds)))) = (^⊥ : V) := hbot
+  rcases zDerivation_iff.mp hmemZ with
+    ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+  · exact absurd (show zTag (znth ds (majorIdx (zK s r ds))) = 0 by rw [h]; simp) hne0
+  · -- tag 1 (zIall): succedent `^∀ p'` ≠ `^⊥`
+    exfalso
+    have heq : seqSucc s' = (^∀ p' : V) := (zDerivation_zIall_inv (h ▸ hmemZ)).2.1
+    rw [h, fstIdx_zIall, heq] at hsucc'
+    exact qqAll_ne_falsum p' hsucc'
+  · -- tag 2 (zIneg): succedent `inegF p'` ≠ `^⊥`
+    exfalso
+    have heq : seqSucc s' = (inegF p' : V) := (zDerivation_zIneg_inv (h ▸ hmemZ)).2.1
+    rw [h, fstIdx_zIneg, heq] at hsucc'
+    exact inegF_ne_falsum p' hsucc'
+  · exact Or.inl (by rw [h]; simp)
+  · exact Or.inr (Or.inl (by rw [h]; simp))
+  · exact Or.inr (Or.inr (Or.inl (by rw [h]; simp)))
+  · exact Or.inr (Or.inr (Or.inr (by rw [h]; simp)))
+  · exact absurd (by rw [h]; simp : zTag (znth ds (majorIdx (zK s r ds))) = 7) hne7
+
 set_option maxHeartbeats 1000000 in
 /-- **The generalized redex finder for a re-routing chain** (lap 122 — the genuine fix for the threaded-atom
 stall, Sub-lemmas A+B assembled). `inference_critical_pair_of_chain` needs FULL criticality `hnperm`
