@@ -1,19 +1,21 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 128 · 2026-06-26 (`ZFresh_red` PROVEN COMPLETE — `red` preserves the freshness invariant, full `zK` chain dispatch; axiom-clean `[propext, choice, Quot.sound]`)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 128 · 2026-06-26 (FRESHNESS CAMPAIGN completed → `ZDerivation_iRKcCrit_all`: ∀-case SOUNDNESS of the engine-swap reduct, freshness self-supplied from the orbit; all 3 `iRKcCrit` invariants now landed)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
 
-> **⭐⭐⭐ Lap-128 — `ZFresh_red` PROVEN COMPLETE (read FIRST — current).** The downward red-stability of
-> the freshness invariant — `ZDerivation d → ZFresh d → ZFresh (red d)` — is now FULLY proven (lap-127
-> closed only the structural + Ind cases; this lap closed the `zK` chain dispatch). Because `zFresh(zK)` is
-> a pure premise max-fold (no own flag), the chain family (`ZFresh_red_zK` + replace/crit/splice/
-> splice_of_chain + the seqUpdate/iCritReductSeq/seqInsert blocks + `ZFresh_zAxReduct` /
-> `ZFresh_iRcritG_premise`) mirrored `ZRegular_red_zK` line-for-line. **NEXT:** thread `∧ ZFresh d` into
-> `ZDerivesEmptyR` (`Crux2Blueprint:933`, mechanical 3rd-conjunct ripple) → close LEFT-branch ∀-soundness
-> via `ZDerivation_iRcritG_critReductCorr`'s `hpfresh`/`hΓfresh`. See `HANDOFF-2026-06-26-lap128.md`,
-> `PENDING_WORK.md` lap-128.
+> **⭐⭐⭐ Lap-128 — FRESHNESS CAMPAIGN completed; ∀-case SOUNDNESS of the engine-swap reduct LANDED (read
+> FIRST — current).** A seven-commit arc: `ZFresh_red` (full `zK` dispatch) → `ZFresh` threaded into
+> `ZDerivesEmptyR` (now a `red`-orbit invariant) → target-3 instance-`k` suppliers → `ZFresh_iRKcCrit` (O3
+> front) → `zfresh_critReductCorr_freshness` (packages `⟨hpfresh,hΓfresh⟩` from the orbit) → **`ZDerivation_
+> iRKcCrit_all`** (⭐ ∀-case soundness: `iRKcCrit (zK s r ds)` is a genuine `ZDerivation` with freshness
+> discharged INTERNALLY from `ZFresh`, via the PROVEN `ZDerivation_iRcritG_critReductCorr`). The lap-114
+> instance-`0`-vs-`k` obstruction is CLOSED on the supply side. **All three `iRKcCrit` invariants now
+> landed:** O1 `ZRegular_iRKcCrit` (lap 119) + O3 `ZFresh_iRKcCrit` + ∀-soundness `ZDerivation_iRKcCrit_all`.
+> **NEXT:** ¬-case soundness twin → discharge non-freshness plumbing (threading/rank from `isChainInf`) →
+> assemble `ZDerivation_red_zK_crit` → the atomic engine swap (`iRKc ↦ iRKcCrit`). See
+> `HANDOFF-2026-06-26-lap128.md`, `PENDING_WORK.md` lap-128.
 
 > **⭐⭐⭐ Lap-127 — `zFresh_zsubst` PROVEN; `ZFresh_red` half-done (read FIRST — current).** The freshness
 > invariant `zFresh` (lap 126) is now shown preserved by closed substitution: `ZFresh d → ZFresh (zsubst d a
