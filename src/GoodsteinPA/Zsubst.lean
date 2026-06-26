@@ -1831,6 +1831,28 @@ lemma fvSubstSeq_numeral_eq_self_of_zfresh_zIall {s a p d0 : V} (h : ZFresh (zIa
     fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) (seqAnt s) = seqAnt s :=
   freshFlag_snd (freshFlag_eq_zero_of_zfresh_zIall h)
 
+/-- **Target-3 supplier `hpfresh` (matrix, ANY instance `k`).** From the orbit-carried `ZFresh (zIall s a
+p d0)` plus the matrix well-formedness `IsUFormula p`, the eigenvariable `a` is fresh in `p` at *any*
+closed numeral instance `k`: `fvSubst a (numeral k) p = p`. This is exactly the `hpfresh` hypothesis of
+`ZDerivation_iRcritG_critReductCorr` at the L-redex instance `k = π₁(π₂(tp …))`; the `numeral 0` witness
+stored in `freshFlag` is lifted to `k` by `fvSubst_numeral_transfer`. The matrix `IsUFormula p` is supplied
+at the call site by the I∀ node's own `ZDerivation` wff data (`hwff.2.2.isUFormula`). -/
+lemma fvSubst_numeral_eq_self_of_zfresh_zIall_at (k : V) {s a p d0 : V}
+    (h : ZFresh (zIall s a p d0)) (hp : IsUFormula ℒₒᵣ p) :
+    fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral k) p = p :=
+  fvSubst_numeral_transfer hp (fvSubst_numeral_eq_self_of_zfresh_zIall h)
+
+/-- **Target-3 supplier `hΓfresh` (antecedent, ANY instance `k`).** The antecedent analogue, supplying
+`ZDerivation_iRcritG_critReductCorr`'s `hΓfresh` at the L-redex instance `k`. NO external hypothesis is
+needed: the antecedent well-formedness `∀ i, IsUFormula (znth (seqAnt s) i)` that `fvSubstSeq_numeral_transfer`
+requires comes FREE from the folded `seqWffFlag` (`freshFlag_wff`), so the orbit-carried `ZFresh` alone
+discharges it. -/
+lemma fvSubstSeq_numeral_eq_self_of_zfresh_zIall_at (k : V) {s a p d0 : V}
+    (h : ZFresh (zIall s a p d0)) :
+    fvSubstSeq a (Bootstrapping.Arithmetic.numeral k) (seqAnt s) = seqAnt s :=
+  fvSubstSeq_numeral_transfer (freshFlag_wff (freshFlag_eq_zero_of_zfresh_zIall h))
+    (fvSubstSeq_numeral_eq_self_of_zfresh_zIall h)
+
 /-! ### `zFresh_zsubst` — freshness is preserved DOWNWARD by closed-numeral substitution
 
 Unlike `zReg_zsubst` (an equality), `zFresh` only preserves **downward**: at an I∀ node whose eigenvariable
