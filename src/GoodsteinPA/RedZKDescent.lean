@@ -134,6 +134,55 @@ lemma iord_descent_red_zK_crit {s r ds : V} (hcrit : ¬ permIdx (zK s r ds) < lh
     (fun A h => by rw [h]; exact irk_falsum) rfl hNF
     hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
 
+/-- **The STALL-BYPASSING critical-reduct descent** (lap 124 — the genuine fix for the `red`-fixpoint
+defect). The critical-cut reduct `iRcrit (zK s r ds) ρ` (`ρ = zAxReduct ∘ red`) of a ⊥-chain `ZDerivation`
+strictly `iord`-descends **regardless of `red`'s `permIdx` selection**, provided every `isymRep` premise is a
+LEAF (`hleaves`). Unlike `iord_descent_red_zK_crit` (which needs `¬ permIdx < lh ds`, i.e. a fully-critical
+chain, and routes through `red = iRcritG`), this manufactures the redex via `inference_critical_pair_of_botChain`
+(the reroute finder — tolerant of permissible leaves) and feeds `iord_descent_iRcrit_of_redex` DIRECTLY, never
+touching `red (zK s r ds)`. **Why it matters:** in the documented stall `red (zK s r ds) = zK s r ds` (a leaf
+is the first `isymRep`, `permIdx < lh ds`), so `iord_descent_red_zK_crit` does NOT apply and the `red`-orbit
+gives no descent — but the genuine redex still exists and `iRcrit` still descends. This is the LEFT branch of
+`redex_or_nonleaf_isymRep_of_botChain` made into an actual ordinal descent. The 6 `ρ`-facts reuse the banked
+`iRedDescent_zAxReduct_red_of_tp_isymR`/`_isymLk` bundles (same as the critical case). -/
+lemma iord_descent_iRcrit_botChain_leaves {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hreg : ∀ i < lh ds, ZRegular (znth ds i))
+    (hleaves : ∀ i < lh ds, tp (znth ds i) = isymRep →
+      (∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck)) :
+    icmp (iord (iRcrit (zK s r ds) (fun n => zAxReduct (red (znth ds n))))) (iord (zK s r ds)) = 0 := by
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  obtain ⟨i0, j1, k0, hij, hjlt, hRi, hLj, hrkpos, hrkr⟩ :=
+    inference_critical_pair_of_botChain hZ hant hsucc hleaves
+  have hilt : i0 < lh ds := lt_trans hij hjlt
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun i hi => isNF_iotil_of_ZDerivation _ (hmem i hi))
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := by
+    intro n
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hredex : isRedexPair ds (⟪i0, j1⟫ : V) := by
+    simp only [isRedexPair, pi₁_pair, pi₂_pair]
+    refine ⟨hij, hjlt, ?_, ?_, ?_⟩
+    · rw [hRi]; simp [isymR]
+    · rw [hLj]; simp [isymLk]
+    · rw [hRi, hLj]; simp [isymR, isymLk]
+  have hex : ∃ c < (⟪lh (zKseq (zK s r ds)), lh (zKseq (zK s r ds))⟫ : V),
+      isRedexPair (zKseq (zK s r ds)) c := by
+    simp only [zKseq_zK]; exact ⟨⟪i0, j1⟫, pair_lt_pair hilt hjlt, hredex⟩
+  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
+  simp only [zKseq_zK] at hrc
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hrc.1 hrc.2.1
+  have hJlt : redexJ (zK s r ds) < lh ds := hrc.2.1
+  obtain ⟨hRedI, hRedJ⟩ := redexPair_tp hrc
+  have hbI := iRedDescent_zAxReduct_red_of_tp_isymR hRedI (hmem _ hIlt) (hreg _ hIlt)
+  have hbJ := iRedDescent_zAxReduct_red_of_tp_isymLk hRedJ (hmem _ hJlt)
+  have hr : 1 ≤ r := pos_iff_one_le.mp (lt_of_lt_of_le hrkpos hrkr)
+  exact iord_descent_iRcrit_of_redex hds hnf hr hex hNF
+    hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
+
 /-- **Critical-reduct halves descend below the chain — the splice sub-fact (lap 110).** For a valid
 critical `K^r` chain `dᵢ = zK s r ds` (`¬ permIdx < lh ds`), `red dᵢ = iRcritG dᵢ ρ` whose two
 premise-halves `a,b = znth (zKseq (red dᵢ)) {0,1}` are `K`-chains over `seqUpdate ds (redexI/J) (red·)` —
@@ -652,3 +701,4 @@ lemma red_zK_fixpoint_of_zAx1_selected {s r ds sᵢ Cᵢ : V}
     tpReduce_isymRep]
 
 end GoodsteinPA.InternalZ
+
