@@ -15,8 +15,9 @@ drops the `hpmem` hypothesis** (axiom-clean `[propext, choice, Quot.sound]`). Th
 
 **ALSO banked this lap (3 more commits, all axiom-clean):** (a) **`iord_iRcritGNeg_eq_iRcrit`** descent twin
 (`InternalZ`) — the ¬-branch re-point, via `inadd_comm`/`max_comm` on the swapped `seqUpdate` halves; (b)
-**`critReductNeg`** (`InternalZ`) — the concrete ¬-case `ρ` (redexJ ↦ `zAx1 (seqSetSucc sⱼ A) A`, redexI ↦
-`red dᵢ`); (c) **`ZDerivation_iRcritGNeg_critReductNeg`** (`Crux2Blueprint`) — concrete-`ρ` ¬-soundness, the
+**`critReductNeg`** (`InternalZ`, red-free) — the concrete ¬-case `ρ` (redexJ ↦ `zAx1 (seqSetSucc sⱼ A) A`,
+redexI ↦ `zInegPrem dᵢ` = `d0`, a 𝚺₁ accessor not `red` — arithmetization-ready);
+(c) **`ZDerivation_iRcritGNeg_critReductNeg`** (`Crux2Blueprint`) — concrete-`ρ` ¬-soundness, the
 `critReductCorr` twin. **Both polarity reduct suppliers now soundness-certified against their concrete engine
 `ρ`, and both descent re-points banked.**
 
