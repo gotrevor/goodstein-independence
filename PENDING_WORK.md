@@ -81,6 +81,25 @@ This is the clean tag-explicit entry the restructured `false_of_ZDerivesEmpty` c
     genuine axiom/rule shapes, mirroring the lap-118 `zAxNeg` `A∈Γ` strengthening (one ZPhi disjunct +
     inversion + arithmetization + the intro/`of` call sites). This is a contained ZPhi-ripple, NOT new deep
     machinery. `hthread`/`hrank` + `redexJ ≤ j0` (free if `j0 = lh ds − 1`, `isChainInf_of_last`) remain.
+  - ✅ **BUILDING BLOCKS BANKED (lap 130, axiom-clean, `𝚫₁`-definable):** **`zAxAllSuccWff s p k`** :=
+    `seqSucc s = substs1 (numeral k) p` (the ∀-axiom succedent shape) + **`zInegAntWff s p d0`** :=
+    `seqAnt (fstIdx d0) = seqCons (seqAnt s) p` (the I¬ premise-antecedent shape), each with its
+    `…Def : 𝚫₁.Semisentence 3` and `…_defined`/`…_definable` instance (`InternalZ.lean`, after
+    `zInegWff_definable`). These are the exact predicates to splice into the ZPhi disjuncts.
+  - **TURNKEY ZPhi-STRENGTHENING PLAN (next lap, atomic):**
+    1. `ZPhi` (`InternalZ:5310/5307`): zAxAll disjunct `… ∧ inAnt (^∀p)(seqAnt s) ∧ zAxAllSuccWff s p k`;
+       zIneg disjunct `… ∧ zInegWff p d0 ∧ zInegAntWff s p d0`.
+    2. `zblueprint` Σ/Π (`:5415/5435` zAxAll, `:5407/5427` zIneg): append `!(zAxAllSuccWffDef.sigma/pi) s p k`
+       / `!(zInegAntWffDef.sigma/pi) s p d0`; add `zAxAllSuccWff_defined.iff`/`zInegAntWff_defined.iff` to the
+       `zPhi_definable` simp (`:5446`).
+    3. `zphi_iff` / `zDerivation_iff` both dirs (`:5319-5392`) + `zphi_monotone` (`:5317`) + the
+       Construction-field destructures (`:5504/5529`): add the new conjunct to each `⟨s,p,k,rfl,hp,hin⟩` /
+       `⟨s,p,d0,rfl,…⟩` pattern (mechanical `_`/`hnew`).
+    4. `zDerivation_zAxAll_inv` / `zDerivation_zIneg_inv`: return the new conjunct.
+    5. Construction sites (`ZDerivation_red` zAxAll/zIneg cases, `Crux2Blueprint:1089/1092`): supply the new
+       conjunct — SELF-HEALING (they reconstruct from the same disjunct they destructured via the inversion).
+    6. Then `hAll`/`hNeg` of `ZDerivation_iRKcCrit_botOrbit` become derivable from `redZKReady_of_zKValid` +
+       the strengthened inversions ⟹ a hypothesis-free `ZDerivation_iRKcCrit_botOrbit'`.
 - **RIGHT tag-4:** recurse into the sub-`zK`-chain — the chain-REPLACE strong induction (`iord_descent_red`
   sorry `Crux2Blueprint:1167`). Well-founded on premise `iord` < parent.
 

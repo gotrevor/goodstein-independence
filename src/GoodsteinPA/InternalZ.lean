@@ -1550,6 +1550,64 @@ instance zInegWff_defined : 𝚫₁-Relation (zInegWff : V → V → Prop) via z
 instance zInegWff_definable : 𝚫₁-Relation (zInegWff : V → V → Prop) :=
   zInegWff_defined.to_definable
 
+/-- **The genuine ∀-axiom succedent shape** (Buchholz `Ax^{∀p,k}: Γ → F(k)`): the `zAxAll` node's succedent
+IS the instance `F(k) = substs1 (numeral k) p`. The current `zAxAll` `ZPhi` disjunct (`InternalZ:5310`)
+carries only `∀p ∈ Γ` and does NOT pin this — so `seqSucc sⱼ = cutFormula` (the `hAll` plumbing input to the
+re-keyed critical reduct's soundness `ZDerivation_iRKcCrit_of_zKValid`) is not yet derivable from `zKValid`.
+This predicate is the building block for strengthening that disjunct (`d = zAxAll s p k ∧ … ∧ zAxAllSuccWff
+s p k`), mirroring the lap-118 `zAxNeg` `A∈Γ` strengthening. -/
+def zAxAllSuccWff (s p k : V) : Prop :=
+  seqSucc s = substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral k) p
+
+/-- **`𝚫₁`-definability of `zAxAllSuccWff`** (mirrors `zIndWffDef`'s `numeral`/`substs1` blocks). -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zAxAllSuccWffDef : 𝚫₁.Semisentence 3 := .mkDelta
+  (.mkSigma “s p k.
+    ∃ ss, !seqSuccDef ss s ∧ ∃ nk, !(Bootstrapping.Arithmetic.numeralGraph) nk k ∧
+      ∃ sub, !(substs1Graph ℒₒᵣ) sub nk p ∧ ss = sub ”)
+  (.mkPi “s p k.
+    ∀ ss, !seqSuccDef ss s → ∀ nk, !(Bootstrapping.Arithmetic.numeralGraph) nk k →
+      ∀ sub, !(substs1Graph ℒₒᵣ) sub nk p → ss = sub ”)
+
+instance zAxAllSuccWff_defined : 𝚫₁-Relation₃ (zAxAllSuccWff : V → V → V → Prop) via zAxAllSuccWffDef :=
+  ⟨by intro v
+      simp [zAxAllSuccWffDef, seqSucc_defined.iff,
+        (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff, (substs1.defined (L := ℒₒᵣ)).iff],
+   by intro v
+      simp [zAxAllSuccWffDef, zAxAllSuccWff, HierarchySymbol.Semiformula.val_sigma,
+        seqSucc_defined.iff, (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff,
+        (substs1.defined (L := ℒₒᵣ)).iff]⟩
+
+instance zAxAllSuccWff_definable : 𝚫₁-Relation₃ (zAxAllSuccWff : V → V → V → Prop) :=
+  zAxAllSuccWff_defined.to_definable
+
+/-- **The genuine I¬-rule premise-antecedent shape** (Buchholz `Γ,A ⊢ ⊥ / Γ ⊢ ¬A`): the I¬ node's premise
+`d0` has antecedent EXACTLY `Γ,A` = `seqCons (seqAnt s) p` (the conclusion antecedent `Γ = seqAnt s` consed
+with the active formula `p = A`). The current `zInegWff` (`InternalZ:1525`) carries only `inAnt p (seqAnt
+(fstIdx d0))` and does NOT pin this exact shape — so `hNeg`'s `seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p`
+(the plumbing input to `ZDerivation_corrected_haux1_neg`'s threading reconstruction) is not yet derivable
+from `zKValid`. This predicate is the building block for strengthening the `zIneg` disjunct. -/
+def zInegAntWff (s p d0 : V) : Prop :=
+  seqAnt (fstIdx d0) = seqCons (seqAnt s) p
+
+/-- **`𝚫₁`-definability of `zInegAntWff`** (all pieces `𝚺₀`: `fstIdx`/`seqAnt` projections + `seqCons`). -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zInegAntWffDef : 𝚫₁.Semisentence 3 := .mkDelta
+  (.mkSigma “s p d0.
+    ∃ f, !fstIdxDef f d0 ∧ ∃ sa0, !seqAntDef sa0 f ∧ ∃ sa1, !seqAntDef sa1 s ∧
+      ∃ sc, !seqConsDef sc sa1 p ∧ sa0 = sc ”)
+  (.mkPi “s p d0.
+    ∀ f, !fstIdxDef f d0 → ∀ sa0, !seqAntDef sa0 f → ∀ sa1, !seqAntDef sa1 s →
+      ∀ sc, !seqConsDef sc sa1 p → sa0 = sc ”)
+
+instance zInegAntWff_defined : 𝚫₁-Relation₃ (zInegAntWff : V → V → V → Prop) via zInegAntWffDef :=
+  ⟨by intro v
+      simp [zInegAntWffDef, fstIdx_defined.iff, seqAnt_defined.iff, seqCons_defined.iff],
+   by intro v
+      simp [zInegAntWffDef, zInegAntWff, HierarchySymbol.Semiformula.val_sigma,
+        fstIdx_defined.iff, seqAnt_defined.iff, seqCons_defined.iff]⟩
+
+instance zInegAntWff_definable : 𝚫₁-Relation₃ (zInegAntWff : V → V → V → Prop) :=
+  zInegAntWff_defined.to_definable
+
 /-- **∀-introduction premise sequent**: `d0 ⊢ Γ→F(a)` — same antecedent as the conclusion `s`, succedent
 `F(a) = substs1 (^&a) p` (matrix `p`'s bound variable replaced by the eigenvariable `a`), and the matrix's
 1-formula-hood `IsSemiformula ℒₒᵣ 1 p` (lap 74: the `ZDerivation_zsubst` commutations `fvSubst_all` /
