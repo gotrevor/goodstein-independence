@@ -5795,6 +5795,38 @@ lemma iperm_tp_fstIdx_of_ZDerivation {d : V} (hZ : ZDerivation d) :
   · rw [fstIdx_zAxNeg]; exact iperm_tp_zAxNeg hin
   · rw [tp_zAx1]; exact iperm_isymRep _
 
+/-- **The `zKValidF` leaf side-conditions hold for any `ZDerivation`** (companion to
+`iperm_tp_fstIdx_of_ZDerivation`). For a premise that is a genuine Z-derivation, the tag-conditional
+formula-hood obligations of `zKValidF` (tags 1/2/5/6 ⟹ the active formula `zIallF`/`zInegF`/`zAxAllF`/
+`zAxNegF` is a `UFormula`) follow from the node's own `ZPhi` side conditions (the I-rule matrices are
+`IsSemiformula 1`, the §5 axiom matrices are `IsUFormula`). This is what lets one BUILD `zKValidF` of a
+FRESH chain (e.g. the corrected Ind reduct `iIndReductSeqG`) from premise `ZDerivation`s. -/
+lemma zKValidF_leafconds_of_ZDerivation {e : V} (hZ : ZDerivation e) :
+    (zTag e = 1 → IsUFormula ℒₒᵣ (zIallF e)) ∧
+    (zTag e = 2 → IsUFormula ℒₒᵣ (zInegF e)) ∧
+    (zTag e = 5 → IsUFormula ℒₒᵣ (zAxAllF e)) ∧
+    (zTag e = 6 → IsUFormula ℒₒᵣ (zAxNegF e)) := by
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, hwff⟩ |
+    ⟨s, p, d0, rfl, _, _, hwff, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _, _⟩ |
+    ⟨s, p, rfl, hp, _, _⟩ | ⟨s, C, rfl, _⟩
+  · exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp),
+      fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+  · exact ⟨fun _ => by rw [zIallF_zIall]; exact hwff.2.2.isUFormula, fun h => absurd h (by simp),
+      fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+  · exact ⟨fun h => absurd h (by simp), fun _ => by rw [zInegF_zIneg]; exact hwff.2.2,
+      fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+  · exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp),
+      fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+  · exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp),
+      fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+  · exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp),
+      fun _ => by rw [zAxAllF_zAxAll]; exact hp.isUFormula, fun h => absurd h (by simp)⟩
+  · exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp),
+      fun h => absurd h (by simp), fun _ => by rw [zAxNegF_zAxNeg]; exact hp⟩
+  · exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp),
+      fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+
 /-- **All-`n` premise NF** of a `ZDerivation` chain: in-range premises are NF (`isNF_iotil_of_ZDerivation`),
 out-of-range default `0` is NF (`isNF_iotil_zero`). Discharges the `hNF : ∀ n` side condition. -/
 lemma isNF_iotil_znth_of_ZDerivation_zK {s r ds : V} (hZ : ZDerivation (zK s r ds)) :

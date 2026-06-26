@@ -2261,7 +2261,136 @@ Witness pinned to `k = 1`: `zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1) = 
    `zSeqAnt_zK_of`⟩ + DESCENT `iord_descent_iIndReductSeqG_one` (banked). On the ⊥-orbit the telescope collapses
    (all antecedents `{⊥}`, succedents `⊥`, exit `j0=1` at `⊥`). See `PENDING_WORK.md` lap-146. -/
 theorem descent_step_Ind {s at' p d0 d1 : V} (hd : ZDerivesEmptyR (zInd s at' p d0 d1)) :
-    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zInd s at' p d0 d1)) = 0 := sorry
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zInd s at' p d0 d1)) = 0 := by
+  -- ⊥-orbit data
+  have hZ : ZDerivation (zInd s at' p d0 d1) := hd.1.1
+  have hant : seqAnt s = (∅ : V) := by have h := hd.1.2.1; rwa [fstIdx_zInd] at h
+  have hsucc : seqSucc s = (^⊥ : V) := by have h := hd.1.2.2; rwa [fstIdx_zInd] at h
+  obtain ⟨hd0Z, hd1Z, hwff⟩ := zDerivation_zInd_inv hZ
+  simp only [zIndWff, zIndEig_zInd, zIndTerm_zInd, zIndP_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
+    fstIdx_zInd] at hwff
+  obtain ⟨⟨h1a, h1b⟩, ⟨_h2seq, h2a, h2b⟩, h3, h4, _h5⟩ := hwff
+  -- the Ind formula collapses to ⊥
+  have hp_bot : p = (^⊥ : V) := eq_falsum_of_substs1_falsum h4 (h3 ▸ hsucc)
+  subst hp_bot
+  have hsubbot : ∀ t : V, substs1 ℒₒᵣ t (^⊥ : V) = (^⊥ : V) := fun t => by
+    rw [substs1]; exact substs_falsum _
+  -- premise invariants extracted from the regular/fresh/seqAnt-clean Ind node
+  have hmaxlt : maxEigen d1 < π₁ at' := by
+    have h : zReg (zInd s at' (^⊥) d0 d1) = 0 := hd.2.1
+    rw [zReg_zInd] at h; exact ltFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp (h ▸ le_max_left _ _))
+  have hreg1 : ZRegular d1 := by
+    have h : zReg (zInd s at' (^⊥) d0 d1) = 0 := hd.2.1
+    rw [zReg_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_right _ _) (le_max_right _ _))
+  have hreg0 : ZRegular d0 := by
+    have h : zReg (zInd s at' (^⊥) d0 d1) = 0 := hd.2.1
+    rw [zReg_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_left _ _) (le_max_right _ _))
+  have hfr1 : ZFresh d1 := by
+    have h : zFresh (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.1
+    rw [zFresh_zInd] at h; exact nonpos_iff_eq_zero.mp (h ▸ le_max_right _ _)
+  have hfr0 : ZFresh d0 := by
+    have h : zFresh (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.1
+    rw [zFresh_zInd] at h; exact nonpos_iff_eq_zero.mp (h ▸ le_max_left _ _)
+  have hsa1 : ZSeqAnt d1 := by
+    have h : zSeqAnt (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.2
+    rw [zSeqAnt_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_right _ _) (le_max_right _ _))
+  have hsa0 : ZSeqAnt d0 := by
+    have h : zSeqAnt (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.2
+    rw [zSeqAnt_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_left _ _) (le_max_right _ _))
+  -- the corrected k=1 Ind reduct `⟨d0, d1[a:=0]⟩`
+  set ds := iIndReductSeqG d0 d1 (π₁ at') 1 with hds_def
+  have hds_seq : Seq ds := iIndReductSeqG_seq d0 d1 (π₁ at') 1
+  have hds_lh1 : lh ds = 1 + 1 := by rw [hds_def, iIndReductSeqG_lh]
+  have hds_lh : lh ds = 2 := by rw [hds_lh1, one_add_one_eq_two]
+  have hz0 : znth ds 0 = d0 := znth_iIndReductSeqG_zero d0 d1 (π₁ at') 1
+  have hz1 : znth ds 1 = zsubst d1 (π₁ at') (Bootstrapping.Arithmetic.numeral 0) := by
+    have h := znth_iIndReductSeqG_step d0 d1 (π₁ at') 1 0 one_pos
+    rw [zero_add] at h; rw [hds_def]; exact h
+  have ht0 : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral 0 : V) := by simp
+  have hZ1sub : ZDerivation (zsubst d1 (π₁ at') (Bootstrapping.Arithmetic.numeral 0)) :=
+    ZDerivation_zsubst ht0 d1 hd1Z hmaxlt
+  have hmem : ∀ i < lh ds, ZDerivation (znth ds i) := by
+    intro i hi
+    rw [hds_lh] at hi
+    rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi) with rfl | rfl
+    · rw [hz0]; exact hd0Z
+    · rw [hz1]; exact hZ1sub
+  -- ⊥-orbit collapse of the chain end-sequents
+  have hF0 : chainAsucc ds 0 = (^⊥ : V) := by
+    simp only [chainAsucc]; rw [hz0, h1b, hsubbot]
+  have hExit : chainAsucc ds 1 = (^⊥ : V) := by
+    simp only [chainAsucc]
+    rw [hz1, fstIdx_zsubst (π₁ at') (Bootstrapping.Arithmetic.numeral 0) hd1Z,
+      seqSucc_fvSubstSeqt, h2b, hsubbot, fvSubst_falsum (L := ℒₒᵣ)]
+  have hAnt1 : ∀ B, inAnt B (chainAnt ds 1) → B = (^⊥ : V) := by
+    intro B hB
+    simp only [chainAnt] at hB
+    rw [hz1, fstIdx_zsubst (π₁ at') (Bootstrapping.Arithmetic.numeral 0) hd1Z,
+      seqAnt_fvSubstSeqt, h2a, hant, hsubbot,
+      fvSubstSeq_seqCons seq_empty, fvSubst_falsum (L := ℒₒᵣ)] at hB
+    rcases (inAnt_seqCons (fvSubstSeq_seq (π₁ at') (Bootstrapping.Arithmetic.numeral 0) ∅)).mp hB
+      with h | h
+    · exact h
+    · obtain ⟨i, hi, _⟩ := h; rw [fvSubstSeq_lh, lh_empty] at hi; exact absurd hi (by simp)
+  have hUbot : IsUFormula ℒₒᵣ (^⊥ : V) := by simp
+  -- the chain is `zKValidF`-valid (telescope + uniform leaf side-conditions)
+  have hvalidF : zKValidF s (irk (^⊥ : V)) ds := by
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · refine isChainInf_telescope (k := 1) hds_lh1 ?_ ?_ ?_ ?_
+      · intro B hB; simp only [chainAnt] at hB; rw [hz0, h1a] at hB; exact hB
+      · intro i hi B hB
+        obtain rfl : i = 0 := by
+          rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp (hi.trans one_lt_two)) with h | h
+          · exact h
+          · exact absurd hi (by rw [h]; simp)
+        rw [zero_add] at hB
+        exact Or.inr ((hAnt1 B hB).trans hF0.symm)
+      · exact Or.inr hExit
+      · intro i hi
+        obtain rfl : i = 0 := by
+          rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp (hi.trans one_lt_two)) with h | h
+          · exact h
+          · exact absurd hi (by rw [h]; simp)
+        rw [hF0]
+    · exact fun i hi => iperm_tp_fstIdx_of_ZDerivation (hmem i hi)
+    · exact fun i hi => (zKValidF_leafconds_of_ZDerivation (hmem i hi)).1
+    · exact fun i hi => (zKValidF_leafconds_of_ZDerivation (hmem i hi)).2.1
+    · exact fun i hi => (zKValidF_leafconds_of_ZDerivation (hmem i hi)).2.2.1
+    · exact fun i hi => (zKValidF_leafconds_of_ZDerivation (hmem i hi)).2.2.2
+    · intro i hi
+      rw [hds_lh] at hi
+      rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi) with rfl | rfl
+      · rw [hF0]; exact hUbot
+      · rw [hExit]; exact hUbot
+    · rw [hsucc]; exact hUbot
+    · intro k hk; rw [hant, lh_empty] at hk; exact absurd hk (by simp)
+  -- assemble the descending `ZDerivesEmptyR` reduct
+  refine ⟨zK s (irk (^⊥ : V)) ds, ⟨⟨zDerivation_zK_intro hds_seq hmem hvalidF, ?_, ?_⟩, ?_, ?_, ?_⟩, ?_⟩
+  · rw [fstIdx_zK]; exact hant
+  · rw [fstIdx_zK]; exact hsucc
+  · show ZRegular (zK _ _ _)
+    refine ZRegular_zK_of_premises hds_seq (fun i hi => ?_)
+    rw [hds_lh] at hi
+    rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi) with rfl | rfl
+    · rw [hz0]; exact hreg0
+    · rw [hz1]; show zReg _ = 0; rw [zReg_zsubst _ _ d1 hd1Z]; exact hreg1
+  · show zFresh (zK _ _ _) = 0
+    refine zfresh_zK_of hds_seq (fun i hi => ?_)
+    rw [hds_lh] at hi
+    rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi) with rfl | rfl
+    · rw [hz0]; exact hfr0
+    · rw [hz1]; exact zFresh_zsubst (π₁ at') 0 d1 hd1Z hfr1
+  · show zSeqAnt (zK _ _ _) = 0
+    refine zSeqAnt_zK_of hds_seq (fun i hi => ?_)
+    rw [hds_lh] at hi
+    rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi) with rfl | rfl
+    · rw [hz0]; exact hsa0
+    · rw [hz1]; exact zSeqAnt_zsubst (π₁ at') _ d1 hd1Z
+  · rw [hds_def]; exact iord_descent_iIndReductSeqG_one hd0Z hd1Z
 
 /-- **(E') the existence-form one-step descent.** Every regular ⊥-orbit code has a sound, strictly-
 descending reduct — Ind root via `descent_step_Ind` (RED-FREE, lap 144), K root via `descent_step_K_majorIdx`
