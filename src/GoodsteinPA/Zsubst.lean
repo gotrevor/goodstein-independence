@@ -2466,6 +2466,49 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
             (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hreg (by simp [zTag_zAx1])
   exact key
 
+/-! ## `red` preserves `ZFresh` — the structural and Ind cases (freshness analogue of `ZRegular_red`)
+
+`ZFresh` is the eigenvariable-condition invariant the LEFT-branch ∀-soundness consumes. Like `ZRegular`,
+it is preserved by the genuine reduct `red`, but only **downward** (an implication, since `red_zIall`
+substitutes the eigenvariable away — `zFresh_zsubst`). The structural rules strip to a premise
+(`red_zIall = zsubst d0 a 0`, `red_zIneg = d0`), the `Ind` reduct is a chain over `⟨d1,…,d0⟩`, and
+atoms/axioms are identities. -/
+
+/-- Every premise of the Ind reduct sequence `⟨d1,…,d1,d0⟩` is fresh when `d0,d1` are. -/
+lemma zfresh_iIndReductSeq {d0 d1 k : V} (h0 : zFresh d0 = 0) (h1 : zFresh d1 = 0) :
+    ∀ i < lh (iIndReductSeq d0 d1 k), zFresh (znth (iIndReductSeq d0 d1 k) i) = 0 := by
+  intro i hi
+  rw [iIndReductSeq] at hi ⊢
+  rw [Seq.lh_seqCons _ (iRepeatSeq_seq d1 k)] at hi
+  rcases eq_or_lt_of_le (le_iff_lt_succ.mpr hi) with heq | hlt
+  · rw [heq, znth_seqCons_self (iRepeatSeq_seq d1 k) d0]; exact h0
+  · rw [znth_seqCons_of_lt (iRepeatSeq_seq d1 k) d0 hlt,
+      znth_iRepeatSeq i (by rwa [iRepeatSeq_lh] at hlt)]
+    exact h1
+
+/-- **`red` preserves `ZFresh` (structural + Ind cases).** The chain (`zK`) case is the remaining
+frontier (mirrors `ZRegular_red_zK`'s replace/splice/crit dispatch). -/
+lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
+    (hnK : zTag d ≠ 4) : ZFresh (red d) := by
+  unfold ZFresh at hfresh ⊢
+  rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+  · rw [red_zAtom]; simpa using hfresh
+  · rw [zFresh_zIall] at hfresh
+    rw [red_zIall]
+    exact zFresh_zsubst a 0 d0 hd0 (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_right _ _))
+  · rw [red_zIneg]; rwa [zFresh_zIneg] at hfresh
+  · rw [zFresh_zInd] at hfresh
+    rw [red_zInd, iRInd_zInd]
+    exact zfresh_zK_of (iIndReductSeq_seq d0 d1 1)
+      (zfresh_iIndReductSeq (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_left _ _))
+        (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_right _ _)))
+  · exact absurd (zTag_zK s r ds) hnK
+  · rw [red_zAxAll]; simpa using hfresh
+  · rw [red_zAxNeg]; simpa using hfresh
+  · rw [red_zAx1]; simpa using hfresh
+
 /-! ### ✅ The `hseltag` leaf — RESOLVED (lap 95) by the gated `iRK` dispatch
 
 **Historical (lap 94 obstruction, now fixed).** The former `ZRegular_red_zK` leaf `hseltag` claimed the
