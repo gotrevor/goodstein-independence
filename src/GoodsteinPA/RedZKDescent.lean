@@ -183,6 +183,27 @@ lemma iord_descent_iRcrit_botChain_leaves {s r ds : V}
   exact iord_descent_iRcrit_of_redex hds hnf hr hex hNF
     hbI.otil_lt hbJ.otil_lt hbI.dg_le hbJ.dg_le hbI.nf hbJ.nf
 
+/-- **The descent dichotomy for a genuine ⊥-chain** (lap 124 — `redex_or_nonleaf_isymRep_of_botChain` with
+its LEFT disjunct upgraded from "a redex exists" to "the critical reduct actually `iord`-descends"). For a
+`ZDerivation` ⊥-chain with regular premises: **either** the critical-cut reduct `iRcrit` strictly descends
+(case 5.1, stall-tolerant — `iord_descent_iRcrit_botChain_leaves`), **or** there is a NON-LEAF `isymRep`
+premise (chain/Ind, case 5.2 — to be spliced). This is the exact case split the restructured
+`false_of_ZDerivesEmpty` consumes: it gives a genuine `iord`-decreasing successor on the LEFT with NO
+dependence on `red`'s `permIdx` (so no `red`-fixpoint branch), and isolates the residual to the case-5.2
+splice on the RIGHT (the existing `ZDerivation_red_zK_splice` machinery). -/
+theorem iRcrit_descends_or_nonleaf_isymRep {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hreg : ∀ i < lh ds, ZRegular (znth ds i)) :
+    icmp (iord (iRcrit (zK s r ds) (fun n => zAxReduct (red (znth ds n))))) (iord (zK s r ds)) = 0
+    ∨ (∃ i < lh ds, tp (znth ds i) = isymRep ∧
+        ¬ ((∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck))) := by
+  by_cases h : ∃ i < lh ds, tp (znth ds i) = isymRep ∧
+      ¬ ((∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck))
+  · exact Or.inr h
+  · push_neg at h
+    exact Or.inl (iord_descent_iRcrit_botChain_leaves hZ hant hsucc hreg (fun i hi hrep => h i hi hrep))
+
 /-- **Critical-reduct halves descend below the chain — the splice sub-fact (lap 110).** For a valid
 critical `K^r` chain `dᵢ = zK s r ds` (`¬ permIdx < lh ds`), `red dᵢ = iRcritG dᵢ ρ` whose two
 premise-halves `a,b = znth (zKseq (red dᵢ)) {0,1}` are `K`-chains over `seqUpdate ds (redexI/J) (red·)` —
