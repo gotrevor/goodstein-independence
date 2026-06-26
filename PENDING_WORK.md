@@ -10,13 +10,26 @@ structural + Ind cases). The `zK` chain dispatch (`ZFresh_red_zK` + `_replace`/`
 `zFresh(zK)` is the pure premise max-fold (`zFresh_zK`), so every branch reduces to "every reduct premise is
 `ZFresh`", closed by `zfresh_zK_of`.
 
-**NEXT (target 2): thread `∧ ZFresh d` into `ZDerivesEmptyR`** (`Crux2Blueprint:933`). Mechanical 3rd-conjunct
-ripple — `ZDerivesEmptyR_red` adds `ZFresh_red d h.1.1 h.2.2`; re-index every `ZRegular`-slot projection from
-`.2` to `.2.1` across Crux2Blueprint + RedZKDescent; widen `foundation_bot_to_Z_empty`'s `∃ z` target. Then
-**target 3:** feed the now-orbit-invariant `ZFresh` (via `zfresh_zK_premise` +
-`fvSubst_numeral_eq_self_of_zfresh_zIall` + `fvSubst_numeral_transfer`) into
-`ZDerivation_iRcritG_critReductCorr`'s `hpfresh`/`hΓfresh` to close LEFT-branch ∀-soundness. See
-`HANDOFF-2026-06-26-lap128.md`.
+**✅ target 2 DONE: `∧ ZFresh d` threaded into `ZDerivesEmptyR`** (`Crux2Blueprint:933`). 3rd conjunct added;
+`ZDerivesEmptyR_red` discharges it via `ZFresh_red d h.1.1 h.2.2`; `redSound` / `iord_descent_red`
+re-indexed `.2 → .2.1`. The freshness invariant is now carried across the whole `red`-orbit.
+
+**✅ target-3 SUPPLIERS DONE (`Zsubst.lean`, after `fvSubstSeq_numeral_eq_self_of_zfresh_zIall`):** the two
+bridge lemmas that feed `ZDerivation_iRcritG_critReductCorr`'s freshness hyps at any L-redex instance `k`:
+`fvSubst_numeral_eq_self_of_zfresh_zIall_at` (matrix; takes `IsUFormula p` from the I∀ node's ZDerivation
+wff) + `fvSubstSeq_numeral_eq_self_of_zfresh_zIall_at` (antecedent; NO external hyp — `seqWffFlag` gives the
+entrywise wff free). Axiom-clean `[propext, choice, Quot.sound]`.
+
+**NEXT — the engine re-key (the genuine remaining crux, lap-114/119 finding).** `ZDerivation_red_zK_crit`
+(`Crux2Blueprint:517`, sorry) is FALSE for the current `ρ = zAxReduct ∘ red` (R-redex derives instance-0,
+not the L-redex instance `k` — `cutFormula` mismatch). The fix is the ATOMIC engine swap: re-key `red`'s
+tag-4 critical branch (`iRNextG`/`red_zK_crit`) to emit `critReductCorr (zK s r ds)` (re-principalizes at
+`k`), then `ZDerivation_red_zK_crit`'s body becomes `ZDerivation_iRcritG_critReductCorr` (PROVEN), with
+`hpfresh`/`hΓfresh` now discharged by the two suppliers above (chain: `zfresh_zK_premise` on the orbit
+`ZFresh (zK)` → `ZFresh dᵢ`, rewrite `dᵢ = zIall sᵢ a p d0` via `hdi`, apply supplier at
+`k = π₁(π₂(tp dⱼ))`). Lap-119 scoped this as 3 fronts (O1 regularity = LANDED; descent re-key; soundness
+assembly); the freshness front (O3) is now fully de-risked. See `HANDOFF-2026-06-26-lap128.md`,
+`engine-swap-not-pure-wiring-lap119` memory.
 
 ## lap 127 — `zFresh_zsubst` SUBSTRATE landed (commutation + node-level preservation); the gap is now ONE wff invariant
 **Build 🟢 1326; 5 new lemmas axiom-clean `[propext, choice, Quot.sound]` (Zsubst).**
