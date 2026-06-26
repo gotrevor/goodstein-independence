@@ -115,6 +115,38 @@ theorem descent_step_Kcrit_of_bundle {s r ds : V}
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 :=
   ⟨iRKcCrit (zK s r ds), ⟨⟨hsound, hant, hsucc⟩, hreg, hfr, hsa⟩, hdesc⟩
 
+/-- **tag-3 (Ind major premise) DESCENT — the termination half of `descent_step_K_majorIdx`'s Ind case,
+SORRY-FREE.** When the faithful major premise `dⱼ = znth ds (majorIdx)` is an Ind node, the explicit
+replace reduct `zK s r (seqUpdate ds (majorIdx) (red dⱼ))` strictly `iord`-descends: `red dⱼ = iRInd dⱼ`
+(`red_zInd`) descends below `dⱼ` (`iRedDescent_zInd`, banked), fed to the index-generic explicit kernel
+`iord_descent_zK_replace_explicit`. The ONLY residual of `descent_step_K_majorIdx`'s tag-3 case after this
+is the SOUNDNESS witness (`ZDerivesEmptyR` of the reduct), which routes to `zKValidF_iIndReduct_of_zInd`
+(`Crux2Blueprint:79`, the Ind-reduct chain-validity sorry) + replace-preservation. No `hAll`, no recursion. -/
+theorem descent_K_majorIdx_Ind_descends {s r ds : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n))
+    (hmlt : majorIdx (zK s r ds) < lh ds)
+    (hind : zTag (znth ds (majorIdx (zK s r ds))) = 3) :
+    icmp (iord (zK s r (seqUpdate ds (majorIdx (zK s r ds))
+            (red (znth ds (majorIdx (zK s r ds)))))))
+         (iord (zK s r ds)) = 0 := by
+  have hjZ : ZDerivation (znth ds (majorIdx (zK s r ds))) := hmem _ hmlt
+  have hIH : iRedDescent (red (znth ds (majorIdx (zK s r ds))))
+      (znth ds (majorIdx (zK s r ds))) := by
+    rcases zDerivation_iff.mp hjZ with ⟨s', heq, _⟩ | ⟨s', a', p', d0', heq, _, _⟩ |
+      ⟨s', p', d0', heq, _, _⟩ | ⟨s', at'', p', d0', d1', heq, _, _, _⟩ |
+      ⟨s', r', ds', heq, _, _, _⟩ | ⟨s', p', k', heq, _, _⟩ | ⟨s', p', heq, _, _⟩ | ⟨s', C', heq, _⟩
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq, red_zInd]
+      obtain ⟨hd0Z, hd1Z, _⟩ := zDerivation_zInd_inv (heq ▸ hjZ)
+      exact iRedDescent_zInd (isNF_iotil_of_ZDerivation _ hd0Z) (isNF_iotil_of_ZDerivation _ hd1Z)
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+    · rw [heq] at hind; simp at hind
+  exact iord_descent_zK_replace_explicit hds hmem hmlt hIH
+
 /-- **THE existence-form K-case crux, via the FAITHFUL one-shot `majorIdx` selector** (lap-135 spike
 verdict: this is the precise form the PIVOT takes). For a regular `∅→⊥` K-node, a descending sound
 reduct is obtained by reducing the **first `⊥`-exit major premise** `dⱼ = znth ds (majorIdx (zK s r ds))`,

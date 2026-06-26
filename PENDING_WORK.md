@@ -38,10 +38,27 @@ proves the same bundle but keys its conclusion to `red (zK s r ds)` via an `hred
 existence form picks the major premise at `majorIdx`, so it needs the descent over the EXPLICIT reduct
 `zK s r (seqUpdate ds i v)`. Proof = the kernel body with `red (znth ds i) ↦ v`, final `rw [hred]` dropped
 (`iotil`/`idg` are conclusion-label & `red`-agnostic). **This is the TERMINATION half of `descent_step_K_majorIdx`'s
-tag-3 (and tag-4) replace cases** — `descent_step_K_majorIdx`'s remaining gap for tag-3 is now only the
-SOUNDNESS witness (`ZDerivesEmptyR` of the reduct), which entangles with `zKValidF_iIndReduct_of_zInd`
-(Crux2Blueprint:79, the Ind-reduct soundness sorry). Ready to move to `src/RedZKDescent.lean` once a full
+tag-3 (and tag-4) replace cases** — ready to move to `src/RedZKDescent.lean` once a full
 `descent_step_K_majorIdx` sub-case ports.
+
+**✅ also landed (SORRY-FREE, in the spike):** `descent_K_majorIdx_Ind_descends` — the tag-3 (Ind major
+premise) DESCENT, assembled from `red_zInd` + `iRedDescent_zInd` (banked) + the explicit kernel above. So
+**`descent_step_K_majorIdx`'s tag-3 case is now reduced to PURELY the soundness witness** (`ZDerivesEmptyR`
+of `zK s r (seqUpdate ds majorIdx (red dⱼ))`), which routes to `zKValidF_iIndReduct_of_zInd`
+(Crux2Blueprint:79) + replace-preservation. No `hAll`, no recursion — the whole termination half of tag-3
+is DONE in-kernel.
+
+**Honest blocker assessment (lap 135):** every remaining src sorry is a genuine wall — the SOUNDNESS nut
+(`redSoundGen` + its 4 sub-sorries: `zKValidF_iIndReduct_of_zInd` = induction-elimination `isChainInf`;
+`ZDerivation_red_zK_{crit,splice,nonRep}` = cut-elim soundness, `hAll`-blocked), the tag-4 RECURSION, M2,
+M3. No single-lap src DROP is available: the termination STRUCTURE is settled but converting it to a dropped
+sorry needs the soundness witnesses, which are themselves deep. `zKValidF_iIndReduct_of_zInd` is the most
+tractable soundness entry (gates tag-3 + redSoundGen's Ind branch) but is the genuine Buchholz induction→
+cut-chain reduction (establish `isChainInf s (irk p) ⟨d1,d0⟩` from `zIndWff`), not a quick win.
+**Concrete next attack:** `zKValidF_iIndReduct_of_zInd` — build `isChainInf s (irk p) (iIndReductSeq d0 d1 1)`:
+the `j0` exit is the `d0` base premise (succedent `F(0)`); threading routes `d1`'s step antecedent `F(at')`
+to `d0`'s succedent; rank `irk p`. Banked support: `iseqReg_iIndReductSeq`/`zfresh_iIndReductSeq`/
+`zSeqAnt_iIndReductSeq` (Zsubst) already handle the reg/fresh/seqAnt conjuncts.
 
 `descent_step_K_majorIdx {s r ds}` (regular `∅→⊥` K-node ⟹ ∃ descending sound reduct) dispatches on the
 major premise `dⱼ = znth ds (majorIdx (zK s r ds))`'s tag (∈{3,4,5,6}, BANKED via `majorIdx_botOrbit_reducible`):
