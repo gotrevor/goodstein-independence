@@ -22,21 +22,33 @@ dispatches `redexJ ≤ j0` (standard) vs `>` (keep-tip).
   `ZDerivation_iRcritGNeg_corrected_neg_botOrbit`, `ZDerivation_iRKcCrit_neg_botOrbit`; `descent_step_K_critical_neg`
   WIRED (soundness `_neg_botOrbit`, descent `iord_descent_iRKcCrit_neg`, invariants `ZRegular_/ZFresh_/ZSeqAnt_iRKcCrit_of_zK`).
 
-### On-path sorry inventory after lap-144 (the live `false_of_ZDerivesEmpty` chain)
+### 🎉 SECOND advance this lap — Ind branch WIRED off `red`: live path now FULLY red-free
+`ZDerivesEmptyR_descent_step`'s Ind root now calls the NEW named honest sorry `descent_step_Ind` (witness =
+genuine `iIndReductSeqG`), NOT `⟨red d, ZDerivesEmptyR_red hd, iord_descent_red_zInd⟩`. Combined with the
+critical-K case (off `red`, lap-143/144), the ENTIRE live `false_of_ZDerivesEmpty` (:2331) path is now off
+`red`. **The headline's open `sorryAx` traces ONLY to honest TRUE-but-unproven lemmas — no kernel-FALSE
+statement remains on the path.**
+
+### On-path sorry inventory after lap-144 (the live `false_of_ZDerivesEmpty` chain) — all GENUINE
 | sorry | live via | disposition |
 |---|---|---|
-| Ind branch of `ZDerivesEmptyR_descent_step` = `⟨red d, ZDerivesEmptyR_red, iord_descent_red_zInd⟩` | **STILL `red`** → `redSoundGen` :1471 (zInd→FALSE :80) | **THE last `red` use — switch to `iIndReductSeqG`** |
-| `redSoundGen` :1471, `zKValidF_iIndReduct_of_zInd` :80, `ZDerivation_red_zK_crit` :1108, `_splice` :1211, `_nonRep` :1384 | only via the Ind branch now (critical-K is off them) | DEAD — drop when the Ind witness switches → relocate to `wip/` |
-| `descent_step_K_noncritical` :2138 | live (non-critical K) | GENUINE — Buchholz 5.2 atomic reduct |
-| `exists_sigma1_descending_step` :2208 (A) | live (gDef packaging) | GENUINE — concrete `redStep`/witness-bound |
+| `descent_step_Ind` (NEW, Crux2Blueprint) | Ind root of `ZDerivesEmptyR_descent_step` | GENUINE — Ind soundness via telescope `zKValidF` + term-value `k = ⟦t⟧` (see below) |
+| `descent_step_K_noncritical` | live (non-critical K) | GENUINE — Buchholz 5.2 atomic reduct |
+| `exists_sigma1_descending_step` (A) | live (gDef packaging) | GENUINE — concrete `redStep`/witness-bound |
+| `redSoundGen`:1616, `zKValidF_iIndReduct_of_zInd`:80, `ZDerivation_red_zK_crit`:1108, `_splice`:1211, `_nonRep`:1384 | **OFF the live path** (only pre-pivot `red^[n]` remnants reference them) | DEAD — relocate to `wip/` (mechanical cleanup, not crux work) |
 
-### NEXT (hardest-first) — re-witness the Ind branch with `iIndReductSeqG`
-This is the FINAL step that takes the whole live path off `red`'s false soundness (the critical-K case
-already is, lap-143/144). Needs Ind soundness `ZDerivesEmptyR (iIndReductSeqG d0 d1 a k)` from
-`ZDerivesEmptyR (zInd s at' p d0 d1)` + descent. The lap-136 `iIndReductSeqG` chain is the soundness shell
-(`iIndReductSeqG_zero/_succ`, `znth_iIndReductSeqG_zero/_step`, `chainA*_iIndReductSeqG_*`,
-`isChainInf_iIndReduct_exit`, `isChainInf_telescope` banked); `iord_descent_iIndReduct` (InternalZ:3056) the
-descent at the modeled count. After the Ind switch, relocate {:80,:1108,:1211,:1384,:1471} to `wip/`.
+### NEXT (hardest-first) — prove `descent_step_Ind` soundness
+Witness = `zK s (irk p) (iIndReductSeqG d0 d1 a k)`, `a = π₁ at'`, `k = value(t)` for the Ind term `t = π₂ at'`.
+- **Soundness** `ZDerivesEmptyR (zK …)`: `zKValidF` via `isChainInf_telescope` (banked) + per-premise
+  read-offs `chainAnt_/chainAsucc_iIndReductSeqG_*` (banked) — base antecedent `= Γ` (`d0`'s), step antecedent
+  `Γ,F(i)` threads `F(i) = chainAsucc i`, rank `irk (F(i)) = irk p` (substitution-invariant). The **`hexit`
+  clause needs `F(k) = F(t)` i.e. `k = value(t)`** = the lone genuine prerequisite (internal term-evaluation
+  `k = ⟦t⟧`, matching `numeral k` to the closed Ind term `t`; `substs1 (numeral k) p = substs1 t p = ⊥`).
+  Plus `ZRegular/ZFresh/ZSeqAnt` of the reduct (premise-hereditary, like the K-case `*_iRKcCrit_of_zK`).
+- **Descent**: `iord_descent_iIndReduct` (InternalZ:3056) via `iotil`/`idg` congruence `iIndReductSeqG ≅
+  iIndReductSeq` (corresponding premises share ordinals — substitution is ordinal-invariant).
+- **First sub-attack:** formalize the internal term-value `k = ⟦t⟧` (the `hexit` blocker), OR prove the
+  telescope threading/rank parts modulo `hexit` (a narrower named sorry).
 
 ### FORBIDDEN (unchanged from lap-143)
 Witnessing ANY `ZDerivesEmptyR_descent_step` branch with `red` (incl. the Ind branch — switch it); attacking

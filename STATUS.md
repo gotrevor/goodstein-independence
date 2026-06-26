@@ -5,16 +5,17 @@
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**);
 `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean. The lone `sorryAx` traces to crux-2.
 
-> **⭐⭐⭐ Lap-144 — CRITICAL ¬-case CLOSED RED-FREE (executes DIRECTION lap-143 step 2; a src sorry DROPS — read FIRST).**
-> `descent_step_K_critical_neg` is now sorry-FREE + `#print axioms`-clean `[propext, Classical.choice, Quot.sound]`,
-> and the whole dispatcher `descent_step_K_critical` is axiom-clean for BOTH polarities (∀ lap-143 + ¬ lap-144) —
-> the critical-K case is FULLY off `red`/`redSoundGen`/false-:80/:1108. **The lap-142 `redexJ ≤ j0` obstruction is
-> dissolved** via route (b): new `isChainInf_reduceR_keepTip` (InternalZ) rebuilds chain-validity at the UNCHANGED
-> ⊥-orbit tip `j0` when the §5 axNeg reduct lands above it (`j0 < redexJ`, uses the `⊥`-exit disjunct) — so the
-> ¬-case `haux0` needs threading only up to `j0`, never `redexJ`. New: `ZDerivation_corrected_haux0_neg_botOrbit`
-> (the `redexJ ≤ j0` dispatcher), `ZDerivation_iRcritGNeg_corrected_neg_botOrbit`, `ZDerivation_iRKcCrit_neg_botOrbit`.
-> **NEXT (the LAST `red` on the live path):** re-witness the Ind branch of `ZDerivesEmptyR_descent_step` with
-> `iIndReductSeqG` (lap-136), not `red d`. See `HANDOFF-2026-06-26-lap144.md`, `PENDING_WORK.md` lap-144.
+> **🎉⭐⭐⭐ Lap-144 — LIVE PATH FULLY OFF `red` (executes DIRECTION lap-143 steps 2+3; a src sorry DROPS — read FIRST).**
+> TWO advances: **(1) ¬-case CLOSED** — `descent_step_K_critical_neg` sorry-FREE + axiom-clean `[propext,
+> Classical.choice, Quot.sound]`; the dispatcher `descent_step_K_critical` axiom-clean for BOTH polarities. The
+> lap-142 `redexJ ≤ j0` obstruction dissolved via route (b): new `isChainInf_reduceR_keepTip` rebuilds chain-validity
+> at the UNCHANGED ⊥-orbit tip `j0` when the §5 axNeg reduct lands above it (`⊥`-exit disjunct) — `haux0` needs
+> threading only up to `j0`. **(2) Ind branch WIRED off `red`** — `ZDerivesEmptyR_descent_step`'s Ind root now calls
+> the named `descent_step_Ind` (witness = genuine `iIndReductSeqG`), not `⟨red d, ZDerivesEmptyR_red, …⟩`. **Result:
+> the ENTIRE live `false_of_ZDerivesEmpty` path is now off `red` — the headline's open `sorryAx` traces ONLY to
+> honest TRUE-but-unproven lemmas (`descent_step_Ind`, `descent_step_K_noncritical`, (A)), NO kernel-FALSE statement.**
+> **NEXT:** prove `descent_step_Ind` (Ind soundness via telescope `zKValidF` + term-value `k = ⟦t⟧`).
+> See `HANDOFF-2026-06-26-lap144.md`, `PENDING_WORK.md` lap-144.
 
 > **🧘 Lap-143 DEEP REFLECTION — direction KEPT; the existence-form pivot was half-ABANDONED, FINISH THE WIRING.**
 > Re-verified in-kernel (green 1326): headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms),
