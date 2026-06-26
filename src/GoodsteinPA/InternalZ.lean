@@ -8165,6 +8165,90 @@ lemma zTag_redexI_of_zKValid {s r ds : V} (hvalid : zKValid s r ds) :
     zTag (znth ds (redexI (zK s r ds))) = 1 ∨ zTag (znth ds (redexI (zK s r ds))) = 2 :=
   tp_isymR_tag (redexPair_tp (isRedexPair_redexCode_of_zKValid hvalid)).1
 
+/-- **The `redZKReady` orbit bundle — the explicit redex constructor forms of a valid critical chain.**
+THE shared residual all three engine-swap fronts reduce to: from a valid critical chain `zK s r ds`,
+extract the in-range redex indices PLUS the polarity-dispatched explicit redex forms that the corrected
+reduct's soundness/descent lemmas consume. The R/L redexes share a formula `A` (`redexPair_tp`); inverting
+both (`zDerivation_isymR_form`/`_isymLk_form`) and cross-ruling the off-diagonal cases on `A` (since
+`∀p ≠ ¬p`) gives either the ∀-pair (`zIall`/`zAxAll` + the rank relation `irk(∀pj) = irk(cutFormula)+1`
+from `cutFormula_all`+`irk_substs1`+`irk_all`) or the ¬-pair (`zIneg`/`zAxNeg` + `cutFormula = p`). -/
+lemma redZKReady_of_zKValid {s r ds : V}
+    (hZ : ZDerivation (zK s r ds)) (hvalid : zKValid s r ds) :
+    redexI (zK s r ds) < redexJ (zK s r ds) ∧ redexJ (zK s r ds) < lh ds ∧
+    ( (∃ sᵢ sⱼ a p pj k' d0,
+        znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0 ∧
+        znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k' ∧
+        irk (^∀ pj : V) = irk (cutFormula (zK s r ds)) + 1)
+    ∨ (∃ sᵢ sⱼ p d0,
+        znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0 ∧
+        znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p ∧
+        cutFormula (zK s r ds) = p ∧ IsUFormula ℒₒᵣ p) ) := by
+  have hrc : isRedexPair ds (redexCode (zK s r ds)) := isRedexPair_redexCode_of_zKValid hvalid
+  obtain ⟨hRi, hLj⟩ := redexPair_tp hrc
+  rw [show π₁ (redexCode (zK s r ds)) = redexI (zK s r ds) from rfl] at hRi hLj
+  rw [show π₂ (redexCode (zK s r ds)) = redexJ (zK s r ds) from rfl] at hLj
+  have hIJ : redexI (zK s r ds) < redexJ (zK s r ds) := hrc.1
+  have hJlt : redexJ (zK s r ds) < lh ds := hrc.2.1
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  obtain ⟨_, hmem⟩ := zDerivation_zK_inv hZ
+  have hZi := hmem _ hIlt
+  have hZj := hmem _ hJlt
+  obtain ⟨_, hperm0, _, _, hf2, _, hf6, _⟩ := hvalid
+  -- shared formula `A = π₂ (tp dᵢ)`; `hRi : tp dᵢ = isymR A`, `hLj : tp dⱼ = isymLk _ A`
+  refine ⟨hIJ, hJlt, ?_⟩
+  rcases zDerivation_isymR_form hZi hRi with ⟨sᵢ, a, p, d0, hdi, hAp⟩ | ⟨sᵢ, p, d0, hdi, hAn⟩
+  · -- R-redex is I∀, `A = ^∀ p`
+    rcases zDerivation_isymLk_form hZj hLj with ⟨sⱼ, pj, hdj, hApj⟩ | ⟨sⱼ, pp, hdj, _, hAnn⟩
+    · -- L-redex is axAll: ∀-pair. Derive `pj = p` and the rank relation.
+      left
+      have hpjp : pj = p := by
+        have h : (^∀ p : V) = (^∀ pj : V) := hAp.symm.trans hApj
+        simpa using h.symm
+      have hsf : IsSemiformula ℒₒᵣ 1 p := by
+        rcases tp_isymR_form_wff hZi hRi with ⟨p', hp'eq, hsf'⟩ | ⟨p', hp'eq, _⟩
+        · have h : (^∀ p : V) = (^∀ p' : V) := hAp.symm.trans hp'eq
+          rwa [show p' = p from by simpa using h.symm] at hsf'
+        · exact absurd (hAp.symm.trans hp'eq) (by simp [qqAll, inegF, qqOr])
+      -- `chainAsucc = A = ^∀ p`, so `cutFormula = F(k)` is the matrix's instance
+      have hChA : chainAsucc ds (redexI (zK s r ds)) = (^∀ p : V) := by
+        have hp := hperm0 _ hIlt
+        rw [hRi, iperm_isymR_iff] at hp
+        exact hp.symm.trans hAp
+      have hcut : cutFormula (zK s r ds) = substs1 ℒₒᵣ
+          (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds))))))) p := by
+        have h := cutFormula_all (d := zK s r ds) (by rw [zKseq_zK]; exact hChA)
+        rwa [zKseq_zK] at h
+      refine ⟨sᵢ, sⱼ, a, p, pj, _, d0, hdi, hdj, ?_⟩
+      rw [hpjp, hcut, irk_substs1 hsf (by simp : IsSemiterm ℒₒᵣ 0
+        (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))) : V)),
+        irk_all hsf.isUFormula]
+    · -- L-redex is axNeg with `A = ¬pp`: contradicts `A = ^∀ p`
+      exact absurd (hAp.symm.trans hAnn) (by simp [qqAll, inegF, qqOr])
+  · -- R-redex is I¬, `A = ¬p`
+    rcases zDerivation_isymLk_form hZj hLj with ⟨sⱼ, pj, hdj, hApj⟩ | ⟨sⱼ, pp, hdj, _, hAnn⟩
+    · -- L-redex is axAll: contradicts `A = ¬p`
+      exact absurd (hApj.symm.trans hAn) (by simp [qqAll, inegF, qqOr])
+    · -- L-redex is axNeg: ¬-pair. `pp = p`, `cutFormula = p`.
+      right
+      have hpUf : IsUFormula ℒₒᵣ p := by
+        have h := hf2 _ hIlt (by rw [hdi]; exact zTag_zIneg _ _ _)
+        rwa [hdi, zInegF_zIneg] at h
+      have hppUf : IsUFormula ℒₒᵣ pp := by
+        have h := hf6 _ hJlt (by rw [hdj]; exact zTag_zAxNeg _ _)
+        rwa [hdj, zAxNegF_zAxNeg] at h
+      have hppp : pp = p := by
+        have h : (inegF p : V) = inegF pp := hAn.symm.trans hAnn
+        simp only [inegF, qqOr_inj] at h
+        exact ((neg_inj_iff hpUf hppUf).mp h.1).symm
+      have hChA : chainAsucc ds (redexI (zK s r ds)) = inegF p := by
+        have hpm := hperm0 _ hIlt
+        rw [hRi, iperm_isymR_iff] at hpm
+        exact hpm.symm.trans hAn
+      have hcut : cutFormula (zK s r ds) = p := by
+        have h := cutFormula_neg (d := zK s r ds) hpUf (by rw [zKseq_zK]; exact hChA)
+        exact h
+      exact ⟨sᵢ, sⱼ, p, d0, hdi, hppp ▸ hdj, hcut, hpUf⟩
+
 /-- **T3.4(a) chain-rank invariant — the `redexCode` redex's R-principal has rank `≤ r`.** For a valid
 critical `K`-chain `zK s r ds`, `irk (chainAsucc ds (redexI)) ≤ r`. This is the rank input the
 cut-formula strip needs (`irk_cutFormula_lt` ⟹ `rk(A(d)) < r`), closing the splice/critical degree drop.
