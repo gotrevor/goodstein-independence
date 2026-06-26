@@ -101,6 +101,14 @@ SAME structural reason as lap-114's critical-reduct bug (ordinal-invariant reduc
   the critical reduct (lap-114, fixed) and the Ind reduct (this finding). **Audit the splice/replace reducts
   (`ZDerivation_red_zK_splice`, axNeg replace validity) for the same latent instance defect BEFORE trusting
   their `zKValidF`/`ZDerivation` obligations** — they may also be mis-stated, not merely hard.
+  - **Sharpening:** the lap-114→119 instance-correction campaign (`critReductCorr`/`iRcritG`/`iRcritGNeg` via
+    `zsubst d0 a (numeral k)`) corrected the **critical K-cut** reduct only. The **Ind** reduct (`iIndReductSeq`,
+    `iRInd`) was NOT touched by that campaign — it kept the original verbatim-repeat shape — which is exactly
+    why it retained the instance defect. So the concrete next-lap fix is: **extend the lap-114 re-principalization
+    treatment to the Ind rule** (an eigenvar-substituted step chain reaching the conclusion instance `t`). The
+    splice reduct CONSUMES the already-corrected critical halves, so it likely inherits the fix (lower risk); the
+    axNeg replace ties to the lap-117/118 corrected ¬-inversion. Verify both, but expect the Ind reduct to be
+    the genuine second mis-statement.
 
 ---
 
