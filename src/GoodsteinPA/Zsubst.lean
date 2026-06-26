@@ -558,7 +558,7 @@ lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : 
     rw [seqSucc_fvSubstSeqt, ← iperm_isymR_iff.mp h, fvSubst_all hwff.2.2.isUFormula]
   · rw [zsubst_zIneg, tp_zIneg]; rw [tp_zIneg] at h
     refine iperm_isymR_iff.mpr ?_
-    rw [seqSucc_fvSubstSeqt, ← iperm_isymR_iff.mp h, fvSubst_inegF ht.isUTerm hwff.2.2]
+    rw [seqSucc_fvSubstSeqt, ← iperm_isymR_iff.mp h, fvSubst_inegF ht.isUTerm hwff.1.2.2]
   · rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd, tp_zInd]
     exact iperm_isymRep _
   · rw [zsubst_zK, tp_zK]; exact iperm_isymRep _
@@ -642,7 +642,7 @@ lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDeri
   · rw [zsubst_zIall, tp_zIall, tp_zIall,
       fvSubst_eq_self_of_le hwff.2.2.isUFormula (le_of_lt (lt_of_lt_of_le (p_lt_zIall s e p d0) hda))]
   · rw [zsubst_zIneg, tp_zIneg, tp_zIneg,
-      fvSubst_eq_self_of_le hwff.2.2 (le_of_lt (lt_of_lt_of_le (p_lt_zIneg s p d0) hda))]
+      fvSubst_eq_self_of_le hwff.1.2.2 (le_of_lt (lt_of_lt_of_le (p_lt_zIneg s p d0) hda))]
   · rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm]
     simp only [zsubst_zInd, tp_zInd]
   · simp only [zsubst_zK, tp_zK]
@@ -3461,16 +3461,23 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     · intro hda
       rw [maxEigen_zIneg] at hda
       have hd0Z : ZDerivation d0 := (hC d0 hd0).1
-      have hpU : IsUFormula ℒₒᵣ p := hwff.2.2
+      obtain ⟨hwffN, hSeqs, hant⟩ := hwff
+      have hpU : IsUFormula ℒₒᵣ p := hwffN.2.2
       rw [zsubst_zIneg]
       refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inl
-        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, zsubst d0 a t, rfl, ?_, ?_, ?_, ?_, ?_⟩)))
+        ⟨fvSubstSeqt a t s, fvSubst ℒₒᵣ a t p, zsubst d0 a t, rfl, ?_, ?_, ⟨?_, ?_, ?_⟩, ?_, ?_⟩)))
       · exact (hC d0 hd0).2 hda
       · rw [seqSucc_fvSubstSeqt, hsc, fvSubst_inegF ht.isUTerm hpU]
-      · rw [fstIdx_zsubst a t hd0Z, seqSucc_fvSubstSeqt, hwff.1, fvSubst_falsum (L := ℒₒᵣ)]
+      · rw [fstIdx_zsubst a t hd0Z, seqSucc_fvSubstSeqt, hwffN.1, fvSubst_falsum (L := ℒₒᵣ)]
       · rw [fstIdx_zsubst a t hd0Z, seqAnt_fvSubstSeqt]
-        exact inAnt_fvSubstSeq hwff.2.1
+        exact inAnt_fvSubstSeq hwffN.2.1
       · exact IsUFormula.fvSubst ht.isUTerm hpU
+      · -- zInegAntWff.1 = Seq (seqAnt (fvSubstSeqt a t s)): the substituted antecedent is a `fvSubstSeq`
+        -- image, always a `Seq`
+        rw [seqAnt_fvSubstSeqt]; exact fvSubstSeq_seq a t (seqAnt s)
+      · -- zInegAntWff.2: transfer the original shape through `fvSubstSeq_seqCons` (needs `Seq (seqAnt s)`)
+        rw [fstIdx_zsubst a t hd0Z, seqAnt_fvSubstSeqt, seqAnt_fvSubstSeqt, hant,
+          fvSubstSeq_seqCons hSeqs]
     -- zInd
     · intro hda
       rw [maxEigen_zInd] at hda

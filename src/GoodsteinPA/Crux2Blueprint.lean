@@ -231,7 +231,7 @@ theorem ZDerivation_corrected_haux1_neg {s r ds sᵢ p d0 : V}
       (seqUpdate ds (redexI (zK s r ds)) d0)) := by
   set i := redexI (zK s r ds) with hidef
   have hZdi : ZDerivation (zIneg sᵢ p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 i hi
-  obtain ⟨hZd0, _hsucceq, hbot, hmem, hp⟩ := zDerivation_zIneg_inv hZdi
+  obtain ⟨hZd0, _hsucceq, ⟨hbot, hmem, hp⟩, _, _⟩ := zDerivation_zIneg_inv hZdi
   obtain ⟨-, -, -, -, -, -, -, hss, hsa⟩ := zKValidF_of_ZDerivation_zK hZ
   have hchain_i : chainAnt ds i = seqAnt sᵢ := by unfold chainAnt; rw [hdi, fstIdx_zIneg]
   rw [hcut]
@@ -878,7 +878,7 @@ theorem ZDerivation_zK_replace_zIneg_of {s r ds i sᵢ p d0 : V}
     (hrank : ∀ i' < i, irk (chainAsucc ds i') ≤ r) :
     ZDerivation (zK (tpReduce (tp (znth ds i)) s 0) r (seqUpdate ds i (red (znth ds i)))) := by
   have hZdi : ZDerivation (zIneg sᵢ p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 i hi
-  obtain ⟨hZd0, _hsucceq, hbot, hmem, hp⟩ := zDerivation_zIneg_inv hZdi
+  obtain ⟨hZd0, _hsucceq, ⟨hbot, hmem, hp⟩, _, _⟩ := zDerivation_zIneg_inv hZdi
   have hSeqs' : Seq (seqAnt (seqSetSucc s (^⊥ : V))) := by rw [seqAnt_seqSetSucc]; exact hSeqs
   have hchain_i : chainAnt ds i = seqAnt sᵢ := by unfold chainAnt; rw [hdi, fstIdx_zIneg]
   -- conclusion-antecedent wff of the parent chain (`zKValidF` field 9)

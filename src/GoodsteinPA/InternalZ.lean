@@ -1587,23 +1587,26 @@ with the active formula `p = A`). The current `zInegWff` (`InternalZ:1525`) carr
 (the plumbing input to `ZDerivation_corrected_haux1_neg`'s threading reconstruction) is not yet derivable
 from `zKValid`. This predicate is the building block for strengthening the `zIneg` disjunct. -/
 def zInegAntWff (s p d0 : V) : Prop :=
-  seqAnt (fstIdx d0) = seqCons (seqAnt s) p
+  Seq (seqAnt s) ∧ seqAnt (fstIdx d0) = seqCons (seqAnt s) p
 
-/-- **`𝚫₁`-definability of `zInegAntWff`** (all pieces `𝚺₀`: `fstIdx`/`seqAnt` projections + `seqCons`). -/
+/-- **`𝚫₁`-definability of `zInegAntWff`** (all pieces `𝚺₀`: `fstIdx`/`seqAnt`/`Seq` projections +
+`seqCons`). The bundled `Seq (seqAnt s)` makes the antecedent-shape self-preserving under eigenvariable
+substitution (`fvSubstSeq_seqCons` needs `Seq` of the consed base). -/
 noncomputable def _root_.LO.FirstOrder.Arithmetic.zInegAntWffDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “s p d0.
-    ∃ f, !fstIdxDef f d0 ∧ ∃ sa0, !seqAntDef sa0 f ∧ ∃ sa1, !seqAntDef sa1 s ∧
+    ∃ sa1, !seqAntDef sa1 s ∧ !seqDef sa1 ∧ ∃ f, !fstIdxDef f d0 ∧ ∃ sa0, !seqAntDef sa0 f ∧
       ∃ sc, !seqConsDef sc sa1 p ∧ sa0 = sc ”)
   (.mkPi “s p d0.
-    ∀ f, !fstIdxDef f d0 → ∀ sa0, !seqAntDef sa0 f → ∀ sa1, !seqAntDef sa1 s →
+    ∀ sa1, !seqAntDef sa1 s → !seqDef sa1 ∧ ∀ f, !fstIdxDef f d0 → ∀ sa0, !seqAntDef sa0 f →
       ∀ sc, !seqConsDef sc sa1 p → sa0 = sc ”)
 
 instance zInegAntWff_defined : 𝚫₁-Relation₃ (zInegAntWff : V → V → V → Prop) via zInegAntWffDef :=
   ⟨by intro v
-      simp [zInegAntWffDef, fstIdx_defined.iff, seqAnt_defined.iff, seqCons_defined.iff],
+      simp [zInegAntWffDef, fstIdx_defined.iff, seqAnt_defined.iff, seqCons_defined.iff,
+        seq_defined.iff],
    by intro v
       simp [zInegAntWffDef, zInegAntWff, HierarchySymbol.Semiformula.val_sigma,
-        fstIdx_defined.iff, seqAnt_defined.iff, seqCons_defined.iff]⟩
+        fstIdx_defined.iff, seqAnt_defined.iff, seqCons_defined.iff, seq_defined.iff]⟩
 
 instance zInegAntWff_definable : 𝚫₁-Relation₃ (zInegAntWff : V → V → V → Prop) :=
   zInegAntWff_defined.to_definable
@@ -5362,7 +5365,8 @@ with its premise(s) in `C`. -/
 def ZPhi (C : Set V) (d : V) : Prop :=
   (∃ s, d = zAtom s ∧ inAnt (seqSucc s) (seqAnt s)) ∨
   (∃ s a p d0, d = zIall s a p d0 ∧ d0 ∈ C ∧ seqSucc s = (^∀ p : V) ∧ zIallWff s a p d0) ∨
-  (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0) ∨
+  (∃ s p d0, d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0 ∧
+    zInegAntWff s p d0) ∨
   (∃ s at' p d0 d1, d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ zIndWff d) ∨
   (∃ s r ds, d = zK s r ds ∧ Seq ds ∧ (∀ i < lh ds, znth ds i ∈ C) ∧ zKValidF s r ds) ∨
   (∃ s p k, d = zAxAll s p k ∧ IsSemiformula ℒₒᵣ 1 p ∧ inAnt (^∀ p : V) (seqAnt s) ∧
@@ -5412,7 +5416,8 @@ private lemma zphi_iff (C d : V) :
       (∃ s < d, ∃ a < d, ∃ p < d, ∃ d0 < d,
         d = zIall s a p d0 ∧ d0 ∈ C ∧ seqSucc s = (^∀ p : V) ∧ zIallWff s a p d0) ∨
       (∃ s < d, ∃ p < d, ∃ d0 < d,
-        d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0) ∨
+        d = zIneg s p d0 ∧ d0 ∈ C ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0 ∧
+        zInegAntWff s p d0) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         d = zInd s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ zIndWff d) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
@@ -5466,7 +5471,8 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         (∃ ss, !seqSuccDef ss s ∧ ∃ ap, !qqAllDef ap p ∧ ss = ap) ∧
         !(zIallWffDef.sigma) s a p d0) ∨
       (∃ s < d, ∃ p < d, ∃ d0 < d, !zInegGraph d s p d0 ∧ d0 ∈ C ∧
-        (∃ ss, !seqSuccDef ss s ∧ ∃ nb, !inegFDef nb p ∧ ss = nb) ∧ !(zInegWffDef.sigma) p d0) ∨
+        (∃ ss, !seqSuccDef ss s ∧ ∃ nb, !inegFDef nb p ∧ ss = nb) ∧ !(zInegWffDef.sigma) p d0 ∧
+        !(zInegAntWffDef.sigma) s p d0) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ !(zIndWffDef.sigma) d) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
@@ -5487,7 +5493,8 @@ noncomputable def zblueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         (∀ ss, !seqSuccDef ss s → ∀ ap, !qqAllDef ap p → ss = ap) ∧
         !(zIallWffDef.pi) s a p d0) ∨
       (∃ s < d, ∃ p < d, ∃ d0 < d, !zInegGraph d s p d0 ∧ d0 ∈ C ∧
-        (∀ ss, !seqSuccDef ss s → ∀ nb, !inegFDef nb p → ss = nb) ∧ !(zInegWffDef.pi) p d0) ∨
+        (∀ ss, !seqSuccDef ss s → ∀ nb, !inegFDef nb p → ss = nb) ∧ !(zInegWffDef.pi) p d0 ∧
+        !(zInegAntWffDef.pi) s p d0) ∨
       (∃ s < d, ∃ at' < d, ∃ p < d, ∃ d0 < d, ∃ d1 < d,
         !zIndGraph d s at' p d0 d1 ∧ d0 ∈ C ∧ d1 ∈ C ∧ !(zIndWffDef.pi) d) ∨
       (∃ s < d, ∃ r < d, ∃ ds < d,
@@ -5511,7 +5518,7 @@ lemma zPhi_definable :
       seq_defined.iff, lh_defined.iff, znth_defined.iff,
       seqSucc_defined.iff, seqAnt_defined.iff, inAnt_defined.iff,
       qqForall_defined.iff, inegF_defined.iff, zInegWff_defined.iff, zIallWff_defined.iff,
-      zIndWff_defined.iff, zAxAllSuccWff_defined.iff]
+      zIndWff_defined.iff, zAxAllSuccWff_defined.iff, zInegAntWff_defined.iff]
 
 /-- The Z-derivation `Fixpoint.Construction` (`Φ = ZPhi`, with the proved monotonicity). -/
 noncomputable def zconstruction : Fixpoint.Construction V zblueprint where
@@ -5695,7 +5702,7 @@ lemma tag_uformula_of_ZDerivation {v : V} (hZ : ZDerivation v) :
   · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
   · exact ⟨fun _ => by rw [zIallF_zIall]; exact hwff.2.2.isUFormula,
       fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
-  · exact ⟨fun h => by simp at h, fun _ => by rw [zInegF_zIneg]; exact hwff.2.2,
+  · exact ⟨fun h => by simp at h, fun _ => by rw [zInegF_zIneg]; exact hwff.1.2.2,
       fun h => by simp at h, fun h => by simp at h⟩
   · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
   · exact ⟨fun h => by simp at h, fun h => by simp at h, fun h => by simp at h, fun h => by simp at h⟩
@@ -6700,7 +6707,7 @@ lemma tp_isymR_form_wff {d A : V} (hZ : ZDerivation d) (h : tp d = isymR A) :
     ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
   · rw [tp_zAtom] at h; exact absurd h (by simp)
   · rw [tp_zIall] at h; exact Or.inl ⟨p, ((isymR_inj _ _).mp h).symm, hwff.2.2⟩
-  · rw [tp_zIneg] at h; exact Or.inr ⟨p, ((isymR_inj _ _).mp h).symm, hwff.2.2⟩
+  · rw [tp_zIneg] at h; exact Or.inr ⟨p, ((isymR_inj _ _).mp h).symm, hwff.1.2.2⟩
   · rw [tp_zInd] at h; exact absurd h (by simp)
   · rw [tp_zK] at h; exact absurd h (by simp)
   · rw [tp_zAxAll] at h; exact absurd h (by simp)
@@ -8723,7 +8730,7 @@ lemma zDerivation_zIall_inv {s a p d0 : V} (hZ : ZDerivation (zIall s a p d0)) :
 succedent `¬p` (`= inegF p`), and the premise-sequent side condition `zInegWff p d0` (`d0 ⊢ p,Γ→⊥`). Peels
 the R-redex premise when the cut formula is a negation; the genuine I¬ reduct `d[0]:=d0` reads `zInegWff`. -/
 lemma zDerivation_zIneg_inv {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
-    ZDerivation d0 ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0 := by
+    ZDerivation d0 ∧ seqSucc s = (inegF p : V) ∧ zInegWff p d0 ∧ zInegAntWff s p d0 := by
   rcases zDerivation_iff.mp hZ with ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ |
     ⟨s', p', d0', h, hd0, hsc, hwff⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
@@ -8751,7 +8758,7 @@ lemma red_zIneg_tpReduce {s p d0 : V} (hZ : ZDerivation (zIneg s p d0)) :
     seqSucc (fstIdx (red (zIneg s p d0)))
         = seqSucc (tpReduce (tp (zIneg s p d0)) (fstIdx (zIneg s p d0)) 0)
       ∧ inAnt p (seqAnt (fstIdx (red (zIneg s p d0)))) := by
-  obtain ⟨hd0, hsucc, hbot, hmem, hp⟩ := zDerivation_zIneg_inv hZ
+  obtain ⟨hd0, hsucc, ⟨hbot, hmem, hp⟩, _⟩ := zDerivation_zIneg_inv hZ
   rw [red_zIneg, tp_zIneg, tpReduce_isymR_neg p (fstIdx (zIneg s p d0)) 0 hp]
   exact ⟨by rw [hbot, seqSucc_seqAddAnt, seqSucc_seqSetSucc], hmem⟩
 
