@@ -66,20 +66,16 @@ chain-source of the least left-symbol. Everything else goes through unchanged.
 clause with re-routing.** Replace `hnperm`'s isymRep clause with: *every `isymRep` leaf `i ≤ j0` has an
 earlier duplicate succedent* `∃ i' < i, Asucc i' = Asucc i` — which is EXACTLY
 `chainAsucc_threaded_of_leaf`'s conclusion (already banked). Then:
-- **Sub-lemma A (least non-isymRep exit):** the LEAST index `j* ≤ j0` with `Asucc j* ∈ {Cmain, ⊥}` is NOT
-  `isymRep`. Proof: if it were, re-routing gives an earlier `i' < j*` with `Asucc i' = Asucc j*`, a
-  smaller exit — contradicting leastness. Run Step A from `j*` (its isymR/isymLk killers are the genuine
-  ⊥-clauses above). **⚠️ lap-121 attempted, math is correct (least_number on `fun x => chainAsucc ds x =
-  c ∧ x ≤ j0`, witness `hc.symm`, re-route contradicts minimality) but BLOCKED on Σ₁-definability of the
-  predicate:** `definability`/aesop LOOPS on `chainAsucc` (depth-3 `seqSucc∘fstIdx∘znth`), hitting the
-  rule-application-depth cap (it unfolds chainAsucc instead of using `chainAsucc_definable : 𝚺₁-Function₂`).
-  `clear_value c` (opaque RHS) + depth 100 + 4M heartbeats did NOT fix it (still loops). The fix is to
-  supply the composed instance `𝚺₁-Function₁ (fun x => chainAsucc ds x)` EXPLICITLY (not via aesop) — but
-  `apply DefinableFunction₂.comp (F := chainAsucc)` failed instance synth (Arithmetic-hierarchy
-  `BoldfaceFunction₂` vs model-theory `DefinableFunction₂` namespace mismatch). NEXT-LAP: either (a) find
-  the Arithmetic-hierarchy comp incantation (grep `Zsubst.lean:43` `DefinableFunction₃.comp (F := zsubst)`
-  pattern — it works there, replicate the EXACT instance path), or (b) hand-build a `Def` semisentence for
-  the predicate mirroring `isChainInfDef` (InternalZ:1246). The math is done; this is pure plumbing.
+- **Sub-lemma A (least non-isymRep exit): ✅ DONE lap 121** — `exit_nonRep_of_reroute` (InternalZ, after
+  `chainAsucc_threaded_of_leaf`), axiom-clean. The LEAST index `j' ≤ j0` with `chainAsucc ds j' = chainAsucc
+  ds j0 ∈ {seqSucc s, ⊥}` is NOT `isymRep` (re-route ⟹ smaller exit ⟹ ⊥ vs minimality). **Definability
+  fix worth remembering:** `definability`/aesop LOOPS on `chainAsucc` (depth-3 `seqSucc∘fstIdx∘znth`,
+  rule-application-depth cap) — the cure was (i) add the generic instance `chainAsucc_definable' (Γ) :
+  Γ-[m+1]-Function₂ := chainAsucc_definable.of_sigmaOne` (mirrors `zsubstTable_definable'`; THIS is what
+  lets the comp lemmas fire — bare `𝚺₁-Function₂` literal-1 instance is not found by `Γ-[m+1]` synthesis),
+  then (ii) hand-build the predicate def: `apply Definable.and ?_ (by definability); exact DefinableRel.comp
+  (by definability) (DefinableFunction₂.comp (F := chainAsucc) (DefinableFunction.const ds)
+  (DefinableFunction.var 0)) (DefinableFunction.const c)` after `set c := chainAsucc ds j0; clear_value c`.
 - **Sub-lemma B (non-isymRep chain-source):** when the least-left-symbol's source `i` would be `isymRep`,
   re-route via the duplicate to a `< i` index; iterate (least-number) to a non-isymRep source. ⚠️ Caveat:
   that source may be `isymLk` (an L-axiom with succ B), not `isymR(B)` — so the re-routed redex needs an
