@@ -674,6 +674,69 @@ theorem ZDerivation_corrected_haux0_neg {s r ds sⱼ p : V}
   -- the `(j := redexJ, Cc := cutFormula)` instance of the explicit-pair `_at` lemma
   ZDerivation_corrected_haux0_neg_at hZ hj hdj hcut hCwff hthread hrank
 
+/-- **`haux0_neg` with the §5 axNeg reduct ABOVE the tip (`redexJ > j0`) — KEEP-TIP route (lap 144).** The
+succedent half replaces premise `redexJ` (the `zAxNeg` axiom) by `Ax^1_{Γⱼ→A}` and SETS the conclusion
+succedent to `A = cutFormula`. The standard `ZDerivation_corrected_haux0_neg` re-points the chain tip to
+`redexJ`, forcing threading up to `redexJ` — NOT free from `zKValid` when `redexJ > j0`. Here, on a ⊥-orbit
+whose distinguished tip `j0` carries `⊥` (`hbot`), the replaced premise lands strictly ABOVE the tip
+(`j0 < redexJ`), so chain-validity is rebuilt with the SAME tip `j0` (`isChainInf_reduceR_keepTip`): the new
+conclusion succedent `A` is irrelevant (the tip uses the `⊥`-exit disjunct), and only threading/rank up to
+`j0` are needed — exactly the `chainInf_redexI_data` tip datum. Fed through the explicit-`hci`
+`ZDerivation_iCritReplaceReduce_general`. -/
+theorem ZDerivation_corrected_haux0_neg_keepTip {s r ds j0 sⱼ p : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hcut : cutFormula (zK s r ds) = p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hj0i : j0 < redexJ (zK s r ds)) (hj0 : j0 < lh ds)
+    (hbot : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank0 : ∀ i' < j0, irk (chainAsucc ds i') ≤ r) :
+    ZDerivation (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+      (seqUpdate ds (redexJ (zK s r ds)) (zAx1 (seqSetSucc sⱼ p) p))) := by
+  have hpmem : inAnt p (seqAnt sⱼ) :=
+    (zDerivation_zAxNeg_inv (hdj ▸ (zDerivation_zK_inv hZ).2 _ hj)).2.2
+  have hZv : ZDerivation (zAx1 (seqSetSucc sⱼ p) p) :=
+    zDerivation_zAx1_intro (by rw [seqSucc_seqSetSucc, seqAnt_seqSetSucc]; exact hpmem)
+  obtain ⟨_, _, _, _, _, _, _, _, hsa⟩ := zKValidF_of_ZDerivation_zK hZ
+  refine ZDerivation_iCritReplaceReduce_general hj hZ hZv
+    (isChainInf_reduceR_keepTip hj hj0i hj0 hbot
+      (seqAnt_seqSetSucc s (cutFormula (zK s r ds))) hthread0 hrank0)
+    ?_ ?_ ?_ ?_ (fun h => by simp at h) (fun h => by simp at h) (fun h => by simp at h)
+    (fun h => by simp at h)
+  · rw [seqSucc_seqSetSucc]; exact hCwff
+  · rw [seqAnt_seqSetSucc]; exact hsa
+  · rw [fstIdx_zAx1, seqSucc_seqSetSucc, ← hcut]; exact hCwff
+  · rw [tp_zAx1, fstIdx_zAx1]; exact iperm_isymRep _
+
+/-- **`haux0_neg` from the ⊥-orbit TIP datum — dispatches on `redexJ ≤ j0` (lap 144).** Given the
+`chainInf_redexI_data` tip `j0` (carrying `⊥`, threading/rank up to `j0`), supplies the succedent half
+WITHOUT the `redexJ ≤ j0` obligation: if `redexJ ≤ j0` the standard `ZDerivation_corrected_haux0_neg` takes
+threading restricted from `j0`; if `redexJ > j0` the keep-tip route
+(`ZDerivation_corrected_haux0_neg_keepTip`) rebuilds chain-validity at the unchanged tip `j0`. This is the
+lone place the ¬-case needed `redexJ ≤ j0` (`PENDING_WORK` lap-142/143) — now discharged unconditionally. -/
+theorem ZDerivation_corrected_haux0_neg_botOrbit {s r ds j0 sⱼ p : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hcut : cutFormula (zK s r ds) = p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hj0 : j0 < lh ds)
+    (hbot : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank0 : ∀ i' < j0, irk (chainAsucc ds i') ≤ r) :
+    ZDerivation (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+      (seqUpdate ds (redexJ (zK s r ds)) (zAx1 (seqSetSucc sⱼ p) p))) := by
+  by_cases hle : redexJ (zK s r ds) ≤ j0
+  · exact ZDerivation_corrected_haux0_neg hZ hj hdj hcut hCwff
+      (fun i' hi' => hthread0 i' (le_trans hi' hle))
+      (fun i' hi' => hrank0 i' (lt_of_lt_of_le hi' hle))
+  · push_neg at hle
+    exact ZDerivation_corrected_haux0_neg_keepTip hZ hj hdj hcut hCwff hle hj0 hbot hthread0 hrank0
+
 /-- **THE corrected critical-cut inversion, ¬-case — SOUNDNESS PROVEN (modulo the §5 `A∈Γⱼ` orbit datum).**
 The negation analogue of `ZDerivation_iRcritG_corrected`: for a critical cut on `¬A` whose redex pair is an
 `I¬` R-redex (`zIneg sᵢ A d0`, `redexI`) and an `axNeg` L-redex (`zAxNeg sⱼ A`, `redexJ`), the
@@ -726,6 +789,57 @@ theorem ZDerivation_iRcritGNeg_corrected_neg {s r ds sᵢ sⱼ p d0 : V} {ρ : V
     · rw [zKseq_zK]; exact (zDerivation_zK_inv hZ).2 _ hi
     · rw [zKseq_zK, hChsucc, hdi, tp_zIneg]
     · rw [zKseq_zK]; exact hrankI
+  · -- hssUf
+    rw [fstIdx_zK]; exact hss
+  · -- hsaUf
+    rw [fstIdx_zK]; exact hsa
+
+/-- **The corrected ¬-case inversion, ⊥-orbit TIP form (lap 144) — `redexJ ≤ j0`-FREE.** The `_botOrbit`
+twin of `ZDerivation_iRcritGNeg_corrected_neg`: takes the `chainInf_redexI_data` tip `j0` (with
+`redexI < j0`, `⊥`-exit `hbot`, threading/rank up to `j0`) instead of the `redexJ`-bounded threading the
+original demanded. The succedent half (`haux0`) routes through `ZDerivation_corrected_haux0_neg_botOrbit`
+(the keep-tip dispatcher, the ONE place that needed `redexJ ≤ j0`); the antecedent half (`haux1`) and the
+cut-rank drop need only `redexI`-bounded data, supplied by restricting from `j0` via `redexI < j0`. -/
+theorem ZDerivation_iRcritGNeg_corrected_neg_botOrbit {s r ds j0 sᵢ sⱼ p d0 : V} {ρ : V → V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : redexI (zK s r ds) < lh ds)
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hρI : ρ (redexI (zK s r ds)) = d0)
+    (hρJ : ρ (redexJ (zK s r ds)) = zAx1 (seqSetSucc sⱼ p) p)
+    (hcut : cutFormula (zK s r ds) = p)
+    (hd0ant : seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hSeqs : Seq (seqAnt s)) (hSeqsi : Seq (seqAnt sᵢ))
+    (hIj0 : redexI (zK s r ds) < j0) (hj0 : j0 < lh ds)
+    (hbot : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank0 : ∀ i' < j0, irk (chainAsucc ds i') ≤ r) :
+    ZDerivation (iRcritGNeg (zK s r ds) ρ) := by
+  obtain ⟨_, _, _, _, _, _, _, hss, hsa⟩ := zKValidF_of_ZDerivation_zK hZ
+  have hZdi : ZDerivation (zIneg sᵢ p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 _ hi
+  have hChsucc : chainAsucc ds (redexI (zK s r ds)) = (inegF p : V) := by
+    unfold chainAsucc; rw [hdi, fstIdx_zIneg]; exact (zDerivation_zIneg_inv hZdi).2.1
+  refine ZDerivation_iRcritGNeg_of (d := zK s r ds) (ρ := ρ) ?_ ?_ ?_ ?_ hCwff ?_ ?_
+  · -- haux0 (¬ succedent half) via the keep-tip dispatcher (drops the `redexJ ≤ j0` need)
+    rw [hρJ]; simp only [fstIdx_zK, zKrank_zK, zKseq_zK]
+    exact ZDerivation_corrected_haux0_neg_botOrbit hZ hj hdj hcut hCwff hj0 hbot hthread0 hrank0
+  · -- haux1 (¬ antecedent half): redexI ↦ I¬ child `d0`, threading up to redexI < j0
+    rw [hρI]; simp only [fstIdx_zK, zKrank_zK, zKseq_zK]
+    exact ZDerivation_corrected_haux1_neg hZ hi hdi hcut hCwff hSeqs hSeqsi hd0ant
+      (fun i' hi' => hthread0 i' (le_trans hi' (le_of_lt hIj0)))
+      (fun i' hi' => hrank0 i' (lt_trans hi' hIj0))
+  · -- hsAnt
+    rw [fstIdx_zK]; exact hSeqs
+  · -- hCrk: rk(cutFormula d) ≤ r − 1
+    rw [zKrank_zK]
+    refine le_pred_of_lt (irk_cutFormula_lt ?_ ?_ ?_)
+    · rw [zKseq_zK]; exact (zDerivation_zK_inv hZ).2 _ hi
+    · rw [zKseq_zK, hChsucc, hdi, tp_zIneg]
+    · rw [zKseq_zK]; exact hrank0 _ hIj0
   · -- hssUf
     rw [fstIdx_zK]; exact hss
   · -- hsaUf
@@ -982,6 +1096,37 @@ theorem ZDerivation_iRKcCrit_neg {s r ds sᵢ sⱼ p d0 : V}
   rw [iRKcCrit_eq_neg htag2 (ne_of_lt hIJ)]
   exact ZDerivation_iRcritGNeg_critReductNeg hZ hi hj hIJ hdi hdj hcut hd0ant
     hCwff hSeqs hSeqsi hthread hrank hrankI
+
+/-- **The re-keyed critical reduct `iRKcCrit` is SOUND — ¬-case, ⊥-orbit TIP form (lap 144).** The
+`_botOrbit` twin of `ZDerivation_iRKcCrit_neg`: consumes the `chainInf_redexI_data` tip `j0` directly
+(threading/rank up to `j0`, `⊥`-exit `hbot`, `redexI < j0`), so it is **`redexJ ≤ j0`-FREE** — the lone
+obstruction that kept the critical ¬-case open (`PENDING_WORK` lap-142). Rewrites `iRKcCrit_eq_neg` then
+feeds the concrete `critReductNeg` reduct to `ZDerivation_iRcritGNeg_corrected_neg_botOrbit`. With this the
+¬-case joins the ∀-case (`ZDerivation_iRKcCrit_critical_all`) OFF `red`'s false soundness. -/
+theorem ZDerivation_iRKcCrit_neg_botOrbit {s r ds j0 sᵢ sⱼ p d0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : redexI (zK s r ds) < lh ds)
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p)
+    (hcut : cutFormula (zK s r ds) = p)
+    (hd0ant : seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hSeqs : Seq (seqAnt s)) (hSeqsi : Seq (seqAnt sᵢ))
+    (hIj0 : redexI (zK s r ds) < j0) (hj0 : j0 < lh ds)
+    (hbot : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank0 : ∀ i' < j0, irk (chainAsucc ds i') ≤ r) :
+    ZDerivation (iRKcCrit (zK s r ds)) := by
+  have htag2 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) ≠ 1 := by
+    rw [zKseq_zK, hdi, zTag_zIneg]; simp
+  rw [iRKcCrit_eq_neg htag2 (ne_of_lt hIJ)]
+  refine ZDerivation_iRcritGNeg_corrected_neg_botOrbit (sᵢ := sᵢ) (sⱼ := sⱼ) (p := p) (d0 := d0)
+    hZ hi hj hIJ hdi hdj ?_ ?_ hcut hd0ant hCwff hSeqs hSeqsi hIj0 hj0 hbot hthread0 hrank0
+  · rw [critReductNeg_redexI (ne_of_lt hIJ), zKseq_zK, hdi, zInegPrem_zIneg]
+  · rw [critReductNeg_redexJ, zKseq_zK, hdj, fstIdx_zAxNeg, hcut]
 
 /-- **The re-keyed critical reduct is SOUND from `zKValid` — BOTH polarities consolidated.** Discharges the
 redex-structural inputs (`hi`/`hj`/`hIJ`/`hdi`/`hdj` + the polarity dispatch) from the chain's own validity
@@ -1867,7 +2012,7 @@ theorem ZDerivation_iRKcCrit_critical_all {s r ds : V}
     have hSeqsj : Seq (seqAnt sⱼ) := by
       have h := seq_seqAnt_zK_premise hds hd.2.2.2 hJlt (hmem _ hJlt) (by rw [hdj]; simp)
       rwa [hdj, fstIdx_zAxAll] at h
-    obtain ⟨j0, _, hI_lt_j0, hthread0, hrank0⟩ := chainInf_redexI_data hvalid
+    obtain ⟨j0, _, hI_lt_j0, hthread0, hrank0, _⟩ := chainInf_redexI_data hvalid
     exact ZDerivation_iRKcCrit_all hZ hIlt hJlt hIJ hdi hdj heig hd.2.2.1 hpwff
       (cutFormula_wff_of_zKValid hZ hvalid) (by rw [hant]; exact seq_empty) hSeqsj hsj
       (fun i' hi' => hthread0 i' (le_of_lt (lt_of_le_of_lt hi' hI_lt_j0)))
@@ -1911,23 +2056,55 @@ theorem descent_step_K_critical_all {s r ds : V}
       rw [hdi'] at hdi
       exact absurd (congrArg zTag hdi) (by rw [zTag_zIall, zTag_zIneg]; simp)
 
-/-- **CRITICAL ¬-case (Buchholz §3.2 case 5.1, I¬ R-redex) — the honest residual (lap 143).** The genuine
-`iRKcCrit` ¬-reduct's soundness (`ZDerivation_iRKcCrit_neg`) replaces premise `redexJ`, so its succedent
-half `ZDerivation_corrected_haux0_neg` needs chain-threading up to `redexJ`; from `zKValid`'s `isChainInf`
-we only get threading up to the existential tip `j0`, and `redexJ ≤ j0` is NOT free in general. **Next
-attack:** pin `j0 = lh ds − 1` for genuine ⊥-orbit chains (`isChainInf_of_last`), giving `redexJ < lh ds =
-j0+1`; or weaken `_haux0_neg` to thread only up to `min(redexJ, j0)`. (Until then the ¬-case is the lone
-open critical sub-case; the ∀-case above is red-free.) -/
+/-- **CRITICAL ¬-case (Buchholz §3.2 case 5.1, I¬ R-redex) — RED-FREE (lap 144).** A regular critical
+`∅→⊥` chain whose R-redex is an `I¬` has the GENUINE corrected reduct `iRKcCrit (zK s r ds)` as a
+strictly-`iord`-descending `ZDerivesEmptyR` reduct — witnessing the existence-form `∃ d'` with `iRKcCrit`,
+NOT `red`. SOUNDNESS = `ZDerivation_iRKcCrit_neg_botOrbit` (the `redexJ ≤ j0`-FREE keep-tip form: when the
+§5 axNeg reduct lands above the ⊥-orbit tip `j0`, chain-validity is rebuilt at the unchanged tip); the
+three orbit invariants = `ZRegular_/ZFresh_/ZSeqAnt_iRKcCrit_of_zK`; DESCENT = `iord_descent_iRKcCrit_neg`
+(banked). This DROPS the second (and last) critical sub-case off the kernel-FALSE `red`-soundness chain —
+the lap-142 `redexJ ≤ j0` obstruction is dissolved via `isChainInf_reduceR_keepTip`. -/
 theorem descent_step_K_critical_neg {s r ds : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hcrit : ¬ permIdx (zK s r ds) < lh ds)
     (hNcase : ∃ sᵢ p d0, znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0) :
-    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  have hvalid : zKValid s r ds := zKValid_iff_zKValidF_and_zKCritical.mpr
+    ⟨zKValidF_of_ZDerivation_zK hZ, zKCritical_of_not_permIdx_lt hcrit⟩
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  obtain ⟨hIJ, hJlt, hcase⟩ := redZKReady_of_zKValid hZ hvalid
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  have hant : seqAnt s = (∅ : V) := by have h := hd.1.2.1; rwa [fstIdx_zK] at h
+  have hsucc : seqSucc s = (^⊥ : V) := by have h := hd.1.2.2; rwa [fstIdx_zK] at h
+  rcases hcase with ⟨sᵢ, sⱼ, a, p, pj, k', d0, hdi, _hdj, _hirk, _hsj⟩ |
+      ⟨sᵢ, sⱼ, p, d0, hdi, hdj, hcut, _hpUf⟩
+  · -- ∀-redex contradicts the I¬ hypothesis `hNcase`
+    exfalso
+    obtain ⟨sᵢ', p', d0', hdi'⟩ := hNcase
+    rw [hdi'] at hdi
+    exact absurd (congrArg zTag hdi) (by rw [zTag_zIneg, zTag_zIall]; simp)
+  · -- ¬-redex: witness `iRKcCrit` via the keep-tip ⊥-orbit soundness (`redexJ ≤ j0`-free)
+    have hZdi : ZDerivation (zIneg sᵢ p d0) := hdi ▸ hmem _ hIlt
+    obtain ⟨_, _, _, hSeqsi, hd0ant⟩ := zDerivation_zIneg_inv hZdi
+    have hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)) := cutFormula_wff_of_zKValid hZ hvalid
+    obtain ⟨j0, hj0, hIj0, hthread0, hrank0, hAj0⟩ := chainInf_redexI_data hvalid
+    have hbot : chainAsucc ds j0 = (^⊥ : V) := hAj0.elim (fun h => h.trans hsucc) id
+    refine ⟨iRKcCrit (zK s r ds),
+      ⟨⟨ZDerivation_iRKcCrit_neg_botOrbit hZ hIlt hJlt hIJ hdi hdj hcut hd0ant hCwff
+          (by rw [hant]; exact seq_empty) hSeqsi hIj0 hj0 hbot hthread0 hrank0, ?_, ?_⟩,
+        ZRegular_iRKcCrit_of_zK hds hZ hd.2.1 hvalid, ZFresh_iRKcCrit_of_zK hds hZ hd.2.2.1 hvalid,
+        ZSeqAnt_iRKcCrit_of_zK hds hZ hd.2.2.2 hvalid⟩, ?_⟩
+    · rw [fstIdx_iRKcCrit]; exact hd.1.2.1
+    · rw [fstIdx_iRKcCrit]; exact hd.1.2.2
+    · exact iord_descent_iRKcCrit_neg hds hmem hvalid hIlt hJlt hIJ hdi hdj hcut (hcut ▸ hCwff)
 
-/-- **CRITICAL case (Buchholz §3.2 case 5.1) — dispatcher.** Case-splits on the R-redex polarity (the
-`redZKReady_of_zKValid` ∀/¬ disjunction): I∀ → `descent_step_K_critical_all` (RED-FREE, lap 143); I¬ →
-`descent_step_K_critical_neg` (the open `redexJ ≤ j0` residual). NO `red`/`redSoundGen` dependence on the
-∀-branch — the lap-141 regression to `red` is undone for the dominant sub-case. -/
+/-- **CRITICAL case (Buchholz §3.2 case 5.1) — dispatcher, FULLY RED-FREE (lap 144).** Case-splits on the
+R-redex polarity (the `redZKReady_of_zKValid` ∀/¬ disjunction): I∀ → `descent_step_K_critical_all`
+(RED-FREE, lap 143); I¬ → `descent_step_K_critical_neg` (RED-FREE, lap 144, via the `redexJ ≤ j0`-free
+keep-tip soundness). NO `red`/`redSoundGen`/false-:80/:1108 dependence on EITHER branch — this whole lemma
+is now `#print axioms`-clean (`[propext, Classical.choice, Quot.sound]`). The lap-141 regression to `red` is
+fully undone. -/
 theorem descent_step_K_critical {s r ds : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hcrit : ¬ permIdx (zK s r ds) < lh ds) :
@@ -1946,8 +2123,9 @@ theorem descent_step_K_critical {s r ds : V}
 partner is a PRINCIPAL R-intro"). Buchholz's reduction (Def 3.2 case 5) splits on whether the chain is
 CRITICAL, NOT on the major premise's tag — and the genuine engine `red` realizes the faithful split. The
 dispatcher case-splits on the `permIdx` criticality sentinel:
-- critical (`¬ permIdx < lh ds`) → `descent_step_K_critical`, CLOSED via `red` (sound + descends), no
-  producer-principal proof (Lemma 3.1 hands back the principal pair from criticality alone);
+- critical (`¬ permIdx < lh ds`) → `descent_step_K_critical`, CLOSED RED-FREE via the genuine `iRKcCrit`
+  reduct (lap 143 ∀-case + lap 144 ¬-case; `#print axioms`-clean), no producer-principal proof (Lemma 3.1
+  hands back the principal pair from criticality alone);
 - non-critical (`permIdx < lh ds`) → `descent_step_K_noncritical`, Buchholz case 5.2 (the one open leaf). -/
 
 /-- **Non-critical case (Buchholz §3.2 case 5.2) — the genuine remaining K-step content.** When the chain is
@@ -1967,9 +2145,9 @@ theorem descent_step_K_noncritical {s r ds : V}
 /-- **NAMED sub-`sorry` #1 — the per-step K-case math, a sorry-FREE critical/non-critical DISPATCHER
 (lap 141).** A regular `∅→⊥` K-node has a SOUND, strictly-`iord`-descending reduct. Case-splits on the
 `permIdx` criticality sentinel (Buchholz Def 3.2 case 5): critical (`¬ permIdx < lh ds`) →
-`descent_step_K_critical` (CLOSED via `red`); non-critical → `descent_step_K_noncritical` (case 5.2). Pure
-plumbing — the deep content is now the single non-critical leaf, and the tag-5/6 producer-principal wall is
-gone (the critical case is fully discharged). -/
+`descent_step_K_critical` (CLOSED RED-FREE via `iRKcCrit`, lap 143/144); non-critical →
+`descent_step_K_noncritical` (case 5.2). Pure plumbing — the deep content is now the single non-critical
+leaf, and the tag-5/6 producer-principal wall is gone (the critical case is fully discharged, off `red`). -/
 theorem descent_step_K_majorIdx {s r ds : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V)) :

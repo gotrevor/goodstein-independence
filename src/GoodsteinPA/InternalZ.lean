@@ -3724,6 +3724,35 @@ lemma isChainInf_reduceR_membership {s' r ds i v : V} (hi : i < lh ds)
   · intro i' hi'
     rw [chainAsucc_seqUpdate_of_ne (ne_of_lt hi')]; exact hrank i' hi'
 
+/-- **Keep-tip replace (⊥-orbit, replaced premise ABOVE the tip).** When the replaced premise `i` lies
+strictly above the distinguished tip `j0` (`j0 < i`) and that tip carries `⊥` (`chainAsucc ds j0 = ^⊥`,
+automatic on a ⊥-orbit where `seqSucc s = ⊥`), replacing premise `i` by ANY `v` keeps chain-validity with
+the SAME tip `j0` and an ARBITRARY new conclusion `s'` whose antecedent is the parent's (`hX_ant`): the new
+premise sits above the tip, so it never enters the tip-bounded exit/threading/rank. Contrast
+`isChainInf_reduceR_membership`, which re-points `j0 := i` and so demands the reduct succedent be the
+conclusion succedent or `⊥` and threading up to `i`. This is the route that frees the ¬-case `haux0` from
+needing `redexJ ≤ j0` (`PENDING_WORK` lap-142/143): when `redexJ > j0` the §5 axNeg reduct lands above the
+tip and is invisible to the tip-`j0` validity. -/
+lemma isChainInf_reduceR_keepTip {s s' r ds i j0 v : V} (hi : i < lh ds)
+    (hj0i : j0 < i) (hj0 : j0 < lh ds)
+    (hbot : chainAsucc ds j0 = (^⊥ : V))
+    (hX_ant : seqAnt s' = seqAnt s)
+    (hthread : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < j0, irk (chainAsucc ds i') ≤ r) :
+    isChainInf s' r (seqUpdate ds i v) := by
+  refine ⟨j0, by rwa [seqUpdate_lh], Or.inr ?_, ?_, ?_⟩
+  · rw [chainAsucc_seqUpdate_of_ne (ne_of_lt hj0i), hbot]
+  · intro i' hi' B hB
+    rw [chainAnt_seqUpdate_of_ne (ne_of_lt (lt_of_le_of_lt hi' hj0i))] at hB
+    rcases hthread i' hi' B hB with hin | ⟨i'', hi'', hB'⟩
+    · left; rwa [hX_ant]
+    · exact Or.inr ⟨i'', hi'', by
+        rw [chainAsucc_seqUpdate_of_ne
+          (ne_of_lt (lt_trans (lt_of_lt_of_le hi'' hi') hj0i)), hB']⟩
+  · intro i' hi'
+    rw [chainAsucc_seqUpdate_of_ne (ne_of_lt (lt_trans hi' hj0i))]; exact hrank i' hi'
+
 /-- **L-rule replace — `isChainInf` conclusion-antecedent weakening (Buchholz Def 3.2 case 5.2.2, axiom
 selected premise).** When the selected premise `dᵢ` is a §5 left-axiom (`tp dᵢ = L^k_A`), the reduct is
 the IDENTITY (`red dᵢ = dᵢ`) and the conclusion gains the cut-formula instance `A(k)` in its ANTECEDENT
@@ -8456,7 +8485,8 @@ lemma chainInf_redexI_data {s r ds : V} (hvalid : zKValid s r ds) :
     ∃ j0, j0 < lh ds ∧ redexI (zK s r ds) < j0 ∧
       (∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
         inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i') ∧
-      (∀ i < j0, irk (chainAsucc ds i) ≤ r) := by
+      (∀ i < j0, irk (chainAsucc ds i) ≤ r) ∧
+      (chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V)) := by
   obtain ⟨hci, hperm0, hnperm0, hf1, hf2, hf5, hf6, _hsucc, _hssf, _hsaf⟩ := hvalid
   obtain ⟨j0, hj0, hAj0, hchain, hrank⟩ := hci
   have hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ False :=
@@ -8503,11 +8533,11 @@ lemma chainInf_redexI_data {s r ds : V} (hvalid : zKValid s r ds) :
     rcases hle_disj with hle | hle
     · exact lt_of_le_of_lt hle (lt_of_lt_of_le hij hjle)
     · exact lt_of_lt_of_le (lt_of_lt_of_le hrc.1 hle) hjle
-  exact ⟨j0, hj0, hI_lt_j0, hchain, hrank⟩
+  exact ⟨j0, hj0, hI_lt_j0, hchain, hrank, hAj0⟩
 
 lemma irk_chainAsucc_redexI_le {s r ds : V} (hvalid : zKValid s r ds) :
     irk (chainAsucc ds (redexI (zK s r ds))) ≤ r := by
-  obtain ⟨j0, _, hI_lt_j0, _, hrank⟩ := chainInf_redexI_data hvalid
+  obtain ⟨j0, _, hI_lt_j0, _, hrank, _⟩ := chainInf_redexI_data hvalid
   exact hrank _ hI_lt_j0
 
 /-- **Criticality from the `permIdx` sentinel**: `¬ permIdx (zK s r ds) < lh ds` (the `iRK` critical
