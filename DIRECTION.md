@@ -3,6 +3,41 @@
 Companion to `EXPEDITION-PLAN.md` (the math). This is the **operational charter** for an
 autonomous treadmill campaign. Read both.
 
+---
+
+## ⚙️ CURRENT DIRECTIVE — altitude-lap-owned · binding on grind laps
+
+> **WRITE-ACCESS: review & reflection (altitude) laps ONLY** (the operator may also set it). Grind
+> laps READ this section and work strictly within it; they MUST NOT edit it. It **OUTRANKS** any
+> `HANDOFF` "NEXT" pointer or in-flight campaign momentum — this is how an altitude lap's
+> course-correction actually STICKS. The standing charter below changes rarely; THIS section turns
+> over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
+> (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
+
+**Set: pre-lap-135 (operator + judge).**
+
+- **THE objective (only this):** **M1b-term** — resolve the `red`-engine **STALL / termination** of
+  crux-2. Make a `red`-fixpoint on a ∅→⊥ orbit yield a contradiction, so the ordinal descent
+  terminates and the fixpoint branch of `false_of_ZDerivesEmpty` (`Crux2Blueprint:1144`) closes.
+- **Success metric:** a `src/` `sorry` actually **DROPS** on this path — NOT "lemmas banked" (src
+  pinned at 11 for ~30 laps while lemmas accumulated; that ends here).
+- **Mandated FIRST move:** run the **lap-132 existence-form reframe** as a cheap `wip/` spike BEFORE
+  any more invariant-fold work — reframe the endgame from "`red` is a total Σ₁ function that descends
+  every step" to the **existence / least-descending-reduct** form, where "fixpoint ⟹ cut-free" is
+  definitional. If it holds it obviates the `majorIdx`/`firstBotPrem`/`zReg`/`zFresh`/`zSeqAnt`
+  campaign and reuses the banked per-reduct soundness (laps 112–119). Settle it like the lap-101 spike.
+- **FORBIDDEN until the spike is decided:** more `zReg`/`zFresh`/`zSeqAnt` folds; the engine swap as a
+  goal; off-critical-path easy `sorry`s; M2 / M3 / M4. If you judge M1b-term blocked, record in
+  `PENDING_WORK.md` why + one concrete attack — don't silently switch threads.
+- **Why:** altitude laps 120 + 132 found the project circling — reduct-soundness / the swap got
+  polished while the TERMINATION question (does cut-elim reach a contradiction, or stall?) sat open
+  since lap 104, because each grind lap read the handoff, not the reflection. This layer is the fix.
+
+### Directive history (newest first; append one line per altitude lap — never delete)
+- **pre-lap-135** (operator + judge): focus to **M1b-term only**; existence-form spike FIRST; success = a `src/` sorry drops.
+
+---
+
 ## The goal (not a fixture — the destination) 🦸
 
 **Prove `Statement.peano_not_proves_goodstein : 𝗣𝗔 ⊬ ↑goodsteinSentence`** — Kirby–Paris (1982),
