@@ -35,14 +35,23 @@ zIall sᵢ a p d0`, `hdj : … = zAxAll sⱼ pj k'`, `hirk : irk(^∀pj) = irk(c
 zIneg sᵢ p d0`, `hdj : … = zAxNeg sⱼ p`, `hcut`, `hp`. (Descent only — regularity needs just `htagI`,
 already discharged.)
 
-**NEXT (THE crux residual) — build `redZKReady`-extraction: from `hZ`/`hvalid`+criticality produce the
-redex forms.** Supplier chain: `isRedexPair_redexCode_of_zKValid` (banked this lap) → `redexPair_tp` gives
-`tp (znth ds redexI) = isymR A`, `tp (znth ds redexJ) = isymLk k A` (A shared); invert each via
-`zDerivation_iff` (tp dispatch) into zIall/zAxAll (∀) or zIneg/zAxNeg (¬); the `hirk` rank relation from
-`cutFormula_all`/`irk_cutFormula_lt`, `hcut`/`hp` from `cutFormula_neg` + `tp_isymR_form_wff`. THEN the
-atomic engine swap (replay `scratchpad/lap119-engine-swap.diff`; `ZRegular_red_zK_splice_of_chain` reroutes
-through `iRKcCrit_eq_corr`/`_eq_neg`) wires all three banked fronts into `ZDerivation_red_zK_crit` /
-`ZRegular_red_zK_crit` / `iord_descent_red_zK_crit`. Full plan in HANDOFF lap-119.
+**Orbit-bundle building blocks BANKED (7th commit):** `zDerivation_isymR_form` (ZDerivation + tp=isymR A
+⟹ explicit `zIall`/`zIneg` node) + `zDerivation_isymLk_form` (tp=isymLk k A ⟹ explicit `zAxAll`/`zAxNeg`).
+These upgrade `tp_isymR_form_wff` (formula-only) to the explicit constructors the corrected reduct needs.
+
+**NEXT (THE crux residual) — assemble `redZKReady`-extraction from the banked blocks.** Now mechanical-ish:
+`isRedexPair_redexCode_of_zKValid hvalid` → `redexPair_tp` gives `tp dᵢ = isymR A`, `tp dⱼ = isymLk k A`
+(SAME `A`). Apply `zDerivation_isymR_form` (→ zIall/zIneg + `A=∀p`/`A=¬p`) and `zDerivation_isymLk_form`
+(→ zAxAll/zAxNeg + `A=∀p`/`k=0,A=¬p`); the shared `A` cross-rules the two off-diagonal cases (zIall forces
+zAxAll since `∀p ≠ ¬p`, by `qqAll ≠ qqOr`/`inegF`). Output: the `hdi`/`hdj` forms. **The one genuinely-hard
+remaining sub-fact is `hirk : irk(^∀pj) = irk(cutFormula (zK s r ds))+1`** — needs (a) `pj = p` (axAll
+formula = R-redex's ∀ matrix, from the shared `A` + `chainAsucc` = R-redex succedent), and (b)
+`cutFormula = F(k)` via `cutFormula_all` + `irk(∀p) = irk(substs1 (numeral k) p)+1` (rank of ∀ = rank of
+instance + 1; substitution rank-invariance, cf. `irk_cut_lt_rank_forall`). The ¬-case `hcut`/`hp` is easier
+(`cutFormula_neg` + `tp_isymR_form_wff`). THEN the atomic engine swap (replay
+`scratchpad/lap119-engine-swap.diff`; `ZRegular_red_zK_splice_of_chain` reroutes via `iRKcCrit_eq_corr`/
+`_eq_neg`) wires all three banked fronts into `ZDerivation_red_zK_crit` / `ZRegular_red_zK_crit` /
+`iord_descent_red_zK_crit`. Full plan in HANDOFF lap-119.
 
 ## lap 118 — ¬-case inversion's `hpmem` residual DISCHARGED; capstone now unconditional
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
