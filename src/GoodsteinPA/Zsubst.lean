@@ -3594,7 +3594,7 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
         (lt_of_le_of_lt (le_trans (le_max_right (maxEigen d0) (maxEigen d1)) (le_max_right _ _)) hda)
       simp only [zIndWff, zIndEig_zInd, zIndTerm_zInd, zIndP_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
         fstIdx_zInd] at hwff
-      obtain ⟨⟨h1a, h1b⟩, ⟨h2a, h2b⟩, h3, h4, h5⟩ := hwff
+      obtain ⟨⟨h1a, h1b⟩, ⟨h2seq, h2a, h2b⟩, h3, h4, h5⟩ := hwff
       rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd]
       refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inl
         ⟨fvSubstSeqt a t s, ⟪π₁ at', termFvSubst ℒₒᵣ a t (π₂ at')⟫, fvSubst ℒₒᵣ a t p,
@@ -3603,12 +3603,15 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
       · exact hZ1
       · simp only [zIndWff, zIndEig_zInd, zIndTerm_zInd, zIndP_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
           fstIdx_zInd, pi₁_pair, pi₂_pair]
-        refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ?_, ?_, ?_⟩
+        refine ⟨⟨?_, ?_⟩, ⟨?_, ?_, ?_⟩, ?_, ?_, ?_⟩
         · rw [fstIdx_zsubst a t hd0Z, seqAnt_fvSubstSeqt, seqAnt_fvSubstSeqt, h1a]
         · rw [fstIdx_zsubst a t hd0Z, seqSucc_fvSubstSeqt, h1b,
             fvSubst_substs1 ht (by simp) h4, termFvSubst_numeral]
-        · rw [fstIdx_zsubst a t hd1Z, seqAnt_fvSubstSeqt, ← fvSubst_substs1_fvar ht hea h4]
-          exact inAnt_fvSubstSeq h2a
+        · -- NEW (bundled `Seq`): `Seq (seqAnt (fvSubstSeqt a t s))` — substituted antecedent is a `fvSubstSeq` image
+          rw [seqAnt_fvSubstSeqt]; exact fvSubstSeq_seq a t (seqAnt s)
+        · -- step antecedent SHAPE (was `inAnt`): push `seqCons` through `fvSubstSeq` (needs `h2seq : Seq (seqAnt s)`)
+          rw [fstIdx_zsubst a t hd1Z, seqAnt_fvSubstSeqt, seqAnt_fvSubstSeqt, h2a,
+            fvSubstSeq_seqCons h2seq, fvSubst_substs1_fvar ht hea h4]
         · rw [fstIdx_zsubst a t hd1Z, seqSucc_fvSubstSeqt, h2b,
             fvSubst_substs1 ht (isSemiterm_succVar _) h4, termFvSubst_succVar hea]
         · rw [seqSucc_fvSubstSeqt, h3, fvSubst_substs1 ht h5 h4]

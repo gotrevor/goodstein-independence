@@ -1681,7 +1681,9 @@ the `Γ ⊆ ant(d1)` threading needed by the genuine Ind reduct's `isChainInf`) 
 noncomputable def zIndWff (d : V) : Prop :=
   (seqAnt (fstIdx (zIndPrem0 d)) = seqAnt (fstIdx d) ∧
     seqSucc (fstIdx (zIndPrem0 d)) = substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral 0) (zIndP d)) ∧
-  (inAnt (substs1 ℒₒᵣ (qqFvar (zIndEig d)) (zIndP d)) (seqAnt (fstIdx (zIndPrem1 d))) ∧
+  (Seq (seqAnt (fstIdx d)) ∧
+    seqAnt (fstIdx (zIndPrem1 d)) =
+      seqCons (seqAnt (fstIdx d)) (substs1 ℒₒᵣ (qqFvar (zIndEig d)) (zIndP d)) ∧
     seqSucc (fstIdx (zIndPrem1 d)) =
       substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd (qqFvar (zIndEig d))
         (Bootstrapping.Arithmetic.numeral 1)) (zIndP d)) ∧
@@ -1701,7 +1703,8 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zIndWffDef : 𝚫₁.Semisente
     (∃ sa0, !seqAntDef sa0 f0 ∧ sa0 = sas) ∧
     (∃ ss0, !seqSuccDef ss0 f0 ∧ ∃ z0, !(Bootstrapping.Arithmetic.numeralGraph) z0 0 ∧
       ∃ sub0, !(substs1Graph ℒₒᵣ) sub0 z0 p ∧ ss0 = sub0) ∧
-    (∃ sa1, !seqAntDef sa1 f1 ∧ ∃ subfa, !(substs1Graph ℒₒᵣ) subfa fa p ∧ !inAntDef subfa sa1) ∧
+    (!seqDef sas ∧ ∃ sa1, !seqAntDef sa1 f1 ∧ ∃ subfa, !(substs1Graph ℒₒᵣ) subfa fa p ∧
+      ∃ sc, !seqConsDef sc sas subfa ∧ sa1 = sc) ∧
     (∃ ss1, !seqSuccDef ss1 f1 ∧ ∃ z1, !(Bootstrapping.Arithmetic.numeralGraph) z1 1 ∧
       ∃ sa, !(Bootstrapping.Arithmetic.qqAddGraph) sa fa z1 ∧
       ∃ subsa, !(substs1Graph ℒₒᵣ) subsa sa p ∧ ss1 = subsa) ∧
@@ -1715,7 +1718,8 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zIndWffDef : 𝚫₁.Semisente
     (∀ sa0, !seqAntDef sa0 f0 → sa0 = sas) ∧
     (∀ ss0, !seqSuccDef ss0 f0 → ∀ z0, !(Bootstrapping.Arithmetic.numeralGraph) z0 0 →
       ∀ sub0, !(substs1Graph ℒₒᵣ) sub0 z0 p → ss0 = sub0) ∧
-    (∀ sa1, !seqAntDef sa1 f1 → ∀ subfa, !(substs1Graph ℒₒᵣ) subfa fa p → !inAntDef subfa sa1) ∧
+    (!seqDef sas ∧ ∀ sa1, !seqAntDef sa1 f1 → ∀ subfa, !(substs1Graph ℒₒᵣ) subfa fa p →
+      ∀ sc, !seqConsDef sc sas subfa → sa1 = sc) ∧
     (∀ ss1, !seqSuccDef ss1 f1 → ∀ z1, !(Bootstrapping.Arithmetic.numeralGraph) z1 1 →
       ∀ sa, !(Bootstrapping.Arithmetic.qqAddGraph) sa fa z1 →
       ∀ subsa, !(substs1Graph ℒₒᵣ) subsa sa p → ss1 = subsa) ∧
@@ -1727,14 +1731,14 @@ instance zIndWff_defined : 𝚫₁-Predicate (zIndWff : V → Prop) via zIndWffD
       simp [zIndWffDef, fstIdx_defined.iff,
         zIndP_defined.iff, zIndPrem0_defined.iff, zIndPrem1_defined.iff, zIndEig_defined.iff,
         zIndTerm_defined.iff, seqAnt_defined.iff, seqSucc_defined.iff, qqFvar_defined.iff,
-        inAnt_defined.iff, (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff,
+        seqCons_defined.iff, seq_defined.iff, (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff,
         (Bootstrapping.Arithmetic.qqAdd_defined (V := V)).iff, (substs1.defined (L := ℒₒᵣ)).iff,
         and_assoc],
    by intro v
       simp [zIndWffDef, zIndWff, HierarchySymbol.Semiformula.val_sigma, fstIdx_defined.iff,
         zIndP_defined.iff, zIndPrem0_defined.iff, zIndPrem1_defined.iff, zIndEig_defined.iff,
         zIndTerm_defined.iff, seqAnt_defined.iff, seqSucc_defined.iff, qqFvar_defined.iff,
-        inAnt_defined.iff, (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff,
+        seqCons_defined.iff, seq_defined.iff, (Bootstrapping.Arithmetic.numeral_defined (V := V)).iff,
         (Bootstrapping.Arithmetic.qqAdd_defined (V := V)).iff, (substs1.defined (L := ℒₒᵣ)).iff,
         and_assoc]⟩
 

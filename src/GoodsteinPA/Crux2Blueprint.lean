@@ -143,7 +143,7 @@ theorem zKValidF_iIndReduct_forces_degenerate {s at' p d0 d1 : V}
       ∨ seqSucc s = substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral 0) p
       ∨ seqSucc (fstIdx d1) = (^⊥ : V) ∨ seqSucc (fstIdx d0) = (^⊥ : V) := by
   obtain ⟨hc, _⟩ := hv
-  obtain ⟨⟨_, h0succ⟩, ⟨_, h1succ⟩, _, _, _⟩ := hwff
+  obtain ⟨⟨_, h0succ⟩, ⟨_, _, h1succ⟩, _, _, _⟩ := hwff
   simp only [zIndPrem0_zInd, zIndPrem1_zInd, zIndP_zInd, zIndEig_zInd, fstIdx_zInd] at h0succ h1succ
   rcases isChainInf_iIndReduct_exit hc with h | h | h | h
   · exact Or.inl (by rw [← h]; exact h1succ)
@@ -326,7 +326,7 @@ theorem seqSucc_zsubst_zInd_step {s at' p d0 d1 t : V} (ht : IsSemiterm ℒₒ�
     seqSucc (fstIdx (zsubst d1 (π₁ at') t)) =
       substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd t (Bootstrapping.Arithmetic.numeral 1)) p := by
   obtain ⟨_, hd1, hwff⟩ := zDerivation_zInd_inv hZ
-  obtain ⟨_, ⟨_, h1succ⟩, _, hsf, _⟩ := hwff
+  obtain ⟨_, ⟨_, _, h1succ⟩, _, hsf, _⟩ := hwff
   simp only [zIndPrem1_zInd, zIndEig_zInd, zIndP_zInd] at h1succ hsf
   have hv : IsSemiterm ℒₒᵣ 0
       (Bootstrapping.Arithmetic.qqAdd (qqFvar (π₁ at')) (Bootstrapping.Arithmetic.numeral 1)) :=
