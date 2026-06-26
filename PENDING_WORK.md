@@ -34,6 +34,19 @@ whose only consumer is that engine's soundness derivation. The existence form ob
   real-cut-vs-structurally-cut-free determination IS the redex-finding) ⟹ fall back to the lap-129 swap with
   that evidence (NEXT_STEPS keeps it as the FALLBACK route; its facts all still valid).
 
+**✅ SPIKE LANDED (this lap) — `wip/ExistenceEndgame.lean` elaborates (exit 0; `lake build GoodsteinPA` still
+green 1326).** Three declarations: `ZDerivesEmptyR_descent_step` (E', **Ind case PROVEN** from banked
+`ZDerivesEmptyR_red` + `iord_descent_red_zInd`; K case sorried = the single remaining math content);
+`prwo_forbids_existence_descent` (reused M3 plumbing, sorried); `false_of_ZDerivesEmpty_existence`
+(**sorry-FREE** 1-line composition — contrast the current bare-sorry `Crux2Blueprint.false_of_ZDerivesEmpty`).
+**Verdict so far:** the endgame assembly is trivial and the Ind case is free, so the existence form provably
+sheds the dichotomy + fixpoint-branch. **Key honest finding the spike forced out:** the iterator MUST be
+`𝚺₁`-definable (`redLeast` least-witness, NOT classical choice) — `iord` is not internally well-founded in
+nonstandard `V`, so PRWO forbids only `𝚺₁` descents; that `𝚺₁`-ness lives inside `prwo_forbids_existence_descent`.
+**NEXT (in the spike):** discharge (E')'s K-critical sub-case (`iRKcCrit` assembly, gap = lap-131 `Seq(seqAnt)`
+fold) then the K-non-critical sub-case (major premise via `firstBotPrem_reducible`) — the decisive test of
+whether the existence form sheds or merely relocates the stall combinatorics.
+
 **Honest caveat (do not over-sell):** the redex-pair combinatorics survive in the existence form (as a one-shot
 `∃`, not a total function threaded through the orbit + every fold). The spike TESTS whether (E) is clean at the
 root; it is not a declared win.
