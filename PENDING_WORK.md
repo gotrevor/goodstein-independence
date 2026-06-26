@@ -1,5 +1,48 @@
 # Pending work — open obligations & attack paths
 
+## lap 127 — `zFresh_zsubst` SUBSTRATE landed (commutation + node-level preservation); the gap is now ONE wff invariant
+**Build 🟢 1326; 5 new lemmas axiom-clean `[propext, choice, Quot.sound]` (Zsubst).**
+
+**✅ LANDED — downward freshness-preservation substrate (after `fvSubstSeq_numeral_transfer`).** Lap 126's
+plan called `zFresh_zsubst` an *equality* (mirror `zReg_zsubst`). **That is wrong** — corrected this lap:
+substituting *away* an eigenvariable can only make a node MORE fresh, so at an I∀ node whose eigenvariable
+*is* the substituted `a`, `zFresh` can DROP. The right statement is the **directional**
+`ZFresh d → ZFresh (zsubst d a (numeral n))`. Its engine:
+- `termFvSubst_numeral_comm` / `termFvSubstVec_numeral_comm` / `fvSubst_numeral_comm` (`e ≠ a`): two
+  distinct fresh-variable *numeral* substitutions COMMUTE (numerals are closed). Pure `IsUTerm`/`IsUFormula`
+  induction.
+- `fvSubst_numeral_fresh_subst` (formula) / `fvSubstSeq_numeral_fresh_subst` (sequence): `fvSubst e
+  (numeral 0) · = ·` (non-occurrence of `^&e`) SURVIVES `fvSubst a (numeral n)`. The `e = a` case is
+  `fvSubst_numeral_idem` (collapse, no hypothesis); `e ≠ a` is commutation + the hypothesis.
+- **`freshFlag_zsubst_eq_zero`** (after `freshFlag_snd`, in the zFresh section) + `freshFlag_eq_zero`
+  constructor: the per-I∀-node step — `freshFlag e p Γ = 0` ⟹ `freshFlag e (fvSubst a (numeral n) p)
+  (fvSubstSeq a (numeral n) Γ) = 0`, given **`IsUFormula p`** and **`∀ i, IsUFormula (znth Γ i)`**.
+
+**⭐ THE REMAINING GAP, now isolated to ONE thing — antecedent well-formedness.** `freshFlag_zsubst_eq_zero`
+needs the I∀ node's antecedent entries (`seqAnt s`) to be `UFormula`s. **`ZDerivation` does NOT supply this**:
+the `zAtom`/`zAx1` ZPhi disjuncts carry only `inAnt (seqSucc s) (seqAnt s)` — a single membership, NOT
+entrywise `IsUFormula`. So `zFresh_zsubst` (directional) is genuinely **FALSE for pathological derivations**
+with garbage I∀ antecedents (a non-`UFormula` antecedent entry breaks the structural `fvSubst` commutation),
+and MUST be conditioned on a well-formedness companion. The matrix half is free (`zIallWff` gives
+`IsSemiformula 1 p` ⟹ `IsUFormula p`, via `tag_uformula_of_ZDerivation`/`hwff.2.2.isUFormula`); only the
+ANTECEDENT half needs the invariant.
+
+**NEXT-LAP TARGETS (in order):**
+1. **Resolve the antecedent-wff gap.** Cheapest principled option: a `𝚫₁` companion invariant
+   `zAntWff`-style "every node's antecedent entries are `UFormula`" (mirror the `zReg`/`zFresh` table; the
+   atom/zAx1 leaves get the constraint as a NEW ZPhi side condition — but that ripples ZPhi, which lap-126
+   warned against). **Better:** bundle `∀ i < lh (seqAnt (fstIdx d')), IsUFormula …` for the relevant nodes
+   into the carried `ZDerivesEmptyR` invariant (the embedding `foundation_bot_to_Z_empty` builds real
+   sequents ⟹ supplies it), and thread it alongside `ZFresh`. Decide which after checking how the consumer
+   `ZDerivation_iRcritG_critReductCorr` already obtains `seqAnt sᵢ`-entry-`UFormula` (the chain `zKValidF`
+   carries `∀ k < lh (seqAnt s), IsUFormula (znth (seqAnt s) k)` for the K node — see if the I∀ child's
+   antecedent inherits it via threading).
+2. **Assemble `zFresh_zsubst`** (directional) by `zDerivation_induction (P := fun d => ZFresh d ∧ <antWff d>
+   → ZFresh (zsubst d a (numeral n)))` — I∀ via `freshFlag_zsubst_eq_zero` + IH; tags 2/3/4 fold via the
+   `zFresh_z*` recursion eqns + IH; leaves are `zFresh = 0` already. → `ZFresh_red`.
+3. Thread `∧ ZFresh d` (+ the antWff companion) into `ZDerivesEmptyR`; close LEFT-branch ∀-soundness via
+   `ZDerivation_iRcritG_critReductCorr` (`hpfresh = fvSubst_numeral_transfer … (fvSubst_numeral_eq_self_of_zfresh_zIall …)`).
+
 ## lap 126 — FRESH-MIND REVIEW: freshness substrate LANDED; mechanism COURSE-CORRECTED (no ZPhi ripple)
 **Build 🟢 (Zsubst + crux-2 stack rebuilt); 4 new transfer lemmas axiom-clean `[propext, choice, Quot.sound]`.**
 
