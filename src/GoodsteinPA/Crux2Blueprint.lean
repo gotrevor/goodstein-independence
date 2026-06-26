@@ -2921,29 +2921,50 @@ derivation CODE (Buchholz Theorem 2.1; NOT `iord`-recursion — that is PRWO/Gö
 replace plumbing is now discharged by `descent_step_K_replace`; the lone genuine residual of each is the
 smaller-premise reduct. -/
 
-/-- **§14.254a, tag-4 (sub-`zK` major premise) — the recursion (named sub-`sorry`).** No redex below the exit
-and the faithful major premise `dₘ = znth ds (majorIdx)` is a sub-`zK` chain. Its `Rep`-reduct (same `Γₘ→⊥`
-end-sequent) is the GENERAL `Γ→⊥` chain reduction on the structurally-smaller `dₘ` (recursion on code) — feed to
-`descent_step_K_replace` at `i = majorIdx`, OR splice if `dₘ`'s reduction is a §14.253 cut. The genuinely
-recursive leaf. -/
-theorem descent_step_K_noncrit_repMajor_K {s r ds j0 : V}
-    (hd : ZDerivesEmptyR (zK s r ds))
-    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
-    (hj0 : j0 < lh ds) (hbot0 : chainAsucc ds j0 = (^⊥ : V))
-    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
-        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
-    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
-    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
-    (htag : zTag (znth ds (majorIdx (zK s r ds))) = 4) :
-    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+/-- **General `Γ→⊥` one-step descending reduct — the §14.254 crux interface (NAMED sub-`sorry`).** Any
+`Rep`-node `ZDerivation d` (tag ∈ {3,4}: a `zInd` or a sub-`zK` chain) deriving `Γ→⊥` with the
+regular/fresh/seqAnt invariants has a SAME-end-sequent, strictly-`iord`-descending regular/fresh/seqAnt
+`ZDerivation` reduct `v` (the conclusion shape `ind_reduct_botSucc_of_fresh` gives). **tag-3 (`zInd`) is
+PROVEN** via `ind_reduct_botSucc_of_fresh` (the eigenvariable freshness now falls out of the strengthened
+`zFresh` invariant, lap 149). **tag-4 (`zK`) is the genuine crux**: the GENERAL `Γ→⊥` chain reduction by
+strong induction on the derivation CODE — recurse the §14.254 reduction into the unchanged structurally-smaller
+premise (NOT `iord`-recursion, which is PRWO/Gödel-barred). This single interface is consumed by BOTH no-redex
+leaves (`repMajor` at the major premise, `axMajor` at the Rep cut-partner) via `descent_step_K_replace`. -/
+lemma genReduct_botSucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh : ZFresh d)
+    (hseqant : ZSeqAnt d) (hsucc : seqSucc (fstIdx d) = (^⊥ : V))
+    (htag : zTag d = 3 ∨ zTag d = 4) :
+    ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = fstIdx d ∧ iRedDescent v d := by
+  rcases htag with htag3 | htag4
+  · -- tag-3: zInd — the general Ind reduct (PROVEN, lap 148/149)
+    rcases zDerivation_iff.mp hZ with
+      ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+      ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+      ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+    · rw [h] at htag3; simp at htag3
+    · rw [h] at htag3; simp at htag3
+    · rw [h] at htag3; simp at htag3
+    · subst h
+      rw [fstIdx_zInd] at hsucc
+      have hfreshΓ : freshFlag (π₁ at'') (^⊥ : V) (seqAnt s') = 0 := by
+        have hz : zFresh (zInd s' at'' p' d0' d1') = 0 := hfresh
+        rw [zFresh_zInd] at hz
+        exact nonpos_iff_eq_zero.mp (hz ▸ le_max_left _ _)
+      obtain ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ :=
+        ind_reduct_botSucc_of_fresh hZ hreg hfresh hseqant hsucc hfreshΓ
+      exact ⟨v, hZv, hregv, hfreshv, hseqantv, by rw [hvfst, fstIdx_zInd], hdesc⟩
+    · rw [h] at htag3; simp at htag3
+    · rw [h] at htag3; simp at htag3
+    · rw [h] at htag3; simp at htag3
+    · rw [h] at htag3; simp at htag3
+  · -- tag-4: zK chain — the GENERAL `Γ→⊥` chain reduction by strong induction on CODE (§14.254). The genuine
+    -- crux: recurse the reduction into the unchanged structurally-smaller premise. NOT `iord`-recursion.
+    sorry
 
 /-- **§14.254a — `Rep` major premise (tags 3,4): replace it with its same-end-sequent reduct.** No redex below
 the exit `j0`; the faithful major premise `dₘ = znth ds (majorIdx)` is a `zInd` (3) or sub-`zK` (4), reduction
-`Rep` (same `Γₘ→⊥` end-sequent). **tag-3 (`zInd`) is PROVEN here** via `ind_reduct_botSucc_of_fresh` (the
-`Γₘ→⊥` Ind reduct) + `descent_step_K_replace` at `i = majorIdx`, modulo the single eigenvariable-freshness
-residual `freshFlag (π₁ at') p Γₘ = 0` (the I∀-style condition `zFresh_zInd` does not yet carry — see
-PENDING_WORK; the principled fix strengthens `zFreshNext`'s tag-3 branch). tag-4 (`zK`) → the recursion
-(`descent_step_K_noncrit_repMajor_K`). -/
+`Rep` (same `Γₘ→⊥` end-sequent). BOTH tags route uniformly through `genReduct_botSucc` (tag-3 `zInd` PROVEN via
+the strengthened `zFresh` invariant; tag-4 `zK` = the general chain reduction) + `descent_step_K_replace` at
+`i = majorIdx`. The lap-148 separate `_K` leaf is now subsumed by `genReduct_botSucc`. -/
 theorem descent_step_K_noncrit_repMajor {s r ds j0 : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
@@ -2954,44 +2975,16 @@ theorem descent_step_K_noncrit_repMajor {s r ds j0 : V}
     (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
     (htag : zTag (znth ds (majorIdx (zK s r ds))) = 3 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 4) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
-  rcases htag with htag3 | htag4
-  · -- tag-3: zInd major premise — reduce by the GENERAL Ind reduct + replace
-    have hZ : ZDerivation (zK s r ds) := hd.1.1
-    obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
-    obtain ⟨hmlt, hmbot, _, _⟩ := majorIdx_botOrbit_reducible hZ hant hsucc
-    have hmemZ : ZDerivation (znth ds (majorIdx (zK s r ds))) := hmem _ hmlt
-    rcases zDerivation_iff.mp hmemZ with
-      ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
-      ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
-      ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
-    · rw [h] at htag3; simp at htag3
-    · rw [h] at htag3; simp at htag3
-    · rw [h] at htag3; simp at htag3
-    · -- the zInd case
-      have hregm : ZRegular (znth ds (majorIdx (zK s r ds))) := ZRegular_zK_premise hds hd.2.1 hmlt
-      have hfreshm : ZFresh (znth ds (majorIdx (zK s r ds))) := ZFresh_zK_premise hds hd.2.2.1 hmlt
-      have hseqantm : ZSeqAnt (znth ds (majorIdx (zK s r ds))) := ZSeqAnt_zK_premise hds hd.2.2.2 hmlt
-      have hsucm : seqSucc (fstIdx (znth ds (majorIdx (zK s r ds)))) = (^⊥ : V) := hmbot
-      rw [h] at hregm hfreshm hseqantm hsucm hmemZ
-      rw [fstIdx_zInd] at hsucm
-      -- the eigenvariable freshness in the conclusion antecedent Γₘ = seqAnt s' now FALLS OUT of the
-      -- strengthened `zFresh` invariant: `zFreshNext`'s tag-3 branch carries
-      -- `freshFlag (zIndEig d) ⊥ (seqAnt (fstIdx d))` (dummy ⊥ matrix; antecedent freshness is all the
-      -- ⊥-orbit Ind reduct needs — `ind_reduct_botSucc_of_fresh` consumes only `freshFlag_snd`/`_wff`).
-      have hfreshΓ : freshFlag (π₁ at'') (^⊥ : V) (seqAnt s') = 0 := by
-        have hz : zFresh (zInd s' at'' p' d0' d1') = 0 := hfreshm
-        rw [zFresh_zInd] at hz
-        exact nonpos_iff_eq_zero.mp (hz ▸ le_max_left _ _)
-      obtain ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ :=
-        ind_reduct_botSucc_of_fresh hmemZ hregm hfreshm hseqantm hsucm hfreshΓ
-      rw [← h] at hdesc
-      exact descent_step_K_replace hd hmlt hZv hregv hfreshv hseqantv
-        (by rw [hvfst, h, fstIdx_zInd]) hdesc
-    · rw [h] at htag3; simp at htag3
-    · rw [h] at htag3; simp at htag3
-    · rw [h] at htag3; simp at htag3
-    · rw [h] at htag3; simp at htag3
-  · exact descent_step_K_noncrit_repMajor_K hd hant hsucc hj0 hbot0 hthread0 hrank0 hnolow htag4
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  obtain ⟨hmlt, hmbot, _, _⟩ := majorIdx_botOrbit_reducible hZ hant hsucc
+  have hmemZ : ZDerivation (znth ds (majorIdx (zK s r ds))) := hmem _ hmlt
+  have hregm : ZRegular (znth ds (majorIdx (zK s r ds))) := ZRegular_zK_premise hds hd.2.1 hmlt
+  have hfreshm : ZFresh (znth ds (majorIdx (zK s r ds))) := ZFresh_zK_premise hds hd.2.2.1 hmlt
+  have hseqantm : ZSeqAnt (znth ds (majorIdx (zK s r ds))) := ZSeqAnt_zK_premise hds hd.2.2.2 hmlt
+  obtain ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ :=
+    genReduct_botSucc hmemZ hregm hfreshm hseqantm hmbot htag
+  exact descent_step_K_replace hd hmlt hZv hregv hfreshv hseqantv hvfst hdesc
 
 /-- **§14.254b — L-axiom major premise (tags 5,6): replace its upstream `Rep` cut-partner (named
 sub-`sorry`).** No redex below the exit; the faithful major premise is `zAxAll`/`zAxNeg` (a `red`-FIXPOINT) with

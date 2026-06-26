@@ -48,15 +48,38 @@ untouched). Concrete steps:
    which now carries `freshFlag (π₁ at'') p' (seqAnt s')` in its outer `max`): `le_max_left` + `nonpos_iff_eq_zero`
    + `fstIdx_zInd`. **tag-3 repMajor goes sorry-free.**
 
-### ▶ THEN — the CRUX (do NOT hunt more leaves): general `Γ→⊥` cut-reduction by code-induction
-With freshFlag closed, the only live crux-2 sorries are the **general reduction** (leaves 2934 + 3002) and
-**gDef** (3125). The general reduction = produce a `ZDerivation`-valued same-end-sequent strictly-`iord`-
-descending `Rep`-reduct of a structurally-SMALLER premise (`Γ′→⊥`, `Γ′` possibly nonempty), closure by strong
-induction on the finite derivation CODE (Buchholz Thm 2.1 / §14.253-254 — NOT `iord`-recursion, which is
-PRWO/Gödel-barred since we're PROVING no-iord-descent). NEXT crux lap = decompose THIS into the code-induction
-skeleton (re-read `scratchpad/buchholz-gentzen.txt` §14.253-254); a disclosed sub-`sorry` decomposition is a
-successful crux lap. **FORBIDDEN:** `red` witnesses; `iord`-recursion; `redLeast`/μ-min for gDef (refuted
-lap-139); collapsing the repMajor/axMajor §14.254a/b split; jumping to the crux before freshFlag drops.
+### ✅ DONE (lap 149, same lap) — general-reduction interface `genReduct_botSucc` LANDED + tag-3 PROVEN
+Built the §14.254 crux interface as a single named lemma (`Crux2Blueprint`, replaces the lap-148 `_K` leaf):
+```
+lemma genReduct_botSucc {d} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh : ZFresh d)
+    (hseqant : ZSeqAnt d) (hsucc : seqSucc (fstIdx d) = ⊥) (htag : zTag d = 3 ∨ zTag d = 4) :
+    ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = fstIdx d ∧ iRedDescent v d
+```
+**tag-3 (zInd) PROVEN** (consumes `ind_reduct_botSucc_of_fresh` + the freshness from the strengthened `zFresh`);
+**tag-4 (zK) = the ONE remaining crux sorry** (`Crux2Blueprint:2961`). `descent_step_K_noncrit_repMajor` now
+routes BOTH tags uniformly through it + `descent_step_K_replace` (the separate `_K` leaf is subsumed). Verified
+axiom-clean: headline + `false_of_ZDerivesEmpty` + `descent_step_K_noncrit_repMajor` =
+`[propext, sorryAx, choice, Quot.sound]` (0 math axioms, no drift). Build 🟢 1326.
+
+### ▶ NEXT — close `genReduct_botSucc` tag-4 (zK): the general `Γ→⊥` chain reduction by structural/code induction
+The single remaining general-reduction crux. `d` is a `zK s' r' ds'` deriving `Γ→⊥`. Produce its same-end-sequent
+strictly-`iord`-descending reduct `v` with `iRedDescent v d`. This is `descent_step_K_majorIdx` GENERALIZED off
+`∅→⊥` to `Γ→⊥` and returning a `ZDerivation` reduct (not a `ZDerivesEmptyR`). Attack path:
+1. **Prove it by `zDerivation_induction`** (structural induction on the derivation CODE — the §14.254 recursion;
+   the IH gives `genReduct_botSucc` for each structurally-smaller premise). This is the `𝗜𝚺₁`-available
+   recursion (NOT `iord`-recursion, PRWO/Gödel-barred). `zDerivation_induction` is the eliminator used in
+   `zFresh_zsubst` (`Zsubst.lean`).
+2. The zK case dispatches on redex/no-redex below the chain exit (mirror `descent_step_K_majorIdx`'s
+   critical/non-critical split, but `Γ→⊥` and `ZDerivation`-valued): redex → the `iRKcCrit` principal cut
+   (`descent_step_K_hasRedex`-style, criticality-free); no-redex → recurse into the major premise / cut-partner
+   via the IH (tags 3/4 → `genReduct_botSucc` IH; tags 5/6 → cut-partner identification).
+3. The descent machinery (`descent_step_K_replace`, `ind_reduct_botSucc_of_fresh`, the banked `iCritAux`
+   invariants) is `ZDerivesEmptyR`-specific — likely needs `Γ→⊥` (`ZDerivation`-valued) analogs. Assess what
+   generalizes vs what's new; decompose further if needed (more disclosed sub-`sorry`s is fine).
+4. **gDef** (`Crux2Blueprint:3128`) is the parallel Σ₁-definability crux — independent; attack after or alongside.
+
+**FORBIDDEN:** `red` witnesses; `iord`-recursion for the general step (structural/code induction ONLY);
+`redLeast`/μ-min for gDef (refuted lap-139); collapsing the repMajor/axMajor §14.254a/b split.
 
 ---
 
