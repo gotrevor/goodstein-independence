@@ -7401,6 +7401,43 @@ lemma critReductNeg_redexI {d : V} (h : redexI d ≠ redexJ d) :
     critReductNeg d (redexI d) = zInegPrem (znth (zKseq d) (redexI d)) := by
   rw [critReductNeg, if_neg h, if_pos rfl]
 
+/-- **The re-keyed tag-4 critical reduct — fully explicit, dispatched on R-redex polarity.** This is the
+object the engine `iRKc` MUST become: a polarity dispatch (`zTag dᵢ = 1` ⟺ I∀ R-redex) emitting the
+soundness-certified corrected reduct, in fully-explicit `iCritReductG … seqUpdate …` form (red-free,
+table-free, no nested `if` — directly arithmetizable). The two branches are exactly
+`iRcritG d (critReductCorr d)` (∀, `iRKcCrit_eq_corr`) and `iRcritGNeg d (critReductNeg d)` (¬,
+`iRKcCrit_eq_neg`), whose SOUNDNESS is `ZDerivation_iRcritG_critReductCorr`/`ZDerivation_iRcritGNeg_critReductNeg`
+and whose DESCENT is `iord_iRcritG_eq_iRcrit`/`iord_iRcritGNeg_eq_iRcrit`. Defined standalone (depends only on
+`d`, NOT the engine table) so its `𝚺₁` arithmetization lands additively, before the engine swap. -/
+noncomputable def iRKcCrit (d : V) : V :=
+  if zTag (znth (zKseq d) (redexI d)) = 1 then
+    iCritReductG (fstIdx d) (cutFormula d) (zKrank d - 1) (zKrank d) (zKrank d)
+      (seqUpdate (zKseq d) (redexI d)
+        (zsubst (zIallPrem (znth (zKseq d) (redexI d))) (zIallEig (znth (zKseq d) (redexI d)))
+          (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d))))))))
+      (seqUpdate (zKseq d) (redexJ d)
+        (zAx1 (seqAddAnt (cutFormula d) (fstIdx (znth (zKseq d) (redexJ d)))) (cutFormula d)))
+  else
+    iCritReductG (fstIdx d) (cutFormula d) (zKrank d - 1) (zKrank d) (zKrank d)
+      (seqUpdate (zKseq d) (redexJ d)
+        (zAx1 (seqSetSucc (fstIdx (znth (zKseq d) (redexJ d))) (cutFormula d)) (cutFormula d)))
+      (seqUpdate (zKseq d) (redexI d) (zInegPrem (znth (zKseq d) (redexI d))))
+
+@[simp] lemma fstIdx_iRKcCrit (d : V) : fstIdx (iRKcCrit d) = fstIdx d := by
+  rw [iRKcCrit]; split <;> simp
+@[simp] lemma zTag_iRKcCrit (d : V) : zTag (iRKcCrit d) = 4 := by
+  rw [iRKcCrit]; split <;> simp
+
+/-- `iRKcCrit` = the ∀-case soundness-certified reduct `iRcritG d (critReductCorr d)` (I∀ R-redex). -/
+lemma iRKcCrit_eq_corr {d : V} (h1 : zTag (znth (zKseq d) (redexI d)) = 1) (h : redexI d ≠ redexJ d) :
+    iRKcCrit d = iRcritG d (critReductCorr d) := by
+  rw [iRKcCrit, if_pos h1, iRcritG, critReductCorr_redexI h, critReductCorr_redexJ]
+
+/-- `iRKcCrit` = the ¬-case soundness-certified reduct `iRcritGNeg d (critReductNeg d)` (I¬ R-redex). -/
+lemma iRKcCrit_eq_neg {d : V} (h1 : zTag (znth (zKseq d) (redexI d)) ≠ 1) (h : redexI d ≠ redexJ d) :
+    iRKcCrit d = iRcritGNeg d (critReductNeg d) := by
+  rw [iRKcCrit, if_neg h1, iRcritGNeg, critReductNeg_redexI h, critReductNeg_redexJ]
+
 /-! ### The critical-only reduct is NON-critical (lap 86) — the 5.2 dispatch is mandatory
 
 **Gating finding (Buchholz Def 3.2 case 5, validated in-kernel).** Buchholz's reduction of a chain
