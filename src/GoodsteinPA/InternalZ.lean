@@ -8873,6 +8873,62 @@ lemma hreroute_of_leaves {s ds j0 : V}
   intro i hi hRep
   exact chainAsucc_threaded_of_leaf (hZ i hi) (hleaves i hi hRep) hant hchain hi
 
+/-- **No-stall linchpin — the MAJOR premise of a `∅→⊥` chain is reducible** (lap 129, Buchholz §14.25).
+For a `ZDerivation` of a chain `zK s r ds` concluding `∅→⊥`, there is a premise whose succedent is `⊥`
+(`chainAsucc ds j = ⊥`) and whose tag is NEITHER `0` (atom) NOR `7` (`Ax¹`) — i.e. a genuinely *reducible*
+major-premise candidate (`red` is the identity only on those two leaf tags). Proof: take the LEAST
+`⊥`-succedent premise (`least_number` on `chainAsucc ds · = ⊥`, witnessed by the `isChainInf` exit `j0`);
+were it an atom/`Ax¹` leaf, `chainAsucc_threaded_of_leaf` would re-route its `⊥` succedent to a STRICTLY
+earlier premise, contradicting leastness.
+
+**Why this is the decisive selection fix.** Buchholz (§14.25) selects the major premise of a `Θ→D` chain
+as *the first premise whose succedent is `D`* (here `⊥`) — NOT the first `iperm`-permissible premise. The
+repo's `permIdx`/`iperm` treats every `isymRep` premise as permissible (`iperm_isymRep`, unconditional), so
+it can select an atom/`Ax¹` leaf whose succedent is some *other* prior formula — a `red`-FIXPOINT
+(`red_zK_fixpoint_of_atom_selected`/`_zAx1_selected`), the laps 104/107/120 STALL. This lemma proves the
+*faithful* selection never stalls: its major premise (the first `⊥`-exit) is one of `{zInd, zK, zAxAll,
+zAxNeg}` (`zIall`/`zIneg` succedents `≠ ⊥`; atom/`Ax¹` killed here), every one of which `red` reduces. The
+`∅→⊥` shape (no antecedent source) is exactly what forces the leaf's succedent to come from an earlier exit
+— so the no-stall guarantee is specific to the headline ⊥-orbit, as it must be (Z-consistency is not free). -/
+lemma firstBotPrem_reducible {s r ds : V} (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V)) :
+    ∃ j < lh ds, chainAsucc ds j = (^⊥ : V) ∧
+      zTag (znth ds j) ≠ 0 ∧ zTag (znth ds j) ≠ 7 := by
+  have hchain : isChainInf s r ds := (zKValidF_of_ZDerivation_zK hZ).1
+  obtain ⟨j0, hj0lt, hAj0, hthread, _hrank⟩ := hchain
+  have hbot0 : chainAsucc ds j0 = (^⊥ : V) := by
+    rcases hAj0 with h | h
+    · rw [h, hsucc]
+    · exact h
+  have hP : 𝚺₁-Predicate (fun j => chainAsucc ds j = (^⊥ : V)) := by definability
+  obtain ⟨jstar, hjstar, hmin⟩ := InductionOnHierarchy.least_number 𝚺 1 hP hbot0
+  have hjle : jstar ≤ j0 := by
+    by_contra h
+    exact (hmin j0 (not_le.mp h)) hbot0
+  have hjlt : jstar < lh ds := lt_of_le_of_lt hjle hj0lt
+  have hmemZ : ZDerivation (znth ds jstar) := (zDerivation_zK_inv hZ).2 jstar hjlt
+  refine ⟨jstar, hjlt, hjstar, ?_⟩
+  rcases zDerivation_iff.mp hmemZ with
+    ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+  · -- atom (tag 0): a leaf ⊥-exit re-routes to a STRICTLY earlier ⊥-exit, contradicting leastness
+    exfalso
+    obtain ⟨i', hi', heq⟩ :=
+      chainAsucc_threaded_of_leaf hmemZ (Or.inl ⟨s', h⟩) hant hthread hjle
+    exact (hmin i' hi') (heq.trans hjstar)
+  · exact ⟨by rw [h]; simp, by rw [h]; simp⟩
+  · exact ⟨by rw [h]; simp, by rw [h]; simp⟩
+  · exact ⟨by rw [h]; simp, by rw [h]; simp⟩
+  · exact ⟨by rw [h]; simp, by rw [h]; simp⟩
+  · exact ⟨by rw [h]; simp, by rw [h]; simp⟩
+  · exact ⟨by rw [h]; simp, by rw [h]; simp⟩
+  · -- zAx1 (tag 7): same leaf re-routing contradiction
+    exfalso
+    obtain ⟨i', hi', heq⟩ :=
+      chainAsucc_threaded_of_leaf hmemZ (Or.inr ⟨s', C', h⟩) hant hthread hjle
+    exact (hmin i' hi') (heq.trans hjstar)
+
 set_option maxHeartbeats 1000000 in
 /-- **The generalized redex finder for a re-routing chain** (lap 122 — the genuine fix for the threaded-atom
 stall, Sub-lemmas A+B assembled). `inference_critical_pair_of_chain` needs FULL criticality `hnperm`
