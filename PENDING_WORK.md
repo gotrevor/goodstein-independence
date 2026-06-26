@@ -47,10 +47,31 @@ via `znth (tpSeq ds) x` (`znth_tpSeq` bridges `= tp (znth ds x)` for `x < lh ds`
 `tpSeq`'s heavy `PR.Construction` and times out. The whole theorem also needs `set_option maxHeartbeats
 1000000`. The `chainAsucc ds · = B` predicate uses the hand-built comp term from `exit_nonRep_of_reroute`.
 
+**⭐ ARCHITECTURE CLARIFICATION (lap 122, late) — the chain/Ind residual is NOT a finder gap; it is the
+non-critical case 5.2.** A chain (tag-3) / Ind (tag-4) `isymRep` premise makes the ⊥-chain NON-critical
+(Buchholz Def 3.2 case 5: a permissible premise exists). Buchholz handles non-critical chains by case 5.2
+(the SPLICE / Rep reduction into the permissible premise — smaller ordinal), NOT by the Lemma-3.1 redex
+finder (case 5.1). So the reroute finder is supposed to handle ONLY the leaf-stall (case 5.1 with
+re-routable atom/`zAx1` permissible premises); the chain/Ind case routes to the EXISTING splice machinery
+(`ZDerivation_red_zK_splice` / `iord_descent_red` chain-REPLACE — already sorries). The lap-121/122
+"residual `hleaves`" is therefore the CRITICALITY-MODULO-LEAVES side of the case-5.1/5.2 dichotomy, not a
+hole to plug inside the finder.
+
+**CONSOLIDATION BANKED (lap 122, 5th commit): `inference_critical_pair_of_botChain`** (InternalZ, after
+`iord_descent_iRcrit_of_chain_reroute`). A `ZDerivation (zK s r ds)` with `seqAnt s = ∅`, `seqSucc s = ⊥`
+contains the genuine `(R_A, L^k_A)` redex (with `0 < rk A ≤ r`) **provided every `isymRep` premise is a leaf
+(`hleaves`)**. ALL finder bookkeeping discharged internally from `ZDerivation` (`zKValidF` ⟹
+isChainInf/hperm/hwfR/hwfL; `hreroute` via `hreroute_of_leaves`). **New free fact:** for a ⊥-chain `hnperm2`
+is automatic — `tp = R_⊥` is impossible (`tp_isymR_pos` ⟹ `0 < rk ⊥ = 0`) and the L-at-`Γmain` clause is
+vacuous on the empty antecedent. So the leaf-stall redex existence now reduces to JUST `hleaves`.
+
 **NEXT-LAP TARGETS (in order):**
-1. **[lap 123] Discharge `hreroute` for chain/Ind premises** — attack path (α): prove that in a valid
-   ⊥-chain, the least source of the cut formula is never a tag-3/4 node, OR that such a node is covered by
-   the outer `iord` descent recursion rather than the finder. THE remaining gate on path (i).
+1. **[lap 123] The case-5.1/5.2 dichotomy at the descent level.** For a valid ⊥-chain: EITHER all `isymRep`
+   premises ≤ j0 are leaves (→ `inference_critical_pair_of_botChain` → redex → `iord_descent_iRcrit_of_redex`,
+   case 5.1, BANKED modulo the 6 ρ-facts), OR ∃ a non-leaf (chain/Ind) `isymRep` premise (→ non-critical
+   case 5.2 splice → descent via that premise's smaller ordinal). Build the dichotomy + wire the leaf branch
+   into the endgame; the splice branch is the existing `iord_descent_red`/`ZDerivation_red_zK_splice` sorries.
+   The 6 ρ-facts (redex-premise reduct soundness) are the remaining deep input on the leaf branch.
 2. ✅ DONE (lap 122, 3rd commit) — `iord_descent_iRcrit_of_chain_reroute` (InternalZ, right after the
    reroute finder): the reroute twin of `iord_descent_iRcrit_of_chain'`, manufactures the redex via the
    generalized finder and feeds `iord_descent_iRcrit_of_redex`. Stall-free K-descent for valid ⊥-chains,
