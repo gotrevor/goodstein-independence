@@ -1,3 +1,32 @@
+# NEXT STEPS — crux-2 (lap 129 FRESH-MIND REVIEW: the `red`-STALL is the crux; faithful selection is the fix)
+
+> **⭐⭐⭐ LAP-129 FRESH-MIND REVIEW — read FIRST. Resolves lap-120's item-1 (below) with a definitive
+> answer, and corrects the campaign's direction.** Build 🟢 1326; headline footprint intact in-kernel.
+>
+> **Lap-120's item-1 "vacuity" hope is REFUTED in-kernel.** An atom-/`zAx1`-selected `∅→⊥` K-node is NOT
+> absurd by sequent shape and NOT killed by `ZRegular`/`ZFresh`: `zReg (zAtom s) = 0` / `zReg (zAx1 s C) = 0`
+> (always regular), and the `zAtom`/`zAx1` `ZPhi` disjuncts carry only `inAnt (seqSucc s) (seqAnt s)` (no
+> atomicity). A valid ⊥-orbit `ZDerivation` with a leaf-stall exists. So the `red`-fixpoint on the ⊥-orbit is
+> a GENUINE stall, NOT vacuous; `false_of_ZDerivesEmpty`'s "fixpoint ⟹ cut-free" route fails.
+>
+> **The genuine fix = the FAITHFUL selection (Buchholz §14.25).** The major premise of a `Θ→D` chain is *the
+> first premise whose succedent IS `D`* (for `∅→⊥`: the first `⊥`-exit), NOT the first `iperm`-permissible
+> premise. `permIdx`/`iperm` is mis-designed (`iperm_isymRep` unconditional). **LANDED `firstBotPrem_reducible`
+> (`InternalZ.lean`, axiom-clean):** the faithful major premise has `zTag ∉ {0,7}` — `red`-reducible, NEVER a
+> leaf-stall. This is the no-stall guarantee the engine re-key needs.
+>
+> **The lap-121/122 redex-finder line is a DEAD END on the ⊥-orbit** (`inference_critical_pair_of_chain_reroute`
+> needs a non-`isymRep` L-symbol exit; ⊥-exits are `zK`/`zInd` `isymRep`; its `hreroute`-for-non-leaf residual
+> is FALSE). Engine surgery is required; it is now SAFE (no-stall proven).
+>
+> **REORDERED PLAN (supersedes lap-120's item 1):**
+> 1. **(HIGHEST VALUE) The faithful-selection engine re-key.** Define `majorIdx d` = least `i` with
+>    `chainAsucc (zKseq d) i = seqSucc (fstIdx d)`; re-key `iRK`'s replace branch from `permIdx` to `majorIdx`;
+>    on the ⊥-orbit the selected premise is reducible (`firstBotPrem_reducible`), so the atom/`zAx1` fixpoint
+>    branches of `iord_descent_red` become UNREACHABLE. See PENDING_WORK lap-129 for the full decomposition.
+> 2. Then `false_of_ZDerivesEmpty`: no ⊥-orbit fixpoints ⟹ strict `iord` descent ⟹ PRWO(ε₀) contradiction
+>    (the PRWO `𝚺₁`-graph wiring is the remaining endgame piece). Then `foundation_bot_to_Z_empty` (M2).
+
 # NEXT STEPS — crux-2 (lap 120 DEEP REFLECTION: the SELECTION/STALL defect is the genuine open crux)
 
 > **⭐⭐⭐ LAP-120 DEEP REFLECTION — read FIRST (supersedes the ordering below; does not overturn its facts).**

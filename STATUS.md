@@ -1,9 +1,34 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 128 · 2026-06-26 (FRESHNESS CAMPAIGN completed → `ZDerivation_iRKcCrit_all`: ∀-case SOUNDNESS of the engine-swap reduct, freshness self-supplied from the orbit; all 3 `iRKcCrit` invariants now landed)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 129 · 2026-06-26 (FRESH-MIND REVIEW — re-oriented to the TERMINATION crux: the `red`-STALL is GENUINE (vacuity refuted in-kernel), Buchholz §14.25 gives the faithful fix, no-stall linchpin `firstBotPrem_reducible` LANDED)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+
+> **⭐⭐⭐ Lap-129 FRESH-MIND REVIEW — DIRECTION CORRECTED: the genuine open crux is the `red`-STALL
+> (termination), not reduct soundness; the lap-121/122 "no engine surgery" line is a DEAD END on the
+> ⊥-orbit (read FIRST — current).** Build re-verified 🟢 green (1326); headline footprint re-verified
+> in-kernel (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms). **THE finding (resolves lap-120's
+> open question with a definitive NO):** the laps 104/107/120 `red`-STALL — `permIdx` selecting an
+> atom/`Ax¹` leaf on a `∅→⊥` K-node, making it a `red`-FIXPOINT (`red_zK_fixpoint_of_atom_selected`) — is
+> NOT vacuous and is NOT killed by `ZRegular`/`ZFresh`. Refuted in-kernel: `zReg (zAtom s) = 0` /
+> `zReg (zAx1 s C) = 0` (atoms/`Ax¹` always regular; regularity only tracks eigenvariable freshness), and the
+> `zAtom`/`zAx1` `ZPhi` disjuncts carry only `inAnt (seqSucc s) (seqAnt s)` — NO atomicity restriction — so a
+> chain with an all-R-intro (`zIall`/`zIneg`) prefix + an atom whose succedent is a prior succedent satisfies
+> `isChainInf` and is a valid ⊥-orbit `ZDerivation`. So `false_of_ZDerivesEmpty`'s "fixpoint ⟹ cut-free ⟹
+> absurd" route FAILS (the fixpoint is NOT cut-free). **THE fix (Buchholz §14.25, source-read this lap):** the
+> major premise of a `Θ→D` chain is *the first premise whose succedent IS `D`* (here `⊥`) — NOT the first
+> `iperm`-permissible (`isymRep`) premise. `permIdx`/`iperm` is mis-designed (`iperm_isymRep` unconditional).
+> **LANDED (axiom-clean, additive, green):** `firstBotPrem_reducible` (`InternalZ.lean`) — the faithful major
+> premise (first `⊥`-exit) has `zTag ∉ {0,7}`, i.e. is `red`-reducible (NEVER a leaf-stall). Proof: the LEAST
+> `⊥`-exit can't be a leaf (`chainAsucc_threaded_of_leaf` re-routes a leaf's `⊥` to a strictly earlier exit,
+> contradicting leastness). **COURSE-CORRECTION:** the lap-121/122 redex-finder line
+> (`inference_critical_pair_of_chain_reroute`, "dissolve the stall with no engine surgery") is mis-aimed for
+> the ⊥-orbit — it needs a non-`isymRep` (L-symbol) exit, but ⊥-exits are `zK`/`zInd` (`isymRep`), so its
+> residual `hreroute` for non-leaf `isymRep` is genuinely FALSE. Engine surgery (re-key `permIdx` to the
+> faithful first-`⊥`-exit selection + recurse into the reducible major premise) IS required. **NEXT:** the
+> faithful-selection engine re-key, with `firstBotPrem_reducible` guaranteeing no-stall. See
+> `HANDOFF-2026-06-26-lap129.md`, `PENDING_WORK.md` lap-129, `NEXT_STEPS.md`.
 
 > **⭐⭐⭐ Lap-128 — FRESHNESS CAMPAIGN completed; ∀-case SOUNDNESS of the engine-swap reduct LANDED (read
 > FIRST — current).** A seven-commit arc: `ZFresh_red` (full `zK` dispatch) → `ZFresh` threaded into

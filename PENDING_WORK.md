@@ -1,5 +1,34 @@
 # Pending work — open obligations & attack paths
 
+## lap 129 — FRESH-MIND REVIEW: the `red`-STALL is the crux; no-stall linchpin landed
+**Build 🟢 1326.** Landed (axiom-clean, additive): **`firstBotPrem_reducible`** (`InternalZ.lean`) — the
+faithful major premise of a `∅→⊥` chain (first `⊥`-exit) has `zTag ∉ {0,7}`, i.e. `red`-reducible.
+
+**FINDING (resolves lap-120 item-1, vacuity — NO):** the `red`-STALL (atom/`zAx1`-selected `∅→⊥` K-node =
+`red`-fixpoint) is GENUINE. Refuted in-kernel: `zReg (zAtom s)=0`, `zReg (zAx1 s C)=0`; `zAtom`/`zAx1`
+`ZPhi` disjuncts carry only `inAnt (seqSucc s)(seqAnt s)` (no atomicity). So `ZRegular`/`ZFresh` do NOT kill
+the stall; a leaf-stall ⊥-orbit `ZDerivation` exists. The fix is Buchholz §14.25's MAJOR-PREMISE selection
+(first premise with succedent = D), not the first `iperm`-permissible. The lap-121/122 redex-finder line
+(`inference_critical_pair_of_chain_reroute`) is a DEAD END on the ⊥-orbit (needs a non-`isymRep` exit; ⊥-exits
+are `zK`/`zInd` `isymRep`; its `hreroute`-for-non-leaf residual is false).
+
+**ATTACK PATH — the faithful-selection engine re-key (next lap's HIGHEST VALUE):**
+1. **`majorIdx d`** (new, mirror `permIdxAux`): least `i < lh (zKseq d)` with `chainAsucc (zKseq d) i =
+   seqSucc (fstIdx d)`. `𝚺₁`-definable. On the ⊥-orbit = first `⊥`-exit.
+2. **No-stall, end-to-end:** `ZDerivesEmptyR d → red d ≠ d` (or: the `majorIdx`-selected premise is
+   `red`-reducible). Core = `firstBotPrem_reducible` (tag ∈ {3,4,5,6}); add `red (zInd/zK/zAxAll/zAxNeg) ≠ id`
+   per tag.
+3. **Re-key `iRK`** replace branch: dispatch on `majorIdx` (was `permIdx`). Critical/splice fires when the
+   major premise's OWN reduction is an `(R,L)` cut (Buchholz 14.253). Ripples: `permIdx`/`permIdxAux`-family
+   `𝚺₁` defs, `iord_descent_red` (atom/`zAx1` fixpoint branches → UNREACHABLE, drop), `fstIdx_red_*` /
+   `tp_selected_isymRep_of_emptyAnt_botSucc` (re-anchor on `majorIdx`).
+4. **`false_of_ZDerivesEmpty`:** no ⊥-orbit fixpoints ⟹ `iord_red_iterate_descends` strict ⟹ PRWO(ε₀)
+   contradiction. Remaining endgame: the PRWO `𝚺₁`-graph wiring (`n ↦ iord (red^[n] z)` vs well-foundedness).
+
+**CONTAINED ALTERNATIVE (if re-key too invasive):** keep `permIdx`, prove `no_red_fixpoint_of_ZDerivesEmptyR`
+directly — bridge `permIdx`-selects-leaf ⟹ that leaf is NOT the `firstBotPrem` major premise ⟹ the node has a
+genuinely-reducible exit elsewhere ⟹ contradiction with `red d = d`. Murkier soundness; the re-key is faithful.
+
 ## lap 128 (late) — SOUNDNESS FRONT CONSOLIDATED + the plumbing's true shape FOUND
 **Build 🟢 1326.** Landed (all sorry-free, axiom-clean): `ZDerivation_iRKcCrit_all` (∀, freshness from
 orbit) · `ZDerivation_iRKcCrit_neg` (¬) · **`ZDerivation_iRKcCrit_of_zKValid`** (both polarities from chain
