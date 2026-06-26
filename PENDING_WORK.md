@@ -41,6 +41,16 @@ genuine remaining work in the swap is (a) re-key `iRK`'s `else` branch `iRKc d s
 re-key (`iord_descent_red` ↦ `iord_iRcritG_eq_iRcrit` family, RedZKDescent), (c) re-point `red_zK_crit` +
 the `ZDerivation_red_zK_crit` body to `ZDerivation_iRcritG_critReductCorr` (PROVEN, freshness now supplied).
 
+**✅ FRESHNESS FRONT FULLY PACKAGED (this lap):** `zfresh_critReductCorr_freshness` (`Zsubst.lean`, after
+`ZFresh_iRKcCrit`) delivers the exact `⟨hpfresh, hΓfresh⟩` pair `ZDerivation_iRcritG_critReductCorr` needs
+at the L-instance `k = π₁(π₂(tp dⱼ))`, from just `ZFresh (zK s r ds)` (orbit) + the R-redex form `hdi` +
+matrix wff. So step (c)'s only remaining inputs are the NON-freshness orbit data (threading `hthread`, rank
+`hrank`/`hrankI`, `hSeqs`/`hSeqsj`, `hsj`, `hCwff`) — all derivable from the chain's `isChainInf` validity
+(`redZKReady_of_zKValid` gives `hdi`/`hdj`/`hIJ`/`hj` + rank relation; threading/rank from the parent
+`isChainInf` restricted to `≤ redex`, cf. `thread_rank_restrict_of_le`). The freshness obstruction (the
+lap-114 "instance-0 vs instance-k" finding) is now CLOSED on the supply side; what remains is pure
+chain-validity plumbing + the atomic `red`/`iRK` redefinition.
+
 ## lap 127 — `zFresh_zsubst` SUBSTRATE landed (commutation + node-level preservation); the gap is now ONE wff invariant
 **Build 🟢 1326; 5 new lemmas axiom-clean `[propext, choice, Quot.sound]` (Zsubst).**
 
