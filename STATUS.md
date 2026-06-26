@@ -1,9 +1,26 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 144 · 2026-06-26
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 145 · 2026-06-26
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**);
 `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean. The lone `sorryAx` traces to crux-2.
+
+> **⭐⭐⭐ Lap-145 — `descent_step_Ind` CRACKED OPEN: `k=⟦t⟧` blocker DISSOLVED + descent PROVEN; real blocker = `zIndWff` antecedent gap (read FIRST — current).**
+> Build re-verified 🟢 green (1326); headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math
+> axioms) — no drift. Attacked the lap-144 #1 hardest-first leaf `descent_step_Ind` (Ind-root soundness/descent)
+> and took it apart. **THREE advances, two banked axiom-clean lemmas:** (1) the lap-144 "lone genuine
+> prerequisite" — internal term-eval `k = ⟦t⟧` — is a **PHANTOM**: on the `∅→⊥` orbit `substs1 t p = ⊥` forces
+> **`p = ⊥`** (`eq_falsum_of_substs1_falsum`: subst preserves the top connective, `^⊥` is its own only
+> preimage), so every reduct premise exits at `⊥` for ANY `k`. (2) **DESCENT half DONE**
+> (`iord_descent_iIndReductSeqG_one`): pinning the witness to `k = 1`, the genuine reduct `⟨d0,d1[a:=0]⟩`'s
+> `iord` = the ordinal shadow `⟨d1,d0⟩`'s via a SINGLE `inadd`/`max` commute (both 2-element, `idg/iotil`
+> substitution-invariant) → banked `iord_descent_iIndReduct` transfers; **`k=1` chosen to dodge `inadd_assoc`**
+> (repo lacks it). (3) **THE finding — soundness blocked by a `zIndWff` GAP**: the reduct chain needs
+> `seqAnt(fstIdx d1) ⊆ {⊥}`, but `zIndWff` gives only `inAnt (F(a)) (seqAnt(fstIdx d1))` (MEMBERSHIP, not shape)
+> — a lax node (`d1` = `zAtom` of `{⊥,X}→⊥`) makes the goal genuinely FALSE, not just unprovable. **FIX (next,
+> hardest-first):** strengthen `zIndWff` step clause to `seqAnt(fstIdx d1) = seqAddAnt (F(a)) Γ` (faithful Ind
+> rule; lap-115/118-style ripple) → soundness closes, descent already done ⟹ DROPS `descent_step_Ind`.
+> See `HANDOFF-2026-06-26-lap145.md`, `PENDING_WORK.md` lap-145.
 
 > **🎉⭐⭐⭐ Lap-144 — LIVE PATH FULLY OFF `red` (executes DIRECTION lap-143 steps 2+3; a src sorry DROPS — read FIRST).**
 > TWO advances: **(1) ¬-case CLOSED** — `descent_step_K_critical_neg` sorry-FREE + axiom-clean `[propext,

@@ -2156,6 +2156,73 @@ theorem descent_step_K_majorIdx {s r ds : V}
   · exact descent_step_K_noncritical hd hant hsucc hcrit
   · exact descent_step_K_critical hd hcrit
 
+/-- **⊥-orbit collapse of the Ind formula (lap 145).** If `substs1 t p = ^⊥` for a 1-ary semiformula
+`p`, then `p = ^⊥`. Substitution preserves the top connective (`substs_*`), and `^⊥` is the only
+constructor whose substitution is `^⊥`. **This dissolves the lap-144 "internal term-value `k = ⟦t⟧`"
+prerequisite**: on a `∅→⊥` orbit a `zIndWff` node has conclusion succedent `substs1 t p = seqSucc s = ⊥`,
+forcing `p = ⊥`, so *every* premise of the Ind reduct `iIndReductSeqG` carries succedent `⊥` for ANY `k`
+(the `hexit` clause needs no term evaluation). -/
+lemma eq_falsum_of_substs1_falsum {t p : V} (hv : IsSemiformula ℒₒᵣ 1 p)
+    (h : substs1 ℒₒᵣ t p = (^⊥ : V)) : p = (^⊥ : V) := by
+  rcases (IsSemiformula.case_iff (L := ℒₒᵣ)).mp hv with
+    ⟨k, R, vv, hR, hvv, rfl⟩ | ⟨k, R, vv, hR, hvv, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩
+  · rw [substs1, substs_rel hR hvv.isUTerm] at h; simp [qqRel, qqFalsum] at h
+  · rw [substs1, substs_nrel hR hvv.isUTerm] at h; simp [qqNRel, qqFalsum] at h
+  · rw [substs1, substs_verum (L := ℒₒᵣ)] at h; simp [qqVerum, qqFalsum] at h
+  · rfl
+  · rw [substs1, substs_and h₁.isUFormula h₂.isUFormula] at h; simp [qqAnd, qqFalsum] at h
+  · rw [substs1, substs_or h₁.isUFormula h₂.isUFormula] at h; simp [qqOr, qqFalsum] at h
+  · rw [substs1, substs_all h₁.isUFormula] at h; simp [qqAll, qqFalsum] at h
+  · rw [substs1, substs_ex h₁.isUFormula] at h; simp [qqExs, qqFalsum] at h
+
+/-! ### Descent of the corrected Ind reduct `iIndReductSeqG` at `k = 1` (lap 145)
+
+On a `∅→⊥` orbit the Ind formula collapses to `⊥` (`eq_falsum_of_substs1_falsum`), so EVERY premise of the
+Ind reduct carries succedent `⊥` and the exit clause needs no term evaluation — in particular the **`k = 1`**
+reduct `iIndReductSeqG d0 d1 a 1 = ⟨d0, d1[a:=0]⟩` already exits at `⊥`. Its `iord` DESCENT (independent of
+the antecedent-threading soundness question) reduces to that of the ordinal shadow `iIndReductSeq d0 d1 1 =
+⟨d1, d0⟩` (banked `iord_descent_iIndReduct`): both are 2-element sequences over the SAME multiset of premise
+ordinals (`idg/iotil` are substitution-invariant, `idg_zsubst`/`iotil_zsubst`), so the folds differ by a
+SINGLE `inadd`/`max` commutation — **no `inadd_assoc`** (which the repo lacks for general `k`). -/
+
+private lemma iIndReductSeqG_one (d0 d1 a : V) :
+    iIndReductSeqG d0 d1 a 1 = seqCons (seqCons ∅ d0) (zsubst d1 a (Bootstrapping.Arithmetic.numeral 0)) := by
+  rw [show (1 : V) = 0 + 1 from (zero_add 1).symm, iIndReductSeqG_succ, iIndReductSeqG_zero]
+
+/-- `idg` of the genuine `k=1` Ind reduct = `idg` of the ordinal shadow (single `max`-commute). -/
+private lemma idg_zK_iIndReductSeqG_one_eq {s' p d0 d1 a : V} (hd1 : ZDerivation d1) :
+    idg (zK s' (irk p) (iIndReductSeqG d0 d1 a 1)) = idg (zK s' (irk p) (iIndReductSeq d0 d1 1)) := by
+  rw [idg_zK _ _ _ (iIndReductSeqG_seq d0 d1 a 1), idg_zK _ _ _ (iIndReductSeq_seq d0 d1 1),
+    iseqMaxIdg_iIndReductSeq one_pos, iIndReductSeqG_one,
+    iseqMaxIdg_seqCons (seq_empty.seqCons d0), iseqMaxIdg_seqCons seq_empty, iseqMaxIdg_empty,
+    idg_zsubst (Bootstrapping.Arithmetic.numeral_uterm 0) a d1 hd1, zero_max, max_comm (idg d0) (idg d1)]
+
+/-- `õ` of the genuine `k=1` Ind reduct = `õ` of the ordinal shadow (single `inadd`-commute). -/
+private lemma iotil_zK_iIndReductSeqG_one_eq {s' p d0 d1 a : V}
+    (hd0 : ZDerivation d0) (hd1 : ZDerivation d1) :
+    iotil (zK s' (irk p) (iIndReductSeqG d0 d1 a 1)) = iotil (zK s' (irk p) (iIndReductSeq d0 d1 1)) := by
+  have hd0nf := isNF_iotil_of_ZDerivation d0 hd0
+  have hd1nf := isNF_iotil_of_ZDerivation d1 hd1
+  rw [iotil_zK _ _ _ (iIndReductSeqG_seq d0 d1 a 1), iotil_zK _ _ _ (iIndReductSeq_seq d0 d1 1),
+    iseqNaddIdg_iIndReductSeq one_pos, iIndReductSeqG_one,
+    iseqNaddIdg_seqCons (seq_empty.seqCons d0), iseqNaddIdg_seqCons seq_empty, iseqNaddIdg_empty,
+    inadd_zero_left, iotil_zsubst (Bootstrapping.Arithmetic.numeral_uterm 0) a d1 hd1,
+    inadd_comm (ocOadd (iotil d1) 1 0) (isNF_omega_pow hd1nf) (ocOadd (iotil d0) 1 0)
+      (isNF_omega_pow hd0nf)]
+
+/-- **RED-FREE Ind descent at `k = 1`** — `iord (zK s' (irk p) ⟨d0, d1[a:=0]⟩) ≺ iord (Ind^{a,t}_F d0 d1)`.
+The genuine substituted reduct's `iord` equals the ordinal shadow's (single `inadd`/`max` commute), so the
+banked `iord_descent_iIndReduct` (the shadow LH4 descent) transfers. This is the descent half of
+`descent_step_Ind` — proven, RED-FREE, axiom-clean. -/
+lemma iord_descent_iIndReductSeqG_one {s s' at' p d0 d1 a : V}
+    (hd0 : ZDerivation d0) (hd1 : ZDerivation d1) :
+    icmp (iord (zK s' (irk p) (iIndReductSeqG d0 d1 a 1))) (iord (zInd s at' p d0 d1)) = 0 := by
+  have hd0nf := isNF_iotil_of_ZDerivation d0 hd0
+  have hd1nf := isNF_iotil_of_ZDerivation d1 hd1
+  rw [iord, idg_zK_iIndReductSeqG_one_eq hd1, iotil_zK_iIndReductSeqG_one_eq hd0 hd1, ← iord]
+  exact iord_descent_iIndReduct hd0nf hd1nf one_pos
+
 /-- **Ind root (Buchholz §3.2 case 4 / Def 3.2 clause `Ind`) — the RED-FREE existence-form reduct (lap 144,
 named sub-`sorry`).** A `∅→⊥` Ind node `zInd s at' p d0 d1` has a sound, strictly-`iord`-descending
 `ZDerivesEmptyR` reduct WITHOUT `red`. The genuine witness is the **corrected substituted chain**
@@ -2166,18 +2233,32 @@ routes through the kernel-FALSE `redSoundGen` (:1471) → `zKValidF_iIndReduct_o
 obstruction: the `k=1` shadow `⟨d1,d0⟩` is NOT valid). Wiring this drops the LAST `red`-soundness dependence
 on the live `false_of_ZDerivesEmpty` path (K-case already off `red`, laps 143/144).
 
-**Residual / next-attack (the genuine Buchholz/term-value content):**
-1. **Soundness** `ZDerivesEmptyR (zK s (irk p) (iIndReductSeqG d0 d1 a k))`: the chain-validity `zKValidF`
-   is `isChainInf_telescope` (banked) fed the per-premise read-offs `chainAnt_/chainAsucc_iIndReductSeqG_*`
-   (banked) — base antecedent `= Γ` (`d0`'s, `zIndWff`), step antecedent `Γ,F(i)` threading `F(i) =
-   chainAsucc i`, rank `irk (F(i)) = irk p` (substitution-invariant). The **`hexit` clause needs `F(k) =
-   F(t)` i.e. `k = value(t)`** — the lone genuine prerequisite: an internal term-evaluation `k = ⟦t⟧`
-   matching `numeral k`'s value to the closed Ind term `t` (`substs1 (numeral k) p = substs1 t p = ⊥`).
-   Plus the orbit invariants `ZRegular/ZFresh/ZSeqAnt` of the reduct (premise-hereditary like the K-case).
-2. **Descent** `icmp (iord (zK s (irk p) (iIndReductSeqG …))) (iord (zInd …)) = 0`: from
-   `iord_descent_iIndReduct` (InternalZ, the ordinal-shadow descent, real `irk`, degree-preserving) via the
-   `iotil`/`idg` congruence `iIndReductSeqG ≅ iIndReductSeq` (corresponding premises share `iotil`/`idg`,
-   substitution being ordinal-invariant — the same fact that makes `iord_descent_red` survive 0→k). -/
+**STATUS after lap 145 — DESCENT done, `k=⟦t⟧` blocker DISSOLVED, soundness blocked on a `zIndWff` gap.**
+Witness pinned to `k = 1`: `zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1) = ⟨d0, d1[a:=0]⟩` (2-element).
+
+1. **`k = ⟦t⟧` blocker DISSOLVED (lap 145).** On the `∅→⊥` orbit, `zIndWff` gives `seqSucc s = substs1 t p`
+   and the orbit gives `seqSucc s = ⊥`, so `substs1 t p = ⊥` ⟹ **`p = ⊥`** (`eq_falsum_of_substs1_falsum`).
+   Then EVERY premise of the reduct carries succedent `substs1 _ ⊥ = ⊥`, so the `hexit` clause holds for ANY
+   `k` (in particular `k = 1`) — no internal term-evaluation `k = ⟦t⟧` needed. The lap-144 "lone genuine
+   prerequisite" was a phantom on the ⊥-orbit.
+2. **DESCENT done (lap 145, `iord_descent_iIndReductSeqG_one`, axiom-clean).** `icmp (iord (zK s (irk p)
+   (iIndReductSeqG d0 d1 (π₁ at') 1))) (iord (zInd …)) = 0`. The genuine substituted `k=1` reduct's `iord`
+   equals the ordinal shadow `iIndReductSeq d0 d1 1 = ⟨d1,d0⟩`'s (single `inadd`/`max` commute — both
+   2-element over the same premise-ordinal multiset, `idg/iotil` substitution-invariant; **no `inadd_assoc`**,
+   which the repo lacks for general `k`), so the banked shadow LH4 descent `iord_descent_iIndReduct` transfers.
+3. **SOUNDNESS BLOCKED — `zIndWff` antecedent-shape GAP (lap-145 finding, the real obstruction).**
+   `ZDerivesEmptyR (zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1))` needs the chain `⟨d0, d1[a:=0]⟩` to thread
+   (`isChainInf`): every formula in `d1[a:=0]`'s antecedent must be `∈ Γ = ∅` or `= chainAsucc 0 = ⊥`, i.e.
+   `seqAnt(fstIdx d1) ⊆ {⊥}`. But **`zIndWff` only gives `inAnt (F(a)) (seqAnt(fstIdx d1))` (MEMBERSHIP, not
+   shape)** — so a lax Ind node can have `d1` = e.g. a `zAtom` deriving `{⊥,X}→⊥` (valid: `⊥ ∈` antecedent),
+   for which the reduct is NOT a valid chain. So the soundness goal is genuinely FALSE for lax nodes, NOT just
+   unprovable. **FIX = strengthen the `zIndWff` step clause to pin `seqAnt(fstIdx d1) = seqAddAnt (F(a)) Γ`**
+   (the faithful Buchholz Ind rule: step premise antecedent EXACTLY `Γ,F(a)`), a faithfulness ripple exactly
+   like lap-115 (`zAx1` 8th disjunct) / lap-118 (`zAxNeg` 4th conjunct): ZPhi Ind disjunct + `zphi_monotone`/
+   `_strong_finite`/`zphi_iff`/`zblueprint` σ+π/`zPhi_definable` + the `rcases zDerivation_iff` sites. After it,
+   `seqAnt(fstIdx d1) = {F(a)} = {⊥}` (Γ=∅, p=⊥), the telescope `hstep` holds, and the soundness closes
+   (`zDerivation_zK_intro` + `isChainInf_telescope` + premise `ZDerivation`s via `ZDerivation_zsubst` using
+   `maxEigen d1 < a` from `ZRegular`). The descent (2) is ALREADY proven for that witness. -/
 theorem descent_step_Ind {s at' p d0 d1 : V} (hd : ZDerivesEmptyR (zInd s at' p d0 d1)) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zInd s at' p d0 d1)) = 0 := sorry
 

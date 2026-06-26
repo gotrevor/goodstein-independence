@@ -1,6 +1,47 @@
 # Pending work — open obligations & attack paths
 
-## lap 144 (latest) — CRITICAL ¬-case CLOSED RED-FREE (`descent_step_K_critical_neg` sorry DROPS)
+## lap 145 (latest) — `descent_step_Ind` cracked: `k=⟦t⟧` blocker DISSOLVED, descent PROVEN, real blocker = `zIndWff` antecedent gap
+**Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms).** Two NEW
+banked lemmas, both axiom-clean `[propext, Classical.choice, Quot.sound]`. `descent_step_Ind` stays a named
+sorry but is now FULLY decomposed — only its soundness remains, behind a precisely-identified `zIndWff` gap.
+
+### THE three advances on the hardest-first leaf `descent_step_Ind`
+1. **`k = ⟦t⟧` blocker DISSOLVED** (`eq_falsum_of_substs1_falsum`). ⊥-orbit ⟹ `substs1 t p = ⊥` ⟹ **`p = ⊥`**
+   (subst preserves top connective; `^⊥` is the only constructor mapping to `^⊥`, via `IsSemiformula.case_iff`
+   + the 8 `substs_*` simp lemmas). So every reduct premise has succedent `⊥` for ANY `k` — the lap-144 "lone
+   genuine prerequisite" (internal term-eval `k=⟦t⟧`) was a phantom. Witness pinned to **`k = 1`**.
+2. **DESCENT half DONE** (`iord_descent_iIndReductSeqG_one`). `icmp (iord (zK s (irk p) (iIndReductSeqG d0 d1
+   (π₁ at') 1))) (iord (zInd …)) = 0`. The genuine `k=1` reduct's `iord` = the ordinal shadow `iIndReductSeq
+   d0 d1 1 = ⟨d1,d0⟩`'s (both 2-element, same premise-ordinal multiset; `idg/iotil` substitution-invariant) via
+   a SINGLE `inadd`/`max` commute → banked `iord_descent_iIndReduct` transfers. **`k=1` chosen precisely to
+   avoid `inadd_assoc`** (repo lacks it for general `k`; the `red` Ind reduct is the 2-element shadow for the
+   same reason). Helpers: `iIndReductSeqG_one`, `idg_/iotil_zK_iIndReductSeqG_one_eq` (private).
+
+### THE finding — soundness is blocked by a `zIndWff` faithfulness GAP (the real obstruction)
+`ZDerivesEmptyR (zK s (irk p) (iIndReductSeqG d0 d1 (π₁ at') 1))` needs `⟨d0, d1[a:=0]⟩` to thread
+(`isChainInf`): `seqAnt(fstIdx d1) ⊆ {⊥}` (Γ=∅, all succedents ⊥). But `zIndWff` gives only `inAnt (F(a))
+(seqAnt(fstIdx d1))` — **MEMBERSHIP, not shape**. A lax Ind node can have `d1` = a `zAtom` deriving `{⊥,X}→⊥`
+(valid: `⊥∈`antecedent), whose reduct is NOT a valid chain ⟹ **the soundness goal is genuinely FALSE for lax
+nodes** (do NOT flat-sorry it). The lap-144 plan silently assumed the antecedent shape `zIndWff` never gave.
+
+### NEXT-ATTACK (hardest-first) — strengthen `zIndWff` (lap-115/118-style faithfulness ripple)
+Pin the step clause to **`seqAnt(fstIdx d1) = seqAddAnt (F(a)) (seqAnt s)`** (Buchholz Ind: step antecedent
+EXACTLY `Γ,F(a)`). Ripple: ZPhi Ind disjunct + `zphi_monotone`/`_strong_finite`/`zphi_iff`/`zblueprint` σ+π/
+`zPhi_definable` + `rcases zDerivation_iff.mp` sites + `zIndWff`/`zDerivation_zInd_inv`. After it: `seqAnt(fstIdx
+d1) = {⊥}`, telescope `hstep` holds, soundness closes (`zDerivation_zK_intro` + `isChainInf_telescope` + premise
+`ZDerivation`s via `ZDerivation_zsubst` [needs `maxEigen d1 < π₁ at'` from `ZRegular`] + reduct invariants). The
+descent is ALREADY proven for that witness ⟹ this strengthening is the WHOLE remaining content ⟹ DROPS
+`descent_step_Ind`. ⚠️ Re-check `seqAddAnt`/`inAnt` shapes vs Buchholz §3.2 first (the `zAxNeg` strengthening
+took ~2 laps from shape mismatches).
+
+### FORBIDDEN (unchanged from lap-144) + lap-145 additions
+Witnessing ANY `ZDerivesEmptyR_descent_step` branch with `red`; the `k=⟦t⟧` term-eval framing for the Ind exit
+(DISSOLVED); flat-sorrying `ZDerivesEmptyR (zK … iIndReductSeqG …)` (FALSE for lax nodes); attacking
+:80/:1108/:1211/:1384/:1471 as stated; `redLeast`/μ-min (A); major-premise-tag {3,4,5,6} split; M2/M4 wiring.
+
+---
+
+## lap 144 — CRITICAL ¬-case CLOSED RED-FREE (`descent_step_K_critical_neg` sorry DROPS)
 **Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms).**
 `descent_step_K_critical_neg` + the dispatcher `descent_step_K_critical` are now `#print axioms`-clean
 `[propext, Classical.choice, Quot.sound]` (sorry-FREE, off `red`). Executes DIRECTION lap-143 step 2.
