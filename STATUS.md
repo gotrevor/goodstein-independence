@@ -1047,7 +1047,10 @@ escape hatch; it re-introduces the `PA_delta1Definable` Foundation axiom 🟡.)
   still open. The inversion work (112–119) solved a different sub-problem (reduct SOUNDNESS ≠ termination).
   **Course correction:** highest-value next target = **(A)** `red w = w ∧ ZDerivesEmptyR w ⟹ False`
   (fixpoint-absurdity; vacuity-of-stall first, probe `ZRegular`), not the atomic engine swap. See
-  `REFLECTION-2026-06-26-lap120.md`.
+  `REFLECTION-2026-06-26-lap120.md`. SECOND FINDING (kernel-grounded, continuation): `zKValidF_iIndReduct_of_zInd`
+  (`Crux2Blueprint:79`) is FALSE as stated — the `k=1` Ind reduct `⟨d1,d0⟩` has `chainAsucc ∈ {F(a+1),F(0)}`,
+  unable to satisfy the `isChainInf` exit `= F(t)` for `t≠0`; same instance defect as lap-114's critical reduct
+  (ordinal-invariant, validity-broken). Fix = instance-correct Ind reduct; AUDIT splice/replace for the same.
 - **2026-06-26 (lap 117 — FRESH-MIND REVIEW + ¬-case inversion):** Validated the lap-116 "engine re-key"
   direction but found its hidden prerequisite: a CLEAN re-key needs the I¬ critical sub-case (else the
   sorry-free descent/regularity lemmas regress). Proved it: the ¬-case critical-cut inversion SOUNDNESS

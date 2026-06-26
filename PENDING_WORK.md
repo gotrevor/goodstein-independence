@@ -73,6 +73,35 @@ banked lemmas (feasible). (A) is a flagged defect with no built resolution (feas
 the M3 critical path, it is additive/independent of the swap, and it is DECISIVE: prove it → de-risk the
 whole endgame; refute it → forces a selection-architecture fix BEFORE more swap investment.
 
+### ⚠️⚠️⚠️ lap-120 (cont) FINDING — `zKValidF_iIndReduct_of_zInd` is FALSE as stated (Ind-case instance defect, KERNEL-GROUNDED)
+Broadened off the stall thread (per `how-to-get-unblocked.md`) to the most self-contained of the 8 sorries —
+the Ind-case validity `zKValidF_iIndReduct_of_zInd` (`Crux2Blueprint:79`). It is **false as stated**, for the
+SAME structural reason as lap-114's critical-reduct bug (ordinal-invariant reduct that loses the instance):
+- **Reduct structure (VERIFIED in-kernel, `scratchpad/indtest2.lean`):** `iIndReductSeq d0 d1 1 = ⟨d1, d0⟩`
+  (`znth 0 = d1`, `znth 1 = d0`, `lh = 2`).
+- **`zIndWff` succedents (definitional, InternalZ:`zIndWff`):** `seqSucc(fstIdx d1) = F(a+1)` where
+  `a = qqFvar(zIndEig)` (a FREE eigenvariable); `seqSucc(fstIdx d0) = F(0)`; `seqSucc s = F(t)` where
+  `t = zIndTerm` is a CLOSED term (`IsSemiterm ℒₒᵣ 0`). (`F(·) = substs1 · (zIndP)`.)
+- **`isChainInf` exit fails:** the exit needs `chainAsucc j0 ∈ {seqSucc s = F(t), ^⊥}` for `j0 ∈ {0,1}`.
+  `chainAsucc 0 = F(a+1)`: can't equal `F(t)` (closed `t` ≠ open `a+1`, different free vars) nor `⊥`.
+  `chainAsucc 1 = F(0)`: equals `F(t)` only if `t = numeral 0`. So for any valid `zInd` concluding `F(t)`
+  with `t ≠ 0` (e.g. `F(5)` — these exist), `isChainInf s (irk p) ⟨d1,d0⟩` is UNSATISFIABLE ⟹ the theorem
+  is false.
+- **ROOT CAUSE (= lap-114 pattern):** `iord` is instance-invariant, so the ordinal-DESCENT side
+  (`iord_descent_red_zInd`, banked green) never caught this; the VALIDITY side (`zKValidF`) does. The
+  verbatim-repeat `iIndReductSeq` (the SAME `d1` each copy, never re-instantiated at 0,1,…,t−1) cannot derive
+  `F(t)`. Buchholz's Ind-elimination instantiates the step derivation along `0..t` — but `t` may be NON-
+  STANDARD, so the faithful internal reduct is a single substitution-based chain whose validity needs an
+  internal (Σ₁-in-V) induction, NOT a verbatim k-fold repeat.
+- **FIX (next lap):** re-define the Ind reduct to be instance-correct (the eigenvar-substituted step chain to
+  `t`), mirroring lap-114's re-principalization of the critical reduct (`zsubst d0 a (numeral k)`). Likely
+  reuses `zsubst`/`ZDerivation_zsubst`. THEN `zKValidF_iIndReduct_of_zInd` (restated on the corrected reduct)
+  becomes provable.
+- **⚠️ SYSTEMIC HYPOTHESIS:** the "ordinal-invariant but validity-broken reduct" defect now appears in BOTH
+  the critical reduct (lap-114, fixed) and the Ind reduct (this finding). **Audit the splice/replace reducts
+  (`ZDerivation_red_zK_splice`, axNeg replace validity) for the same latent instance defect BEFORE trusting
+  their `zKValidF`/`ZDerivation` obligations** — they may also be mis-stated, not merely hard.
+
 ---
 
 ## lap 119 — the engine swap is NOT "pure wiring"; its O1 (regularity) front LANDED
