@@ -268,6 +268,60 @@ theorem ZDerivation_iRcritG_corrected {s r ds sᵢ sⱼ a p pj k' C d0 : V} {ρ 
   · -- hsaUf
     rw [fstIdx_zK]; exact hsa
 
+/-- **The genuine re-principalized critical reduct supplier** — the concrete `ρ` that `red`'s tag-4 critical
+branch MUST emit (the corrected version of the engine's `fun n => zAxReduct (red (znth ds n))`). At the two
+redexes it reads the cut data from `d`'s own structure:
+- **R-redex** (`n = redexI d`, the I∀ premise): `zsubst (zIallPrem dᵢ) (zIallEig dᵢ) (numeral k)` —
+  re-principalized at the L-instance `k = π₁(π₂(tp dⱼ))` (instead of the engine's instance-`0`).
+- **L-redex** (`n = redexJ d`, the axAll premise): `zAx1 (seqAddAnt (cutFormula d) (fstIdx dⱼ)) (cutFormula d)`
+  — the §5 logical axiom `Ax^1`, antecedent grown by the cut instance, succedent `= cutFormula d`.
+- elsewhere: the engine reduct `zAxReduct (red dₙ)` (irrelevant: `iRcritG` only reads `ρ` at the redexes).
+This is a `noncomputable` function of `d` (engine-definable: every accessor is `𝚺₁`), so the next lap can
+re-key `iRKc` to `iRcritG d (critReductCorr d)` and its `iRKcDef` arithmetization to match. -/
+noncomputable def critReductCorr (d n : V) : V :=
+  if n = redexJ d then
+    zAx1 (seqAddAnt (cutFormula d) (fstIdx (znth (zKseq d) n))) (cutFormula d)
+  else if n = redexI d then
+    zsubst (zIallPrem (znth (zKseq d) n)) (zIallEig (znth (zKseq d) n))
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq d) (redexJ d))))))
+  else zAxReduct (red (znth (zKseq d) n))
+
+/-- **The corrected critical reduct is SOUND — concrete-`ρ` specialization (no `ρ`-emission side goals).**
+`ZDerivation (iRcritG d (critReductCorr d))` for the genuine re-principalized reduct supplier, given the
+orbit data. The two emission equations `hρI`/`hρJ` of `ZDerivation_iRcritG_corrected` discharge by `simp`
+from `critReductCorr`'s definition (`hIJ : redexI < redexJ` disambiguates the redex slots, `hdi`/`hdj`
+compute the accessors). This is exactly the object `red` should produce at a critical chain — soundness
+PROVEN, modulo only the engine re-keying (`red_zK_crit` ↦ `critReductCorr`) and the orbit invariants. -/
+theorem ZDerivation_iRcritG_critReductCorr {s r ds sᵢ sⱼ a p pj k' d0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : redexI (zK s r ds) < lh ds)
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k')
+    (hfresh_eig : maxEigen d0 < a)
+    (hpfresh : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds))))))) p = p)
+    (hΓfresh : fvSubstSeq a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds))))))) (seqAnt sᵢ) = seqAnt sᵢ)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hSeqs : Seq (seqAnt s))
+    (hSeqsj : Seq (seqAnt sⱼ))
+    (hsj : seqSucc sⱼ = cutFormula (zK s r ds))
+    (hthread : ∀ i' ≤ redexI (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < redexI (zK s r ds), irk (chainAsucc ds i') ≤ r)
+    (hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r) :
+    ZDerivation (iRcritG (zK s r ds) (critReductCorr (zK s r ds))) := by
+  refine ZDerivation_iRcritG_corrected (sᵢ := sᵢ) (sⱼ := sⱼ) (a := a) (p := p) (pj := pj)
+    (k' := k') (C := cutFormula (zK s r ds)) (d0 := d0)
+    hZ hi hj hdi hdj ?_ ?_ hfresh_eig hpfresh hΓfresh hCwff hSeqs hSeqsj hsj hthread hrank hrankI
+  · -- hρI: `critReductCorr` at `redexI` (skip the `redexJ` branch via `hIJ.ne`, then read off the accessors)
+    rw [critReductCorr, if_neg (ne_of_lt hIJ), if_pos rfl, zKseq_zK, hdi,
+      zIallPrem_zIall, zIallEig_zIall]
+  · -- hρJ: `critReductCorr` at `redexJ` (the `redexJ` branch fires; `fstIdx (zAxAll sⱼ …) = sⱼ`)
+    rw [critReductCorr, if_pos rfl, zKseq_zK, hdj, fstIdx_zAxAll]
+
 /-- **5.1 critical sub-residual — THE cut-elimination prize.** When the chain is critical, `red = iRcritG
 d ρ` with `ρ` the recursive premise reducts; delegates to `ZDerivation_iRcritG_of`, which reduces it to the
 two stripped half-derivations `haux0` (`Γ → cutFormula d`) / `haux1` (Buchholz Thm 3.4(a) inversion).
