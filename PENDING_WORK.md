@@ -31,6 +31,16 @@ tag-4 critical branch (`iRNextG`/`red_zK_crit`) to emit `critReductCorr (zK s r 
 assembly); the freshness front (O3) is now fully de-risked. See `HANDOFF-2026-06-26-lap128.md`,
 `engine-swap-not-pure-wiring-lap119` memory.
 
+**✅ BOTH invariant fronts of the swap's critical reduct now LANDED additively:** `ZRegular_iRKcCrit` (O1,
+lap 119) + **`ZFresh_iRKcCrit` (O3, this lap)** — `iRKcCrit d` (the explicit re-keyed reduct) preserves both
+`ZRegular` and `ZFresh`. So once `red`'s tag-4 branch emits `iRKcCrit`, the `ZRegular_red_zK_crit` /
+`ZFresh_red_zK_crit` re-proofs are one-liners (`ZRegular_iRKcCrit` / `ZFresh_iRKcCrit` fed the chain's own
+premise invariants via `ZRegular_zK_premise` / `ZFresh_zK_premise` + `redexI`-tag from the orbit). The
+genuine remaining work in the swap is (a) re-key `iRK`'s `else` branch `iRKc d s ↦ iRKcCrit d` +
+`iRKDef`/`iRNextGDef` arithmetization (the `iRKcCritDef` `𝚺₁` graph is already built), (b) the DESCENT
+re-key (`iord_descent_red` ↦ `iord_iRcritG_eq_iRcrit` family, RedZKDescent), (c) re-point `red_zK_crit` +
+the `ZDerivation_red_zK_crit` body to `ZDerivation_iRcritG_critReductCorr` (PROVEN, freshness now supplied).
+
 ## lap 127 — `zFresh_zsubst` SUBSTRATE landed (commutation + node-level preservation); the gap is now ONE wff invariant
 **Build 🟢 1326; 5 new lemmas axiom-clean `[propext, choice, Quot.sound]` (Zsubst).**
 
