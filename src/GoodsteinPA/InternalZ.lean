@@ -8853,6 +8853,129 @@ lemma exit_nonRep_of_reroute {s ds j0 : V}
     obtain ⟨i', hi'lt, hi'eq⟩ := hreroute j hj_le hRep
     exact hmin i' hi'lt ⟨hi'eq.trans hAj, le_of_lt (lt_of_lt_of_le hi'lt hj_le)⟩
 
+set_option maxHeartbeats 1000000 in
+/-- **The generalized redex finder for a re-routing chain** (lap 122 — the genuine fix for the threaded-atom
+stall, Sub-lemmas A+B assembled). `inference_critical_pair_of_chain` needs FULL criticality `hnperm`
+(no premise permissible for the conclusion, incl. its `isymRep` clause). A threaded atom/`Ax¹` leaf is
+unconditionally permissible (`iperm_isymRep`), so that clause FAILS — the documented `red`-stall. This
+finder REPLACES the `isymRep` clause of `hnperm` with `hreroute` (every `isymRep` premise `≤ j0` re-routes
+its succedent to a strictly earlier premise — exactly `chainAsucc_threaded_of_leaf`'s conclusion for the
+leaf case). It still produces the genuine `(R_A, L^k_A)` redex pair with `0 < rk A ≤ r`, so any chain
+whose permissibility-failures are all re-routable leaves still drives the K-descent
+(`iord_descent_iRcrit_of_redex`), the threaded-atom stall DISSOLVED with no engine surgery.
+
+**Why the "L-axiom caveat" (lap-121 baton) does NOT arise.** Step B takes the LEAST left-symbol index `j`;
+the cut formula `B = A_i` is then re-routed to its LEAST source `i'` via `least_number` on the (definable)
+`chainAsucc ds · = B`. Every such re-route lands at an index `< j` (`i' ≤ i < j`), where by minimality of
+`j` there are NO left symbols — so the source can never bottom out at an `isymLk` L-axiom. The least source
+`i'` is non-left and non-`isymRep` (re-route ⟹ smaller source ⟹ contradiction with `i'` least), hence
+`I_{i'} = R_B`. The genuine residual is therefore only `hreroute` for NON-leaf `isymRep` premises (chain/Ind
+nodes), which `chainAsucc_threaded_of_leaf` does not cover. -/
+theorem inference_critical_pair_of_chain_reroute {s r ds j0 : V} {Tr Fa : V → Prop}
+    (hj0 : j0 < lh ds)
+    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
+    (hchain : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+      inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hwfR : ∀ i ≤ j0, ∀ A, tp (znth ds i) = isymR A → 0 < irk A ∨ Tr A)
+    (hwfL : ∀ i ≤ j0, ∀ k A, tp (znth ds i) = isymLk k A → 0 < irk A ∨ Fa A)
+    (hperm : ∀ i ≤ j0, iperm (tp (znth ds i)) (fstIdx (znth ds i)))
+    (hnperm2 : ∀ i ≤ j0, ¬ (tp (znth ds i) = isymR (seqSucc s) ∨
+      (∃ k A, tp (znth ds i) = isymLk k A ∧ inAnt A (seqAnt s))))
+    (hreroute : ∀ i ≤ j0, tp (znth ds i) = isymRep →
+      ∃ i' < i, chainAsucc ds i' = chainAsucc ds i)
+    (hdisj : ∀ A, ¬ (Tr A ∧ Fa A)) (hFa_rk : ∀ A, Fa A → irk A = 0)
+    (hFa_bot : Fa (^⊥ : V)) :
+    ∃ i j k, i < j ∧ j ≤ j0 ∧ tp (znth ds i) = isymR (chainAsucc ds i) ∧
+      tp (znth ds j) = isymLk k (chainAsucc ds i) ∧
+      0 < irk (chainAsucc ds i) ∧ irk (chainAsucc ds i) ≤ r := by
+  -- `hperm` already has L3.1's unfolded disjunction shape (chainAsucc/chainAnt = seqSucc/seqAnt ∘ fstIdx).
+  have hperm' : ∀ i ≤ j0, tp (znth ds i) = isymR (chainAsucc ds i) ∨
+      (∃ k A, tp (znth ds i) = isymLk k A ∧ inAnt A (chainAnt ds i)) ∨
+      tp (znth ds i) = isymRep := by
+    intro i hi
+    have h := hperm i hi
+    unfold iperm at h
+    simpa only [chainAsucc, chainAnt] using h
+  -- Step A: a non-`isymRep` exit `j'` (Sub-lemma A) is forced to be a LEFT symbol.
+  obtain ⟨j', hj'le, hAj', hj'nRep⟩ := exit_nonRep_of_reroute hAj0 hreroute
+  have hLj' : isymIsL (tp (znth ds j')) := by
+    rcases hperm' j' hj'le with hR | hL | hRep
+    · exfalso
+      rcases hAj' with hC | hFa
+      · exact hnperm2 j' hj'le (Or.inl (by rw [hR, hC]))
+      · have hFaA : Fa (chainAsucc ds j') := by rw [hFa]; exact hFa_bot
+        rcases hwfR j' hj'le _ hR with hpos | hTr
+        · exact absurd (hFa_rk _ hFaA) (by simpa using hpos.ne')
+        · exact hdisj _ ⟨hTr, hFaA⟩
+    · obtain ⟨k, A, hI, _⟩ := hL; exact isymIsL_iff.mpr ⟨k, A, hI⟩
+    · exact absurd hRep hj'nRep
+  -- Step B: the LEAST left-symbol index `j ≤ j'`. Search over the CODED symbol map `tpSeq ds` (so
+  -- `znth (tpSeq ds) x` is `𝚺₁` in `x`, avoiding the aesop depth-blowup on `tp (znth ds x)`).
+  set Is := tpSeq ds with hIs
+  have htp : ∀ x, x ≤ j0 → znth Is x = tp (znth ds x) :=
+    fun x hx => by rw [hIs]; exact znth_tpSeq (lt_of_le_of_lt hx hj0)
+  clear_value Is
+  have hQdef : 𝚺₁-Predicate (fun x : V => isymIsL (znth Is x) ∧ x ≤ j') := by
+    simp only [isymIsL]; definability
+  have hLj'' : isymIsL (znth Is j') := by rw [htp j' hj'le]; exact hLj'
+  obtain ⟨j, ⟨hLj, hjle'⟩, hmin⟩ :=
+    InductionOnHierarchy.least_number 𝚺 1 hQdef ⟨hLj'', le_rfl⟩
+  have hjle : j ≤ j0 := le_trans hjle' hj'le
+  have hLj_tp : isymIsL (tp (znth ds j)) := by rw [← htp j hjle]; exact hLj
+  obtain ⟨k, B, hIj⟩ := isymIsL_iff.mp hLj_tp
+  -- B ∈ Γ_j  (own-permissibility of the L-symbol `j`)
+  have hBmem : inAnt B (chainAnt ds j) := by
+    rcases hperm' j hjle with hR | ⟨k', A', hI', hA'⟩ | hRep
+    · exact absurd (hR.symm.trans hIj) (isymR_ne_isymLk _ _ _)
+    · obtain ⟨-, hBA⟩ := (isymLk_inj k B k' A').mp (hIj.symm.trans hI')
+      rw [hBA]; exact hA'
+    · exact absurd (hRep.symm.trans hIj) (isymRep_ne_isymLk _ _)
+  -- B ∉ Γmain  (non-permissibility of `j` for the conclusion, 2-clause form)
+  have hBnmem : ¬ inAnt B (seqAnt s) := fun h =>
+    hnperm2 j hjle (Or.inr ⟨k, B, hIj, h⟩)
+  -- chain condition: B = A_i for some i < j
+  obtain ⟨i, hij, hBi⟩ := (hchain j hjle B hBmem).resolve_left hBnmem
+  have hi_le_j0 : i ≤ j0 := le_of_lt (lt_of_lt_of_le hij hjle)
+  -- Step C (Sub-lemma B): the LEAST source `i'` of the cut formula `B`.
+  have hQ2 : 𝚺₁-Predicate (fun x : V => chainAsucc ds x = B ∧ x ≤ j0) := by
+    apply Definable.and ?_ (by definability)
+    exact DefinableRel.comp (by definability)
+      (DefinableFunction₂.comp (F := chainAsucc)
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction.const B)
+  obtain ⟨i', ⟨hAi', hi'le⟩, hmin'⟩ :=
+    InductionOnHierarchy.least_number 𝚺 1 hQ2 ⟨hBi.symm, hi_le_j0⟩
+  have hi'le_i : i' ≤ i := by
+    by_contra h
+    push_neg at h
+    exact hmin' i h ⟨hBi.symm, hi_le_j0⟩
+  have hi'lt_j : i' < j := lt_of_le_of_lt hi'le_i hij
+  have hi'le_j' : i' ≤ j' := le_of_lt (lt_of_lt_of_le hi'lt_j hjle')
+  have hi'le_j0 : i' ≤ j0 := le_trans hi'le_i hi_le_j0
+  -- `i'` is non-left (minimality of `j`) and non-`isymRep` (re-route ⟹ smaller source) ⟹ `I_{i'} = R_B`.
+  have hLi'_not : ¬ isymIsL (tp (znth ds i')) := by
+    intro h
+    exact hmin i' hi'lt_j ⟨by rw [htp i' hi'le_j0]; exact h, hi'le_j'⟩
+  have hRi' : tp (znth ds i') = isymR (chainAsucc ds i') := by
+    rcases hperm' i' hi'le_j0 with hR | hL | hRep
+    · exact hR
+    · obtain ⟨k', A', hI', _⟩ := hL
+      exact absurd (isymIsL_iff.mpr ⟨k', A', hI'⟩) hLi'_not
+    · obtain ⟨i'', hi''lt, hi''eq⟩ := hreroute i' hi'le_j0 hRep
+      exact absurd ⟨hi''eq.trans hAi', le_of_lt (lt_of_lt_of_le hi''lt hi'le_j0)⟩
+        (hmin' i'' hi''lt)
+  -- 0 < rk B  (`B = chainAsucc ds i'`)
+  have hrk : 0 < irk (chainAsucc ds i') := by
+    rcases hwfR i' hi'le_j0 _ hRi' with hpos | hTr
+    · exact hpos
+    · rcases hwfL j hjle k B hIj with hpos | hFa
+      · rw [hAi']; exact hpos
+      · exact absurd ⟨by rw [hAi'] at hTr; exact hTr, hFa⟩ (hdisj B)
+  exact ⟨i', j, k, hi'lt_j, hjle, hRi',
+    by rw [hAi']; exact hIj, hrk,
+    hrank i' (lt_of_le_of_lt hi'le_i (lt_of_lt_of_le hij hjle))⟩
+
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
 
 `RedSound` (`iR2 d` is a genuine `ZDerivation` for `ZDerivesEmpty d`) is **FALSE** for the current
@@ -9071,3 +9194,4 @@ lemma iord_iR2_iterate_descends (hRS : RedSound (V := V)) {z : V} (hz : ZDerives
   exact iord_descent_iR2_of_ZDerivesEmpty (ZDerivesEmpty_iterate hRS hz n) (hcrit n)
 
 end GoodsteinPA.InternalZ
+
