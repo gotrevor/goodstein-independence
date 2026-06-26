@@ -64,9 +64,14 @@ This is the clean tag-explicit entry the restructured `false_of_ZDerivesEmpty` c
   `ZDerivation_red_zK_crit` (`Crux2Blueprint:655`), FALSE as stated under the current `ρ` (instance-0 vs k),
   fixed post-engine-swap by `ZDerivation_iRKcCrit_of_zKValid` (`:575`, PROVEN modulo its plumbing
   `hAll`/`hNeg`/`hthread`/`hrank`/`hCwff`/`hSeqs`). Supplying that plumbing from the orbit (`zKValid`+`ZFresh`)
-  is the lap-128 "extract-everything-from-isChainInf" unit; key open structural fact is `seqSucc sⱼ =
-  cutFormula` (the L-redex succedent matches the cut instance — routes through threading at `redexJ`, NOT the
-  axAll node alone) + `redexJ ≤ j0` (free if `j0 = lh ds − 1`, `isChainInf_of_last`).
+  is the lap-128 "extract-everything-from-isChainInf" unit. **PLUMBING PROGRESS (lap 130):**
+  - ✅ `hCwff` DONE — **`cutFormula_wff_of_zKValid`** (`InternalZ.lean`, axiom-clean): `IsUFormula
+    (cutFormula (zK s r ds))` from `ZDerivation`+`zKValid` (∀-redex `substs1` of the I∀ premise's
+    1-semiformula; ¬-redex matrix directly).
+  - NEXT plumbing: `hSeqs` (`Seq (seqAnt s)` — likely from `ZDerivation` of the conclusion / orbit `∅`);
+    `hAll`/`hNeg` per-node facts; the key open structural fact `seqSucc sⱼ = cutFormula` (the L-redex
+    succedent matches the cut instance — routes through threading at `redexJ`, NOT the axAll node alone) +
+    `redexJ ≤ j0` (free if `j0 = lh ds − 1`, `isChainInf_of_last`).
 - **RIGHT tag-4:** recurse into the sub-`zK`-chain — the chain-REPLACE strong induction (`iord_descent_red`
   sorry `Crux2Blueprint:1167`). Well-founded on premise `iord` < parent.
 

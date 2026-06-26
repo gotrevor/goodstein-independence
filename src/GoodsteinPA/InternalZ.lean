@@ -9263,6 +9263,34 @@ lemma isymRep_nonleaf_zInd_or_zK {d : V} (hZ : ZDerivation d) (hrep : tp d = isy
   · rw [h, tp_zAxNeg] at hrep; exact absurd hrep (isymLk_ne_isymRep _ _)
   · exact absurd (Or.inr ⟨s', C', h⟩) hnleaf
 
+/-- **The cut formula of a valid critical chain is well-formed** — `IsUFormula (cutFormula (zK s r ds))`.
+This is the `hCwff` plumbing input to `ZDerivation_iRKcCrit_of_zKValid` (the re-keyed critical reduct's
+soundness, `Crux2Blueprint`), supplied here from the orbit data alone (`ZDerivation` + `zKValid`). The cut
+formula is the stripped principal: in the ∀-redex case it is the matrix instance `F(k) = substs1 (numeral
+k) p` (a `UFormula` since `p` is a 1-`IsSemiformula` from the I∀ premise's `zIallWff`); in the ¬-redex case
+it is the negation matrix `p` (a `UFormula` directly, from `redZKReady`'s axNeg branch). -/
+lemma cutFormula_wff_of_zKValid {s r ds : V}
+    (hZ : ZDerivation (zK s r ds)) (hvalid : zKValid s r ds) :
+    IsUFormula ℒₒᵣ (cutFormula (zK s r ds)) := by
+  obtain ⟨hIJ, hJlt, hcase⟩ := redZKReady_of_zKValid hZ hvalid
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  obtain ⟨_, hmem⟩ := zDerivation_zK_inv hZ
+  rcases hcase with ⟨sᵢ, sⱼ, a, p, pj, k', d0, hdi, hdj, _hrk⟩ | ⟨sᵢ, sⱼ, p, d0, hdi, hdj, hcut, hpUf⟩
+  · -- ∀-redex: `cutFormula = substs1 (numeral _) p`, `p` a 1-semiformula
+    have hZi : ZDerivation (zIall sᵢ a p d0) := hdi ▸ hmem _ hIlt
+    obtain ⟨_, hssi, hwff⟩ := zDerivation_zIall_inv hZi
+    have hsf : IsSemiformula ℒₒᵣ 1 p := hwff.2.2
+    have hChA : chainAsucc ds (redexI (zK s r ds)) = (^∀ p : V) := by
+      show seqSucc (fstIdx (znth ds (redexI (zK s r ds)))) = (^∀ p : V)
+      rw [hdi, fstIdx_zIall]; exact hssi
+    have hcut := cutFormula_all (d := zK s r ds) (by rw [zKseq_zK]; exact hChA)
+    rw [hcut]
+    exact (IsSemiformula.substs1 (by simp : IsSemiterm ℒₒᵣ 0
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth (zKseq (zK s r ds)) (redexJ (zK s r ds)))))) : V))
+      hsf).isUFormula
+  · -- ¬-redex: `cutFormula = p`, `IsUFormula p` directly
+    rw [hcut]; exact hpUf
+
 set_option maxHeartbeats 1000000 in
 /-- **The generalized redex finder for a re-routing chain** (lap 122 — the genuine fix for the threaded-atom
 stall, Sub-lemmas A+B assembled). `inference_critical_pair_of_chain` needs FULL criticality `hnperm`
