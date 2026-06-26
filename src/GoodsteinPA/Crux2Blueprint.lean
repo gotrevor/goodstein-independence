@@ -273,6 +273,28 @@ lemma znth_iIndReductSeqG_step (d0 d1 a : V) : ∀ k, ∀ i < k,
         (zsubst d1 a (Bootstrapping.Arithmetic.numeral k))
       rwa [iIndReductSeqG_lh] at h
 
+/-- **Ind-step succedent under eigensubstitution.** The step premise `d1 : Γ,F(a)→F(a+1)` of a valid Ind
+node, substituted `a := t`, has succedent `F(t+1) = substs1 (t ^+ 𝟏) p` (modulo eigenvar freshness on `p`,
+`fvSubst a t p = p`). The Ind-step analog of `seqSucc_zsubst_zIall_premise`; this is the telescoping
+succedent `chainAsucc` of premise `i+1` of the corrected reduct (with `t = numeral i`). Since `^+ = qqAdd`
+and `𝟏 = numeral 1`, `numeral_succ_pos` turns `t ^+ 𝟏` into `numeral (i+1)` for `i > 0`. -/
+theorem seqSucc_zsubst_zInd_step {s at' p d0 d1 t : V} (ht : IsSemiterm ℒₒᵣ 0 t)
+    (hZ : ZDerivation (zInd s at' p d0 d1))
+    (hpfresh : fvSubst ℒₒᵣ (π₁ at') t p = p) :
+    seqSucc (fstIdx (zsubst d1 (π₁ at') t)) =
+      substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd t (Bootstrapping.Arithmetic.numeral 1)) p := by
+  obtain ⟨_, hd1, hwff⟩ := zDerivation_zInd_inv hZ
+  obtain ⟨_, ⟨_, h1succ⟩, _, hsf, _⟩ := hwff
+  simp only [zIndPrem1_zInd, zIndEig_zInd, zIndP_zInd] at h1succ hsf
+  have hv : IsSemiterm ℒₒᵣ 0
+      (Bootstrapping.Arithmetic.qqAdd (qqFvar (π₁ at')) (Bootstrapping.Arithmetic.numeral 1)) :=
+    isSemiterm_succVar (π₁ at')
+  rw [fstIdx_zsubst (π₁ at') t hd1, seqSucc_fvSubstSeqt, h1succ,
+    fvSubst_substs1 ht hv hsf,
+    termFvSubst_qqAdd _ _ _ _ ((IsSemiterm.fvar (L := ℒₒᵣ) 0 (π₁ at')).isUTerm)
+      (Bootstrapping.Arithmetic.numeral_uterm 1),
+    termFvSubst_fvar_self (L := ℒₒᵣ), termFvSubst_numeral, hpfresh]
+
 /-! ### Branch recursion equations for the tag-4 dispatch (table lookups resolved to `red dᵢ`)
 
 `red (zK s r ds) = iRK (zK s r ds) (redTable …)` dispatches on two `permIdx` sentinels. These three

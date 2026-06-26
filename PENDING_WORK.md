@@ -58,7 +58,20 @@ NOT on `at'` (term/eigenvar) or `p`. Consequences:
         recursion eqs (`iIndReductSeqG_zero/_succ`) + `𝚺₁-Function₄` definability + structural lemmas
         (`iIndReductSeqG_seq`, `iIndReductSeqG_lh = k+1`) + the read-outs `znth_iIndReductSeqG_zero` (premise 0
         = `d0`) and `znth_iIndReductSeqG_step` (premise `i+1` = `zsubst d1 a (numeral i)`, for `i<k`).
-     - **NEXT (the validity, now a finite computation):** prove
+     3. **`seqSucc_zsubst_zInd_step`** (Crux2Blueprint): the Ind-step succedent identity —
+        `seqSucc (fstIdx (zsubst d1 (π₁ at') t)) = substs1 (t ^+ 𝟏) p` (modulo eigenvar freshness
+        `fvSubst (π₁ at') t p = p`). The telescoping succedent `chainAsucc` of premise `i+1` (`t = numeral i`).
+     - **⚠️ NUMERAL-REPRESENTATION subtlety (found lap 136):** the step succedent is `F(numeral i ^+ 𝟏)`
+       (`^+ = qqAdd`, `𝟏 = numeral 1`); the next premise's antecedent / the conclusion needs `F(numeral (i+1))`.
+       `numeral_succ_pos` (`0<n → numeral(n+1) = numeral n ^+ 𝟏`) makes these match for `i>0`, but at `i=0`
+       `numeral 0 ^+ 𝟏 = 𝟎 ^+ 𝟏 ≠ 𝟏 = numeral 1` — a syntactic boundary mismatch. So the telescoping cut
+       formulas align via `^+ 𝟏` (successor), NOT the `numeral` shortcut. The Ind term `t = π₂ at'` of the
+       reduced node must be the successor-tower `𝟎 ^+ 𝟏 ^+ … ^+ 𝟏` (k ones) for the exit to match `F(t)` —
+       a constraint to thread through M2's Ind-node setup (or substitute the successor-tower term, not `numeral i`).
+     - **NEXT (the validity):** the antecedent analog `seqAnt (fstIdx (zsubst d1 (π₁ at') t)) ∋ F(t)` +
+       `= seqAnt s` (eigenvar/Γ freshness `fvSubstSeq (π₁ at') t (seqAnt s) = seqAnt s`), the base/exit/rank
+       feeds, then assemble `zKValidF_iIndReductSeqG` via `isChainInf_telescope` + per-premise conjuncts
+       (`iperm`/tag-UFormula from `ZDerivation_zsubst` of each premise). Then the OLD plan:
        `zKValidF_iIndReductSeqG : ZDerivation (zInd s at' p d0 d1) → seqSucc s = substs1 (numeral k) p →
          zKValidF s (irk p) (iIndReductSeqG d0 d1 (π₁ at') k)` (or with `k` = decoded value of `t`). Apply
        `isChainInf_telescope`: feed `chainAsucc`/`chainAnt` of `iIndReductSeqG` via the znth read-outs +
