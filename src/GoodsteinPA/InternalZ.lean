@@ -6647,6 +6647,27 @@ noncomputable def iRcritG (d : V) (ρ : V → V) : V :=
   simp [iRcritG]
 @[simp] lemma zTag_iRcritG (d : V) (ρ : V → V) : zTag (iRcritG d ρ) = 4 := by simp [iRcritG]
 
+/-- **The SWAPPED-half critical reduct — the ¬-case constructor (Buchholz Def 3.2 case 5.1, subcase
+`Aᵢ = ¬A`).** For a critical cut on a NEGATION `¬A` the two auxiliary half-derivations are assigned to the
+OPPOSITE redex premises from the `∀`-case (Buchholz's `d{0} := K^r_{Π.A(d)}(j/dⱼ[0])`, `d{1} :=
+K^r_{A(d),Π}(i/dᵢ[0])` for `Aᵢ = ¬A`):
+- `d{0}` (the SUCCEDENT half `Π.A(d)`, conclusion `Γ→A`) replaces the **L**-redex `j` (the `axNeg` axiom,
+  whose §5 reduct `dⱼ[0]` derives `Γⱼ→A`), and
+- `d{1}` (the ANTECEDENT half `A(d),Π`, conclusion `A,Γ→⊥`) replaces the **R**-redex `i` (the `I¬` rule,
+  whose reduct `dᵢ[0] = d₀` derives `A,Γᵢ→⊥`).
+This is exactly `iRcritG` with `redexI`/`redexJ` swapped in the two `seqUpdate` slots. Since `iCritReductG`
+is symmetric in its ordinal (`#` is commutative), the ordinal DESCENT is SHARED with `iRcritG`/`iRcrit`;
+only SOUNDNESS distinguishes the two polarities, which is why the engine `red` (descent-keyed) survives the
+distinction but the inversion `ZDerivation_red_zK_crit` needs the polarity-correct constructor. -/
+noncomputable def iRcritGNeg (d : V) (ρ : V → V) : V :=
+  iCritReductG (fstIdx d) (cutFormula d) (zKrank d - 1) (zKrank d) (zKrank d)
+    (seqUpdate (zKseq d) (redexJ d) (ρ (redexJ d)))
+    (seqUpdate (zKseq d) (redexI d) (ρ (redexI d)))
+
+@[simp] lemma fstIdx_iRcritGNeg (d : V) (ρ : V → V) : fstIdx (iRcritGNeg d ρ) = fstIdx d := by
+  simp [iRcritGNeg]
+@[simp] lemma zTag_iRcritGNeg (d : V) (ρ : V → V) : zTag (iRcritGNeg d ρ) = 4 := by simp [iRcritGNeg]
+
 /-! ## The 5.1 critical-reduct dispatch helper `iRKc` (Buchholz Def 3.2 case 5.1)
 
 The standalone 5.1 case — exactly the (table-supplied) critical reduct the original `iRNextG` tag-4
@@ -8497,6 +8518,25 @@ lemma ZDerivation_iRcritG_of {d : V} {ρ : V → V}
     (hssUf : IsUFormula ℒₒᵣ (seqSucc (fstIdx d)))
     (hsaUf : ∀ k < lh (seqAnt (fstIdx d)), IsUFormula ℒₒᵣ (znth (seqAnt (fstIdx d)) k)) :
     ZDerivation (iRcritG d ρ) :=
+  ZDerivation_iCritReductG_of haux0 haux1 hsAnt hCrk hCUf hssUf hsaUf
+
+/-- **`iRcritGNeg` is a `ZDerivation`** — the ¬-case (swapped-half) analogue of `ZDerivation_iRcritG_of`.
+The SUCCEDENT half `d{0}` (replacing the L-redex `j = redexJ d`, conclusion `Γ→A(d)`) is `haux0`, and the
+ANTECEDENT half `d{1}` (replacing the R-redex `i = redexI d`, conclusion `A(d),Γ→D`) is `haux1`. Delegates
+to the same `ZDerivation_iCritReductG_of` with the two half-sequences SWAPPED, matching `iRcritGNeg`'s
+`seqUpdate` slots (`ds0 = seqUpdate ds (redexJ d) (ρ (redexJ d))`, `ds1 = seqUpdate ds (redexI d)
+(ρ (redexI d))`). -/
+lemma ZDerivation_iRcritGNeg_of {d : V} {ρ : V → V}
+    (haux0 : ZDerivation (zK (seqSetSucc (fstIdx d) (cutFormula d))
+      (zKrank d) (seqUpdate (zKseq d) (redexJ d) (ρ (redexJ d)))))
+    (haux1 : ZDerivation (zK (seqAddAnt (cutFormula d) (fstIdx d))
+      (zKrank d) (seqUpdate (zKseq d) (redexI d) (ρ (redexI d)))))
+    (hsAnt : Seq (seqAnt (fstIdx d)))
+    (hCrk : irk (cutFormula d) ≤ zKrank d - 1)
+    (hCUf : IsUFormula ℒₒᵣ (cutFormula d))
+    (hssUf : IsUFormula ℒₒᵣ (seqSucc (fstIdx d)))
+    (hsaUf : ∀ k < lh (seqAnt (fstIdx d)), IsUFormula ℒₒᵣ (znth (seqAnt (fstIdx d)) k)) :
+    ZDerivation (iRcritGNeg d ρ) :=
   ZDerivation_iCritReductG_of haux0 haux1 hsAnt hCrk hCUf hssUf hsaUf
 
 /-! ## The iterated descent — `n ↦ iord (iR2^[n] z)` is an infinite `≺`-descent
