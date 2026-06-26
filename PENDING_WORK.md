@@ -35,23 +35,29 @@ zIall sᵢ a p d0`, `hdj : … = zAxAll sⱼ pj k'`, `hirk : irk(^∀pj) = irk(c
 zIneg sᵢ p d0`, `hdj : … = zAxNeg sⱼ p`, `hcut`, `hp`. (Descent only — regularity needs just `htagI`,
 already discharged.)
 
-**Orbit-bundle building blocks BANKED (7th commit):** `zDerivation_isymR_form` (ZDerivation + tp=isymR A
-⟹ explicit `zIall`/`zIneg` node) + `zDerivation_isymLk_form` (tp=isymLk k A ⟹ explicit `zAxAll`/`zAxNeg`).
-These upgrade `tp_isymR_form_wff` (formula-only) to the explicit constructors the corrected reduct needs.
+**⭐ THE orbit bundle `redZKReady_of_zKValid` is EXTRACTED (9th commit) — the central multi-lap residual,
+CLOSED.** From `hZ`/`hvalid` it produces `redexI < redexJ < lh ds` + the polarity-dispatched explicit redex
+forms: ∀-pair (`zIall sᵢ a p d0` / `zAxAll sⱼ pj k'` + `irk(∀pj) = irk(cutFormula)+1`) ∨ ¬-pair (`zIneg sᵢ
+p d0` / `zAxNeg sⱼ p` + `cutFormula = p` + `IsUFormula p`). Built from the banked blocks
+(`isRedexPair_redexCode_of_zKValid` → `redexPair_tp` → `zDerivation_isymR_form`/`_isymLk_form`, cross-ruled
+on the shared `A`); the `hirk` rank relation via `cutFormula_all`+`irk_substs1`+`irk_all`, the ¬ `pp=p` via
+`neg_inj_iff`. Axiom-clean. **This is EXACTLY the `hdi`/`hdj`/`hirk`|`hcut`/`hp` that all three banked fronts
+(`ZRegular_iRKcCrit_of_zK`, `iord_descent_iRKcCrit_corr`/`_neg`, `ZDerivation_iRcritG_critReductCorr`/
+`_iRcritGNeg_critReductNeg`) consume.**
 
-**NEXT (THE crux residual) — assemble `redZKReady`-extraction from the banked blocks.** Now mechanical-ish:
-`isRedexPair_redexCode_of_zKValid hvalid` → `redexPair_tp` gives `tp dᵢ = isymR A`, `tp dⱼ = isymLk k A`
-(SAME `A`). Apply `zDerivation_isymR_form` (→ zIall/zIneg + `A=∀p`/`A=¬p`) and `zDerivation_isymLk_form`
-(→ zAxAll/zAxNeg + `A=∀p`/`k=0,A=¬p`); the shared `A` cross-rules the two off-diagonal cases (zIall forces
-zAxAll since `∀p ≠ ¬p`, by `qqAll ≠ qqOr`/`inegF`). Output: the `hdi`/`hdj` forms. **The one genuinely-hard
-remaining sub-fact is `hirk : irk(^∀pj) = irk(cutFormula (zK s r ds))+1`** — needs (a) `pj = p` (axAll
-formula = R-redex's ∀ matrix, from the shared `A` + `chainAsucc` = R-redex succedent), and (b)
-`cutFormula = F(k)` via `cutFormula_all` + `irk(∀p) = irk(substs1 (numeral k) p)+1` (rank of ∀ = rank of
-instance + 1; substitution rank-invariance, cf. `irk_cut_lt_rank_forall`). The ¬-case `hcut`/`hp` is easier
-(`cutFormula_neg` + `tp_isymR_form_wff`). THEN the atomic engine swap (replay
-`scratchpad/lap119-engine-swap.diff`; `ZRegular_red_zK_splice_of_chain` reroutes via `iRKcCrit_eq_corr`/
-`_eq_neg`) wires all three banked fronts into `ZDerivation_red_zK_crit` / `ZRegular_red_zK_crit` /
-`iord_descent_red_zK_crit`. Full plan in HANDOFF lap-119.
+**NEXT — the atomic engine swap, now genuinely PURE WIRING (all suppliers banked).** Replay
+`scratchpad/lap119-engine-swap.diff` (InternalZ: relocate `iRKcCrit`/`iRK`/`iRKcCritDef` before `iRNextG`;
+`red_zK_crit ↦ iRKcCrit`; `not_zKCritical_red_zK ↦ _iRKcCrit`). Then re-prove the 3 consumers (build is RED
+until all land — atomic):
+- `ZRegular_red_zK_crit` (Zsubst): `rw [red_zK_crit hcrit]; exact ZRegular_iRKcCrit_of_zK hds hZ hreg hvalid`
+  (the caller `ZRegular_red_zK` hcrit-branch already builds `hvalid`). `ZRegular_red_zK_splice_of_chain`
+  reroutes its `iRcritG` premise reads via `iRKcCrit_eq_corr`/`_eq_neg`.
+- `iord_descent_red_zK_crit` (RedZKDescent): `rw [red_zK_crit hcrit]`, then `rcases redZKReady_of_zKValid
+  hZ hvalid` and dispatch to `iord_descent_iRKcCrit_corr`/`_neg`. (`iCrit_halves_descend` likewise re-keys.)
+- `ZDerivation_red_zK_crit` (Crux2Blueprint sorry): restate to `ZDerivation (iRKcCrit (zK s r ds))`, `rcases
+  redZKReady_of_zKValid hZ hvalid`, case on ∀/¬ → `iRKcCrit_eq_corr`/`_eq_neg` + the soundness capstones
+  (need `hvalid` at the `redSoundGen` zK call site — from `zKValid_iff_zKValidF_and_zKCritical` + criticality).
+Full plan in HANDOFF lap-119.
 
 ## lap 118 — ¬-case inversion's `hpmem` residual DISCHARGED; capstone now unconditional
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
