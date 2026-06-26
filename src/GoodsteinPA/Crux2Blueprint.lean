@@ -2654,10 +2654,12 @@ theorem descent_step_Ind {s at' p d0 d1 : V} (hd : ZDerivesEmptyR (zInd s at' p 
     exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_left _ _) (le_max_right _ _))
   have hfr1 : ZFresh d1 := by
     have h : zFresh (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.1
-    rw [zFresh_zInd] at h; exact nonpos_iff_eq_zero.mp (h ▸ le_max_right _ _)
+    rw [zFresh_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_right _ _) (le_max_right _ _))
   have hfr0 : ZFresh d0 := by
     have h : zFresh (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.1
-    rw [zFresh_zInd] at h; exact nonpos_iff_eq_zero.mp (h ▸ le_max_left _ _)
+    rw [zFresh_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_left _ _) (le_max_right _ _))
   have hsa1 : ZSeqAnt d1 := by
     have h : zSeqAnt (zInd s at' (^⊥) d0 d1) = 0 := hd.2.2.2
     rw [zSeqAnt_zInd] at h
@@ -2772,7 +2774,7 @@ lemma ind_reduct_botSucc_of_fresh {s at' p d0 d1 : V}
     (hreg : ZRegular (zInd s at' p d0 d1)) (hfresh : ZFresh (zInd s at' p d0 d1))
     (hseqant : ZSeqAnt (zInd s at' p d0 d1))
     (hsucc : seqSucc s = (^⊥ : V))
-    (hfreshΓ : freshFlag (π₁ at') p (seqAnt s) = 0) :
+    (hfreshΓ : freshFlag (π₁ at') (^⊥ : V) (seqAnt s) = 0) :
     ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = s ∧
       iRedDescent v (zInd s at' p d0 d1) := by
   obtain ⟨hd0Z, hd1Z, hwff⟩ := zDerivation_zInd_inv hZ
@@ -2798,10 +2800,12 @@ lemma ind_reduct_botSucc_of_fresh {s at' p d0 d1 : V}
     exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_left _ _) (le_max_right _ _))
   have hfr1 : ZFresh d1 := by
     have h : zFresh (zInd s at' (^⊥) d0 d1) = 0 := hfresh
-    rw [zFresh_zInd] at h; exact nonpos_iff_eq_zero.mp (h ▸ le_max_right _ _)
+    rw [zFresh_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_right _ _) (le_max_right _ _))
   have hfr0 : ZFresh d0 := by
     have h : zFresh (zInd s at' (^⊥) d0 d1) = 0 := hfresh
-    rw [zFresh_zInd] at h; exact nonpos_iff_eq_zero.mp (h ▸ le_max_left _ _)
+    rw [zFresh_zInd] at h
+    exact nonpos_iff_eq_zero.mp (h ▸ le_trans (le_max_left _ _) (le_max_right _ _))
   have hsa1 : ZSeqAnt d1 := by
     have h : zSeqAnt (zInd s at' (^⊥) d0 d1) = 0 := hseqant
     rw [zSeqAnt_zInd] at h
@@ -2970,8 +2974,14 @@ theorem descent_step_K_noncrit_repMajor {s r ds j0 : V}
       have hsucm : seqSucc (fstIdx (znth ds (majorIdx (zK s r ds)))) = (^⊥ : V) := hmbot
       rw [h] at hregm hfreshm hseqantm hsucm hmemZ
       rw [fstIdx_zInd] at hsucm
-      -- the lone residual: the eigenvariable is fresh in the conclusion antecedent Γₘ = seqAnt s'
-      have hfreshΓ : freshFlag (π₁ at'') p' (seqAnt s') = 0 := sorry
+      -- the eigenvariable freshness in the conclusion antecedent Γₘ = seqAnt s' now FALLS OUT of the
+      -- strengthened `zFresh` invariant: `zFreshNext`'s tag-3 branch carries
+      -- `freshFlag (zIndEig d) ⊥ (seqAnt (fstIdx d))` (dummy ⊥ matrix; antecedent freshness is all the
+      -- ⊥-orbit Ind reduct needs — `ind_reduct_botSucc_of_fresh` consumes only `freshFlag_snd`/`_wff`).
+      have hfreshΓ : freshFlag (π₁ at'') (^⊥ : V) (seqAnt s') = 0 := by
+        have hz : zFresh (zInd s' at'' p' d0' d1') = 0 := hfreshm
+        rw [zFresh_zInd] at hz
+        exact nonpos_iff_eq_zero.mp (hz ▸ le_max_left _ _)
       obtain ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ :=
         ind_reduct_botSucc_of_fresh hmemZ hregm hfreshm hseqantm hsucm hfreshΓ
       rw [← h] at hdesc

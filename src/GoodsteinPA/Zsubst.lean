@@ -1670,7 +1670,9 @@ noncomputable def zFreshNext (d s : V) : V :=
   if zTag d = 1 then
     max (freshFlag (zIallEig d) (zIallF d) (seqAnt (fstIdx d))) (znth s (zIallPrem d))
   else if zTag d = 2 then znth s (zInegPrem d)
-  else if zTag d = 3 then max (znth s (zIndPrem0 d)) (znth s (zIndPrem1 d))
+  else if zTag d = 3 then
+    max (freshFlag (zIndEig d) (^⊥ : V) (seqAnt (fstIdx d)))
+      (max (znth s (zIndPrem0 d)) (znth s (zIndPrem1 d)))
   else if zTag d = 4 then iseqMaxTab s (zKseq d)
   else 0
 
@@ -1680,8 +1682,11 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zFreshNextDef : 𝚺₁.Semise
          ∃ ga, !seqAntDef ga f ∧ ∃ fl, !freshFlagDef fl ea pf ga ∧
          ∃ pr, !zIallPremDef pr d ∧ ∃ v, !znthDef v s pr ∧ !max.dfn y fl v)
     ∨ (t = 2 ∧ ∃ pr, !zInegPremDef pr d ∧ !znthDef y s pr)
-    ∨ (t = 3 ∧ ∃ p0, !zIndPrem0Def p0 d ∧ ∃ v0, !znthDef v0 s p0 ∧
-         ∃ p1, !zIndPrem1Def p1 d ∧ ∃ v1, !znthDef v1 s p1 ∧ !max.dfn y v0 v1)
+    ∨ (t = 3 ∧ ∃ ea, !zIndEigDef ea d ∧ ∃ bot, !qqFalsumDef bot ∧ ∃ f, !fstIdxDef f d ∧
+         ∃ ga, !seqAntDef ga f ∧ ∃ fl, !freshFlagDef fl ea bot ga ∧
+         ∃ p0, !zIndPrem0Def p0 d ∧ ∃ v0, !znthDef v0 s p0 ∧
+         ∃ p1, !zIndPrem1Def p1 d ∧ ∃ v1, !znthDef v1 s p1 ∧
+         ∃ m1, !max.dfn m1 v0 v1 ∧ !max.dfn y fl m1)
     ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqMaxTabDef y s ds)
     ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = 0) )”
 
@@ -1690,8 +1695,8 @@ instance zFreshNext_defined : 𝚺₁-Function₂ (zFreshNext : V → V → V) v
   .mk fun v ↦ by
     simp [zFreshNextDef, zFreshNext, zTag_defined.iff, zIallEig_defined.iff, zIallF_defined.iff,
       fstIdx_defined.iff, seqAnt_defined.iff, freshFlag_defined.iff, zIallPrem_defined.iff,
-      zInegPrem_defined.iff, zIndPrem0_defined.iff, zIndPrem1_defined.iff,
-      zKseq_defined.iff, iseqMaxTab_defined.iff, znth_defined.iff, max_defined.iff]
+      zInegPrem_defined.iff, zIndPrem0_defined.iff, zIndPrem1_defined.iff, zIndEig_defined.iff,
+      qqFalsum_defined.iff, zKseq_defined.iff, iseqMaxTab_defined.iff, znth_defined.iff, max_defined.iff]
     by_cases h1 : zTag (v 1) = 1
     · simp [h1]
     · by_cases h2 : zTag (v 1) = 2
@@ -1810,9 +1815,10 @@ lemma zFresh_eq_zFreshNext {c : V} (hpos : 0 < c) : zFresh c = zFreshNext c (zFr
     zInegPrem_zIneg, znth_zFreshTable_eq_zFresh _ d0 (le_pred_of_lt (d0_lt_zIneg s p d0))]
 
 @[simp] lemma zFresh_zInd (s at' p d0 d1 : V) :
-    zFresh (zInd s at' p d0 d1) = max (zFresh d0) (zFresh d1) := by
+    zFresh (zInd s at' p d0 d1) =
+      max (freshFlag (π₁ at') (^⊥ : V) (seqAnt s)) (max (zFresh d0) (zFresh d1)) := by
   rw [zFresh_eq_zFreshNext (by simp [zInd]), zFreshNext, if_neg (by simp), if_neg (by simp),
-    if_pos (zTag_zInd s at' p d0 d1), zIndPrem0_zInd, zIndPrem1_zInd,
+    if_pos (zTag_zInd s at' p d0 d1), zIndEig_zInd, fstIdx_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
     znth_zFreshTable_eq_zFresh _ d0 (le_pred_of_lt (d0_lt_zInd s at' p d0 d1)),
     znth_zFreshTable_eq_zFresh _ d1 (le_pred_of_lt (d1_lt_zInd s at' p d0 d1))]
 
@@ -1946,12 +1952,19 @@ theorem zFresh_zsubst (a n : V) : ∀ d, ZDerivation d →
       unfold ZFresh; rw [zsubst_zIneg, zFresh_zIneg]; exact hd0f
     · intro hfresh
       unfold ZFresh at hfresh; rw [zFresh_zInd] at hfresh
+      have hflag : freshFlag (π₁ at') (^⊥ : V) (seqAnt s) = 0 :=
+        nonpos_iff_eq_zero.mp (hfresh ▸ le_max_left _ _)
       have hf0 : zFresh (zsubst d0 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
-        (hC d0 hd0).2 (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_left _ _))
+        (hC d0 hd0).2 (nonpos_iff_eq_zero.mp (hfresh ▸ le_trans (le_max_left _ _) (le_max_right _ _)))
       have hf1 : zFresh (zsubst d1 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
-        (hC d1 hd1).2 (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_right _ _))
+        (hC d1 hd1).2 (nonpos_iff_eq_zero.mp (hfresh ▸ le_trans (le_max_right _ _) (le_max_right _ _)))
+      have hflag' : freshFlag (π₁ at') (^⊥ : V)
+          (fvSubstSeq a (Bootstrapping.Arithmetic.numeral n) (seqAnt s)) = 0 := by
+        have h := freshFlag_zsubst_eq_zero (a := a) (n := n) (by simp : IsUFormula ℒₒᵣ (^⊥ : V)) hflag
+        rwa [fvSubst_falsum (L := ℒₒᵣ)] at h
       unfold ZFresh
-      rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd, zFresh_zInd, hf0, hf1]
+      rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd, zFresh_zInd, pi₁_pair,
+        seqAnt_fvSubstSeqt, hf0, hf1, hflag']
       simp
     · intro hfresh
       unfold ZFresh; rw [zsubst_zK]
@@ -2894,8 +2907,9 @@ lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
   · rw [zFresh_zInd] at hfresh
     rw [red_zInd, iRInd_zInd]
     exact zfresh_zK_of (iIndReductSeq_seq d0 d1 1)
-      (zfresh_iIndReductSeq (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_left _ _))
-        (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_right _ _)))
+      (zfresh_iIndReductSeq
+        (nonpos_iff_eq_zero.mp (hfresh ▸ le_trans (le_max_left _ _) (le_max_right _ _)))
+        (nonpos_iff_eq_zero.mp (hfresh ▸ le_trans (le_max_right _ _) (le_max_right _ _))))
   · exact absurd (zTag_zK s r ds) hnK
   · rw [red_zAxAll]; simpa using hfresh
   · rw [red_zAxNeg]; simpa using hfresh

@@ -1,7 +1,7 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 149 (FRESH-MIND REVIEW — crux-2 = 4 disclosed sorryAx leaves; mandate tag-3 freshFlag DROP then the general code-recursion crux) · 2026-06-26
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 149 (FRESH-MIND REVIEW + tag-3 freshFlag DROPPED → crux-2 = 3 disclosed sorryAx leaves; next = the general code-recursion crux) · 2026-06-26
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**);
 `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean. The lone `sorryAx` traces to crux-2.
 
@@ -16,12 +16,17 @@
 > decomposed faithfully per Buchholz §14.254a/b). FINDING = a crux-neglect signal is forming — laps 144-148
 > closed the *surrounding* machinery (Ind reducts, `descent_step_K_replace` plumbing, dispatchers) while the
 > genuine deepest crux — the **general `Γ→⊥` cut-reduction by strong induction on derivation CODE** (leaves
-> 2934+3002) — stays untouched; tag-3 freshFlag is the LAST tractable leaf. **MANDATE (DIRECTION.md lap-149):**
-> DROP tag-3 freshFlag via the focused `zFreshNext` tag-3→`freshFlag` strengthening (mirror tag-1 I∀
-> `Zsubst.lean:1671`, the EXACT shape of the proven lap-146 `zIndWff` ripple) → tag-3 repMajor goes sorry-free;
-> THEN turn to the crux (general code-recursion + gDef) — NO more leaf-hunting. FORBIDDEN = `red` witnesses;
-> `iord`-recursion for the general step (PRWO/Gödel-barred); `redLeast` for gDef; jumping to the crux before
-> freshFlag drops. See `DIRECTION.md` CURRENT DIRECTIVE (lap-149), `HANDOFF-2026-06-26-lap149.md`, `PENDING_WORK.md`.
+> 2934+3002) — stays untouched; tag-3 freshFlag is the LAST tractable leaf. **✅ DROPPED THIS LAP:** executed
+> the mandate — strengthened `zFreshNext`'s tag-3 branch to carry `freshFlag (zIndEig d) ⊥ (seqAnt (fstIdx d))`
+> (a **dummy `^⊥` matrix** — `ind_reduct_botSucc_of_fresh` consumes only the antecedent part, and the real
+> `IsSemiformula 1` matrix would force a level-1 yak-shave; the ⊥-orbit conclusion is `⊥` so antecedent-only
+> freshness is the complete eigenvariable condition). tag-3 freshFlag sorry GONE;
+> `descent_step_K_noncrit_repMajor` tag-3 branch sorry-free; `ind_reduct_botSucc_of_fresh`/`zFresh_zsubst`
+> axiom-clean `[propext, choice, Quot.sound]`; headline unchanged 0 math axioms. Crux-2 now = **3 disclosed
+> sorryAx leaves** {tag-4 K-recursion :2938, axMajor 5/6 :3012, gDef :3135}. **NEXT (DIRECTION.md lap-149):**
+> the general `Γ→⊥` code-recursion crux (leaves 2938+3012) + gDef — NO more leaf-hunting. FORBIDDEN = `red`;
+> `iord`-recursion for the general step; `redLeast` for gDef. See `DIRECTION.md` CURRENT DIRECTIVE (lap-149),
+> `HANDOFF-2026-06-26-lap149.md`, `PENDING_WORK.md`.
 
 > **🧭 Lap-148 — §14.254 REPLACE plumbing banked + no-redex residual re-split (judge-C3 aligned); read FIRST — current.**
 > Build re-verified 🟢 green (1326); headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math

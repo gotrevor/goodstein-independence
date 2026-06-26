@@ -9,8 +9,19 @@ leaves**: (1) tag-3 freshFlag `Crux2Blueprint:2974`; (2) tag-4 K-recursion `desc
 :3125. Leaves (2)+(3) ARE the genuine crux (general `Γ→⊥` cut-reduction); (4) the parallel Σ₁-definability crux;
 (1) the LAST tractable leaf. (DIRECTION.md CURRENT DIRECTIVE = lap-149, OUTRANKS this file.)
 
-### ▶ MANDATED next move — DROP tag-3 freshFlag (`Crux2Blueprint:2974`). A real src-sorry DROP.
-The residual is `have hfreshΓ : freshFlag (π₁ at'') p' (seqAnt s') = 0 := sorry` — the I∀-style eigenvariable
+### ✅ DONE (lap 149) — tag-3 freshFlag DROPPED. `descent_step_K_noncrit_repMajor` tag-3 branch is sorry-free.
+Executed the strengthening below. **Twist found:** the real zInd matrix is `IsSemiformula 1` (induction var),
+not `IsUFormula`, so `freshFlag_zsubst_eq_zero` (wants `IsUFormula`) doesn't apply to it directly — a level-1
+generalization would have been a yak-shave. **Resolved** by carrying the flag with a **dummy `^⊥` matrix**
+(`freshFlag (zIndEig d) ⊥ (seqAnt (fstIdx d))`): `ind_reduct_botSucc_of_fresh` consumes ONLY the antecedent
+part (`freshFlag_snd`/`_wff`), never the matrix, and on the ⊥-orbit the conclusion formula is `⊥` anyway, so
+antecedent-only freshness is the complete (faithful) eigenvariable condition. Reuses `freshFlag` + its
+definability, zero new boilerplate. Verified axiom-clean: `ind_reduct_botSucc_of_fresh`/`zFresh_zsubst` =
+`[propext, choice, Quot.sound]` (no sorryAx); headline + `false_of_ZDerivesEmpty` unchanged 0 math axioms.
+**NEXT = the crux below (general `Γ→⊥` code-recursion).**
+
+#### (Historical) the executed ripple — DROP tag-3 freshFlag (`Crux2Blueprint:2974`)
+The residual was `have hfreshΓ : freshFlag (π₁ at'') p' (seqAnt s') = 0 := sorry` — the I∀-style eigenvariable
 freshness of the `zInd` major premise. `ind_reduct_botSucc_of_fresh` already CONSUMES it; producing it makes
 `descent_step_K_noncrit_repMajor`'s tag-3 branch sorry-free. **`zFresh`/`zFreshNext` does not yet carry it for
 `zInd` — the fix mirrors the tag-1 I∀ clause** (which DOES carry `freshFlag`, `Zsubst.lean:1671`). It is the
