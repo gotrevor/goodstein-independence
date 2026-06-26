@@ -1,6 +1,58 @@
 # Pending work — open obligations & attack paths
 
-## lap 149 (latest) — FRESH-MIND REVIEW: tag-3 freshFlag DROP teed up, then the general code-recursion crux
+## lap 150 (latest) — CODE-RECURSION FRAME LANDED: `genReduct_botSucc` by `𝚺₁` structural induction
+**Build 🟢 1326. `false_of_ZDerivesEmpty` = `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math
+axioms, no drift).** Operator SOLE-OBJECTIVE = M1b-term. Per DIRECTION lap-149's "THEN — the CRUX": the
+tag-3 freshFlag was dropped lap 149, so this lap turned to the genuine crux (the general `Γ→⊥`
+cut-reduction by strong induction on the derivation CODE) and **built the code-induction skeleton**.
+
+### ✅ DONE (lap 150) — the §14.254 recursion is now a real `𝚺₁` structural induction
+The LINCHPIN meta-question ("can the existence-form general reduction even be run by code-induction in
+`𝗜𝚺₁`?") is **settled YES**, machine-checked:
+- The existence-form motive `P d := …invariants… → ∃ v, ZDerivation v ∧ … ∧ iRedDescent v d` is
+  **`𝚺-[1]`-definable** (probed in-kernel, then landed). It is `𝚺₁` precisely because `iRedDescent` is
+  `𝚫₁`. New in `InternalZ.lean`: `iRedDescent_iff` (structure → 3-field conjunction) +
+  `iRedDescent_definable` instance + **`zDerivation_sigma_induction`** (the `𝚺₁`-motive variant of
+  `zDerivation_induction`; same `Construction.induction (Γ := 𝚺)`, `order_induction_sigma` at `m:=1`).
+- **`genReduct_botSucc` restructured** to be proven by `zDerivation_sigma_induction` (`Crux2Blueprint`):
+  tags ∉{3,4} vacuous (`simp at htag`); tag-3 (`zInd`) PROVEN inline via `ind_reduct_botSucc_of_fresh`;
+  tag-4 (`zK`) delegates to the new `genReduct_botSucc_chain`, **supplying the per-premise IH** the
+  induction hands back (`(hC (znth ds i) (hmem i hi)).2`). So the §14.254 recursion is now set up with
+  its IH in hand — no `iord`-recursion (PRWO/Gödel-barred), recursion on the CODE only.
+- Verified axiom-clean: `genReduct_botSucc` / `genReduct_botSucc_chain` / `false_of_ZDerivesEmpty` all
+  `[propext, sorryAx, choice, Quot.sound]` (the lone new `sorryAx` is `genReduct_botSucc_chain`).
+
+### ▶ NEXT — prove `genReduct_botSucc_chain` (`Crux2Blueprint`, the ONE remaining general-reduction crux)
+A `zK s r ds` chain deriving `Γ→⊥` (`seqSucc s = ⊥`, `Γ = seqAnt s` possibly NONEMPTY), regular/fresh/
+seqAnt, with the per-premise IH (each premise `znth ds i`, when a tag-3/4 `Rep` node with the invariants,
+already has its descending reduct). Produce the chain's same-end-sequent (`fstIdx v = s`) strictly-`iord`-
+descending regular/fresh/seqAnt `ZDerivation` reduct `v`. This is the `Γ→⊥` `ZDerivation`/`iRedDescent`-
+valued analog of the WHOLE `∅→⊥` tower (`descent_step_K_hasRedex` + `descent_step_K_noncrit_*`). Attack:
+1. **Extract the exit `j0`** from `zKValidF s r ds` (chain validity) — the `isChainInf` first ⊥-exit, with
+   threading/rank. Same as `descent_step_K_noncritical:3042` (`zKValidF_of_ZDerivation_zK hZ).1`).
+2. **`by_cases` redex pair below `j0`:**
+   - YES → the criticality-free principal cut `iRKcCrit (zK s r ds)`. PORT `descent_step_K_hasRedex`
+     (`Crux2Blueprint:2346`) to RETURN the `iRedDescent`-bundle (not `icmp (iord …)=0`) and to a
+     `ZDerivation` value: `ZDerivation_iRKcCrit_all`/`_neg_botOrbit` are ALREADY `ZDerivation`-valued and
+     do NOT need `seqAnt = ∅` (the `hant` is used only to supply `Seq (seqAnt s)=Seq ∅` — replace with
+     `Seq Γ` from the chain's own seqAnt validity). The descent half: need an `iRedDescent`-bundle form of
+     `iord_descent_iRKcCrit_corr_of_redex`/`_neg_of_redex` (they give the combined `iord` descent; split
+     into `idg_le` + `iotil` `icmp=0` + NF — check `RedZKDescent.lean` for the bundle, mirror
+     `iRedDescent_iIndReductSeqG_one`).
+   - NO → `majorPrem_tag_mem` ⟹ major premise tag ∈ {3,4,5,6}. tags 3/4 → reduce the major premise by
+     the **IH** directly; tags 5/6 → identify the `Rep` cut-partner (`majorPrem_zAxAll_cutPartner`/
+     `_zAxNeg_cutPartner`, tag 3/4) and reduce IT by the IH. Then REPLACE: PORT `descent_step_K_replace`
+     (`Crux2Blueprint:2475`) to a `Γ→⊥` `ZDerivation`/`iRedDescent`-valued analog
+     (`ZDerivation_iCritAux_of` + `iord_descent_iCritAux_of_ZDerivation` are `Γ`-agnostic; the only
+     `∅→⊥`-specific part of `_replace` is the `ZDerivesEmptyR` wrapping — rebundle as `iRedDescent`).
+3. Likely needs a `Γ→⊥` `ZDerivation`-valued `descent_step_K_replace_gen` + a `genReduct_chain_hasRedex`
+   leaf; decompose further with disclosed sub-`sorry`s as needed (raising src count = progress).
+
+**FORBIDDEN (unchanged):** `red` witnesses; `iord`-recursion for the general step (CODE-induction ONLY —
+now wired); `redLeast`/μ-min for gDef; collapsing the repMajor/axMajor split. The parallel **gDef**
+(`exists_sigma1_descending_step`) crux is independent — attack after/alongside.
+
+
 **Build 🟢 1326. Re-verified in-kernel: headline + `false_of_ZDerivesEmpty` + `ZDerivesEmptyR_descent_step` +
 `descent_step_K_noncrit_recurse` all `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms) — no
 drift.** Operator SOLE-OBJECTIVE = M1b-term. Crux-2 termination is now reduced to **4 disclosed `sorryAx`
