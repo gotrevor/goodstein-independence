@@ -3165,6 +3165,95 @@ lemma ZSeqAnt_iRcritG_premise {d ρk : V} {ρ : V → V} (h : ZSeqAnt (iRcritG d
   rw [zKseq_zK]
   exact ZSeqAnt_zK_premise (iCritReductSeq_seq _ _) h (by rw [iCritReductSeq_lh]; exact hk)
 
+/-- **The I∀ R-redex's corrected-reduct premise is `ZSeqAnt`-clean (UNCONDITIONAL).** The §3.2-case-5.1
+∀-reduct substitutes the I∀ child `zIallPrem e = d0` by `numeral k`; `zsubst` is antecedent-`Seq` for free
+(`zSeqAnt_zsubst`, no `ZSeqAnt e` hypothesis), needing only `ZDerivation e` (⟹ `ZDerivation d0`). `ZSeqAnt`
+analogue of `ZRegular_zsubst_zIallPrem`. -/
+lemma ZSeqAnt_zsubst_zIallPrem {e k : V} (he : ZDerivation e) (htag : zTag e = 1) :
+    ZSeqAnt (zsubst (zIallPrem e) (zIallEig e) (Bootstrapping.Arithmetic.numeral k)) := by
+  rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+  · simp at htag
+  · rw [zIallPrem_zIall, zIallEig_zIall]
+    exact zSeqAnt_zsubst a (Bootstrapping.Arithmetic.numeral k) d0 hd0
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+
+/-- **The I¬ R-redex's corrected-reduct premise `zInegPrem e = d0` inherits `ZSeqAnt`** from the I¬ node
+(`zSeqAnt_zIneg` decomposes as a `max`, so the premise flag is dominated). `ZSeqAnt` analogue of
+`ZRegular_zInegPrem`. -/
+lemma ZSeqAnt_zInegPrem {e : V} (he : ZDerivation e) (hsa : ZSeqAnt e) (htag : zTag e = 2) :
+    ZSeqAnt (zInegPrem e) := by
+  rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+  · simp at htag
+  · simp at htag
+  · rw [zInegPrem_zIneg]
+    unfold ZSeqAnt at hsa ⊢; rw [zSeqAnt_zIneg] at hsa
+    exact nonpos_iff_eq_zero.mp (hsa ▸ le_max_right _ _)
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+  · simp at htag
+
+/-- **The re-keyed critical reduct of a valid critical chain is `ZSeqAnt`-clean — O-`ZSeqAnt` front of the
+engine swap (red-FREE).** Mirrors `ZFresh_iRKcCrit`/`ZRegular_iRKcCrit`: both halves of the `iCritReductG`
+are `seqUpdate` chains whose premises are clean (`hprem`), one slot a `zsubst`/`zInegPrem` redex premise
+(`ZSeqAnt_zsubst_zIallPrem`/`ZSeqAnt_zInegPrem`), the other the §5 `Ax^1` whose antecedent stays a `Seq`
+(`seqAddAnt`/`seqSetSucc` of the cut-partner's `Seq` antecedent `hSeqJ`). -/
+lemma ZSeqAnt_iRKcCrit {d : V}
+    (hprem : ∀ m < lh (zKseq d), ZSeqAnt (znth (zKseq d) m))
+    (hdI : ZDerivation (znth (zKseq d) (redexI d)))
+    (hsaI : ZSeqAnt (znth (zKseq d) (redexI d)))
+    (hSeqJ : Seq (seqAnt (fstIdx (znth (zKseq d) (redexJ d)))))
+    (htagI : zTag (znth (zKseq d) (redexI d)) = 1 ∨ zTag (znth (zKseq d) (redexI d)) = 2) :
+    ZSeqAnt (iRKcCrit d) := by
+  rw [iRKcCrit]
+  split
+  case isTrue h1 =>
+    rw [iCritReductG]
+    refine ZSeqAnt_zK_of_iCritReductSeq ?_ ?_
+    · exact ZSeqAnt_zK_of_seqUpdate hprem (ZSeqAnt_zsubst_zIallPrem hdI h1)
+    · refine ZSeqAnt_zK_of_seqUpdate hprem ?_
+      show zSeqAnt (zAx1 _ _) = 0
+      rw [zSeqAnt_zAx1]; exact seqAntSeqFlag_eq_zero_iff.mpr (Seq_seqAnt_seqAddAnt hSeqJ)
+  case isFalse h1 =>
+    have h2 : zTag (znth (zKseq d) (redexI d)) = 2 := htagI.resolve_left h1
+    rw [iCritReductG]
+    refine ZSeqAnt_zK_of_iCritReductSeq ?_ ?_
+    · refine ZSeqAnt_zK_of_seqUpdate hprem ?_
+      show zSeqAnt (zAx1 _ _) = 0
+      rw [zSeqAnt_zAx1]
+      exact seqAntSeqFlag_eq_zero_iff.mpr (by rw [seqAnt_seqSetSucc]; exact hSeqJ)
+    · exact ZSeqAnt_zK_of_seqUpdate hprem (ZSeqAnt_zInegPrem hdI hsaI h2)
+
+/-- **`ZSeqAnt (iRKcCrit (zK s r ds))` from a valid critical chain** — discharges every `ZSeqAnt_iRKcCrit`
+hypothesis from the orbit data (parallel to `ZRegular_iRKcCrit_of_zK`). The cut-partner's `Seq` antecedent
+`hSeqJ` comes from `seq_seqAnt_zK_premise` (the partner is an L-axiom, `tp = isymLk` ⟹ `zTag ∈ {5,6} ≠ 4`,
+`tp_isymLk_tag`). -/
+lemma ZSeqAnt_iRKcCrit_of_zK {s r ds : V} (hds : Seq ds)
+    (hZ : ZDerivation (zK s r ds)) (hsa : ZSeqAnt (zK s r ds))
+    (hvalid : zKValid s r ds) :
+    ZSeqAnt (iRKcCrit (zK s r ds)) := by
+  obtain ⟨hIlt, hJlt⟩ := redexI_redexJ_lt_of_zKValid hvalid
+  refine ZSeqAnt_iRKcCrit ?_ ?_ ?_ ?_ ?_
+  · rw [zKseq_zK]; intro m hm; exact ZSeqAnt_zK_premise hds hsa hm
+  · rw [zKseq_zK]; exact (zDerivation_zK_inv hZ).2 _ hIlt
+  · rw [zKseq_zK]; exact ZSeqAnt_zK_premise hds hsa hIlt
+  · rw [zKseq_zK]
+    refine seq_seqAnt_zK_premise hds hsa hJlt ((zDerivation_zK_inv hZ).2 _ hJlt) ?_
+    have htagJ : zTag (znth ds (redexJ (zK s r ds))) = 5 ∨ zTag (znth ds (redexJ (zK s r ds))) = 6 :=
+      tp_isymLk_tag (redexPair_tp (isRedexPair_redexCode_of_zKValid hvalid)).2
+    rcases htagJ with h | h <;> simp [h]
+  · rw [zKseq_zK]; exact zTag_redexI_of_zKValid hvalid
+
 /-- **5.2.2 replace branch — `ZSeqAnt` preserved (unconditional).** -/
 lemma ZSeqAnt_red_zK_replace {s r ds : V} (hds : Seq ds)
     (hsa : ZSeqAnt (zK s r ds))
@@ -3361,6 +3450,20 @@ lemma ZFresh_iRKcCrit {d : V}
     exact ZFresh_zK_of_iCritReductSeq
       (ZFresh_zK_of_seqUpdate hprem (hax _ _))
       (ZFresh_zK_of_seqUpdate hprem (ZFresh_zInegPrem hdI hfreshI h2))
+
+/-- **`ZFresh (iRKcCrit (zK s r ds))` from a valid critical chain** — the O3/freshness front of the
+witness-swap, discharging `ZFresh_iRKcCrit`'s hypotheses from the orbit data (parallel to
+`ZRegular_iRKcCrit_of_zK` / `ZSeqAnt_iRKcCrit_of_zK`). -/
+lemma ZFresh_iRKcCrit_of_zK {s r ds : V} (hds : Seq ds)
+    (hZ : ZDerivation (zK s r ds)) (hfresh : ZFresh (zK s r ds))
+    (hvalid : zKValid s r ds) :
+    ZFresh (iRKcCrit (zK s r ds)) := by
+  obtain ⟨hIlt, _⟩ := redexI_redexJ_lt_of_zKValid hvalid
+  refine ZFresh_iRKcCrit ?_ ?_ ?_ ?_
+  · rw [zKseq_zK]; intro m hm; exact ZFresh_zK_premise hds hfresh hm
+  · rw [zKseq_zK]; exact (zDerivation_zK_inv hZ).2 _ hIlt
+  · rw [zKseq_zK]; exact ZFresh_zK_premise hds hfresh hIlt
+  · rw [zKseq_zK]; exact zTag_redexI_of_zKValid hvalid
 
 /-- **The ∀-critical reduct soundness freshness package, from the orbit `ZFresh`.** Combines the premise
 extraction `zfresh_zK_premise` with the two target-3 suppliers: from the orbit invariant `ZFresh (zK s r

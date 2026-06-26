@@ -1879,25 +1879,66 @@ theorem ZDerivation_iRKcCrit_critical_all {s r ds : V}
     rw [hdi'] at hdi
     exact absurd (congrArg zTag hdi) (by rw [zTag_zIall, zTag_zIneg]; simp)
 
-/-- **CRITICAL case (Buchholz §3.2 case 5.1).** A regular `∅→⊥` chain that is critical (`¬ permIdx < lh ds`)
-has `red (zK s r ds) = iRcritG …` as a strictly-`iord`-descending reduct. DESCENT = `iord_descent_red_zK_crit`
-(banked, sorry-free); SOUNDNESS = `ZDerivesEmptyR_red` (red's standard orbit soundness, gated on the
-PRE-EXISTING red-R2 `ZDerivation_red_zK_crit`, `Crux2Blueprint:1108` — the lap-114 instance-0→k
-re-principalization gap, shared by EVERY `red`-soundness use incl. the Ind case below, NOT new here). **NO
-"cutPartner-is-principal-R-intro" obligation** — Lemma 3.1 (`inference_critical_pair`, inside the descent
-lemma) supplies the principal redex pair from criticality alone. This is the lap-141 payoff: the tag-5/6 wall
-does not arise in the faithful Buchholz split, and the critical case introduces NO new sorry (it reuses red's
-existing soundness chain, not the false-risk `iR2` reduct). -/
+/-- **CRITICAL ∀-case (Buchholz §3.2 case 5.1, I∀ R-redex) — RED-FREE (lap 143).** A regular critical
+`∅→⊥` chain whose R-redex is an `I∀` has the GENUINE corrected reduct `iRKcCrit (zK s r ds)` as a
+strictly-`iord`-descending `ZDerivesEmptyR` reduct — witnessing the existence-form `∃ d'` with `iRKcCrit`,
+NOT `red`. SOUNDNESS = `ZDerivation_iRKcCrit_critical_all` (lap-142, sorry-free, NO `red`/`redSoundGen`);
+the three orbit invariants = `ZRegular_/ZFresh_/ZSeqAnt_iRKcCrit_of_zK`; DESCENT = `iord_descent_iRKcCrit_corr`
+(banked). This DROPS the dominant critical sub-case off the kernel-FALSE `red`-soundness chain
+(`ZDerivation_red_zK_crit` :1108 / `zKValidF_iIndReduct_of_zInd` :80). -/
+theorem descent_step_K_critical_all {s r ds : V}
+    (hd : ZDerivesEmptyR (zK s r ds))
+    (hcrit : ¬ permIdx (zK s r ds) < lh ds)
+    (hAcase : ∃ sᵢ a p d0, znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  have hvalid : zKValid s r ds := zKValid_iff_zKValidF_and_zKCritical.mpr
+    ⟨zKValidF_of_ZDerivation_zK hZ, zKCritical_of_not_permIdx_lt hcrit⟩
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  obtain ⟨hIJ, hJlt, hcase⟩ := redZKReady_of_zKValid hZ hvalid
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  refine ⟨iRKcCrit (zK s r ds),
+    ⟨⟨ZDerivation_iRKcCrit_critical_all hd hcrit hAcase, ?_, ?_⟩,
+      ZRegular_iRKcCrit_of_zK hds hZ hd.2.1 hvalid, ZFresh_iRKcCrit_of_zK hds hZ hd.2.2.1 hvalid,
+      ZSeqAnt_iRKcCrit_of_zK hds hZ hd.2.2.2 hvalid⟩, ?_⟩
+  · rw [fstIdx_iRKcCrit]; exact hd.1.2.1
+  · rw [fstIdx_iRKcCrit]; exact hd.1.2.2
+  · rcases hcase with ⟨sᵢ, sⱼ, a, p, pj, k', d0, hdi, hdj, hirk, _hsj⟩ |
+      ⟨sᵢ, sⱼ, p, d0, hdi, _hdj, _hcut, _hpUf⟩
+    · exact iord_descent_iRKcCrit_corr hds hmem hvalid hIlt hJlt hIJ hdi hdj hirk
+    · exfalso
+      obtain ⟨sᵢ', a', p', d0', hdi'⟩ := hAcase
+      rw [hdi'] at hdi
+      exact absurd (congrArg zTag hdi) (by rw [zTag_zIall, zTag_zIneg]; simp)
+
+/-- **CRITICAL ¬-case (Buchholz §3.2 case 5.1, I¬ R-redex) — the honest residual (lap 143).** The genuine
+`iRKcCrit` ¬-reduct's soundness (`ZDerivation_iRKcCrit_neg`) replaces premise `redexJ`, so its succedent
+half `ZDerivation_corrected_haux0_neg` needs chain-threading up to `redexJ`; from `zKValid`'s `isChainInf`
+we only get threading up to the existential tip `j0`, and `redexJ ≤ j0` is NOT free in general. **Next
+attack:** pin `j0 = lh ds − 1` for genuine ⊥-orbit chains (`isChainInf_of_last`), giving `redexJ < lh ds =
+j0+1`; or weaken `_haux0_neg` to thread only up to `min(redexJ, j0)`. (Until then the ¬-case is the lone
+open critical sub-case; the ∀-case above is red-free.) -/
+theorem descent_step_K_critical_neg {s r ds : V}
+    (hd : ZDerivesEmptyR (zK s r ds))
+    (hcrit : ¬ permIdx (zK s r ds) < lh ds)
+    (hNcase : ∃ sᵢ p d0, znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+
+/-- **CRITICAL case (Buchholz §3.2 case 5.1) — dispatcher.** Case-splits on the R-redex polarity (the
+`redZKReady_of_zKValid` ∀/¬ disjunction): I∀ → `descent_step_K_critical_all` (RED-FREE, lap 143); I¬ →
+`descent_step_K_critical_neg` (the open `redexJ ≤ j0` residual). NO `red`/`redSoundGen` dependence on the
+∀-branch — the lap-141 regression to `red` is undone for the dominant sub-case. -/
 theorem descent_step_K_critical {s r ds : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hcrit : ¬ permIdx (zK s r ds) < lh ds) :
     ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
-  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hd.1.1
-  have hreg : ∀ i < lh ds, ZRegular (znth ds i) := fun i hi => ZRegular_zK_premise hds hd.2.1 hi
-  refine ⟨red (zK s r ds), ZDerivesEmptyR_red hd, ?_⟩
-  exact iord_descent_red_zK_crit hcrit hds hmem hreg
-    (zKValid_iff_zKValidF_and_zKCritical.mpr
-      ⟨zKValidF_of_ZDerivation_zK hd.1.1, zKCritical_of_not_permIdx_lt hcrit⟩)
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  have hvalid : zKValid s r ds := zKValid_iff_zKValidF_and_zKCritical.mpr
+    ⟨zKValidF_of_ZDerivation_zK hZ, zKCritical_of_not_permIdx_lt hcrit⟩
+  obtain ⟨_, _, hcase⟩ := redZKReady_of_zKValid hZ hvalid
+  rcases hcase with ⟨sᵢ, sⱼ, a, p, pj, k', d0, hdi, _⟩ | ⟨sᵢ, sⱼ, p, d0, hdi, _⟩
+  · exact descent_step_K_critical_all hd hcrit ⟨sᵢ, a, p, d0, hdi⟩
+  · exact descent_step_K_critical_neg hd hcrit ⟨sᵢ, p, d0, hdi⟩
 
 /-! ### `descent_step_K_majorIdx` — DECOMPOSED critical / non-critical (lap 141, Buchholz §3.2 case 5)
 
