@@ -1100,7 +1100,7 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZRegular d → ZDerivation (r
 `ZDerivesEmpty`: the genuine reduct `red` does the I∀ eigensubst `zsubst d0 a 0`, which is a `ZDerivation`
 only when the node is regular (`maxEigen d0 < a`). The embedding (M2) produces a regular derivation; `red`
 preserves both (`ZRegular_red` for O1, `fstIdx_red` for the conclusion). -/
-def ZDerivesEmptyR (d : V) : Prop := ZDerivesEmpty d ∧ ZRegular d ∧ ZFresh d
+def ZDerivesEmptyR (d : V) : Prop := ZDerivesEmpty d ∧ ZRegular d ∧ ZFresh d ∧ ZSeqAnt d
 
 /-- **M1b — THE nut.** The `red`-reduct of a contradiction derivation is again a genuine `ZDerivation`.
 (Re-pointed `RedSound`, off the dead `iR2`.) A corollary of `redSoundGen`; the regularity comes from the
@@ -1268,7 +1268,7 @@ theorem ZDerivesEmptyR_red {d : V} (h : ZDerivesEmptyR d) : ZDerivesEmptyR (red 
   have hfst : fstIdx (red d) = fstIdx d :=
     fstIdx_red h.1.1 h.1.2.1 h.1.2.2 (zTag_Ind_or_K_of_ZDerivesEmpty h.1)
   exact ⟨⟨redSound d h, by rw [hfst]; exact h.1.2.1, by rw [hfst]; exact h.1.2.2⟩,
-    ZRegular_red d h.1.1 h.2.1, ZFresh_red d h.1.1 h.2.2⟩
+    ZRegular_red d h.1.1 h.2.1, ZFresh_red d h.1.1 h.2.2.1, ZSeqAnt_red d h.1.1 h.2.2.2⟩
 
 /-- `ZDerivesEmptyR` is closed under the `red`-orbit (no hypothesis — `redSound`+`ZRegular_red` discharge it). -/
 theorem ZDerivesEmptyR_red_iterate {z : V} (hz : ZDerivesEmptyR z) :
