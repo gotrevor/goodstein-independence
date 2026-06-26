@@ -2459,14 +2459,107 @@ dichotomy on whether the chain has a redex pair `⟪i0,j1⟫` BELOW the `isChain
   of `Γₘ→⊥`, `Γₘ` possibly nonempty) — the GENERAL `Γ→⊥` Z-derivation reduction, closure via strong
   `iord`-induction (Buchholz Thm 2.1 / Cor 2.1). The one genuinely deep remaining piece. -/
 
-/-- **§5.2 residual — no redex below the exit ⟹ REDUCE the (Rep / chain-partnered) major premise (named
-sub-`sorry`).** When the `∅→⊥` chain has NO redex pair below the `isChainInf` exit `j0`, the faithful major
-premise (first ⊥-exit, `majorIdx ≤ j0`) is a `Rep` node (`zInd`/sub-`zK`) or a tag-5/6 L-axiom whose
-cut-partner is a chain — in all cases Buchholz reduces by REPLACING the major premise with its own
-strictly-`iord`-descending reduct (same `Γₘ→⊥` end-sequent, `isChainInf_congr` keeps the chain valid). This is
-the GENERAL Z-derivation reduction (the major premise's antecedent `Γₘ` is possibly nonempty, so it is NOT a
-`ZDerivesEmptyR` and the ⊥-orbit collapses of `descent_step_Ind`/`_K_critical` do not apply); closure = a
-strong-`iord`-induction-generalized descent step on `Γ→⊥` (Buchholz Theorem 2.1 / Corollary 2.1). -/
+/-- **Shared §14.254 REPLACE step (off `red`, off criticality) — the reusable plumbing of BOTH no-redex
+sub-cases.** If SOME premise `i` of the `∅→⊥` chain `zK s r ds` has a SAME-end-sequent
+(`fstIdx v = fstIdx (znth ds i)`, i.e. Buchholz `tp(dᵢ) = Rep` — the reduction step does not change `dᵢ`'s
+endsequent, §14.254) strictly-`iord`-descending reduct `v` that is itself a regular/fresh/seqAnt
+`ZDerivation`, then replacing it — `zK s r (seqUpdate ds i v) = iCritAux (zK s r ds) i v` — yields a
+strictly-`iord`-descending `ZDerivesEmptyR`. This realizes Buchholz §14.254 `d[0] = K^r_Θ(i ∕ dᵢ[0])` at the
+assembly layer, wiring the banked `ZDerivation_iCritAux_of` (chain validity, `zKValidF_seqUpdate`) +
+`iord_descent_iCritAux_of_ZDerivation` (the N1-IH descent) + `ZRegular/ZFresh/ZSeqAnt_zK_of_seqUpdate`
+(invariant preservation). The reduct's own well-formedness side-conditions are discharged UNIFORMLY from
+`ZDerivation v` (`iperm_tp_fstIdx_of_ZDerivation` + `zKValidF_leafconds_of_ZDerivation`), so the only genuine
+remaining content of each no-redex case is PRODUCING `v` — the Rep-reduct of the major premise (§14.254a,
+`repMajor`) or of its upstream cut-partner (§14.254b, `axMajor`) — i.e. the GENERAL `Γ→⊥` reduction
+(recursion on a structurally-smaller premise). -/
+theorem descent_step_K_replace {s r ds i v : V}
+    (hd : ZDerivesEmptyR (zK s r ds)) (hi : i < lh ds)
+    (hZv : ZDerivation v) (hregv : ZRegular v) (hfreshv : ZFresh v) (hseqantv : ZSeqAnt v)
+    (hvfst : fstIdx v = fstIdx (znth ds i))
+    (hdesc : iRedDescent v (znth ds i)) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  have hant : seqAnt s = (∅ : V) := by have h := hd.1.2.1; rwa [fstIdx_zK] at h
+  have hsucc : seqSucc s = (^⊥ : V) := by have h := hd.1.2.2; rwa [fstIdx_zK] at h
+  have hperm_v := iperm_tp_fstIdx_of_ZDerivation hZv
+  obtain ⟨hf1, hf2, hf5, hf6⟩ := zKValidF_leafconds_of_ZDerivation hZv
+  refine ⟨iCritAux (zK s r ds) i v, ⟨⟨?_, ?_, ?_⟩, ?_, ?_, ?_⟩, ?_⟩
+  · exact ZDerivation_iCritAux_of hi hZ hZv hvfst hperm_v hf1 hf2 hf5 hf6
+  · rw [iCritAux_zK, fstIdx_zK]; exact hant
+  · rw [iCritAux_zK, fstIdx_zK]; exact hsucc
+  · rw [iCritAux_zK]
+    exact ZRegular_zK_of_seqUpdate (fun m hm => ZRegular_zK_premise hds hd.2.1 hm) hregv
+  · rw [iCritAux_zK]
+    exact ZFresh_zK_of_seqUpdate (fun m hm => ZFresh_zK_premise hds hd.2.2.1 hm) hfreshv
+  · rw [iCritAux_zK]
+    exact ZSeqAnt_zK_of_seqUpdate (fun m hm => ZSeqAnt_zK_premise hds hd.2.2.2 hm) hseqantv
+  · exact iord_descent_iCritAux_of_ZDerivation hZ hi hdesc.otil_lt hdesc.dg_le hdesc.nf
+
+/-! ### No-redex residual — the §14.254 major-premise dichotomy (lap 148)
+
+With NO redex pair below the exit `j0`, Buchholz §14.25 dispatches on `tp(dₘ)` (the major premise's OWN
+reduction type) — equivalently, on its constructor tag (`majorPrem_tag_mem` ⟹ tag ∈ {3,4,5,6}):
+
+- **§14.254a `repMajor` (tags 3,4):** the major premise `dₘ = znth ds m` (`m = majorIdx`) is a `zInd` (tag 3,
+  whose Ind-unfolding reduction is `Rep`) or a sub-`zK` (tag 4, `Rep` when its own major premise is `Rep`).
+  `tp(dₘ) = Rep`, so `dₘ`'s reduct `dₘ[0]` has the SAME end-sequent `Γₘ→⊥` — feed it to `descent_step_K_replace`
+  at `i = m`. (Caveat tag-4: if the sub-chain L-reduces, `tp(dₘ) ≠ Rep` and it falls to §14.254b on the
+  cut-partner — handled there.)
+- **§14.254b `axMajor` (tags 5,6):** the major premise is an L-axiom `zAxAll`/`zAxNeg` (a `red`-FIXPOINT,
+  `tp(dₘ) = Lk_V`). Its active formula `V` (`^∀p`/`inegF p`) is NOT in `Θ = ∅`, so it agrees with the succedent
+  of a strictly-earlier premise `i′` (`majorPrem_zAxAll_cutPartner`/`_zAxNeg_cutPartner`). Since there is NO
+  redex, `i′` is NOT a direct R-introduction (else `⟪i′,m⟫` is a redex pair `≤ j0`), so `tp(d_{i′}) = Rep` and
+  `d_{i′}`'s reduct has the same end-sequent — feed it to `descent_step_K_replace` at `i = i′`.
+
+BOTH bottom out in producing the `Rep`-reduct of a structurally-smaller premise (`dₘ` or `d_{i′}`) deriving
+`Γ′→⊥` with `Γ′` possibly nonempty — the GENERAL `Γ→⊥` reduction, closure via strong induction on the
+derivation CODE (Buchholz Theorem 2.1; NOT `iord`-recursion — that is PRWO/Gödel-barred). The surrounding
+replace plumbing is now discharged by `descent_step_K_replace`; the lone genuine residual of each is the
+smaller-premise reduct. -/
+
+/-- **§14.254a — `Rep` major premise (tags 3,4): replace it with its same-end-sequent reduct (named
+sub-`sorry`).** No redex below the exit `j0`; the faithful major premise `dₘ = znth ds (majorIdx)` is a `zInd`
+(3) or sub-`zK` (4), whose reduction is `Rep` (same `Γₘ→⊥` end-sequent). Closure: produce `dₘ`'s
+strictly-`iord`-descending regular/fresh/seqAnt `ZDerivation` reduct (the GENERAL `Γ→⊥` reduction, recursion on
+the smaller premise `dₘ`) and feed `descent_step_K_replace` at `i = majorIdx`. The replace plumbing is banked
+(`descent_step_K_replace`); the residual is the major-premise reduct. -/
+theorem descent_step_K_noncrit_repMajor {s r ds j0 : V}
+    (hd : ZDerivesEmptyR (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hj0 : j0 < lh ds) (hbot0 : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
+    (htag : zTag (znth ds (majorIdx (zK s r ds))) = 3 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 4) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+
+/-- **§14.254b — L-axiom major premise (tags 5,6): replace its upstream `Rep` cut-partner (named
+sub-`sorry`).** No redex below the exit; the faithful major premise is `zAxAll`/`zAxNeg` (a `red`-FIXPOINT) with
+active formula `V` (`^∀p`/`inegF p`). `V` agrees with the succedent of a strictly-earlier premise `i′`
+(`majorPrem_zAxAll_cutPartner`/`_zAxNeg_cutPartner`); since there is no redex, `i′` is NOT a direct R-intro, so
+`tp(d_{i′}) = Rep` and `d_{i′}`'s reduct keeps the end-sequent. Closure: produce `d_{i′}`'s strictly-descending
+regular/fresh/seqAnt `ZDerivation` reduct (the GENERAL `Γ→⊥` reduction on the smaller premise `d_{i′}`) and feed
+`descent_step_K_replace` at `i = i′`. The replace plumbing is banked; the residual is the cut-partner reduct. -/
+theorem descent_step_K_noncrit_axMajor {s r ds j0 : V}
+    (hd : ZDerivesEmptyR (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hj0 : j0 < lh ds) (hbot0 : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
+    (htag : zTag (znth ds (majorIdx (zK s r ds))) = 5 ∨ zTag (znth ds (majorIdx (zK s r ds))) = 6) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+
+/-- **§5.2 no-redex residual — sorry-FREE major-premise DISPATCHER (lap 148).** No redex pair below the
+`isChainInf` exit `j0`. By `majorPrem_tag_mem` the faithful major premise's tag ∈ {3,4,5,6}: routes tag-3/4
+(`Rep` major) → `descent_step_K_noncrit_repMajor` (§14.254a replace the major premise), tag-5/6 (L-axiom major)
+→ `descent_step_K_noncrit_axMajor` (§14.254b replace the upstream cut-partner). This restores the faithful
+Buchholz §14.254a/b split (lap-147 collapsed it into one residual with a docstring that wrongly claimed all
+cases replace the major premise — false for the tag-5/6 `red`-FIXPOINT L-axioms, lap-130 finding
+`InternalZ:9281`). Both leaves now consume the banked `descent_step_K_replace`. -/
 theorem descent_step_K_noncrit_recurse {s r ds j0 : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
@@ -2475,7 +2568,13 @@ theorem descent_step_K_noncrit_recurse {s r ds j0 : V}
         inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
     (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
     (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)) :
-    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  rcases majorPrem_tag_mem hZ hant hsucc with h | h | h | h
+  · exact descent_step_K_noncrit_repMajor hd hant hsucc hj0 hbot0 hthread0 hrank0 hnolow (Or.inl h)
+  · exact descent_step_K_noncrit_repMajor hd hant hsucc hj0 hbot0 hthread0 hrank0 hnolow (Or.inr h)
+  · exact descent_step_K_noncrit_axMajor hd hant hsucc hj0 hbot0 hthread0 hrank0 hnolow (Or.inl h)
+  · exact descent_step_K_noncrit_axMajor hd hant hsucc hj0 hbot0 hthread0 hrank0 hnolow (Or.inr h)
 
 /-- **Non-critical case (Buchholz §3.2 case 5.2) — sorry-FREE has-redex/no-redex DISPATCHER (lap 147).**
 Extracts the `isChainInf` exit `j0` (with threading/rank/⊥-exit) from `zKValidF`, then case-splits on whether

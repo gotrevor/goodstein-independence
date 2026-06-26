@@ -17,6 +17,17 @@
   sharpest point but is **already de-fanged** by banked machinery — and its suggested fix must keep
   determinism at the STEP, never the orbit (the orbit-level `redLeast`/μ-min was refuted lap-139).
 
+## Convergence (Codex follow-up, 2026-06-26) — both reviewers now agree
+- **All 5 critiques: settled** as below. No open disagreement between the two outside reviews.
+- **§5.2 (C3): a VALIDATION SPIKE, not a mandate.** Prove the two cases first, generalize only if they
+  share one motive (concrete 3-step plan in C3).
+- **gDef (C4): graphability coupled to the single-step reduct from the START.** Do not prove a bare `∃ d'`
+  and hope definability appears later; do not revive the orbit-wide `redLeast`/μ-min (refuted lap-139).
+- **Revised finishability (both reviewers):** **~55–70% full headline** (M2 / Foundation→Z behaving),
+  **~75–85% the current M1b-term path** if the next few laps confirm the §5.2 interface shape. Codex's
+  earlier 80–90% was a generous ~100-lap horizon and is withdrawn. **Core risk = interface
+  shape-corrections, not theorem feasibility** — both reviews land here independently.
+
 ## Per-critique adjudication
 
 ### C1 — DIRECTION.md stale. ✅ TRUE, structural, mild. (~90%)
@@ -34,14 +45,19 @@ Verified: §5.2 is two leaves — `descent_step_K_noncrit_repMajor` (`:2370`) + 
 - **Full headline** (= `peano_not_proves_goodstein`): + **M2** (Foundation→Z bridge, ~0%, the lone big
   unknown) + top wiring (`goodstein_implies_consistency`). Do not let the M1b dashboard read as "almost done."
 
-### C3 — §5.2 decomposed but broad; prove `descent_step_general` then instantiate. ⚠️ GOOD INSTINCT, VERIFY FIRST. (~60%)
-Codex assumes repMajor and axMajor "both collapse into general nonempty-antecedent Γ→⊥ reduction." But in
-Buchholz §5.2 these are **different reduction cases** — rep-major = chain-promotion of the selected premise;
-ax-major = an axiom-cut. They MAY share a general form, they may not. **Do not build `descent_step_general`
-as a goal until you've confirmed both repMajor and axMajor genuinely instantiate from one statement**
-(check: do both reduce via the same `iRKcCrit`-style reduct + the same `isChainInf` keep-tip reconstruction
-used for the ¬-case lap-144?). If yes, generalize and save a leaf. If no, prove them as the two cases they
-are. Right instinct, premature as a mandate.
+### C3 — §5.2 broad; generalize? ✅ CONVERGED (Codex follow-up): VALIDATION SPIKE, NOT A MANDATE. (~70%)
+Both reviewers agree `descent_step_general` is a **spike, not a goal**. The shared motive is plausible —
+both repMajor and axMajor need a *smaller-premise reduction* + *reconstruction of the outer K-chain with
+strict iord descent*. BUT Buchholz §5.2 has genuinely different constructors: **Rep-major = replacement of
+the selected (major) premise (chain-promotion); ax-major = an axiom principal cut.** So prove the two cases
+FIRST; decide a common motive only after:
+1. **repMajor lemma:** "replace a major premise by a same-sequent descending reduct, outer K descends."
+2. **ax-major lemma:** the cut-partner / redex-bound lemma, **independent of criticality** — this is exactly
+   the "decouple `iRKcCrit` redex-finding from CRITICALITY" the lap-147 commit `112f41b` already began.
+3. **THEN** decide whether (1)+(2) fit one strong-iord-induction Γ→⊥ motive; generalize only if they do.
+Do NOT write `descent_step_general` as the first move — it risks a general statement that instantiates to
+neither case. (Cheap check that would confirm a clean collapse: do both reduce via the same `iRKcCrit`-style
+reduct + the same `isChainInf` keep-tip reconstruction used for the ¬-case lap-144?)
 
 ### C4 — gDef may become a second cut-elim rewrite. ✅ SHARPEST POINT, but already de-fanged. (~75%)
 Codex correctly names the real risk the existence-form pivot introduced: a definability debt at (A), and the

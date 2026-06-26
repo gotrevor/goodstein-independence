@@ -1,6 +1,56 @@
 # Pending work — open obligations & attack paths
 
-## lap 147 (latest) — §5.2 WIRED to Buchholz §14.25: `descent_step_K_noncritical` decomposed on MAJOR-premise tag
+## lap 148 (latest) — §14.254 REPLACE plumbing banked + no-redex residual re-split, judge-C3-aligned
+**Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms) — no drift.**
+Operator SOLE-OBJECTIVE = M1b-term. This lap acted on the host-flagged judge review
+(`E-2026-06-26-JUDGE-codex-review.md`, point **C3** — converged with Codex): **prove the two no-redex
+major-premise cases SEPARATELY first + a shared replace tool; do NOT write `descent_step_general` blind.**
+
+### What this lap DID
+1. **Source-grounded the no-redex dichotomy in Buchholz §14.25** (`scratchpad/buchholz-gentzen.txt:262-490`).
+   The decisive reads:
+   - **§14.25**: the major premise is NEVER in endform — GENERAL argument (`Γⱼ ⊆ Θ` + `Aⱼ ≈ ⊥`: if the major
+     premise were endform, the endsequent would be too) — valid for ANY `Γ`, not just `∅`. So the recursion
+     into a sub-premise stays reducible.
+   - **has-redex = §14.253** principal cut (PROVEN lap-147, `descent_step_K_hasRedex`).
+   - **no-redex splits into §14.254a + §14.254b**, BOTH of which "replace a `Rep` premise with its
+     same-end-sequent reduct": **14.254a** (`tp(dₘ)=Rep`) replaces the major premise `dₘ`; **14.254b**
+     (`tp(dₘ)=Lₖ_V`, `V∉Θ`) replaces the upstream cut-partner `i′` — which, in the NO-redex case, is NOT an
+     R-intro (else `⟪i′,m⟫` is a redex `≤ j0`), so `tp(d_{i′})=Rep`. **CORRECTION vs lap-147's PENDING note:**
+     no-redex axMajor is §14.254b (reduce the Rep partner), NOT §14.253 (principal cut — that IS the has-redex
+     case, already proven). The two cases provably share ONE motive (judge C3 gate SATISFIED).
+2. **Banked the shared replace plumbing `descent_step_K_replace`** (`Crux2Blueprint:2475`, axiom-clean
+   `[propext, choice, Quot.sound]`): given a chain `zK s r ds` and ANY premise `i` with a same-end-sequent
+   (`fstIdx v = fstIdx (znth ds i)`) strictly-`iord`-descending regular/fresh/seqAnt `ZDerivation` reduct `v`,
+   `zK s r (seqUpdate ds i v)` is a strictly-descending `ZDerivesEmptyR`. Pure assembly over banked
+   `ZDerivation_iCritAux_of` (validity, `zKValidF_seqUpdate`) + `iord_descent_iCritAux_of_ZDerivation` (the
+   N1-IH descent) + `ZRegular/ZFresh/ZSeqAnt_zK_of_seqUpdate`; the reduct's wff side-conditions discharge
+   uniformly from `ZDerivation v` (`iperm_tp_fstIdx_of_ZDerivation` + `zKValidF_leafconds_of_ZDerivation`).
+   This is the §14.254 `d[0] = Kʳ_Θ(i ∕ dᵢ[0])` step, off `red`, off criticality.
+3. **Re-split `descent_step_K_noncrit_recurse`** (lap-147 had collapsed it to ONE sorry with a docstring that
+   wrongly claimed "all cases replace the major premise" — false for the tag-5/6 `red`-FIXPOINT L-axioms,
+   lap-130 finding `InternalZ:9281`) into the faithful §14.254a/b leaves, restoring the judge-C2 three-leaf
+   M1b path `{repMajor, axMajor, gDef}`:
+   - `descent_step_K_noncrit_repMajor` (`Crux2Blueprint:2527`, tags 3/4) — §14.254a, replace the major premise.
+   - `descent_step_K_noncrit_axMajor` (`Crux2Blueprint:2545`, tags 5/6) — §14.254b, replace the Rep cut-partner.
+   - dispatcher `descent_step_K_noncrit_recurse` now sorry-FREE (routes via `majorPrem_tag_mem`).
+
+### ⚠️ WHY no sorry dropped — both leaves bottom out in the GENERAL `Γ→⊥` reduction (multi-lap, honest)
+Each leaf's lone residual is now PRECISE: produce the `Rep`-reduct of a structurally-smaller premise (`dₘ` for
+repMajor, `d_{i′}` for axMajor) deriving `Γ′→⊥` with `Γ′` possibly NONEMPTY. That is the GENERAL reduction,
+closure via strong induction on the derivation CODE (Buchholz Thm 2.1; NOT `iord`-recursion — PRWO/Gödel-barred).
+All the SURROUNDING plumbing (replace → ZDerivesEmptyR + descent) is now discharged by `descent_step_K_replace`.
+
+### CONCRETE NEXT ATTACK (hardest-first)
+Build the GENERAL reduction as a `ZDerivation`-valued lemma producing the smaller premise's reduct, by strong
+induction on code. Tractable first leaf = **tag-3 repMajor** (the `zInd` major premise): generalize lap-146
+`descent_step_Ind` off `Γ=∅` to a `ZDerivation`-valued `Γₘ→⊥` Ind reduct (`iIndReductSeqG`, same end-sequent,
+descending/regular/fresh/seqAnt), then `descent_step_K_replace` at `i=majorIdx` DROPS the tag-3 part. The
+`Γ=∅`-dependence is localized to `descent_step_Ind`'s `hAnt1` (antecedent collapse, `Crux2Blueprint:2782`) — the
+telescope must carry `Γₘ` through each Ind-reduct premise. (tag-4 `zK` major premise needs the recursion proper;
+axMajor needs the cut-partner-Rep dichotomy via `majorPrem_*_cutPartner` + the recursion.)
+
+## lap 147 — §5.2 WIRED to Buchholz §14.25: `descent_step_K_noncritical` decomposed on MAJOR-premise tag
 **Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms) — no drift.**
 ONE commit (major-premise dispatch wiring). Operator SOLE-OBJECTIVE = M1b-term (terminate crux-2). The
 live `false_of_ZDerivesEmpty` path's first remaining sorry is `descent_step_K_noncritical` (the §5.2

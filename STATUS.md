@@ -1,11 +1,30 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 147 (§5.2 wired to Buchholz §14.25 major-premise dispatch) · 2026-06-26
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 148 (§14.254 replace plumbing banked + no-redex residual re-split) · 2026-06-26
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**);
 `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean. The lone `sorryAx` traces to crux-2.
 
-> **🎉🧭 Lap-147 — §5.2 has-redex half PROVEN (criticality DECOUPLED); residual = the general `Γ→⊥` recursion (read FIRST — current).**
+> **🧭 Lap-148 — §14.254 REPLACE plumbing banked + no-redex residual re-split (judge-C3 aligned); read FIRST — current.**
+> Build re-verified 🟢 green (1326); headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math
+> axioms) — no drift. Acted on the host-flagged judge review (`E-2026-06-26-JUDGE-codex-review.md` **C3**,
+> converged with Codex): prove the two no-redex cases SEPARATELY + a shared replace tool; do NOT write
+> `descent_step_general` blind. **Source-grounded the no-redex dichotomy in Buchholz §14.25** (major premise
+> never endform — GENERAL `Γⱼ⊆Θ`+`Aⱼ≈⊥` argument; no-redex = §14.254a/b, BOTH "replace a `Rep` premise with its
+> same-end-sequent reduct" — the judge-C3 shared-motive gate SATISFIED). **CORRECTION:** no-redex `axMajor` is
+> §14.254b (reduce the Rep cut-partner), NOT §14.253 (the principal cut = the has-redex case, already proven).
+> **Banked `descent_step_K_replace`** (`Crux2Blueprint:2475`, axiom-clean) — the shared §14.254 replace step
+> (off `red`, off criticality): any premise with a same-end-sequent descending regular/fresh/seqAnt
+> `ZDerivation` reduct yields a strictly-descending `ZDerivesEmptyR` (pure assembly over banked
+> `ZDerivation_iCritAux_of` + `iord_descent_iCritAux_of_ZDerivation` + the `_of_seqUpdate` invariants).
+> **Re-split `descent_step_K_noncrit_recurse`** (lap-147 had collapsed it to one sorry with a docstring wrongly
+> claiming "all replace the major premise") into the faithful §14.254a/b leaves, restoring the judge-C2
+> three-leaf M1b path `{repMajor:2527, axMajor:2545, gDef:2913}`. No sorry DROPPED — both leaves bottom out in
+> the GENERAL `Γ→⊥` reduction (strong induction on CODE, Buchholz Thm 2.1; the surrounding replace plumbing is
+> now discharged). NEXT (hardest-first): generalize `descent_step_Ind` off `Γ=∅` → tag-3 repMajor DROPS via
+> `descent_step_K_replace`. See `HANDOFF-2026-06-26-lap148.md`, `PENDING_WORK.md` lap-148.
+
+> **🎉🧭 Lap-147 — §5.2 has-redex half PROVEN (criticality DECOUPLED); residual = the general `Γ→⊥` recursion (historical).**
 > Build re-verified 🟢 green (1326); headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math
 > axioms) — no drift. Operator SOLE-OBJECTIVE = M1b-term (terminate crux-2). Attacked the hardest-first live
 > sorry `descent_step_K_noncritical` (Buchholz §5.2) and got it off `red` AND off CRITICALITY. **Key in-kernel
