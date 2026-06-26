@@ -21,13 +21,21 @@ redexI ↦ `zInegPrem dᵢ` = `d0`, a 𝚺₁ accessor not `red` — arithmetiza
 `critReductCorr` twin. **Both polarity reduct suppliers now soundness-certified against their concrete engine
 `ρ`, and both descent re-points banked.**
 
-**NEXT (hardest-first):** the ONLY remaining piece is the engine-internal re-key + its 𝚺₁ arithmetization —
-re-key `iRKc` (`InternalZ:~6679`) to DISPATCH on redex polarity (`zTag dᵢ=1` → `iRcritG`+`critReductCorr`;
-I¬ → `iRcritGNeg`+`critReductNeg`) and re-arithmetize `iRKcDef` to match (new graphs for `critReductCorr`/
-`critReductNeg`/`iRcritGNeg`; all accessors already 𝚺₁). Then `red_zK_crit` gives the dispatched form and
-`ZDerivation_red_zK_crit` closes via the two concrete-`ρ` soundness lemmas; descent re-points via the two
-banked `iord_…_eq_iRcrit` lemmas. This step breaks the build mid-way — do as one unit, don't commit until
-green. Full 6-step list in HANDOFF lap-118.
+**ALSO banked this lap (the dispatched reduct DEFINED + ARITHMETIZED — the hardest re-key piece):**
+**`iRKcCrit d`** (`InternalZ`) — the fully-explicit polarity-dispatched critical reduct (`zTag dᵢ=1` → ∀
+re-principalized `zsubst`+`Ax^1`-antgrow; else ¬ swapped-slot `Ax^1`-succset+`zInegPrem`), standalone
+(table-free, red-free). Bridges `iRKcCrit_eq_corr`/`_eq_neg` → the soundness-certified
+`iRcritG (critReductCorr)`/`iRcritGNeg (critReductNeg)`. **`iRKcCritDef` + `iRKcCrit_defined`** — the 𝚺₁
+graph (closed first try, `by_cases` on `ti`, reusing `cutFormulaDef`'s `k=π₁(π₂(tp dⱼ))`+`numeralGraph`).
+THE arithmetization wall is DOWN.
+
+**NEXT (hardest-first):** the engine SWAP (atomic, one unit, breaks build mid-way — don't commit until green):
+(3) re-key `iRK`'s critical branch `else iRKc d s` → `else iRKcCrit d` + `iRKDef`/`iRK_defined`; (4)
+`red_zK_crit` SIMPLIFIES to `red (zK s r ds) = iRKcCrit (zK s r ds)`; (5) close `ZDerivation_red_zK_crit`
+via `iRKcCrit_eq_corr`/`_eq_neg` + the two soundness lemmas — the real residual is the `redZKReady` orbit
+bundle (`hdi`/`hdj`/`hIJ`/`hthread`/`hrank`/… at the call site, itself an open sorry); (6) re-prove
+`iord_descent_red_zK_crit` (the descent consumer of `red_zK_crit`) via the banked `iord_…_eq_iRcrit` twins.
+Full 6-step list (with line numbers) in HANDOFF lap-118.
 
 ## lap 117 — ¬-case critical-cut inversion SOUNDNESS proven; BOTH critical sub-cases complete
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
