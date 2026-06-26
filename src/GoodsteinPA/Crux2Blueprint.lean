@@ -930,13 +930,13 @@ theorem redSoundGen : ∀ d : V, ZDerivation d → ZRegular d → ZDerivation (r
 `ZDerivesEmpty`: the genuine reduct `red` does the I∀ eigensubst `zsubst d0 a 0`, which is a `ZDerivation`
 only when the node is regular (`maxEigen d0 < a`). The embedding (M2) produces a regular derivation; `red`
 preserves both (`ZRegular_red` for O1, `fstIdx_red` for the conclusion). -/
-def ZDerivesEmptyR (d : V) : Prop := ZDerivesEmpty d ∧ ZRegular d
+def ZDerivesEmptyR (d : V) : Prop := ZDerivesEmpty d ∧ ZRegular d ∧ ZFresh d
 
 /-- **M1b — THE nut.** The `red`-reduct of a contradiction derivation is again a genuine `ZDerivation`.
 (Re-pointed `RedSound`, off the dead `iR2`.) A corollary of `redSoundGen`; the regularity comes from the
 regular ⊥-orbit (`ZDerivesEmptyR`). -/
 theorem redSound : ∀ d : V, ZDerivesEmptyR d → ZDerivation (red d) :=
-  fun d h => redSoundGen d h.1.1 h.2
+  fun d h => redSoundGen d h.1.1 h.2.1
 
 /-- **`iord_descent_red`, Ind case (lap 100).** For an Ind node (`zTag d = 3`), `red d = iRInd d` (a chain
 reduct), and the ordinal strictly descends — directly from the banked `iord_descent_iRInd_of_ZDerivation`.
@@ -981,7 +981,7 @@ theorem iord_descent_red {d : V} (hd : ZDerivesEmptyR d) :
     · simp at htag
     · -- the genuine K-rule node `zK s r ds`
       have hreg : ∀ i < lh ds, ZRegular (znth ds i) :=
-        fun i hi => ZRegular_zK_premise hds hd.2 hi
+        fun i hi => ZRegular_zK_premise hds hd.2.1 hi
       by_cases hcrit : permIdx (zK s r ds) < lh ds
       · -- NON-critical: `red (zK s r ds) = K^r(i/red dᵢ)` (replace, 5.2.2), `i = permIdx`. Dispatch on the
         -- selected premise's tag and feed the banked premise-IH to `iord_descent_red_zK_replace_eq`.
@@ -1098,7 +1098,7 @@ theorem ZDerivesEmptyR_red {d : V} (h : ZDerivesEmptyR d) : ZDerivesEmptyR (red 
   have hfst : fstIdx (red d) = fstIdx d :=
     fstIdx_red h.1.1 h.1.2.1 h.1.2.2 (zTag_Ind_or_K_of_ZDerivesEmpty h.1)
   exact ⟨⟨redSound d h, by rw [hfst]; exact h.1.2.1, by rw [hfst]; exact h.1.2.2⟩,
-    ZRegular_red d h.1.1 h.2⟩
+    ZRegular_red d h.1.1 h.2.1, ZFresh_red d h.1.1 h.2.2⟩
 
 /-- `ZDerivesEmptyR` is closed under the `red`-orbit (no hypothesis — `redSound`+`ZRegular_red` discharge it). -/
 theorem ZDerivesEmptyR_red_iterate {z : V} (hz : ZDerivesEmptyR z) :
