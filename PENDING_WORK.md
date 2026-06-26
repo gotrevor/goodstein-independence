@@ -1,5 +1,45 @@
 # Pending work — open obligations & attack paths
 
+## Reflection — 2026-06-26 (lap 132, DEEP REFLECTION): the STALL is an engine-formulation artifact; course-TEST the existence form
+**Build 🟢 1326. No proof code touched (reflection lap). Headline + faithfulness re-verified in-kernel; statement
+re-audited vs source — no drift.** Primary deliverable `REFLECTION-2026-06-26-lap132.md`.
+
+**Direction call.** Destination KEPT (axiom-free Kirby–Paris via crux-1 ∘ crux-2; the semantic shortcut is
+refuted, lap 98; axiomatizing crux-2 is forbidden — so the honest endpoint is the built girder). crux-2's
+diagnosis is converged and correct. **But the SELECTION/STALL sub-goal consuming laps 120→131 is an artifact
+of the *fixed-deterministic-engine* formulation** (it exists only to make a permIdx-based `red` not stall, so
+"fixpoint ⟹ cut-free" holds for the fixpoint branch of `false_of_ZDerivesEmpty`).
+
+**KEEP doing:** per-reduct soundness (laps 112-119); the invariant folds (`zReg`/`zFresh`, and FINISH the
+`seqAntSeq` fold — needed in BOTH formulations so the reduct stays in `ZDerivesEmptyR`); per-reduct descent
+lemmas; green commits + honest sorries.
+
+**STOP doing (pending the spike verdict):** sinking laps into the fixed-engine permIdx→`majorIdx` swap +
+selection-correctness (`firstBotPrem_reducible`, the tag-5/6 dispatch) + the ZPhi exact-shape strengthenings
+whose only consumer is that engine's soundness derivation. The existence form obviates them.
+
+**HIGHEST-VALUE NEXT TARGET — `wip/ExistenceEndgame.lean` spike (decisive either way, mirror lap-101):**
+- Define `redLeast(d)` := least `d'` with `[ ZDerivesEmptyR d' ∧ icmp (iord d') (iord d)=0 ∧ d' a cut-reduct
+  of d ]`, else `d` (Σ₁ least-witness).
+- State **(E)**: `ZDerivesEmptyR d ∧ ¬cutfree d ⟹ ∃ d', ZDerivesEmptyR d' ∧ iord d' ≺ iord d ∧ d' a cut-reduct
+  of d`. Then "`redLeast d = d` ⟺ no descending reduct ⟹ `d` cut-free" is DEFINITIONAL.
+- Assemble the existence-form `false_of_ZDerivesEmpty`: descend-while-cut + PRWO(ε₀) ⟹ reach a fixpoint ⟹
+  cut-free ∅→⊥ ⟹ Cor 2.1 absurd. Signatures pinned against the real API; bodies sorried where banked lemmas
+  plug in. Getting it to ELABORATE is the evidence.
+- **(E) suppliers, all banked:** `zTag_Ind_or_K_of_ZDerivesEmpty` (`InternalZ:8636`); `iord_descent_iRKcCrit_corr`/
+  `_neg` (`RedZKDescent:580/597`) + `ZDerivation_iRKcCrit_all`; `iord_descent_red_zInd` (`Crux2Blueprint:1116`);
+  Cor 2.1 (`tp_selected_isymRep_of_emptyAnt_botSucc`, `InternalZ:7684`); `iRcrit_descends_or_zInd_zK_premise`
+  (`RedZKDescent:734`, ≈ (E) at the root).
+- **Decision rule:** (E) closes cleanly ⟹ PIVOT, drop the stall campaign. (E) re-imports the stall (the
+  real-cut-vs-structurally-cut-free determination IS the redex-finding) ⟹ fall back to the lap-129 swap with
+  that evidence (NEXT_STEPS keeps it as the FALLBACK route; its facts all still valid).
+
+**Honest caveat (do not over-sell):** the redex-pair combinatorics survive in the existence form (as a one-shot
+`∃`, not a total function threaded through the orbit + every fold). The spike TESTS whether (E) is clean at the
+root; it is not a declared win.
+
+---
+
 ## lap 131 — the lap-130 "turnkey/self-healing" ZPhi-strengthening plan is INCOMPLETE: the `zsubst`-transfer needs TWO un-recorded invariants. Substrate `fvSubstSeq_seqCons` LANDED
 **Build 🟢 1326.** Landed (axiom-clean `[propext, choice, Quot.sound]`, additive, `Zsubst.lean` after
 `inAnt_fvSubstSeq`): **`fvSubstSeq_seqCons`** — `fvSubstSeq a t (Γ ⁀' A) = (fvSubstSeq a t Γ) ⁀' (fvSubst a t A)`

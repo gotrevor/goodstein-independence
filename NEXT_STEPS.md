@@ -1,4 +1,52 @@
-# NEXT STEPS — crux-2 (lap 129 FRESH-MIND REVIEW: the `red`-STALL is the crux; faithful selection is the fix)
+# NEXT STEPS — crux-2 (lap 132 DEEP REFLECTION: the STALL is an engine-formulation artifact; course-TEST the existence form)
+
+> **⭐⭐⭐ LAP-132 DEEP REFLECTION — read FIRST. Does NOT overturn lap-129's facts; it reframes what they are
+> evidence FOR.** Build 🟢 1326; headline footprint + faithfulness re-verified in-kernel (0 math axioms, no drift).
+>
+> **The reframe.** Laps 120→131 attacked the `red`-STALL by making the *fixed, deterministic, permIdx-based*
+> engine `red` not stall (so "fixpoint ⟹ cut-free" holds and `false_of_ZDerivesEmpty`'s fixpoint branch closes):
+> `firstBotPrem_reducible`, the `majorIdx` re-key, the tag-5/6 critical dispatch, the `zReg`/`zFresh`/`seqAntSeq`
+> invariant folds, and the ZPhi exact-shape strengthenings. **All of that exists ONLY because we demand `red` be a
+> total Σ₁ FUNCTION descending on every orbit step.** Lap 129 correctly refuted "permIdx-fixpoint ⟹ cut-free" — but
+> the right response is to *stop requiring a fixed selector*, not to perfect one.
+>
+> **The existence form.** Define `redLeast(d)` := least `d'` with `[ ZDerivesEmptyR d' ∧ icmp (iord d') (iord d)=0 ∧
+> d' a one-step cut-reduct of d ]`, else `d` (Σ₁, least-witness). Then **"`redLeast d = d`" ⟺ "no descending reduct
+> exists" ⟹ "`d` is cut-free"** by the contrapositive of one existence lemma:
+> **(E)**  `ZDerivesEmptyR d ∧ ¬cutfree d ⟹ ∃ d', ZDerivesEmptyR d' ∧ iord d' ≺ iord d ∧ d' a cut-reduct of d.`
+> "fixpoint ⟹ cut-free" is now DEFINITIONAL (no faithful-selector proof). `false_of_ZDerivesEmpty` closes:
+> `redLeast`-orbit strictly descends while a cut remains ⟹ PRWO(ε₀) forbids the infinite descent ⟹ it reaches a
+> `redLeast`-fixpoint ⟹ cut-free ∅→⊥ ⟹ Cor 2.1 absurd.
+>
+> **(E) is discharged at the ⊥-root from already-banked facts** — every ⊥-derivation's root is Ind/K
+> (`zTag_Ind_or_K_of_ZDerivesEmpty`, `InternalZ:8636`); the K-critical reduct is SOUND (laps 112-119,
+> `ZDerivation_iRKcCrit_all` + ¬-twin) and DESCENDS (`iord_descent_iRKcCrit_corr`/`_neg`, `RedZKDescent:580/597`);
+> the Ind reduct sound + `iord_descent_red_zInd` (`Crux2Blueprint:1116`); cut-free ∅→⊥ absurd (Cor 2.1,
+> `tp_selected_isymRep_of_emptyAnt_botSucc`, `InternalZ:7684`). The dichotomy `iRcrit_descends_or_zInd_zK_premise`
+> (`RedZKDescent:734`) is essentially (E) at the root already.
+>
+> **KEEP / OBVIATE.** KEEP (needed in BOTH forms): per-reduct soundness (112-119); the invariant folds
+> `ZRegular_red`/`ZFresh_red` + the pending `seqAntSeq` fold (the reduct must stay in `ZDerivesEmptyR`); the
+> per-reduct descent lemmas. OBVIATE (pending the spike verdict): the *fixed-engine* permIdx→`majorIdx` swap +
+> selection-correctness (`firstBotPrem_reducible`, tag-5/6 dispatch) + the ZPhi exact-shape strengthenings whose
+> only consumer is that engine's soundness derivation. Honest caveat: the redex-pair combinatorics survive, but as
+> a one-shot `∃` discharged by reduce-and-descend, NOT a total function threaded through the orbit + every fold.
+>
+> **PLAN (course-test, mirror lap-101's fork spike):**
+> 1. **(HIGHEST VALUE) `wip/ExistenceEndgame.lean` spike** — self-contained (NOT imported by `GoodsteinPA.lean`).
+>    Define `redLeast`; state (E); assemble the existence-form `false_of_ZDerivesEmpty` with signatures pinned
+>    against the real `InternalZ`/`RedZKDescent`/`Crux2Blueprint` API, bodies sorried where the banked descent/
+>    soundness lemmas plug in. **Decision rule:** (E) closes cleanly at the root ⟹ PIVOT the endgame to the
+>    existence form, drop the stall campaign. (E) re-imports the stall (the "real cut vs structurally cut-free
+>    chain" determination is itself the redex-finding) ⟹ fall back to the lap-129 engine swap WITH that evidence.
+> 2. Then the PRWO wiring (`gentzenDescentφ` Σ₁ graph of `n ↦ iord(redLeast^[n] z)`) + `foundation_bot_to_Z_empty`
+>    (M2) — both reused verbatim from the existing plan; only the iterator changes (`red` → `redLeast`).
+>
+> (The lap-129 plan below remains the FALLBACK route and its facts are all still valid.)
+
+---
+
+# (FALLBACK) NEXT STEPS — crux-2 (lap 129 FRESH-MIND REVIEW: the `red`-STALL is the crux; faithful selection is the fix)
 
 > **⭐⭐⭐ LAP-129 FRESH-MIND REVIEW — read FIRST. Resolves lap-120's item-1 (below) with a definitive
 > answer, and corrects the campaign's direction.** Build 🟢 1326; headline footprint intact in-kernel.
