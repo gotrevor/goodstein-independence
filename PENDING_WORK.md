@@ -1,5 +1,56 @@
 # Pending work — open obligations & attack paths
 
+## lap 131 — the lap-130 "turnkey/self-healing" ZPhi-strengthening plan is INCOMPLETE: the `zsubst`-transfer needs TWO un-recorded invariants. Substrate `fvSubstSeq_seqCons` LANDED
+**Build 🟢 1326.** Landed (axiom-clean `[propext, choice, Quot.sound]`, additive, `Zsubst.lean` after
+`inAnt_fvSubstSeq`): **`fvSubstSeq_seqCons`** — `fvSubstSeq a t (Γ ⁀' A) = (fvSubstSeq a t Γ) ⁀' (fvSubst a t A)`
+for `Seq Γ` (positional `Seq.lh_ext` proof; `lt_succ_iff_le`, `znth_seqCons_of_lt/self`).
+
+**⭐ FINDING (corrects lap-130's NEXT plan; verified by attempting the full atomic change, then reverting):**
+The lap-130 "TURNKEY ZPhi-STRENGTHENING PLAN" claims the construction sites are **SELF-HEALING** ("they
+reconstruct from the same disjunct they destructured via the inversion"). **That is FALSE for
+`ZDerivation_zsubst`** (`Zsubst.lean:~2890`), which is a genuine SECOND constructor of `zIneg`/`zAxAll`
+`ZDerivation`s: it rebuilds the disjunct from *substituted* data (`fvSubstSeqt a t s`, `fvSubst a t p`,
+`zsubst d0 a t`), NOT via inversion. So strengthening the `zIneg`/`zAxAll` `ZPhi` disjuncts forces
+`ZDerivation_zsubst` to PROVE the new conjuncts for the substituted node — and each needs an invariant the
+current `ZPhi` skeleton does NOT record:
+
+- **`zInegAntWff s p d0 := seqAnt (fstIdx d0) = seqCons (seqAnt s) p`** transfers iff `fvSubstSeq` commutes
+  with `seqCons` — which is `fvSubstSeq_seqCons` (LANDED) but it **needs `Seq (seqAnt s)`**. And `seqAnt q :=
+  π₁ q` is NOT structurally a `Seq` (verified `InternalZ:967`); `Seq (seqAnt …)` is a separately-THREADED
+  invariant (cf. `Seq_seqAnt_seqAddAnt`, `InternalZ:1057`) the `ZPhi` skeleton never carries. So the
+  `zInegAntWff` strengthening additionally requires threading `Seq (seqAnt s)` through `ZPhi` (a new
+  `seqWffFlag`-style fold, OR add `Seq (seqAnt s)` as a disjunct conjunct + supply it at every `zIneg`
+  constructor). **zIneg is the genuinely blocked half.**
+- **`zAxAllSuccWff s p k := seqSucc s = substs1 (numeral k) p`** transfers iff `fvSubst` commutes with
+  `substs1 (numeral k)` — that is `fvSubst_substs1` (`FvSubst:581`) + `termFvSubst_numeral` (`Zsubst:205`),
+  but `fvSubst_substs1` **needs `IsSemiformula ℒₒᵣ 1 p`**, NOT the `IsUFormula ℒₒᵣ p` the `zAxAll` disjunct
+  records. The faithful Buchholz `Ax^{∀p,k}` matrix IS a 1-formula (exactly like `zIallWff` carries
+  `IsSemiformula 1 p` "the `ZDerivation_zsubst` commutations consume it", `InternalZ:1613`). So strengthen
+  the `zAxAll` disjunct's formula-hood `IsUFormula ℒₒᵣ p → IsSemiformula ℒₒᵣ 1 p` (arith
+  `!(isUFormula ℒₒᵣ).sigma p → !(isSemiformula ℒₒᵣ).sigma 1 p`); then `ZDerivation_zsubst`'s `hp` IS the
+  `IsSemiformula 1` it needs (**self-supplied** — `zAxAll` is completable), and `IsSemiformula 1 →`
+  `.isUFormula` heals the ~15 downstream `IsUFormula`-consumers. **zAxAll is the completable half.**
+
+**Backed-up WIP (re-applies the full plumbing minus the two blocked obligations):**
+`scratchpad/lap131-zphi-strengthening-WIP.diff` (342 lines): the complete, CORRECT ZPhi ripple —
+`ZPhi`/`zphi_iff`/`zblueprint` Σ/Π/`zPhi_definable` simp, `zphi_monotone`/`zphi_strong_finite`, the 8 raw
+`zDerivation_iff.mp` destructure fixups (only the ones NAMING the last conjunct break; trailing-`_`-absorb
+sites are unaffected), `zDerivation_zIneg_inv`/`zDerivation_zAxAll_inv` returning the new conjunct + their
+5-tuple/`.2`-projection consumers, and the `+ zAxAllSuccWffDef`/`+ zInegAntWffDef` building blocks already in
+`InternalZ.lean:1559/1589`. The diff builds InternalZ green; it goes red ONLY at `ZDerivation_zsubst`'s two
+new obligations (the Seq/IsSemiformula gaps above) — that is the whole residual.
+
+**NEXT (decomposed, by risk):**
+1. **zAxAll FIRST (completable, lower risk):** re-apply ONLY the zAxAll half of the WIP diff + the
+   `IsUFormula → IsSemiformula 1` strengthening; discharge `ZDerivation_zsubst`'s zAxAll obligation with
+   `seqSucc_fvSubstSeqt ▸ hsucc ▸ fvSubst_substs1 ht (numeral_semiterm) hp ▸ termFvSubst_numeral`. Green-commit.
+2. **zIneg SECOND (needs the Seq invariant):** add a `Seq (seqAnt …)` fold (mirror `seqWffFlag`, lap 127) OR
+   carry `Seq (seqAnt s)` in the `zIneg` disjunct; then discharge `ZDerivation_zsubst`'s zIneg obligation
+   with `fstIdx_zsubst ▸ seqAnt_fvSubstSeqt ▸ hant ▸ fvSubstSeq_seqCons (the threaded Seq)`.
+3. Then `hAll`/`hNeg` of `ZDerivation_iRKcCrit_botOrbit` are derivable ⟹ hypothesis-free
+   `ZDerivation_iRKcCrit_botOrbit'` (lap-130 step 6); LEFT soundness real; tag-4 RIGHT recursion +
+   `false_of_ZDerivesEmpty` PRWO wiring remain.
+
 ## lap 130 — the `majorIdx` re-key plan is INCOMPLETE: tag-5/6 major premises stall too; cut-partner PINNED
 **Build 🟢 1326.** Landed (axiom-clean `[propext, choice, Quot.sound]`, additive, `InternalZ.lean` after
 `majorIdx_botOrbit_reducible`): **`majorPrem_zAxAll_cutPartner`** + **`majorPrem_zAxNeg_cutPartner`**.

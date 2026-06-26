@@ -171,6 +171,33 @@ lemma inAnt_fvSubstSeq {a t A Γ : V} (h : inAnt A Γ) :
   obtain ⟨i, hi, hA⟩ := h
   exact ⟨i, by rw [fvSubstSeq_lh]; exact hi, by rw [znth_fvSubstSeq hi, hA]⟩
 
+/-- **`fvSubstSeq` commutes with `seqCons`**: mapping `fvSubst a t` over `Γ ⁀' A` equals consing
+`fvSubst a t A` onto the mapped `Γ` (needs `Seq Γ`, since `fvSubstSeq`/`seqCons` are positional). The
+genuine I¬-rule premise-antecedent shape `seqAnt (fstIdx d0) = seqCons (seqAnt s) p` (= the would-be
+`zInegAntWff` conjunct) transfers through `ZDerivation_zsubst` via this — modulo a `Seq (seqAnt s)`
+invariant that the current `ZPhi` skeleton does NOT yet record (see PENDING_WORK lap 131). -/
+lemma fvSubstSeq_seqCons {a t Γ A : V} (hΓ : Seq Γ) :
+    fvSubstSeq a t (seqCons Γ A) = seqCons (fvSubstSeq a t Γ) (fvSubst ℒₒᵣ a t A) := by
+  refine Seq.lh_ext (fvSubstSeq_seq _ _ _) ((fvSubstSeq_seq _ _ _).seqCons _)
+    (by rw [fvSubstSeq_lh, Seq.lh_seqCons _ hΓ, Seq.lh_seqCons _ (fvSubstSeq_seq a t Γ),
+      fvSubstSeq_lh]) ?_
+  intro i x₁ x₂ h₁ h₂
+  have hi1 : i < lh (seqCons Γ A) := by
+    have h := (fvSubstSeq_seq a t (seqCons Γ A)).lt_lh_of_mem h₁
+    rwa [fvSubstSeq_lh] at h
+  rw [← (fvSubstSeq_seq _ _ _).znth_eq_of_mem h₁,
+    ← ((fvSubstSeq_seq a t Γ).seqCons _).znth_eq_of_mem h₂, znth_fvSubstSeq hi1]
+  rcases lt_or_ge i (lh Γ) with hlt | hge
+  · rw [znth_seqCons_of_lt hΓ A hlt,
+      znth_seqCons_of_lt (fvSubstSeq_seq a t Γ) _ (by rw [fvSubstSeq_lh]; exact hlt),
+      znth_fvSubstSeq hlt]
+  · have hile : i ≤ lh Γ := by
+      have h := hi1; rw [Seq.lh_seqCons _ hΓ] at h; exact lt_succ_iff_le.mp h
+    obtain rfl : i = lh Γ := le_antisymm hile hge
+    rw [znth_seqCons_self hΓ A]
+    conv_rhs => rw [show lh Γ = lh (fvSubstSeq a t Γ) from (fvSubstSeq_lh a t Γ).symm]
+    rw [znth_seqCons_self (fvSubstSeq_seq a t Γ) _]
+
 /-- **`fvSubst` commutes with `inegF`** (`inegF p = ∼p ⋎ ⊥`), via `fvSubst_neg`. Needed to transfer the
 `zIneg` conclusion succedent `inegF p` under eigenvariable substitution. -/
 lemma fvSubst_inegF {a t p : V} (ht : IsUTerm ℒₒᵣ t) (hp : IsUFormula ℒₒᵣ p) :
