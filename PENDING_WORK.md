@@ -1,5 +1,26 @@
 # Pending work — open obligations & attack paths
 
+## lap 133 — ✅ `zSeqAnt` fold LANDED (the single shared `Seq(seqAnt)` blocker's core infra)
+**Build 🟢 1326, sorry-free in `src/`, footprint unchanged.** Added to `Zsubst.lean` (after `zFresh_zsubst`,
+before the corrected-reduct-premise regularity section): the full `Seq`-analogue of `zFresh`, threaded
+additively (NOT in `ZPhi`). `zSeqAntNext`/`zSeqAntTable`/`zSeqAnt` + Δ₁ defs + structural correctness +
+per-tag recursion eqns + `ZSeqAnt` + extraction (`seq_seqAnt_zK_premise` = the `Seq(seqAnt sⱼ)` supplier,
+`zSeqAnt_zK_of`, `zSeqAnt_zK_premise_zero`, `zDerivation_pos`). Unlike `zFresh` (flag at I∀ only), the
+head flag `seqAntSeqFlag (fstIdx d)` fires at EVERY node.
+
+**NEXT (turnkey, two independent sub-steps):**
+1. **Thread `ZSeqAnt` into `ZDerivesEmptyR`** (`Crux2Blueprint:1103`): add `∧ ZSeqAnt d` and prove
+   `ZSeqAnt_red` (mirror `ZFresh_red`, `Zsubst:~2580-2780`: `ZSeqAnt_red_zK` via `zSeqAnt_zK_of` over the
+   reduct premises + `Seq (seqAnt s)` of the conclusion — FREE on the ⊥-orbit, `seqAnt s = ∅`). Ripple:
+   `ZDerivesEmptyR_red`, `redSound`, the `ZDerivesEmptyR_red_iterate` chain, M2 `foundation_bot_to_Z_empty`
+   gains a `ZSeqAnt` conjunct.
+2. **Discharge the `Seq` parts of `hAll`/`hNeg`** in `ZDerivation_iRKcCrit_botOrbit` (`Crux2Blueprint:648`)
+   from `seq_seqAnt_zK_premise` (premise = redexJ/redexI node, both genuine `ZDerivation`s via
+   `zDerivation_zK_inv`). The RESIDUAL after that = the exact-shape ZPhi facts `seqSucc sⱼ = cutFormula`
+   (∀) and `seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p` (¬) — a SEPARATE blocker (the lap-130/131
+   ZPhi-strengthening, `zAxAllSuccWff`/`zInegAntWff`; `zIneg` half needs `Seq (seqAnt sᵢ)` which is now
+   suppliable from this very fold via `seq_seqAnt_zK_premise`).
+
 ## Reflection — 2026-06-26 (lap 132, DEEP REFLECTION): the STALL is an engine-formulation artifact; course-TEST the existence form
 **Build 🟢 1326. No proof code touched (reflection lap). Headline + faithfulness re-verified in-kernel; statement
 re-audited vs source — no drift.** Primary deliverable `REFLECTION-2026-06-26-lap132.md`.
