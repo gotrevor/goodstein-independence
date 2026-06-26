@@ -21,13 +21,40 @@
   build on `_at` halves (`haux0_at`/`haux1_at`). Residual = cutPartner is a PRINCIPAL R-intro (`znth ds i'=zIall…`).
 - **`descent_step_K_tag6`** (¬-axiom) — dual; `majorPrem_zAxNeg_cutPartner` + `_neg_at` halves.
 
+### ⚠️ lap-140 in-kernel REFUTATION (read before attacking tag-5/6) — the `redZKReady` shortcut is BLOCKED
+A tempting shortcut: a ⊥-orbit K-node is `zKValidF` (from `ZDerivation`), so just apply `redZKReady_of_zKValid`
+(`InternalZ:8338`) — it ALREADY delivers a principal critical pair with the R-intro form
+(`znth ds redexI = zIall …`/`zIneg …`) via the `redexCode`/Lemma-3.1 finder, sidestepping the cutPartner gap.
+**REFUTED:** `redZKReady_of_zKValid` needs `zKValid = zKValidF ∧ zKCritical` (`zKValid_iff_zKValidF_and_zKCritical`,
+`InternalZ:1428`), and `zKCritical s ds = ∀ i, ¬ iperm (tp dᵢ) s` is **FALSE on the ⊥-orbit**: an isymRep premise
+(Ind/K/atom/Ax¹, tags 3/4/0/7 — and the major premise IS one) has `iperm isymRep s` UNCONDITIONALLY
+(`iperm_isymRep`), violating `¬iperm`. This is the lap-129 criticality stall restated: the global-criticality
+finder cannot run on a non-critical ⊥-chain. ⟹ the cutPartner route is genuinely NECESSARY for tag-5/6.
+
+### ⚠️ lap-140 SHARPENED tag-5/6 residual — `cutPartner is R-intro` ⟺ `tp(i') = isymR (^∀p)`, rule out 2 cases
+Every chain premise has `iperm (tp dᵢ) (fstIdx dᵢ)` (from `zKValidF`), so by the permissibility trichotomy
+(`iperm`, `InternalZ:979`) `tp dᵢ ∈ {isymR (seqSucc dᵢ), isymLk k A (A∈ant), isymRep}`. For the cutPartner `i'`
+(`chainAsucc ds i' = ^∀p`, from `majorPrem_zAxAll_cutPartner`): if `tp i' = isymR C` then `iperm_isymR_iff` FORCES
+`C = seqSucc(fstIdx i') = ^∀p`, i.e. `tp i' = isymR (^∀p)` = the zIall R-intro `haux0_at` needs (and then
+`(i', majorIdx)` is a genuine `isRedexPair`). **So the ENTIRE tag-5/6 deep content = ruling out the OTHER two
+trichotomy cases for the ∀p-producer:** `tp i' = isymLk k A` (another L-axiom with succedent ^∀p) and
+`tp i' = isymRep` (an Ind/K/atom passing ^∀p through). This is a LOCALIZED `inference_critical_pair_of_chain`
+that does NOT need global criticality — it uses the SPECIFIC datum that majorIdx is the L-axiom of ^∀p and ^∀p
+threads back. Either (a) prove SOME ∀p-producer upstream of majorIdx is an R-intro (a leastness/threading argument,
+cf. `firstBotPrem_reducible` + `chainAsucc_threaded_of_leaf` rule out the atom/Ax¹ leaves; the residual is
+isymLk-axiom + Ind/K), OR (b) build a general internal ∀-INVERSION (`ZDerivation Γ→∀p ⟹ ZDerivation Γ→p[k]`,
+Buchholz Inversion Lemma — handles ANY ∀p-producer, not just zIall; the `_at` halves would then take the inverted
+derivation). **DECIDE (a)-vs-(b) by reading Buchholz §5 + the zInd/zK/zAxAll succedent forms BEFORE building.**
+
 ### NEXT (hardest-first, per DIRECTION.md lap-140) — ASSEMBLE a banked sub-piece to a DROP, don't bank more
-1. **tag-5**: assemble explicit-pair `iCritReductG` soundness from the `_at` halves via `ZDerivation_iCritReductG_of`
-   directly (NOT `iRcritG`, which bakes `redexI/redexJ`); thread the cut-rank drop. Then attack the genuine residual
-   `cutPartner i' is a principal R-intro` (Buchholz criticality — the R-side of the principal cut IS the I-rule
-   introducing the cut formula; thread via `isChainInf` from the cutPartner's succedent `^∀p` back to its zIall intro).
+1. **tag-5**: resolve the (a)-vs-(b) question above (source read), then build the chosen bridge. The rest of tag-5
+   is the explicit-pair assembly: mirror `ZDerivation_iRcritG_corrected` (`Crux2Blueprint:783`) with the `_at`
+   halves via `ZDerivation_iCritReductG_of` (not `iRcritG`), threading the orbit data (freshness `hpfresh/hΓfresh`,
+   `hthread`, `hrank`/`hrankI`, wff) for the `(cutPartner, majorIdx)` pair + the descent (`iord_descent_iRcrit_of_chain'`
+   is pair-parametric) + regularity (`ZDerivesEmptyR` of the reduct).
 2. **tag-3**: assemble `isChainInf_iIndReductSeqG` (lap-138 NEXT, readouts banked; exit subtlety pinned first).
-⚠️ Forbidden: `redLeast`/μ for (A); engine re-key of `red`/`redexI`/`redexJ`; `red dⱼ` single-replace for tag-3.
+⚠️ Forbidden: `redLeast`/μ for (A); engine re-key of `red`/`redexI`/`redexJ`; `red dⱼ` single-replace for tag-3;
+the `redZKReady_of_zKValid` shortcut (needs `zKCritical`, FALSE on the ⊥-orbit — see refutation above).
 
 ## lap 139 — critical-cut half-derivation layer made PAIR-PARAMETRIC (dissolves the tag-5/6 engine re-key)
 **Build 🟢 1326. Headline footprint UNCHANGED.** 3 green commits (`bde9e72`→`a4076c6`→`d5e9e44`). **No src sorry
