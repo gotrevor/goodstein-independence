@@ -48,6 +48,48 @@ open GoodsteinPA.InternalONote
 
 variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
+/-- **Explicit-reduct REPLACE descent kernel (index-generic, `red`-free)** — the termination half the
+existence form needs at `majorIdx` (NOT `permIdx`). `iRedDescent_red_zK_replace_eq` (`RedZKDescent:334`)
+proves exactly this bundle but its conclusion is keyed to `red (zK s r ds)` via an `hred` hypothesis that
+only holds at `permIdx`. The existence form chooses the major premise at `majorIdx`, so it needs the
+descent stated over the EXPLICIT reduct `zK s r (seqUpdate ds i v)`. The proof is the kernel body with
+`red (znth ds i) ↦ v` and the final `rw [hred]` dropped — `iRedDescent`/`iotil`/`idg` are conclusion-label
+and `red`-agnostic (read only the premise sequence), so the bundle proves the explicit form directly.
+This is SORRY-FREE termination infrastructure (no soundness, no recursion) — ready to move to `src`. -/
+theorem iRedDescent_zK_replace_explicit {s r ds i v : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hIH : iRedDescent v (znth ds i)) :
+    iRedDescent (zK s r (seqUpdate ds i v)) (zK s r ds) := by
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := fun n => by
+    rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  have hNF' : ∀ n, isNF (iotil (znth (seqUpdate ds i v) n)) := fun n => by
+    rcases eq_or_ne n i with rfl | hne
+    · rw [znth_seqUpdate_self hi]; exact hIH.nf
+    · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+  have hle : ∀ n, idg (znth (seqUpdate ds i v) n) ≤ idg (znth ds n) := fun n => by
+    rcases eq_or_ne n i with rfl | hne
+    · rw [znth_seqUpdate_self hi]; exact hIH.dg_le
+    · rw [znth_seqUpdate_of_ne hne]
+  have heq : ∀ n, n ≠ i →
+      iotil (znth (seqUpdate ds i v) n) = iotil (znth ds n) :=
+    fun n hne => by rw [znth_seqUpdate_of_ne hne]
+  have hlt : icmp (iotil (znth (seqUpdate ds i v) i)) (iotil (znth ds i)) = 0 := by
+    rw [znth_seqUpdate_self hi]; exact hIH.otil_lt
+  exact ⟨idg_zK_le_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hle,
+    iotil_zK_lt_replace hds (seqUpdate_seq ds i _) (seqUpdate_lh ds i _) hi hlt heq hNF hNF',
+    isNF_iotil_zK (seqUpdate_seq ds i _) (fun n _ => hNF' n)⟩
+
+/-- **`iord`-descent corollary** of `iRedDescent_zK_replace_explicit` — the form `descent_step_K_majorIdx`
+consumes (strict `iord` drop of the explicit `majorIdx`-replace reduct). -/
+theorem iord_descent_zK_replace_explicit {s r ds i v : V}
+    (hds : Seq ds) (hmem : ∀ n < lh ds, ZDerivation (znth ds n)) (hi : i < lh ds)
+    (hIH : iRedDescent v (znth ds i)) :
+    icmp (iord (zK s r (seqUpdate ds i v))) (iord (zK s r ds)) = 0 :=
+  iord_descent_of_iRedDescent (iRedDescent_zK_replace_explicit hds hmem hi hIH)
+    (isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation _ (hmem n hn)))
+
 /-- **K-critical sub-case of (E'), as a PLUMBING assembly of the banked reduct facts.** For a critical
 (`zKCritical`) ⊥-orbit K-node `zK s r ds`, the witness is the genuine cut reduct `iRKcCrit (zK s r ds)`;
 the existence step is `⟨iRKcCrit …, ⟨⟨sound, ∅-ant, ⊥-succ⟩, regular, fresh⟩, descent⟩`. This lemma makes

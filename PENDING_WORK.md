@@ -32,6 +32,17 @@ the stall. Answer (derived from the actual code, not the lap-132 hope):
 - K (tag 4) → reduces cleanly to **`descent_step_K_majorIdx`** (the lone math residual).
 `false_of_ZDerivesEmpty_existence` = sorry-FREE composition of (E') + `prwo_forbids_existence_descent`.
 
+**✅ also landed (SORRY-FREE, in the spike):** `iRedDescent_zK_replace_explicit` + `iord_descent_zK_replace_explicit`
+— the index-generic, `red`-free REPLACE descent kernel. `iRedDescent_red_zK_replace_eq` (`RedZKDescent:334`)
+proves the same bundle but keys its conclusion to `red (zK s r ds)` via an `hred` true only at `permIdx`; the
+existence form picks the major premise at `majorIdx`, so it needs the descent over the EXPLICIT reduct
+`zK s r (seqUpdate ds i v)`. Proof = the kernel body with `red (znth ds i) ↦ v`, final `rw [hred]` dropped
+(`iotil`/`idg` are conclusion-label & `red`-agnostic). **This is the TERMINATION half of `descent_step_K_majorIdx`'s
+tag-3 (and tag-4) replace cases** — `descent_step_K_majorIdx`'s remaining gap for tag-3 is now only the
+SOUNDNESS witness (`ZDerivesEmptyR` of the reduct), which entangles with `zKValidF_iIndReduct_of_zInd`
+(Crux2Blueprint:79, the Ind-reduct soundness sorry). Ready to move to `src/RedZKDescent.lean` once a full
+`descent_step_K_majorIdx` sub-case ports.
+
 `descent_step_K_majorIdx {s r ds}` (regular `∅→⊥` K-node ⟹ ∃ descending sound reduct) dispatches on the
 major premise `dⱼ = znth ds (majorIdx (zK s r ds))`'s tag (∈{3,4,5,6}, BANKED via `majorIdx_botOrbit_reducible`):
 - **tag 3 (Ind major)** — `replace`-at-`majorIdx`; descent via the INDEX-GENERIC kernel
