@@ -65,13 +65,34 @@ isChainInf/hperm/hwfR/hwfL; `hreroute` via `hreroute_of_leaves`). **New free fac
 is automatic — `tp = R_⊥` is impossible (`tp_isymR_pos` ⟹ `0 < rk ⊥ = 0`) and the L-at-`Γmain` clause is
 vacuous on the empty antecedent. So the leaf-stall redex existence now reduces to JUST `hleaves`.
 
+**lap 123 — DICHOTOMY BANKED + the `red`-fixpoint defect pinned precisely.**
+- ✅ **`redex_or_nonleaf_isymRep_of_botChain`** (InternalZ, after `inference_critical_pair_of_botChain`):
+  for a `ZDerivation` ⊥-chain, EITHER a genuine `(R_A,L^k_A)` redex exists (case 5.1) OR a non-leaf
+  `isymRep` premise (chain/Ind, case 5.2) exists. Proved by EM + the botChain finder. Axiom-clean.
+- **⭐ THE SHARPENED DIAGNOSIS (the genuine resolution).** For a ⊥-chain, `iperm (tp dᵢ) s ⟺ tp dᵢ = isymRep`
+  (R needs succ ⊥ [impossible], L needs the formula in `seqAnt s = ∅` [vacuous]). So `permIdx` = the FIRST
+  `isymRep` premise, and (reading `iord_descent_red` lines 997–1080) `red` is a **fixpoint ⟺ the first
+  `isymRep` premise is an atom/`zAx1` LEAF** (Ind/chain firsts reduce → descent; L-axioms are excluded by
+  the selection invariant `tp_selected_isymRep_of_emptyAnt_botSucc`). **The defect is `permIdx`'s selection,
+  not redex absence:** in the fixpoint case a genuine redex may still exist (LEFT disjunct of the dichotomy),
+  but `red` ignores it because it picked the first leaf. So "fixpoint ⟹ cut-free ⟹ absurd" (the lap-120
+  endgame plan) is FALSE; the descent must be driven by the EXHIBITED redex (`iord_descent_iRcrit_of_redex`),
+  NOT by `red`'s permIdx.
+- **THE PLAN (option a — restructure the endgame off `red`'s orbit).** Replace `false_of_ZDerivesEmpty`'s
+  reliance on `iord_red_iterate_descends` (which carries the unprovable fixpoint branch) with a
+  "some-reduction-descends" relation built from the dichotomy: LEFT → `iord_descent_iRcrit_of_redex` on the
+  exhibited redex (needs the 6 ρ-facts); RIGHT → splice on the non-leaf premise (smaller ordinal, the
+  existing `iord_descent_red` chain-REPLACE/`ZDerivation_red_zK_splice` machinery). Then well-foundedness of
+  `iord` (PRWO ε₀) gives False with no fixpoint branch. (Option b — fix `permIdx` to skip leaves — is an
+  engine redesign; option a reuses everything banked laps 121–123.)
+
 **NEXT-LAP TARGETS (in order):**
-1. **[lap 123] The case-5.1/5.2 dichotomy at the descent level.** For a valid ⊥-chain: EITHER all `isymRep`
-   premises ≤ j0 are leaves (→ `inference_critical_pair_of_botChain` → redex → `iord_descent_iRcrit_of_redex`,
-   case 5.1, BANKED modulo the 6 ρ-facts), OR ∃ a non-leaf (chain/Ind) `isymRep` premise (→ non-critical
-   case 5.2 splice → descent via that premise's smaller ordinal). Build the dichotomy + wire the leaf branch
-   into the endgame; the splice branch is the existing `iord_descent_red`/`ZDerivation_red_zK_splice` sorries.
-   The 6 ρ-facts (redex-premise reduct soundness) are the remaining deep input on the leaf branch.
+1. **[lap 124] The 6 ρ-facts on the exhibited redex** (LEFT branch) — redex-premise reduct soundness:
+   redexI is an I-rule (R-symbol, reduct via `zsubst`/haux0), redexJ is a §5 L-axiom (reduct `Ax¹`). These
+   are the `hρlt`/`hρg`/`hρNF` inputs `iord_descent_iRcrit_of_redex` needs. Partially banked (haux0/haux1).
+2. Wire the dichotomy LEFT branch (redex + ρ-facts) into a `false`-driving descent independent of `red`.
+3. Sibling: `zKValidF_iIndReduct_of_zInd` (lap-120: false as stated; fix via `zsubst`). Then
+   `foundation_bot_to_Z_empty` (M2) + `gentzenDescentφ`.
 2. ✅ DONE (lap 122, 3rd commit) — `iord_descent_iRcrit_of_chain_reroute` (InternalZ, right after the
    reroute finder): the reroute twin of `iord_descent_iRcrit_of_chain'`, manufactures the redex via the
    generalized finder and feeds `iord_descent_iRcrit_of_redex`. Stall-free K-descent for valid ⊥-chains,
