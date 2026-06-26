@@ -1,7 +1,7 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 129 · 2026-06-26 (FRESH-MIND REVIEW — re-oriented to the TERMINATION crux: the `red`-STALL is GENUINE (vacuity refuted in-kernel), Buchholz §14.25 gives the faithful fix, no-stall linchpin `firstBotPrem_reducible` LANDED)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 131 · 2026-06-26 (zAxAll ZPhi-strengthening LANDED — `hAll`'s ∀-side exact-shape `seqSucc sⱼ = cutFormula` now derivable; the SHARED `Seq(seqAnt)` blocker for BOTH hAll/hNeg bundles pinned; `seqAntSeqFlag` building block + `fvSubstSeq_seqCons` substrate banked. See `HANDOFF-2026-06-26-lap131.md`.)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
 
