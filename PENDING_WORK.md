@@ -51,8 +51,10 @@ via `znth (tpSeq ds) x` (`znth_tpSeq` bridges `= tp (znth ds x)` for `x < lh ds`
 1. **[lap 123] Discharge `hreroute` for chain/Ind premises** — attack path (α): prove that in a valid
    ⊥-chain, the least source of the cut formula is never a tag-3/4 node, OR that such a node is covered by
    the outer `iord` descent recursion rather than the finder. THE remaining gate on path (i).
-2. Wire the assembled finder + discharged `hreroute` into `iord_descent_iRcrit_of_redex` to obtain a
-   stall-free K-descent lemma for valid ⊥-chains.
+2. ✅ DONE (lap 122, 3rd commit) — `iord_descent_iRcrit_of_chain_reroute` (InternalZ, right after the
+   reroute finder): the reroute twin of `iord_descent_iRcrit_of_chain'`, manufactures the redex via the
+   generalized finder and feeds `iord_descent_iRcrit_of_redex`. Stall-free K-descent for valid ⊥-chains,
+   modulo `hreroute`. Only target #1 (discharge `hreroute` for chain/Ind) now gates path (i).
 3. Re-point the endgame `false_of_ZDerivesEmpty` (M3) strict-descent disjunct onto this stall-free track
    (cf. lap-121 note: `iR2`-track and `red`-track share the ordinal `iord_iRcritG_eq_iRcrit`).
 4. Sibling (independent of the stall): `zKValidF_iIndReduct_of_zInd` (lap-120 found it false as stated;
