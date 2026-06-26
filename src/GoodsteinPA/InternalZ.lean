@@ -5205,13 +5205,44 @@ theorem iord_descent_iRcrit_of_chain {s r ds j0 : V} {Tr Fa : V → Prop} {ρ : 
     hNF (hρNF (redexI (zK s r ds))) (hρNF (redexJ (zK s r ds)))
   exact hgoal
 
+/-- **The K-cut descent, parametrized by an EXHIBITED redex** (lap 121). The descent computation
+`iord_descent_iRcrit_of_chain'` uses its criticality data (`hwfR`/`hwfL`/`hperm`/`hnperm`/…) ONLY to
+run `inference_critical_pair_of_chain` and manufacture a redex pair; the actual ordinal descent
+(`redexCode` → `iord_descent_iCritReduct_object`) needs just (a) a redex pair exists below the finder
+sentinel, (b) `1 ≤ r`, and (c) the six `ρ`-facts on the two redex premises. This lemma takes exactly
+those, DECOUPLING the descent from global criticality. **Why it matters (the lap-121 stall lever):** in
+the genuinely-open stall case a *threaded* atom premise breaks `hnperm`, so the finder route is blocked —
+but if the redex can be exhibited another way (e.g. from the chain's principal-cut structure directly),
+this lemma still discharges the descent, IGNORING the atom. -/
+theorem iord_descent_iRcrit_of_redex {s r ds : V} {ρ : V → V}
+    (hds : Seq ds) (hnf : isNF (iotil (zK s r ds))) (hr : 1 ≤ r)
+    (hex : ∃ c < (⟪lh (zKseq (zK s r ds)), lh (zKseq (zK s r ds))⟫ : V),
+      isRedexPair (zKseq (zK s r ds)) c)
+    (hNF : ∀ n, isNF (iotil (znth ds n)))
+    (hρlt_i : icmp (iotil (ρ (redexI (zK s r ds)))) (iotil (znth ds (redexI (zK s r ds)))) = 0)
+    (hρlt_j : icmp (iotil (ρ (redexJ (zK s r ds)))) (iotil (znth ds (redexJ (zK s r ds)))) = 0)
+    (hρg_i : idg (ρ (redexI (zK s r ds))) ≤ idg (znth ds (redexI (zK s r ds))))
+    (hρg_j : idg (ρ (redexJ (zK s r ds))) ≤ idg (znth ds (redexJ (zK s r ds))))
+    (hρNF_i : isNF (iotil (ρ (redexI (zK s r ds)))))
+    (hρNF_j : isNF (iotil (ρ (redexJ (zK s r ds))))) :
+    icmp (iord (iRcrit (zK s r ds) ρ)) (iord (zK s r ds)) = 0 := by
+  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
+  simp only [zKseq_zK] at hrc
+  obtain ⟨hIJ, hJlh, -, -, -⟩ := hrc
+  have hJlh' : redexJ (zK s r ds) < lh ds := hJlh
+  have hIlh' : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlh
+  exact iord_descent_iCritReduct_object hds hr hnf hIlh' hJlh'
+    hρlt_i hρlt_j hρg_i hρg_j hNF hρNF_i hρNF_j
+
 /-- **The nut, with the `ρ`-hyps WEAKENED to the two redex premises.** `iord_descent_iRcrit_of_chain`
 states `hρlt`/`hρg`/`hρNF` as `∀ n`, but its proof only ever USES them at `redexI`/`redexJ` (the finder
 output). For the concrete `ρ = iR2(znth ds ·)` the `∀ n` form is FALSE (a critical-chain premise's `õ`
 can jump up; an atom premise's `iR2` is the identity), so this redex-only form is the one the recursive
 descent can actually discharge. It pins the entire K-case ordinal obligation to SIX facts about the two
 redex-premise reducts `ρ(redexI)`,`ρ(redexJ)` — exactly what the redexI I-rule case
-(`iRedDescent_iR_of_tp_isymR`) and the redexJ §5 atomic reduct must supply. -/
+(`iRedDescent_iR_of_tp_isymR`) and the redexJ §5 atomic reduct must supply. (lap-121: now a thin wrapper
+over `iord_descent_iRcrit_of_redex`, which manufactures the redex via `inference_critical_pair_of_chain`
+from the criticality data.) -/
 theorem iord_descent_iRcrit_of_chain' {s r ds j0 : V} {Tr Fa : V → Prop} {ρ : V → V}
     (hds : Seq ds) (hnf : isNF (iotil (zK s r ds)))
     (hj0 : j0 < lh ds)
@@ -5248,13 +5279,8 @@ theorem iord_descent_iRcrit_of_chain' {s r ds j0 : V} {Tr Fa : V → Prop} {ρ :
       isRedexPair (zKseq (zK s r ds)) c := by
     simp only [zKseq_zK]
     exact ⟨⟪i, j⟫, pair_lt_pair hilt hjlt, hredex⟩
-  have hrc : isRedexPair (zKseq (zK s r ds)) (redexCode (zK s r ds)) := redexCode_isRedexPair hex
-  simp only [zKseq_zK] at hrc
-  obtain ⟨hIJ, hJlh, -, -, -⟩ := hrc
-  have hJlh' : redexJ (zK s r ds) < lh ds := hJlh
-  have hIlh' : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlh
-  exact iord_descent_iCritReduct_object hds hr hnf hIlh' hJlh'
-    hρlt_i hρlt_j hρg_i hρg_j hNF hρNF_i hρNF_j
+  exact iord_descent_iRcrit_of_redex hds hnf hr hex hNF
+    hρlt_i hρlt_j hρg_i hρg_j hρNF_i hρNF_j
 
 /-! ## C0 Fixpoint — the system-Z derivation predicate `ZDerivation : V → Prop`
 
