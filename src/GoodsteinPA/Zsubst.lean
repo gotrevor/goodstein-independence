@@ -1492,6 +1492,46 @@ template — a standalone `𝚺₁` function threaded *alongside* `ZDerivation` 
 instance `k`). NB: unlike `zReg` (which tracks `maxEigen < eigenvar` at I∀ AND Ind), `zFresh` puts a flag only
 at I∀ (tag 1) — the only node the ∀-inversion inverts; tags 2/3/4 just fold the premises. -/
 
+/-- `seqWffFlag Γ = 0` iff every entry of `Γ` is a `UFormula`, else `1` — the antecedent
+well-formedness indicator that `freshFlag`/`zFresh` carry so the I∀-node freshness is preserved by closed
+substitution (`freshFlag_zsubst_eq_zero` needs `∀ i, IsUFormula (znth Γ i)`, which `ZDerivation` does NOT
+supply at atom/`zAx1` leaves — so it must be tracked as an invariant). -/
+noncomputable def seqWffFlag (Γ : V) : V :=
+  if (∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i)) then 0 else 1
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.seqWffFlagDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “z Γ. (∃ l, !lhDef l Γ ∧ (∀ i < l, ∃ x, !znthDef x Γ i ∧ !(isUFormula ℒₒᵣ).sigma x) ∧ z = 0)
+      ∨ (∃ l, !lhDef l Γ ∧ (∃ i < l, ∃ x, !znthDef x Γ i ∧ ¬!(isUFormula ℒₒᵣ).pi x) ∧ z = 1)”
+
+instance seqWffFlag_defined : 𝚺₁-Function₁ (seqWffFlag : V → V) via seqWffFlagDef := .mk fun v ↦ by
+  simp [seqWffFlagDef, lh_defined.iff, znth_defined.iff]
+  by_cases h : ∀ x < lh (v 1), IsUFormula ℒₒᵣ (znth (v 1) x)
+  · rw [seqWffFlag, if_pos h]
+    refine ⟨fun H => ?_, fun H => Or.inl ⟨h, H⟩⟩
+    rcases H with ⟨_, H0⟩ | ⟨H1, _⟩
+    · exact H0
+    · obtain ⟨i, hi, hni⟩ := H1; exact absurd (h i hi) hni
+  · rw [seqWffFlag, if_neg h]
+    refine ⟨fun H => ?_, fun H => Or.inr ⟨?_, H⟩⟩
+    · rcases H with ⟨H0, _⟩ | ⟨_, H1⟩
+      · exact absurd H0 h
+      · exact H1
+    · push_neg at h; exact h
+instance seqWffFlag_definable : 𝚺₁-Function₁ (seqWffFlag : V → V) := seqWffFlag_defined.to_definable
+
+@[simp] lemma seqWffFlag_eq_zero_iff {Γ : V} :
+    seqWffFlag Γ = 0 ↔ ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i) := by
+  unfold seqWffFlag; by_cases h : ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i) <;> simp [h]
+
+/-- Antecedent well-formedness survives `fvSubstSeq` by a closed numeral (`IsUFormula.fvSubst`). -/
+lemma seqWffFlag_fvSubstSeq {a n Γ : V} (h : seqWffFlag Γ = 0) :
+    seqWffFlag (fvSubstSeq a (Bootstrapping.Arithmetic.numeral n) Γ) = 0 := by
+  rw [seqWffFlag_eq_zero_iff] at h ⊢
+  intro i hi
+  rw [fvSubstSeq_lh] at hi
+  rw [znth_fvSubstSeq hi]
+  exact IsUFormula.fvSubst (by simp) (h i hi)
+
 /-- `eqFlag x y = 0` iff `x = y`, else `1` — a `𝚺₀` equality-violation indicator (lets the `fvSubst`-equality
 freshness conditions be a `max`-fold of `eqFlag (fvSubst …) ·`, mirroring `ltFlag`). -/
 noncomputable def eqFlag (x y : V) : V := if x = y then 0 else 1
@@ -1506,19 +1546,22 @@ instance eqFlag_definable : 𝚺₀-Function₂ (eqFlag : V → V → V) := eqFl
 @[simp] lemma eqFlag_eq_zero_iff {x y : V} : eqFlag x y = 0 ↔ x = y := by
   unfold eqFlag; by_cases h : x = y <;> simp [h]
 
-/-- Per-I∀-node freshness flag: `0` iff `^&a` is free in neither the matrix `p` nor the antecedent `Γ`. -/
+/-- Per-I∀-node freshness flag: `0` iff `^&a` is free in neither the matrix `p` nor the antecedent `Γ`,
+AND every entry of `Γ` is a `UFormula` (the `seqWffFlag Γ` conjunct — needed so the freshness is
+preserved by closed substitution, since `ZDerivation` does not supply antecedent wff at leaves). -/
 noncomputable def freshFlag (a p Γ : V) : V :=
   max (eqFlag (fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral 0) p) p)
-    (eqFlag (fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) Γ) Γ)
+    (max (eqFlag (fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) Γ) Γ) (seqWffFlag Γ))
 
 noncomputable def _root_.LO.FirstOrder.Arithmetic.freshFlagDef : 𝚺₁.Semisentence 4 := .mkSigma
   “z a p Γ. ∃ n0, !Bootstrapping.Arithmetic.numeralGraph n0 0 ∧ ∃ fp, !(fvSubstGraph ℒₒᵣ) fp a n0 p ∧
      ∃ fg, !fvSubstSeqDef fg a n0 Γ ∧ ∃ e1, !eqFlagDef e1 fp p ∧ ∃ e2, !eqFlagDef e2 fg Γ ∧
-     !max.dfn z e1 e2”
+     ∃ wf, !seqWffFlagDef wf Γ ∧ ∃ m2, !max.dfn m2 e2 wf ∧ !max.dfn z e1 m2”
 
 instance freshFlag_defined : 𝚺₁-Function₃ (freshFlag : V → V → V → V) via freshFlagDef := .mk fun v ↦ by
   simp [freshFlagDef, freshFlag, Bootstrapping.Arithmetic.numeral_defined.iff,
-    (fvSubst.defined (L := ℒₒᵣ)).iff, fvSubstSeq_defined.iff, eqFlag_defined.iff, max_defined.iff]
+    (fvSubst.defined (L := ℒₒᵣ)).iff, fvSubstSeq_defined.iff, eqFlag_defined.iff, max_defined.iff,
+    seqWffFlag_defined.iff]
 instance freshFlag_definable : 𝚺₁-Function₃ (freshFlag : V → V → V → V) := freshFlag_defined.to_definable
 
 lemma freshFlag_fst {a p Γ : V} (h : freshFlag a p Γ = 0) :
@@ -1529,28 +1572,38 @@ lemma freshFlag_fst {a p Γ : V} (h : freshFlag a p Γ = 0) :
 lemma freshFlag_snd {a p Γ : V} (h : freshFlag a p Γ = 0) :
     fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) Γ = Γ := by
   unfold freshFlag at h
-  exact eqFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp (le_of_le_of_eq (le_max_right _ _) h))
+  exact eqFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp
+    (le_of_le_of_eq (le_trans (le_max_left _ _) (le_max_right _ _)) h))
 
-/-- **`freshFlag = 0` constructor** from the two non-occurrence equalities. -/
+/-- Antecedent well-formedness extracted from a vanishing `freshFlag`. -/
+lemma freshFlag_wff {a p Γ : V} (h : freshFlag a p Γ = 0) :
+    ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i) := by
+  unfold freshFlag at h
+  exact seqWffFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp
+    (le_of_le_of_eq (le_trans (le_max_right _ _) (le_max_right _ _)) h))
+
+/-- **`freshFlag = 0` constructor** from the two non-occurrence equalities + antecedent well-formedness. -/
 lemma freshFlag_eq_zero {a p Γ : V}
     (hp : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral 0) p = p)
-    (hΓ : fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) Γ = Γ) :
+    (hΓ : fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) Γ = Γ)
+    (hwff : seqWffFlag Γ = 0) :
     freshFlag a p Γ = 0 := by
   unfold freshFlag
-  rw [eqFlag_eq_zero_iff.mpr hp, eqFlag_eq_zero_iff.mpr hΓ]; simp
+  rw [eqFlag_eq_zero_iff.mpr hp, eqFlag_eq_zero_iff.mpr hΓ, hwff]; simp
 
 /-- **Per-I∀-node `freshFlag` is preserved (downward) by closed-numeral substitution** — the I∀ step of
 `zFresh_zsubst`. The eigenvariable `e` is unchanged by `zsubst d a (numeral n)`; if `e` is fresh in the
 matrix `p` and antecedent `Γ` of the node, it stays fresh in `fvSubst a (numeral n) p` /
-`fvSubstSeq a (numeral n) Γ` (substituting a *different/closed* numeral cannot introduce `^&e`). Needs the
-node's matrix + antecedent entries to be `UFormula`s (so the structural `fvSubst` commutation applies). -/
+`fvSubstSeq a (numeral n) Γ` (substituting a *different/closed* numeral cannot introduce `^&e`). The
+antecedent well-formedness needed for the structural commutation is now carried IN `freshFlag` itself
+(`seqWffFlag`), so only the matrix `IsUFormula p` (free from `zIallWff`) is an external hypothesis. -/
 lemma freshFlag_zsubst_eq_zero {a e n p Γ : V} (hp : IsUFormula ℒₒᵣ p)
-    (hΓ : ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i))
     (h : freshFlag e p Γ = 0) :
     freshFlag e (fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral n) p)
       (fvSubstSeq a (Bootstrapping.Arithmetic.numeral n) Γ) = 0 :=
   freshFlag_eq_zero (fvSubst_numeral_fresh_subst hp (freshFlag_fst h))
-    (fvSubstSeq_numeral_fresh_subst hΓ (freshFlag_snd h))
+    (fvSubstSeq_numeral_fresh_subst (freshFlag_wff h) (freshFlag_snd h))
+    (seqWffFlag_fvSubstSeq (seqWffFlag_eq_zero_iff.mpr (freshFlag_wff h)))
 
 noncomputable def zFreshNext (d s : V) : V :=
   if zTag d = 1 then
@@ -1711,6 +1764,46 @@ lemma zFresh_eq_zFreshNext {c : V} (hpos : 0 < c) : zFresh c = zFreshNext c (zFr
 @[simp] lemma zFresh_zAx1 (s C : V) : zFresh (zAx1 s C) = 0 := by
   rw [zFresh_eq_zFreshNext (by simp [zAx1]), zFreshNext]; simp [zTag_zAx1]
 
+/-- The `iseqMaxAux` max-fold of a value table is `0` when every read value is `0`. -/
+lemma iseqMaxAux_eq_zero_of {s ds : V} :
+    ∀ j, (∀ i < j, znth s (znth ds i) = 0) → iseqMaxAux s ds j = 0 := by
+  intro j
+  induction j using ISigma1.sigma1_succ_induction
+  · exact Definable.imp (by definability)
+      (Definable.comp₂ (DefinableFunction₃.comp (F := iseqMaxAux) (DefinableFunction.const s)
+        (DefinableFunction.const ds) (DefinableFunction.var 0)) (by definability))
+  case zero => intro _; simp
+  case succ j ih =>
+    intro h
+    rw [iseqMaxAux_succ, ih (fun i hi => h i (lt_trans hi (by simp))), h j (by simp)]; simp
+
+/-- **`zFresh` over a chain** (tag-4 folds the premises, no own flag): `zFresh (zK s r ds)` is the
+max-fold of the premises' `zFresh` read out of the recursion table. -/
+lemma zFresh_zK (s r ds : V) :
+    zFresh (zK s r ds) = iseqMaxTab (zFreshTable (zK s r ds - 1)) ds := by
+  rw [zFresh_eq_zFreshNext (by simp [zK]), zFreshNext, if_neg (by simp), if_neg (by simp),
+    if_neg (by simp), if_pos (zTag_zK s r ds), zKseq_zK]
+
+/-- A premise of a fresh chain node is itself fresh. -/
+lemma zfresh_zK_premise {s r ds : V} (hds : Seq ds) (h : zFresh (zK s r ds) = 0)
+    {i : V} (hi : i < lh ds) : zFresh (znth ds i) = 0 := by
+  have hle : znth (zFreshTable (zK s r ds - 1)) (znth ds i)
+      ≤ iseqMaxTab (zFreshTable (zK s r ds - 1)) ds := le_iseqMaxAux (lh ds) i hi
+  rw [znth_zFreshTable_eq_zFresh _ (znth ds i)
+      (le_pred_of_lt (lt_trans (lt_of_mem_rng (hds.znth hi)) (ds_lt_zK s r ds)))] at hle
+  rw [zFresh_zK] at h
+  exact nonpos_iff_eq_zero.mp (h ▸ hle)
+
+/-- A chain node all of whose premises are fresh is fresh. -/
+lemma zfresh_zK_of {s r ds : V} (hds : Seq ds)
+    (h : ∀ i < lh ds, zFresh (znth ds i) = 0) : zFresh (zK s r ds) = 0 := by
+  rw [zFresh_zK, iseqMaxTab]
+  apply iseqMaxAux_eq_zero_of
+  intro i hi
+  rw [znth_zFreshTable_eq_zFresh _ (znth ds i)
+      (le_pred_of_lt (lt_trans (lt_of_mem_rng (hds.znth hi)) (ds_lt_zK s r ds)))]
+  exact h i hi
+
 /-- **Hereditary I∀ eigenvariable-condition freshness.** -/
 def ZFresh (d : V) : Prop := zFresh d = 0
 
@@ -1737,6 +1830,59 @@ seqAnt s`. -/
 lemma fvSubstSeq_numeral_eq_self_of_zfresh_zIall {s a p d0 : V} (h : ZFresh (zIall s a p d0)) :
     fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) (seqAnt s) = seqAnt s :=
   freshFlag_snd (freshFlag_eq_zero_of_zfresh_zIall h)
+
+/-! ### `zFresh_zsubst` — freshness is preserved DOWNWARD by closed-numeral substitution
+
+Unlike `zReg_zsubst` (an equality), `zFresh` only preserves **downward**: at an I∀ node whose eigenvariable
+*is* the substituted `a`, `zsubst` removes `^&a` everywhere, which can only *lower* the violation count. So
+the invariant is the implication `ZFresh d → ZFresh (zsubst d a (numeral n))`. The I∀ step is
+`freshFlag_zsubst_eq_zero` (with the antecedent well-formedness now carried inside `freshFlag`); the chain
+step folds the premises via `zfresh_zK_of`/`zfresh_zK_premise`; the other rules fold premises directly. This
+is the substitution step of "`red` preserves `ZFresh`" (the freshness analogue of `ZRegular_red`). -/
+theorem zFresh_zsubst (a n : V) : ∀ d, ZDerivation d →
+    ZFresh d → ZFresh (zsubst d a (Bootstrapping.Arithmetic.numeral n)) := by
+  apply zDerivation_induction
+    (P := fun d => ZFresh d → ZFresh (zsubst d a (Bootstrapping.Arithmetic.numeral n)))
+  · unfold ZFresh; exact Definable.imp (by definability) (by definability)
+  · intro C hC d hphi
+    rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, hwff⟩ |
+      ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    · intro _; simp [ZFresh, zsubst_zAtom]
+    · intro hfresh
+      have hd0f : zFresh (zsubst d0 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
+        (hC d0 hd0).2 (zfresh_zIallPrem hfresh)
+      unfold ZFresh
+      rw [zsubst_zIall, zFresh_zIall, seqAnt_fvSubstSeqt,
+        freshFlag_zsubst_eq_zero hwff.2.2.isUFormula (freshFlag_eq_zero_of_zfresh_zIall hfresh), hd0f]
+      simp
+    · intro hfresh
+      unfold ZFresh at hfresh; rw [zFresh_zIneg] at hfresh
+      have hd0f : zFresh (zsubst d0 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
+        (hC d0 hd0).2 hfresh
+      unfold ZFresh; rw [zsubst_zIneg, zFresh_zIneg]; exact hd0f
+    · intro hfresh
+      unfold ZFresh at hfresh; rw [zFresh_zInd] at hfresh
+      have hf0 : zFresh (zsubst d0 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
+        (hC d0 hd0).2 (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_left _ _))
+      have hf1 : zFresh (zsubst d1 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
+        (hC d1 hd1).2 (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_right _ _))
+      unfold ZFresh
+      rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd, zFresh_zInd, hf0, hf1]
+      simp
+    · intro hfresh
+      unfold ZFresh; rw [zsubst_zK]
+      apply zfresh_zK_of (tblMapSeq_seq _ _)
+      intro i hi
+      have hlh : lh (tblMapSeq (zsubstTable a (Bootstrapping.Arithmetic.numeral n) (zK s r ds - 1)) ds)
+          = lh ds := tblMapSeq_lh _ _
+      rw [hlh] at hi
+      rw [znth_tblMapSeq hi, znth_zsubstTable_eq_zsubst a (Bootstrapping.Arithmetic.numeral n) _ (znth ds i)
+        (le_pred_of_lt (lt_of_le_of_lt (znth_le_self ds i) (ds_lt_zK s r ds)))]
+      exact (hC (znth ds i) (hmem i hi)).2 (zfresh_zK_premise hseq hfresh hi)
+    · intro _; simp [ZFresh, zsubst_zAxAll]
+    · intro _; simp [ZFresh, zsubst_zAxNeg]
+    · intro _; simp [ZFresh, zsubst_zAx1]
 
 /-! ### Regularity of the corrected-reduct premises (engine re-key prerequisite, lap 119)
 
