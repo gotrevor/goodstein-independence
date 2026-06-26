@@ -27,7 +27,30 @@ and MUST be conditioned on a well-formedness companion. The matrix half is free 
 `IsSemiformula 1 p` ⟹ `IsUFormula p`, via `tag_uformula_of_ZDerivation`/`hwff.2.2.isUFormula`); only the
 ANTECEDENT half needs the invariant.
 
-**NEXT-LAP TARGETS (in order):**
+**✅ UPDATE (same lap 127) — `zFresh_zsubst` (directional) is now PROVEN; targets 1 & the wff gap are CLOSED.**
+The antecedent-wff gap was resolved by **folding `seqWffFlag`** (a `𝚺₁` all-entries-`IsUFormula` indicator)
+**into `freshFlag`** — so `zFresh` now carries the antecedent well-formedness itself (the embedding supplies
+it; `red`/`zsubst` preserve it via `IsUFormula.fvSubst`). `freshFlag = max(matrix-fresh, antecedent-fresh,
+seqWffFlag)`; extractors `freshFlag_fst`/`_snd`/`_wff` + 3-arg `freshFlag_eq_zero` + `seqWffFlag_fvSubstSeq`.
+Then `zFresh_zsubst : ZFresh d → ZFresh (zsubst d a (numeral n))` by `zDerivation_induction` (I∀ =
+`freshFlag_zsubst_eq_zero`; chain = `zfresh_zK_of`/`zfresh_zK_premise` — new `zFresh_zK` fold +
+`iseqMaxAux_eq_zero_of`). All axiom-clean, green 1326. **The matrix `IsUFormula p` is free from `zIallWff`.**
+
+**REMAINING NEXT-LAP TARGETS (in order):**
+1. **`ZFresh_red`** (red-stability, mirror the `zReg`→`ZRegular_red` chain `Zsubst.lean:1704`
+   `ZRegular_red_of_not_zK` + the zK splice/replace lemmas). Use `zFresh_zsubst` at the `red_zIall`/I¬
+   sites; the chain `red` cases fold via `zfresh_zK_premise`/`zfresh_zK_of`. NB `ZFresh` is DOWNWARD-closed
+   (an implication), so `ZFresh_red` should read `ZFresh d → ZFresh (red d)` (not an equality like
+   `zReg`'s) — the `red` zK-critical reduct replaces premises by `zsubst`/`zInegPrem`/`zAx1` children, each
+   `ZFresh` by `zFresh_zsubst` / premise-extraction / `zFresh_zAx1 = 0`.
+2. **Thread `∧ ZFresh d` into `ZDerivesEmptyR`** (Crux2Blueprint:933); the embedding
+   `foundation_bot_to_Z_empty` supplies it (real formula antecedents ⟹ `seqWffFlag = 0`; eigenvariables
+   chosen fresh ⟹ the two fresh-eqs). Then LEFT-branch ∀-soundness closes via
+   `ZDerivation_iRcritG_critReductCorr` (`hpfresh = fvSubst_numeral_transfer (matrix UFormula)
+   (fvSubst_numeral_eq_self_of_zfresh_zIall (zfresh_zK_premise …))`, `hΓfresh` likewise).
+3. ¬-case (`iRcritGNeg`, lap-117) — same substrate covers it.
+
+**(SUPERSEDED) original target 1 — antecedent-wff gap resolution (kept for context):**
 1. **Resolve the antecedent-wff gap.** Cheapest principled option: a `𝚫₁` companion invariant
    `zAntWff`-style "every node's antecedent entries are `UFormula`" (mirror the `zReg`/`zFresh` table; the
    atom/zAx1 leaves get the constraint as a NEW ZPhi side condition — but that ripples ZPhi, which lap-126
