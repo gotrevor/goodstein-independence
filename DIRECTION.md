@@ -78,7 +78,7 @@ This is **formalization of a known proof**, not origination. Gentzen's ordinal a
 years old and in textbooks (Gentzen 1936, Schütte, Takeuti). Decomposing it into mathlib-shaped
 Lean lemmas is exactly treadmill work. The phases (see `EXPEDITION-PLAN.md` for the math):
 
-- **Phase 0 — encoding.** DONE except `goodsteinTerminates_re` (below). Milestone **M1**.
+- **Phase 0 — encoding.** ✅ DONE - Milestone **M1** complete (`goodsteinTerminates_re` + `computable_bump` proven, 0 sorries; verified 2026-06-26).
 - **Phase 1 — Gödel II hook.** Surface `Con(𝗣𝗔)` + `𝗣𝗔 ⊬ Con(𝗣𝗔)` from Foundation's *existing*
   Gödel II (`FirstOrder/Incompleteness/Second.lean`), and reduce the headline to the single
   implication `𝗣𝗔 ⊢ γ → 𝗣𝗔 ⊢ Con(𝗣𝗔)`. Assembly. Milestone **M2**.
@@ -109,17 +109,18 @@ with precise questions; a host fulfiller researches it and commits `ON-LINE-FIND
 may add a PDF to `papers/`) for you to read next lap. Getting the math right from the literature
 beats inventing a decomposition.
 
-## M1 — the immediate residual
+## M1 — ✅ DONE (do NOT re-attack)
 
-```
-Encoding.goodsteinTerminates_re : REPred goodsteinTerminates
-```
-`goodsteinTerminates m := ∃ N, goodsteinSeq m N = 0` is r.e. (search `N`); the only non-trivial
-input is **`Computable bump`** (`Defs.lean`, well-founded recursion on `Nat.log` — mathlib won't
-auto-derive it). Route: `Computable bump` → `Computable₂ goodsteinSeq` → `ComputablePred (·=0)` →
-`ComputablePred.to_re` → `REPred.projection` (∃ N). See Foundation `Vorspiel/Computability`. Pure
-computability: zero faithfulness risk (typechecks or it doesn't). Closing M1 makes Phase 0
-axiom-clean (`#print axioms goodsteinSentence_faithful` loses its `sorryAx`).
+`Encoding.goodsteinTerminates_re : REPred goodsteinTerminates` is **PROVEN** (verified 2026-06-26:
+0 sorries in `Encoding.lean` / `Computability.lean` / `Defs.lean`). It landed as built:
+`computable_bump : Computable₂ bump` (`Computability.lean:131`) → `goodsteinTerminates_re`
+(`Encoding.lean:60`). Effect realized: **Phase 0 is axiom-clean** - `goodsteinSentence_faithful`
+(`Bridge.lean:34`) prints `[propext, Classical.choice, Quot.sound]`, no `sorryAx` (re-verified
+in-kernel lap 132). Nothing here to do.
+
+> Historical route (for reference): `Computable bump` (well-founded recursion on `Nat.log`) →
+> `Computable₂ goodsteinSeq` → `ComputablePred (·=0)` → `ComputablePred.to_re` →
+> `REPred.projection` (∃ N), per Foundation `Vorspiel/Computability`.
 
 ## ANTI-FRAUD guard (the one hard rule) 🚫
 
