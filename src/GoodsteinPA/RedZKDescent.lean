@@ -721,5 +721,29 @@ lemma red_zK_fixpoint_of_zAx1_selected {s r ds sᵢ Cᵢ : V}
     show tp (znth ds (permIdx (zK s r ds))) = isymRep from by rw [hax1, tp_zAx1],
     tpReduce_isymRep]
 
+/-- **Tag-explicit ⊥-orbit descent dichotomy** (lap 130). Upgrades `iRcrit_descends_or_nonleaf_isymRep`'s
+RIGHT disjunct from "a non-leaf `isymRep` premise exists" to the STRUCTURAL form "a `zInd` (tag 3) or `zK`
+(tag 4) premise exists" (via `isymRep_nonleaf_zInd_or_zK`). This is the clean entry the restructured
+`false_of_ZDerivesEmpty` consumes — and it sidesteps the `red`-`permIdx` fixpoint entirely:
+- **LEFT** = the stall-tolerant critical-cut descent `iRcrit` (no `permIdx`/`red`-fixpoint dependence,
+  `iord_descent_iRcrit_botChain_leaves`).
+- **RIGHT** = the major-premise recursion target: a `zInd` premise (reduced by `red_zInd`, a banked strict
+  descent `iord_descent_red_zInd`) or a sub-`zK`-chain premise (the genuine tag-4 recursion residual).
+Tags 5/6 (L-axioms, `isymLk` not `isymRep`) never appear on the RIGHT — they are the LEFT redex's L-side,
+their cut-partner pinned by `majorPrem_zAxAll_cutPartner` / `majorPrem_zAxNeg_cutPartner`. -/
+theorem iRcrit_descends_or_zInd_zK_premise {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hreg : ∀ i < lh ds, ZRegular (znth ds i)) :
+    icmp (iord (iRcrit (zK s r ds) (fun n => zAxReduct (red (znth ds n))))) (iord (zK s r ds)) = 0
+    ∨ (∃ i < lh ds, (∃ s' at' p d0 d1, znth ds i = zInd s' at' p d0 d1) ∨
+        (∃ s' r' ds', znth ds i = zK s' r' ds')) := by
+  rcases iRcrit_descends_or_nonleaf_isymRep hZ hant hsucc hreg with hL | ⟨i, hi, hrep, hnleaf⟩
+  · exact Or.inl hL
+  · obtain ⟨_, hmem⟩ := zDerivation_zK_inv hZ
+    exact Or.inr ⟨i, hi, isymRep_nonleaf_zInd_or_zK (hmem i hi) hrep hnleaf⟩
+
 end GoodsteinPA.InternalZ
 
+
+#print axioms GoodsteinPA.InternalZ.iRcrit_descends_or_zInd_zK_premise

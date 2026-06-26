@@ -54,6 +54,22 @@ cases (a ⊥-exit `zInd`/`zK` IS a non-leaf `isymRep`). So the endgame dispatch 
 Tags 5/6 (L-axioms, `isymLk`) are NOT `isymRep` — they live in the LEFT redex (cut), partner pinned by
 `majorPrem_zAxAll/zAxNeg_cutPartner`.
 
+**✅ ENTRY POINT BANKED — `iRcrit_descends_or_zInd_zK_premise`** (`RedZKDescent.lean` end, axiom-clean): for a
+regular ⊥-orbit chain, **either** `iRcrit` strictly `iord`-descends, **or** there is a `zInd`/`zK` premise.
+This is the clean tag-explicit entry the restructured `false_of_ZDerivesEmpty` consumes (combines the lap-124
+`iRcrit_descends_or_nonleaf_isymRep` with `isymRep_nonleaf_zInd_or_zK`).
+
+**⚠️ REMAINING DEEP RESIDUALS (both gate the LEFT and tag-4 paths — the genuine multi-lap walls):**
+- **LEFT soundness:** `iRcrit (zK s r ds) (zAxReduct∘red)` must be a `ZDerivation` to iterate. This is
+  `ZDerivation_red_zK_crit` (`Crux2Blueprint:655`), FALSE as stated under the current `ρ` (instance-0 vs k),
+  fixed post-engine-swap by `ZDerivation_iRKcCrit_of_zKValid` (`:575`, PROVEN modulo its plumbing
+  `hAll`/`hNeg`/`hthread`/`hrank`/`hCwff`/`hSeqs`). Supplying that plumbing from the orbit (`zKValid`+`ZFresh`)
+  is the lap-128 "extract-everything-from-isChainInf" unit; key open structural fact is `seqSucc sⱼ =
+  cutFormula` (the L-redex succedent matches the cut instance — routes through threading at `redexJ`, NOT the
+  axAll node alone) + `redexJ ≤ j0` (free if `j0 = lh ds − 1`, `isChainInf_of_last`).
+- **RIGHT tag-4:** recurse into the sub-`zK`-chain — the chain-REPLACE strong induction (`iord_descent_red`
+  sorry `Crux2Blueprint:1167`). Well-founded on premise `iord` < parent.
+
 **NEXT (restructure `false_of_ZDerivesEmpty` around the lap-124 dichotomy, NOT the `red`-orbit):** define the
 ⊥-orbit successor to apply `iRcrit` on the LEFT and, on the RIGHT, dispatch by `isymRep_nonleaf_zInd_or_zK`
 (tag 3 → `red_zInd`; tag 4 → recurse into the major premise). The infinite `iord`-descent then has NO
