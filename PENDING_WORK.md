@@ -51,12 +51,31 @@ new obligations (the Seq/IsSemiformula gaps above) — that is the whole residua
    `zPhi_definable`'s simp closed with just `+ zAxAllSuccWff_defined.iff` (the raw `isSemiformula` resolved
    automatically, same as `isUFormula` did). So `hAll`'s `seqSucc sⱼ = cutFormula` (∀-side) is now derivable
    from `zKValid` + `zDerivation_zAxAll_inv`. **zIneg (hNeg, ¬-side) is the only remaining gate.**
-2. **zIneg SECOND (needs the Seq invariant):** add a `Seq (seqAnt …)` fold (mirror `seqWffFlag`, lap 127) OR
-   carry `Seq (seqAnt s)` in the `zIneg` disjunct; then discharge `ZDerivation_zsubst`'s zIneg obligation
-   with `fstIdx_zsubst ▸ seqAnt_fvSubstSeqt ▸ hant ▸ fvSubstSeq_seqCons (the threaded Seq)`.
-3. Then `hAll`/`hNeg` of `ZDerivation_iRKcCrit_botOrbit` are derivable ⟹ hypothesis-free
-   `ZDerivation_iRKcCrit_botOrbit'` (lap-130 step 6); LEFT soundness real; tag-4 RIGHT recursion +
-   `false_of_ZDerivesEmpty` PRWO wiring remain.
+2. **THE SHARED BLOCKER (refines the lap-130 plan, verified by reading `Crux2Blueprint:584-663`): a
+   `Seq (seqAnt)` invariant on chain premise nodes.** The hypothesis-free `botOrbit'` must DERIVE `hAll`
+   AND `hNeg`, and BOTH bundles require not only the exact-shape equalities but also **`Seq (seqAnt sⱼ)`**
+   (hAll, the ∀-axiom node) / **`Seq (seqAnt sᵢ)`** (hNeg, the I-rule premise node) of the chain redex
+   premises (`sⱼ = fstIdx (znth ds redexJ)`, `sᵢ = fstIdx (znth ds redexI)`). So even hAll — whose
+   exact-shape `seqSucc sⱼ = cutFormula` IS now derivable (step 1) — is NOT yet fully dischargeable: its
+   `Seq (seqAnt sⱼ)` half is missing. `Seq (seqAnt s)` is NOT a `ZDerivation` consequence (the `zAtom`/`zAx1`
+   base disjuncts never record it; `seqAnt q := π₁ q` is not structurally a `Seq`). So it needs a tracked
+   invariant — the `Seq` analogue of `seqWffFlag` (lap 127).
+   - ✅ **BUILDING BLOCK BANKED (this lap, axiom-clean, `𝚺₁`-definable, `Zsubst.lean` after `seqWffFlag`):**
+     **`seqAntSeqFlag s`** := `if Seq (seqAnt s) then 0 else 1` + `seqAntSeqFlagDef`/`_defined`/`_definable`
+     + `seqAntSeqFlag_eq_zero_iff`. The per-node flag the eventual derivation-fold maxes over.
+   - **NEXT (the fold):** mirror `ZFresh`'s `freshFlag` machinery (lap 126/127) — a `seqAntSeqFold d` that
+     maxes `seqAntSeqFlag (fstIdx ·)` over the derivation tree (= 0 ⟹ every node antecedent is a `Seq`),
+     proved preserved by `red`/`iRcrit` (each rule's antecedent op `seqAddAnt`/`seqSetSucc`/identity
+     preserves `Seq` — `Seq_seqAnt_seqAddAnt` `InternalZ:1057` exists), and threaded into `ZDerivesEmptyR`
+     like `ZFresh`/`ZRegular`. At the ⊥-orbit ROOT `seqAnt s = ∅` (Seq trivially), and the fold gives
+     `Seq (seqAnt)` for every chain premise ⟹ supplies `hSeqsj`/`hSeqsi`.
+3. **zIneg exact-shape (the seqCons equality), once the Seq fold lands:** re-apply the `zInegAntWff` half of
+   `scratchpad/lap131-zphi-strengthening-WIP.diff`; discharge `ZDerivation_zsubst`'s zIneg obligation with
+   `fstIdx_zsubst ▸ seqAnt_fvSubstSeqt ▸ hant ▸ fvSubstSeq_seqCons hSeq` where `hSeq : Seq (seqAnt s)` comes
+   from reconstructing `ZDerivation (zIneg s p d0)` + the Seq fold (`fvSubstSeq_seq` makes the substituted
+   antecedent a `Seq` automatically, so the produced node self-satisfies the flag).
+4. Then `hAll`/`hNeg` derivable ⟹ hypothesis-free `botOrbit'` (lap-130 step 6); LEFT soundness real; tag-4
+   RIGHT recursion + `false_of_ZDerivesEmpty` PRWO wiring remain.
 
 ## lap 130 — the `majorIdx` re-key plan is INCOMPLETE: tag-5/6 major premises stall too; cut-partner PINNED
 **Build 🟢 1326.** Landed (axiom-clean `[propext, choice, Quot.sound]`, additive, `InternalZ.lean` after

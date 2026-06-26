@@ -1551,6 +1551,39 @@ instance seqWffFlag_definable : 𝚺₁-Function₁ (seqWffFlag : V → V) := se
     seqWffFlag Γ = 0 ↔ ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i) := by
   unfold seqWffFlag; by_cases h : ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i) <;> simp [h]
 
+/-- `seqAntSeqFlag s = 0` iff the antecedent `seqAnt s` is a `Seq`, else `1` — the antecedent **Seq-ness**
+indicator, the `Seq` analogue of `seqWffFlag`. `ZDerivation` does NOT supply `Seq (seqAnt s)` at atom/axiom
+leaves (`seqAnt q := π₁ q` is not structurally a `Seq`, `InternalZ:967`), so the per-node bundles
+`hAll`/`hNeg` of the ⊥-orbit critical-reduct soundness (`Crux2Blueprint`, `ZDerivation_iRKcCrit_*`) — which
+require `Seq (seqAnt sⱼ)`/`Seq (seqAnt sᵢ)` of the chain redex premise nodes — must carry it as a tracked
+invariant (lap 131). This is the per-node flag the eventual derivation-fold (mirror `ZFresh`/`seqWffFlag`)
+maxes over. -/
+noncomputable def seqAntSeqFlag (s : V) : V :=
+  if Seq (seqAnt s) then 0 else 1
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.seqAntSeqFlagDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “z s. (∃ sa, !seqAntDef sa s ∧ !seqDef sa ∧ z = 0)
+      ∨ (∃ sa, !seqAntDef sa s ∧ ¬!seqDef sa ∧ z = 1)”
+
+instance seqAntSeqFlag_defined : 𝚺₁-Function₁ (seqAntSeqFlag : V → V) via seqAntSeqFlagDef := .mk fun v ↦ by
+  simp [seqAntSeqFlagDef, seqAnt_defined.iff, seq_defined.iff]
+  by_cases h : Seq (seqAnt (v 1))
+  · rw [seqAntSeqFlag, if_pos h]
+    refine ⟨fun H => ?_, fun H => Or.inl ⟨h, H⟩⟩
+    rcases H with ⟨_, H0⟩ | ⟨H1, _⟩
+    · exact H0
+    · exact absurd h H1
+  · rw [seqAntSeqFlag, if_neg h]
+    refine ⟨fun H => ?_, fun H => Or.inr ⟨h, H⟩⟩
+    rcases H with ⟨H0, _⟩ | ⟨_, H1⟩
+    · exact absurd H0 h
+    · exact H1
+
+instance seqAntSeqFlag_definable : 𝚺₁-Function₁ (seqAntSeqFlag : V → V) := seqAntSeqFlag_defined.to_definable
+
+@[simp] lemma seqAntSeqFlag_eq_zero_iff {s : V} : seqAntSeqFlag s = 0 ↔ Seq (seqAnt s) := by
+  unfold seqAntSeqFlag; by_cases h : Seq (seqAnt s) <;> simp [h]
+
 /-- Antecedent well-formedness survives `fvSubstSeq` by a closed numeral (`IsUFormula.fvSubst`). -/
 lemma seqWffFlag_fvSubstSeq {a n Γ : V} (h : seqWffFlag Γ = 0) :
     seqWffFlag (fvSubstSeq a (Bootstrapping.Arithmetic.numeral n) Γ) = 0 := by

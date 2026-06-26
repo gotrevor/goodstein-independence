@@ -1,4 +1,2 @@
-import GoodsteinPA.InternalBump
-open GoodsteinPA.InternalPow
-#print axioms ibump_mono
-#print axioms ibump_strictMono
+import GoodsteinPA.Zsubst
+#print axioms GoodsteinPA.InternalZ.seqAntSeqFlag_eq_zero_iff
