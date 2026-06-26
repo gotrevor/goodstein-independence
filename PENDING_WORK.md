@@ -1,5 +1,29 @@
 # Pending work — open obligations & attack paths
 
+## lap 119 — the engine swap is NOT "pure wiring"; its O1 (regularity) front LANDED
+**Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
+1 commit. No sorries added.** See `HANDOFF-2026-06-26-lap119.md`.
+
+**Attempted the lap-118 engine swap as prescribed** (`iRK` else-branch → `iRKcCrit`, `iRKDef`/`iRK_defined`
+swap, `red_zK_crit ↦ iRKcCrit`). InternalZ compiles green standalone (`scratchpad/lap119-engine-swap.diff`),
+but changing `red`'s critical value breaks FAR more than the baton's "2 consumers": the entire **O1 /
+`ZRegular` front** (`ZRegular_red_zK_crit`/`_splice_of_chain`, Zsubst) was ABSENT from the lap-118 all-banked
+table, and `ZRegular_red` is load-bearing (feeds `ZDerivesEmptyR` → M3). Plus the ~200-line RedZKDescent
+descent re-key. Reverted to keep `src/` green; landed the missing O1 front additively.
+
+**THE ADVANCE — regularity of the corrected reduct (all `Zsubst.lean`, all axiom-clean):**
+- `zReg_zsubst` ALREADY EXISTED (substitution preserves regularity — the hard piece was done).
+- `ZRegular_zsubst_zIallPrem` (I∀ child regular via `zReg_zsubst` + `zReg_zIall`),
+  `ZRegular_zInegPrem` (I¬ child via `zReg_zIneg` heredity),
+  `ZRegular_iRKcCrit` (whole corrected reduct regular; composes the slot facts; takes `htagI : zTag dᵢ∈{1,2}`).
+
+**NEXT:** the swap, correctly scoped into THREE fronts (do front 2 = descent in a prep lap, THEN atomic):
+(1) O1 — NOW DE-RISKED, re-prove `ZRegular_red_zK_crit` via `ZRegular_iRKcCrit` (`htagI` from `redexPair_tp`+
+`tp dᵢ=isymR`); (2) descent re-key (RedZKDescent, heavy) via banked `iord_descent_iRcritG_critReductCorr`/
+`_iRcritGNeg_critReductNeg`; (3) soundness `ZDerivation_red_zK_crit` via the two capstones + the `redZKReady`
+orbit bundle. Replay `scratchpad/lap119-engine-swap.diff` for the green InternalZ half. Full plan in HANDOFF
+lap-119.
+
 ## lap 118 — ¬-case inversion's `hpmem` residual DISCHARGED; capstone now unconditional
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
 1 commit (4aa7a44). No sorries added.** See `HANDOFF-2026-06-26-lap118.md`.

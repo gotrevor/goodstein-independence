@@ -1,9 +1,19 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 118 · 2026-06-26 (¬-case `hpmem` residual DISCHARGED; capstone now unconditional)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 119 · 2026-06-26 (engine-swap O1/regularity front landed; swap re-scoped into 3 fronts)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+
+> **⭐⭐ Lap-119 — the engine swap is NOT "pure wiring"; its O1 (regularity) front LANDED (read FIRST — current).**
+> The lap-118 baton's "all-banked → pure wiring" engine-swap plan OMITTED the `ZRegular`/O1 front entirely.
+> Swapping `red`'s critical value to `iRKcCrit` breaks `ZRegular_red_zK_crit` (premises become
+> `zsubst`/`zInegPrem`/`zAx1`, not `zAxReduct∘red`), and `ZRegular_red` is load-bearing (→ `ZDerivesEmptyR`).
+> Reverted the swap (kept `src/` green), landed the missing front additively: **`ZRegular_zsubst_zIallPrem`**,
+> **`ZRegular_zInegPrem`**, **`ZRegular_iRKcCrit`** (whole corrected reduct regular; `zReg_zsubst` already
+> existed). All axiom-clean. Swap now correctly scoped into 3 fronts (O1 de-risked / descent re-key /
+> soundness+orbit). InternalZ swap half saved as `scratchpad/lap119-engine-swap.diff`. See
+> `HANDOFF-2026-06-26-lap119.md`.
 
 > **⭐⭐⭐ Lap-118 — the ¬-case inversion's last residual DISCHARGED; capstone now UNCONDITIONAL (read FIRST — current).**
 > Lap 117 proved the ¬-case critical-cut inversion SOUND but carried one orbit hypothesis `hpmem : inAnt A
