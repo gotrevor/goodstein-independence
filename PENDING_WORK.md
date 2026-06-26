@@ -1,5 +1,44 @@
 # Pending work — open obligations & attack paths
 
+## lap 124 — the stall-bypassing DESCENT is built; the `red`-fixpoint defect is now ROUTED AROUND
+**Build 🟢 1326; both new theorems axiom-clean `[propext, choice, Quot.sound]`** (RedZKDescent, after
+`iord_descent_red_zK_crit`).
+- ✅ **`iord_descent_iRcrit_botChain_leaves`** — the genuine fix for the `red`-fixpoint defect. The
+  critical-cut reduct `iRcrit (zK s r ds) (zAxReduct∘red)` of a ⊥-chain `ZDerivation` strictly
+  `iord`-descends **regardless of `red`'s `permIdx` selection**, provided every `isymRep` premise is a leaf
+  (`hleaves`). Manufactures the redex via `inference_critical_pair_of_botChain` (leaf-tolerant reroute
+  finder) and feeds `iord_descent_iRcrit_of_redex` DIRECTLY — never touches `red (zK s r ds)`, so the
+  documented stall (`red d = d`) is IRRELEVANT to this descent. The 6 ρ-facts reuse the banked
+  `iRedDescent_zAxReduct_red_of_tp_isymR`/`_isymLk` bundles (same as the fully-critical case).
+- ✅ **`iRcrit_descends_or_nonleaf_isymRep`** — the descent DICHOTOMY: for a regular ⊥-chain `ZDerivation`,
+  EITHER `iRcrit` `iord`-descends (case 5.1, stall-tolerant) OR a non-leaf `isymRep` premise exists (case
+  5.2 splice). This is the case split the restructured endgame consumes — a genuine `iord`-decreasing
+  successor on the LEFT with NO `red`/`permIdx` dependence (no fixpoint branch).
+
+**THE ENDGAME RESTRUCTURE (the remaining frontier, sharpened).** `false_of_ZDerivesEmpty` should NO LONGER
+iterate `red` (whose fixpoint branch is unprovable — lap-123 finding). Instead, build the infinite
+`iord`-descent from the dichotomy: from a ⊥-derivation `z` (tag 3 Ind / tag 4 K), produce a strictly
+`iord`-smaller ⊥-derivation successor, then `PRWO(ε₀)` / well-foundedness forbids the infinite descent.
+Remaining inputs:
+1. **LEFT successor is a valid ⊥-derivation** — `iRcritG (zK s r ds) (zAxReduct∘red)` must be a
+   `ZDerivesEmptyR` (ZDerivation of ∅→⊥ + regular) so the descent can RECURSE. This is reduct SOUNDNESS:
+   `ZDerivation_red_zK_crit` (the haux0/haux1 inversion, mostly banked — Crux2Blueprint sorry) +
+   `fstIdx`/`ZRegular` preservation. `iord_descent_iRcrit_botChain_leaves` already gives the ordinal drop;
+   only the *validity* of the successor remains.
+2. **RIGHT successor (non-leaf isymRep)** — the case-5.2 splice into the permissible chain/Ind premise
+   (smaller ordinal). Existing `ZDerivation_red_zK_splice` / `iord_descent_red` chain-REPLACE machinery.
+3. **`hleaves` in the LEFT branch is now provided by the dichotomy's own case split** — no longer an open
+   hypothesis; the non-leaf case is the RIGHT branch.
+4. Ind (tag 3) top node: `red d = iRInd d` already descends (`iord_descent_red_zInd`, banked) and stays a
+   ⊥-derivation (`ZDerivesEmptyR_red` for tag 3 — no stall).
+
+**NEXT-LAP TARGETS (in order):**
+1. **[lap 125] Reduct soundness of the LEFT successor** — `iRcritG (zK s r ds) (zAxReduct∘red)` is a
+   `ZDerivesEmptyR`. Pull together `ZDerivation_red_zK_crit` (haux0/haux1) + `fstIdx_red`/`ZRegular_red`
+   restricted to the genuine reduct. This makes the LEFT branch a self-contained recursive descent step.
+2. Restructure `false_of_ZDerivesEmpty` off the `red`-orbit onto the dichotomy successor + WF(`iord`).
+3. RIGHT splice branch validity (case 5.2). Then `foundation_bot_to_Z_empty` (M2) + `gentzenDescentφ`.
+
 ## lap 122 — the generalized redex finder is ASSEMBLED; the "L-axiom caveat" is REFUTED
 **Build 🟢 1326; new theorem axiom-clean `[propext, choice, Quot.sound]`.** Banked
 `inference_critical_pair_of_chain_reroute` (InternalZ, right after `exit_nonRep_of_reroute`).
