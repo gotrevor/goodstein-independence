@@ -1531,6 +1531,27 @@ lemma freshFlag_snd {a p Γ : V} (h : freshFlag a p Γ = 0) :
   unfold freshFlag at h
   exact eqFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp (le_of_le_of_eq (le_max_right _ _) h))
 
+/-- **`freshFlag = 0` constructor** from the two non-occurrence equalities. -/
+lemma freshFlag_eq_zero {a p Γ : V}
+    (hp : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral 0) p = p)
+    (hΓ : fvSubstSeq a (Bootstrapping.Arithmetic.numeral 0) Γ = Γ) :
+    freshFlag a p Γ = 0 := by
+  unfold freshFlag
+  rw [eqFlag_eq_zero_iff.mpr hp, eqFlag_eq_zero_iff.mpr hΓ]; simp
+
+/-- **Per-I∀-node `freshFlag` is preserved (downward) by closed-numeral substitution** — the I∀ step of
+`zFresh_zsubst`. The eigenvariable `e` is unchanged by `zsubst d a (numeral n)`; if `e` is fresh in the
+matrix `p` and antecedent `Γ` of the node, it stays fresh in `fvSubst a (numeral n) p` /
+`fvSubstSeq a (numeral n) Γ` (substituting a *different/closed* numeral cannot introduce `^&e`). Needs the
+node's matrix + antecedent entries to be `UFormula`s (so the structural `fvSubst` commutation applies). -/
+lemma freshFlag_zsubst_eq_zero {a e n p Γ : V} (hp : IsUFormula ℒₒᵣ p)
+    (hΓ : ∀ i < lh Γ, IsUFormula ℒₒᵣ (znth Γ i))
+    (h : freshFlag e p Γ = 0) :
+    freshFlag e (fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral n) p)
+      (fvSubstSeq a (Bootstrapping.Arithmetic.numeral n) Γ) = 0 :=
+  freshFlag_eq_zero (fvSubst_numeral_fresh_subst hp (freshFlag_fst h))
+    (fvSubstSeq_numeral_fresh_subst hΓ (freshFlag_snd h))
+
 noncomputable def zFreshNext (d s : V) : V :=
   if zTag d = 1 then
     max (freshFlag (zIallEig d) (zIallF d) (seqAnt (fstIdx d))) (znth s (zIallPrem d))
