@@ -23,12 +23,26 @@ descent re-key. Reverted to keep `src/` green; landed the missing O1 front addit
 InternalZ orbit lemmas `isRedexPair_redexCode_of_zKValid` (full redex-pair certificate) +
 `zTag_redexI_of_zKValid` (R-redex is an I-rule). All axiom-clean.
 
-**NEXT:** the swap's remaining TWO fronts (do front 2 = descent in a prep lap, THEN atomic):
-(2) descent re-key (RedZKDescent `iord_descent_red_zK_crit`+`iCrit_halves_descend`, heavy) via banked
-`iord_descent_iRcritG_critReductCorr`/`_iRcritGNeg_critReductNeg`; (3) soundness `ZDerivation_red_zK_crit`
-via the two capstones + the `redZKReady` orbit bundle. Replay `scratchpad/lap119-engine-swap.diff` for the
-green InternalZ half (also: `ZRegular_red_zK_splice_of_chain` re-routes through `iRKcCrit_eq_corr`/`_eq_neg`).
-Full plan in HANDOFF lap-119.
+**Front 2 (descent) also brought to forms-parity (4th commit):** `iord_descent_iRKcCrit_corr` (∀) /
+`_neg` (¬) (RedZKDescent) state the descent on `iRKcCrit (zK s r ds)` directly — via `iRKcCrit_eq_corr`/
+`_eq_neg` → the banked `iord_descent_iRcritG_critReductCorr`/`_iRcritGNeg_critReductNeg`. Both axiom-clean.
+
+**ALL THREE fronts now reduce to ONE shared residual — the `redZKReady` orbit bundle.** Regularity
+(`ZRegular_iRKcCrit_of_zK`, front 1 ✅ fully self-contained from `hvalid`), descent
+(`iord_descent_iRKcCrit_corr`/`_neg`) and soundness (`ZDerivation_iRcritG_critReductCorr`/
+`_iRcritGNeg_critReductNeg`) ALL now need only the explicit redex forms: ∀ = `hdi : znth ds redexI =
+zIall sᵢ a p d0`, `hdj : … = zAxAll sⱼ pj k'`, `hirk : irk(^∀pj) = irk(cutFormula)+1`; ¬ = `hdi : … =
+zIneg sᵢ p d0`, `hdj : … = zAxNeg sⱼ p`, `hcut`, `hp`. (Descent only — regularity needs just `htagI`,
+already discharged.)
+
+**NEXT (THE crux residual) — build `redZKReady`-extraction: from `hZ`/`hvalid`+criticality produce the
+redex forms.** Supplier chain: `isRedexPair_redexCode_of_zKValid` (banked this lap) → `redexPair_tp` gives
+`tp (znth ds redexI) = isymR A`, `tp (znth ds redexJ) = isymLk k A` (A shared); invert each via
+`zDerivation_iff` (tp dispatch) into zIall/zAxAll (∀) or zIneg/zAxNeg (¬); the `hirk` rank relation from
+`cutFormula_all`/`irk_cutFormula_lt`, `hcut`/`hp` from `cutFormula_neg` + `tp_isymR_form_wff`. THEN the
+atomic engine swap (replay `scratchpad/lap119-engine-swap.diff`; `ZRegular_red_zK_splice_of_chain` reroutes
+through `iRKcCrit_eq_corr`/`_eq_neg`) wires all three banked fronts into `ZDerivation_red_zK_crit` /
+`ZRegular_red_zK_crit` / `iord_descent_red_zK_crit`. Full plan in HANDOFF lap-119.
 
 ## lap 118 — ¬-case inversion's `hpmem` residual DISCHARGED; capstone now unconditional
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
