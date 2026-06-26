@@ -1,5 +1,50 @@
 # Pending work — open obligations & attack paths
 
+## Reflection — 2026-06-26 (lap 120, DEEP) — the SELECTION/STALL defect is the genuine open crux
+**Build 🟢 1326; headline + girder re-verified in-kernel (`[propext, sorryAx, choice, Quot.sound]`, 0 math
+axioms); statement re-audited vs paper — no drift.** Primary deliverable `REFLECTION-2026-06-26-lap120.md`.
+
+**DIRECTION: KEEP** (axiom-free Kirby–Paris, Σ₁ engine `red`/`iord`). **The inversion is SOLVED** — laps
+112–119 proved critical-cut soundness on both polarities (Buchholz §5). That was reduct SOUNDNESS.
+
+**THE FINDING — `red` STALLS, so `false_of_ZDerivesEmpty` cannot close.** The endgame
+`false_of_ZDerivesEmpty {z} (hz : ZDerivesEmptyR z) : False` (`Crux2Blueprint:1144`) is a bare sorry whose
+docstring claims it "closes either way" (fixpoint→cut-free→absurd OR infinite→PRWO). But `red` can be a
+FIXPOINT on the ⊥-orbit: `permIdx` selects the first premise with `iperm isymRep`, which is unconditionally
+true, so an ATOM (or `zAx1`) leaf can be selected → `red (zK s r ds) = zK s r ds` (banked
+`red_zK_fixpoint_of_atom_selected`/`_zAx1_selected`) → a tag-4 K-node that is NOT cut-free. The repo flags
+this in `RedZKDescent.lean`'s own docstring ("the orbit STALLS … an atom CAN be the first permissible
+premise … fix = `permIdx` refinement OR an atom-free embedding"). **Lap-111's disjunctive `iord_descent_red`
+(`red d = d ∨ iord ≺`) did NOT fix the stall — it RELOCATED it** into the unbuilt `false_of_ZDerivesEmpty`
+sorry (the stall branches close `Or.inl`). Same defect as laps 104/107, still open 13 laps later.
+
+**KEEP doing:** discharge the inversion → `redSound` (the swap is genuinely needed for the RIGHT disjunct).
+**STOP:** treating the atomic engine swap as the SOLE next target before the stall is de-risked; asserting
+`false_of_ZDerivesEmpty` "closes either way" while (A)+(B) are unbuilt.
+
+**HIGHEST-VALUE NEXT TARGET — (A) `red w = w ∧ ZDerivesEmptyR w ⟹ False`** (fixpoint-absurdity). Decompose
+the endgame into named leaves (mirrors how `redSound` was decomposed):
+- **(A) fixpoint-absurdity:** `no_red_fixpoint_of_ZDerivesEmptyR : ZDerivesEmptyR w → red w ≠ w`. **Attack
+  the VACUITY resolution first:** an atom-/`zAx1`-selected K-node concluding `∅→⊥` is impossible by sequent
+  shape (the Rep node promotes the selected premise's sequent to `∅→⊥`; an atom axiom's sequent / `zAx1`'s
+  sequent cannot be `∅→⊥`). Use `red_zK_fixpoint_of_atom_selected`/`_zAx1_selected` + Cor 2.1
+  (`tp_selected_isymRep_of_emptyAnt_botSucc`, on ⊥-orbit selected premise has `tp=isymRep`). PROBE whether
+  `ZRegular w` already excludes the stall (lap-119 O1 may be the lever). If vacuity fails → fall back to the
+  repo's two named fixes (engine `permIdx`/`isPermPrem` refinement to skip atoms = the faithful Buchholz
+  "lowest cut"; OR an atom-free-orbit invariant supplied by M2's embedding & preserved by `red`).
+- **(B) no cut-free `∅→⊥`:** standard; only needed if (A) routes through "cut-free" rather than direct
+  sequent-shape absurdity.
+- **(C) descent-internalization:** `gentzenDescentφ` as the real Σ₁ graph of `n ↦ iord(red^[n] z)`. Probably
+  routine Σ₁-recursion in IΣ₁ (one fixed function `red`, internally iterable via sequence coding). Lower risk.
+- Then assemble `false_of_ZDerivesEmpty` = (A) [the orbit can't fixpoint] composed with descent+PRWO [RIGHT].
+
+**Why (A) over the swap:** hardest-first = attack the piece whose FEASIBILITY is in doubt. The swap wires
+banked lemmas (feasible). (A) is a flagged defect with no built resolution (feasibility unknown), it is on
+the M3 critical path, it is additive/independent of the swap, and it is DECISIVE: prove it → de-risk the
+whole endgame; refute it → forces a selection-architecture fix BEFORE more swap investment.
+
+---
+
 ## lap 119 — the engine swap is NOT "pure wiring"; its O1 (regularity) front LANDED
 **Build 🟢 green 1326; headline footprint intact (`[propext, sorryAx, choice, Quot.sound]`, 0 math axioms).
 1 commit. No sorries added.** See `HANDOFF-2026-06-26-lap119.md`.

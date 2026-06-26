@@ -1,4 +1,34 @@
-# NEXT STEPS — crux-2 (lap 111 DEEP REFLECTION: reformulate the descent, then the INVERSION is the prize)
+# NEXT STEPS — crux-2 (lap 120 DEEP REFLECTION: the SELECTION/STALL defect is the genuine open crux)
+
+> **⭐⭐⭐ LAP-120 DEEP REFLECTION — read FIRST (supersedes the ordering below; does not overturn its facts).**
+> Build 🟢 1326; direction KEPT (axiom-free, Σ₁ engine). The inversion (lap-111's "prize", item 3 below) is
+> now SOLVED — laps 112–119 proved critical-cut soundness on both polarities (Buchholz §5). But that was
+> reduct SOUNDNESS, and lap-111's item-1 residual — the **selection-correctness / no-cut-free-`∅→⊥` pair** —
+> was NEVER discharged; only the disjunctive `iord_descent_red` half was done, which RELOCATED the stall into
+> the unbuilt `false_of_ZDerivesEmpty` sorry. So the genuine open crux is exactly that deferred residual, and
+> it is the SAME selection/stall defect from laps 104/107 (`red` stalls when `permIdx` selects an atom/`zAx1`,
+> `iperm isymRep` unconditional → a tag-4 K-node is a non-cut-free `red`-fixpoint; flagged in `RedZKDescent.lean`).
+>
+> **REORDERED PLAN:**
+> 1. **(HIGHEST VALUE — do FIRST) Confront (A):** `red w = w ∧ ZDerivesEmptyR w ⟹ False` — a `red`-fixpoint
+>    on the ⊥-orbit is impossible. Attempt the **vacuity** resolution first: an atom-/`zAx1`-selected K-node
+>    concluding `∅→⊥` is absurd by sequent shape (a Rep node promotes its selected premise's sequent to `∅→⊥`,
+>    but an atom axiom's sequent / `zAx1`'s sequent cannot be `∅→⊥`). Build on `red_zK_fixpoint_of_atom_selected`
+>    / `red_zK_fixpoint_of_zAx1_selected` + Cor 2.1 (`tp_selected_isymRep_of_emptyAnt_botSucc`). Probe whether
+>    `ZRegular w` already kills the stall. Land `no_red_fixpoint_of_ZDerivesEmptyR` — OR record the wall and
+>    fall back to the repo's two named fixes (engine `permIdx` refinement / atom-free-orbit invariant from M2).
+>    DECISIVE either way; additive; does not disturb the green `iord_descent_red`.
+> 2. **(then)** Finish the atomic engine swap → `redSound` → the RIGHT (infinite-descent) disjunct.
+> 3. **(then)** Build (C) `gentzenDescentφ` as the real Σ₁ graph of `n ↦ iord(red^[n] z)`; assemble
+>    `false_of_ZDerivesEmpty` = (A) [LEFT] + descent+PRWO [RIGHT]; then M2 `foundation_bot_to_Z_empty`.
+>
+> Rationale: hardest-first = attack the piece whose FEASIBILITY is in doubt. The swap wires banked lemmas
+> (feasible); (A) is a flagged defect with no built resolution (feasibility unknown). (A) gates whether the
+> swap is even worth finishing. See `REFLECTION-2026-06-26-lap120.md`.
+
+---
+
+# (HISTORICAL) NEXT STEPS — crux-2 (lap 111 DEEP REFLECTION: reformulate the descent, then the INVERSION is the prize)
 
 > **⭐⭐⭐ LAP-111 DEEP REFLECTION — read FIRST (refines, does not overturn, lap 107/110).** Build 🟢 1326;
 > direction KEPT (Σ₁ engine `red`/`iord`, axiom-free destination). Three altitude findings + an ordered plan:
