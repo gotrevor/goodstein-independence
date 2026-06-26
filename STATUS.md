@@ -1,9 +1,19 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 126 · 2026-06-26 (FRESH-MIND REVIEW — freshness substrate LANDED; the lap-125 ZPhi-ripple mechanism COURSE-CORRECTED to a standalone `zFresh` invariant)
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 127 · 2026-06-26 (`zFresh_zsubst` PROVEN — freshness survives closed substitution; `ZFresh_red` structural+Ind cases done; antecedent-wff gap CLOSED by folding `seqWffFlag` into `freshFlag`)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**).
 The lone `sorryAx` traces to crux-2 (the internalized cut-elimination).
+
+> **⭐⭐⭐ Lap-127 — `zFresh_zsubst` PROVEN; `ZFresh_red` half-done (read FIRST — current).** The freshness
+> invariant `zFresh` (lap 126) is now shown preserved by closed substitution: `ZFresh d → ZFresh (zsubst d a
+> (numeral n))` — a **directional** law (NOT the equality lap-126 expected: substituting away an eigenvariable
+> only LOWERS the violation count). The antecedent-wff gap (`ZDerivation` gives no entrywise `IsUFormula` at
+> atom/`zAx1` leaves) was closed by **folding `seqWffFlag` into `freshFlag`**, so `zFresh` self-carries the
+> well-formedness. `ZFresh_red_of_not_zK` (structural+Ind cases of red-stability) also landed. **NEXT:**
+> `ZFresh_red_zK` (chain dispatch, mirror `ZRegular_red_zK` — should be EASIER, `zFresh(zK)` is pure
+> premise-max-fold) → thread `∧ ZFresh` into `ZDerivesEmptyR` → close LEFT-branch ∀-soundness via
+> `ZDerivation_iRcritG_critReductCorr`. See `HANDOFF-2026-06-26-lap127.md`, `PENDING_WORK.md` lap-127.
 
 > **⭐⭐⭐ Lap-126 FRESH-MIND REVIEW — direction KEPT, MECHANISM corrected; the eigenvariable-freshness transfer substrate is LANDED (read FIRST — current).**
 > Re-verified in-kernel (real `#print axioms`, green 1326): headline `peano_not_proves_goodstein =
