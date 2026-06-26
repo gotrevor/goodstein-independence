@@ -30,6 +30,30 @@ reduct FUNCTION (not a bare `∃`).** Route:
 Order: **(i) define `redStep`/`redStepDef`** (mechanical, banks (A)'s shell), **(ii) grind `descent_step_K_majorIdx`**.
 ⚠️ Avoid the `μ`/witness-bound route for (A) — the concrete engine reduct sidesteps the wrong-polarity totality guard.
 
+### ⚠️ lap-138 STRUCTURAL FINDINGS (read before attacking (A) / `descent_step_K_majorIdx` — avoid two traps)
+**(1) `g := red` is NOT (A)'s descending step.** `red` is valid everywhere (`ZDerivesEmptyR_red`, PROVEN — `red d`
+stays a regular ⊥-derivation for ANY `d`) and descends on **Ind roots** (`iord_descent_red_zInd`), but **STALLS on
+K roots** (the original defect: `iord (red d) = iord d`). So `red` fails the descent clause on K roots. A descending
+step needs the **majorIdx-keyed** K-reduct, whose descent on K roots IS `descent_step_K_majorIdx`. (A) genuinely
+couples to `descent_step_K_majorIdx`; there is no `red`-only shortcut.
+
+**(2) `descent_step_K_majorIdx` tag-3 is NOT "descent-proven + soundness-sorry" — naive decomposition plants a FALSE
+sorry.** The banked `descent_K_majorIdx_Ind_descends` proves descent for the single-replace witness
+`zK s r (seqUpdate ds m (red dⱼ))` (dⱼ = the Ind major premise) — but that witness is the **ORDINAL SHADOW**: `iord`
+is instance-invariant so it descends, yet its **chain-VALIDITY** is exactly the lap-136 obstruction
+(`zKValidF_iIndReduct_of_zInd` FALSE — `red dⱼ = iRInd dⱼ` is the invalid `k=1` reduct `⟨d1,d0⟩`, which forces a
+degenerate Ind term; refuted in-kernel by `zKValidF_iIndReduct_forces_degenerate`). So `ZDerivesEmptyR` of the
+single-replace witness is FALSE for a genuine Ind node — do NOT decompose tag-3 with the `red dⱼ` witness.
+
+**The genuine tag-3 reduct** is the lap-136 **corrected substituted chain** `iIndReductSeqG d0 d1 a k = ⟨d0,
+d1[a:=0], …, d1[a:=k-1]⟩` (k = value of the Ind term `t`). Its `PR.Construction`/`seq`/`lh`/`znth` infra is BUILT
+(`Crux2Blueprint:196-270`), but its **VALIDITY IS NOT YET ASSEMBLED** — no `isChainInf_iIndReductSeqG` /
+`ZDerivation_iIndReductSeqG` / `zKValidF_iIndReductSeqG` exists yet. **THE concrete tag-3 next attack:** prove the
+corrected chain is a valid derivation that descends — i.e. `isChainInf s (irk p) (iIndReductSeqG d0 d1 a k)` (exit at
+the last premise `d1[a:=k-1]` deriving `F(k)=seqSucc s`; threading `F(i)→F(i+1)` via `znth_iIndReductSeqG_step` +
+`seqSucc_zsubst_zInd_step`) and `iord(iIndReductSeqG-reduct) ≺ iord(zInd…)`. This is the deep lap-136 core, on the
+tag-3 critical path; it is what BOTH `descent_step_K_majorIdx` tag-3 AND (via (A)) the whole termination half need.
+
 ---
 
 ## lap 137 — ⚠️ ALTITUDE REVIEW: existence-form termination half was MIS-TYPED (Gödel-barred); FIXED + decomposed
