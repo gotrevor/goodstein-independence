@@ -1967,6 +1967,237 @@ theorem zFresh_zsubst (a n : V) : ∀ d, ZDerivation d →
     · intro _; simp [ZFresh, zsubst_zAxNeg]
     · intro _; simp [ZFresh, zsubst_zAx1]
 
+/-! ## `zSeqAnt` — hereditary antecedent **Seq-ness** (lap 133, the shared `Seq(seqAnt)` blocker)
+
+The per-node bundles `hAll`/`hNeg` of the ⊥-orbit critical-reduct soundness (`Crux2Blueprint`,
+`ZDerivation_iRKcCrit_*`) require `Seq (seqAnt sⱼ)` / `Seq (seqAnt sᵢ)` of the chain redex premise nodes.
+`ZDerivation` does NOT supply `Seq (seqAnt s)` at atom/axiom leaves (`ZPhi` records only `inAnt`/membership,
+`InternalZ:5362`; `seqAnt q := π₁ q` is not structurally a `Seq`, `InternalZ:967`). So it must be carried as
+a tracked invariant — the `Seq` analogue of `zFresh`, threaded *alongside* `ZDerivation` (lap-93 additive O1),
+NOT baked into `ZPhi` (which would shrink the fixpoint + force the embedding/`ZDerivation_zsubst` to re-prove
+it, the lap-130/131 finding). Unlike `zFresh` (a flag only at I∀), `zSeqAnt` puts `seqAntSeqFlag (fstIdx d)`
+at EVERY node (we need `Seq (seqAnt …)` of arbitrary chain premises), then folds the premises by the EXACT
+`zFreshNext` template. `ZSeqAnt d := zSeqAnt d = 0` is the invariant `ZDerivesEmptyR` will carry to supply the
+per-node `Seq (seqAnt sⱼ)`/`Seq (seqAnt sᵢ)` (`ZSeqAnt_zK_premise`). -/
+
+/-- Per-node antecedent-Seq fold step: max the node's own `seqAntSeqFlag (fstIdx d)` with the premise
+fold (the EXACT `zFreshNext` premise template — tag 1/2 read the single premise, tag 3 the two Ind
+premises, tag 4 the `iseqMaxTab` over the chain, leaves contribute `0`). -/
+noncomputable def zSeqAntNext (d s : V) : V :=
+  max (seqAntSeqFlag (fstIdx d))
+    (if zTag d = 1 then znth s (zIallPrem d)
+    else if zTag d = 2 then znth s (zInegPrem d)
+    else if zTag d = 3 then max (znth s (zIndPrem0 d)) (znth s (zIndPrem1 d))
+    else if zTag d = 4 then iseqMaxTab s (zKseq d)
+    else 0)
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zSeqAntNextDef : 𝚺₁.Semisentence 3 := .mkSigma
+  “y d s. ∃ f, !fstIdxDef f d ∧ ∃ fl, !seqAntSeqFlagDef fl f ∧ ∃ t, !zTagDef t d ∧ ∃ w,
+    ( (t = 1 ∧ ∃ pr, !zIallPremDef pr d ∧ !znthDef w s pr)
+    ∨ (t = 2 ∧ ∃ pr, !zInegPremDef pr d ∧ !znthDef w s pr)
+    ∨ (t = 3 ∧ ∃ p0, !zIndPrem0Def p0 d ∧ ∃ v0, !znthDef v0 s p0 ∧
+         ∃ p1, !zIndPrem1Def p1 d ∧ ∃ v1, !znthDef v1 s p1 ∧ !max.dfn w v0 v1)
+    ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqMaxTabDef w s ds)
+    ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ w = 0) ) ∧ !max.dfn y fl w”
+
+set_option maxHeartbeats 1000000 in
+instance zSeqAntNext_defined : 𝚺₁-Function₂ (zSeqAntNext : V → V → V) via zSeqAntNextDef :=
+  .mk fun v ↦ by
+    simp [zSeqAntNextDef, zSeqAntNext, zTag_defined.iff, fstIdx_defined.iff, seqAntSeqFlag_defined.iff,
+      zIallPrem_defined.iff, zInegPrem_defined.iff, zIndPrem0_defined.iff, zIndPrem1_defined.iff,
+      zKseq_defined.iff, iseqMaxTab_defined.iff, znth_defined.iff, max_defined.iff]
+    by_cases h1 : zTag (v 1) = 1
+    · simp [h1]
+    · by_cases h2 : zTag (v 1) = 2
+      · simp [h1, h2]
+      · by_cases h3 : zTag (v 1) = 3
+        · simp [h1, h2, h3]
+        · by_cases h4 : zTag (v 1) = 4
+          · simp [h1, h2, h3, h4]
+          · simp [h1, h2, h3, h4]
+
+instance zSeqAntNext_definable : 𝚺₁-Function₂ (zSeqAntNext : V → V → V) := zSeqAntNext_defined.to_definable
+
+noncomputable def zSeqAntTable.blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !mkSeq₁Def y 0”
+  succ := .mkSigma “y ih n. ∃ v, !zSeqAntNextDef v (n + 1) ih ∧ !seqConsDef y ih v”
+
+noncomputable def zSeqAntTable.construction : PR.Construction V zSeqAntTable.blueprint where
+  zero := fun _ ↦ !⟦0⟧
+  succ := fun _ n ih ↦ seqCons ih (zSeqAntNext (n + 1) ih)
+  zero_defined := .mk fun v ↦ by
+    simp [zSeqAntTable.blueprint, mkSeq₁Def, seqCons_defined.iff, emptyset_def]
+  succ_defined := .mk fun v ↦ by
+    simp [zSeqAntTable.blueprint, zSeqAntNext_defined.iff, seqCons_defined.iff]
+
+noncomputable def zSeqAntTable (n : V) : V := zSeqAntTable.construction.result ![] n
+
+@[simp] lemma zSeqAntTable_zero : zSeqAntTable (0 : V) = !⟦0⟧ := by
+  simp [zSeqAntTable, zSeqAntTable.construction]
+
+@[simp] lemma zSeqAntTable_succ (n : V) :
+    zSeqAntTable (n + 1) = seqCons (zSeqAntTable n) (zSeqAntNext (n + 1) (zSeqAntTable n)) := by
+  simp [zSeqAntTable, zSeqAntTable.construction]
+
+/-- **Violation count** `zSeqAnt d`: `0` iff every node of `d` has a `Seq` antecedent. -/
+noncomputable def zSeqAnt (d : V) : V := znth (zSeqAntTable d) d
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zSeqAntTableDef : 𝚺₁.Semisentence 2 :=
+  zSeqAntTable.blueprint.resultDef.rew (Rew.subst ![#0, #1])
+
+instance zSeqAntTable_defined : 𝚺₁-Function₁ (zSeqAntTable : V → V) via zSeqAntTableDef := .mk
+  fun v ↦ by simp [zSeqAntTable.construction.result_defined_iff, zSeqAntTableDef]; rfl
+instance zSeqAntTable_definable : 𝚺₁-Function₁ (zSeqAntTable : V → V) := zSeqAntTable_defined.to_definable
+instance zSeqAntTable_definable' (Γ) : Γ-[m + 1]-Function₁ (zSeqAntTable : V → V) :=
+  zSeqAntTable_definable.of_sigmaOne
+
+noncomputable def _root_.LO.FirstOrder.Arithmetic.zSeqAntDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “y d. ∃ t, !zSeqAntTableDef t d ∧ !znthDef y t d”
+
+instance zSeqAnt_defined : 𝚺₁-Function₁ (zSeqAnt : V → V) via zSeqAntDef := .mk fun v ↦ by
+  simp [zSeqAntDef, zSeqAnt, zSeqAntTable_defined.iff, znth_defined.iff]
+instance zSeqAnt_definable : 𝚺₁-Function₁ (zSeqAnt : V → V) := zSeqAnt_defined.to_definable
+instance zSeqAnt_definable' (Γ) : Γ-[m + 1]-Function₁ (zSeqAnt : V → V) := zSeqAnt_definable.of_sigmaOne
+
+/-! ### Structural correctness of the `zSeqAnt` table (mirror `zFresh`) -/
+
+private lemma def_zSeqAntTable {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ zSeqAntTable (v i)) :=
+  DefinableFunction₁.comp (F := zSeqAntTable) (DefinableFunction.var i)
+
+private lemma def_zSeqAnt {k} (i : Fin k) :
+    𝚺-[1].DefinableFunction (fun v : Fin k → V ↦ zSeqAnt (v i)) :=
+  DefinableFunction₁.comp (F := zSeqAnt) (DefinableFunction.var i)
+
+@[simp] lemma zSeqAntTable_seq (n : V) : Seq (zSeqAntTable n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₁ (def_zSeqAntTable 0)
+  case zero => simp
+  case succ n ih => rw [zSeqAntTable_succ]; exact ih.seqCons _
+
+@[simp] lemma zSeqAntTable_lh (n : V) : lh (zSeqAntTable n) = n + 1 := by
+  induction n using ISigma1.sigma1_succ_induction
+  · exact Definable.comp₂ (DefinableFunction₁.comp (F := lh) (def_zSeqAntTable 0)) (by definability)
+  case zero => simp
+  case succ n ih => rw [zSeqAntTable_succ, Seq.lh_seqCons _ (zSeqAntTable_seq n), ih]
+
+lemma znth_zSeqAntTable_succ {n k : V} (hk : k < n + 1) :
+    znth (zSeqAntTable (n + 1)) k = znth (zSeqAntTable n) k := by
+  rw [zSeqAntTable_succ]
+  exact znth_seqCons_of_lt (zSeqAntTable_seq n) _ (by rw [zSeqAntTable_lh]; exact hk)
+
+lemma znth_zSeqAntTable_eq_zSeqAnt : ∀ N : V, ∀ k ≤ N, znth (zSeqAntTable N) k = zSeqAnt k := by
+  intro N
+  induction N using ISigma1.sigma1_succ_induction
+  · refine Definable.ball_le (by definability) ?_
+    exact Definable.comp₂
+      (DefinableFunction₂.comp (F := znth) (def_zSeqAntTable 1) (DefinableFunction.var 0))
+      (def_zSeqAnt 0)
+  case zero => intro k hk; rcases (nonpos_iff_eq_zero.mp hk) with rfl; rfl
+  case succ N ih =>
+    intro k hk
+    rcases eq_or_lt_of_le hk with rfl | hlt
+    · rfl
+    · rw [znth_zSeqAntTable_succ hlt]; exact ih k (le_iff_lt_succ.mpr hlt)
+
+lemma zSeqAnt_eq_zSeqAntNext {c : V} (hpos : 0 < c) :
+    zSeqAnt c = zSeqAntNext c (zSeqAntTable (c - 1)) := by
+  obtain ⟨M, rfl⟩ : ∃ M, c = M + 1 := ⟨c - 1, (sub_add_self_of_le (pos_iff_one_le.mp hpos)).symm⟩
+  have key : znth (zSeqAntTable (M + 1)) (M + 1) = zSeqAntNext (M + 1) (zSeqAntTable M) := by
+    rw [zSeqAntTable_succ]
+    have h := znth_seqCons_self (zSeqAntTable_seq M) (zSeqAntNext (M + 1) (zSeqAntTable M))
+    rwa [zSeqAntTable_lh] at h
+  simp only [zSeqAnt, add_tsub_cancel_right, key]
+
+/-! ### `zSeqAnt` recursion equations + per-node extraction. Each node carries its own
+`seqAntSeqFlag (fstIdx ·)` head term (unlike `zFresh`, where only I∀ flags). -/
+
+@[simp] lemma zSeqAnt_zAtom (s : V) : zSeqAnt (zAtom s) = seqAntSeqFlag s := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zAtom]), zSeqAntNext, fstIdx_zAtom]; simp [zTag_zAtom]
+
+@[simp] lemma zSeqAnt_zIall (s a p d0 : V) :
+    zSeqAnt (zIall s a p d0) = max (seqAntSeqFlag s) (zSeqAnt d0) := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zIall]), zSeqAntNext, if_pos (zTag_zIall s a p d0),
+    fstIdx_zIall, zIallPrem_zIall,
+    znth_zSeqAntTable_eq_zSeqAnt _ d0 (le_pred_of_lt (d0_lt_zIall s a p d0))]
+
+@[simp] lemma zSeqAnt_zIneg (s p d0 : V) :
+    zSeqAnt (zIneg s p d0) = max (seqAntSeqFlag s) (zSeqAnt d0) := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zIneg]), zSeqAntNext, if_neg (by simp),
+    if_pos (zTag_zIneg s p d0), fstIdx_zIneg, zInegPrem_zIneg,
+    znth_zSeqAntTable_eq_zSeqAnt _ d0 (le_pred_of_lt (d0_lt_zIneg s p d0))]
+
+@[simp] lemma zSeqAnt_zInd (s at' p d0 d1 : V) :
+    zSeqAnt (zInd s at' p d0 d1) = max (seqAntSeqFlag s) (max (zSeqAnt d0) (zSeqAnt d1)) := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zInd]), zSeqAntNext, if_neg (by simp), if_neg (by simp),
+    if_pos (zTag_zInd s at' p d0 d1), fstIdx_zInd, zIndPrem0_zInd, zIndPrem1_zInd,
+    znth_zSeqAntTable_eq_zSeqAnt _ d0 (le_pred_of_lt (d0_lt_zInd s at' p d0 d1)),
+    znth_zSeqAntTable_eq_zSeqAnt _ d1 (le_pred_of_lt (d1_lt_zInd s at' p d0 d1))]
+
+@[simp] lemma zSeqAnt_zAxAll (s p k : V) : zSeqAnt (zAxAll s p k) = seqAntSeqFlag s := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zAxAll]), zSeqAntNext, fstIdx_zAxAll]; simp [zTag_zAxAll]
+
+@[simp] lemma zSeqAnt_zAxNeg (s p : V) : zSeqAnt (zAxNeg s p) = seqAntSeqFlag s := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zAxNeg]), zSeqAntNext, fstIdx_zAxNeg]; simp [zTag_zAxNeg]
+
+@[simp] lemma zSeqAnt_zAx1 (s C : V) : zSeqAnt (zAx1 s C) = seqAntSeqFlag s := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zAx1]), zSeqAntNext, fstIdx_zAx1]; simp [zTag_zAx1]
+
+/-- **`zSeqAnt` over a chain** (tag-4 own flag `seqAntSeqFlag s` PLUS the premise fold). -/
+lemma zSeqAnt_zK (s r ds : V) :
+    zSeqAnt (zK s r ds) = max (seqAntSeqFlag s) (iseqMaxTab (zSeqAntTable (zK s r ds - 1)) ds) := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zK]), zSeqAntNext, if_neg (by simp), if_neg (by simp),
+    if_neg (by simp), if_pos (zTag_zK s r ds), fstIdx_zK, zKseq_zK]
+
+/-- A premise of a `zSeqAnt`-clean chain node is itself `zSeqAnt`-clean. -/
+lemma zSeqAnt_zK_premise_zero {s r ds : V} (hds : Seq ds) (h : zSeqAnt (zK s r ds) = 0)
+    {i : V} (hi : i < lh ds) : zSeqAnt (znth ds i) = 0 := by
+  have hle : znth (zSeqAntTable (zK s r ds - 1)) (znth ds i)
+      ≤ iseqMaxTab (zSeqAntTable (zK s r ds - 1)) ds := le_iseqMaxAux (lh ds) i hi
+  rw [znth_zSeqAntTable_eq_zSeqAnt _ (znth ds i)
+      (le_pred_of_lt (lt_trans (lt_of_mem_rng (hds.znth hi)) (ds_lt_zK s r ds)))] at hle
+  have hmax : iseqMaxTab (zSeqAntTable (zK s r ds - 1)) ds = 0 := by
+    rw [zSeqAnt_zK] at h; exact nonpos_iff_eq_zero.mp ((le_max_right _ _).trans_eq h)
+  exact nonpos_iff_eq_zero.mp (hmax ▸ hle)
+
+/-- **Hereditary antecedent-Seq-ness.** -/
+def ZSeqAnt (d : V) : Prop := zSeqAnt d = 0
+
+/-- A `ZSeqAnt`-clean node (a genuine node, `0 < d`) has a `Seq` antecedent (own-node extraction; every node
+carries the head flag `seqAntSeqFlag (fstIdx d)`). -/
+lemma seq_seqAnt_of_zSeqAnt {d : V} (hpos : 0 < d) (h : zSeqAnt d = 0) :
+    Seq (seqAnt (fstIdx d)) := by
+  rw [zSeqAnt_eq_zSeqAntNext hpos, zSeqAntNext] at h
+  exact seqAntSeqFlag_eq_zero_iff.mp (nonpos_iff_eq_zero.mp ((le_max_left _ _).trans_eq h))
+
+/-- Every `ZDerivation` code is positive (each constructor is `⟪…⟫ + 1`). -/
+lemma zDerivation_pos {d : V} (hd : ZDerivation d) : 0 < d := by
+  rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
+    ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ <;>
+    simp [zAtom, zIall, zIneg, zInd, zK, zAxAll, zAxNeg, zAx1]
+
+/-- **The per-node `Seq (seqAnt sⱼ)` supplier** that `hAll`/`hNeg` consume: a chain premise of a
+`ZSeqAnt`-clean K-node (with the premise a genuine `ZDerivation`) has a `Seq` antecedent. -/
+lemma seq_seqAnt_zK_premise {s r ds i : V} (hds : Seq ds) (h : ZSeqAnt (zK s r ds))
+    (hi : i < lh ds) (hpos : ZDerivation (znth ds i)) :
+    Seq (seqAnt (fstIdx (znth ds i))) :=
+  seq_seqAnt_of_zSeqAnt (zDerivation_pos hpos) (zSeqAnt_zK_premise_zero hds h hi)
+
+/-- A chain node all of whose premises are `zSeqAnt`-clean, with a `Seq` conclusion antecedent, is
+`zSeqAnt`-clean. (Constructor analogue of `zfresh_zK_of`; used to push `ZSeqAnt` through reducts.) -/
+lemma zSeqAnt_zK_of {s r ds : V} (hds : Seq ds) (hs : Seq (seqAnt s))
+    (h : ∀ i < lh ds, zSeqAnt (znth ds i) = 0) : zSeqAnt (zK s r ds) = 0 := by
+  rw [zSeqAnt_zK, seqAntSeqFlag_eq_zero_iff.mpr hs]
+  have hmax : iseqMaxTab (zSeqAntTable (zK s r ds - 1)) ds = 0 := by
+    rw [iseqMaxTab]
+    apply iseqMaxAux_eq_zero_of
+    intro i hi
+    rw [znth_zSeqAntTable_eq_zSeqAnt _ (znth ds i)
+        (le_pred_of_lt (lt_trans (lt_of_mem_rng (hds.znth hi)) (ds_lt_zK s r ds)))]
+    exact h i hi
+  rw [hmax]; simp
+
 /-! ### Regularity of the corrected-reduct premises (engine re-key prerequisite, lap 119)
 
 The re-keyed tag-4 critical reduct `iRKcCrit` (`InternalZ`) replaces each redex premise by its genuine
