@@ -1,5 +1,27 @@
 # Pending work — open obligations & attack paths
 
+## lap 134 — ✅ `ZSeqAnt` threaded + the `Seq(seqAnt·)` obligation DISCHARGED at the soundness front
+**Build 🟢 1326, footprint unchanged.** Both lap-133 turnkey sub-steps LANDED:
+1. **`ZDerivesEmptyR` now carries `∧ ZSeqAnt d`** (`Crux2Blueprint:1103`); `ZDerivesEmptyR_red` produces
+   `ZSeqAnt (red d)` via the banked `ZSeqAnt_red d h.1.1 h.2.2.2`. No consumer relied on `.2.2` as `ZFresh`
+   (the only `.2.2.2` hits are `tag_uformula` projections on a different object), so the tuple ripple was clean.
+2. **The `Seq(seqAnt sⱼ)`/`Seq(seqAnt sᵢ)` conjuncts are GONE from `hAll`/`hNeg`.** Discharged at the SOURCE
+   `ZDerivation_iRKcCrit_of_zKValid` (and propagated to `_of_isChainInf`, `_botOrbit`): each now takes
+   `hZSeq : ZSeqAnt (zK s r ds)` and derives the two `Seq` facts internally via `seq_seqAnt_zK_premise`
+   (`hds`/`hmem` from `zDerivation_zK_inv hZ`; both redex premises non-chain — `zAxAll` tag 5 / `zIneg`
+   tag 2 ≠ 4 — via `rw [hdj/hdi]; simp`; `fstIdx_zAxAll`/`fstIdx_zIneg` rewrite `seqAnt (fstIdx ·)` to
+   `seqAnt sⱼ/sᵢ`).
+
+**RESIDUAL (the now-sole per-node blocker) = the EXACT-SHAPE ZPhi equalities** that `hAll`/`hNeg` still carry:
+- `hAll`: `seqSucc sⱼ = cutFormula (zK s r ds)` (the ∀-axiom succedent IS the cut instance `F(k)`).
+- `hNeg`: `seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p` (the I¬ premise antecedent is exactly `Γ,p`).
+These are the lap-130/131 **ZPhi-strengthening** target (`zAxAllSuccWff`/`zInegAntWff`): strengthen the loose
+`zAxAll`/`zIneg` `ZPhi` disjuncts (currently only `inAnt`/membership) to the genuine axiom/rule shapes,
+mirroring the lap-118 `zAxNeg` `A∈Γ` strengthening. NOTE the `zIneg` half's old `Seq (seqAnt sᵢ)` precondition
+(lap-131's pinned blocker) is now FREE from the same `ZSeqAnt` fold — so that strengthening is unblocked on its
+`Seq` side. **NEXT:** either (a) the ZPhi-strengthening for the engine-swap route, or (b) pivot to
+`wip/ExistenceEndgame.lean` whose K-critical case `descent_step_Kcrit_of_bundle` consumes the same `hAll`/`hNeg`.
+
 ## lap 133 — ✅ `zSeqAnt` fold LANDED (the single shared `Seq(seqAnt)` blocker's core infra)
 **Build 🟢 1326, sorry-free in `src/`, footprint unchanged.** Added to `Zsubst.lean` (after `zFresh_zsubst`,
 before the corrected-reduct-premise regularity section): the full `Seq`-analogue of `zFresh`, threaded
