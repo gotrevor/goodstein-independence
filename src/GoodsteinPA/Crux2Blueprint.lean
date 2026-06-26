@@ -497,6 +497,42 @@ theorem ZDerivation_iRcritG_critReductCorr {s r ds sᵢ sⱼ a p pj k' d0 : V}
   · -- hρJ: `critReductCorr` at `redexJ` (the `redexJ` branch fires; `fstIdx (zAxAll sⱼ …) = sⱼ`)
     rw [critReductCorr, if_pos rfl, zKseq_zK, hdj, fstIdx_zAxAll]
 
+/-- **The re-keyed critical reduct `iRKcCrit` is SOUND — ∀-case, freshness now supplied from the orbit.**
+The soundness payoff of the freshness campaign, keyed on the engine-swap reduct `iRKcCrit` (parallel to
+`ZRegular_iRKcCrit` / `ZFresh_iRKcCrit`). Where `ZDerivation_iRcritG_critReductCorr` takes the freshness
+conditions `hpfresh`/`hΓfresh` as bare hypotheses, this consumes the orbit invariant `ZFresh (zK s r ds)`
+(plus the matrix wff `hpwff`) and discharges them INTERNALLY via `zfresh_critReductCorr_freshness` — closing
+the lap-114 instance-`0`-vs-`k` obstruction on the supply side. The remaining hypotheses are the genuine
+non-freshness chain-validity plumbing (`hCwff`/`hSeqs`/`hSeqsj`/`hsj`/`hthread`/`hrank`/`hrankI`), all
+derivable from `isChainInf` (see `PENDING_WORK` lap-128 step (c)). With `iRKcCrit_eq_corr`, this IS the
+`ZDerivation_red_zK_crit` ∀-branch under the engine swap (`red_zK_crit ↦ iRKcCrit`). -/
+theorem ZDerivation_iRKcCrit_all {s r ds sᵢ sⱼ a p pj k' d0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : redexI (zK s r ds) < lh ds)
+    (hj : redexJ (zK s r ds) < lh ds)
+    (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
+    (hdi : znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0)
+    (hdj : znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k')
+    (hfresh_eig : maxEigen d0 < a)
+    (hfresh : ZFresh (zK s r ds))
+    (hpwff : IsUFormula ℒₒᵣ p)
+    (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
+    (hSeqs : Seq (seqAnt s))
+    (hSeqsj : Seq (seqAnt sⱼ))
+    (hsj : seqSucc sⱼ = cutFormula (zK s r ds))
+    (hthread : ∀ i' ≤ redexI (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < redexI (zK s r ds), irk (chainAsucc ds i') ≤ r)
+    (hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r) :
+    ZDerivation (iRKcCrit (zK s r ds)) := by
+  have htag1 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) = 1 := by
+    rw [zKseq_zK, hdi]; exact zTag_zIall _ _ _ _
+  rw [iRKcCrit_eq_corr htag1 (ne_of_lt hIJ)]
+  obtain ⟨hpfresh, hΓfresh⟩ :=
+    zfresh_critReductCorr_freshness (zDerivation_zK_inv hZ).1 hfresh hi hdi hpwff
+  exact ZDerivation_iRcritG_critReductCorr hZ hi hj hIJ hdi hdj hfresh_eig hpfresh hΓfresh
+    hCwff hSeqs hSeqsj hsj hthread hrank hrankI
+
 /-- **5.1 critical sub-residual — THE cut-elimination prize.** When the chain is critical, `red = iRcritG
 d ρ` with `ρ` the recursive premise reducts; delegates to `ZDerivation_iRcritG_of`, which reduces it to the
 two stripped half-derivations `haux0` (`Γ → cutFormula d`) / `haux1` (Buchholz Thm 3.4(a) inversion).
