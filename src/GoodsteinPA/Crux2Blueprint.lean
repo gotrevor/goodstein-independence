@@ -576,6 +576,7 @@ theorem ZDerivation_iRKcCrit_of_zKValid {s r ds : V}
     (hZ : ZDerivation (zK s r ds))
     (hvalid : zKValid s r ds)
     (hfresh : ZFresh (zK s r ds))
+    (hZSeq : ZSeqAnt (zK s r ds))
     (hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)))
     (hSeqs : Seq (seqAnt s))
     (hthread : ∀ i' ≤ redexJ (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
@@ -584,22 +585,33 @@ theorem ZDerivation_iRKcCrit_of_zKValid {s r ds : V}
     (hAll : ∀ sᵢ sⱼ a p pj k' d0,
         znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0 →
         znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k' →
-        maxEigen d0 < a ∧ IsUFormula ℒₒᵣ p ∧ seqSucc sⱼ = cutFormula (zK s r ds) ∧ Seq (seqAnt sⱼ))
+        maxEigen d0 < a ∧ IsUFormula ℒₒᵣ p ∧ seqSucc sⱼ = cutFormula (zK s r ds))
     (hNeg : ∀ sᵢ sⱼ p d0,
         znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0 →
         znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p →
-        seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p ∧ Seq (seqAnt sᵢ)) :
+        seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p) :
     ZDerivation (iRKcCrit (zK s r ds)) := by
   obtain ⟨hIJ, hJlt, hcase⟩ := redZKReady_of_zKValid hZ hvalid
   have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  -- The two `Seq (seqAnt ·)` facts the half-derivations need are now DERIVED from the orbit's
+  -- `ZSeqAnt` invariant (`seq_seqAnt_zK_premise`): both redex premises are non-chain (`zAxAll`/`zIneg`,
+  -- tags 5/2 ≠ 4), so a `ZSeqAnt`-clean K-node's premise has a `Seq` antecedent.
+  have hds : Seq ds := (zDerivation_zK_inv hZ).1
+  have hmem : ∀ i < lh ds, ZDerivation (znth ds i) := (zDerivation_zK_inv hZ).2
   rcases hcase with ⟨sᵢ, sⱼ, a, p, pj, k', d0, hdi, hdj, _hirk⟩ |
     ⟨sᵢ, sⱼ, p, d0, hdi, hdj, hcut, _hpUf⟩
-  · obtain ⟨heig, hpwff, hsj, hSeqsj⟩ := hAll sᵢ sⱼ a p pj k' d0 hdi hdj
+  · obtain ⟨heig, hpwff, hsj⟩ := hAll sᵢ sⱼ a p pj k' d0 hdi hdj
+    have hSeqsj : Seq (seqAnt sⱼ) := by
+      have h := seq_seqAnt_zK_premise hds hZSeq hJlt (hmem _ hJlt) (by rw [hdj]; simp)
+      rwa [hdj, fstIdx_zAxAll] at h
     exact ZDerivation_iRKcCrit_all hZ hIlt hJlt hIJ hdi hdj heig hfresh hpwff hCwff hSeqs hSeqsj hsj
       (fun i' hi' => hthread i' (le_trans hi' (le_of_lt hIJ)))
       (fun i' hi' => hrank i' (lt_trans hi' hIJ))
       (hrank _ hIJ)
-  · obtain ⟨hd0ant, hSeqsi⟩ := hNeg sᵢ sⱼ p d0 hdi hdj
+  · have hd0ant := hNeg sᵢ sⱼ p d0 hdi hdj
+    have hSeqsi : Seq (seqAnt sᵢ) := by
+      have h := seq_seqAnt_zK_premise hds hZSeq hIlt (hmem _ hIlt) (by rw [hdi]; simp)
+      rwa [hdi, fstIdx_zIneg] at h
     exact ZDerivation_iRKcCrit_neg hZ hIlt hJlt hIJ hdi hdj hcut hd0ant hCwff hSeqs hSeqsi
       hthread hrank (hrank _ hIJ)
 
@@ -615,6 +627,7 @@ theorem ZDerivation_iRKcCrit_of_isChainInf {s r ds j0 : V}
     (hZ : ZDerivation (zK s r ds))
     (hvalid : zKValid s r ds)
     (hfresh : ZFresh (zK s r ds))
+    (hZSeq : ZSeqAnt (zK s r ds))
     (hJj0 : redexJ (zK s r ds) ≤ j0)
     (hthread0 : ∀ i' ≤ j0, ∀ B, inAnt B (chainAnt ds i') →
         inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
@@ -624,13 +637,13 @@ theorem ZDerivation_iRKcCrit_of_isChainInf {s r ds j0 : V}
     (hAll : ∀ sᵢ sⱼ a p pj k' d0,
         znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0 →
         znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k' →
-        maxEigen d0 < a ∧ IsUFormula ℒₒᵣ p ∧ seqSucc sⱼ = cutFormula (zK s r ds) ∧ Seq (seqAnt sⱼ))
+        maxEigen d0 < a ∧ IsUFormula ℒₒᵣ p ∧ seqSucc sⱼ = cutFormula (zK s r ds))
     (hNeg : ∀ sᵢ sⱼ p d0,
         znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0 →
         znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p →
-        seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p ∧ Seq (seqAnt sᵢ)) :
+        seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p) :
     ZDerivation (iRKcCrit (zK s r ds)) :=
-  ZDerivation_iRKcCrit_of_zKValid hZ hvalid hfresh hCwff hSeqs
+  ZDerivation_iRKcCrit_of_zKValid hZ hvalid hfresh hZSeq hCwff hSeqs
     (fun i' hi' => hthread0 i' (le_trans hi' hJj0))
     (fun i' hi' => hrank0 i' (lt_of_lt_of_le hi' hJj0))
     hAll hNeg
@@ -649,6 +662,7 @@ theorem ZDerivation_iRKcCrit_botOrbit {s r ds : V}
     (hZ : ZDerivation (zK s r ds))
     (hvalid : zKValid s r ds)
     (hfresh : ZFresh (zK s r ds))
+    (hZSeq : ZSeqAnt (zK s r ds))
     (hant : seqAnt s = (∅ : V))
     (hthread : ∀ i' ≤ redexJ (zK s r ds), ∀ B, inAnt B (chainAnt ds i') →
         inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
@@ -656,13 +670,13 @@ theorem ZDerivation_iRKcCrit_botOrbit {s r ds : V}
     (hAll : ∀ sᵢ sⱼ a p pj k' d0,
         znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0 →
         znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k' →
-        maxEigen d0 < a ∧ IsUFormula ℒₒᵣ p ∧ seqSucc sⱼ = cutFormula (zK s r ds) ∧ Seq (seqAnt sⱼ))
+        maxEigen d0 < a ∧ IsUFormula ℒₒᵣ p ∧ seqSucc sⱼ = cutFormula (zK s r ds))
     (hNeg : ∀ sᵢ sⱼ p d0,
         znth ds (redexI (zK s r ds)) = zIneg sᵢ p d0 →
         znth ds (redexJ (zK s r ds)) = zAxNeg sⱼ p →
-        seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p ∧ Seq (seqAnt sᵢ)) :
+        seqAnt (fstIdx d0) = seqCons (seqAnt sᵢ) p) :
     ZDerivation (iRKcCrit (zK s r ds)) :=
-  ZDerivation_iRKcCrit_of_zKValid hZ hvalid hfresh
+  ZDerivation_iRKcCrit_of_zKValid hZ hvalid hfresh hZSeq
     (cutFormula_wff_of_zKValid hZ hvalid)
     (by rw [hant]; exact seq_empty)
     hthread hrank hAll hNeg
