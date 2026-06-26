@@ -56,16 +56,30 @@ tag-3 critical path; it is what BOTH `descent_step_K_majorIdx` tag-3 AND (via (A
 
 **lap-138 (later) — readouts BANKED toward the `isChainInf` assembly.** Sorry-free `chainAsucc`/`chainAnt`
 readouts of the corrected reduct landed (`Crux2Blueprint`, after `znth_iIndReductSeqG_step`):
-`chainAsucc_iIndReductSeqG_zero/_step`, `chainAnt_iIndReductSeqG_zero/_step` — resolving the per-premise
-end-sequent projections that `isChainInf_of_last` (`InternalZ:1208`, the reusable last-premise reduction) consumes.
+`chainAsucc_iIndReductSeqG_zero/_step`, `chainAnt_iIndReductSeqG_zero/_step`, and `chainAsucc_iIndReductSeqG_last`
+(index-`k` form, the exit clause's readout) — resolving the per-premise end-sequent projections that
+`isChainInf_of_last` (`InternalZ:1208`, the reusable last-premise reduction) consumes.
 **NEXT (assemble `isChainInf_iIndReductSeqG` via `isChainInf_of_last`, j0 = last index k):** three sub-goals —
-(i) **last-succedent**: `chainAsucc … k = seqSucc s` — for `k>0`, `= F((k-1)+1)` via `chainAsucc_iIndReductSeqG_step`
-(`i:=k-1`) + `seqSucc_zsubst_zInd_step`; needs the internal-numeral identity `qqAdd (numeral (k-1)) (numeral 1) =
-numeral k` (a `numeral_succ_pos`-type lemma — CHECK if banked) + the Ind hyp `seqSucc s = substs1 (numeral k) p`
-(the Ind term is the numeral `k`) + freshness `fvSubst a (numeral i) p = p`. (ii) **threading**: premise `i+1`
-antecedent `Γ,F(i)` — `Γ` → `seqAnt s`, `F(i)` → `chainAsucc … i` (prior premise); reads `chainAnt_iIndReductSeqG_step`
-+ d1's antecedent structure (`Γ,F(a)` substituted). (iii) **rank**: `irk (chainAsucc … i) ≤ irk p` — substitution-
-invariance of `irk` on the `F(i)` succedents (`irk (F(i)) = irk p`?). Likely k=0 needs a separate (base-only) branch.
+(i) **last-succedent**: `chainAsucc … k = seqSucc s` — `chainAsucc_iIndReductSeqG_last` (BANKED) gives `= seqSucc
+(fstIdx (d1[a:=numeral(k-1)]))`, then `seqSucc_zsubst_zInd_step` gives `= substs1 (qqAdd (numeral(k-1)) (numeral 1)) p`.
+(ii) **threading**: premise `i+1` antecedent `Γ,F(i)` — `Γ` → `seqAnt s`, `F(i)` → `chainAsucc … i` (prior premise);
+reads `chainAnt_iIndReductSeqG_step` + d1's antecedent structure (`Γ,F(a)` substituted). (iii) **rank**:
+`irk (chainAsucc … i) ≤ irk p` — substitution-invariance of `irk` on the `F(i)` succedents.
+
+### ⚠️ lap-138 SUBTLETY found at the exit clause (resolve FIRST — it sets the assembly's hypothesis form)
+The numeral lemma exists: **`numeral_succ_pos (0 < n) : numeral (n+1) = numeral n ^+ 𝟏`** (`= qqAdd (numeral n)
+(numeral 1)`, Foundation `Bootstrapping/Syntax/Term/Functions.lean:750`). So the last-premise succedent
+`substs1 (qqAdd (numeral (k-1)) (numeral 1)) p = substs1 (numeral k) p` **ONLY for `k ≥ 2`** (needs `0 < k-1`).
+For **k=1** the step is `qqAdd (numeral 0) (numeral 1) = qqAdd 𝟎 𝟏`, which is NOT syntactically `numeral 1 = 𝟏`
+(`substs1 (qqAdd 𝟎 𝟏) p ≠ substs1 𝟏 p` — different term substituted); **k=0** the reduct is `⟨d0⟩` (base only,
+succedent `F(0)`). So the Ind conclusion succedent `seqSucc s = substs1 t p` does NOT match the reduct's exit as
+`t = numeral k` at the edges — the reduct is keyed to the Ind term `t`'s SYNTACTIC `+1` structure (Buchholz: `t =
+t'+1 → recurse`, `t = 0 → base`), not a flattened numeral. **THE next-attack ORDER:** pin the exact
+`iIndReductSeqG`↔Ind-term correspondence (what `k` is vs `t = π₂ at'`, and whether the conclusion succedent the
+exit must hit is `F(t)` with `t` retaining `+1`-structure, or `F(numeral k)` only for `k≥2` with k=0,1 special) —
+this DECIDES whether the assembly hypothesis is `zIndTerm = numeral k` (k≥2) or a structural `t = t'+1`. Do this
+BEFORE stating `isChainInf_iIndReductSeqG`, else the exit sub-goal is mis-stated. (Also: `seqSucc_zsubst_zInd_step`
+needs freshness `fvSubst a (numeral i) p = p` — from `ZFresh`/the orbit, NOT bare `ZDerivation`.)
 
 ---
 

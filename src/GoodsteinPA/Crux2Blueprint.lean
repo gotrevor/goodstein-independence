@@ -305,6 +305,16 @@ lemma chainAnt_iIndReductSeqG_step (d0 d1 a : V) {k i : V} (hi : i < k) :
       = seqAnt (fstIdx (zsubst d1 a (Bootstrapping.Arithmetic.numeral i))) := by
   unfold chainAnt; rw [znth_iIndReductSeqG_step d0 d1 a k i hi]
 
+/-- **Succedent of the LAST premise (index `k`, `k>0`) of the corrected reduct** = succedent of the top
+eigensubstituted step `d1[a:=numeral (k-1)]`. The exact `chainAsucc` the `isChainInf` EXIT clause reads at
+`j0 = lh - 1 = k`. Pure arithmetic specialization of `chainAsucc_iIndReductSeqG_step` at `i = k-1`. -/
+lemma chainAsucc_iIndReductSeqG_last (d0 d1 a : V) {k : V} (hk : 0 < k) :
+    chainAsucc (iIndReductSeqG d0 d1 a k) k
+      = seqSucc (fstIdx (zsubst d1 a (Bootstrapping.Arithmetic.numeral (k - 1)))) := by
+  have hkk : k - 1 + 1 = k := sub_add_self_of_le (pos_iff_one_le.mp hk)
+  have hstep := chainAsucc_iIndReductSeqG_step d0 d1 a (k := k) (i := k - 1) (tsub_lt_self hk one_pos)
+  rwa [hkk] at hstep
+
 /-- **Ind-step succedent under eigensubstitution.** The step premise `d1 : Γ,F(a)→F(a+1)` of a valid Ind
 node, substituted `a := t`, has succedent `F(t+1) = substs1 (t ^+ 𝟏) p` (modulo eigenvar freshness on `p`,
 `fvSubst a t p = p`). The Ind-step analog of `seqSucc_zsubst_zIall_premise`; this is the telescoping
