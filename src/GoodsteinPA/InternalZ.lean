@@ -9093,6 +9093,31 @@ theorem inference_critical_pair_of_botChain {s r ds : V}
       (fun _ h => h.1) (fun A h => by rw [h]; exact irk_falsum) rfl
   exact ⟨i, j, k, hij, lt_of_le_of_lt hjle hj0, hRi, hLj, hpos, hler⟩
 
+/-- **The case-5.1/5.2 dichotomy for a genuine ⊥-chain** (lap 123). Buchholz Def 3.2 case 5 splits a chain
+inference into *critical* (5.1, a redex exists — eliminate it) vs *non-critical* (5.2, a permissible premise
+exists — splice into it). For a `ZDerivation` ⊥-chain this is now a CONCRETE, PROVED dichotomy: **either**
+there is a genuine `(R_A, L^k_A)` redex pair (case 5.1, the engine should reduce via
+`iord_descent_iRcrit_of_redex`), **or** there is a NON-LEAF `isymRep` premise — a chain (tag-3) / Ind
+(tag-4) node (case 5.2, the engine should splice into it, smaller ordinal). Proof: classical case split on
+the existence of a non-leaf `isymRep` premise; its negation is exactly `inference_critical_pair_of_botChain`'s
+`hleaves`, which then yields the redex. **This is the case split the stall-free endgame needs:** the
+documented `red`-stall (`permIdx` selects an atom/`zAx1` leaf, `red d = d`) lands in the LEFT disjunct (a
+redex exists and is ignored by `red`'s mis-selection) — so the descent must be driven by the exhibited redex,
+not by `red`'s permIdx, on the LEFT, and by the splice on the RIGHT. Neither disjunct is a `red`-fixpoint. -/
+theorem redex_or_nonleaf_isymRep_of_botChain {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V)) :
+    (∃ i j k, i < j ∧ j < lh ds ∧ tp (znth ds i) = isymR (chainAsucc ds i) ∧
+      tp (znth ds j) = isymLk k (chainAsucc ds i) ∧
+      0 < irk (chainAsucc ds i) ∧ irk (chainAsucc ds i) ≤ r)
+    ∨ (∃ i < lh ds, tp (znth ds i) = isymRep ∧
+        ¬ ((∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck))) := by
+  by_cases h : ∃ i < lh ds, tp (znth ds i) = isymRep ∧
+      ¬ ((∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck))
+  · exact Or.inr h
+  · push_neg at h
+    exact Or.inl (inference_critical_pair_of_botChain hZ hant hsucc (fun i hi hrep => h i hi hrep))
+
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity
 
 `RedSound` (`iR2 d` is a genuine `ZDerivation` for `ZDerivesEmpty d`) is **FALSE** for the current
