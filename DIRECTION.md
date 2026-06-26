@@ -19,8 +19,12 @@ autonomous treadmill campaign. Read both.
 - **THE objective (only this):** **M1b-term** — resolve the `red`-engine **STALL / termination** of
   crux-2. Make a `red`-fixpoint on a ∅→⊥ orbit yield a contradiction, so the ordinal descent
   terminates and the fixpoint branch of `false_of_ZDerivesEmpty` (`Crux2Blueprint:1144`) closes.
-- **Success metric:** a `src/` `sorry` actually **DROPS** on this path — NOT "lemmas banked" (src
-  pinned at 11 for ~30 laps while lemmas accumulated; that ends here).
+- **Success metric:** *advance the crux toward discharge* — a sub-lemma of M1b-term CLOSED, OR the
+  crux honestly **DECOMPOSED into named `src/` sub-`sorry`s** (this RAISES the src count, and that is
+  PROGRESS, not regress — a monolithic `sorry` is worse than five named, individually-attackable
+  ones). What does NOT count: off-path lemma-banking, count-management, or relocating an active sorry
+  to `wip/` to keep `src/` "clean." The decomposition belongs in `src/`. (The "drop a src sorry"
+  framing was wrong — it punished exactly the decomposition this crux needs.)
 - **Mandated FIRST move:** run the **lap-132 existence-form reframe** as a cheap `wip/` spike BEFORE
   any more invariant-fold work — reframe the endgame from "`red` is a total Σ₁ function that descends
   every step" to the **existence / least-descending-reduct** form, where "fixpoint ⟹ cut-free" is
