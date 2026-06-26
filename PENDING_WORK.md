@@ -30,20 +30,31 @@ These plug DIRECTLY into `ZDerivation_iRcritG_critReductCorr` (Crux2Blueprint:47
 `fvSubst_numeral_transfer hp h0`, `hΓfresh` = `fvSubstSeq_numeral_transfer hΓ h0Γ`, where `k` = the
 consumer's `π₁(π₂(tp(znth ds redexJ)))` and `h0`/`h0Γ` are the `numeral 0` witnesses from `zFresh`.
 
+**✅ ALSO LANDED this lap — the standalone `zFresh` invariant (`Zsubst.lean`, after `zReg_zsubst`).**
+Full mirror of the `zReg` table machinery, all axiom-clean `[propext, choice, Quot.sound]`:
+`eqFlag` (`𝚺₀` equality flag) → `freshFlag a p Γ = max (eqFlag (fvSubst a (numeral 0) p) p) (eqFlag
+(fvSubstSeq a (numeral 0) Γ) Γ)` (`𝚺₁`, via `numeralGraph`/`fvSubstGraph`/`fvSubstSeqDef`) → `zFreshNext`
+(flag at tag 1 I∀ only; tags 2/3/4 fold premises) → `zFreshTable`/`zFresh` (`PR.Construction`) → recursion
+eqns (`zFresh_zIall`/`zIneg`/`zInd`/`zAtom`/`zAxAll`/`zAxNeg`/`zAx1`) → **`ZFresh d := zFresh d = 0`** +
+per-node extraction **`fvSubst_numeral_eq_self_of_zfresh_zIall`** / **`fvSubstSeq_numeral_eq_self_of_zfresh_zIall`**
+(the `maxEigen_lt_of_regular_zIall` analogues) + **`zfresh_zIallPrem`** (premise stays fresh). These compose
+with the transfer lemmas to give `hpfresh`/`hΓfresh` at the cut instance `k`. **The freshness front is now
+DEFINED + per-node-extractable end-to-end.**
+
 **NEXT-LAP TARGETS (in order) — REPLACES lap-125's ZPhi-ripple plan:**
-1. **Define the standalone `zFresh` invariant** (mirror `zReg`, `Zsubst.lean:940+`): `zFreshNext`/
-   `zFreshTable`/`zFresh` via the `maxEigen`/`idg` table template; per-I∀-node violation flag = `0` iff
-   `fvSubst a (numeral 0) p = p ∧ fvSubstSeq a (numeral 0) (seqAnt s) = seqAnt s` (both `𝚫₁`, function-graph
-   equalities). Recursion eqns (`zFresh_zIall`/`zFresh_zK`/…), `𝚫₁`-definability (template = `zRegNext_defined`),
-   `ZFresh d := zFresh d = 0`, and the per-node extraction `fvSubst_numeral_eq_self_of_zfresh_zIall` (the
-   `maxEigen_lt_of_regular_zIall` analogue) → feeds the transfer lemmas → `hpfresh`/`hΓfresh`.
-2. **`zFresh_zsubst` stability** (mirror `zReg_zsubst`, Zsubst:1224): non-occurrence is preserved by
-   closed-term substitution of a different variable. → `red`-stability (`ZFresh_red`).
-3. Add `∧ ZFresh d` to `ZDerivesEmptyR` (Crux2Blueprint:933); the embedding `foundation_bot_to_Z_empty`
+1. **`zFresh_zsubst` stability** (mirror `zReg_zsubst`, Zsubst:1329 — `zDerivation_induction`, 8 cases):
+   `zFresh (zsubst d a t) = zFresh d` for `ZDerivation d`, closed `t`. The I∀ case needs: the per-node flag
+   is preserved, i.e. `freshFlag a' (fvSubst a t p) (fvSubstSeq a t Γ) = freshFlag a' p Γ` when `a' ≠ a` —
+   non-occurrence of `a'` survives substituting a *different* var by a *closed* term. Needs a small
+   commutation lemma `fvSubst a' (numeral 0) (fvSubst a t p) = fvSubst a t (fvSubst a' (numeral 0) p)`
+   (distinct fresh vars commute) — pure `FvSubst` induction. → `red`-stability (`ZFresh_red`, mirror the
+   `zReg`→`ZRegular_red` chain).
+2. Add `∧ ZFresh d` to `ZDerivesEmptyR` (Crux2Blueprint:933); the embedding `foundation_bot_to_Z_empty`
    supplies it (choose eigenvariables fresh). Then the LEFT-branch ∀-soundness closes via
-   `ZDerivation_iRcritG_critReductCorr`; assemble the LEFT successor + restructure `false_of_ZDerivesEmpty`
-   off the `red`-orbit onto the dichotomy successor + WF(`iord`) (lap-124 plan unchanged below).
-4. ¬-case (`iRcritGNeg`, lap-117) needs the same freshness; the transfer substrate already covers it.
+   `ZDerivation_iRcritG_critReductCorr` (feed `hpfresh = fvSubst_numeral_transfer (…) (fvSubst_numeral_eq_self_of_zfresh_zIall …)`);
+   assemble the LEFT successor + restructure `false_of_ZDerivesEmpty` off the `red`-orbit onto the dichotomy
+   successor + WF(`iord`) (lap-124 plan unchanged below).
+3. ¬-case (`iRcritGNeg`, lap-117) needs the same freshness; the transfer + extraction substrate already covers it.
 
 ## lap 124 — the stall-bypassing DESCENT is built; the `red`-fixpoint defect is now ROUTED AROUND
 **Build 🟢 1326; both new theorems axiom-clean `[propext, choice, Quot.sound]`** (RedZKDescent, after
