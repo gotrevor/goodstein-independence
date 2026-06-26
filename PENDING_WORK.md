@@ -46,12 +46,27 @@ isymLk-axiom + Ind/K), OR (b) build a general internal ∀-INVERSION (`ZDerivati
 Buchholz Inversion Lemma — handles ANY ∀p-producer, not just zIall; the `_at` halves would then take the inverted
 derivation). **DECIDE (a)-vs-(b) by reading Buchholz §5 + the zInd/zK/zAxAll succedent forms BEFORE building.**
 
-### NEXT (hardest-first, per DIRECTION.md lap-140) — ASSEMBLE a banked sub-piece to a DROP, don't bank more
-1. **tag-5**: resolve the (a)-vs-(b) question above (source read), then build the chosen bridge. The rest of tag-5
-   is the explicit-pair assembly: mirror `ZDerivation_iRcritG_corrected` (`Crux2Blueprint:783`) with the `_at`
-   halves via `ZDerivation_iCritReductG_of` (not `iRcritG`), threading the orbit data (freshness `hpfresh/hΓfresh`,
-   `hthread`, `hrank`/`hrankI`, wff) for the `(cutPartner, majorIdx)` pair + the descent (`iord_descent_iRcrit_of_chain'`
-   is pair-parametric) + regularity (`ZDerivesEmptyR` of the reduct).
+### ✅ lap-140 LANDED (green, axiom-clean) — explicit-pair ∀-case SOUNDNESS `ZDerivation_iCritReductG_all_at`
+lap-139 NEXT **step 1 is DONE** (`Crux2Blueprint`, before `ZDerivation_iRcritG_corrected`): the pair-parametric
+assembly of the `_at` halves (`haux0_at` + `haux1_at`) into a full `ZDerivation` of the CLOSED critical reduct
+`iCritReductG s (cutFormulaAt i j (zK s r ds)) (r-1) r r (seqUpdate ds i (zsubst d0 a (numeral k))) (seqUpdate ds
+j (zAx1 …))`, at an ARBITRARY pair `(i,j)` — NO `redexI/redexJ`, NO `iRcritG`, via `ZDerivation_iCritReductG_of`
+directly. Takes `hdi : znth ds i = zIall …` as a HYPOTHESIS, so it is INDEPENDENT of the cutPartner residual. The
+cut-rank STRICT drop `irk (cutFormulaAt i j d) ≤ r−1` is `irk_substs1_lt_all` on the I∀ matrix (`cutFormulaAt_all`).
+**This is the soundness SKELETON `descent_step_K_tag5` instantiates.** (≈ +40 lines, 0 new sorry.)
+
+### NEXT (hardest-first, per DIRECTION.md lap-140) — wire the skeleton into a tag-5 DROP
+1. **tag-5 remaining** (now that soundness is banked): to close `descent_step_K_tag5`, supply at `(i,j) =
+   (cutPartner, majorIdx)`: (i) **the cutPartner residual** `hdi` — discharge `znth ds cutPartner = zIall …` via
+   the (a)/(b) decision above (the genuine deep gap); (ii) **the orbit-data hyps** of `ZDerivation_iCritReductG_all_at`
+   (freshness `hfresh_eig`/`hpfresh`/`hΓfresh` from `ZFresh`, `hthread`/`hrank`/`hrankI` from the chain, `hsj` from
+   the L-axiom/cutPartner being on the same `^∀p`, `Seq` facts) — these mirror the deterministic orbit-data
+   suppliers (laps 113-128, keyed off `redexI`; re-key to `(cutPartner, majorIdx)`); (iii) **regularity**
+   `ZDerivesEmptyR (iCritReductG …)` (the reduct stays a regular ⊥-derivation — `fstIdx` unchanged = `s`, so
+   `seqAnt=∅`/`seqSucc=^⊥` preserved; `ZRegular`/`ZFresh`/`ZSeqAnt` of the reduct, cf. banked `ZRegular_iRKcCrit`);
+   (iv) **descent** `icmp (iord (iCritReductG …)) (iord (zK s r ds)) = 0` via `iord_descent_iRcrit_of_chain'`
+   (pair-parametric). Build (iii)+(iv) next (independent of the cutPartner residual); they + the skeleton reduce
+   tag-5 to exactly the residual + orbit-data plumbing.
 2. **tag-3**: assemble `isChainInf_iIndReductSeqG` (lap-138 NEXT, readouts banked; exit subtlety pinned first).
 ⚠️ Forbidden: `redLeast`/μ for (A); engine re-key of `red`/`redexI`/`redexJ`; `red dⱼ` single-replace for tag-3;
 the `redZKReady_of_zKValid` shortcut (needs `zKCritical`, FALSE on the ⊥-orbit — see refutation above).

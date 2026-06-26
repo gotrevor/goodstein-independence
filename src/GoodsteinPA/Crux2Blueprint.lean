@@ -764,6 +764,61 @@ theorem ZDerivation_iRcritGNeg_critReductNeg {s r ds sᵢ sⱼ p d0 : V}
   · -- hρJ: `critReductNeg` at `redexJ` → the §5 axNeg reduct `Ax^1_{Γⱼ→A}`
     rw [critReductNeg_redexJ, zKseq_zK, hdj, fstIdx_zAxNeg, hcut]
 
+/-- **Explicit-pair `iCritReductG` SOUNDNESS (∀-case) — lap-139 NEXT step 1, ASSEMBLED (lap 140).** The
+pair-parametric assembly of the lap-139 `_at` halves (`haux0_at` R-side + `haux1_at` L-side) into a full
+`ZDerivation` of the CLOSED critical reduct `iCritReductG`, at an ARBITRARY R-intro/L-axiom pair `(i, j)` —
+**NO `redexI/redexJ`, NO `iRcritG`** (which bake the deterministic finder). Mirrors `ZDerivation_iRcritG_corrected`
+but routes through `ZDerivation_iCritReductG_of` directly, supplying the two halves at the explicit pair. The
+cut-rank STRICT drop `irk (cutFormulaAt i j d) ≤ r − 1` is `irk_substs1_lt_all` on the I∀ matrix (`cutFormulaAt_all`).
+
+This is the soundness SKELETON `descent_step_K_tag5` instantiates at `(i, j) = (cutPartner, majorIdx)` — taking
+`hdi : znth ds i = zIall …` (the principal R-intro) as a HYPOTHESIS, so it is INDEPENDENT of the lap-140 residual
+(`tp(cutPartner) = isymR (^∀p)`); that residual only enters when discharging `hdi` at the existence-form call site. -/
+theorem ZDerivation_iCritReductG_all_at {s r ds i j sᵢ a p d0 sⱼ pj k' C : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hi : i < lh ds)
+    (hdi : znth ds i = zIall sᵢ a p d0)
+    (hj : j < lh ds)
+    (hdj : znth ds j = zAxAll sⱼ pj k')
+    (hfresh_eig : maxEigen d0 < a)
+    (hpfresh : fvSubst ℒₒᵣ a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds j))))) p = p)
+    (hΓfresh : fvSubstSeq a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds j))))) (seqAnt sᵢ) = seqAnt sᵢ)
+    (hSeqs : Seq (seqAnt s))
+    (hSeqsj : Seq (seqAnt sⱼ))
+    (hsj : seqSucc sⱼ = cutFormulaAt i j (zK s r ds))
+    (hthread : ∀ i' ≤ i, ∀ B, inAnt B (chainAnt ds i') →
+        inAnt B (seqAnt s) ∨ ∃ i'' < i', B = chainAsucc ds i'')
+    (hrank : ∀ i' < i, irk (chainAsucc ds i') ≤ r)
+    (hrankI : irk (chainAsucc ds i) ≤ r) :
+    ZDerivation (iCritReductG s (cutFormulaAt i j (zK s r ds)) (r - 1) r r
+      (seqUpdate ds i (zsubst d0 a (Bootstrapping.Arithmetic.numeral
+        (π₁ (π₂ (tp (znth ds j)))))))
+      (seqUpdate ds j (zAx1 (seqAddAnt (cutFormulaAt i j (zK s r ds)) sⱼ) C))) := by
+  obtain ⟨_, _, _, _, _, _, _, hss, hsa⟩ := zKValidF_of_ZDerivation_zK hZ
+  have hZdi : ZDerivation (zIall sᵢ a p d0) := hdi ▸ (zDerivation_zK_inv hZ).2 _ hi
+  have hsfp : IsSemiformula ℒₒᵣ 1 p := (zDerivation_zIall_inv hZdi).2.2.2.2
+  have hChsucc : chainAsucc ds i = (^∀ p : V) := by
+    unfold chainAsucc; rw [hdi, fstIdx_zIall]; exact (zDerivation_zIall_inv hZdi).2.1
+  have hcutEq : cutFormulaAt i j (zK s r ds) = substs1 ℒₒᵣ
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth ds j))))) p := by
+    rw [cutFormulaAt_all (by rw [zKseq_zK]; exact hChsucc), zKseq_zK]
+  have hCwff : IsUFormula ℒₒᵣ (cutFormulaAt i j (zK s r ds)) := by
+    rw [hcutEq]
+    exact (IsSemiformula.substs1 (by simp : IsSemiterm ℒₒᵣ 0
+      (Bootstrapping.Arithmetic.numeral (π₁ (π₂ (tp (znth ds j)))) : V)) hsfp).isUFormula
+  have hCrk : irk (cutFormulaAt i j (zK s r ds)) ≤ r - 1 := by
+    refine le_pred_of_lt ?_
+    rw [hcutEq]
+    refine lt_of_lt_of_le (irk_substs1_lt_all (m := 0) hsfp (by simp)) ?_
+    rw [← hChsucc]; exact hrankI
+  exact ZDerivation_iCritReductG_of
+    (ZDerivation_corrected_haux0_at hZ hi hdi hfresh_eig hpfresh hΓfresh hCwff hthread hrank)
+    (ZDerivation_corrected_haux1_at (C := C) (Cc := cutFormulaAt i j (zK s r ds))
+      hZ hj hdj hSeqs hCwff hSeqsj hsj)
+    hSeqs hCrk hCwff hss hsa
+
 /-- **THE corrected critical-cut inversion — SOUNDNESS PROVEN for the re-principalized reduct.** This is
 the assembly the lap-114 crux finding pointed to: for ANY reduct function `ρ` that emits the CORRECTED
 critical reducts at the two redexes
