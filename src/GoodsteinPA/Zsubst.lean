@@ -2198,6 +2198,40 @@ lemma zSeqAnt_zK_of {s r ds : V} (hds : Seq ds) (hs : Seq (seqAnt s))
     exact h i hi
   rw [hmax]; simp
 
+/-- The conclusion antecedent of any `zsubst` node is a `fvSubstSeq` image, hence always a `Seq`, so its
+head flag vanishes — `seqAntSeqFlag (fvSubstSeqt a t s) = 0`. -/
+@[simp] lemma seqAntSeqFlag_fvSubstSeqt (a t s : V) : seqAntSeqFlag (fvSubstSeqt a t s) = 0 :=
+  seqAntSeqFlag_eq_zero_iff.mpr (by rw [seqAnt_fvSubstSeqt]; exact fvSubstSeq_seq a t (seqAnt s))
+
+/-- **`zsubst` always yields antecedent-`Seq` derivations (UNCONDITIONAL).** Every node of `zsubst d a t`
+concludes `fvSubstSeqt a t (·)`, whose antecedent is a `fvSubstSeq` image (always a `Seq`,
+`seqAntSeqFlag_fvSubstSeqt`), so `ZSeqAnt (zsubst d a t)` needs NO `ZSeqAnt d` hypothesis (contrast
+`zFresh_zsubst`, only downward). This is the I∀-reduct substitution step of "`red` preserves `ZSeqAnt`"
+(`red_zIall = zsubst d0 a 0`). -/
+theorem zSeqAnt_zsubst (a t : V) : ∀ d, ZDerivation d → zSeqAnt (zsubst d a t) = 0 := by
+  apply zDerivation_induction (P := fun d => zSeqAnt (zsubst d a t) = 0)
+  · definability
+  · intro C hC d hphi
+    rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
+      ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    · simp [zsubst_zAtom]
+    · rw [zsubst_zIall, zSeqAnt_zIall, seqAntSeqFlag_fvSubstSeqt, (hC d0 hd0).2]; simp
+    · rw [zsubst_zIneg, zSeqAnt_zIneg, seqAntSeqFlag_fvSubstSeqt, (hC d0 hd0).2]; simp
+    · rw [show at' = ⟪π₁ at', π₂ at'⟫ from (pair_unpair at').symm, zsubst_zInd, zSeqAnt_zInd,
+        seqAntSeqFlag_fvSubstSeqt, (hC d0 hd0).2, (hC d1 hd1).2]; simp
+    · rw [zsubst_zK]
+      refine zSeqAnt_zK_of (tblMapSeq_seq _ _) ?_ ?_
+      · rw [seqAnt_fvSubstSeqt]; exact fvSubstSeq_seq a t (seqAnt s)
+      · intro i hi
+        rw [tblMapSeq_lh] at hi
+        rw [znth_tblMapSeq hi, znth_zsubstTable_eq_zsubst a t _ (znth ds i)
+          (le_pred_of_lt (lt_of_le_of_lt (znth_le_self ds i) (ds_lt_zK s r ds)))]
+        exact (hC (znth ds i) (hmem i hi)).2
+    · simp [zsubst_zAxAll]
+    · simp [zsubst_zAxNeg]
+    · simp [zsubst_zAx1]
+
 /-! ### Regularity of the corrected-reduct premises (engine re-key prerequisite, lap 119)
 
 The re-keyed tag-4 critical reduct `iRKcCrit` (`InternalZ`) replaces each redex premise by its genuine
