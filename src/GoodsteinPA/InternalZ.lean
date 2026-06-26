@@ -5592,6 +5592,18 @@ lemma zDerivation_induction {P : V → Prop} (hP : 𝚫₁-Predicate P)
     ∀ d, ZDerivation d → P d :=
   (zconstruction (V := V)).induction (Γ := 𝚺) hP.of_deltaOne H
 
+/-- **`𝚺₁`-motive structural induction** over `ZDerivation` — the SAME `Fixpoint.Construction.induction`
+but for a `𝚺-[1]` (rather than `𝚫₁`) motive `P`. `𝗜𝚺₁` proves order-induction at the `𝚺₁` level
+(`InductionOnHierarchy.order_induction_sigma`, `m := 1`), so an EXISTENCE-form motive
+`P d := … → ∃ v, …` (which is `𝚺₁` whenever its matrix is `𝚫₁`) admits strong induction on the derivation
+CODE. This is the vehicle for the Buchholz §14.254 general-reduction recursion (`genReduct_botSucc`):
+the IH supplies, for each structurally-smaller premise, its own descending reduct — WITHOUT any
+`iord`-recursion (PRWO/Gödel-barred) and without committing to a total reduct function. -/
+lemma zDerivation_sigma_induction {P : V → Prop} (hP : 𝚺-[1]-Predicate P)
+    (H : ∀ C : Set V, (∀ x ∈ C, ZDerivation x ∧ P x) → ∀ d, ZPhi C d → P d) :
+    ∀ d, ZDerivation d → P d :=
+  (zconstruction (V := V)).induction (Γ := 𝚺) hP H
+
 /-- **`õ(d)` is a valid CNF code (`isNF`) for EVERY Z-derivation** — the structural-induction closure of
 the per-constructor NF lemmas (`isNF_iotil_zAtom`/`_zIall`/`_zIneg`/`_zInd`/`_zK`). This **discharges the
 `isNF (iotil ·)` hypothesis carried by every Thm-4.2 descent lemma** (the nut `iord_descent_iRcrit_of_chain`,
@@ -6101,6 +6113,22 @@ structure iRedDescent (red d : V) : Prop where
   otil_lt : icmp (iotil red) (iotil d) = 0
   /-- the reduct's pre-ordinal is a normal form. -/
   nf : isNF (iotil red)
+
+/-- `iRedDescent red d` unfolded to its three `𝚫₁` fields — the characterization the definability
+instance and the existence-form code-recursion motive (`genReduct_botSucc`) consume. -/
+theorem iRedDescent_iff {red d : V} :
+    iRedDescent red d ↔ (idg red ≤ idg d ∧ icmp (iotil red) (iotil d) = 0 ∧ isNF (iotil red)) :=
+  ⟨fun h => ⟨h.dg_le, h.otil_lt, h.nf⟩, fun ⟨a, b, c⟩ => ⟨a, b, c⟩⟩
+
+/-- **`𝚫₁`-definability of the reduct-descent interface `iRedDescent`** (a conjunction of `idg`/`icmp`/
+`isNF` predicates). Required as the matrix definability for the existence-form code-recursion motive of
+`genReduct_botSucc` (Buchholz §14.254): `∃ v, … ∧ iRedDescent v d` is `𝚺₁` exactly because `iRedDescent`
+is `𝚫₁`, which is what legitimizes strong induction on the derivation CODE in `𝗜𝚺₁`. -/
+instance iRedDescent_definable (Γ) : Γ-[m + 1]-Relation (iRedDescent : V → V → Prop) := by
+  have : (iRedDescent : V → V → Prop) =
+      fun red d => (idg red ≤ idg d ∧ icmp (iotil red) (iotil d) = 0 ∧ isNF (iotil red)) := by
+    funext red d; simp [iRedDescent_iff]
+  rw [this]; definability
 
 /-- `iRedDescent` ⟹ the full `iord` descent (tower combine via `iord_descent_le`), given `õ(d)` NF. -/
 lemma iord_descent_of_iRedDescent {red d : V} (h : iRedDescent red d) (hnf : isNF (iotil d)) :
