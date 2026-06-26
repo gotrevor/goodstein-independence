@@ -1,6 +1,58 @@
 # Pending work — open obligations & attack paths
 
-## lap 145 (latest) — `descent_step_Ind` cracked: `k=⟦t⟧` blocker DISSOLVED, descent PROVEN, real blocker = `zIndWff` antecedent gap
+## lap 146 (latest, FRESH-MIND REVIEW) — direction KEPT + SHARPENED; live path down to THREE genuine sorries; EXECUTE the `zIndWff` ripple
+**Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms) — no drift.**
+This is a review lap: no proof code changed, but the lap-145 direction was validated in-kernel and the ripple
+scoped to an executable plan. The deliverable is the sharpened direction below (mirrored in `DIRECTION.md`).
+
+### Live-path inventory (the ONLY sorries reachable from `false_of_ZDerivesEmpty`)
+`false_of_ZDerivesEmpty` (:2412, sorry-free) → `prwo_forbids_existence_descent` → `exists_sigma1_descent_of_step`
+→ {**(A) `exists_sigma1_descending_step`** :2327 — `gDef` Σ₁-Semisentence packaging} + `ZDerivesEmptyR_descent_step`
+(:2270, sorry-free dispatch) → {**`descent_step_Ind`** :2262} + `descent_step_K_majorIdx` (sorry-free) →
+{`descent_step_K_critical` (sorry-free, ∀+¬ both off `red`), **`descent_step_K_noncritical`** :2139 (Buchholz §5.2)}.
+So exactly THREE live sorries: `descent_step_Ind`, `descent_step_K_noncritical`, (A) `gDef`. All genuine, none
+generational, NONE routing through `red`/`redSoundGen`/the kernel-FALSE :80/:1108 chain (those are now off-path).
+
+### Review findings (what makes the lap-145 direction SOUND, not a stale-obstruction repeat)
+1. **The gap is REAL.** `zIndWff` (`InternalZ:1681`): base clause :1682 is `seqAnt(fstIdx prem0) = seqAnt(fstIdx d)`
+   (an EQUATION); step clause :1684 is `inAnt (F(a)) (seqAnt(fstIdx prem1))` (MEMBERSHIP). Genuine asymmetry —
+   contrast the lap-130/142 "obstruction was STALE (disjunct already carried it)" misfires; this one is real.
+2. **The strengthening is REQUIRED, not convenient.** Membership-only admits *unsound* Ind nodes: a lax
+   `d1 ⊢ {⊥,X}→⊥` (valid, `⊥∈`ant) leaks stray `X` past the Ind rule, so the conclusion `Γ→F(t)` does NOT
+   actually follow. So strengthening fixes a latent SOUNDNESS gap in the Z-system AND is more faithful to
+   Buchholz (`buchholz-gentzen.txt:140-152`, step premise `F(a),Γ→F(Sa)`) — it cannot over-strengthen.
+3. **Cheaper reframes REFUTED.** (a) `ZSeqAnt d := zSeqAnt d = 0` only flags sequence-wellformedness
+   (`Seq (seqAnt …)`), NOT antecedent content → gives no shape. (b) The `zIndWff` docstring's "strengthen body
+   without re-running the ZPhi cascade" is over-optimistic: `zIndWff` IS a conjunct of the `zPhi` Ind disjunct
+   (`InternalZ:5399, 5451`), so its `𝚫₁`-Def changes. BUT `zIndWff` is C-free → `zphi_monotone`/`_strong_finite`
+   are untouched; the ripple is definability-dominated, NOT a 64-site cascade.
+
+### NEXT-ATTACK (hardest-first, EXECUTE) — the focused `zIndWff` step-clause→shape ripple ⟹ DROPS `descent_step_Ind`
+Replace the step clause (`InternalZ.lean:1684`) MEMBERSHIP with SHAPE
+**`seqAnt (fstIdx (zIndPrem1 d)) = seqCons (seqAnt (fstIdx d)) (substs1 ℒₒᵣ (qqFvar (zIndEig d)) (zIndP d))`**
+(antecedent EXACTLY `Γ, F(a)`; `seqCons Γ (F(a))`, avoids the `seqAddAnt` succedent mismatch since seqAddAnt
+operates on full sequents whereas we only constrain the antecedent sequence). Concrete edit list:
+1. **`zIndWff` body** :1684 — swap the `inAnt …` conjunct for the `seqAnt … = seqCons … (substs1 …)` equation.
+2. **`zIndWffDef`** σ (:1704) + π (:1718) — replace the `∃ subfa, substs1 subfa fa p ∧ inAnt subfa sa1` clause
+   with `∃ subfa, substs1 subfa fa p ∧ ∃ sc, !seqConsDef sc sas subfa ∧ sa1 = sc` (σ) / the ∀-form (π). `sas`
+   (= `seqAnt(fstIdx d)`) is ALREADY bound at :1700/:1714. `seqConsDef` exists; `seqAddAntDef`:6318 is the
+   sequent-level alternative if needed. ⚠️ `seqCons`'s arg order is `seqCons <seq> <elt>` → `seqCons sas subfa`.
+3. **`zIndWff_defined`** :1725 — add `seqCons_defined.iff` to BOTH simp sets (σ and π halves).
+4. **`zsubst` preservation** `Zsubst.lean:3595/3604` — re-establish the new equation under substitution
+   (`seqAnt`/`seqCons` commute with `zsubst`; the F(a) term substitutes; ZFresh gives eigenvar ≠ subst var).
+5. **Assemble `descent_step_Ind`** (`Crux2Blueprint:2262`): from `zDerivation_zInd_inv` (now yielding the shape) +
+   `p = ⊥` (`eq_falsum_of_substs1_falsum`) get `seqAnt(fstIdx d1) = seqCons ∅ ⊥ = {⊥}`; chain `⟨d0, d1[a:=0]⟩`
+   threads (`isChainInf_telescope`), soundness via `zDerivation_zK_intro` + premise `ZDerivation`s
+   (`ZDerivation_zsubst`, `maxEigen d1 < a` from `ZRegular`); descent = banked `iord_descent_iIndReductSeqG_one`.
+6. **Build green.** If it surfaces a LIVE constructor of a `zInd` ZDerivation beyond `zsubst`, discharge the new
+   shape there too — but M4/embedding isn't wired, so expect only the `zsubst` site.
+Risk: like the lap-118 `zAxNeg` ripple this may span 1-2 laps (shape mismatches in the Def σ/π or the zsubst
+commute). If stuck >3 honest attempts on any sub-step, leave `descent_step_Ind` sorry'd + record the exact
+sub-step here. THEN (separate laps): `descent_step_K_noncritical` (§5.2 atomic reduct), then (A) `gDef`.
+
+---
+
+## lap 145 — `descent_step_Ind` cracked: `k=⟦t⟧` blocker DISSOLVED, descent PROVEN, real blocker = `zIndWff` antecedent gap
 **Build 🟢 1326. Headline `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math axioms).** Two NEW
 banked lemmas, both axiom-clean `[propext, Classical.choice, Quot.sound]`. `descent_step_Ind` stays a named
 sorry but is now FULLY decomposed — only its soundness remains, behind a precisely-identified `zIndWff` gap.

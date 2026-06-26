@@ -14,51 +14,54 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
-**Set: lap-143 (DEEP REFLECTION). Supersedes lap-140. Direction KEPT (existence-form pivot, lap-132);
-the binding move is course-corrected because laps 141-142 half-ABANDONED the pivot's core discipline.**
+**Set: lap-146 (FRESH-MIND REVIEW). Supersedes lap-143. Direction KEPT (existence-form pivot, lap-132);
+lap-143's mandated moves are DONE — the live `false_of_ZDerivesEmpty` path is now FULLY off `red`
+(lap-144). The binding move advances to CLOSING the first genuine live-path sorry of the post-red era.**
 
-- **THE objective (only this):** **M1b-term** = get the live `false_of_ZDerivesEmpty` path entirely
-  OFF `red`'s false-as-stated soundness, by witnessing the existence-form `∃ d'` with GENUINE reducts.
-  This is the lap-132 pivot's whole point — and it was REGRESSED:
-  - `ZDerivesEmptyR_descent_step` (`Crux2Blueprint:1943`) returns a bare `∃ d'`, NOT `red d` — so it
-    can witness with any sound, descending reduct. But TODAY both its load-bearing branches witness via
-    `red`: the Ind branch (`⟨red d, ZDerivesEmptyR_red …⟩`, :1946) and `descent_step_K_critical`
-    (`⟨red (zK …), ZDerivesEmptyR_red …⟩`, :1897). Both route soundness through `ZDerivesEmptyR_red` →
-    **`redSoundGen` (:1471), which is FALSE/incomplete**: its zInd case invokes the kernel-FALSE
-    `zKValidF_iIndReduct_of_zInd` (:80) and its zK case is an open sorry (:1508), and `ZDerivation_red_zK`
-    routes critical soundness through the kernel-FALSE `ZDerivation_red_zK_crit` (:1108).
-  - The GENUINE replacement is BANKED but UNWIRED: `ZDerivation_iRKcCrit_critical_all` (:1847, lap-142,
-    sorry-free, axiom-clean — the critical ∀-case soundness with NO `red`), plus support
-    `ZRegular_iRKcCrit_of_zK` / `ZFresh_iRKcCrit` / `fstIdx_iRKcCrit` / `iord_descent_iRKcCrit_corr`.
-- **MANDATED next move (assemble, don't bank):**
-  1. **Derive `ZSeqAnt_iRKcCrit`** (the ONE missing support lemma — `ZRegular`/`ZFresh`/`fstIdx`/descent
-     all exist). Mirror `ZFresh_iRKcCrit` (`Zsubst.lean:3344`).
-  2. **SPLIT `descent_step_K_critical` (:1891) into ∀ + ¬** on the R-redex shape (`hAcase`). Wire the
-     **∀-case to `iRKcCrit`** as the witness — `⟨iRKcCrit (zK s r ds), ⟨ZDerivation_iRKcCrit_critical_all …,
-     fstIdx_iRKcCrit▸…, ZRegular_iRKcCrit_of_zK …, ZFresh_iRKcCrit …, ZSeqAnt_iRKcCrit …⟩,
-     iord_descent_iRKcCrit_corr …⟩` — dropping the dominant critical sub-case OFF `red`/`redSoundGen`/false
-     :80/:1108. Leave the **¬-case as a NEW named sorry** `descent_step_K_critical_neg` (honest residual =
-     `redexJ ≤ j0`, NOT free from `zKValid`). RAISES src count = PROGRESS (the ∀-case goes genuinely red-free).
-  3. Then the same treatment for the **Ind branch** of `ZDerivesEmptyR_descent_step`: witness with the
-     corrected-Ind reduct `iIndReductSeqG` (lap-136), not `red d`, dropping its `redSoundGen`/:80 dependence.
-- **Success metric:** the live path's dependence on a FALSE `red`-soundness sorry DROPS for the critical
-  ∀-case (the operator's bar — substantive even if the visible sorry count rises by the honest ¬-residual).
-  NOT: banking another iRKcCrit/Ind lemma without wiring it into `descent_step_*`; count-management.
-- **FORBIDDEN:** witnessing any `ZDerivesEmptyR_descent_step` branch with `red` (re-introduces the false
-  soundness — this is the lap-141 regression); attacking `redSoundGen`(:1471)/`ZDerivation_red_zK_crit`(:1108)/
-  `zKValidF_iIndReduct_of_zInd`(:80)/`ZDerivation_red_zK_splice`(:1211)/`_nonRep`(:1384) AS STATED (all
-  FALSE/dead — they become off-path once the witnesses switch; relocate to `wip/` only AFTER the live path
-  no longer references them, never before — premature relocation games the count); the `redLeast`/μ-min route
-  for (A) (refuted lap-139); the major-premise-tag {3,4,5,6} split (abandoned lap-141); `zReg`/`zFresh`/`zSeqAnt`
-  folds as a *goal*; off-critical-path easy `sorry`s; M2 / M4 wiring.
-- **Why:** the existence form (`∃ d'`) was adopted precisely to free the path from proving `red`'s fixed
-  selection faithful — but the witnesses were never switched, so the live path still pins to `red`'s
-  false soundness and every lap banks genuine reducts that never load-bear. The crux advances ONLY when a
-  genuine reduct actually becomes the witness. After the critical ∀-case + Ind branch are off `red`, the
-  remaining honest sorries are {¬-case `redexJ≤j0`, non-critical 5.2 `descent_step_K_noncritical`, (A) `gDef`}
-  — all genuine Buchholz cut-reduction / Foundation-definability content, none generational.
+- **THE objective (only this):** **M1b-term** = close the live `false_of_ZDerivesEmpty` termination path.
+  The off-`red` STRUCTURAL goal is ACHIEVED: `ZDerivesEmptyR_descent_step` (`Crux2Blueprint:2270`) is
+  sorry-free and dispatches Ind→`descent_step_Ind` (genuine `iIndReductSeqG`) / K→`descent_step_K_majorIdx`
+  (critical off `red`, ¬-case CLOSED lap-144) — NO `red`, NO kernel-FALSE soundness on the live path. What
+  remains are **three co-equal genuine live sorries**, none generational, none needing `red`:
+  `descent_step_Ind` (:2262), `descent_step_K_noncritical` (:2139, Buchholz §5.2 atomic reduct),
+  and (A) `exists_sigma1_descending_step` (:2327, the `gDef` Σ₁-Semisentence packaging).
+- **MANDATED next move (hardest-first among teed-up work — DROP `descent_step_Ind`):**
+  Strengthen the `zIndWff` STEP-premise clause (`InternalZ.lean:1684`) from MEMBERSHIP
+  `inAnt (F(a)) (seqAnt(fstIdx prem1))` to SHAPE
+  `seqAnt(fstIdx prem1) = seqCons (seqAnt(fstIdx d)) (F(a))` (faithful Buchholz Ind rule: step antecedent
+  EXACTLY `Γ,F(a)`). This is **REQUIRED**, not convenient: the membership-only clause admits *unsound* Ind
+  nodes (a lax `d1 ⊢ {⊥,X}→⊥` lets stray `X` leak past the rule, so the conclusion `Γ→F(t)` doesn't
+  actually follow), and `ZSeqAnt` only flags sequence-wellformedness, not antecedent content — neither the
+  ZSeqAnt nor the "no-cascade-docstring" reframe delivers the shape (both CHECKED + refuted lap-146). It is a
+  **FOCUSED, definability-dominated ripple, NOT a 64-site cascade** (`zIndWff` is C-free, so `zphi_monotone`/
+  `_strong_finite` are untouched): edit (a) `zIndWff` body :1684; (b) `zIndWffDef` σ+π :1704/1718 — use
+  `seqConsDef` with `sas = seqAnt(fstIdx d)` already bound at :1700/1714 (or the available `seqAddAntDef`
+  :6318); (c) `zIndWff_defined` simp set :1725 (+ `seqCons_defined.iff`); (d) the `zsubst`-preservation site
+  `Zsubst.lean:3595/3604` (seqCons commutes with substitution); (e) assemble `descent_step_Ind` from the
+  now-derivable shape. The DESCENT half (`iord_descent_iIndReductSeqG_one`) and the `p=⊥` collapse
+  (`eq_falsum_of_substs1_falsum`) are ALREADY BANKED — the strengthening is the WHOLE remaining content.
+  After it: on the ⊥-orbit `seqAnt(fstIdx d1) = {⊥}`, the telescope threads, soundness closes via
+  `zDerivation_zK_intro` + `isChainInf_telescope`. (⚠️ if the build surfaces a LIVE constructor of a `zInd`
+  ZDerivation beyond `zsubst`, discharge the new shape there too — but M4/embedding isn't wired, so expect
+  only `zsubst`.) THEN: `descent_step_K_noncritical` (§5.2), THEN (A) `gDef`.
+- **Success metric:** `descent_step_Ind`'s sorry DROPS — a live-path src sorry, the operator's bar. NOT:
+  banking more support lemmas without dropping the sorry; relocating dead `red`-machinery for count-management.
+- **FORBIDDEN:** witnessing any `ZDerivesEmptyR_descent_step` branch with `red`; attacking the now-off-path
+  dead `red`-soundness sorries {`zKValidF_iIndReduct_of_zInd`:80, `ZDerivation_red_zK_crit`:1108, `_splice`
+  :1257-ish, `_nonRep`:1367-ish, `redSoundGen`:1471-ish} AS STATED (relocate to `wip/` only as a DELIBERATE
+  cleanup pass AFTER `descent_step_Ind` drops, never as count-management, never before); the
+  ZSeqAnt/"no-cascade" reframes (CHECKED lap-146 — neither delivers the shape); jumping to
+  `descent_step_K_noncritical`/(A) before `descent_step_Ind` drops (Ind is teed-up and validates the
+  red-free pivot end-to-end — keep focus); the `redLeast`/μ-min route for (A) (refuted lap-139);
+  `zReg`/`zFresh`/`zSeqAnt` folds as a *goal*; off-critical-path easy `sorry`s; M2 / M4 wiring.
+- **Why:** lap-144 got the live path off `red`; lap-145 cracked `descent_step_Ind` down to a single
+  well-understood obstruction with both prerequisites (descent + `p=⊥`) already banked. Closing it DROPS the
+  FIRST genuine live-path sorry of the post-`red` era and confirms the existence-form + genuine-reduct pivot
+  actually yields a sound, dropping proof — the thing the campaign has built toward for ~13 laps. The
+  remaining {§5.2, (A) `gDef`} are then the last two genuine pieces, both decomposed and none generational.
 
 ### Directive history (newest first; append one line per altitude lap — never delete)
+- **lap-146** (FRESH-MIND REVIEW): direction KEPT; lap-143's mandate is DONE (live path FULLY off `red`, lap-144; `ZDerivesEmptyR_descent_step` sorry-free). FINDING = the live termination path now has exactly THREE co-equal genuine sorries {`descent_step_Ind`, `descent_step_K_noncritical` §5.2, (A) `gDef`}, none generational. VERIFIED lap-145's `zIndWff` diagnosis is REAL not stale (step clause :1684 is membership `inAnt(F(a))`, base clause :1682 is an equation — genuine asymmetry) AND that the strengthening is REQUIRED for soundness (membership-only admits unsound Ind nodes) + more faithful to Buchholz; the ZSeqAnt + "no-cascade-docstring" reframes both CHECKED and refuted. MANDATE = DROP `descent_step_Ind` via the focused, definability-dominated `zIndWff` step-clause→shape ripple (`seqAnt(fstIdx prem1) = seqCons (seqAnt(fstIdx d)) (F(a))`); descent + `p=⊥` already banked. FORBIDDEN = `red` witnesses; the refuted reframes; jumping to §5.2/(A) before Ind drops.
 - **lap-143** (DEEP REFLECTION): direction KEPT (existence-form pivot); FINDING = laps 141-142 regressed it — `descent_step_K_critical` re-witnesses with `red` (= the kernel-FALSE `redSoundGen`/:80/:1108 chain) and the genuine `ZDerivation_iRKcCrit_critical_all` (lap-142) is banked but UNWIRED. MANDATE = finish the pivot: derive `ZSeqAnt_iRKcCrit`, split `descent_step_K_critical` into ∀ (wire `iRKcCrit`, red-free) + ¬ (named `redexJ≤j0` sorry), then re-witness the Ind branch with `iIndReductSeqG`. FORBIDDEN = witnessing any descent branch with `red`. Retires lap-140's `descent_step_K_majorIdx`-by-major-tag mandate (abandoned lap-141).
 - **lap-140** (altitude review): RETIRED lap-137's two stale mandates (orbit (B) DONE lap-138; `redLeast` μ-route REFUTED lap-139). Crux-2 termination collapses to ONE lemma `descent_step_K_majorIdx`; (A) folds in via concrete `redStep`. MANDATE = decompose it into per-tag {3,4,5/6} src sub-`sorry`s + assemble a banked sub-piece to a DROP (tag-5/6 explicit-pair soundness, or tag-3 `isChainInf_iIndReductSeqG`).
 - **lap-137** (altitude review): existence-form spike DONE; TYPE-CORRECTED the PRWO seam (`InternalPRWO` hyp; `→ False` in bare 𝗜𝚺₁ was Gödel-barred). PRIMARY = `exists_sigma1_descent_of_step` (the 𝚺₁ ε₀-descent — neglected through laps 135-136); secondary = `descent_step_K_majorIdx`. [stale: see lap-140]
