@@ -1,5 +1,50 @@
 # Pending work — open obligations & attack paths
 
+## lap 121 — the stall SPLITS: junk-beyond-j0 is provably harmless; only threaded atom ≤ j0 is open
+**Build 🟢 1326; new lemma axiom-clean `[propext, choice, Quot.sound]`.** Banked
+`iord_descent_iR2_zK_of_validF_critUpTo` (InternalZ, right after `iord_descent_iR2_zK_of_valid`).
+
+**THE FINDING (sharpens lap-120's monolithic stall).** `iord_descent_iR2_zK_of_valid` destructures
+`zKValid`'s GLOBAL criticality conjunct `hnperm0 : ∀ i < lh ds, ¬iperm(tp dᵢ) s`, but its proof body
+applies it ONLY at indices `i ≤ j0` (the `isChainInf` exit; see InternalZ:8045 in the original). So the
+ordinal descent goes through under the strictly weaker `hcrit : ∀ i ≤ j0, ¬iperm(tp dᵢ) s` — that is the
+new lemma. **Consequence:** `isChainInf` constrains only premises `0..j0`; therefore a `red`-stall caused
+by a **junk** permissible premise (`tp=isymRep`, e.g. a spurious identity atom A→A) at an index `> j0` is
+HARMLESS to the genuine `iR2`/redex descent — the redex lives in `0..j0` and the new lemma reduces it
+regardless of any junk beyond it. lap-120 conflated this junk case with the genuinely-hard threaded case.
+
+**THE OPEN CORE, now sharp.** The stall is genuinely open ONLY when an atom/`zAx1` premise sits AT an
+index `≤ j0` AND is threaded (its antecedent is a real cut formula `B = chainAsucc ds i'`, `i' < idx`).
+That breaks `hcrit` at that index, so the redex finder (`inference_critical_pair_of_chain_tp`, needs
+`hnperm` up to j0) does not apply, and the atom is a genuine cut against an axiom `B→B` → needs axiom-cut
+elimination (the lap-120 prescription stands, but now scoped to a strictly smaller case).
+
+**REACHABILITY of the open core (kernel-grounded structural facts, lap 121).** For a valid ⊥-chain
+(`zKValidF s r ds`, `seqAnt s=∅`, `seqSucc s=⊥`) the threading at i=0 (no earlier premises, `seqAnt s=∅`)
+FORCES premise 0 to have empty antecedent ⟹ premise 0 is NOT `zAtom`/`zAxAll`/`zAxNeg`/`zAx1` (all need a
+formula in their antecedent) ⟹ premise 0 ∈ {I-rule, chain, Ind}. So a threaded atom (`hcrit` breaker) is
+always at index `> 0`, with its cut formula `B` produced by an earlier non-isymRep premise (I-rule succ =
+`∀p`/`¬A` compound, or L-axiom `zAxNeg` succ = arbitrary incl. `⊥`). Whether a COMPLETE valid ⊥-chain
+with a threaded atom ≤ j0 as its first-`isymRep` premise actually exists is STILL unverified — the global
+exit-to-⊥ constraint fights it (you must thread the cut formulas all the way to a `⊥`-succedent premise,
+and an atom B→B passes B through without progress). lap-120 asserted "reachable" from a LOCAL type-system
+argument but never exhibited a full valid witness; this is the decisive sub-question.
+
+**NEXT-LAP TARGETS (in order):**
+1. **Decide reachability of the threaded-atom-≤-j0 core.** Either (a) prove a valid ⊥-chain's
+   first-`isymRep` premise within `0..j0` is reducible (zTag ∈ {3,4}, never atom/`zAx1`) — would DISSOLVE
+   the stall and let the endgame run on `iord_descent_iR2_zK_of_validF_critUpTo` + a "critical-up-to-j0
+   OR has-reducible-isymRep-≤-j0" dichotomy; or (b) construct the witness ⟹ axiom-cut elimination forced.
+   Attack via the exit-to-⊥ threading: does reaching a `⊥`-succedent premise force an isymRep cut/Ind ≤ j0?
+2. **Wire the junk case into the endgame.** Use the new lemma: a valid ⊥-chain that is critical-up-to-j0
+   (no isymRep premise ≤ j0) descends under `iR2` — independent of `red`'s permIdx stall. This is the
+   `Or.inr` (strict-descent) closer of `iord_descent_red`'s analogue on the `iR2` track for the junk case.
+   ⚠️ Note: `iR2`-track descent and `red`-track descent share the ordinal (`iord_iRcritG_eq_iRcrit`); the
+   endgame `false_of_ZDerivesEmpty` currently routes through `red`/`iord_red_iterate_descends` — consider
+   re-pointing the strict-descent disjunct onto the `iR2` track where the junk case is already handled.
+
+---
+
 ## Reflection — 2026-06-26 (lap 120, DEEP) — the SELECTION/STALL defect is the genuine open crux
 **Build 🟢 1326; headline + girder re-verified in-kernel (`[propext, sorryAx, choice, Quot.sound]`, 0 math
 axioms); statement re-audited vs paper — no drift.** Primary deliverable `REFLECTION-2026-06-26-lap120.md`.
