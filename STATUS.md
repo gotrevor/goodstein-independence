@@ -1,9 +1,24 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 152 (DEEP REFLECTION — direction KEPT; crux isolated to TWO master keys `genReduct_chain_hasRedex`/`_noRedex`; outer `axMajor`+`gDef` shown downstream; M2 caution elevated) · 2026-06-27
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 153 (**MASTER KEY #1 `genReduct_chain_hasRedex` DROPPED, axiom-clean** — §14.253 principal cut at general `Γ→⊥`, FLATTEN cert via inverting the proven `iRKcCrit` reduct; crux now = master key #2 `genReduct_chain_noRedex` + downstream axMajor/gDef) · 2026-06-27
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**);
 `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean. The lone `sorryAx` traces to crux-2.
+
+> **🔑 Lap-153 — MASTER KEY #1 DROPPED. Read FIRST — current.** Build re-verified 🟢 green (1326);
+> `genReduct_chain_hasRedex` (`Crux2Blueprint:3048`) sorry → **PROVEN**, `#print axioms`-clean
+> `[propext, choice, Quot.sound]` (no `sorryAx`); new shared helper `certFlatten_of_critHalves` likewise clean;
+> `false_of_ZDerivesEmpty` trace unchanged `[propext, sorryAx, choice, Quot.sound]` (0 math axioms). The §14.253
+> principal cut realized at the GENERAL `Γ→⊥` level (Γ nonempty) off `red`, returning the FLATTEN
+> `GenReductCert` (`Or.inr`). **KEY INSIGHT:** the two FLATTEN halves are the `iCritReductSeq` premises of the
+> proven `iRKcCrit` reduct — extracted by premise-INVERSION (not rebuilt); the N2 per-half `õ`/`idg` drops fall
+> out of `iotil_zK`/`idg_zK` being `fstIdx`-irrelevant + `iotil_zK_lt_replace`/`idg_zK_le_replace` from the N1
+> records; `Seq (seqAnt s)` from the lap-152 fold's `seq_seqAnt_zK`. This **VALIDATES the entire `GenReductCert`
+> FLATTEN machinery end-to-end** (the cert consumer `descent_step_K_noncrit_repMajor` →
+> `descent_step_K_spliceHalves` was already banked). **NEXT = MASTER KEY #2 `genReduct_chain_noRedex`
+> (`:3294`)**, the genuine §14.254 recursion via the per-premise IH cert. Closing it collapses the downstream
+> `axMajor` (`:3507`) + gDef (`:3630`). See `HANDOFF-2026-06-27-lap153.md`, `DIRECTION.md` (lap-152, still
+> binding). ALTITUDE CAUTION (lap-152) STILL HOLDS: M2 (Foundation→Z bridge) ~0% built — "crux only" ≠ "almost done."
 
 > **🧘 Lap-152 — DEEP REFLECTION (every-9th, prev lap-143). Direction KEPT; crux isolated to TWO master keys; read FIRST — current.**
 > Re-verified 🟢 green (1326); re-ran `#print axioms` in-kernel: headline `peano_not_proves_goodstein =

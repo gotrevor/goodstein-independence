@@ -1,5 +1,28 @@
 # Pending work — open obligations & attack paths
 
+## Lap 153 — MASTER KEY #1 `genReduct_chain_hasRedex` DROPPED (axiom-clean)
+
+**Advance on the crux:** `genReduct_chain_hasRedex` (`Crux2Blueprint:3048`) sorry → PROVEN,
+`#print axioms`-clean `[propext, choice, Quot.sound]`. The §14.253 principal cut at the GENERAL `Γ→⊥` level
+(Γ nonempty) off `red`, returning the FLATTEN `GenReductCert` (`Or.inr`). New shared helper
+`certFlatten_of_critHalves` (`~:2978`). Build 🟢 green (1326); `false_of_ZDerivesEmpty` trace unchanged
+`[propext, sorryAx, choice, Quot.sound]` (0 math axioms). This validates the `GenReductCert` FLATTEN
+machinery end-to-end. crux-2 live leaves: **4 → 3** {noRedex :3294, axMajor :3507, gDef :3630}.
+
+**Method (reusable):** the two FLATTEN halves `a ⊢ Γ→C`, `b ⊢ C,Γ→⊥` are the `iCritReductSeq` PREMISES of
+the proven `iRKcCrit` reduct (`iRKcCrit d = zK s (r−1) (iCritReductSeq a b)`). EXTRACT their 4 invariants by
+premise-inversion (`zDerivation_zK_inv`/`*_zK_premise` at idx 0,1) rather than rebuilding. N2 per-half
+`õ`/`idg` drops: `iotil_zK`/`idg_zK` ignore `fstIdx`, so `iotil_zK_lt_replace`/`idg_zK_le_replace` discharge
+them from the N1 `iRedDescent` records (`critReductCorr`/`critReductNeg` at redexI/redexJ). `irk C+1 ≤ idg d`
+= `irk_cutFormula_lt` + `r_le_idg_zK`. `Seq (seqAnt s)` = `seq_seqAnt_zK` (lap-152 fold).
+
+**NEXT ATTACK — MASTER KEY #2 `genReduct_chain_noRedex` (`Crux2Blueprint:3294`):** the §14.254 recursion.
+No redex below `j0` ⟹ `majorPrem_tag_mem` ⟹ major tag ∈{3,4,5,6}. Reduce major (3/4) or the upstream Rep
+cut-partner (5/6) by the per-premise IH (which now hands back a `GenReductCert`), re-base as parent cert. The
+cert consumer is banked + validated (`descent_step_K_noncrit_repMajor` →
+`descent_step_K_replace`/`descent_step_K_spliceHalves`). **STEP 0 (do first): verify
+`majorPrem_zAxAll_cutPartner`/`_zAxNeg_cutPartner` exist & are sorry-free** before committing to tag-5/6.
+
 ## Reflection — 2026-06-27 (lap 152, DEEP REFLECTION; prev altitude lap-143)
 
 **Build re-verified 🟢 green (1326). In-kernel: headline `[propext, sorryAx, choice, Quot.sound]` (0 math

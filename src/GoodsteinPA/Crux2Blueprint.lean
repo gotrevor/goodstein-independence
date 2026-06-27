@@ -2973,6 +2973,68 @@ instance certFlatten_definable : 𝚺₁-Predicate (certFlatten : V → Prop) :=
 instance GenReductCert_definable : 𝚺₁-Predicate (GenReductCert : V → Prop) := by
   unfold GenReductCert; exact certReplace_definable.or certFlatten_definable
 
+/-- **Shared FLATTEN-cert assembler from a critical-cut reduct's two principal-cut halves (lap 153).**
+The reduct `iRKcCrit (zK s r ds)` is, by construction, `zK s (r−1) (iCritReductSeq a b)` whose two
+premises `a ⊢ Γ→C`, `b ⊢ C,Γ→⊥` (`C = cutFormula`, `fstIdx a = seqSetSucc s C`, `fstIdx b = seqAddAnt C s`)
+ARE the FLATTEN halves the `GenReductCert`'s `Or.inr` branch wants. The four per-half invariants are
+extracted from the reduct's own `ZDerivation`/`ZRegular`/`ZFresh`/`ZSeqAnt` by premise-inversion
+(`zDerivation_zK_inv` / `*_zK_premise` at indices `0`,`1` of `iCritReductSeq`); the end-sequent / threading
+data fall out of `seqAnt_seqSetSucc` / `seqSucc_seqAddAnt` / `inAnt_seqAddAnt`; the cut formula's wff and
+the rank-drop `irk C + 1 ≤ idg d` and the N2 `õ`/`idg` descent facts are supplied by the caller. **Polarity
+-agnostic:** the ∀- and ¬-cases (`iRcritG`/`iRcritGNeg`) differ only in which premise each half replaces, but
+present identical end-sequent shapes here, so both feed this one assembler. -/
+lemma certFlatten_of_critHalves {s r ds a b C : V}
+    (hZcrit : ZDerivation (zK s (r - 1) (iCritReductSeq a b)))
+    (hregcrit : ZRegular (zK s (r - 1) (iCritReductSeq a b)))
+    (hfreshcrit : ZFresh (zK s (r - 1) (iCritReductSeq a b)))
+    (hseqantcrit : ZSeqAnt (zK s (r - 1) (iCritReductSeq a b)))
+    (ha_fst : fstIdx a = seqSetSucc s C) (hb_fst : fstIdx b = seqAddAnt C s)
+    (hsucc : seqSucc s = (^⊥ : V)) (hSeqs : Seq (seqAnt s))
+    (hCwff : IsUFormula ℒₒᵣ C) (hCrk : irk C + 1 ≤ idg (zK s r ds))
+    (ha_otil : icmp (iotil a) (iotil (zK s r ds)) = 0)
+    (hb_otil : icmp (iotil b) (iotil (zK s r ds)) = 0)
+    (ha_idg : idg a ≤ idg (zK s r ds)) (hb_idg : idg b ≤ idg (zK s r ds)) :
+    GenReductCert (zK s r ds) := by
+  have hseq2 : Seq (iCritReductSeq a b) := iCritReductSeq_seq a b
+  have h0lt : (0 : V) < lh (iCritReductSeq a b) := by rw [iCritReductSeq_lh]; exact zero_lt_two
+  have h1lt : (1 : V) < lh (iCritReductSeq a b) := by rw [iCritReductSeq_lh]; exact one_lt_two
+  have hZa : ZDerivation a := by
+    have h := (zDerivation_zK_inv hZcrit).2 0 h0lt; rwa [znth_iCritReductSeq_zero] at h
+  have hZb : ZDerivation b := by
+    have h := (zDerivation_zK_inv hZcrit).2 1 h1lt; rwa [znth_iCritReductSeq_one] at h
+  have hrega : ZRegular a := by
+    have h := ZRegular_zK_premise hseq2 hregcrit h0lt; rwa [znth_iCritReductSeq_zero] at h
+  have hregb : ZRegular b := by
+    have h := ZRegular_zK_premise hseq2 hregcrit h1lt; rwa [znth_iCritReductSeq_one] at h
+  have hfresha : ZFresh a := by
+    have h := ZFresh_zK_premise hseq2 hfreshcrit h0lt; rwa [znth_iCritReductSeq_zero] at h
+  have hfreshb : ZFresh b := by
+    have h := ZFresh_zK_premise hseq2 hfreshcrit h1lt; rwa [znth_iCritReductSeq_one] at h
+  have hseqanta : ZSeqAnt a := by
+    have h := ZSeqAnt_zK_premise hseq2 hseqantcrit h0lt; rwa [znth_iCritReductSeq_zero] at h
+  have hseqantb : ZSeqAnt b := by
+    have h := ZSeqAnt_zK_premise hseq2 hseqantcrit h1lt; rwa [znth_iCritReductSeq_one] at h
+  refine Or.inr ⟨a, b, hZa, hZb, hrega, hregb, hfresha, hfreshb, hseqanta, hseqantb,
+    ?_, ?_, ?_, ?_, ?_, ?_, ha_otil, hb_otil, ha_idg, hb_idg⟩
+  · -- seqAnt (fstIdx a) = seqAnt (fstIdx d)
+    rw [ha_fst, seqAnt_seqSetSucc, fstIdx_zK]
+  · -- seqSucc (fstIdx b) = seqSucc (fstIdx d)
+    rw [hb_fst, seqSucc_seqAddAnt, fstIdx_zK]
+  · -- threading: every antecedent formula of `b` is the cut formula `C = seqSucc (fstIdx a)` or in `Γ`
+    intro k hk
+    rw [hb_fst] at hk ⊢
+    rw [fstIdx_zK]
+    have hin : inAnt (znth (seqAnt (seqAddAnt C s)) k) (seqAnt (seqAddAnt C s)) := ⟨k, hk, rfl⟩
+    rcases (inAnt_seqAddAnt hSeqs).mp hin with h | h
+    · left; rw [ha_fst, seqSucc_seqSetSucc]; exact h
+    · right; exact h
+  · -- IsUFormula (seqSucc (fstIdx a)) = IsUFormula C
+    rw [ha_fst, seqSucc_seqSetSucc]; exact hCwff
+  · -- IsUFormula (seqSucc (fstIdx b)) = IsUFormula ⊥
+    rw [hb_fst, seqSucc_seqAddAnt, hsucc]; simp
+  · -- irk (seqSucc (fstIdx a)) + 1 ≤ idg d
+    rw [ha_fst, seqSucc_seqSetSucc]; exact hCrk
+
 /-- **has-redex leaf of the §14.254 chain reduction (`Γ→⊥`, FLATTEN certificate) — NAMED
 sub-`sorry`.** A `zK s r ds` chain deriving `Γ→⊥` with a redex pair `⟪i0,j1⟫` below its `isChainInf`
 ⊥-exit `j0` has the criticality-free principal-cut reduct `iRKcCrit (zK s r ds)` as a SAME-end-sequent
@@ -2993,7 +3055,219 @@ lemma genReduct_chain_hasRedex {s r ds i0 j1 j0 : V}
     (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
     (hij : i0 < j1) (hj1 : j1 ≤ j0) (hpair : isRedexPair ds (⟪i0, j1⟫ : V)) :
     GenReductCert (zK s r ds) := by
-  sorry
+  have hvalidF : zKValidF s r ds := zKValidF_of_ZDerivation_zK hZ
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  have hjlt : j1 < lh ds := lt_of_le_of_lt hj1 hj0
+  have hilt0 : i0 < lh ds := lt_trans hij hjlt
+  have hex : ∃ c < (⟪lh ds, lh ds⟫ : V), isRedexPair ds c :=
+    ⟨⟪i0, j1⟫, pair_lt_pair hilt0 hjlt, hpair⟩
+  have hIlt_j0 : redexI (zK s r ds) < j0 := redexI_lt_of_redexPair hij hj1 hj0 hpair
+  obtain ⟨hIJ, hJlt, hcase⟩ := redZKReady_of_zKValidF_exists hZ hvalidF hex
+  have hIlt : redexI (zK s r ds) < lh ds := lt_trans hIJ hJlt
+  have hrankI : irk (chainAsucc ds (redexI (zK s r ds))) ≤ r := hrank0 _ hIlt_j0
+  have hca : ∀ i < lh ds, IsUFormula ℒₒᵣ (chainAsucc ds i) := hvalidF.2.2.2.2.2.2.1
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun i hi => isNF_iotil_of_ZDerivation _ (hmem i hi))
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := by
+    intro n; rcases lt_or_ge n (lh ds) with hn | hn
+    · exact isNF_iotil_of_ZDerivation _ (hmem n hn)
+    · rw [znth_prop_not (Or.inr hn)]; exact isNF_iotil_zero
+  rcases hcase with ⟨sᵢ, sⱼ, a', p, pj, k', d0, hdi, hdj, hirk, hsj⟩ |
+      ⟨sᵢ, sⱼ, p, d0, hdi, hdj, hcut, hpUf⟩
+  · -- ∀-redex: the principal cut on `^∀ p` (`iRcritG`, halves replace `redexI`/`redexJ`)
+    have hZdi : ZDerivation (zIall sᵢ a' p d0) := hdi ▸ hmem _ hIlt
+    obtain ⟨_, hssi, hwff⟩ := zDerivation_zIall_inv hZdi
+    have hpwff : IsUFormula ℒₒᵣ p := hwff.2.2.isUFormula
+    have hregI : ZRegular (zIall sᵢ a' p d0) := hdi ▸ ZRegular_zK_premise hds hreg hIlt
+    have heig : maxEigen d0 < a' := maxEigen_lt_of_regular_zIall hregI
+    have hSeqsj : Seq (seqAnt sⱼ) := by
+      have h := seq_seqAnt_zK_premise hds hseqant hJlt (hmem _ hJlt) (by rw [hdj]; simp)
+      rwa [hdj, fstIdx_zAxAll] at h
+    have hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)) := by
+      have h := hca _ hJlt; rw [chainAsucc, hdj, fstIdx_zAxAll, hsj] at h; exact h
+    have hChAI : chainAsucc ds (redexI (zK s r ds)) = (^∀ p : V) := by
+      rw [chainAsucc, hdi, fstIdx_zIall]; exact hssi
+    have htag1 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) = 1 := by
+      rw [zKseq_zK, hdi]; exact zTag_zIall _ _ _ _
+    have hZcrit : ZDerivation (iRKcCrit (zK s r ds)) :=
+      ZDerivation_iRKcCrit_all hZ hIlt hJlt hIJ hdi hdj heig hfresh hpwff hCwff
+        (seq_seqAnt_zK hseqant) hSeqsj hsj
+        (fun i' hi' => hthread0 i' (le_of_lt (lt_of_le_of_lt hi' hIlt_j0)))
+        (fun i' hi' => hrank0 i' (lt_trans hi' hIlt_j0)) hrankI
+    have hregcrit : ZRegular (iRKcCrit (zK s r ds)) := by
+      refine ZRegular_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZRegular_zK_premise hds hreg hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZRegular_zK_premise hds hreg hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inl (zTag_zIall _ _ _ _)
+    have hfreshcrit : ZFresh (iRKcCrit (zK s r ds)) := by
+      refine ZFresh_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZFresh_zK_premise hds hfresh hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZFresh_zK_premise hds hfresh hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inl (zTag_zIall _ _ _ _)
+    have hseqantcrit : ZSeqAnt (iRKcCrit (zK s r ds)) := by
+      refine ZSeqAnt_iRKcCrit ?_ ?_ ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZSeqAnt_zK_premise hds hseqant hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZSeqAnt_zK_premise hds hseqant hIlt
+      · rw [fstIdx_zK]; exact seq_seqAnt_zK hseqant
+      · rw [zKseq_zK, hdj, fstIdx_zAxAll]; exact hSeqsj
+      · rw [zKseq_zK, hdi]; exact Or.inl (zTag_zIall _ _ _ _)
+    have hbI : iRedDescent (critReductCorr (zK s r ds) (redexI (zK s r ds)))
+        (znth ds (redexI (zK s r ds))) := by
+      rw [critReductCorr, if_neg (ne_of_lt hIJ), if_pos rfl, zKseq_zK, hdi,
+        zIallPrem_zIall, zIallEig_zIall]
+      exact iRedDescent_zsubst_zIall
+        (by simp : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral
+          (π₁ (π₂ (tp (znth ds (redexJ (zK s r ds)))))) : V)).isUTerm (hdi ▸ hmem _ hIlt)
+    have hbJ : iRedDescent (critReductCorr (zK s r ds) (redexJ (zK s r ds)))
+        (znth ds (redexJ (zK s r ds))) := by
+      rw [critReductCorr, if_pos rfl]
+      simp only [zKseq_zK, hdj, fstIdx_zAxAll]
+      exact iRedDescent_zAx1_zAxAll_of_irk hirk
+    have heqRKc : iRKcCrit (zK s r ds)
+        = zK s (r - 1) (iCritReductSeq
+            (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+              (seqUpdate ds (redexI (zK s r ds)) (critReductCorr (zK s r ds) (redexI (zK s r ds)))))
+            (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+              (seqUpdate ds (redexJ (zK s r ds)) (critReductCorr (zK s r ds) (redexJ (zK s r ds)))))) := by
+      rw [iRKcCrit_eq_corr htag1 (ne_of_lt hIJ)]
+      simp only [iRcritG, iCritReductG, fstIdx_zK, zKrank_zK, zKseq_zK]
+    have hCrk : irk (cutFormula (zK s r ds)) + 1 ≤ idg (zK s r ds) := by
+      have hlt : irk (cutFormula (zK s r ds)) < r :=
+        irk_cutFormula_lt (by rw [zKseq_zK]; exact hmem _ hIlt)
+          (by rw [zKseq_zK, hChAI, hdi]; exact tp_zIall _ _ _ _)
+          (by rw [zKseq_zK]; exact hrankI)
+      exact le_trans (succ_le_iff_lt.mpr hlt) (r_le_idg_zK s r ds hds)
+    have ha_otil : icmp (iotil (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+          (seqUpdate ds (redexI (zK s r ds)) (critReductCorr (zK s r ds) (redexI (zK s r ds))))))
+          (iotil (zK s r ds)) = 0 := by
+      refine iotil_zK_lt_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) hIlt ?_ ?_ hNF ?_
+      · rw [znth_seqUpdate_self hIlt]; exact hbI.otil_lt
+      · intro n hn; rw [znth_seqUpdate_of_ne hn]
+      · intro n; rcases eq_or_ne n (redexI (zK s r ds)) with rfl | hne
+        · rw [znth_seqUpdate_self hIlt]; exact hbI.nf
+        · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+    have hb_otil : icmp (iotil (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+          (seqUpdate ds (redexJ (zK s r ds)) (critReductCorr (zK s r ds) (redexJ (zK s r ds))))))
+          (iotil (zK s r ds)) = 0 := by
+      refine iotil_zK_lt_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) hJlt ?_ ?_ hNF ?_
+      · rw [znth_seqUpdate_self hJlt]; exact hbJ.otil_lt
+      · intro n hn; rw [znth_seqUpdate_of_ne hn]
+      · intro n; rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
+        · rw [znth_seqUpdate_self hJlt]; exact hbJ.nf
+        · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+    have ha_idg : idg (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+          (seqUpdate ds (redexI (zK s r ds)) (critReductCorr (zK s r ds) (redexI (zK s r ds)))))
+          ≤ idg (zK s r ds) := by
+      refine idg_zK_le_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) (fun n => ?_)
+      rcases eq_or_ne n (redexI (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hIlt]; exact hbI.dg_le
+      · exact le_of_eq (congrArg idg (znth_seqUpdate_of_ne hne))
+    have hb_idg : idg (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+          (seqUpdate ds (redexJ (zK s r ds)) (critReductCorr (zK s r ds) (redexJ (zK s r ds)))))
+          ≤ idg (zK s r ds) := by
+      refine idg_zK_le_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) (fun n => ?_)
+      rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hJlt]; exact hbJ.dg_le
+      · exact le_of_eq (congrArg idg (znth_seqUpdate_of_ne hne))
+    exact certFlatten_of_critHalves (C := cutFormula (zK s r ds))
+      (heqRKc ▸ hZcrit) (heqRKc ▸ hregcrit) (heqRKc ▸ hfreshcrit) (heqRKc ▸ hseqantcrit)
+      (fstIdx_zK _ _ _) (fstIdx_zK _ _ _) hsucc (seq_seqAnt_zK hseqant) hCwff hCrk
+      ha_otil hb_otil ha_idg hb_idg
+  · -- ¬-redex: the principal cut on `inegF p` (`iRcritGNeg`, halves SWAPPED across `redexI`/`redexJ`)
+    have hZdi : ZDerivation (zIneg sᵢ p d0) := hdi ▸ hmem _ hIlt
+    obtain ⟨_, hssi, _, hSeqsi, hd0ant⟩ := zDerivation_zIneg_inv hZdi
+    have hCwff : IsUFormula ℒₒᵣ (cutFormula (zK s r ds)) := hcut ▸ hpUf
+    have hChAI : chainAsucc ds (redexI (zK s r ds)) = (inegF p : V) := by
+      rw [chainAsucc, hdi, fstIdx_zIneg]; exact hssi
+    have htag2 : zTag (znth (zKseq (zK s r ds)) (redexI (zK s r ds))) ≠ 1 := by
+      rw [zKseq_zK, hdi, zTag_zIneg]; simp
+    have hZcrit : ZDerivation (iRKcCrit (zK s r ds)) :=
+      ZDerivation_iRKcCrit_neg_botOrbit hZ hIlt hJlt hIJ hdi hdj hcut hd0ant hCwff
+        (seq_seqAnt_zK hseqant) hSeqsi hIlt_j0 hj0 hbot0 hthread0 hrank0
+    have hregcrit : ZRegular (iRKcCrit (zK s r ds)) := by
+      refine ZRegular_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZRegular_zK_premise hds hreg hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZRegular_zK_premise hds hreg hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inr (zTag_zIneg _ _ _)
+    have hfreshcrit : ZFresh (iRKcCrit (zK s r ds)) := by
+      refine ZFresh_iRKcCrit ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZFresh_zK_premise hds hfresh hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZFresh_zK_premise hds hfresh hIlt
+      · rw [zKseq_zK, hdi]; exact Or.inr (zTag_zIneg _ _ _)
+    have hseqantcrit : ZSeqAnt (iRKcCrit (zK s r ds)) := by
+      refine ZSeqAnt_iRKcCrit ?_ ?_ ?_ ?_ ?_ ?_
+      · rw [zKseq_zK]; intro m hm; exact ZSeqAnt_zK_premise hds hseqant hm
+      · rw [zKseq_zK]; exact hmem _ hIlt
+      · rw [zKseq_zK]; exact ZSeqAnt_zK_premise hds hseqant hIlt
+      · rw [fstIdx_zK]; exact seq_seqAnt_zK hseqant
+      · rw [zKseq_zK]
+        have h := seq_seqAnt_zK_premise hds hseqant hJlt (hmem _ hJlt) (by rw [hdj]; simp)
+        rwa [hdj] at h ⊢
+      · rw [zKseq_zK, hdi]; exact Or.inr (zTag_zIneg _ _ _)
+    have hbI : iRedDescent (critReductNeg (zK s r ds) (redexI (zK s r ds)))
+        (znth ds (redexI (zK s r ds))) := by
+      rw [critReductNeg_redexI (ne_of_lt hIJ), zKseq_zK, hdi, zInegPrem_zIneg]
+      exact iRedDescent_zIneg
+        (isNF_iotil_of_ZDerivation d0 (zDerivation_zIneg_inv (hdi ▸ hmem _ hIlt)).1)
+    have hbJ : iRedDescent (critReductNeg (zK s r ds) (redexJ (zK s r ds)))
+        (znth ds (redexJ (zK s r ds))) := by
+      rw [critReductNeg_redexJ, zKseq_zK, hdj, fstIdx_zAxNeg, hcut]
+      exact iRedDescent_zAx1_zAxNeg_gen hpUf
+    have heqRKc : iRKcCrit (zK s r ds)
+        = zK s (r - 1) (iCritReductSeq
+            (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+              (seqUpdate ds (redexJ (zK s r ds)) (critReductNeg (zK s r ds) (redexJ (zK s r ds)))))
+            (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+              (seqUpdate ds (redexI (zK s r ds)) (critReductNeg (zK s r ds) (redexI (zK s r ds)))))) := by
+      rw [iRKcCrit_eq_neg htag2 (ne_of_lt hIJ)]
+      simp only [iRcritGNeg, iCritReductG, fstIdx_zK, zKrank_zK, zKseq_zK]
+    have hCrk : irk (cutFormula (zK s r ds)) + 1 ≤ idg (zK s r ds) := by
+      have hlt : irk (cutFormula (zK s r ds)) < r :=
+        irk_cutFormula_lt (by rw [zKseq_zK]; exact hmem _ hIlt)
+          (by rw [zKseq_zK, hChAI, hdi]; exact tp_zIneg _ _ _)
+          (by rw [zKseq_zK]; exact hrankI)
+      exact le_trans (succ_le_iff_lt.mpr hlt) (r_le_idg_zK s r ds hds)
+    have ha_otil : icmp (iotil (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+          (seqUpdate ds (redexJ (zK s r ds)) (critReductNeg (zK s r ds) (redexJ (zK s r ds))))))
+          (iotil (zK s r ds)) = 0 := by
+      refine iotil_zK_lt_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) hJlt ?_ ?_ hNF ?_
+      · rw [znth_seqUpdate_self hJlt]; exact hbJ.otil_lt
+      · intro n hn; rw [znth_seqUpdate_of_ne hn]
+      · intro n; rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
+        · rw [znth_seqUpdate_self hJlt]; exact hbJ.nf
+        · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+    have hb_otil : icmp (iotil (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+          (seqUpdate ds (redexI (zK s r ds)) (critReductNeg (zK s r ds) (redexI (zK s r ds))))))
+          (iotil (zK s r ds)) = 0 := by
+      refine iotil_zK_lt_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) hIlt ?_ ?_ hNF ?_
+      · rw [znth_seqUpdate_self hIlt]; exact hbI.otil_lt
+      · intro n hn; rw [znth_seqUpdate_of_ne hn]
+      · intro n; rcases eq_or_ne n (redexI (zK s r ds)) with rfl | hne
+        · rw [znth_seqUpdate_self hIlt]; exact hbI.nf
+        · rw [znth_seqUpdate_of_ne hne]; exact hNF n
+    have ha_idg : idg (zK (seqSetSucc s (cutFormula (zK s r ds))) r
+          (seqUpdate ds (redexJ (zK s r ds)) (critReductNeg (zK s r ds) (redexJ (zK s r ds)))))
+          ≤ idg (zK s r ds) := by
+      refine idg_zK_le_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) (fun n => ?_)
+      rcases eq_or_ne n (redexJ (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hJlt]; exact hbJ.dg_le
+      · exact le_of_eq (congrArg idg (znth_seqUpdate_of_ne hne))
+    have hb_idg : idg (zK (seqAddAnt (cutFormula (zK s r ds)) s) r
+          (seqUpdate ds (redexI (zK s r ds)) (critReductNeg (zK s r ds) (redexI (zK s r ds)))))
+          ≤ idg (zK s r ds) := by
+      refine idg_zK_le_replace hds (seqUpdate_seq _ _ _) (seqUpdate_lh _ _ _) (fun n => ?_)
+      rcases eq_or_ne n (redexI (zK s r ds)) with rfl | hne
+      · rw [znth_seqUpdate_self hIlt]; exact hbI.dg_le
+      · exact le_of_eq (congrArg idg (znth_seqUpdate_of_ne hne))
+    exact certFlatten_of_critHalves (C := cutFormula (zK s r ds))
+      (heqRKc ▸ hZcrit) (heqRKc ▸ hregcrit) (heqRKc ▸ hfreshcrit) (heqRKc ▸ hseqantcrit)
+      (fstIdx_zK _ _ _) (fstIdx_zK _ _ _) hsucc (seq_seqAnt_zK hseqant) hCwff hCrk
+      ha_otil hb_otil ha_idg hb_idg
 
 /-- **no-redex leaf of the §14.254 chain reduction (`Γ→⊥`, recurse via the IH) — NAMED sub-`sorry`.** No
 redex pair below the ⊥-exit `j0`; by `majorPrem_tag_mem` the major premise's tag ∈ {3,4,5,6}. tags 3/4
