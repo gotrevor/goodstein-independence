@@ -3672,37 +3672,16 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
         (le_of_lt (lt_of_lt_of_le hi' hi)) heq.symm with hΓ | ⟨m, hmn, hCm, h0, h7⟩
       · exact Or.inl hΓ
       · exact Or.inr ⟨m, lt_of_le_of_lt hmn hi', hCm, h0, h7⟩
-  -- §14.254b zAxNeg PRODUCER close: thread BOTH `¬q`,`q` to Γ ⟹ `axNegCloseGen`, else residual.
-  have closeZAxNeg : ∀ m', m' ≤ j0 → m' < lh ds → zTag (znth ds m') = 6 → GenReductCert (zK s r ds) := by
-    intro m' hm'j0 hm'lt h6
-    rcases zDerivation_iff.mp (hmem m' hm'lt) with
-      ⟨s'', h'', _⟩ | ⟨s'', a'', p'', d0'', h'', _, _⟩ | ⟨s'', p'', d0'', h'', _, _⟩ |
-      ⟨s'', at''', p'', d0'', d1'', h'', _, _⟩ | ⟨s'', r'', ds'', h'', _, _, _⟩ |
-      ⟨s'', p'', k'', h'', _, _⟩ | ⟨s'', q, h'', hq, hqn, hqp⟩ | ⟨s'', C'', h'', _⟩ | ⟨s'', h'', _⟩
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · have hXq : iotil (znth ds m') = oAtomLk (inegF q) := by rw [h'', iotil_zAxNeg]
-      have hin_neg : inAnt (inegF q : V) (chainAnt ds m') := by
-        simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqn
-      have hin_q : inAnt q (chainAnt ds m') := by
-        simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqp
-      rcases collapse m' hm'j0 (inegF q) hin_neg with hΓ_neg | ⟨mq, hmqjs, hCmq, hmq0, hmq7⟩
-      · rcases collapse m' hm'j0 q hin_q with hΓ_q | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
-        · exact axNegCloseGen q m' hm'lt hXq hq hΓ_neg hΓ_q
-        · -- `q` threads to a non-leaf producer `mp`; Rep (3,4) → reduce, else residual. (lap-164)
-          by_cases h34 : zTag (znth ds mp) = 3 ∨ zTag (znth ds mp) = 4
-          · exact repProducerClose mp (le_of_lt (lt_of_lt_of_le hmpjs hm'j0)) (lt_trans hmpjs hm'lt) h34
-          · exact residual
-      · -- `inegF q` threads to a non-leaf producer `mq`; Rep (3,4) → reduce, else residual. (lap-164)
-        by_cases h34 : zTag (znth ds mq) = 3 ∨ zTag (znth ds mq) = 4
-        · exact repProducerClose mq (le_of_lt (lt_of_lt_of_le hmqjs hm'j0)) (lt_trans hmqjs hm'lt) h34
-        · exact residual
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
+  -- §14.254b — the unified NON-Rep producer closer (lap 165), instantiated with the anySucc closers and the
+  -- residual `residual` (the R1/R2 escapes, VACUOUS at `Γ = ∅`). THE keystone least-number recursion.
+  have cnrp : ∀ m, m ≤ j0 → m < lh ds →
+      (zTag (znth ds m) = 5 ∨ zTag (znth ds m) = 6 ∨ zTag (znth ds m) = 8) →
+      GenReductCert (zK s r ds) :=
+    fun m hmj0 hmlt htagm => closeNonRepProducer hmem hj0 hnolow hthread0 repProducerClose exFalsoClose
+      axNegCloseGen collapse residual hmj0 hmlt htagm
+  -- §14.254b zAxNeg PRODUCER close: thin wrapper onto `cnrp` (the unified closer subsumes the per-tag logic).
+  have closeZAxNeg : ∀ m', m' ≤ j0 → m' < lh ds → zTag (znth ds m') = 6 → GenReductCert (zK s r ds) :=
+    fun m' hm'j0 hm'lt h6 => cnrp m' hm'j0 hm'lt (Or.inr (Or.inl h6))
   -- §14.254b producer dispatch (succedent-agnostic): {3,4} → repProducerClose; 5 → CLIMB; 6 → closeZAxNeg.
   -- The producer `m` is supplied by `collapse` (NON-LEAF: `zTag ≠ 0,7`) inside the `else` branch of a
   -- `by_cases π₁(tp) = 0` (NON-right-symbol). tags 0/1/2/7 are PHANTOM (lap-164 narrowing): leaf (0/7)
@@ -3719,28 +3698,13 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
     · exact absurd (show π₁ (tp (znth ds m)) = 0 by rw [h'', tp_zIneg, pi₁_isymR]) hmneR  -- tag 2: PHANTOM (R-intro)
     · exact repProducerClose m hmj0 hmlt (Or.inl (by rw [h'']; simp))
     · exact repProducerClose m hmj0 hmlt (Or.inr (by rw [h'']; simp))
-    · have hjLm : tp (znth ds m) = isymLk k'' (^∀ p'' : V) := by rw [h'', tp_zAxAll]
-      have hin' : inAnt (^∀ p'' : V) (chainAnt ds m) := by
-        have hinv := zDerivation_zAxAll_inv (h'' ▸ hmem m hmlt)
-        simpa only [chainAnt, h'', fstIdx_zAxAll] using hinv.2.1
-      rcases climb_to_rep_producer hmem hthread0 hj0 hnolow hmj0 hjLm ⟨p'', rfl⟩ hin' with
-        ⟨_, _, _⟩ | ⟨m', hm'jm, hm'lt, hm'tag⟩
-      · exact residual
-      · have hm'j0 : m' ≤ j0 := le_of_lt (lt_of_lt_of_le hm'jm hmj0)
-        rcases hm'tag with h3 | h4 | h6 | h8
-        · exact repProducerClose m' hm'j0 hm'lt (Or.inl h3)
-        · exact repProducerClose m' hm'j0 hm'lt (Or.inr h4)
-        · exact closeZAxNeg m' hm'j0 hm'lt h6
-        · exact residual
-    · exact closeZAxNeg m hmj0 hmlt (by rw [h'']; simp)
+    · -- tag 5 (zAxAll): NON-Rep producer → the unified closer (lap 165 keystone recursion).
+      exact cnrp m hmj0 hmlt (Or.inl (by rw [h'']; simp))
+    · -- tag 6 (zAxNeg): NON-Rep producer → the unified closer.
+      exact cnrp m hmj0 hmlt (Or.inr (Or.inl (by rw [h'']; simp)))
     · exact absurd (show zTag (znth ds m) = 7 by rw [h'']; simp) hmne7          -- tag 7: PHANTOM (non-leaf)
-    · -- tag 8 (zAxBot): ex-falso producer. `⊥ ∈ Γ_m` threads (`collapse`) to `⊥ ∈ Γ` → `exFalsoClose`
-      -- (lap-163, AVAILABLE) or a NON-LEAF earlier ⊥-exit (the narrowed residual). (lap-164)
-      have hbot : inAnt (^⊥ : V) (chainAnt ds m) := by
-        simpa only [chainAnt, h'', fstIdx_zAxBot] using zDerivation_zAxBot_inv (h'' ▸ hmem m hmlt)
-      rcases collapse m hmj0 (^⊥) hbot with hΓ | _
-      · exact exFalsoClose hΓ
-      · exact residual
+    · -- tag 8 (zAxBot): NON-Rep producer → the unified closer.
+      exact cnrp m hmj0 hmlt (Or.inr (Or.inr (by rw [h'']; simp)))
   -- dispatch on the least-exit major premise `jstar`
   rcases zDerivation_iff.mp hmemZ with
     ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
@@ -3785,26 +3749,8 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
     · by_cases h0 : π₁ (tp (znth ds m)) = 0
       · exact (rightSym_producer_redex (hmem m (lt_trans hmjs hjlt)) hjL hjlt hjle hmjs hCm h0 hnolow).elim
       · exact tryProducerClose m (le_of_lt (lt_of_lt_of_le hmjs hjle)) (lt_trans hmjs hjlt) hm0 hm7 h0
-  · -- tag 6 (zAxNeg): dual L-axiom. Thread BOTH `inegF p'`,`p'`: both in Γ → `axNegCloseGen` (any
-    -- succedent); else residual / tryProducerClose.
-    have hXval : iotil (znth ds jstar) = oAtomLk (inegF p') := by rw [h, iotil_zAxNeg]
-    have hin_negp : inAnt (inegF p' : V) (chainAnt ds jstar) := by
-      simpa only [chainAnt, h, fstIdx_zAxNeg] using hin6
-    have hin_p : inAnt p' (chainAnt ds jstar) := by
-      simpa only [chainAnt, h, fstIdx_zAxNeg] using hin6_2
-    have hjLneg : tp (znth ds jstar) = isymLk 0 (inegF p') := by rw [h, tp_zAxNeg]
-    rcases collapse jstar hjle (inegF p') hin_negp with hΓ_neg | ⟨mn, hmnjs, hCmn, hmn0, hmn7⟩
-    · rcases collapse jstar hjle p' hin_p with hΓ_p | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
-      · exact axNegCloseGen p' jstar hjlt hXval hp6 hΓ_neg hΓ_p
-      · -- `inegF p' ∈ Γ`; `p'` threads to a NON-LEAF producer `mp`. If `mp` is a `Rep` (3,4) → reduce it
-        -- (`repProducerClose`); else (axiom/R-intro producer of `p'`) → residual. (lap-164)
-        by_cases hmp34 : zTag (znth ds mp) = 3 ∨ zTag (znth ds mp) = 4
-        · exact repProducerClose mp (le_of_lt (lt_of_lt_of_le hmpjs hjle)) (lt_trans hmpjs hjlt) hmp34
-        · exact residual
-    · by_cases h0 : π₁ (tp (znth ds mn)) = 0
-      · exact (rightSym_producer_redex (hmem mn (lt_trans hmnjs hjlt)) hjLneg hjlt hjle hmnjs hCmn h0
-          hnolow).elim
-      · exact tryProducerClose mn (le_of_lt (lt_of_lt_of_le hmnjs hjle)) (lt_trans hmnjs hjlt) hmn0 hmn7 h0
+  · -- tag 6 (zAxNeg): the major IS a NON-Rep producer → the unified closer (lap 165 keystone recursion).
+    exact cnrp jstar hjle hjlt (Or.inr (Or.inl (by rw [h]; simp)))
   · -- tag 7 (zAx1): leaf, like tag 0.
     have hin : inAnt (chainAsucc ds jstar) (chainAnt ds jstar) := by
       have hax := zDerivation_zAx1_inv (h ▸ hmemZ)
@@ -3998,40 +3944,16 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
             (by simp only [oAtomLk, ocExp_ocOadd]) (by simp only [oAtomLk]; exact (ocOadd_pos _ _ _).ne')
             hXq hNF,
        by rw [iotil_zAxNeg, ← hXq]; exact hNF jw⟩⟩
-  -- §14.254b zAxNeg PRODUCER close (factored): a `zAxNeg s'' q` producer (tag 6) is a §5 ¬-axiom
-  -- `Γₘ→anything` from `¬q,q ∈ Γₘ`; threading BOTH `¬q` and `q` (`collapse` at `m'`) to `Γ` ⟹ `zAxNeg s q`
-  -- derives `Γ→⊥` directly (`axNegCloseGen`). Reused by `tryProducerClose`'s tag-6 case AND the tag-5
-  -- climb's zAxNeg landing.
-  have closeZAxNeg : ∀ m', m' ≤ j0 → m' < lh ds → zTag (znth ds m') = 6 → GenReductCert (zK s r ds) := by
-    intro m' hm'j0 hm'lt h6
-    rcases zDerivation_iff.mp (hmem m' hm'lt) with
-      ⟨s'', h'', _⟩ | ⟨s'', a'', p'', d0'', h'', _, _⟩ | ⟨s'', p'', d0'', h'', _, _⟩ |
-      ⟨s'', at''', p'', d0'', d1'', h'', _, _⟩ | ⟨s'', r'', ds'', h'', _, _, _⟩ |
-      ⟨s'', p'', k'', h'', _, _⟩ | ⟨s'', q, h'', hq, hqn, hqp⟩ | ⟨s'', C'', h'', _⟩ | ⟨s'', h'', _⟩
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
-    · have hXq : iotil (znth ds m') = oAtomLk (inegF q) := by rw [h'', iotil_zAxNeg]
-      have hin_neg : inAnt (inegF q : V) (chainAnt ds m') := by
-        simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqn
-      have hin_q : inAnt q (chainAnt ds m') := by
-        simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqp
-      rcases collapse m' hm'j0 (inegF q) hin_neg with hΓ_neg | ⟨mq, hmqjs, hCmq, hmq0, hmq7⟩
-      · rcases collapse m' hm'j0 q hin_q with hΓ_q | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
-        · exact axNegCloseGen q m' hm'lt hXq hq hΓ_neg hΓ_q
-        · -- `q` threads to a non-leaf producer `mp`; Rep (3,4) → reduce, else residual. (lap-164)
-          by_cases h34 : zTag (znth ds mp) = 3 ∨ zTag (znth ds mp) = 4
-          · exact repProducerClose mp (le_of_lt (lt_of_lt_of_le hmpjs hm'j0)) (lt_trans hmpjs hm'lt) h34
-          · exact axMajorResidual
-      · -- `inegF q` threads to a non-leaf producer `mq`; Rep (3,4) → reduce, else residual. (lap-164)
-        by_cases h34 : zTag (znth ds mq) = 3 ∨ zTag (znth ds mq) = 4
-        · exact repProducerClose mq (le_of_lt (lt_of_lt_of_le hmqjs hm'j0)) (lt_trans hmqjs hm'lt) h34
-        · exact axMajorResidual
-    · rw [h''] at h6; simp at h6
-    · rw [h''] at h6; simp at h6
+  -- §14.254b — the unified NON-Rep producer closer (lap 165), instantiated with the local closers and the
+  -- residual `axMajorResidual` (the R1/R2 escapes, VACUOUS at `Γ = ∅`). THE keystone least-number recursion.
+  have cnrp : ∀ m, m ≤ j0 → m < lh ds →
+      (zTag (znth ds m) = 5 ∨ zTag (znth ds m) = 6 ∨ zTag (znth ds m) = 8) →
+      GenReductCert (zK s r ds) :=
+    fun m hmj0 hmlt htagm => closeNonRepProducer hmem hj0 hnolow hthread0 repProducerClose leafClose
+      axNegCloseGen collapse axMajorResidual hmj0 hmlt htagm
+  -- §14.254b zAxNeg PRODUCER close: thin wrapper onto `cnrp` (the unified closer subsumes the per-tag logic).
+  have closeZAxNeg : ∀ m', m' ≤ j0 → m' < lh ds → zTag (znth ds m') = 6 → GenReductCert (zK s r ds) :=
+    fun m' hm'j0 hm'lt h6 => cnrp m' hm'j0 hm'lt (Or.inr (Or.inl h6))
   -- §14.254b producer dispatch: a NON-LEAF producer `m` concluding the cut formula is reduced by
   -- CONSTRUCTOR. tag 6 (zAxNeg) → `closeZAxNeg`. tag 5 (zAxAll) → the rank-CLIMB
   -- (`climb_to_rep_producer`): its active `^∀ p''` threads UP one rank, so it can only bottom out at a
@@ -4057,30 +3979,13 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
       exact repProducerClose m hmj0 hmlt (Or.inl (by rw [h'']; simp))
     · -- tag 4 (zK): {3,4} PRODUCER — close via the general recursion (lap 159, WIRED)
       exact repProducerClose m hmj0 hmlt (Or.inr (by rw [h'']; simp))
-    · -- tag 5 (zAxAll s'' p'' k''): CLIMB its active `^∀ p''`.
-      have hjLm : tp (znth ds m) = isymLk k'' (^∀ p'' : V) := by rw [h'', tp_zAxAll]
-      have hin' : inAnt (^∀ p'' : V) (chainAnt ds m) := by
-        have hinv := zDerivation_zAxAll_inv (h'' ▸ hmem m hmlt)
-        simpa only [chainAnt, h'', fstIdx_zAxAll] using hinv.2.1
-      rcases climb_to_rep_producer hmem hthread0 hj0 hnolow hmj0 hjLm ⟨p'', rfl⟩ hin' with
-        ⟨_, _, _⟩ | ⟨m', hm'jm, hm'lt, hm'tag⟩
-      · exact axMajorResidual                                -- climb escape: `^∀`-formula in `Γ` (general-`C`)
-      · have hm'j0 : m' ≤ j0 := le_of_lt (lt_of_lt_of_le hm'jm hmj0)
-        rcases hm'tag with h3 | h4 | h6 | h8
-        · exact repProducerClose m' hm'j0 hm'lt (Or.inl h3) -- climb → {3,4} producer (WIRED)
-        · exact repProducerClose m' hm'j0 hm'lt (Or.inr h4) -- climb → {3,4} producer (WIRED)
-        · exact closeZAxNeg m' hm'j0 hm'lt h6
-        · exact axMajorResidual                              -- climb → tag-8 ex-falso producer
-    · -- tag 6 (zAxNeg s'' q): close via the factored helper.
-      exact closeZAxNeg m hmj0 hmlt (by rw [h'']; simp)
+    · -- tag 5 (zAxAll): NON-Rep producer → the unified closer (lap 165 keystone recursion).
+      exact cnrp m hmj0 hmlt (Or.inl (by rw [h'']; simp))
+    · -- tag 6 (zAxNeg): NON-Rep producer → the unified closer.
+      exact cnrp m hmj0 hmlt (Or.inr (Or.inl (by rw [h'']; simp)))
     · exact absurd (show zTag (znth ds m) = 7 by rw [h'']; simp) hmne7          -- tag 7: PHANTOM (non-leaf)
-    · -- tag 8 (zAxBot): ex-falso producer. `⊥ ∈ Γ_m` threads (`collapse`) to `⊥ ∈ Γ` → `leafClose` (lap-163
-      -- ex-falso, AVAILABLE) or a NON-LEAF earlier ⊥-exit (the narrowed residual). (lap-164)
-      have hbot : inAnt (^⊥ : V) (chainAnt ds m) := by
-        simpa only [chainAnt, h'', fstIdx_zAxBot] using zDerivation_zAxBot_inv (h'' ▸ hmem m hmlt)
-      rcases collapse m hmj0 (^⊥) hbot with hΓ | _
-      · exact leafClose hΓ
-      · exact axMajorResidual
+    · -- tag 8 (zAxBot): NON-Rep producer → the unified closer.
+      exact cnrp m hmj0 hmlt (Or.inr (Or.inr (by rw [h'']; simp)))
   rcases zDerivation_iff.mp hmemZ with
     ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
@@ -4157,48 +4062,9 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
     · by_cases h0 : π₁ (tp (znth ds m)) = 0
       · exact (rightSym_producer_redex (hmem m (lt_trans hmjs hjlt)) hjL hjlt hjle hmjs hCm h0 hnolow).elim
       · exact tryProducerClose m (le_of_lt (lt_of_lt_of_le hmjs hjle)) (lt_trans hmjs hjlt) hm0 hm7 h0
-  · -- tag 6 (zAxNeg): dual L-axiom `Ax^0_{¬p'}` major (`red`-FIXPOINT). `zDerivation_zAxNeg_inv` gives
-    -- BOTH `inegF p' ∈ Γ'` and `p' ∈ Γ'` (no `zAxAllSuccWff`, so no `p=⊥` collapse). Thread BOTH via
-    -- `hthread0`: SUB-CASE (a) `inegF p', p' ∈ Γ` → fresh `zAxNeg s p'` derives `Γ→⊥` directly (the §5
-    -- ¬-axiom: `¬p',p' ∈ Γ ⟹ Γ→anything`), õ-dropping; otherwise → `axMajorResidual` cut-partner.
-    have hXval : iotil (znth ds jstar) = oAtomLk (inegF p') := by rw [h, iotil_zAxNeg]
-    have hin_negp : inAnt (inegF p' : V) (chainAnt ds jstar) := by
-      simpa only [chainAnt, h, fstIdx_zAxNeg] using hin6
-    have hin_p : inAnt p' (chainAnt ds jstar) := by
-      simpa only [chainAnt, h, fstIdx_zAxNeg] using hin6_2
-    -- SUB-CASE (a) reduct, parametrized on BOTH `inegF p' ∈ Γ` and `p' ∈ Γ`: the §5 ¬-axiom `zAxNeg s p'`
-    -- deriving `Γ→⊥` directly (`¬p',p' ∈ Γ ⟹ Γ→anything`), õ-dropping (`iotil_zAxNeg`, finite head).
-    have axNegClose : inAnt (inegF p' : V) (seqAnt s) → inAnt p' (seqAnt s) →
-        GenReductCert (zK s r ds) := fun hΓ_neg hΓ_p =>
-      Or.inl ⟨zAxNeg s p',
-        zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-          ⟨s, p', rfl, hp6, hΓ_neg, hΓ_p⟩))))))),
-        zReg_zAxNeg s p', zFresh_zAxNeg s p',
-        (zSeqAnt_zAxNeg s p').trans (seqAntSeqFlag_zK_of_ZSeqAnt hseqant),
-        by rw [fstIdx_zAxNeg, fstIdx_zK],
-        ⟨by rw [idg_zAxNeg]; exact zero_le,
-         by rw [iotil_zAxNeg, iotil_zK s r ds hds]
-            exact finHead_iotil_lt_iseqNaddIdg hjlt
-              (by simp only [oAtomLk, ocExp_ocOadd]) (by simp only [oAtomLk]; exact (ocOadd_pos _ _ _).ne')
-              hXval hNF,
-         by rw [iotil_zAxNeg, ← hXval]; exact hNF jstar⟩⟩
-    -- Collapse BOTH `inegF p'` and `p'` to `Γ` (succedent-threading); both in `Γ` → `axNegClose`, else the
-    -- narrowed NON-LEAF residual. For the `inegF p'` half, `jstar` is the left ¬-axiom on `inegF p'`, so a
-    -- RIGHT-symbol producer is killed by `hnolow` (→ `Rep`-node residual); the `p'` half has no left-axiom
-    -- on `p'` at `jstar`, so its non-leaf producer stays a full residual.
-    have hjLneg : tp (znth ds jstar) = isymLk 0 (inegF p') := by rw [h, tp_zAxNeg]
-    rcases collapse jstar hjle (inegF p') hin_negp with hΓ_neg | ⟨mn, hmnjs, hCmn, hmn0, hmn7⟩
-    · rcases collapse jstar hjle p' hin_p with hΓ_p | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
-      · exact axNegClose hΓ_neg hΓ_p
-      · -- `inegF p' ∈ Γ`; `p'` threads to a NON-LEAF producer `mp`. If `mp` is a `Rep` (3,4) → reduce it
-        -- (`repProducerClose`); else (axiom/R-intro producer of `p'`) → residual. (lap-164)
-        by_cases hmp34 : zTag (znth ds mp) = 3 ∨ zTag (znth ds mp) = 4
-        · exact repProducerClose mp (le_of_lt (lt_of_lt_of_le hmpjs hjle)) (lt_trans hmpjs hjlt) hmp34
-        · exact axMajorResidual
-    · by_cases h0 : π₁ (tp (znth ds mn)) = 0
-      · exact (rightSym_producer_redex (hmem mn (lt_trans hmnjs hjlt)) hjLneg hjlt hjle hmnjs hCmn h0
-          hnolow).elim
-      · exact tryProducerClose mn (le_of_lt (lt_of_lt_of_le hmnjs hjle)) (lt_trans hmnjs hjlt) hmn0 hmn7 h0
+  · -- tag 6 (zAxNeg): the major IS a NON-Rep producer → the unified closer (lap 165 keystone recursion).
+    -- (The least `{5,6,8}`-producer the closer selects subsumes this `jstar` dispatch with `n`-leastness.)
+    exact cnrp jstar hjle hjlt (Or.inr (Or.inl (by rw [h]; simp)))
   · -- tag 7 (zAx1): a leaf (§5 logical axiom, like zAtom); `⊥ ∈ Γ`. Same trivial-axiom collapse. PROVEN.
     refine leafClose ?_
     have hin : inAnt (^⊥ : V) (chainAnt ds jstar) := by
