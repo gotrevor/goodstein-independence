@@ -14,63 +14,49 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
-**Set: lap-152 (DEEP REFLECTION). Supersedes lap-149. Direction KEPT (existence-form pivot off `red` + the
-lap-150 code-recursion frame). lap-149's mandate is DONE — tag-3 freshFlag DROPPED (lap 149); laps 150-151
-landed the `genReduct_botSucc` code-recursion (Σ₁ structural induction), REFUTED the false single-premise
-`seqUpdate` splice in-kernel, PROVED the FLATTEN engine `descent_step_K_spliceHalves`, and DROPPED the false
-`descent_step_K_splice` via the `GenReductCert` (replace|flatten). The crux is now correctly isolated to the
-GENERAL `Γ→⊥` reduction `genReduct_botSucc`, whose only open content is TWO master-key chain leaves.**
+**Set: lap-155 (FRESH-MIND REVIEW). Supersedes lap-152. Direction KEPT (existence-form pivot off `red` +
+code-recursion frame `genReduct_botSucc`). lap-152's mandate is DONE — `genReduct_chain_hasRedex` DROPPED
+(lap 153), `genReduct_chain_noRedex` 6/8 branches PROVEN (lap 154). The whole termination crux is now the ONE
+open leaf `axMajorClose` (tag-5/6 L-axiom cut-partner, `Crux2Blueprint:3418`). COURSE-CORRECTION: the lap-154
+handoff frames this leaf's sub-case (b) as the lap-136 general-succedent reduction (the repo's hardest target);
+this review judges that PESSIMISTIC + PREMATURE and mandates the cheaper SUCCEDENT-THREADING COLLAPSE first.
+Re-verified axiom-clean (lap 155): headline `peano_not_proves_goodstein` = `[propext, sorryAx, choice,
+Quot.sound]` (0 math axioms), `goodsteinSentence_faithful` + `peano_not_proves_consistency` clean — no drift.**
 
-- **THE objective (only this):** **M1b-term** = close the live `false_of_ZDerivesEmpty` termination path.
-  RE-VERIFIED axiom-clean (lap 152): headline `peano_not_proves_goodstein`, `goodsteinSentence_faithful`,
-  `peano_not_proves_consistency` all axiom-clean / `[propext, sorryAx, choice, Quot.sound]` — ZERO custom
-  math axioms, no drift. The whole crux-2 chain is reduced to **four disclosed live `sorryAx` leaves**, none
-  needing `red`, none generational — and only TWO are independent:
-  - **(MASTER KEY) `genReduct_chain_hasRedex` `Crux2Blueprint:2989`** — the chain's own §14.253 principal
-    cut, returned as the FLATTEN `GenReductCert` (`Or.inr`). DESCENT IS FREE (`iord_descent_iRKcCrit_corr_of_redex`/`_neg_of_redex`); the halves are `iRKcCrit`'s `iCritReductSeq` components.
-  - **(MASTER KEY) `genReduct_chain_noRedex` `Crux2Blueprint:3013`** — the genuine §14.254 recursion: reduce
-    the major (tags 3/4) / Rep cut-partner (tags 5/6) by the per-premise **IH** (now hands back a
-    `GenReductCert`), re-package as the parent's cert.
-  - `descent_step_K_noncrit_axMajor` `:3226` (outer tag-5/6) and gDef `exists_sigma1_descending_step` `:3349`
-    are NOT independent work: axMajor is the Γ=∅ special case of `genReduct_chain_noRedex`'s cut-partner
-    branch (it falls out once the master keys + cut-partner identification land), and gDef needs the
-    *constructive* reduct the genReduct cert already supplies. **Do NOT attack either standalone.**
-- **MANDATED next move (lap-151's teed-up DROP, confirmed by this reflection): close `genReduct_chain_hasRedex`
-  via the zSeqAnt tag-4 `Seq (seqAnt s)` FOLD.** Soundness of the principal-cut halves (`ZDerivation_iRKcCrit_all`/`_neg_botOrbit` + `ZRegular/ZFresh/ZSeqAnt_iRKcCrit`) needs `Seq (seqAnt s)`, which for a
-  tag-4 CHAIN is NOT derivable from `ZSeqAnt` (the `zSeqAntNext` tag-4 branch flags `0`, `Zsubst:2003`). FIX =
-  change that branch from `if zTag d = 4 then 0 else seqAntSeqFlag (fstIdx d)` to **always**
-  `seqAntSeqFlag (fstIdx d)` — the EXACT shape of the proven lap-149 freshFlag fold / lap-146 zIndWff fold
-  (both succeeded). Ripple (definability-dominated): (a) `zSeqAntNext` body `Zsubst:2003`; (b) `zSeqAntNextDef`
-  σ-clause :2012 (drop the `t=4 ∧ fl=0` disjunct → always `fstIdx`+`seqAntSeqFlag`); (c) `zSeqAntNext_defined`
-  simp :2021-2023; (d) `zSeqAnt_zK` :2164 (now carries the head flag) + `zSeqAnt_zK_premise_zero`; (e) the
-  ~6 `ZSeqAnt_zK_*`/`_iRKcCrit` + `_of_seqInsert` + orbit-build sites that read the old tag-4=0 clause. Then
-  `Seq (seqAnt s)` falls out of `hseqant` with NO threading, the halves' soundness closes, and
-  `genReduct_chain_hasRedex` returns the FLATTEN cert sorry-free.
-- **THEN — `genReduct_chain_noRedex` (the genuine recursion).** With the cert machinery validated end-to-end
-  by hasRedex, prove the §14.254 recurse: `majorPrem_tag_mem` ⟹ major tag ∈{3,4,5,6}; reduce major (3/4) or
-  identify+reduce the Rep cut-partner (5/6, via `majorPrem_zAxAll_cutPartner`/`_zAxNeg_cutPartner` — CHECK
-  these exist/are sorry-free first) by the IH `GenReductCert`, then re-base the cert to the parent end-sequent.
-  Closing both master keys makes `genReduct_botSucc` fully proven ⟹ the outer no-redex path (repMajor already
-  sorry-free; axMajor mechanical) closes AND gDef gets its constructive reduct.
-- **Success metric:** `genReduct_chain_hasRedex` sorry DROPS (a live-path src sorry, the operator's bar). NOT:
-  banking support lemmas without the drop; relocating dead `red`-machinery for count-management; closing
-  axMajor or gDef standalone (they are downstream).
-- **FORBIDDEN:** witnessing any descent branch with `red`; the construction by `iord`-recursion
+- **THE objective (only this):** close `axMajorClose` (`Crux2Blueprint:3418`) — the LAST open content of
+  `genReduct_chain_noRedex` ⟹ of `genReduct_botSucc` ⟹ of the M1b-term termination crux `false_of_ZDerivesEmpty`.
+- **MANDATED move — the SUCCEDENT-THREADING COLLAPSE, NOT the lap-136 general-succedent reduction.**
+  Kernel-grounded this review: the tag-5 major `zAxAll s' p' k'` has `p'=⊥`, so the cut formula is `^∀⊥`; its
+  active formula sits in the major's antecedent, and the chain's `hthread` gives **`^∀⊥ ∈ Γ` (sub-case a)** ∨
+  **cut-partner `i'<jstar` concluding `^∀⊥` (sub-case b)** — exactly as `majorPrem_zAxAll_cutPartner` already
+  splits, but now the (a) disjunct is LIVE at `Γ≠∅` (it dies only at `seqAnt s=∅`). Under `hnolow` (no redex
+  below j0) a **direct R-intro `zIall` of `^∀⊥` below j0 is IMPOSSIBLE** — it would form an `isRedexPair` with
+  jstar (VERIFIED: `isRedexPair` (`InternalZ:4820`) fires on `(zIall ^∀p, zAxAll ^∀p)`). So `^∀⊥` is never
+  *created* below j0; it only threads from Γ. Decompose `axMajorClose` (raise the src sorry count = progress);
+  full attack-tree in `PENDING_WORK.md` (lap-155 top). The teed-up first DROP = the 2 reusable ordinal lemmas
+  `w < ω^w` + summand-≤-fold, which close sub-case (a) (fresh `zAxAll s ⊥ k'` derives `Γ→⊥`, õ-dropping).
+- **Success metric:** a `src` sorry drops on this path. The ordinal-lemmas + sub-case (a) is the teed-up DROP;
+  closing all of `axMajorClose` (the collapse total) drops the LAST `genReduct_chain_noRedex` leaf ⟹
+  `genReduct_botSucc` PROVEN ⟹ outer `axMajor` + gDef collapse. NOT: building the lap-136 reduct before the
+  collapse is tested; banking the ordinal lemmas without wiring them into sub-case (a).
+- **FORBIDDEN:** building the lap-136 general-succedent / general-induction reduct (`⟨d0,d1[a:=0..k-1]⟩`,
+  `k=⟦t⟧`) as the PRIMARY attack BEFORE the succedent-threading collapse is tested to exhaustion — it is most
+  likely OBVIATED, and at worst returns as a NARROWED `Γ→^∀⊥` target (a `zInd` concluding a ∀-formula), never
+  "arbitrary succedent C"; witnessing any descent branch with `red`; the construction by `iord`-recursion
   (PRWO/Gödel-barred — CODE induction via `zDerivation_sigma_induction` ONLY); `redLeast`/μ-min for gDef
-  (refuted lap-139); re-introducing the single-premise `seqUpdate`+combined-`iord` splice
-  (`descent_step_K_splice`, refuted in-kernel lap 151 + judge-convergent — the faithful object is the FLATTEN
-  `seqInsert` halves); attacking `descent_step_K_noncrit_axMajor` :3226 or gDef :3349 as STANDALONE leaves
-  (re-derives the master-key combinatorics twice — they are corollaries); the zSeqAnt fold as a *goal* (it is
-  mandated here ONLY because it directly unblocks `genReduct_chain_hasRedex`); the off-path dead `red`-soundness
+  (refuted lap-139); the single-premise `seqUpdate`+combined-`iord` splice (`descent_step_K_splice`, refuted
+  in-kernel lap 151); attacking `descent_step_K_noncrit_axMajor` :3507 or gDef :3630 STANDALONE (they are the
+  Γ=∅ special case / constructive-reduct consumer of the master keys); the off-path dead `red`-soundness
   sorries {:82,:1257,:1367,:1563,:1653,:1765,:1868} AS STATED; M2 / M4 wiring.
-- **Why:** `genReduct_chain_hasRedex` is the LAST teed-up tractable DROP and closing it validates the entire
-  `GenReductCert` FLATTEN cert machinery end-to-end (exactly as `descent_step_Ind` validated the pivot at lap
-  146) before the bigger `genReduct_chain_noRedex` recursion investment. The two master keys SUBSUME the outer
-  no-redex path and feed gDef — closing them collapses three of the four open leaves, the highest-leverage
-  move available. (Altitude note: M2 — the Foundation→Z bridge — is ~0% built and crux-entangled; "only the
-  crux is left" must NOT read as "almost done." M1b-term first per hardest-first, but M2 is the next horizon.)
+- **Why:** the handoff's "(b) = lap-136" reading would commit grind laps to the repo's hardest target (the
+  general induction reduct, kernel-refuted at face value lap-136) when the structural facts (`hnolow` forbids
+  *creating* `^∀⊥`; the existing `chainAsucc_threaded_of_leaf`; the verified redex-pair check) most likely
+  COLLAPSE tag-5/6 to the tractable sub-case (a). Test the collapse first — it is the lap-101/lap-132-style
+  decisive spike. ALTITUDE CAUTION (still binding): M2 — the Foundation→Z bridge — is ~0% built and
+  crux-entangled; "only the crux is left" must NOT read as "almost done."
 
 ### Directive history (newest first; append one line per altitude lap — never delete)
+- **lap-155** (FRESH-MIND REVIEW): direction KEPT (existence-form pivot off `red` + `genReduct_botSucc` code-recursion). lap-152's mandate DONE — `genReduct_chain_hasRedex` DROPPED (lap 153) + `genReduct_chain_noRedex` 6/8 branches PROVEN (lap 154). Re-verified axiom-clean (headline `[propext,sorryAx,choice,Quot.sound]` 0 math axioms; faithful/consistency clean; statement no drift). The whole termination crux = the ONE open leaf `axMajorClose` (tag-5/6 L-axiom cut-partner, `Crux2Blueprint:3418`). **COURSE-CORRECTION:** the lap-154 handoff frames its sub-case (b) as the lap-136 general-succedent reduction (the repo's hardest target, kernel-refuted at face value); the review judges that PESSIMISTIC + PREMATURE. Kernel-grounded insight: cut formula is `^∀⊥` (`p=⊥`); under `hnolow` a direct R-intro `zIall` of `^∀⊥` below j0 is IMPOSSIBLE (would `isRedexPair` with jstar — VERIFIED `isRedexPair:4820` fires on `(zIall ^∀p, zAxAll ^∀p)`), so `^∀⊥` is never CREATED, only threaded from Γ. MANDATE = the SUCCEDENT-THREADING COLLAPSE (sub-case (a) `^∀⊥∈Γ` via 2 reusable ordinal lemmas `w<ω^w`+summand-≤-fold + generalize `majorPrem_*_cutPartner` off `seqAnt s=∅`; collapse sub-case (b): leaf→`chainAsucc_threaded_of_leaf`, R-intro→`hnolow`, zK→recurse, residual at most a `zInd` concluding `^∀⊥` — check it's even derivable). FORBIDDEN = building the lap-136 reduct BEFORE the collapse is tested to exhaustion; `red`; `iord`-recursion; `redLeast`; the refuted `seqUpdate` splice; axMajor/gDef standalone. ALTITUDE CAUTION = M2 (Foundation→Z bridge) ~0% built — "only the crux left" ≠ "almost done."
 - **lap-152** (DEEP REFLECTION): direction KEPT (existence-form pivot off `red` + lap-150 code-recursion frame). lap-149's mandate DONE (tag-3 freshFlag DROPPED lap 149); laps 150-151 landed `genReduct_botSucc` (Σ₁ code-recursion), REFUTED the false `seqUpdate` splice in-kernel, PROVED the FLATTEN engine `descent_step_K_spliceHalves`, DROPPED false `descent_step_K_splice` via `GenReductCert` (replace|flatten). RE-VERIFIED axiom-clean (headline/faithful/consistency all `[propext,(sorryAx,)choice,Quot.sound]`, 0 math axioms, no drift). FINDING = trajectory is HEALTHY (lap-143's banking-not-wiring/witness-with-red worries RESOLVED; steady crux DROPS 144→151, in-kernel refutation discipline alive); crux now correctly isolated to `genReduct_botSucc`. KEY ARCHITECTURAL INSIGHT = the four open leaves reduce to TWO master keys: `genReduct_chain_hasRedex` :2989 + `genReduct_chain_noRedex` :3013 SUBSUME the outer `descent_step_K_noncrit_axMajor` :3226 (Γ=∅ special case) and feed gDef :3349 (constructive reduct) — do NOT attack axMajor/gDef standalone. MANDATE = DROP `genReduct_chain_hasRedex` via the zSeqAnt tag-4 `Seq (seqAnt s)` fold (`zSeqAntNext` :2003, exact shape of the proven lap-149/146 folds), THEN `genReduct_chain_noRedex`. FORBIDDEN = `red`; `iord`-recursion for construction; `redLeast` for gDef; the refuted `seqUpdate` single-splice; axMajor/gDef standalone; the fold as a goal. ALTITUDE CAUTION = M2 (Foundation→Z bridge) ~0% built + crux-entangled — "only the crux left" ≠ "almost done."
 - **lap-149** (FRESH-MIND REVIEW): direction KEPT (existence-form pivot off `red`); lap-146's mandate is DONE (`descent_step_Ind` DROPPED lap 146; laps 147-148 advanced §5.2 noncritical, decomposed faithfully per Buchholz §14.254a/b). VERIFIED axiom-clean: `false_of_ZDerivesEmpty`/`ZDerivesEmptyR_descent_step`/`descent_step_K_noncrit_recurse` all `[propext, sorryAx, choice, Quot.sound]` — 0 math axioms; crux-2 = 4 disclosed `sorryAx` leaves {tag-3 freshFlag :2974, tag-4 K-recursion :2934, axMajor 5/6 :3002, gDef :3125}. FINDING = crux-neglect signal forming — recent laps closed surrounding machinery (Ind reducts, replace plumbing, dispatchers) while the genuine crux (general `Γ→⊥` cut-reduction by code-induction, leaves 2934+3002) stays untouched; tag-3 freshFlag is the LAST tractable leaf. MANDATE = DROP tag-3 freshFlag via the focused `zFreshNext` tag-3→freshFlag strengthening (mirror tag-1 I∀ :1671, exact shape of the proven lap-146 `zIndWff` ripple), THEN turn to the crux (general code-recursion + gDef) — NO more leaf-hunting. FORBIDDEN = `red` witnesses; `iord`-recursion for the general step; `redLeast` for gDef; jumping to the crux before freshFlag drops.
 - **lap-146** (FRESH-MIND REVIEW): direction KEPT; lap-143's mandate is DONE (live path FULLY off `red`, lap-144; `ZDerivesEmptyR_descent_step` sorry-free). FINDING = the live termination path now has exactly THREE co-equal genuine sorries {`descent_step_Ind`, `descent_step_K_noncritical` §5.2, (A) `gDef`}, none generational. VERIFIED lap-145's `zIndWff` diagnosis is REAL not stale (step clause :1684 is membership `inAnt(F(a))`, base clause :1682 is an equation — genuine asymmetry) AND that the strengthening is REQUIRED for soundness (membership-only admits unsound Ind nodes) + more faithful to Buchholz; the ZSeqAnt + "no-cascade-docstring" reframes both CHECKED and refuted. MANDATE = DROP `descent_step_Ind` via the focused, definability-dominated `zIndWff` step-clause→shape ripple (`seqAnt(fstIdx prem1) = seqCons (seqAnt(fstIdx d)) (F(a))`); descent + `p=⊥` already banked. FORBIDDEN = `red` witnesses; the refuted reframes; jumping to §5.2/(A) before Ind drops.

@@ -1,6 +1,60 @@
 # Pending work — open obligations & attack paths
 
+## Lap 155 (FRESH-MIND REVIEW) — COURSE-CORRECTION: tag-5/6 = SUCCEDENT-THREADING COLLAPSE, not lap-136
+
+**Supersedes the lap-154b "(b) = lap-136" framing below.** Build 🟢 green (1326); headline `[propext, sorryAx,
+choice, Quot.sound]` (0 math axioms); faithful/consistency clean; statement re-audited — no drift. The whole
+M1b-term termination crux is now the SINGLE open leaf `axMajorClose` (`Crux2Blueprint:3418`), the tag-5/6
+L-axiom cut-partner branch of `genReduct_chain_noRedex`. (lap-152's mandate is DONE: hasRedex DROPPED lap 153,
+noRedex 6/8 PROVEN lap 154.)
+
+**The structural insight (kernel-grounded this review).** Finding 1 (lap-154b, kept): the tag-5 major
+`zAxAll s' p' k'` satisfies `zAxAllSuccWff` (`seqSucc s' = substs1 k' p'`); the ⊥-exit forces `seqSucc s' = ⊥`,
+so `eq_falsum_of_substs1_falsum` gives `p' = ⊥` and the **cut formula is `^∀⊥`** (dually `inegF ⊥` for tag 6).
+The major's active formula `^∀⊥` sits in ITS antecedent (`zDerivation_zAxAll_inv` → `inAnt (^∀⊥) (seqAnt s')`),
+and the chain's own `hthread` (= the `genReduct_chain_noRedex` hyp `hthread0`, also the `isChainInf` threading
+the existing `majorPrem_zAxAll_cutPartner` consumes) splits it:
+- **(a) `^∀⊥ ∈ Γ = seqAnt s`** — the ESCAPE; LIVE at `Γ≠∅` (dies only at `seqAnt s=∅`, where the existing
+  `*_cutPartner` kills it via `simp [inAnt, lh_empty]`).
+- **(b) `∃ i' < jstar, ^∀⊥ = chainAsucc ds i'`** — a strictly-earlier premise CONCLUDING `^∀⊥`.
+
+**The key:** under `hnolow` (no redex pair below j0) a **direct R-intro `zIall` of `^∀⊥` below j0 is
+IMPOSSIBLE** — `(i', jstar)` would be an `isRedexPair` (`InternalZ:4820`: i-end right-symbol `π₁(tp)=0`, j-end
+left-symbol `π₁(tp)=1`, SAME cut formula — exactly the `(zIall ^∀p, zAxAll ^∀p)` shape; VERIFIED the def fires).
+So `^∀⊥` is **never CREATED** below j0 — it can only thread up from Γ. This OBVIATES the lap-136 general
+induction reduct for tag-5/6 (the handoff's pessimistic read); the genuine residual is at most a single
+narrow case (a `zInd` concluding `^∀⊥`).
+
+**ATTACK TREE (decompose `axMajorClose` into named src sub-`sorry`s — raising the count is progress):**
+1. **[teed-up first DROP] 2 reusable ordinal lemmas** — `w < ω^w`: `icmp w (ocOadd w 1 0) = 0` for NF
+   `w < ε₀` (order-induction on the CNF spine, ~30-50 lines; cf. the `iseqNaddIdg ≠ 0` positivity proof at
+   `Crux2Blueprint:3395-3410` which already uses `inadd_left_mono`/`icmp_pos_zero`/`isNF_omega_pow`); and the
+   **summand-≤-fold** `icmp (ocOadd (iotil (znth ds jstar)) 1 0) (iseqNaddIdg ds) = 0` (a single `#`-summand ≤
+   the whole `#`-fold). Self-contained, clean, REUSED by every nonzero-õ reduct from here on.
+2. **sub-case (a) — `axLeafClose`** (the `^∀⊥ ∈ Γ` analogue of the existing `leafClose` at
+   `Crux2Blueprint:3420`): generalize `majorPrem_zAxAll_cutPartner`/`_zAxNeg_cutPartner` (`InternalZ:9329/9357`)
+   off `seqAnt s = ∅` so the threading RETURNS the `^∀⊥ ∈ Γ` disjunct (don't kill it); then the fresh axiom
+   `zAxAll s ⊥ k'` (NOT `zAtom` — the cut formula `^∀⊥`, not `⊥`, is in Γ) derives `Γ→⊥` directly. Validity:
+   `seqSucc s = ⊥ = substs1 k' ⊥`, `^∀⊥ ∈ seqAnt s`. õ-drop: `iotil(zAxAll) = oAtomLk(^∀⊥) ≠ 0` (`InternalZ:2428`)
+   `< iseqNaddIdg ds` by the lemma-1 ordinal facts. Reg/fresh/seqAnt for `zAxAll` are free (mirror `zReg_zAtom`
+   etc.). CLOSES sub-case (a).
+3. **collapse sub-case (b) into (a)** — `^∀⊥ = chainAsucc ds i'`, case-split on i''s constructor:
+   - leaf (`zAtom`/`zAx1`): `^∀⊥ ∈` its own antecedent → `chainAsucc_threaded_of_leaf` (EXISTS, used by
+     `majorIdx_botOrbit_reducible:9292`) threads `^∀⊥` to Γ → sub-case (a).
+   - direct R-intro (`zIall`): forms `isRedexPair` with jstar → contradicts `hnolow`. IMPOSSIBLE (verified).
+   - sub-chain (`zK`): succedent threads to its own major premise → recurse the threading downward.
+   - **the lone genuine residual: a `zInd` concluding `^∀⊥`.** FIRST check whether a sound `zInd` can even
+     conclude a `^∀`-formula (its succedent is `substs1 t p_ind` per `zDerivation_zInd_inv`; `^∀⊥` would force
+     `p_ind` to be a ∀-shaped matrix). If NOT derivable, the collapse is TOTAL and lap-136 is fully obviated for
+     tag-5/6. Only if it survives does the lap-136 unfolding return — and then as a NARROW `Γ→^∀⊥` target.
+
+**Success = a src sorry drops (lemma 1 + sub-case (a) is the bar).** Closing all of `axMajorClose` ⟹
+`genReduct_chain_noRedex` LAST leaf gone ⟹ `genReduct_botSucc` PROVEN ⟹ outer `axMajor`/gDef collapse.
+**Forbidden:** the lap-136 reduct as the primary attack before the collapse is tested to exhaustion.
+
 ## Lap 154b — REFINED: the tag-5/6 cut-partner is the lap-136 Ind-unfolding wall (not a quick ⊥-generalization)
+> **⚠️ SUPERSEDED by lap-155 above** — the "(b) = lap-136" reading is too pessimistic; `hnolow` forbids
+> *creating* `^∀⊥`, so the cut-partner collapses to the leaf-escape. Kept for the Finding-1/2/3 analysis.
 
 **Crux-understanding advance (corrects the lap-154 handoff's over-optimistic "just generalize
 `genReduct_botSucc` off ⊥").** Investigated the ONE remaining open leaf of `genReduct_chain_noRedex`
