@@ -1,5 +1,65 @@
 # Pending work — open obligations & attack paths
 
+## Lap 165 (M1b-term) — ⭐⭐⭐ KEYSTONE `closeNonRepProducer` PROVEN + WIRED; both residuals narrowed to R1/R2
+
+**Build 🟢 1326. HEAD `6732eb2` (3 commits `9a3d78e`,`5f03aee`,`6732eb2`).** No src sorry dropped (still 46),
+but the keystone least-number RECURSION the lap-164 handoff named is now **in-kernel and sorry-free**, and
+BOTH `residual`/`axMajorResidual` copies are reduced to exactly two sharply-characterized escapes. Real
+`#print axioms`: `false_of_ZDerivesEmpty` + headline = `[propext, sorryAx, choice, Quot.sound]` (0 math
+axioms, no drift); **`closeNonRepProducer` = `[propext, choice, Quot.sound]` (sorry-FREE)**.
+
+### What landed
+1. **`climb_to_rep_producer` exposes `m < jstar`** (was `m ≤ j0`; `InternalZ.lean`). The least ∀-producer
+   `m₀ ≤ n₀ < jstar`, now in the signature — the prerequisite that lets the recursion's `n*`-leastness
+   rule out the climb's `{6,8}` landings.
+2. **`closeNonRepProducer` (top-level lemma, `Crux2Blueprint.lean` ~:3382, `set_option maxHeartbeats
+   1600000`).** Given the no-redex chain data + the per-case closers (`hrepClose`/`hleafClose`/`haxNegClose`/
+   `hcollapse`) + a residual cert `hresidual`, ANY L-axiom producer (tag∈{5,6,8})≤j0 yields
+   `GenReductCert (zK s r ds)` via a GLOBAL `least_number` over `{5,6,8}`-producers ≤ j0: the least `n*`'s
+   active formula threads (`collapse`/∀-`climb`) to `m' < n*`, which `n*`-leastness forces into `{3,4}`
+   (→`hrepClose`) or a right-symbol R-intro forming an `isRedexPair` with `n*` (→`hnolow`, ⊥). **Proven
+   sorry-free** (uses the passed `hresidual`, not a `sorry`).
+3. **Wired into BOTH copies** via a local `cnrp` wrapper: `closeZAxNeg` is a thin wrapper, `tryProducerClose`
+   tag-5/6/8 → `cnrp`, and the main tag-6 jstar block collapses to one `cnrp jstar` call. Net **−134 lines**
+   (the unified closer subsumes the duplicated per-tag dispatch).
+
+### 🎯 The genuine remaining open core (sharply pinned)
+After wiring, `axMajorResidual` / `residual` are reached ONLY from:
+- **(R1)** tag-6 producer with `inegF q ∈ Γ` whose POSITIVE `q` is produced by an R-intro (`n*` left-consumes
+  `inegF q`, NOT `q`, so no redex). Reduct = a genuine cut on `q` (`irk q ≤ r`).
+- **(R2)** tag-5 ∀-climb landing `^∀G ∈ Γ`. Reduct = a genuine ∀-cut on `^∀G` (instantiating gives only
+  `G`'s instance, not the exit succedent).
+- **(anySucc only)** the main tag-5 jstar escape `^∀p' ∈ Γ` (an R2-twin) + the **Family-C** C-exit R-intro
+  replay (tag-1/2 jstar producing the conclusion `C`; needs internal weakening / chain-truncation).
+- The ⊥-version `axMajorResidual` is now **PURELY R1/R2** (no C-exit — that is anySucc-only).
+
+**KEY:** R1, R2, and the tag-5 escape ALL require a formula in `Γ = seqAnt s`, hence are **VACUOUS for the
+headline `∅→⊥`** (outer Γ=∅). The obstruction to a DROP: `genReduct_chain_noRedex` is Γ-GENERAL — the
+recursion (`repProducerClose` → `genReduct_anySucc`/`genReduct_botSucc` code-induction) descends into Rep
+producers whose Γ_sub is NON-empty (its formulas thread to earlier outer succedents, not to ∅), so R1/R2 ARE
+reachable in the recursion.
+
+### Next attack (ranked) — toward an actual DROP of `axMajorResidual`
+- **(a) GLOBAL-THREADING REFRAME (the drop path).** Thread an invariant "every Γ_sub formula traces (via the
+  ROOT chain's `hthread0`) to the outer Γ=∅ or an earlier outer succedent" through `genReduct_botSucc`'s
+  `zDerivation_sigma_induction`. Then R1's `inegF q ∈ Γ_sub` / R2's `^∀G ∈ Γ_sub` trace to root-∅ →
+  vacuous → `closeNonRepProducer`'s `hresidual` is never hit → `axMajorResidual` DROPS. The wall: the
+  code-IH does not currently carry the outer threading; this is a structural strengthening of the
+  `GenReductCert` motive (carry a "Γ ⊆ {earlier succedents}" predicate). 1-2 lap reframe; the cleanest path
+  to the first real drop since the narrowing began.
+- **(b) Handle R1/R2 as genuine cut-reductions** (Γ-general). R1 = cut on `q` (`irk q ≤ r`), R2 = ∀-cut on
+  `^∀G`. These are the deep Buchholz general-cut pieces; harder than (a). Defer.
+- **(c) Family-C C-exit** (anySucc only): tag-1/2 jstar R-intro producing `C` — needs internal weakening
+  (re-base the R-intro to conclude the full `Γ→C`); analogous depth to how ex-falso needed `zAxBot`. Defer.
+
+### FORBIDDEN / ALTITUDE (per DIRECTION.md lap-161/164, unchanged)
+`red` witnesses; `iord`-recursion for the construction; `redLeast`/μ-min for gDef; the refuted single-premise
+`seqUpdate` splice; axMajor/gDef STANDALONE before the port; M2/M3/M4 wiring until `false_of_ZDerivesEmpty`
+is sorry-free. **ALTITUDE:** a sorry-free `false_of_ZDerivesEmpty` is NOT the headline — `goodstein_implies_
+consistency` (`Reduction.lean:68`) is a bare sorry, M2/M4 ~0%.
+
+---
+
 ## Lap 164 (FRESH-MIND REVIEW) — direction KEPT; `residual`/`axMajorResidual` NARROWED (tags 0/1/2/7 producers now PHANTOM)
 
 **Build 🟢 1326. HEAD after commit.** Review lap: DIRECTION.md CURRENT DIRECTIVE + STATUS.md refreshed (lap-164

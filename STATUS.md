@@ -1,24 +1,40 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 164 (**FRESH-MIND REVIEW**; HEAD `09cd161`) · 2026-06-27 ·
-Direction KEPT (lap-161 still current). **Lap-163 DISCHARGED escape (i) ⊥-exit ex-falso in-kernel** — `zAxBot`
-(tag-8 ⊥-left leaf, the ZPhi 9th disjunct) + the `exFalsoClose` cert, axiom-clean (`zDerivation_zAxBot` =
-`[propext, choice, Quot.sound]`, no `sorryAx`). The {3,4}-producer cut-reduction core (Buchholz Thm 2.1) was
-CLOSED laps 159-160 (`repProducerClose`, consumed at `Crux2Blueprint:3578-3581`). **The `residual` (:3475) now
-holds ONLY two families: (ii) C-exit R-intro replay (tag-1/2 major producing `C`) + (iii) tag-5/6 thread-escape
-(shared with `axMajorResidual`).** NEXT = decompose `residual` into named src sub-`sorry`s (`cExitReplay`/
-`threadEscapeClose`), then close (ii) via the major premise's own R-intro reduct spliced same-end-sequent.
-Closing `residual` cascades → drops `genReduct_chain_noRedex_anySucc` → `axMajorResidual` +
-`descent_step_K_noncrit_axMajor`. See `DIRECTION.md` CURRENT DIRECTIVE (lap-164 banner), `HANDOFF-2026-06-27-lap163.md`.
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 165 (**KEYSTONE recursion**; HEAD `6732eb2`) · 2026-06-27 ·
+Direction KEPT (lap-161 still current). **Lap-165 PROVED + WIRED the keystone `closeNonRepProducer`** — the
+unified NON-Rep producer closer (a GLOBAL `least_number` over `{5,6,8}`-producers; sorry-FREE, `[propext,
+choice, Quot.sound]`). Both `axMajorResidual` (⊥) and `residual` (anySucc) now route every L-axiom producer
+landing through it, narrowing the open core to exactly **(R1)** tag-6 `inegF q∈Γ` w/ `q` by an R-intro +
+**(R2)** tag-5 ∀-climb `^∀G∈Γ` (+ anySucc-only Family-C C-exit). The ⊥-version `axMajorResidual` is now PURELY
+R1/R2 — **both VACUOUS at the headline `Γ=∅`**. NEXT = the GLOBAL-THREADING REFRAME: carry "Γ_sub traces to
+root-Γ=∅" through `genReduct_botSucc`'s code-induction → R1/R2 vacuous → DROP `axMajorResidual`. See
+`HANDOFF-2026-06-27-lap165.md`, `PENDING_WORK.md` lap-165. (Lap-163 had discharged escape (i) ⊥-exit ex-falso
+via `zAxBot`; the {3,4}-producer core was closed laps 159-160 by `repProducerClose`.)
 · Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**, bare-sorry
 headline); `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean; `false_of_ZDerivesEmpty` =
-`[propext, sorryAx, choice, Quot.sound]` (0 math axioms) (real `#print axioms`, lap 164, no drift). **ALTITUDE:** a
+`[propext, sorryAx, choice, Quot.sound]` (0 math axioms) (real `#print axioms`, lap 165, no drift). **ALTITUDE:** a
 sorry-free `false_of_ZDerivesEmpty` is NOT the headline — `goodstein_implies_consistency` (`Reduction.lean:68`) is a
 bare sorry, NOT YET wired to it; the M2/M4 embedding bridge is ~0% built (the dominant remaining feasibility
 unknown). "Only the crux left" ≠ "almost done." The lap that closes `false_of_ZDerivesEmpty` HANDS to altitude to re-plan M2.
 
-> **🧭 Lap-164 — FRESH-MIND REVIEW. Direction KEPT; ex-falso (i) now CLOSED. Read FIRST — current.**
+> **⭐⭐⭐ Lap-165 — KEYSTONE `closeNonRepProducer` PROVEN + WIRED; both residuals narrowed to R1/R2. Read FIRST — current.**
+> Build 🟢 1326 (exit 0); real `#print axioms`: headline + `false_of_ZDerivesEmpty` = `[propext, sorryAx, choice,
+> Quot.sound]` (**0 math axioms**, no drift); **`closeNonRepProducer` = `[propext, choice, Quot.sound]` (sorry-FREE)**.
+> **THE ADVANCE:** the keystone least-number RECURSION the lap-164 handoff named is now in-kernel and wired into BOTH
+> `genReduct_chain_noRedex` (⊥) and `_anySucc`. Given the no-redex chain data + per-case closers + a residual cert, ANY
+> L-axiom producer (tag∈{5,6,8})≤j0 → `GenReductCert` via a GLOBAL `least_number` over `{5,6,8}`-producers: the least `n*`'s
+> active formula threads (`collapse`/∀-`climb`, the latter now exposing `m<jstar`) to `m'<n*`, which `n*`-leastness forces
+> into `{3,4}` (→reduce) or a right-symbol R-intro `isRedexPair` with `n*` (→`hnolow` ⊥). Net **−134 lines** (the unified
+> closer subsumes the duplicated per-tag dispatch). **Open core now = (R1)** tag-6 `inegF q∈Γ`, `q` by an R-intro **+ (R2)**
+> tag-5 ∀-climb `^∀G∈Γ` **+** (anySucc-only) Family-C C-exit; the ⊥-version `axMajorResidual` is **PURELY R1/R2**. All of
+> R1/R2/tag-5-escape need a formula in `Γ`, so are **VACUOUS at the headline `∅→⊥`**. **MANDATE:** the GLOBAL-THREADING
+> REFRAME — carry "every Γ_sub formula traces (via root `hthread0`) to outer Γ=∅" through `genReduct_botSucc`'s code-induction
+> → R1/R2 vacuous → DROP `axMajorResidual` (the first real drop since narrowing began). FORBIDDEN/engines per lap-161/164.
+> **ALTITUDE (binding):** the lap that closes `false_of_ZDerivesEmpty` HANDS to altitude to re-plan M2 (~0% built). See
+> `HANDOFF-2026-06-27-lap165.md`, `PENDING_WORK.md` lap-165.
+
+> **🧭 Lap-164 — FRESH-MIND REVIEW. Direction KEPT; ex-falso (i) now CLOSED. (historical — see lap-165.)**
 > Build re-verified 🟢 green (1326, exit 0); real `#print axioms` in-kernel: headline `peano_not_proves_goodstein` +
 > `false_of_ZDerivesEmpty` = `[propext, sorryAx, choice, Quot.sound]` (**0 math axioms**); `peano_not_proves_consistency` +
 > `goodsteinSentence_faithful` = `[propext, choice, Quot.sound]` (clean) — no drift. **THE CALL:** lap-161's mandate
