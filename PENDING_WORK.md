@@ -1,6 +1,73 @@
 # Pending work — open obligations & attack paths
 
-## lap 150 (latest) — CODE-RECURSION FRAME LANDED: `genReduct_botSucc` by `𝚺₁` structural induction
+## lap 150b (latest) — `iRedDescent`→`iord` CORRECTION + §14.254 splice isolated (judge-convergent)
+**Operator SOLE-OBJECTIVE = M1b-term.** This continuation of lap-150 acted on TWO things: (1) an in-kernel
+finding that the lap-150a frame used the WRONG descent measure, and (2) the host-dropped judge review
+(`E-2026-06-26-JUDGE-code-recursion-crux.md` + `JUDGE-HANDOFF-2026-06-26-lap150.md`) which INDEPENDENTLY
+reached the same correction.
+
+### ⚠️ THE FINDING (in-kernel, then judge-confirmed) — the chain reduct descends via `iord`, NOT `iRedDescent`
+The lap-150a frame had `genReduct_botSucc` conclude `iRedDescent v d` (= `idg v ≤ idg d ∧ icmp (iotil v)
+(iotil d) = 0 ∧ isNF (iotil v)`, i.e. `õ` STRICTLY drops). **That is FALSE for tag-4 chains:** the principal
+cut reduct (`iRKcCrit`) drops via the **DEGREE** (`idg_zK_iCritReduct_lt`: `idg(reduct)+1 ≤ idg d`), NOT via
+`õ`. Proof: `iord_descent_iCritReduct` routes through `iord_descent_cut` whose `iotil` premise is
+`icmp (iotil e) (ocOadd (iotil d) 1 0) = 0` — against **`ω^{õ d}`**, strictly weaker than against `õ d`; and
+`icmp_omega_pow_nadd_lt` concludes against `ocOadd α 1 0` too. So `õ(iRKcCrit) ⊀ õ(chain)` in general ⟹
+`iRedDescent (iRKcCrit …) (chain)` is unprovable. (I built `iRedDescent_iCritReduct` bundle twins before
+catching this; they're WRONG — saved dead in `scratchpad/lap150-flawed-iRedDescent-bundle.diff`, reverted
+from `InternalZ`.) **The judge review reached the identical conclusion:** every `descent_step_*` concludes
+`icmp (iord d') … = 0`; the motive must carry the **combined `iord`** descent, not `iRedDescent`.
+
+### ✅ DONE (lap 150b) — corrected the whole `genReduct_botSucc` chain to `iord`-descent
+- `genReduct_botSucc` / `genReduct_botSucc_chain` / `genReduct_chain_hasRedex` / `genReduct_chain_noRedex`:
+  conclusion + IH changed from `iRedDescent v d` to **`icmp (iord v) (iord d) = 0`** (matrix `𝚫₁` via
+  `iord`/`icmp` definability ⟹ motive stays `𝚺₁` ⟹ `zDerivation_sigma_induction` still fires). tag-3
+  (`zInd`) PROVEN: `ind_reduct_botSucc_of_fresh`'s `iRedDescent` is converted to `iord` by
+  `iord_descent_of_iRedDescent` (Ind genuinely drops `õ`, so `iRedDescent ⟹ iord`). The frame stays
+  green; tag-4 still delegates to `genReduct_botSucc_chain` with the per-premise IH.
+- **NEW named sub-`sorry` `descent_step_K_splice`** (the genuine Buchholz §14.254 SPLICE, `iord`-monotone
+  premise replacement): the `iord`-descent analog of `descent_step_K_replace` (which is `iCritAux`/`iotil`-
+  based and does NOT apply when the premise reduct drops via degree). `descent_step_K_noncrit_repMajor` now
+  routes through it (was `descent_step_K_replace`). **Bug-magnet** (judge): pin its dispatch against
+  `ANALYSIS-…-lap87-splice-order-sensitivity.md` + `…-lap94-splice-dispatch-unfaithful.md` BEFORE grinding.
+
+### ▶ NEXT — the three remaining genuine leaves (all `iord`-descent now), hardest-first
+1. **`descent_step_K_splice`** (§14.254 SPLICE, the bug-magnet): prove the outer chain's `iord` is monotone
+   under replacing premise `i` by an `iord`-descending reduct `v` (`fstIdx v = fstIdx(znth ds i)`). This is
+   the genuine engine the judge flags. Re-read `scratchpad/buchholz-gentzen.txt` §14.254 (lines 480-535) +
+   lap87/lap94 ANALYSIS. Likely needs an `iord`-fold-monotonicity lemma for `iCritAux`/`seqUpdate` that does
+   NOT assume the `iotil` drop (unlike `iotil_iCritAux_lt`) — handle the degree-traded case.
+2. **`genReduct_chain_hasRedex`** (principal cut, `iord`): descent is FREE from the EXISTING
+   `iord_descent_iRKcCrit_corr_of_redex`/`_neg_of_redex` (`Crux2Blueprint:2245`/`:2282` — they already give
+   `icmp (iord (iRKcCrit …)) (iord (zK s r ds)) = 0`!). The residual is SOUNDNESS
+   `ZDerivation_iRKcCrit_all`/`_neg_botOrbit` + invariants `ZRegular/ZFresh/ZSeqAnt_iRKcCrit` — which need
+   **`Seq (seqAnt s)`** for the tag-4 chain conclusion. **That is the `Seq (seqAnt s)` GAP (below).**
+3. **`genReduct_chain_noRedex`** (recurse via IH + splice): `majorPrem_tag_mem` ⟹ major tag ∈ {3,4,5,6};
+   tag-3/4 reduce major by IH, tag-5/6 reduce the Rep cut-partner by IH; splice via the §14.254 splice (#1).
+
+### 🔑 THE `Seq (seqAnt s)` GAP (tag-4 chains) — needed for hasRedex/noRedex soundness; fix = zSeqAnt fold
+`ZDerivation_iRKcCrit_all`/`_neg_botOrbit` (soundness) need `Seq (seqAnt s)`. For a tag-4 CHAIN node this is
+NOT derivable from `ZSeqAnt`: `zSeqAntNext`'s tag-4 clause flags **`0`** (own-flag dropped, `Zsubst:2164`
+`zSeqAnt_zK` carries only the premise `iseqMaxTab`-fold), so `ZSeqAnt (zK …)` ⇏ `Seq (seqAnt s)`. (Non-chain
+tags 1/2/5/6 DO flag → `seq_seqAnt_of_zSeqAnt` works only for `zTag ≠ 4`.) **Fix = the zSeqAnt tag-4 fold**
+(analog of the lap-149 freshFlag fold / lap-146 zIndWff fold): change `zSeqAntNext`'s tag-4 branch from
+`if zTag d = 4 then 0 else seqAntSeqFlag (fstIdx d)` to ALWAYS `seqAntSeqFlag (fstIdx d)`, ripple through
+`zSeqAntNextDef` σ-clause + `_defined` simp + `zSeqAnt_zK` + the ~6 `ZSeqAnt_zK_*`/`_iRKcCrit` establishing
+sites (each re-proves `Seq (seqAnt s)` for the UNCHANGED conclusion `s` from the original chain's strengthened
+`ZSeqAnt`) + the orbit sites where chains are first built (genuine `Seq Γ`). Then `Seq (seqAnt s)` falls out
+of `hseqant` everywhere, closing the gap with NO threading. Its own focused lap.
+
+### gDef (`exists_sigma1_descending_step` :3128) — SEPARATE obligation (judge): the `𝚺₁` induction yields
+`∃ v` (existence), NOT the explicit `𝚺₁` GRAPH gDef needs. Build the constructive single-step reduct
+function separately; do NOT expect it from the existence proof. NOT `redLeast`/μ-min (refuted lap-139).
+
+**FORBIDDEN (unchanged):** `red` witnesses; `iord`-RECURSION for the construction (PRWO/Gödel-barred — CODE
+induction only, now wired); `redLeast` for gDef; collapsing the repMajor/axMajor split; `iRedDescent` as the
+chain descent measure (refuted in-kernel this lap).
+
+---
+
+## lap 150a — CODE-RECURSION FRAME LANDED: `genReduct_botSucc` by `𝚺₁` structural induction
 **Build 🟢 1326. `false_of_ZDerivesEmpty` = `[propext, sorryAx, Classical.choice, Quot.sound]` (0 math
 axioms, no drift).** Operator SOLE-OBJECTIVE = M1b-term. Per DIRECTION lap-149's "THEN — the CRUX": the
 tag-3 freshFlag was dropped lap 149, so this lap turned to the genuine crux (the general `Γ→⊥`
