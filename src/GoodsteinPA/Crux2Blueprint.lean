@@ -3056,6 +3056,72 @@ lemma genReduct_botSucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh
       · simp at htag                                       -- zAx1 (tag 7)
   exact key d hZ hreg hfresh hseqant hsucc htag
 
+/-- **§14.254 FLATTEN — splice a chain premise's principal-cut halves `dⱼ{0}`,`dⱼ{1}` in place of `dⱼ`
+(the genuine Buchholz §14.254 case-(ii) reduct, `iord`-DESCENT) — PROVEN.** A `∅→⊥` chain `zK s r ds`
+with the `isChainInf` exit data, whose premise `i ≤ j0` reduces by §14.253 (a principal cut), is reduced
+by REMOVING `dⱼ = znth ds i` and SPLICING its two cut-halves `a = dⱼ{0} ⊢ Γⱼ→B`, `b = dⱼ{1} ⊢ B,Γⱼ→Aⱼ`
+into the premise sequence (`seqInsert ds i a b`). This is the FLATTEN the bare `seqUpdate`-replacement
+canNOT do: when `dⱼ`'s reduct degree-trades (`õ` RISES, `idg` drops), a single same-end-sequent
+replacement does NOT lower the outer `iord` (`iotil_zK` is `õ`-only, `idg_zK` pinned `≥ r` — the lap-150
+in-kernel finding, judge-convergent `E-2026-06-26-JUDGE-splice-flatten-not-seqUpdate.md`); but the flatten
+DESCENDS because both halves have `õ` STRICTLY below `õ dⱼ` (the principal-cut auxiliaries, N1 IH), so the
+outer `õ`-fold strictly drops (`iord_descent_seqInsert'`, F2 `ω^{õa}#ω^{õb} ≺ ω^{õ dⱼ}`). Validity is the
+genuine ordered-insert object (`isChainInf_seqInsert`/`ZDerivation_seqInsert_of`, the lap-87
+order-sensitive object). The cut formula `B = seqSucc (fstIdx a)` now lives at the OUTER level with rank
+`r' = max r (irk B) ≤ dg(parent)` (`hr'deg`). This is the genuine §14.254 splice engine; the residual is
+only PRODUCING the halves (the reduced premise's principal-cut decomposition, exposed by the structured
+genReduct certificate). -/
+theorem descent_step_K_spliceHalves {s r r' ds i j0 a b : V}
+    (hd : ZDerivesEmptyR (zK s r ds))
+    (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
+    (hj0 : j0 < lh ds) (hij0 : i ≤ j0) (hbot0 : chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ p ≤ j0, ∀ B, inAnt B (chainAnt ds p) →
+        inAnt B (seqAnt s) ∨ ∃ p' < p, B = chainAsucc ds p')
+    (hrank0 : ∀ p < j0, irk (chainAsucc ds p) ≤ r)
+    (hZa : ZDerivation a) (hZb : ZDerivation b)
+    (hrega : ZRegular a) (hregb : ZRegular b)
+    (hfresha : ZFresh a) (hfreshb : ZFresh b)
+    (hseqanta : ZSeqAnt a) (hseqantb : ZSeqAnt b)
+    (ha_ant : seqAnt (fstIdx a) = chainAnt ds i)
+    (hb_succ : seqSucc (fstIdx b) = chainAsucc ds i)
+    (hb_ant : ∀ B, inAnt B (seqAnt (fstIdx b)) →
+        B = seqSucc (fstIdx a) ∨ inAnt B (chainAnt ds i))
+    (hfa_a : IsUFormula ℒₒᵣ (seqSucc (fstIdx a))) (hfa_b : IsUFormula ℒₒᵣ (seqSucc (fstIdx b)))
+    (hrr : r ≤ r') (ha_rank : irk (seqSucc (fstIdx a)) ≤ r') (hr'deg : r' ≤ idg (zK s r ds))
+    (ha_otil : icmp (iotil a) (iotil (znth ds i)) = 0)
+    (hb_otil : icmp (iotil b) (iotil (znth ds i)) = 0)
+    (ha_idg : idg a ≤ idg (znth ds i)) (hb_idg : idg b ≤ idg (znth ds i)) :
+    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := by
+  have hZ : ZDerivation (zK s r ds) := hd.1.1
+  obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
+  have hi : i < lh ds := lt_of_le_of_lt hij0 hj0
+  -- chain validity of the genuine ordered-insert object (lap-87)
+  have hci : isChainInf s r' (seqInsert ds i a b) :=
+    isChainInf_seqInsert hj0 hij0 (Or.inr hbot0) hthread0 hrank0
+      ha_ant ha_rank hb_succ hb_ant hrr
+  -- the spliced `ZDerivation`
+  have hZ' : ZDerivation (zK s r' (seqInsert ds i a b)) :=
+    ZDerivation_seqInsert_of hi hZ hZa hZb hci
+      (iperm_tp_fstIdx_of_ZDerivation hZa) (iperm_tp_fstIdx_of_ZDerivation hZb)
+      (zKValidF_leafconds_of_ZDerivation hZa).1 (zKValidF_leafconds_of_ZDerivation hZb).1
+      (zKValidF_leafconds_of_ZDerivation hZa).2.1 (zKValidF_leafconds_of_ZDerivation hZb).2.1
+      (zKValidF_leafconds_of_ZDerivation hZa).2.2.1 (zKValidF_leafconds_of_ZDerivation hZb).2.2.1
+      (zKValidF_leafconds_of_ZDerivation hZa).2.2.2 (zKValidF_leafconds_of_ZDerivation hZb).2.2.2
+      hfa_a hfa_b
+  -- NF facts for the descent
+  have hnf : isNF (iotil (zK s r ds)) :=
+    isNF_iotil_zK hds (fun n hn => isNF_iotil_of_ZDerivation (znth ds n) (hmem n hn))
+  have hNF : ∀ n, isNF (iotil (znth ds n)) := isNF_iotil_znth_of_ZDerivation_zK hZ
+  refine ⟨zK s r' (seqInsert ds i a b), ⟨⟨hZ', ?_, ?_⟩, ?_, ?_, ?_⟩, ?_⟩
+  · rw [fstIdx_zK]; exact hant
+  · rw [fstIdx_zK]; exact hsucc
+  · exact ZRegular_zK_of_seqInsert hi (fun m hm => ZRegular_zK_premise hds hd.2.1 hm) hrega hregb
+  · exact ZFresh_zK_of_seqInsert hi (fun m hm => ZFresh_zK_premise hds hd.2.2.1 hm) hfresha hfreshb
+  · exact ZSeqAnt_zK_of_seqInsert hi (fun m hm => ZSeqAnt_zK_premise hds hd.2.2.2 hm)
+      hseqanta hseqantb
+  · exact iord_descent_seqInsert' hds hi hnf hr'deg ha_otil hb_otil ha_idg hb_idg hNF
+      (isNF_iotil_of_ZDerivation a hZa) (isNF_iotil_of_ZDerivation b hZb)
+
 /-- **§14.254 SPLICE — replace a chain premise by its same-end-sequent `iord`-descending reduct (NAMED
 sub-`sorry`).** The `iord`-DESCENT analog of `descent_step_K_replace` (`:2475`): the consumed reduct `v`
 descends only in the COMBINED `iord` (`icmp (iord v) (iord (znth ds i)) = 0`), NOT necessarily in `iotil`

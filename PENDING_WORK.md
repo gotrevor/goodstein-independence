@@ -1,6 +1,64 @@
 # Pending work — open obligations & attack paths
 
-## lap 150b (latest) — `iRedDescent`→`iord` CORRECTION + §14.254 splice isolated (judge-convergent)
+## lap 151 (latest) — §14.254 splice = FLATTEN not seqUpdate; `descent_step_K_spliceHalves` PROVEN (judge-convergent)
+**Operator SOLE-OBJECTIVE = M1b-term.** This lap settled the §14.254 splice decisively — in-kernel, BEFORE
+grinding the false lemma — and BUILT the genuine engine. The host dropped a fresh judge note
+(`E-2026-06-26-JUDGE-splice-flatten-not-seqUpdate.md`) that reached the IDENTICAL conclusion independently.
+
+### ⚠️ THE FINDING (in-kernel + judge-convergent) — the single-premise `seqUpdate` splice is FALSE
+`descent_step_K_splice` (the lap-150b residual) tried: replace premise `i` of a `∅→⊥` chain by a single
+same-end-sequent reduct `v` with COMBINED-`iord` drop (`icmp (iord v) (iord (znth ds i)) = 0`), conclude the
+outer chain's `iord` drops. **That is unprovable / false.** Mechanism (grounded in `iotil_zK`:2524 +
+`idg_zK`:2159 + `iord_descent_cut`:2667): when `v` is a principal-cut reduct it DEGREE-TRADES —
+`idg v < idg dⱼ` but `õ v` can RISE (bounded only by `ω^{õ dⱼ}`, the `iRKcCrit` structure
+`iord_descent_iCritReduct`:3276). For the outer chain, `õ(zK) = #ⱼ ω^{õ dⱼ}` is `õ`-ONLY and
+`idg(zK) = max r (maxdeg−1)` is pinned `≥ r`. So if `dⱼ` is not the strict argmax (another premise ties, or
+`r` pins the degree), replacing it by `v` leaves outer `idg` FLAT while outer `õ` RISES → outer `iord`
+rises/flat, NOT a descent. `iord_descent_cut`'s two premises (`idg(e)+1 ≤ idg(d)` and `õ(e) ≺ ω^{õ(d)}`) BOTH
+fail. (Judge `E-…-splice-flatten`, ~85%; I converged in-kernel before the note arrived.)
+
+### ✅ THE FIX (Buchholz §14.254 case-(ii) = FLATTEN) — `descent_step_K_spliceHalves` PROVEN axiom-clean
+Buchholz does NOT keep `dⱼ` as one premise: he REMOVES it and SPLICES its two principal-cut halves
+`dⱼ{0}⊢Γⱼ→B`, `dⱼ{1}⊢B,Γⱼ→Aⱼ` into the outer chain ("without completing the third chain-rule inference",
+source 486–535). Both halves have `õ` STRICTLY below `õ dⱼ` (the N1 IH auxiliaries), so the outer `õ`-fold
+strictly drops (F2 `ω^{õa}#ω^{õb} ≺ ω^{õ dⱼ}`). The genuine ordered-insert object `seqInsert ds i a b`
+(lap-87) carries validity; ALL bricks were already proven (`isChainInf_seqInsert`/`zKValidF_seqInsert`/
+`ZDerivation_seqInsert_of`/`ZRegular,ZFresh,ZSeqAnt_zK_of_seqInsert`/`iord_descent_seqInsert'`). **Banked
+`descent_step_K_spliceHalves`** (`Crux2Blueprint`, after `genReduct_botSucc`): a `∅→⊥` chain whose premise
+`i ≤ j0` has principal-cut halves `a,b` (with `õ`-drop + the cut-pair threading `seqAnt(fstIdx a)=Γⱼ`,
+`seqSucc(fstIdx b)=Aⱼ`, `hb_ant ⊆ {B}∪Γⱼ`, `irk B + 1 ≤ idg dⱼ`) yields a strictly-`iord`-descending
+`ZDerivesEmptyR`. Axiom-clean `[propext, choice, Quot.sound]`. **This is the bug-magnet engine the judge
+flagged — now machine-checked.**
+
+### ▶ NEXT (the DROP) — enrich the genReduct certificate to `replace | flatten`, delete `descent_step_K_splice`
+The lap-150 `genReduct_botSucc` conclusion (bare `∃ v, … ∧ icmp (iord v) (iord d)=0`) HIDES the halves the
+flatten needs (judge's "the IH reaches `dⱼ` but the conclusion it hands back hides `dⱼ{0}/dⱼ{1}`"). Fix
+(judge's PREFERRED option a — structured certificate):
+1. Define `GenReductCert d : Prop :=`
+   `(∃ v, ZDeriv v ∧ inv v ∧ fstIdx v = fstIdx d ∧ iRedDescent v d)   -- REPLACE (õ-drop single)`
+   `∨ (∃ a b, ZDeriv a ∧ ZDeriv b ∧ inv a ∧ inv b ∧ seqAnt(fstIdx a)=seqAnt(fstIdx d) ∧`
+   `   seqSucc(fstIdx b)=seqSucc(fstIdx d) ∧ (∀ B, inAnt B (seqAnt(fstIdx b)) → B=seqSucc(fstIdx a) ∨ inAnt B (seqAnt(fstIdx d))) ∧`
+   `   IsUFormula(seqSucc(fstIdx a)) ∧ IsUFormula(seqSucc(fstIdx b)) ∧ irk(seqSucc(fstIdx a))+1 ≤ idg d ∧`
+   `   icmp(iotil a)(iotil d)=0 ∧ icmp(iotil b)(iotil d)=0 ∧ idg a ≤ idg d ∧ idg b ≤ idg d)  -- FLATTEN`
+   `inAnt` is a BOUNDED ∀ (membership in a finite seq) ⟹ Δ₁ ⟹ cert is `𝚺₁` ⟹ motive stays `𝚺₁`
+   (re-verify `definability` — the judge's flagged risk; watch the unbounded-∀ gotcha on the `∀ B` clause).
+2. Change `genReduct_botSucc`/`_chain`/`genReduct_chain_hasRedex`/`_noRedex` conclusions to `GenReductCert d`.
+   tag-3 (zInd) → `Or.inl` (the ind reduct IS `iRedDescent`, already proven). tag-4 → delegate.
+3. `genReduct_chain_hasRedex` → `Or.inr` the halves = the `iRKcCrit(d)` components `d0,d1` of `iCritReductSeq`;
+   their `õ`-drop is `iord_descent_iCritReduct`'s `h0o/h1o` inputs (descent FREE, per judge). STILL blocked on
+   the `Seq (seqAnt s)` / zSeqAnt-tag-4 fold for the halves' soundness (`ZDerivation a/b`) — stays a sorry but
+   in the FAITHFUL cert form. (Do the zSeqAnt tag-4 fold — handoff lap-150 — to unblock.)
+4. `genReduct_chain_noRedex` → recurse via IH (cert), then splice the cert: REPLACE→`descent_step_K_replace`,
+   FLATTEN→`descent_step_K_spliceHalves`. Stays a sorry (cert form).
+5. `descent_step_K_noncrit_repMajor` consumes the cert from `genReduct_botSucc`: REPLACE→`descent_step_K_replace`
+   (PROVEN, `iRedDescent`), FLATTEN→`descent_step_K_spliceHalves` (PROVEN). Stays sorry-FREE.
+6. **DELETE `descent_step_K_splice` (the false sorry).** ← THE DROP (net −1 src sorry, path now FAITHFUL).
+Pin the splice ORDER against lap87/lap94 (done: `seqInsert` is the in-place ordered object, NOT end-append).
+FORBIDDEN: `seqUpdate`/combined-iord single splice (FALSE this lap); `iord`-recursion; `redLeast` for gDef.
+
+---
+
+## lap 150b — `iRedDescent`→`iord` CORRECTION + §14.254 splice isolated (judge-convergent)
 **Operator SOLE-OBJECTIVE = M1b-term.** This continuation of lap-150 acted on TWO things: (1) an in-kernel
 finding that the lap-150a frame used the WRONG descent measure, and (2) the host-dropped judge review
 (`E-2026-06-26-JUDGE-code-recursion-crux.md` + `JUDGE-HANDOFF-2026-06-26-lap150.md`) which INDEPENDENTLY
