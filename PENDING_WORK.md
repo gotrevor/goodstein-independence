@@ -1,5 +1,53 @@
 # Pending work — open obligations & attack paths
 
+## Lap 161 (DEEP REFLECTION + ex-falso isolation) — directive RE-SYNCED; ⊥-exit ex-falso named + its design wall pinned
+
+**Build 🟢 1326 (exit 0); `false_of_ZDerivesEmpty` = `[propext, sorryAx, choice, Quot.sound]` (0 math axioms, no
+drift). HEAD after this lap's grind commit.** Altitude lap — synthesis (DIRECTION.md lap-161, REFLECTION-2026-06-27-lap161.md,
+STATUS.md) committed at `3310b26`; see those for the full direction call. Grind delta below.
+
+### What the grind did
+Isolated the ⊥-exit ex-falso out of the context-free `residual` (`Crux2Blueprint:3451`) into a NAMED,
+properly-typed sub-`sorry` `exFalsoClose : inAnt (^⊥ : V) (seqAnt s) → GenReductCert (zK s r ds)` (added after
+`leafCloseC`, ~:3471), and rewired the two ⊥-exit dispatch sites (tag-0, tag-7) from `exact residual` to
+`exact exFalsoClose (hbot ▸ hDin)`. Build green, 0 math axioms. This NAMES the one genuinely-new anySucc content
+(per DIRECTION.md lap-161 mandate) and pins its real wall (below). `residual` still covers (ii) C-exit R-intro
+replay + (iii) tag-5/6 thread-escape.
+
+### ⭐ KEY FINDING — the ⊥-exit ex-falso is a DESIGN question, not a quick lemma
+`exFalsoClose` needs `⊥ ∈ seqAnt s ⟹ a low-ordinal ZDerivation of seqAnt s → seqSucc s` (= `Γ→C`, `C = seqSucc s`
+arbitrary). I confirmed against the 8-rule `ZPhi` list (`InternalZ:5458`):
+- NO single Z-rule fires: `zAtom`/`zAx1` (tags 0,7) need the SUCCEDENT `C ∈ Γ` (not `⊥`); `zAxNeg` (tag 6) needs a
+  complementary `inegF q, q ∈ Γ` PAIR (not bare `⊥`; and `⊥ = 0 ≠ inegF q = qqOr (neg q) ⊥`); tags 1-5 are
+  R-intros/cut/L-axiom, none keyed by `⊥∈Γ`.
+- **The naive "structural induction on the UFormula `C`" FAILS at the atom base case.** Atoms have NO R-introduction
+  rule — `Γ→atom` is derivable ONLY by the leaf axiom (`atom ∈ Γ`). So `⊥∈Γ ⟹ Γ→atom` (atom ∉ Γ) cannot be built by
+  R-intros. **This Z-system has NO ⊥-left (ex-falso-from-⊥) rule.**
+- So `⊥∈Γ ⟹ Γ→C` is NOT admissible as-is. Three routes (pick on a future lap, design call):
+  1. **Vacuity** — prove `¬ inAnt (^⊥) (seqAnt s)` from the chain hyps (`zKValidF`/`ZSeqAnt`/`ZFresh`/`ZRegular`),
+     then `exFalsoClose := fun h => absurd h hvac`. CLEANEST if true. RISK: antecedents grow via cuts on the
+     `false_of_ZDerivesEmpty` (`∅→⊥`) path, and an inconsistency proof can cut on `⊥` itself → `⊥` may legitimately
+     enter an antecedent. Must CHECK whether the invariants actually forbid it (likely NOT — needs evidence).
+  2. **Add a ⊥-left `ZPhi` disjunct** `(∃ s, d = zAxBot s ∧ inAnt (^⊥) (seqAnt s))` deriving `Γ→C` for any `C`
+     (mirror tag-6 `zAxNeg`'s succedent-agnostic shape). This is a real datatype extension — a 9th disjunct + the
+     ~60-site ripple (cf. the lap-116 `zAx1` tag-7 addition: `monotone`/`StrongFinite`/`zDerivation_iff`/inversions/
+     `iotil`/`idg`/`zReg`/`zFresh`/`zSeqAnt`). Heavy but mechanical and PROVEN-doable (lap-116 did exactly this).
+  3. **Alternative reduct** — don't derive `Γ→C` fresh; instead, at the ⊥-exit the leaf at jstar derives
+     `chainAnt ds jstar → ⊥` via `⊥ ∈ chainAnt ds jstar`. Investigate whether a chain `certReplace`/`certFlatten`
+     that REUSES that leaf (rather than re-deriving `C`) gives the õ-drop. Least explored.
+- **RECOMMENDED next lap:** test route 1 (vacuity) FIRST — cheapest, decisive either way. If `⊥∈seqAnt s` is
+  genuinely reachable, fall to route 2 (the `zAxBot` 9th disjunct, lap-116 playbook). Do route 2 as a wip/ design
+  spike (pin the disjunct + the `iotil`/`idg` for it) BEFORE the src ripple.
+
+### The rest of the residual (unchanged from lap 160)
+(ii) C-exit R-intro replay (tag-1/2 major produces `C = seqSucc s` directly) — likely needs the major premise's own
+reduct, spliced same-end-sequent. (iii) tag-5/6 thread-escape — shared with `axMajorResidual` (:3735); factor a
+`threadEscapeClose`. These remain in `residual` (:3451). Once all three close, `genReduct_chain_noRedex_anySucc`
+DROPS → (with the 2 other anySucc leaves) thin-wraps `genReduct_botSucc` → DROPS `axMajorResidual` +
+`descent_step_K_noncrit_axMajor`. gDef (:4316) separable.
+
+---
+
 ## Lap 160 (WIRE) — genReduct_chain_noRedex_anySucc dispatch wired (load-bearing leaf)
 
 **Build 🟢 1326; `false_of_ZDerivesEmpty` = `[propext, sorryAx, choice, Quot.sound]` (0 math axioms, no drift). HEAD `d4ce7e3`.**

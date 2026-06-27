@@ -3468,6 +3468,13 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
       ⟨by rw [idg_zAtom]; exact zero_le,
        by rw [iotil_zAtom, iotil_zK s r ds hds]; exact icmp_zero_pos hposlast,
        by rw [iotil_zAtom]; exact isNF_zero⟩⟩
+  -- §14.254 ⊥-exit EX-FALSO (the ONE genuinely-new anySucc content — NAMED sub-`sorry`, lap 161). A tag-0/7
+  -- leaf at a ⊥-exit threads its succedent `⊥` to `⊥ ∈ seqAnt s`; deriving the chain's ACTUAL succedent
+  -- `C = seqSucc s` (≠ ⊥ in general) from `⊥ ∈ Γ` has NO single Z-rule (`zAtom`/`zAx1` need `C ∈ Γ`, NOT `⊥`;
+  -- the lone ex-falso `zAxNeg` needs a complementary `¬q,q` pair, not bare `⊥`). It needs an internal ⊥-elim:
+  -- a structural induction on the UFormula `C` building the `R`-intros (`zIall`/`zIneg`/…) down to the `⊥`
+  -- leaf, with `idg = 0` / a finite-head `iotil` that `õ`-drops vs `zK s r ds`. See PENDING_WORK lap-161.
+  have exFalsoClose : inAnt (^⊥ : V) (seqAnt s) → GenReductCert (zK s r ds) := fun _ => sorry
   -- §5 ¬-axiom reduct (SUCCEDENT-AGNOSTIC): `inegF q, q ∈ Γ` ⟹ `zAxNeg s q` derives `Γ→C` for ANY `C`,
   -- õ-dropping (`iotil_zAxNeg`, finite head). Reused by both the tag-6 major and a `zAxNeg` cut-partner.
   have axNegCloseGen : ∀ q jw, jw < lh ds → iotil (znth ds jw) = oAtomLk (inegF q) →
@@ -3561,7 +3568,7 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
     rcases hthread0 jstar hjle (chainAsucc ds jstar) hin with hDin | ⟨i', hi', heq⟩
     · rcases hjstar with hC | hbot
       · exact leafCloseC (hC ▸ hDin)
-      · exact residual
+      · exact exFalsoClose (hbot ▸ hDin)
     · exact absurd (heq ▸ hjstar) (hmin i' hi')
   · -- tag 1 (zIall): succedent `^∀ p'`. ⊥-exit impossible; C-exit = R-intro of `C` → residual.
     have heq : seqSucc s' = (^∀ p' : V) := (zDerivation_zIall_inv (h ▸ hmemZ)).2.1
@@ -3614,7 +3621,7 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
     rcases hthread0 jstar hjle (chainAsucc ds jstar) hin with hDin | ⟨i', hi', heq⟩
     · rcases hjstar with hC | hbot
       · exact leafCloseC (hC ▸ hDin)
-      · exact residual
+      · exact exFalsoClose (hbot ▸ hDin)
     · exact absurd (heq ▸ hjstar) (hmin i' hi')
 
 /-- **GENERALIZED chain step off `seqSucc = ⊥` — PROVEN dispatcher.** Off-`⊥` twin of
