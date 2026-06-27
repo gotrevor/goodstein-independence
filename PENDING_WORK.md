@@ -22,23 +22,33 @@ sub-case (b) now COLLAPSE leaf cut-partner chains to Γ → the proven sub-case 
 a premise `m < jstar` concluding the cut formula `F` with `zTag (znth ds m) ∈ {1,2,3,4,5,6}`. Net sorry
 count still 1→1, open core strictly smaller (leaf chains gone).
 
-**NEXT ATTACK (next lap) — narrow {1,2,3,4,5,6} → {3,4,5,6}, then attack the genuine residual:**
-1. **tag-1 (zIall) producer → `hnolow` redex (the directive's "R-intro→hnolow" step).** A `zIall` at
-   `m < jstar` concluding `F` (so `seqSucc = ^∀p''=F`; for tag-5 `F=^∀⊥` → `p''=⊥`) forms `isRedexPair ds
-   ⟪m,jstar⟫` (`InternalZ:4820`: `π₁(tp(zIall))=0` right-symbol, `π₁(tp(zAxAll/zAxNeg))=1` left-symbol, cut
-   formulas match) → contradicts `hnolow`. Need `tp_zIall`/`tp_zAxAll`/`tp_zAxNeg` + `isymR`/`isymLk` π
-   projections (check existing `redexPair_tp:4891` for the shape). Dispatch on `zDerivation_iff.mp (hmem m)`
-   in the `collapse` non-leaf branch.
-2. **tag-2 (zIneg) producer → succedent mismatch.** `zIneg` succedent is `inegF p'' ≠ ^∀⊥` (tag-5);
-   for tag-6 `F=inegF p'` a `zIneg` concluding it gives `p''=p'` — NOT immediately killed, needs the redex
-   argument too (it's the R¬-intro of `inegF p'`, dual of tag-1).
-3. **the GENUINE residual = tags {3,4,5,6} producers** (zInd/zK/zAxAll/zAxNeg concluding `F`). These
-   genuinely produce `F` (e.g. zAxAll with matrix `^∀⊥` concludes `^∀⊥`; zAxNeg concludes anything) and are
-   NOT killed by `hnolow` (not R-intros). Reducing them = the general-succedent reduction (narrowed
-   `Γ→^∀⊥` / `Γ→inegF p'` targets, the lap-136 wall). **This is the genuine remaining content; closing it
-   DROPS `axMajorResidual`.** A zAxAll producer's active formula `^∀(^∀⊥)` threads via `hthread0 m`, but to
-   a DEEPER formula (rank+1) — the recursion climbs rank toward `r` (bounded), suggesting a well-founded
-   induction on `r − rank`, OR the constructive 2-step `zK` composition reduct (`^∀(^∀⊥)∈Γ ⟹ ^∀⊥ ⟹ ⊥`).
+✅ **R-INTRO KILLED BY `hnolow` (commit `a0c1524`) — collapse TESTED TO EXHAUSTION (directive precondition
+met).** Two new `InternalZ` helpers: `pi2_tp_eq_seqSucc_of_pi1_zero` (a right-symbol premise carries its
+succedent as the `tp`-formula) + `rightSym_producer_redex` (a RIGHT-symbol producer `m < jstar` of a
+left-axiom major's cut formula `F` forms `isRedexPair ⟪m,jstar⟫ ≤ j0` → contradicts `hnolow`). Wired into
+tag-5 (`F=^∀⊥`) and tag-6's `inegF p'` half: the right-symbol (`π₁(tp)=0`) producer is killed; only `Rep`
+producers (tags {3,4,5,6}, `π₁(tp)∈{1,2}`) survive. **The directive's "R-intro→`hnolow`" step is now
+machine-verified; the lap-136 general-succedent reduct is UN-FORBIDDEN for the residual.**
+
+🔻 **`axMajorResidual` now = the GENUINE §14.254b general-succedent reduction (tags {3,4,5,6} producers):**
+a `Rep`/L-axiom premise `m < jstar` concluding the cut formula `F` (= `^∀⊥` tag-5 / `inegF p'` tag-6-neg /
+ANY non-leaf producer of `p'` tag-6-p'). Reducing the chain `zK s r ds` past this cut is the narrowed
+lap-136 target (`Γ→^∀⊥` etc., NOT "arbitrary C"). Net sorry count still 1→1, open core now precisely
+the deep wall.
+
+**NEXT ATTACK (next lap) — the general-succedent reduct, by producer constructor:**
+1. **zAxAll/zAxNeg producers (axioms, NO sub-derivations) — likely the WEDGE.** A `zAxAll s_m (^∀⊥) k_m`
+   producer of `^∀⊥` has active formula `^∀(^∀⊥)` (rank+1) in its antecedent; `hthread0 m` threads it →
+   `^∀(^∀⊥)∈Γ` or a deeper producer. Rank is bounded by `r` (`hrank0`), so the climb terminates → bottoms
+   out at `^∀^k⊥ ∈ Γ`. Reduct = a 2-cut `zK [d_a, d_b]`: `d_a = zAxAll` derives `Γ→^∀⊥` (from `^∀(^∀⊥)∈Γ`),
+   `d_b = zAxAll s ⊥ 0` derives `^∀⊥,Γ→⊥`; the cut composes to `Γ→⊥`. Build as a `certReplace`/`certFlatten`;
+   prove the õ-descent of the 2-cut chain. Start with the ONE-STEP case (`^∀(^∀⊥)∈Γ` directly).
+2. **zInd producer concluding `^∀⊥`** — `substs1 t p_ind = ^∀⊥` forces `p_ind = ^∀⊥`; the induction reduct
+   is the lap-136 unfolding `⟨d0, d1[a:=0..k-1]⟩` (now un-forbidden, narrowed to `Γ→^∀⊥`). CHECK first
+   whether `zIndWff` even ADMITS a sound zInd concluding a closed ∀-sentence (it may be vacuous).
+3. **zK producer (sub-chain concluding `^∀⊥`)** — recurse the chain reduction at general succedent.
+   Likely needs `genReduct_chain_noRedex` generalized off `seqSucc s = ⊥` (the genReduct_botSucc
+   generalization the lap-154 handoff flagged). Hardest; defer behind 1+2.
 
 ---
 
