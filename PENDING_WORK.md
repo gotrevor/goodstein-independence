@@ -1,5 +1,41 @@
 # Pending work — open obligations & attack paths
 
+## Lap 155 (GRIND) — DONE: ordinal lemmas + tag-5 sub-case (a) PROVEN; residual = tag-5(b) + tag-6
+
+**Executed the lap-155 course-correction (below) end-to-end for the dominant case. Build 🟢 green (1326);
+headline + `false_of_ZDerivesEmpty` `[propext, sorryAx, choice, Quot.sound]` (0 math axioms) — no drift.**
+
+✅ **DONE step 1 (ordinal lemmas, `InternalZ`, commit f922831):** `finHead_lt_omega_pow` (finite-head
+`X ≺ ω^X`), `finHead_iotil_lt_iseqNaddIdg` (finite-head fold-summand `≺` the `#`-fold), `icmp_lt_trans`
+(unbounded ≺-transitivity wrapper over the bounded `icmp_trans`). Reusable for any nonzero-õ reduct.
+
+✅ **DONE step 2, tag-5 SUB-CASE (a) (`Crux2Blueprint`, commit e0ac99a):** proven INLINE in
+`genReduct_chain_noRedex`'s tag-5 branch (no separate `majorPrem_*_cutPartner` generalization needed — the
+chain's own `hthread0` hypothesis is in scope). Mechanism: ⊥-exit + `zAxAllSuccWff` ⟹ `p'=⊥`
+(`eq_falsum_of_substs1_falsum`); `hthread0 jstar` splits `^∀⊥ ∈ chainAnt ds jstar` into `^∀⊥ ∈ Γ` (the fresh
+`zAxAll s ⊥ 0` reduct derives `Γ→⊥`, õ-dropping via the step-1 ordinal lemma) ∨ cut-partner (residual). The
+collapse approach is now MACHINE-VALIDATED for the dominant case.
+
+🔻 **`axMajorClose` → `axMajorResidual` (NARROWED sorry, `Crux2Blueprint:~3502`).** Net sorry count 1→1 but
+the open core is strictly smaller. Remaining:
+- **tag-5 SUB-CASE (b)** — the active `^∀⊥` is the succedent of an upstream cut-partner `i' < jstar` (`heq :
+  ^∀⊥ = chainAsucc ds i'`). Collapse it: case-split `i'`'s constructor — leaf → `chainAsucc_threaded_of_leaf`
+  threads `^∀⊥` further toward Γ; direct R-intro `zIall` → contradicts `hnolow` (would `isRedexPair` jstar);
+  `zK` sub-chain → recurse the threading; the lone genuine residual is a `zInd` concluding `^∀⊥` (CHECK
+  derivable — `zDerivation_zInd_inv` succedent is `substs1 t p_ind`; can it be a ∀-formula?). KEY OPEN PIECE:
+  a SUCCEDENT-threading invariant (the existing `hthread0` is ANTECEDENT-only) OR iterate `hthread0` on the
+  cut-partner's own antecedent (since `i'` Rep ⟹ `^∀⊥` ∈ its antecedent or threads).
+- **tag-6 (`zAxNeg`) — both sub-cases.** STRUCTURALLY DIFFERENT from tag-5: `zDerivation_zAxNeg_inv` gives
+  `IsUFormula p ∧ inegF p ∈ Γ ∧ p ∈ Γ` (NO `zAxAllSuccWff`, so NO `p=⊥` collapse). The reduct `zAxNeg s p`
+  needs BOTH `inegF p ∈ Γ` AND `p ∈ Γ` threaded to the outer Γ. Its descent reuses the SAME ordinal lemma
+  (`iotil_zAxNeg = oAtomLk(inegF p)`, also finite head). NEXT: thread both `inegF p` and `p` via `hthread0`;
+  if both land in Γ → fresh `zAxNeg s p` reduct (dual of tag-5(a)); else cut-partner residual.
+
+**NEXT ATTACK (next lap):** tag-6 sub-case (a) (dual of the proven tag-5(a), reuses the ordinal lemma) is the
+lowest-risk next DROP; then the sub-case (b) succedent-threading collapse (the genuine remaining content).
+
+---
+
 ## Lap 155 (FRESH-MIND REVIEW) — COURSE-CORRECTION: tag-5/6 = SUCCEDENT-THREADING COLLAPSE, not lap-136
 
 **Supersedes the lap-154b "(b) = lap-136" framing below.** Build 🟢 green (1326); headline `[propext, sorryAx,
