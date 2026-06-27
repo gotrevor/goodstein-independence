@@ -35,6 +35,31 @@ After the narrowing, `axMajorResidual` (⊥) / `residual` (anySucc) are reached 
    R-intro to conclude the full `Γ→C`) — the genuine general-cut-elimination piece; analogous in depth to how
    ex-falso needed the new `zAxBot` constructor. NOT a quick win.
 
+### ✅ NARROWING COMPLETE (lap-164, commits 7a999c8..b98a8d8) — the residual is now UNIFORM
+All four narrowing rounds landed green (sorry count 46 throughout, no axiom drift):
+- **r1** tags 0/1/2/7 producers PHANTOM in `tryProducerClose` (non-leaf + non-right-symbol).
+- **r2** tag-8 ⊥-producer `⊥∈Γ` → `leafClose`/`exFalsoClose`.
+- **r3** tag-6 partial `p'`-producer: Rep (3,4) → `repProducerClose`.
+- **r4** `closeZAxNeg` ¬q/q-producers: Rep (3,4) → `repProducerClose`.
+**Net:** EVERY `residual`/`axMajorResidual` landing is now one of: (A) a NON-Rep producer (axiom tag-5/6/8 or
+a non-redex R-intro tag-1/2) whose active formula threads to ANOTHER non-Rep producer at a STRICTLY SMALLER
+index; or (B) a `^∀Z∈Γ` climb-escape; or (C) [anySucc only] the C-exit R-intro replay. This is the clean,
+uniform target the recursive closer needs.
+
+### THE keystone next move — `closeNonRepProducer` (recursive, strong-induction on the producer index)
+Build a top-level lemma that closes (A) by **strong induction / least-counterexample on the V-index** of the
+producer (every thread step goes to a strictly smaller index, so it is well-founded; motive
+`GenReductCert (zK s r ds)` is Σ₁, antecedents Δ₁, so the implication motive is Σ₁ → use `least_number`-style
+least counterexample, mirroring the `jstar`-leastness pattern already in these lemmas). Dispatch per producer
+tag: Rep(3,4)→`repProducerClose` (base), zAxNeg(6)→thread ¬q/q (recurse on smaller-index producer or close at
+Γ via `axNegCloseGen`), zAxAll(5)→`climb_to_rep_producer` (lands {3,4,6,8} or escape), zAxBot(8)→thread ⊥
+(recurse or `leafClose` at Γ); R-intro(1,2) phantom by non-right-symbol. Closing (A) leaves ONLY (B) the
+`^∀Z∈Γ` escape + (C) the C-exit — both genuine cut-elimination constructions (the ∀-tower elimination
+`^∀^{k}⊥∈Γ ⟹ Γ→⊥` needs a cut-tower or a new structural rule, analogous to how ex-falso needed `zAxBot`;
+deferred). **Check FIRST:** whether the escape (B) is even reachable when the OUTER Γ=∅ (it is vacuous there)
+— if the recursion preserves "escape ⟹ formula was in the outer Γ", (B) may be vacuous for the headline
+`∅→⊥` and the whole `axMajorResidual` collapses with just (A).
+
 ### Next attack (ranked)
 - **(a) tag-8 ⊥-producer (item 2)** — PARTIALLY DONE lap-164: the `⊥∈Γ` sub-case now closes directly via
   `collapse` → `leafClose`/`exFalsoClose` (in both `tryProducerClose` copies). Remaining = the NON-LEAF
