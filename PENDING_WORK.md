@@ -1,5 +1,58 @@
 # Pending work — open obligations & attack paths
 
+## Lap 157 (GRIND) — `climb_to_rep_producer` PROVEN (axiom-clean) + wired; tag-5 producer collapses to {3,4,6}/escape
+
+**Build 🟢 green (1326); headline `peano_not_proves_goodstein` + `false_of_ZDerivesEmpty`
+`[propext, sorryAx, choice, Quot.sound]` (0 math axioms) — no drift. `climb_to_rep_producer` itself is
+sorry-FREE + axiom-clean (`[propext, choice, Quot.sound]`, NO `sorryAx`).**
+
+✅ **THE WEDGE PROVEN — `climb_to_rep_producer` (`InternalZ:~9166`, axiom-clean).** A left-axiom major
+(`tp = isymLk kk F`, `F = ^∀…` a `^∀`-formula, `F ∈ chainAnt ds jstar`) has its cut formula `F` ALWAYS
+produced by a `zInd`/`zK` (tag 3/4) or `zAxNeg` (tag 6) node, or threads to a `^∀`-formula in `Γ`. Mechanism:
+thread `F` → escape (`^∀ … ∈ Γ`) or NON-LEAF producer (`leastSucc_in_ant_or_nonleaf`); an R-intro producer
+(`zIall`/`zIneg`, right symbol) is killed by `hnolow` (`rightSym_producer_redex`). **The `zAxAll` (tag-5)
+producer is NOT an independent gap:** its OWN active `^∀ p'` is again a `^∀`-formula threading one rank UP, so
+by a `least_number` search over "`x ≤ j0 ∧ tag x ∈ {3,4,5,6} ∧ chainAsucc ds x` is a `^∀`-formula" the LEAST
+such producer cannot be `zAxAll` (it would force a strictly-earlier `^∀`-producer, contradicting minimality).
+
+✅ **WIRED into `genReduct_chain_noRedex`** (`Crux2Blueprint`, commit `34ff2b3`): factored `closeZAxNeg`
+(the lap-156 zAxNeg-thread-and-close, now reusable); `tryProducerClose`'s tag-5 (zAxAll) case now CLIMBS →
+`closeZAxNeg` on a zAxNeg landing (CLOSES), `axMajorResidual` on {3,4}/escape. So a zAxAll producer whose
+climb ends at a `zAxNeg` now CLOSES (strict superset of cases vs lap-156).
+
+🔻 **`axMajorResidual` (`Crux2Blueprint:~3417`) NARROWED to {zInd(3), zK(4)} producers of a `^∀^k⊥` + the
+general `^∀^k⊥ ∈ Γ` escape (k≥1).** The tag-5 (zAxAll) producer is GONE from the residual (collapsed by the
+climb). Net sorry count still 1→1; open core strictly smaller and SHARPER.
+
+⛔ **REFUTED (kernel-grounded) — the local `certReplace`/2-cut-`certFlatten` (õ-drop) is the WRONG target for
+the {3,4} producer.** Reducing a producer of `^∀^k⊥` (a non-⊥ succedent) by a same-end-sequent REPLACE or a
+2-cut FLATTEN requires `irk(cutFormula)+1 ≤ idg(zK s r ds)`, which is **NOT derivable**: `isChainInf` records
+only `irk(chainAsucc ds i) ≤ r` (`InternalZ:1182`) and `idg_zK = max r (iseqMaxIdg ds − 1) ≥ r` — so the cut
+formula's rank can be `= r = idg` (off-by-one, no headroom). Concretely `r` may be `1`, `idg = 1`,
+`irk(^∀⊥) = 1`, `irk(^∀⊥)+1 = 2 > idg`. **Degree-trade confirmed** (mirrors lap-150/151 has-redex finding):
+the producer reduction must drop the DEGREE (`iord`, eliminating the cut on `^∀^k⊥` lowers max cut rank), NOT
+`õ` (`iRedDescent`). The `genReduct_botSucc` machinery is `⊥`-succedent-only (`hsucc : seqSucc (fstIdx d) =
+⊥`), so it CANNOT reduce a producer deriving `Γ_m → ^∀^k⊥`. Also refuted: degenerate `zInd → d0` (the
+`idg_zInd = max(max(idg d0 − 1, …), irk p)` can RAISE the degree).
+
+**NEXT ATTACK (next lap), in priority order:**
+1. **Wire `climb_to_rep_producer` at the OUTER level `descent_step_K_noncrit_axMajor` (`:~3826`, Γ=∅).** There
+   `seqAnt s = ∅`, so the climb's ESCAPE (`^∀ … ∈ Γ`) is VACUOUS — the tag-5 major collapses cleanly to a
+   {3,4,6}-producer (no escape residual). {6} closes; {3,4} is the sharp residual. This DECOMPOSES the
+   monolithic `descent_step_K_noncrit_axMajor` sorry into the precise "reduce a {3,4} producer of `^∀^k⊥`"
+   obligation. (Needs: map `majorIdx`→the climb's jstar; the `∃ d'`-conclusion + splice via
+   `descent_step_K_replace` at the producer index — but see #2 for the reduction itself.)
+2. **Generalize `genReduct_botSucc`/`genReduct_chain_noRedex`/`GenReductCert` OFF `seqSucc = ⊥` to a general
+   succedent `C` (the principled Buchholz route).** This is the ONLY way to reduce a {3,4} producer deriving
+   `Γ_m → ^∀^k⊥` (general succedent). The reduction drops the DEGREE (per the refutation above), so it should
+   reuse the `genReduct_chain_hasRedex`/`iRKcCrit` `iord`-degree-drop engine, NOT `iRedDescent`. Big refactor;
+   the cut-formula-rank-`< idg` headroom is available in the general framework (eliminate highest cuts first).
+3. **CHECK** whether the general `^∀^k⊥ ∈ Γ` escape closes via a k-fold instantiation-cut chain whose degree
+   `= irk(^∀^k⊥) ≤ r ≤ idg` (the cut formulas `^∀^j⊥` have rank `j ≤ k`, all `< idg` IF the framework gives
+   strict headroom — see #2). At Γ=∅ this escape is vacuous (#1 dodges it).
+
+---
+
 ## Lap 156 (GRIND) — tag-6 sub-case (a) PROVEN + succedent-threading COLLAPSE wired (leaf chains)
 
 **Executed the lap-155 directive's succedent-threading collapse for BOTH tags. Build 🟢 green (1326);
