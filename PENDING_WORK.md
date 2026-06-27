@@ -1,5 +1,66 @@
 # Pending work — open obligations & attack paths
 
+## Lap 158 (FRESH-MIND REVIEW) — collapse EXHAUSTED; residual = the IRREDUCIBLE {3,4}-producer cut-elim (degree-induction)
+
+**Build 🟢 green (1326); real `#print axioms` re-verified: headline `peano_not_proves_goodstein` +
+`false_of_ZDerivesEmpty` = `[propext, sorryAx, choice, Quot.sound]` (0 math axioms); `peano_not_proves_consistency`
++ `goodsteinSentence_faithful` = `[propext, choice, Quot.sound]` (clean) — no drift.**
+
+### The three live crux-2 sorries (the only on-path ones)
+1. **`axMajorResidual`** (`Crux2Blueprint:3417`, inside `genReduct_chain_noRedex`) — THE crux core. Reached ONLY
+   for a NON-LEAF `Rep` producer `m < jstar` (`zInd` tag-3 / sub-`zK` tag-4) genuinely PRODUCING the cut formula.
+2. **`descent_step_K_noncrit_axMajor`** (`:3857`, the `Γ=∅` outer twin) — bottoms out in the SAME content (#1).
+3. **`exists_sigma1_descending_step` / gDef** (`:3980`) — the Σ₁-definability consumer (separate obligation).
+
+(Off-path dead `red`-soundness sorries {`:82,:1257,:1367,:1563,:1653,:1765,:1868`} — DO NOT ATTACK AS STATED.)
+
+### Why the collapse is EXHAUSTED (laps 155-157 did everything threadable)
+The §14.254b major premise `jstar` is an L-axiom (`zAxAll`/`zAxNeg`) on a cut formula. Its active formula(s)
+thread via `collapse`/`climb_to_rep_producer` to either Γ (escape — CLOSED) or an upstream producer. Producers:
+leaf (tags 0/7) → thread to Γ; R-intro (tags 1/2, π₁(tp)=0) → KILLED by `hnolow` (`rightSym_producer_redex`);
+`zAxNeg` (tag 6) producer → CLOSED (`closeZAxNeg`/`axNegCloseGen`, threads both `¬q,q`); `zAxAll` (tag 5)
+producer → CLIMBS one rank (`climb_to_rep_producer`, axiom-clean lap 157) → lands on {3,4,6}/escape. **The ONLY
+thing left is a {3,4} (`zInd`/`zK`) producer** — it genuinely PRODUCES the cut formula (cannot be threaded away)
+and CANNOT be reduced by a same-degree `õ`-drop (REFUTED in-kernel lap 157: `certReplace`/`certFlatten` need
+`irk(cutFormula)+1 ≤ idg(zK s r ds)`, NOT derivable — `isChainInf` records only `irk(chainAsucc) ≤ r` and
+`idg_zK = max r (iseqMaxIdg−1) ≥ r`, so the cut rank can `= r = idg`, no headroom).
+
+### The residual's two shapes
+- **(i) tag-5 + the climb** → cut formula `^∀^k⊥` (k≥1): a ∀-TOWER over the CLOSED matrix `⊥`. DOMINANT — all
+  climbing produces ∀-towers over ⊥.
+- **(ii) tag-6** → arbitrary `p'` / `inegF p'` (the `p'`-half non-leaf producer at `Crux2Blueprint:3630`).
+
+### MANDATE (DIRECTION.md lap-158): a DESIGN SPIKE FIRST, then port to src — DO NOT refactor the src stack blind
+The fix must drop the **DEGREE** (`idg`), not `õ` (lap-157 refutation). The structure is the standard Buchholz
+Thm 2.1 cut-elimination: **OUTER induction on the NAT `idg`** (kosher — it is a finite max-cut-rank bound, NOT
+`iord`/PRWO-barred) + **INNER code-induction** (`zDerivation_sigma_induction`); eliminate the HIGHEST-rank cuts
+first (this is where the `irk < idg` headroom the lap-157 refutation found missing actually appears). Reuse the
+`genReduct_chain_hasRedex`/`iRKcCrit` degree-drop engine + the same-end-sequent `certReplace` splice — do not
+rebuild them.
+
+**Spike (`wip/`, lap-101/132-style — decisive either way):**
+1. Pin the generalized statement: generalize `genReduct_botSucc` / `genReduct_chain_noRedex` / `GenReductCert`
+   off `seqSucc = ⊥` to a general succedent `C`, with a degree parameter `D` and the degree-IH "every Rep node
+   with `idg ≤ D` has a GenReductCert."
+2. CHECK the degree-drop closes BOTH shapes (i) `^∀^k⊥` and (ii) arbitrary `p'`: eliminating the top-rank cut
+   lowers `idg` to `D−1` where the degree-IH applies; verify the resulting reduct's `iord` strictly descends
+   (the `#`-fold dominates any single premise via `finHead_iotil_lt_iseqNaddIdg`, as in the existing branches).
+3. EXPLORE the cheap optimization for shape (i): a ∀-inversion `Γ→^∀⊥ ⟹ Γ→⊥` is VACUOUS-instantiation for the
+   closed matrix `⊥` (no eigenvariable bookkeeping) — but it changes the succedent, so it needs a
+   change-of-succedent splice (NOT the banked same-end-sequent `certReplace`). Confirm in the spike whether it
+   actually undercuts the degree-general route before committing; if not, the degree-general route handles both.
+4. PORT the pinned statements to src as named sub-`sorry`s (RAISING the src count = progress), discharging the
+   parts that fall out of existing banked lemmas (the leaf/R-intro/escape cases already proven, the descent
+   `finHead_*` lemmas, `certReplace_of_premise_cert`).
+
+**FORBIDDEN:** the full src refactor before the spike pins the statement; a same-degree `õ`-drop for the {3,4}
+producer (refuted lap 157); `red` witnesses; `iord`-recursion for the construction (degree-induction on the NAT
+`idg` + CODE only); `redLeast`/μ-min for gDef; the refuted single-premise `seqUpdate` splice; attacking #2/#3
+standalone; the off-path dead `red`-soundness sorries AS STATED; M2/M4 wiring. ALTITUDE CAUTION: M2 (Foundation→Z
+bridge) ~0% built + crux-entangled — "only the crux is left" ≠ "almost done."
+
+---
+
 ## Lap 157 (GRIND) — `climb_to_rep_producer` PROVEN (axiom-clean) + wired; tag-5 producer collapses to {3,4,6}/escape
 
 **Build 🟢 green (1326); headline `peano_not_proves_goodstein` + `false_of_ZDerivesEmpty`
