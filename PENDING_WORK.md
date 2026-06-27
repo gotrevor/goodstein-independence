@@ -58,16 +58,22 @@ soundness. Precedent: lap-116 added `zAx1` as the 8th disjunct ("64-site ripple"
    `isNF_iotil_zAxBot`, `iord_zAxBot = 0`; in `Zsubst.lean`: `zReg_zAxBot = 0`, `zFresh_zAxBot = 0`,
    `zSeqAnt_zAxBot = seqAntSeqFlag s`. All mirror `zAtom` (dispatchers default tag 8 → 0). `false_of_ZDerivesEmpty`
    axioms unchanged (`[propext, sorryAx, choice, Quot.sound]`, no drift).
-2. **ZPhi disjunct #9 + the ripple.** Add to `ZPhi` (`:5458`), `zphi_iff`, `zphi_monotone`, `zphi_strong_finite`,
-   `zblueprint` (Σ+Π), `zPhi_definable`. Then thread a 9th branch through the ~125 `zDerivation_iff.mp` rcases
-   (compiler-driven: each missing-pattern error → add `| ⟨s, h, hbot⟩` and the obvious branch; the new leaf is a
-   degree-0 leaf, so most branches mirror tag-0/7). Add `zDerivation_zAxBot_inv` + a `zAxBot`-as-`ZDerivation`
-   intro. Build green at the end (atomic — the disjunct change breaks all rcases until the last is patched).
-3. **`exFalsoClose := fun h => Or.inl ⟨zAxBot s, zDerivation_iff.mpr (Or.inr⁸ ⟨s, rfl, h⟩), zReg_zAxBot s,
-   zFresh_zAxBot s, …, ⟨by rw[idg_zAxBot]; exact zero_le, by rw[iotil_zAxBot, iotil_zK …]; exact
-   icmp_zero_pos hposlast, by rw[iotil_zAxBot]; exact isNF_zero⟩⟩`** — DROPS the `exFalsoClose` sub-`sorry`. Then
-   `residual` (:3451) still needs (ii) C-exit R-intro replay + (iii) tag-5/6 thread-escape; closing those DROPS the
-   `genReduct_chain_noRedex_anySucc` leaf.
+3. ✅ **DONE (lap 162, build 🟢 1326).** `exFalsoClose` (`Crux2Blueprint:3477`) is now a REAL `certReplace`
+   cert (no longer a `have`-sorry) — KERNEL-VERIFIED that the 9 step-1 `zAxBot` projection lemmas line up:
+   `Or.inl ⟨zAxBot s, zDerivation_zAxBot hbot, zReg_zAxBot s, zFresh_zAxBot s, (zSeqAnt_zAxBot s).trans (…),
+   by rw[fstIdx_zAxBot, fstIdx_zK], ⟨zero_le, icmp_zero_pos hposlast, isNF_zero⟩⟩`. The ex-falso obligation is
+   now ISOLATED to the single top-level sorried intro `zDerivation_zAxBot {s} (hbot : inAnt (^⊥) (seqAnt s)) :
+   ZDerivation (zAxBot s)` (`Crux2Blueprint:~3367`). `false_of_ZDerivesEmpty` axioms unchanged, no drift.
+2. **⏭ NEXT — discharge `zDerivation_zAxBot` = ZPhi disjunct #9 + the ripple (the one remaining ex-falso piece).**
+   Add the disjunct `(∃ s, d = zAxBot s ∧ inAnt (^⊥) (seqAnt s))` to `ZPhi` (`:5458`), `zphi_iff`,
+   `zphi_monotone`, `zphi_strong_finite`, `zblueprint` (Σ+Π, add a `qqFalsum`/`inAnt` clause), `zPhi_definable`.
+   Then thread a 9th branch through the ~125 `zDerivation_iff.mp` rcases (compiler-driven: each missing-pattern
+   error → add `| ⟨s, h, hbot⟩` and the obvious branch; new leaf is degree-0, most branches mirror tag-0/7).
+   Finally `zDerivation_zAxBot hbot := zDerivation_iff.mpr (Or.inr⁸ ⟨s, rfl, hbot⟩)` → DROPS that sorry → the
+   ex-falso `exFalsoClose` is FULLY real. Build green at the end (ATOMIC — the disjunct breaks all rcases until
+   the last is patched; ~2 lap effort; precedent lap-116 zAx1). Then `residual` (:3451) still needs (ii) C-exit
+   R-intro replay + (iii) tag-5/6 thread-escape; closing those + zAxBot DROPS the `genReduct_chain_noRedex_anySucc`
+   whole-lemma sorry.
 
 **DIRECTION note (for the next altitude lap):** DIRECTION.md's CURRENT DIRECTIVE (lap-161) MANDATED the ex-falso
 "by ROUTE 4 (induction on C); pure ASSEMBLY". That is REFUTED here in-kernel. Its own §2 fallback (the `zAxBot`

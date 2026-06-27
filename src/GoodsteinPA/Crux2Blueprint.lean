@@ -3353,6 +3353,18 @@ lemma certReplace_of_premise_cert {s r ds m j0 : V}
           (isNF_iotil_of_ZDerivation a hZa) (isNF_iotil_of_ZDerivation b hZb),
         isNF_iotil_of_ZDerivation _ hZ'⟩
 
+/-- **⊥-left axiom intro (`zAxBot`, tag 8) — NAMED sub-`sorry` (the ZPhi disjunct #9, lap 162).** The
+ex-falso / weakening rule `⊥ ∈ Γ ⟹ Γ → C` for ANY succedent: a `zAxBot s` with `⊥ ∈ seqAnt s` is a
+`ZDerivation`. This is the SOLE remaining obligation of `exFalsoClose` (`:3477`) — the rest of that
+`certReplace` cert is assembled + KERNEL-VERIFIED below from the `zAxBot` projection lemmas (`iotil = 0`
+strict-drops `iseqNaddIdg ds ≠ 0` via `icmp_zero_pos`, exactly the `leafCloseC` move; route-4 towers can't
+drop, `wip/ExFalsoOrdinalSpike.lean`). DISCHARGED by adding the 9th `ZPhi` disjunct
+`(∃ s, d = zAxBot s ∧ inAnt (^⊥) (seqAnt s))` + the `zDerivation_iff` ripple (PENDING_WORK lap-162 route-2
+step 2): then `zDerivation_iff.mpr (Or.inr⁸ ⟨s, rfl, hbot⟩)`. Soundness: `⊥∈Γ ⟹ Γ⊨C`, so the extended
+Z-system stays consistent (`false_of_ZDerivesEmpty` preserved). -/
+lemma zDerivation_zAxBot {s : V} (hbot : inAnt (^⊥ : V) (seqAnt s)) :
+    ZDerivation (zAxBot s) := sorry
+
 /-! ## §14.254 reduction GENERALIZED off `seqSucc = ⊥` (lap 159 — the `axMajorResidual` decomposition)
 
 The residual `axMajorResidual` (`:3417`) and its `Γ=∅` twin `descent_step_K_noncrit_axMajor` (`:3857`) both
@@ -3474,7 +3486,15 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
   -- the lone ex-falso `zAxNeg` needs a complementary `¬q,q` pair, not bare `⊥`). It needs an internal ⊥-elim:
   -- a structural induction on the UFormula `C` building the `R`-intros (`zIall`/`zIneg`/…) down to the `⊥`
   -- leaf, with `idg = 0` / a finite-head `iotil` that `õ`-drops vs `zK s r ds`. See PENDING_WORK lap-161.
-  have exFalsoClose : inAnt (^⊥ : V) (seqAnt s) → GenReductCert (zK s r ds) := fun _ => sorry
+  have exFalsoClose : inAnt (^⊥ : V) (seqAnt s) → GenReductCert (zK s r ds) := fun hbot =>
+    Or.inl ⟨zAxBot s,
+      zDerivation_zAxBot hbot,
+      zReg_zAxBot s, zFresh_zAxBot s,
+      (zSeqAnt_zAxBot s).trans (seqAntSeqFlag_zK_of_ZSeqAnt hseqant),
+      by rw [fstIdx_zAxBot, fstIdx_zK],
+      ⟨by rw [idg_zAxBot]; exact zero_le,
+       by rw [iotil_zAxBot, iotil_zK s r ds hds]; exact icmp_zero_pos hposlast,
+       by rw [iotil_zAxBot]; exact isNF_zero⟩⟩
   -- §5 ¬-axiom reduct (SUCCEDENT-AGNOSTIC): `inegF q, q ∈ Γ` ⟹ `zAxNeg s q` derives `Γ→C` for ANY `C`,
   -- õ-dropping (`iotil_zAxNeg`, finite head). Reused by both the tag-6 major and a `zAxNeg` cut-partner.
   have axNegCloseGen : ∀ q jw, jw < lh ds → iotil (znth ds jw) = oAtomLk (inegF q) →
