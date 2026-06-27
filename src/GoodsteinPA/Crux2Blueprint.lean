@@ -3425,6 +3425,21 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
       ⟨by rw [idg_zAtom]; exact zero_le,
        by rw [iotil_zAtom, iotil_zK s r ds hds]; exact icmp_zero_pos hposlast,
        by rw [iotil_zAtom]; exact isNF_zero⟩⟩
+  -- §14.254b SUCCEDENT-THREADING COLLAPSE: an active L-axiom formula `F` at `jstar` either threads to
+  -- `Γ` (directly, or after the leaf-chain collapse `leastSucc_in_ant_or_nonleaf`) — the LIVE escape — or
+  -- bottoms out at a NON-LEAF premise `m < jstar` concluding `F` (the narrowed residual: an R-intro is
+  -- killed by `hnolow`, leaving a `Rep` node, the §14.254b cut-partner). Shared by tag-5 (`F = ^∀⊥`) and
+  -- tag-6 (`F = inegF p'` and `F = p'`).
+  have collapse : ∀ F, inAnt F (chainAnt ds jstar) →
+      inAnt F (seqAnt s) ∨
+      ∃ m, m < jstar ∧ chainAsucc ds m = F ∧ zTag (znth ds m) ≠ 0 ∧ zTag (znth ds m) ≠ 7 := by
+    intro F hF
+    rcases hthread0 jstar hjle F hF with hΓ | ⟨i', hi', heq⟩
+    · exact Or.inl hΓ
+    · rcases leastSucc_in_ant_or_nonleaf hmem hthread0 hj0
+        (le_of_lt (lt_of_lt_of_le hi' hjle)) heq.symm with hΓ | ⟨m, hmn, hCm, h0, h7⟩
+      · exact Or.inl hΓ
+      · exact Or.inr ⟨m, lt_of_le_of_lt hmn hi', hCm, h0, h7⟩
   rcases zDerivation_iff.mp hmemZ with
     ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
     ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
@@ -3470,10 +3485,11 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
     have hin_chain : inAnt (^∀ (^⊥) : V) (chainAnt ds jstar) := by
       rw [hp_bot] at hin5
       simpa only [chainAnt, h, fstIdx_zAxAll] using hin5
-    rcases hthread0 jstar hjle (^∀ (^⊥)) hin_chain with hΓ | ⟨i', hi', heq⟩
-    · -- SUB-CASE (a): `^∀⊥ ∈ Γ`. Reduct = the ∀-instantiation axiom `zAxAll s ⊥ 0` deriving `Γ→⊥`.
-      have hXval : iotil (znth ds jstar) = oAtomLk (^∀ (^⊥) : V) := by rw [h, iotil_zAxAll, hp_bot]
-      refine Or.inl ⟨zAxAll s (^⊥) 0,
+    have hXval : iotil (znth ds jstar) = oAtomLk (^∀ (^⊥) : V) := by rw [h, iotil_zAxAll, hp_bot]
+    -- SUB-CASE (a) reduct, parametrized on `^∀⊥ ∈ Γ`: the ∀-instantiation axiom `zAxAll s ⊥ 0` deriving
+    -- `Γ→⊥` (`substs1 0 ⊥ = ⊥`), õ-dropping (`iotil_zAxAll = oAtomLk(^∀⊥)`, finite head).
+    have axAllClose : inAnt (^∀ (^⊥) : V) (seqAnt s) → GenReductCert (zK s r ds) := fun hΓ =>
+      Or.inl ⟨zAxAll s (^⊥) 0,
         zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
           ⟨s, (^⊥ : V), 0, rfl, IsSemiformula.falsum, hΓ,
             by have hsb : substs1 ℒₒᵣ (Bootstrapping.Arithmetic.numeral 0) (^⊥ : V) = (^⊥ : V) := by
@@ -3489,8 +3505,11 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
               (by simp only [oAtomLk, ocExp_ocOadd]) (by simp only [oAtomLk]; exact (ocOadd_pos _ _ _).ne')
               hXval hNF,
          by rw [iotil_zAxAll, ← hXval]; exact hNF jstar⟩⟩
-    · -- SUB-CASE (b): the active `^∀⊥` is the succedent of an upstream cut-partner `i' < jstar`. Residual.
-      exact axMajorResidual
+    -- SUB-CASE (a)∨(b) via the succedent-threading collapse: `^∀⊥` threads to `Γ` (→ `axAllClose`) or
+    -- bottoms out at a NON-LEAF `Rep` premise concluding `^∀⊥` (the narrowed residual).
+    rcases collapse (^∀ (^⊥)) hin_chain with hΓ | ⟨m, hmjs, hCm, hm0, hm7⟩
+    · exact axAllClose hΓ
+    · exact axMajorResidual
   · -- tag 6 (zAxNeg): dual L-axiom `Ax^0_{¬p'}` major (`red`-FIXPOINT). `zDerivation_zAxNeg_inv` gives
     -- BOTH `inegF p' ∈ Γ'` and `p' ∈ Γ'` (no `zAxAllSuccWff`, so no `p=⊥` collapse). Thread BOTH via
     -- `hthread0`: SUB-CASE (a) `inegF p', p' ∈ Γ` → fresh `zAxNeg s p'` derives `Γ→⊥` directly (the §5
@@ -3500,25 +3519,29 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
       simpa only [chainAnt, h, fstIdx_zAxNeg] using hin6
     have hin_p : inAnt p' (chainAnt ds jstar) := by
       simpa only [chainAnt, h, fstIdx_zAxNeg] using hin6_2
-    rcases hthread0 jstar hjle (inegF p') hin_negp with hΓ_neg | hres_neg
-    · rcases hthread0 jstar hjle p' hin_p with hΓ_p | hres_p
-      · -- SUB-CASE (a): `inegF p' ∈ Γ` AND `p' ∈ Γ`. Reduct = the §5 ¬-axiom `zAxNeg s p'` deriving `Γ→⊥`.
-        refine Or.inl ⟨zAxNeg s p',
-          zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-            ⟨s, p', rfl, hp6, hΓ_neg, hΓ_p⟩))))))),
-          zReg_zAxNeg s p', zFresh_zAxNeg s p',
-          (zSeqAnt_zAxNeg s p').trans (seqAntSeqFlag_zK_of_ZSeqAnt hseqant),
-          by rw [fstIdx_zAxNeg, fstIdx_zK],
-          ⟨by rw [idg_zAxNeg]; exact zero_le,
-           by rw [iotil_zAxNeg, iotil_zK s r ds hds]
-              exact finHead_iotil_lt_iseqNaddIdg hjlt
-                (by simp only [oAtomLk, ocExp_ocOadd]) (by simp only [oAtomLk]; exact (ocOadd_pos _ _ _).ne')
-                hXval hNF,
-           by rw [iotil_zAxNeg, ← hXval]; exact hNF jstar⟩⟩
-      · -- SUB-CASE (b): `p'` is the succedent of an upstream cut-partner `i' < jstar`. Residual.
-        exact axMajorResidual
-    · -- SUB-CASE (b): `inegF p'` is the succedent of an upstream cut-partner `i' < jstar`. Residual.
-      exact axMajorResidual
+    -- SUB-CASE (a) reduct, parametrized on BOTH `inegF p' ∈ Γ` and `p' ∈ Γ`: the §5 ¬-axiom `zAxNeg s p'`
+    -- deriving `Γ→⊥` directly (`¬p',p' ∈ Γ ⟹ Γ→anything`), õ-dropping (`iotil_zAxNeg`, finite head).
+    have axNegClose : inAnt (inegF p' : V) (seqAnt s) → inAnt p' (seqAnt s) →
+        GenReductCert (zK s r ds) := fun hΓ_neg hΓ_p =>
+      Or.inl ⟨zAxNeg s p',
+        zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+          ⟨s, p', rfl, hp6, hΓ_neg, hΓ_p⟩))))))),
+        zReg_zAxNeg s p', zFresh_zAxNeg s p',
+        (zSeqAnt_zAxNeg s p').trans (seqAntSeqFlag_zK_of_ZSeqAnt hseqant),
+        by rw [fstIdx_zAxNeg, fstIdx_zK],
+        ⟨by rw [idg_zAxNeg]; exact zero_le,
+         by rw [iotil_zAxNeg, iotil_zK s r ds hds]
+            exact finHead_iotil_lt_iseqNaddIdg hjlt
+              (by simp only [oAtomLk, ocExp_ocOadd]) (by simp only [oAtomLk]; exact (ocOadd_pos _ _ _).ne')
+              hXval hNF,
+         by rw [iotil_zAxNeg, ← hXval]; exact hNF jstar⟩⟩
+    -- Collapse BOTH `inegF p'` and `p'` to `Γ` (succedent-threading); both in `Γ` → `axNegClose`, else the
+    -- narrowed NON-LEAF residual.
+    rcases collapse (inegF p') hin_negp with hΓ_neg | ⟨mn, hmnjs, hCmn, hmn0, hmn7⟩
+    · rcases collapse p' hin_p with hΓ_p | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
+      · exact axNegClose hΓ_neg hΓ_p
+      · exact axMajorResidual
+    · exact axMajorResidual
   · -- tag 7 (zAx1): a leaf (§5 logical axiom, like zAtom); `⊥ ∈ Γ`. Same trivial-axiom collapse. PROVEN.
     refine leafClose ?_
     have hin : inAnt (^⊥ : V) (chainAnt ds jstar) := by

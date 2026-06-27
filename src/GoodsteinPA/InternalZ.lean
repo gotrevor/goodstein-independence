@@ -9062,6 +9062,63 @@ lemma chainAsucc_threaded_of_leaf {s ds j0 k : V}
   · rw [hant] at h; simp [inAnt, lh_empty] at h
   · obtain ⟨i', hi', heq⟩ := h; exact ⟨i', hi', heq.symm⟩
 
+/-- **General-Γ succedent-threading collapse (lap-156).** The general-Γ (possibly NONEMPTY `seqAnt s`)
+analogue of `chainAsucc_threaded_of_leaf`: it RETURNS the `V ∈ Γ` disjunct rather than killing it via
+`seqAnt s = ∅`. For a chain with the antecedent-threading invariant `hthread` (the `isChainInf` field),
+if some premise `n ≤ j0` has succedent `chainAsucc ds n = V`, then the LEAST-indexed premise `m ≤ n` with
+succedent `V` either (a) puts `V ∈ Γ` — when it is an atom/`Ax¹` LEAF (its succedent sits in its OWN
+antecedent, and threading routes it to Γ since by leastness no STRICTLY-EARLIER premise concludes `V`), or
+(b) is a NON-LEAF (`zTag ∉ {0,7}`) premise concluding `V`. Consumed by `genReduct_chain_noRedex`'s tag-5/6
+cut-partner sub-case (b): the leaf chain collapses the cut formula to Γ (→ the proven sub-case (a) reduct),
+leaving only the NON-LEAF producer as the residual (an R-intro `zIall`/`zIneg` of the cut formula is then
+killed by `hnolow` — it would form an `isRedexPair` with the major premise — so the residual narrows to a
+`Rep` node concluding `V`, the narrowed §14.254b target). -/
+lemma leastSucc_in_ant_or_nonleaf {s ds j0 C : V}
+    (hZprem : ∀ i < lh ds, ZDerivation (znth ds i))
+    (hthread : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+      inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hj0 : j0 < lh ds)
+    {n : V} (hn : n ≤ j0) (hCn : chainAsucc ds n = C) :
+    inAnt C (seqAnt s) ∨
+    ∃ m, m ≤ n ∧ chainAsucc ds m = C ∧ zTag (znth ds m) ≠ 0 ∧ zTag (znth ds m) ≠ 7 := by
+  have hQdef : 𝚺₁-Predicate (fun x : V => chainAsucc ds x = C ∧ x ≤ j0) := by
+    apply Definable.and ?_ (by definability)
+    exact DefinableRel.comp (by definability)
+      (DefinableFunction₂.comp (F := chainAsucc)
+        (DefinableFunction.const ds) (DefinableFunction.var 0))
+      (DefinableFunction.const C)
+  obtain ⟨m, ⟨hCm, hmle⟩, hmin⟩ :=
+    InductionOnHierarchy.least_number 𝚺 1 hQdef ⟨hCn, hn⟩
+  have hmn : m ≤ n := not_lt.mp (fun hlt => hmin n hlt ⟨hCn, hn⟩)
+  have hmlt : m < lh ds := lt_of_le_of_lt hmle hj0
+  have hmemZ : ZDerivation (znth ds m) := hZprem m hmlt
+  rcases zDerivation_iff.mp hmemZ with
+    ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+  · -- tag 0 (zAtom): succedent in its own antecedent; threading + leastness ⟹ `C ∈ Γ`.
+    have hin : inAnt C (chainAnt ds m) := by
+      have hinv := zDerivation_zAtom_inv (h ▸ hmemZ)
+      have hCeq : C = seqSucc s' := by rw [← hCm, chainAsucc, h, fstIdx_zAtom]
+      rw [hCeq]; simpa only [chainAnt, h, fstIdx_zAtom] using hinv
+    rcases hthread m hmle C hin with hΓ | ⟨i', hi', heq⟩
+    · exact Or.inl hΓ
+    · exact absurd (hmin i' hi' ⟨heq.symm, le_of_lt (lt_of_lt_of_le hi' hmle)⟩) (by simp)
+  · exact Or.inr ⟨m, hmn, hCm, by rw [h]; simp, by rw [h]; simp⟩
+  · exact Or.inr ⟨m, hmn, hCm, by rw [h]; simp, by rw [h]; simp⟩
+  · exact Or.inr ⟨m, hmn, hCm, by rw [h]; simp, by rw [h]; simp⟩
+  · exact Or.inr ⟨m, hmn, hCm, by rw [h]; simp, by rw [h]; simp⟩
+  · exact Or.inr ⟨m, hmn, hCm, by rw [h]; simp, by rw [h]; simp⟩
+  · exact Or.inr ⟨m, hmn, hCm, by rw [h]; simp, by rw [h]; simp⟩
+  · -- tag 7 (zAx1): succedent in its own antecedent; threading + leastness ⟹ `C ∈ Γ`.
+    have hin : inAnt C (chainAnt ds m) := by
+      have hinv := zDerivation_zAx1_inv (h ▸ hmemZ)
+      have hCeq : C = seqSucc s' := by rw [← hCm, chainAsucc, h, fstIdx_zAx1]
+      rw [hCeq]; simpa only [chainAnt, h, fstIdx_zAx1] using hinv
+    rcases hthread m hmle C hin with hΓ | ⟨i', hi', heq⟩
+    · exact Or.inl hΓ
+    · exact absurd (hmin i' hi' ⟨heq.symm, le_of_lt (lt_of_lt_of_le hi' hmle)⟩) (by simp)
+
 /-- **The least chain exit is NOT an `isymRep` leaf** (lap 121, Sub-lemma A of the generalized redex
 finder). The `isChainInf` exit `j0` (`chainAsucc ds j0 ∈ {seqSucc s, ⊥}`) need not be unique. If every
 `isymRep` premise `≤ j0` re-routes its succedent to a STRICTLY earlier premise (`hreroute`, supplied by
