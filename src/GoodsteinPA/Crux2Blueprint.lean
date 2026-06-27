@@ -3554,11 +3554,17 @@ lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
         simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqn
       have hin_q : inAnt q (chainAnt ds m') := by
         simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqp
-      rcases collapse m' hm'j0 (inegF q) hin_neg with hΓ_neg | _
-      · rcases collapse m' hm'j0 q hin_q with hΓ_q | _
+      rcases collapse m' hm'j0 (inegF q) hin_neg with hΓ_neg | ⟨mq, hmqjs, hCmq, hmq0, hmq7⟩
+      · rcases collapse m' hm'j0 q hin_q with hΓ_q | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
         · exact axNegCloseGen q m' hm'lt hXq hq hΓ_neg hΓ_q
+        · -- `q` threads to a non-leaf producer `mp`; Rep (3,4) → reduce, else residual. (lap-164)
+          by_cases h34 : zTag (znth ds mp) = 3 ∨ zTag (znth ds mp) = 4
+          · exact repProducerClose mp (le_of_lt (lt_of_lt_of_le hmpjs hm'j0)) (lt_trans hmpjs hm'lt) h34
+          · exact residual
+      · -- `inegF q` threads to a non-leaf producer `mq`; Rep (3,4) → reduce, else residual. (lap-164)
+        by_cases h34 : zTag (znth ds mq) = 3 ∨ zTag (znth ds mq) = 4
+        · exact repProducerClose mq (le_of_lt (lt_of_lt_of_le hmqjs hm'j0)) (lt_trans hmqjs hm'lt) h34
         · exact residual
-      · exact residual
     · rw [h''] at h6; simp at h6
     · rw [h''] at h6; simp at h6
   -- §14.254b producer dispatch (succedent-agnostic): {3,4} → repProducerClose; 5 → CLIMB; 6 → closeZAxNeg.
@@ -3876,11 +3882,17 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
         simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqn
       have hin_q : inAnt q (chainAnt ds m') := by
         simpa only [chainAnt, h'', fstIdx_zAxNeg] using hqp
-      rcases collapse m' hm'j0 (inegF q) hin_neg with hΓ_neg | _
-      · rcases collapse m' hm'j0 q hin_q with hΓ_q | _
+      rcases collapse m' hm'j0 (inegF q) hin_neg with hΓ_neg | ⟨mq, hmqjs, hCmq, hmq0, hmq7⟩
+      · rcases collapse m' hm'j0 q hin_q with hΓ_q | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
         · exact axNegCloseGen q m' hm'lt hXq hq hΓ_neg hΓ_q
+        · -- `q` threads to a non-leaf producer `mp`; Rep (3,4) → reduce, else residual. (lap-164)
+          by_cases h34 : zTag (znth ds mp) = 3 ∨ zTag (znth ds mp) = 4
+          · exact repProducerClose mp (le_of_lt (lt_of_lt_of_le hmpjs hm'j0)) (lt_trans hmpjs hm'lt) h34
+          · exact axMajorResidual
+      · -- `inegF q` threads to a non-leaf producer `mq`; Rep (3,4) → reduce, else residual. (lap-164)
+        by_cases h34 : zTag (znth ds mq) = 3 ∨ zTag (znth ds mq) = 4
+        · exact repProducerClose mq (le_of_lt (lt_of_lt_of_le hmqjs hm'j0)) (lt_trans hmqjs hm'lt) h34
         · exact axMajorResidual
-      · exact axMajorResidual
     · rw [h''] at h6; simp at h6
     · rw [h''] at h6; simp at h6
   -- §14.254b producer dispatch: a NON-LEAF producer `m` concluding the cut formula is reduced by
