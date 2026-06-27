@@ -9163,6 +9163,108 @@ lemma rightSym_producer_redex {ds j0 jstar m F kk : V}
   · rw [hjL]; simp [isymLk]
   · rw [hjL]; simp only [isymLk, pi₂_pair]; exact hA.symm
 
+set_option maxHeartbeats 1600000 in
+/-- **§14.254b rank-climb: a left-axiom major's cut formula is always produced by a reducible / ¬-axiom
+node, or threads to `Γ` (lap-157).** The genuine WEDGE for the tag-5 (`zAxAll`) residual. The major at
+`jstar` is a LEFT axiom on a `^∀`-formula `F` (`tp = isymLk kk F`, `F ∈ chainAnt ds jstar`). Threading `F`
+either lands a `^∀`-formula IN `Γ` (the escape), or bottoms out (via `leastSucc_in_ant_or_nonleaf`) at a
+NON-LEAF producer — an R-introduction (`zIall`/`zIneg`, right symbol) is killed by `hnolow` (it forms an
+`isRedexPair` with its left-axiom consumer), leaving a `Rep`/¬-axiom node (`zInd`/`zK`/`zAxNeg`, tags
+{3,4,6}). The `zAxAll` (tag 5) producer cannot be a dead end: its OWN active formula `^∀ p'` is again a
+`^∀`-formula that threads one rank UP — so it cannot be the LEAST `^∀`-producing axiom/`Rep` node (the
+least-number search collapses the all-`zAxAll` climb to a strictly-earlier producer, contradicting
+minimality). Hence the cut formula `^∀⊥` is ALWAYS produced by a `zInd`/`zK` (the general-succedent
+reduction residual) or a `zAxNeg` (closed by `tryProducerClose`), or threads to `Γ`. This DISCHARGES the
+"`zAxAll` producer is an independent gap" worry: the tag-5 residual collapses onto the tag-{3,4,6} cases. -/
+lemma climb_to_rep_producer {s ds j0 jstar kk F : V}
+    (hZprem : ∀ i < lh ds, ZDerivation (znth ds i))
+    (hthread : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hj0 : j0 < lh ds)
+    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
+    (hjsj0 : jstar ≤ j0)
+    (hjL : tp (znth ds jstar) = isymLk kk F)
+    (hFall : ∃ Z, F = (^∀ Z : V))
+    (hFin : inAnt F (chainAnt ds jstar)) :
+    (∃ G, inAnt G (seqAnt s) ∧ ∃ Z, G = (^∀ Z : V)) ∨
+    (∃ m, m ≤ j0 ∧ m < lh ds ∧
+      (zTag (znth ds m) = 3 ∨ zTag (znth ds m) = 4 ∨ zTag (znth ds m) = 6)) := by
+  -- ONE climb step from a left-axiom node `i` on cut formula `F'` (a `^∀`-formula): thread its active
+  -- formula → escape (`F' ∈ Γ`) or a NON-LEAF producer `m < i` of `F'` (R-intro killed by `hnolow`).
+  have producerStep : ∀ i ki F', i ≤ j0 → tp (znth ds i) = isymLk ki F' →
+      inAnt F' (chainAnt ds i) → (∃ Z, F' = (^∀ Z : V)) →
+      (∃ G, inAnt G (seqAnt s) ∧ ∃ Z, G = (^∀ Z : V)) ∨
+      (∃ m, m < i ∧ m < lh ds ∧
+        (zTag (znth ds m) = 3 ∨ zTag (znth ds m) = 4 ∨ zTag (znth ds m) = 5 ∨
+          zTag (znth ds m) = 6) ∧ ∃ Z, chainAsucc ds m = (^∀ Z : V)) := by
+    intro i ki F' hi hiL hF'in hF'all
+    have hilt : i < lh ds := lt_of_le_of_lt hi hj0
+    rcases hthread i hi F' hF'in with hΓ | ⟨i', hi'lt, hi'eq⟩
+    · exact Or.inl ⟨F', hΓ, hF'all⟩
+    · have hi'j0 : i' ≤ j0 := le_of_lt (lt_of_lt_of_le hi'lt hi)
+      rcases leastSucc_in_ant_or_nonleaf hZprem hthread hj0 hi'j0 hi'eq.symm with
+        hΓ | ⟨m, hmi', hCm, hm0, hm7⟩
+      · exact Or.inl ⟨F', hΓ, hF'all⟩
+      · have hmi : m < i := lt_of_le_of_lt hmi' hi'lt
+        have hmlt : m < lh ds := lt_trans hmi hilt
+        rcases zDerivation_iff.mp (hZprem m hmlt) with
+          ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+          ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+          ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+        · exact absurd (show zTag (znth ds m) = 0 by rw [h]; simp) hm0
+        · exact (rightSym_producer_redex (hZprem m hmlt) hiL hilt hi hmi hCm
+            (by rw [h, tp_zIall, pi₁_isymR]) hnolow).elim
+        · exact (rightSym_producer_redex (hZprem m hmlt) hiL hilt hi hmi hCm
+            (by rw [h, tp_zIneg, pi₁_isymR]) hnolow).elim
+        · exact Or.inr ⟨m, hmi, hmlt, Or.inl (by rw [h]; simp), hCm ▸ hF'all⟩
+        · exact Or.inr ⟨m, hmi, hmlt, Or.inr (Or.inl (by rw [h]; simp)), hCm ▸ hF'all⟩
+        · exact Or.inr ⟨m, hmi, hmlt, Or.inr (Or.inr (Or.inl (by rw [h]; simp))), hCm ▸ hF'all⟩
+        · exact Or.inr ⟨m, hmi, hmlt, Or.inr (Or.inr (Or.inr (by rw [h]; simp))), hCm ▸ hF'all⟩
+        · exact absurd (show zTag (znth ds m) = 7 by rw [h]; simp) hm7
+  -- `Z` is strictly below `^∀ Z = ⟪6,Z⟫+1`, so the "is a `^∀`-formula" test bounds its witness.
+  have hZlt : ∀ Z : V, Z < (^∀ Z : V) := fun Z => by
+    rw [qqAll]; exact lt_succ_iff_le.mpr (le_pair_right 6 Z)
+  -- Seed the least-producer search by threading `F` at `jstar`.
+  rcases producerStep jstar kk F hjsj0 hjL hFin hFall with hesc | ⟨n₀, hn₀i, hn₀lt, hn₀tag, hn₀all⟩
+  · exact Or.inl hesc
+  · -- Least-indexed `^∀`-producing axiom/`Rep` node (tags {3,4,5,6}) `≤ j0`.
+    have hPdef : 𝚺₁-Predicate (fun x : V =>
+        x ≤ j0 ∧ (zTag (znth ds x) = 3 ∨ zTag (znth ds x) = 4 ∨ zTag (znth ds x) = 5 ∨
+          zTag (znth ds x) = 6) ∧ ∃ Z < chainAsucc ds x, chainAsucc ds x = (^∀ Z : V)) := by
+      apply Definable.and (by definability)
+      apply Definable.and (by definability)
+      haveI hsub : 𝚺₁-Predicate (fun y : V => ∃ Z < y, y = (^∀ Z : V)) := by definability
+      exact Definable.comp₁ (P := fun y : V => ∃ Z < y, y = (^∀ Z : V))
+        (DefinableFunction₂.comp (F := chainAsucc)
+          (DefinableFunction.const ds) (DefinableFunction.var 0))
+    have hn₀j0 : n₀ ≤ j0 := le_of_lt (lt_of_lt_of_le hn₀i hjsj0)
+    have hn₀all' : ∃ Z < chainAsucc ds n₀, chainAsucc ds n₀ = (^∀ Z : V) := by
+      obtain ⟨Z, hZ⟩ := hn₀all; exact ⟨Z, hZ ▸ hZlt Z, hZ⟩
+    obtain ⟨m₀, ⟨hm₀j0, hm₀tag, hm₀all⟩, hmin⟩ :=
+      InductionOnHierarchy.least_number 𝚺 1 hPdef ⟨hn₀j0, hn₀tag, hn₀all'⟩
+    have hm₀lt : m₀ < lh ds := lt_of_le_of_lt hm₀j0 hj0
+    rcases zDerivation_iff.mp (hZprem m₀ hm₀lt) with
+      ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+      ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+      ⟨s', p', k', h, hp5, hin5, hsucc5⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+    · rw [h] at hm₀tag; simp at hm₀tag
+    · rw [h] at hm₀tag; simp at hm₀tag
+    · rw [h] at hm₀tag; simp at hm₀tag
+    · exact Or.inr ⟨m₀, hm₀j0, hm₀lt, Or.inl (by rw [h]; simp)⟩      -- zInd (3)
+    · exact Or.inr ⟨m₀, hm₀j0, hm₀lt, Or.inr (Or.inl (by rw [h]; simp))⟩  -- zK (4)
+    · -- zAxAll (5): its active `^∀ p'` is a `^∀`-formula; climb one step.
+      have hjLm₀ : tp (znth ds m₀) = isymLk k' (^∀ p' : V) := by rw [h, tp_zAxAll]
+      have hin' : inAnt (^∀ p' : V) (chainAnt ds m₀) := by
+        simpa only [chainAnt, h, fstIdx_zAxAll] using hin5
+      rcases producerStep m₀ k' (^∀ p') hm₀j0 hjLm₀ hin' ⟨p', rfl⟩ with
+        hesc | ⟨m', hm'm₀, hm'lt, hm'tag, hm'all⟩
+      · exact Or.inl hesc
+      · obtain ⟨Z', hZ'eq⟩ := hm'all
+        exact absurd ⟨le_of_lt (lt_of_lt_of_le hm'm₀ hm₀j0), hm'tag, Z', hZ'eq ▸ hZlt Z', hZ'eq⟩
+          (hmin m' hm'm₀)
+    · exact Or.inr ⟨m₀, hm₀j0, hm₀lt, Or.inr (Or.inr (by rw [h]; simp))⟩  -- zAxNeg (6)
+    · rw [h] at hm₀tag; simp at hm₀tag
+
 /-- **The least chain exit is NOT an `isymRep` leaf** (lap 121, Sub-lemma A of the generalized redex
 finder). The `isChainInf` exit `j0` (`chainAsucc ds j0 ∈ {seqSucc s, ⊥}`) need not be unique. If every
 `isymRep` premise `≤ j0` re-routes its succedent to a STRICTLY earlier premise (`hreroute`, supplied by
