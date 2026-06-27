@@ -52,10 +52,12 @@ soundness. Precedent: lap-116 added `zAx1` as the 8th disjunct ("64-site ripple"
 2-3 lap structural extension, NOT "pure assembly".
 
 ### 🎯 NEXT (route 2, in order) — each step a green checkpoint
-1. **`zAxBot` constructor + projections (additive, green).** `def zAxBot`, then `@[simp] zTag_zAxBot = 8`,
-   `fstIdx_zAxBot = s`, `iotil_zAxBot = 0` (via `iotil_eq_ioNext` → `ioNext` else-0), `idg_zAxBot = 0`,
-   `iord_zAxBot = 0`, `isNF_iotil_zAxBot`, and `zReg_zAxBot`/`zFresh_zAxBot`/`zSeqAnt_zAxBot` (mirror `zAtom`).
-   Build green. (Mirror the `zAtom`/`zAx1` projection lemmas exactly — same encoding shape.)
+1. ✅ **DONE (lap 162, build 🟢 1326).** `zAxBot` constructor + projections (additive). Landed in
+   `InternalZ.lean`: `def zAxBot s := ⟪s,8,0⟫+1` + `zAxBotGraph`/`zAxBot_defined`, `seq_lt_zAxBot`,
+   `zTag_zAxBot = 8`, `fstIdx_zAxBot = s`, `tp_zAxBot = isymRep`, `idg_zAxBot = 0`, `iotil_zAxBot = 0`,
+   `isNF_iotil_zAxBot`, `iord_zAxBot = 0`; in `Zsubst.lean`: `zReg_zAxBot = 0`, `zFresh_zAxBot = 0`,
+   `zSeqAnt_zAxBot = seqAntSeqFlag s`. All mirror `zAtom` (dispatchers default tag 8 → 0). `false_of_ZDerivesEmpty`
+   axioms unchanged (`[propext, sorryAx, choice, Quot.sound]`, no drift).
 2. **ZPhi disjunct #9 + the ripple.** Add to `ZPhi` (`:5458`), `zphi_iff`, `zphi_monotone`, `zphi_strong_finite`,
    `zblueprint` (Σ+Π), `zPhi_definable`. Then thread a 9th branch through the ~125 `zDerivation_iff.mp` rcases
    (compiler-driven: each missing-pattern error → add `| ⟨s, h, hbot⟩` and the obvious branch; the new leaf is a

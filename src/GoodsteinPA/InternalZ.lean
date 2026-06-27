@@ -655,6 +655,23 @@ def zAx1Graph : 𝚺₀.Semisentence 3 :=
 instance zAx1_defined : 𝚺₀-Function₂ (zAx1 : V → V → V) via zAx1Graph := .mk fun v ↦ by
   simp_all [zAx1Graph, numeral_eq_natCast, zAx1]
 
+/-- **⊥-left leaf `Ax⊥` (tag 8, lap 162).** The ex-falso / weakening axiom `⊥ ∈ Γ ⟹ Γ → C` for ANY
+succedent `C`. Encoded exactly like `zAtom` (a `⟪s, tag, 0⟫+1` leaf) but with tag `8`, so it inherits
+`iotil = idg = iord = 0` (the dispatchers `ioNext`/`idgTable`/`zRegNext`/… all default unknown tags to `0`)
+— the UNIQUE `iotil = 0` reduct that strict-`õ`-drops a ⊥-exit cut chain (route-4 R-intro towers cannot
+drop; only an `iotil=0` leaf can — `wip/ExFalsoOrdinalSpike.lean`, lap 162). The ZPhi disjunct + its ripple
+wire this in (PENDING_WORK lap-162). -/
+noncomputable def zAxBot (s : V) : V := ⟪s, 8, 0⟫ + 1
+
+def zAxBotGraph : 𝚺₀.Semisentence 2 :=
+  .mkSigma “y s. ∃ y' < y, !pair₃Def y' s 8 0 ∧ y = y' + 1”
+instance zAxBot_defined : 𝚺₀-Function₁ (zAxBot : V → V) via zAxBotGraph := .mk fun v ↦ by
+  simp_all [zAxBotGraph, numeral_eq_natCast, zAxBot]
+
+@[simp] lemma seq_lt_zAxBot (s : V) : s < zAxBot s := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma zTag_zAxBot (s : V) : zTag (zAxBot s) = 8 := by simp [zTag, sndIdx, zAxBot]
+@[simp] lemma fstIdx_zAxBot (s : V) : fstIdx (zAxBot s) = s := by simp [fstIdx, zAxBot]
+
 @[simp] lemma s_lt_zAx1 (s C : V) : s < zAx1 s C := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma C_lt_zAx1 (s C : V) : C < zAx1 s C :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
@@ -2752,6 +2769,17 @@ lemma isNF_omega_pow {e : V} (he : isNF e) : isNF (ocOadd e 1 0) :=
 
 @[simp] lemma isNF_iotil_zAtom (s : V) : isNF (iotil (zAtom s)) := by
   rw [iotil_zAtom]; exact isNF_zero
+
+/-! ### `zAxBot` (tag 8) ordinal/projection lemmas — all mirror `zAtom` (deps available here). -/
+@[simp] lemma tp_zAxBot (s : V) : tp (zAxBot s) = isymRep := by simp [tp]
+@[simp] lemma idg_zAxBot (s : V) : idg (zAxBot s) = 0 := by
+  rw [idg_eq_idgNext (by simp [zAxBot]), idgNext]; simp [zTag_zAxBot]
+@[simp] lemma iotil_zAxBot (s : V) : iotil (zAxBot s) = 0 := by
+  rw [iotil_eq_ioNext (by simp [zAxBot]), ioNext]; simp [zTag_zAxBot]
+@[simp] lemma isNF_iotil_zAxBot (s : V) : isNF (iotil (zAxBot s)) := by
+  rw [iotil_zAxBot]; exact isNF_zero
+@[simp] lemma iord_zAxBot (s : V) : iord (zAxBot s) = 0 := by
+  rw [iord_eq, idg_zAxBot, iotil_zAxBot, iotower_zero]
 
 /-- `õ(I^a_∀xF d0)` is NF when `õ(d0)` is — the assignment is `õ(d0) + 1`, NF by `isNF_iadd_one_right`. -/
 @[simp] lemma isNF_iotil_zIall {s a p d0 : V} (hd0 : isNF (iotil d0)) :

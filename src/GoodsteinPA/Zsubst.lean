@@ -2133,6 +2133,15 @@ lemma zSeqAnt_eq_zSeqAntNext {c : V} (hpos : 0 < c) :
 @[simp] lemma zSeqAnt_zAtom (s : V) : zSeqAnt (zAtom s) = seqAntSeqFlag s := by
   rw [zSeqAnt_eq_zSeqAntNext (by simp [zAtom]), zSeqAntNext, fstIdx_zAtom]; simp [zTag_zAtom]
 
+/-- `zReg`/`zFresh`/`zSeqAnt` for the tag-8 ⊥-left leaf `zAxBot` — mirror `zAtom` (dispatchers default
+unknown tags to `0`). -/
+@[simp] lemma zReg_zAxBot (s : V) : zReg (zAxBot s) = 0 := by
+  rw [zReg_eq_zRegNext (by simp [zAxBot]), zRegNext]; simp [zTag_zAxBot]
+@[simp] lemma zFresh_zAxBot (s : V) : zFresh (zAxBot s) = 0 := by
+  rw [zFresh_eq_zFreshNext (by simp [zAxBot]), zFreshNext]; simp [zTag_zAxBot]
+@[simp] lemma zSeqAnt_zAxBot (s : V) : zSeqAnt (zAxBot s) = seqAntSeqFlag s := by
+  rw [zSeqAnt_eq_zSeqAntNext (by simp [zAxBot]), zSeqAntNext, fstIdx_zAxBot]; simp [zTag_zAxBot]
+
 @[simp] lemma zSeqAnt_zIall (s a p d0 : V) :
     zSeqAnt (zIall s a p d0) = max (seqAntSeqFlag s) (zSeqAnt d0) := by
   rw [zSeqAnt_eq_zSeqAntNext (by simp [zIall]), zSeqAntNext,
