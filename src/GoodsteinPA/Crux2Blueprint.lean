@@ -3506,10 +3506,15 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
               hXval hNF,
          by rw [iotil_zAxAll, ← hXval]; exact hNF jstar⟩⟩
     -- SUB-CASE (a)∨(b) via the succedent-threading collapse: `^∀⊥` threads to `Γ` (→ `axAllClose`) or
-    -- bottoms out at a NON-LEAF `Rep` premise concluding `^∀⊥` (the narrowed residual).
+    -- bottoms out at a NON-LEAF premise `m < jstar` concluding `^∀⊥`. A RIGHT-symbol producer
+    -- (`π₁(tp)=0`) forms an `isRedexPair` with `jstar` (the left ∀-axiom on `^∀⊥`) → killed by `hnolow`;
+    -- so the residual is a genuine `Rep` node (tags {3,4,5,6}) concluding `^∀⊥` (narrowed §14.254b target).
+    have hjL : tp (znth ds jstar) = isymLk k' (^∀ (^⊥) : V) := by rw [h, tp_zAxAll, hp_bot]
     rcases collapse (^∀ (^⊥)) hin_chain with hΓ | ⟨m, hmjs, hCm, hm0, hm7⟩
     · exact axAllClose hΓ
-    · exact axMajorResidual
+    · by_cases h0 : π₁ (tp (znth ds m)) = 0
+      · exact (rightSym_producer_redex (hmem m (lt_trans hmjs hjlt)) hjL hjlt hjle hmjs hCm h0 hnolow).elim
+      · exact axMajorResidual
   · -- tag 6 (zAxNeg): dual L-axiom `Ax^0_{¬p'}` major (`red`-FIXPOINT). `zDerivation_zAxNeg_inv` gives
     -- BOTH `inegF p' ∈ Γ'` and `p' ∈ Γ'` (no `zAxAllSuccWff`, so no `p=⊥` collapse). Thread BOTH via
     -- `hthread0`: SUB-CASE (a) `inegF p', p' ∈ Γ` → fresh `zAxNeg s p'` derives `Γ→⊥` directly (the §5
@@ -3536,12 +3541,18 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
               hXval hNF,
          by rw [iotil_zAxNeg, ← hXval]; exact hNF jstar⟩⟩
     -- Collapse BOTH `inegF p'` and `p'` to `Γ` (succedent-threading); both in `Γ` → `axNegClose`, else the
-    -- narrowed NON-LEAF residual.
+    -- narrowed NON-LEAF residual. For the `inegF p'` half, `jstar` is the left ¬-axiom on `inegF p'`, so a
+    -- RIGHT-symbol producer is killed by `hnolow` (→ `Rep`-node residual); the `p'` half has no left-axiom
+    -- on `p'` at `jstar`, so its non-leaf producer stays a full residual.
+    have hjLneg : tp (znth ds jstar) = isymLk 0 (inegF p') := by rw [h, tp_zAxNeg]
     rcases collapse (inegF p') hin_negp with hΓ_neg | ⟨mn, hmnjs, hCmn, hmn0, hmn7⟩
     · rcases collapse p' hin_p with hΓ_p | ⟨mp, hmpjs, hCmp, hmp0, hmp7⟩
       · exact axNegClose hΓ_neg hΓ_p
       · exact axMajorResidual
-    · exact axMajorResidual
+    · by_cases h0 : π₁ (tp (znth ds mn)) = 0
+      · exact (rightSym_producer_redex (hmem mn (lt_trans hmnjs hjlt)) hjLneg hjlt hjle hmnjs hCmn h0
+          hnolow).elim
+      · exact axMajorResidual
   · -- tag 7 (zAx1): a leaf (§5 logical axiom, like zAtom); `⊥ ∈ Γ`. Same trivial-axiom collapse. PROVEN.
     refine leafClose ?_
     have hin : inAnt (^⊥ : V) (chainAnt ds jstar) := by

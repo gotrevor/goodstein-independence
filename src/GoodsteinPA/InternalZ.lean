@@ -9119,6 +9119,50 @@ lemma leastSucc_in_ant_or_nonleaf {s ds j0 C : V}
     · exact Or.inl hΓ
     · exact absurd (hmin i' hi' ⟨heq.symm, le_of_lt (lt_of_lt_of_le hi' hmle)⟩) (by simp)
 
+/-- **A right-symbol premise's `tp`-formula IS its succedent** (lap-156). For a `ZDerivation` whose `tp`
+discriminant is a RIGHT symbol (`π₁ (tp d) = 0`), the carried formula `π₂ (tp d)` equals the succedent
+`seqSucc (fstIdx d)`. The only right-symbol constructors are `zIall` (`tp = isymR (^∀p)`, succedent `^∀p`)
+and `zIneg` (`tp = isymR (¬p ⋎ ⊥)`, succedent `inegF p`); every other constructor has `π₁ (tp) ∈ {1,2}`,
+contradicting the hypothesis. -/
+lemma pi2_tp_eq_seqSucc_of_pi1_zero {d : V} (hZ : ZDerivation d) (h0 : π₁ (tp d) = 0) :
+    π₂ (tp d) = seqSucc (fstIdx d) := by
+  rcases zDerivation_iff.mp hZ with
+    ⟨s', h, _⟩ | ⟨s', a', p', d0', h, _, _⟩ | ⟨s', p', d0', h, _, _⟩ |
+    ⟨s', at'', p', d0', d1', h, _, _⟩ | ⟨s', r', ds', h, _, _, _⟩ |
+    ⟨s', p', k', h, _, _⟩ | ⟨s', p', h, _, _⟩ | ⟨s', C', h, _⟩
+  · rw [h] at h0; simp [tp_zAtom] at h0
+  · have hsucc : seqSucc s' = (^∀ p' : V) := (zDerivation_zIall_inv (h ▸ hZ)).2.1
+    rw [h, tp_zIall, fstIdx_zIall, pi₂_isymR]; exact hsucc.symm
+  · have hsucc : seqSucc s' = (inegF p' : V) := (zDerivation_zIneg_inv (h ▸ hZ)).2.1
+    rw [h, tp_zIneg, fstIdx_zIneg, pi₂_isymR]; exact hsucc.symm
+  · rw [h] at h0; simp [tp_zInd] at h0
+  · rw [h] at h0; simp [tp_zK] at h0
+  · rw [h] at h0; simp [tp_zAxAll, isymLk] at h0
+  · rw [h] at h0; simp [tp_zAxNeg, isymLk] at h0
+  · rw [h] at h0; simp [tp_zAx1] at h0
+
+/-- **A right-symbol producer of a left-axiom's cut formula `F` is a `hnolow` redex** (lap-156, the
+directive's "R-intro→`hnolow`" collapse step). If the major premise `jstar` is a LEFT axiom on `F`
+(`tp (znth ds jstar) = isymLk kk F`) and a strictly-earlier premise `m < jstar` CONCLUDES `F`
+(`chainAsucc ds m = F`) via a RIGHT symbol (`π₁ (tp (znth ds m)) = 0`), then `⟪m, jstar⟫` is an
+`isRedexPair` `≤ j0` — contradicting `hnolow`. So under `hnolow` the cut formula of a left-axiom major can
+NEVER be produced by a direct R-introduction below `j0`: it only threads from `Γ` or bottoms out at a `Rep`
+node (the genuine §14.254b residual). Consumed by `genReduct_chain_noRedex`'s tag-5/6 non-leaf branch. -/
+lemma rightSym_producer_redex {ds j0 jstar m F kk : V}
+    (hZm : ZDerivation (znth ds m))
+    (hjL : tp (znth ds jstar) = isymLk kk F)
+    (hjlt : jstar < lh ds) (hjsj0 : jstar ≤ j0) (hmjs : m < jstar)
+    (hCm : chainAsucc ds m = F)
+    (h0 : π₁ (tp (znth ds m)) = 0)
+    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)) :
+    False := by
+  have hA : π₂ (tp (znth ds m)) = F := (pi2_tp_eq_seqSucc_of_pi1_zero hZm h0).trans hCm
+  refine hnolow ⟨m, jstar, hmjs, hjsj0, ?_⟩
+  simp only [isRedexPair, pi₁_pair, pi₂_pair]
+  refine ⟨hmjs, hjlt, h0, ?_, ?_⟩
+  · rw [hjL]; simp [isymLk]
+  · rw [hjL]; simp only [isymLk, pi₂_pair]; exact hA.symm
+
 /-- **The least chain exit is NOT an `isymRep` leaf** (lap 121, Sub-lemma A of the generalized redex
 finder). The `isChainInf` exit `j0` (`chainAsucc ds j0 ∈ {seqSucc s, ⊥}`) need not be unique. If every
 `isymRep` premise `≤ j0` re-routes its succedent to a STRICTLY earlier premise (`hreroute`, supplied by
