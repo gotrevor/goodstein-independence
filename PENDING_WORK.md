@@ -1,5 +1,41 @@
 # Pending work — open obligations & attack paths
 
+## Lap 159 (PORT + WIRE) — genReduct_anySucc family in src; {3,4}-producer core of axMajorResidual WIRED
+
+**Build 🟢 1326; `false_of_ZDerivesEmpty` = `[propext, sorryAx, choice, Quot.sound]` (0 math axioms, no drift).**
+
+Executed the directive's port plan. Three commits:
+1. `b7033f7` — certFlatten_of_critHalves generalized off `seqSucc s = ⊥` → `IsUFormula (seqSucc s)` (the
+   FLATTEN splice is now succedent-agnostic); PORTED the lap-158 spike `genReduct_anySucc` family to src:
+   the entry (code-induction) + `genReduct_anySucc_chain` (dispatcher) PROVEN off `⊥`; three NAMED leaf
+   sorries (`ind_reduct_anySucc`, `genReduct_chain_hasRedex_anySucc`, `genReduct_chain_noRedex_anySucc`).
+2. `ca8744e` — WIRED `genReduct_anySucc` into `axMajorResidual`: added `repProducerClose` (a {3,4} producer
+   `m ≤ j0` closes by `genReduct_anySucc (znth ds m)` → `certReplace_of_premise_cert`), routed the four clean
+   {3,4}-producer sites in `tryProducerClose` (tag-3, tag-4, the two climb→{3,4} landings) through it. **The
+   IRREDUCIBLE {3,4}-producer core of `axMajorResidual` is now reduced to the proven `genReduct_anySucc` entry
+   + its 3 named leaves** — the directive's success metric (decompose into named src sub-sorries WITH the
+   skeleton wired) is MET. Residual `axMajorResidual` now = ONLY the general-`C` leaf/escape/R-intro closes.
+
+### NEW finding (lap 159, recorded)
+The has-redex ¬-case `keepTip` (`ZDerivation_corrected_haux0_neg_botOrbit` `:738`) GENUINELY needs the ⊥-exit:
+it replaces the succedent by the cut formula, so only a ⊥-exit re-validates the rebuilt chain. The ∀-redex
+sub-case generalizes cleanly (via the certFlatten generalization). → `genReduct_chain_hasRedex_anySucc`'s
+¬-case is a real deep leaf; its ∀-case is a clean port.
+
+### NEXT attack (priority order)
+1. **`genReduct_chain_noRedex_anySucc` body** (the load-bearing leaf): port `genReduct_chain_noRedex`'s
+   machinery (collapse / climb / closeZAxNeg / tryProducerClose / tag dispatch) to general `C`, `rcases hAj0`
+   on the exit. The {3,4}-producer + tag-5/6→producer closes via the GENERAL IH (the same `repProducerClose`
+   pattern, IH instead of `genReduct_anySucc`); leaf `C∈Γ`→`zAtom`, axAll sub-(a)→`zAxAll s p' k'`, axNeg→
+   `zAxNeg s q` all GENERALIZE (the Z-rules allow any succedent — only the ⊥-exit leaf needs ex-falso, and
+   tag-1/2 R-intro-of-`C` is genuinely new). Then `ind_reduct_anySucc` (lap-136 unfolding) and the
+   `genReduct_chain_hasRedex_anySucc` ∀-case.
+2. **Swap `genReduct_botSucc` → `genReduct_anySucc`** (thin wrapper, drop the `hsucc` arg) and retire the
+   ⊥-stack (`genReduct_botSucc_chain` / `genReduct_chain_noRedex` / `genReduct_chain_hasRedex`) once the
+   general versions are proven — DROPS `axMajorResidual` outright.
+3. `descent_step_K_noncrit_axMajor` (`:3857` twin) then closes the same way via the cut-partner lemmas
+   (`majorPrem_zAxAll_cutPartner`/`_zAxNeg_cutPartner`, Γ=∅, already proven) + `genReduct_anySucc`.
+
 ## Lap 158 (FRESH-MIND REVIEW + SPIKE) — collapse EXHAUSTED; residual = {3,4}-producer cut-elim; SPIKE settled it by CODE-induction
 
 **Build 🟢 green (1326); real `#print axioms` re-verified: headline `peano_not_proves_goodstein` +
