@@ -3353,6 +3353,125 @@ lemma certReplace_of_premise_cert {s r ds m j0 : V}
           (isNF_iotil_of_ZDerivation a hZa) (isNF_iotil_of_ZDerivation b hZb),
         isNF_iotil_of_ZDerivation _ hZ'⟩
 
+/-! ## §14.254 reduction GENERALIZED off `seqSucc = ⊥` (lap 159 — the `axMajorResidual` decomposition)
+
+The residual `axMajorResidual` (`:3417`) and its `Γ=∅` twin `descent_step_K_noncrit_axMajor` (`:3857`) both
+reduce to **one** missing piece: the general-succedent reduction `genReduct_anySucc` — a `{3,4}` (`Rep`) node
+deriving `Γ→F` for ANY `F` has a `GenReductCert`. The spike (`wip/GenReductAnySucc.lean`, lap 158) settled the
+FORK: the recursion threads by the EXISTING CODE-induction (`zDerivation_sigma_induction`), NOT an outer
+degree-induction — the `𝚺₁` motive `GenReductCert` never mentions `⊥`, the code-IH threads, and the
+`{3,4}`-producer of the cut formula closes by recursing INTO it (the general IH) then splicing via the
+already-general `certReplace_of_premise_cert` (`:3283`, its rank-headroom is LOCAL to the premise's own
+`irk+1 ≤ idg`, not the chain degree — sidesteps the lap-157 refutation). This block PORTS the spike: the entry
+and chain-step are PROVEN; the four genuinely-deep leaves are NAMED sub-`sorry`s (raising the src count = the
+decomposition, per CLAUDE.local.md). The leaves:
+1. `ind_reduct_anySucc` — the tag-3 Ind reduct off `⊥`: the lap-136 `k`-fold unfolding `⟨d0, d1[a:=0..k-1]⟩`
+   (`k = ⟦t⟧`); for a CLOSED succedent (`p` closed) the induction is vacuous and the reduct is `d0`.
+2. `genReduct_chain_hasRedex_anySucc` — the §14.253 principal cut off `⊥`: the ∀-redex sub-case now ports
+   cleanly (`certFlatten_of_critHalves` generalized off `hsucc → IsUFormula (seqSucc s)`, lap 159); the
+   ¬-redex sub-case routes through the `keepTip` (`ZDerivation_corrected_haux0_neg_botOrbit` `:738`) which
+   GENUINELY needs the `⊥`-exit (it replaces the succedent by the cut formula, so only a `⊥`-exit re-validates).
+3. `genReduct_chain_noRedex_anySucc` — the §14.254 chain recursion off `⊥`: the `{3,4}`-producer + the
+   tag-5/6→producer threads CLOSE via the general IH + `certReplace_of_premise_cert` (the lap-158
+   `noRedex_producer_closes` wiring, validated); the leaf `C∈Γ` / tag-1/2 R-intro-of-`C` / ex-falso closes
+   (currently `Γ→⊥` reducts) need the general-`C` re-construction. -/
+
+/-- **GENERALIZED Ind reduct off `seqSucc = ⊥` — NAMED sub-`sorry` (leaf 1).** The off-`⊥` twin of
+`ind_reduct_botSucc_of_fresh` (`:2776`). For `C = ^∀^k⊥` (the residual's dominant shape) the induction is
+VACUOUS (`substs1 t p = p`) and the reduct is `d0`; general `C` is the lap-136 unfolding. -/
+lemma ind_reduct_anySucc {s at' p d0 d1 : V}
+    (hZ : ZDerivation (zInd s at' p d0 d1))
+    (hreg : ZRegular (zInd s at' p d0 d1)) (hfresh : ZFresh (zInd s at' p d0 d1))
+    (hseqant : ZSeqAnt (zInd s at' p d0 d1)) :
+    GenReductCert (zInd s at' p d0 d1) := sorry
+
+/-- **GENERALIZED has-redex chain reduct off `seqSucc = ⊥` — NAMED sub-`sorry` (leaf 2).** The off-`⊥` twin of
+`genReduct_chain_hasRedex` (`:3048`). ∀-redex sub-case: clean port (certFlatten generalized). ¬-redex
+sub-case: the `keepTip` needs the `⊥`-exit — the deep blocker. -/
+lemma genReduct_chain_hasRedex_anySucc {s r ds i0 j1 j0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hreg : ZRegular (zK s r ds)) (hfresh : ZFresh (zK s r ds)) (hseqant : ZSeqAnt (zK s r ds))
+    (hj0 : j0 < lh ds)
+    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hij : i0 < j1) (hj1 : j1 ≤ j0) (hpair : isRedexPair ds (⟪i0, j1⟫ : V)) :
+    GenReductCert (zK s r ds) := sorry
+
+/-- **GENERALIZED no-redex chain reduct off `seqSucc = ⊥` — NAMED sub-`sorry` (leaf 3).** The off-`⊥` twin of
+`genReduct_chain_noRedex` (`:3365`), with the IH DROPPING the `seqSucc = ⊥` clause (so it fires on a
+`{3,4}` producer of ANY succedent — what `axMajorResidual` needs). The `{3,4}`-producer + tag-5/6→producer
+threads CLOSE via the general IH + `certReplace_of_premise_cert` (`noRedex_producer_closes`, lap 158); the
+leaf `C∈Γ` / tag-1/2 R-intro / ex-falso closes need general-`C` reducts. -/
+lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hreg : ZRegular (zK s r ds)) (hfresh : ZFresh (zK s r ds)) (hseqant : ZSeqAnt (zK s r ds))
+    (hj0 : j0 < lh ds)
+    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
+    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
+        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
+    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
+    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
+    (IH : ∀ i < lh ds, ZRegular (znth ds i) → ZFresh (znth ds i) → ZSeqAnt (znth ds i) →
+        (zTag (znth ds i) = 3 ∨ zTag (znth ds i) = 4) →
+        GenReductCert (znth ds i)) :
+    GenReductCert (zK s r ds) := sorry
+
+/-- **GENERALIZED chain step off `seqSucc = ⊥` — PROVEN dispatcher.** Off-`⊥` twin of
+`genReduct_botSucc_chain` (`:3655`): extract SOME `isChainInf` exit `j0` (`chainAsucc ds j0 ∈ {seqSucc s, ⊥}`,
+the `⊥`-exit is the ex-falso fallback) from `zKValidF`, then `by_cases` a redex below `j0` → the generalized
+has-redex or no-redex leaves. The IH is the general (no `⊥`-clause) per-premise certificate. -/
+lemma genReduct_anySucc_chain {s r ds : V}
+    (hZ : ZDerivation (zK s r ds))
+    (hreg : ZRegular (zK s r ds)) (hfresh : ZFresh (zK s r ds)) (hseqant : ZSeqAnt (zK s r ds))
+    (IH : ∀ i < lh ds, ZRegular (znth ds i) → ZFresh (znth ds i) → ZSeqAnt (znth ds i) →
+        (zTag (znth ds i) = 3 ∨ zTag (znth ds i) = 4) →
+        GenReductCert (znth ds i)) :
+    GenReductCert (zK s r ds) := by
+  obtain ⟨j0, hj0, hAj0, hthread0, hrank0⟩ := (zKValidF_of_ZDerivation_zK hZ).1
+  by_cases hlow : ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)
+  · obtain ⟨i0, j1, hij, hj1, hpair⟩ := hlow
+    exact genReduct_chain_hasRedex_anySucc hZ hreg hfresh hseqant hj0 hAj0 hthread0 hrank0 hij hj1 hpair
+  · exact genReduct_chain_noRedex_anySucc hZ hreg hfresh hseqant hj0 hAj0 hthread0 hrank0 hlow IH
+
+/-- **THE general-succedent `Rep`-node reduction `genReduct_anySucc` — PROVEN entry (off `⊥`).** A `Rep` node
+`d` (tag ∈ {3,4}) deriving `Γ→F` for ANY `F` has a `GenReductCert d`. Identical CODE-induction structure to
+`genReduct_botSucc` (`:3682`), only the `seqSucc (fstIdx d) = ⊥` antecedent is DROPPED from the motive (the
+`𝚺₁` motive `GenReductCert` is definable without it; the code-IH threads; tag-3/4 delegate to the
+generalized sub-reducts). **This is the single key that closes both `axMajorResidual` and
+`descent_step_K_noncrit_axMajor`** (each via recursing into the `{3,4}` cut-partner). -/
+lemma genReduct_anySucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh : ZFresh d)
+    (hseqant : ZSeqAnt d) (htag : zTag d = 3 ∨ zTag d = 4) :
+    GenReductCert d := by
+  have key : ∀ d : V, ZDerivation d → ZRegular d → ZFresh d → ZSeqAnt d →
+      (zTag d = 3 ∨ zTag d = 4) → GenReductCert d := by
+    apply zDerivation_sigma_induction
+      (P := fun d : V => ZRegular d → ZFresh d → ZSeqAnt d →
+        (zTag d = 3 ∨ zTag d = 4) → GenReductCert d)
+    · -- motive definability: `GenReductCert` banked `𝚺₁`; antecedents `𝚫₁` (no `⊥`-clause to carry)
+      unfold ZRegular ZFresh ZSeqAnt; definability
+    · -- inductive step: dispatch on the rule; the code-IH `hC` gives `P` on every premise
+      intro C hC d hphi
+      have hZd : ZDerivation d := zDerivation_iff.mpr (zphi_monotone (fun x hx => (hC x hx).1) hphi)
+      intro hreg hfresh hseqant htag
+      rcases hphi with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
+        ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, hmem, _⟩ |
+        ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C', rfl, _⟩
+      · simp at htag                                       -- zAtom (tag 0)
+      · simp at htag                                       -- zIall (tag 1)
+      · simp at htag                                       -- zIneg (tag 2)
+      · -- zInd (tag 3): the generalized Ind reduct (no `seqSucc=⊥`)
+        exact ind_reduct_anySucc hZd hreg hfresh hseqant
+      · -- zK (tag 4): delegate to the generalized chain step, IH WITHOUT the `⊥`-clause
+        refine genReduct_anySucc_chain hZd hreg hfresh hseqant ?_
+        intro i hi hregi hfreshi hseqanti htagi
+        exact (hC (znth ds i) (hmem i hi)).2 hregi hfreshi hseqanti htagi
+      · simp at htag                                       -- zAxAll (tag 5)
+      · simp at htag                                       -- zAxNeg (tag 6)
+      · simp at htag                                       -- zAx1 (tag 7)
+  exact key d hZ hreg hfresh hseqant htag
+
 /-- **no-redex leaf of the §14.254 chain reduction (`Γ→⊥`, recurse via the IH) — NAMED sub-`sorry`.** No
 redex pair below the ⊥-exit `j0`; by `majorPrem_tag_mem` the major premise's tag ∈ {3,4,5,6}. tags 3/4
 (`Rep` major) → reduce the major premise `znth ds (majorIdx …)` directly by the **IH**; tags 5/6 (L-axiom
@@ -3415,6 +3534,18 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
   -- forbids a `zIall ^∀⊥` below j0), and the tag-6 (`zAxNeg`) dual (which lacks the `zAxAllSuccWff`
   -- `p=⊥` collapse and needs BOTH `inegF p, p ∈ Γ` threaded). See `DIRECTION.md`/`PENDING_WORK.md` lap-155.
   have axMajorResidual : GenReductCert (zK s r ds) := sorry
+  -- §14.254a {3,4}-PRODUCER CLOSE (lap 159 — WIRED): a non-leaf `Rep` producer `m ≤ j0` (a `zInd`/`zK`)
+  -- of the cut formula is reduced by RECURSING into it — `genReduct_anySucc` gives `GenReductCert (znth ds m)`
+  -- for ANY succedent (the general entry, off `⊥`) — then SPLICED into the parent by the Γ-general
+  -- `certReplace_of_premise_cert`. This is the lap-158 spike's `noRedex_producer_closes`, ported. It closes
+  -- the IRREDUCIBLE {3,4}-producer core of `axMajorResidual` (the rest of `axMajorResidual` is now only the
+  -- general-`C` leaf/escape closes, which still derive `Γ→⊥`).
+  have repProducerClose : ∀ m, m ≤ j0 → m < lh ds →
+      (zTag (znth ds m) = 3 ∨ zTag (znth ds m) = 4) → GenReductCert (zK s r ds) :=
+    fun m hmj0 hmlt htagm =>
+      Or.inl (certReplace_of_premise_cert hZ hreg hfresh hseqant hj0 hthread0 hrank0 (Or.inr hbot0)
+        hmlt hmj0 (genReduct_anySucc (hmem m hmlt) (ZRegular_zK_premise hds hreg hmlt)
+          (ZFresh_zK_premise hds hfresh hmlt) (ZSeqAnt_zK_premise hds hseqant hmlt) htagm))
   -- §14.254 leaf escape: `⊥ ∈ Γ` ⟹ the trivial `Γ→⊥` axiom `zAtom s` is a sound `õ`-dropping reduct.
   have leafClose : inAnt (^⊥ : V) (seqAnt s) → GenReductCert (zK s r ds) := fun hbotIn =>
     Or.inl ⟨zAtom s,
@@ -3499,11 +3630,13 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
       ⟨s'', h'', _⟩ | ⟨s'', a'', p'', d0'', h'', _, _⟩ | ⟨s'', p'', d0'', h'', _, _⟩ |
       ⟨s'', at''', p'', d0'', d1'', h'', _, _⟩ | ⟨s'', r'', ds'', h'', _, _, _⟩ |
       ⟨s'', p'', k'', h'', _, _⟩ | ⟨s'', q, h'', hq, hqn, hqp⟩ | ⟨s'', C'', h'', _⟩
-    · exact axMajorResidual
-    · exact axMajorResidual
-    · exact axMajorResidual
-    · exact axMajorResidual
-    · exact axMajorResidual
+    · exact axMajorResidual                                  -- tag 0 (zAtom): general-`C` leaf escape
+    · exact axMajorResidual                                  -- tag 1 (zIall): general-`C` R-intro
+    · exact axMajorResidual                                  -- tag 2 (zIneg): general-`C` R-intro
+    · -- tag 3 (zInd): {3,4} PRODUCER — close via the general recursion (lap 159, WIRED)
+      exact repProducerClose m hmj0 hmlt (Or.inl (by rw [h'']; simp))
+    · -- tag 4 (zK): {3,4} PRODUCER — close via the general recursion (lap 159, WIRED)
+      exact repProducerClose m hmj0 hmlt (Or.inr (by rw [h'']; simp))
     · -- tag 5 (zAxAll s'' p'' k''): CLIMB its active `^∀ p''`.
       have hjLm : tp (znth ds m) = isymLk k'' (^∀ p'' : V) := by rw [h'', tp_zAxAll]
       have hin' : inAnt (^∀ p'' : V) (chainAnt ds m) := by
@@ -3511,10 +3644,10 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
         simpa only [chainAnt, h'', fstIdx_zAxAll] using hinv.2.1
       rcases climb_to_rep_producer hmem hthread0 hj0 hnolow hmj0 hjLm ⟨p'', rfl⟩ hin' with
         ⟨_, _, _⟩ | ⟨m', hm'j0, hm'lt, hm'tag⟩
-      · exact axMajorResidual
-      · rcases hm'tag with _ | _ | h6
-        · exact axMajorResidual
-        · exact axMajorResidual
+      · exact axMajorResidual                                -- climb escape: `^∀`-formula in `Γ` (general-`C`)
+      · rcases hm'tag with h3 | h4 | h6
+        · exact repProducerClose m' hm'j0 hm'lt (Or.inl h3) -- climb → {3,4} producer (WIRED)
+        · exact repProducerClose m' hm'j0 hm'lt (Or.inr h4) -- climb → {3,4} producer (WIRED)
         · exact closeZAxNeg m' hm'j0 hm'lt h6
     · -- tag 6 (zAxNeg s'' q): close via the factored helper.
       exact closeZAxNeg m hmj0 hmlt (by rw [h'']; simp)
@@ -3719,125 +3852,6 @@ lemma genReduct_botSucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh
       · simp at htag                                       -- zAxNeg (tag 6)
       · simp at htag                                       -- zAx1 (tag 7)
   exact key d hZ hreg hfresh hseqant hsucc htag
-
-/-! ## §14.254 reduction GENERALIZED off `seqSucc = ⊥` (lap 159 — the `axMajorResidual` decomposition)
-
-The residual `axMajorResidual` (`:3417`) and its `Γ=∅` twin `descent_step_K_noncrit_axMajor` (`:3857`) both
-reduce to **one** missing piece: the general-succedent reduction `genReduct_anySucc` — a `{3,4}` (`Rep`) node
-deriving `Γ→F` for ANY `F` has a `GenReductCert`. The spike (`wip/GenReductAnySucc.lean`, lap 158) settled the
-FORK: the recursion threads by the EXISTING CODE-induction (`zDerivation_sigma_induction`), NOT an outer
-degree-induction — the `𝚺₁` motive `GenReductCert` never mentions `⊥`, the code-IH threads, and the
-`{3,4}`-producer of the cut formula closes by recursing INTO it (the general IH) then splicing via the
-already-general `certReplace_of_premise_cert` (`:3283`, its rank-headroom is LOCAL to the premise's own
-`irk+1 ≤ idg`, not the chain degree — sidesteps the lap-157 refutation). This block PORTS the spike: the entry
-and chain-step are PROVEN; the four genuinely-deep leaves are NAMED sub-`sorry`s (raising the src count = the
-decomposition, per CLAUDE.local.md). The leaves:
-1. `ind_reduct_anySucc` — the tag-3 Ind reduct off `⊥`: the lap-136 `k`-fold unfolding `⟨d0, d1[a:=0..k-1]⟩`
-   (`k = ⟦t⟧`); for a CLOSED succedent (`p` closed) the induction is vacuous and the reduct is `d0`.
-2. `genReduct_chain_hasRedex_anySucc` — the §14.253 principal cut off `⊥`: the ∀-redex sub-case now ports
-   cleanly (`certFlatten_of_critHalves` generalized off `hsucc → IsUFormula (seqSucc s)`, lap 159); the
-   ¬-redex sub-case routes through the `keepTip` (`ZDerivation_corrected_haux0_neg_botOrbit` `:738`) which
-   GENUINELY needs the `⊥`-exit (it replaces the succedent by the cut formula, so only a `⊥`-exit re-validates).
-3. `genReduct_chain_noRedex_anySucc` — the §14.254 chain recursion off `⊥`: the `{3,4}`-producer + the
-   tag-5/6→producer threads CLOSE via the general IH + `certReplace_of_premise_cert` (the lap-158
-   `noRedex_producer_closes` wiring, validated); the leaf `C∈Γ` / tag-1/2 R-intro-of-`C` / ex-falso closes
-   (currently `Γ→⊥` reducts) need the general-`C` re-construction. -/
-
-/-- **GENERALIZED Ind reduct off `seqSucc = ⊥` — NAMED sub-`sorry` (leaf 1).** The off-`⊥` twin of
-`ind_reduct_botSucc_of_fresh` (`:2776`). For `C = ^∀^k⊥` (the residual's dominant shape) the induction is
-VACUOUS (`substs1 t p = p`) and the reduct is `d0`; general `C` is the lap-136 unfolding. -/
-lemma ind_reduct_anySucc {s at' p d0 d1 : V}
-    (hZ : ZDerivation (zInd s at' p d0 d1))
-    (hreg : ZRegular (zInd s at' p d0 d1)) (hfresh : ZFresh (zInd s at' p d0 d1))
-    (hseqant : ZSeqAnt (zInd s at' p d0 d1)) :
-    GenReductCert (zInd s at' p d0 d1) := sorry
-
-/-- **GENERALIZED has-redex chain reduct off `seqSucc = ⊥` — NAMED sub-`sorry` (leaf 2).** The off-`⊥` twin of
-`genReduct_chain_hasRedex` (`:3048`). ∀-redex sub-case: clean port (certFlatten generalized). ¬-redex
-sub-case: the `keepTip` needs the `⊥`-exit — the deep blocker. -/
-lemma genReduct_chain_hasRedex_anySucc {s r ds i0 j1 j0 : V}
-    (hZ : ZDerivation (zK s r ds))
-    (hreg : ZRegular (zK s r ds)) (hfresh : ZFresh (zK s r ds)) (hseqant : ZSeqAnt (zK s r ds))
-    (hj0 : j0 < lh ds)
-    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
-    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
-        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
-    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
-    (hij : i0 < j1) (hj1 : j1 ≤ j0) (hpair : isRedexPair ds (⟪i0, j1⟫ : V)) :
-    GenReductCert (zK s r ds) := sorry
-
-/-- **GENERALIZED no-redex chain reduct off `seqSucc = ⊥` — NAMED sub-`sorry` (leaf 3).** The off-`⊥` twin of
-`genReduct_chain_noRedex` (`:3365`), with the IH DROPPING the `seqSucc = ⊥` clause (so it fires on a
-`{3,4}` producer of ANY succedent — what `axMajorResidual` needs). The `{3,4}`-producer + tag-5/6→producer
-threads CLOSE via the general IH + `certReplace_of_premise_cert` (`noRedex_producer_closes`, lap 158); the
-leaf `C∈Γ` / tag-1/2 R-intro / ex-falso closes need general-`C` reducts. -/
-lemma genReduct_chain_noRedex_anySucc {s r ds j0 : V}
-    (hZ : ZDerivation (zK s r ds))
-    (hreg : ZRegular (zK s r ds)) (hfresh : ZFresh (zK s r ds)) (hseqant : ZSeqAnt (zK s r ds))
-    (hj0 : j0 < lh ds)
-    (hAj0 : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
-    (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
-        inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
-    (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
-    (hnolow : ¬ ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V))
-    (IH : ∀ i < lh ds, ZRegular (znth ds i) → ZFresh (znth ds i) → ZSeqAnt (znth ds i) →
-        (zTag (znth ds i) = 3 ∨ zTag (znth ds i) = 4) →
-        GenReductCert (znth ds i)) :
-    GenReductCert (zK s r ds) := sorry
-
-/-- **GENERALIZED chain step off `seqSucc = ⊥` — PROVEN dispatcher.** Off-`⊥` twin of
-`genReduct_botSucc_chain` (`:3655`): extract SOME `isChainInf` exit `j0` (`chainAsucc ds j0 ∈ {seqSucc s, ⊥}`,
-the `⊥`-exit is the ex-falso fallback) from `zKValidF`, then `by_cases` a redex below `j0` → the generalized
-has-redex or no-redex leaves. The IH is the general (no `⊥`-clause) per-premise certificate. -/
-lemma genReduct_anySucc_chain {s r ds : V}
-    (hZ : ZDerivation (zK s r ds))
-    (hreg : ZRegular (zK s r ds)) (hfresh : ZFresh (zK s r ds)) (hseqant : ZSeqAnt (zK s r ds))
-    (IH : ∀ i < lh ds, ZRegular (znth ds i) → ZFresh (znth ds i) → ZSeqAnt (znth ds i) →
-        (zTag (znth ds i) = 3 ∨ zTag (znth ds i) = 4) →
-        GenReductCert (znth ds i)) :
-    GenReductCert (zK s r ds) := by
-  obtain ⟨j0, hj0, hAj0, hthread0, hrank0⟩ := (zKValidF_of_ZDerivation_zK hZ).1
-  by_cases hlow : ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)
-  · obtain ⟨i0, j1, hij, hj1, hpair⟩ := hlow
-    exact genReduct_chain_hasRedex_anySucc hZ hreg hfresh hseqant hj0 hAj0 hthread0 hrank0 hij hj1 hpair
-  · exact genReduct_chain_noRedex_anySucc hZ hreg hfresh hseqant hj0 hAj0 hthread0 hrank0 hlow IH
-
-/-- **THE general-succedent `Rep`-node reduction `genReduct_anySucc` — PROVEN entry (off `⊥`).** A `Rep` node
-`d` (tag ∈ {3,4}) deriving `Γ→F` for ANY `F` has a `GenReductCert d`. Identical CODE-induction structure to
-`genReduct_botSucc` (`:3682`), only the `seqSucc (fstIdx d) = ⊥` antecedent is DROPPED from the motive (the
-`𝚺₁` motive `GenReductCert` is definable without it; the code-IH threads; tag-3/4 delegate to the
-generalized sub-reducts). **This is the single key that closes both `axMajorResidual` and
-`descent_step_K_noncrit_axMajor`** (each via recursing into the `{3,4}` cut-partner). -/
-lemma genReduct_anySucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh : ZFresh d)
-    (hseqant : ZSeqAnt d) (htag : zTag d = 3 ∨ zTag d = 4) :
-    GenReductCert d := by
-  have key : ∀ d : V, ZDerivation d → ZRegular d → ZFresh d → ZSeqAnt d →
-      (zTag d = 3 ∨ zTag d = 4) → GenReductCert d := by
-    apply zDerivation_sigma_induction
-      (P := fun d : V => ZRegular d → ZFresh d → ZSeqAnt d →
-        (zTag d = 3 ∨ zTag d = 4) → GenReductCert d)
-    · -- motive definability: `GenReductCert` banked `𝚺₁`; antecedents `𝚫₁` (no `⊥`-clause to carry)
-      unfold ZRegular ZFresh ZSeqAnt; definability
-    · -- inductive step: dispatch on the rule; the code-IH `hC` gives `P` on every premise
-      intro C hC d hphi
-      have hZd : ZDerivation d := zDerivation_iff.mpr (zphi_monotone (fun x hx => (hC x hx).1) hphi)
-      intro hreg hfresh hseqant htag
-      rcases hphi with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
-        ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, hmem, _⟩ |
-        ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C', rfl, _⟩
-      · simp at htag                                       -- zAtom (tag 0)
-      · simp at htag                                       -- zIall (tag 1)
-      · simp at htag                                       -- zIneg (tag 2)
-      · -- zInd (tag 3): the generalized Ind reduct (no `seqSucc=⊥`)
-        exact ind_reduct_anySucc hZd hreg hfresh hseqant
-      · -- zK (tag 4): delegate to the generalized chain step, IH WITHOUT the `⊥`-clause
-        refine genReduct_anySucc_chain hZd hreg hfresh hseqant ?_
-        intro i hi hregi hfreshi hseqanti htagi
-        exact (hC (znth ds i) (hmem i hi)).2 hregi hfreshi hseqanti htagi
-      · simp at htag                                       -- zAxAll (tag 5)
-      · simp at htag                                       -- zAxNeg (tag 6)
-      · simp at htag                                       -- zAx1 (tag 7)
-  exact key d hZ hreg hfresh hseqant htag
 
 /-- **§14.254 FLATTEN — splice a chain premise's principal-cut halves `dⱼ{0}`,`dⱼ{1}` in place of `dⱼ`
 (the genuine Buchholz §14.254 case-(ii) reduct, `iord`-DESCENT) — PROVEN.** A `∅→⊥` chain `zK s r ds`
