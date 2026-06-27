@@ -139,6 +139,13 @@ lemma zsubst_eq_zsubstNext (a t : V) {c : V} (hpos : 0 < c) :
     if_pos (zTag_zAx1 s C)]
   simp only [fstIdx_zAx1, zAx1F_zAx1]
 
+@[simp] lemma zsubst_zAxBot (s a t : V) :
+    zsubst (zAxBot s) a t = zAxBot (fvSubstSeqt a t s) := by
+  rw [zsubst_eq_zsubstNext a t (by simp [zAxBot]), zsubstNext, if_neg (by simp), if_neg (by simp),
+    if_neg (by simp), if_neg (by simp), if_neg (by simp), if_neg (by simp), if_neg (by simp),
+    if_neg (by simp), if_pos (zTag_zAxBot s)]
+  simp only [fstIdx_zAxBot]
+
 /-! ### `fstIdx_zsubst` — the end-sequent of the substituted derivation computes (rung-1 step 1)
 
 For any genuine Z-derivation `d`, the reduct's end-sequent is the substituted end-sequent. Proven by
@@ -148,7 +155,7 @@ lemma fstIdx_zsubst {d : V} (a t : V) (hZ : ZDerivation d) :
     fstIdx (zsubst d a t) = fvSubstSeqt a t (fstIdx d) := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
   · rw [zsubst_zAtom, fstIdx_zAtom, fstIdx_zAtom]
   · rw [zsubst_zIall, fstIdx_zIall, fstIdx_zIall]
   · rw [zsubst_zIneg, fstIdx_zIneg, fstIdx_zIneg]
@@ -157,6 +164,7 @@ lemma fstIdx_zsubst {d : V} (a t : V) (hZ : ZDerivation d) :
   · rw [zsubst_zAxAll, fstIdx_zAxAll, fstIdx_zAxAll]
   · rw [zsubst_zAxNeg, fstIdx_zAxNeg, fstIdx_zAxNeg]
   · rw [zsubst_zAx1, fstIdx_zAx1, fstIdx_zAx1]
+  · rw [zsubst_zAxBot, fstIdx_zAxBot, fstIdx_zAxBot]
 
 /-! ## Substitution-commutation substrate for `ZDerivation_zsubst` (rung-1 step 2)
 
@@ -528,7 +536,8 @@ rebuilds the same Z-rule, so `zTag` is unchanged. Feeds the tag-gated formula-ho
     zTag (zsubst d a t) = zTag d := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · rw [zsubst_zAtom]; simp
   · rw [zsubst_zIall]; simp
   · rw [zsubst_zIneg]; simp
@@ -537,6 +546,7 @@ rebuilds the same Z-rule, so `zTag` is unchanged. Feeds the tag-gated formula-ho
   · rw [zsubst_zAxAll]; simp
   · rw [zsubst_zAxNeg]; simp
   · rw [zsubst_zAx1]; simp
+  · rw [zsubst_zAxBot]; simp
 
 /-- **Permissibility (`iperm`, Lemma 3.3) transfers under `fvSubst`.** For a genuine Z-derivation `d`,
 if its rule symbol `tp d` permits a sequent `q`, then the substituted symbol `tp (zsubst d a t)` permits
@@ -551,7 +561,8 @@ lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : 
     (h : iperm (tp d) q) : iperm (tp (zsubst d a t)) (fvSubstSeqt a t q) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · rw [zsubst_zAtom, tp_zAtom]; exact iperm_isymRep _
   · rw [zsubst_zIall, tp_zIall]; rw [tp_zIall] at h
     refine iperm_isymR_iff.mpr ?_
@@ -571,6 +582,7 @@ lemma iperm_tp_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d q : V} (hd : 
     rw [seqAnt_fvSubstSeqt, ← fvSubst_inegF ht.isUTerm hp]
     exact inAnt_fvSubstSeq (iperm_isymLk_iff.mp h)
   · rw [zsubst_zAx1, tp_zAx1]; exact iperm_isymRep _
+  · rw [zsubst_zAxBot, tp_zAxBot]; exact iperm_isymRep _
 
 /-- **`isChainInf` transfers under eigenvariable substitution** (the chain-structure conjunct of
 `zKValid`). Given a chain `s r ds` whose premises are Z-derivations and whose succedents are genuine
@@ -637,7 +649,8 @@ lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDeri
     tp (zsubst d a t) = tp d := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp only [zsubst_zAtom, tp_zAtom]
   · rw [zsubst_zIall, tp_zIall, tp_zIall,
       fvSubst_eq_self_of_le hwff.2.2.isUFormula (le_of_lt (lt_of_lt_of_le (p_lt_zIall s e p d0) hda))]
@@ -651,6 +664,7 @@ lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDeri
   · rw [zsubst_zAxNeg, tp_zAxNeg, tp_zAxNeg,
       fvSubst_eq_self_of_le hp (le_of_lt (lt_of_lt_of_le (p_lt_zAxNeg s p) hda))]
   · simp only [zsubst_zAx1, tp_zAx1]
+  · simp only [zsubst_zAxBot, tp_zAxBot]
 
 /-- **Permissibility against an `a`-free well-formed conclusion reflects through substitution.** If the
 substituted symbol `I` permits the substituted conclusion `fvSubstSeqt a t s` and `s ≤ a` is a genuine
@@ -674,9 +688,11 @@ lemma zIallF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 1) :
     zIallF (zsubst d a t) = fvSubst ℒₒᵣ a t (zIallF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at h
   · rw [zsubst_zIall]; simp
+  · simp at h
   · simp at h
   · simp at h
   · simp at h
@@ -689,10 +705,12 @@ lemma zInegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 2) :
     zInegF (zsubst d a t) = fvSubst ℒₒᵣ a t (zInegF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at h
   · simp at h
   · rw [zsubst_zIneg]; simp
+  · simp at h
   · simp at h
   · simp at h
   · simp at h
@@ -704,7 +722,8 @@ lemma zAxAllF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 5) :
     zAxAllF (zsubst d a t) = fvSubst ℒₒᵣ a t (zAxAllF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at h
   · simp at h
   · simp at h
@@ -713,13 +732,15 @@ lemma zAxAllF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 5) :
   · rw [zsubst_zAxAll]; simp
   · simp at h
   · simp at h
+  · simp at h
 
 /-- Principal-formula read-out under substitution (tag 6): `zAxNegF` commutes with `zsubst`. -/
 lemma zAxNegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 6) :
     zAxNegF (zsubst d a t) = fvSubst ℒₒᵣ a t (zAxNegF d) := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at h
   · simp at h
   · simp at h
@@ -727,6 +748,7 @@ lemma zAxNegF_zsubst {a t d : V} (hd : ZDerivation d) (h : zTag d = 6) :
   · simp at h
   · simp at h
   · rw [zsubst_zAxNeg]; simp
+  · simp at h
   · simp at h
 
 
@@ -916,6 +938,9 @@ eigenvariable; chains/negations/atoms/axioms contribute nothing of their own. Th
 @[simp] lemma maxEigen_zAx1 (s C : V) : maxEigen (zAx1 s C) = 0 := by
   rw [maxEigen_eq_maxEigenNext (by simp [zAx1]), maxEigenNext]; simp [zTag_zAx1]
 
+@[simp] lemma maxEigen_zAxBot (s : V) : maxEigen (zAxBot s) = 0 := by
+  rw [maxEigen_eq_maxEigenNext (by simp [zAxBot]), maxEigenNext]; simp [zTag_zAxBot]
+
 /-! ### `maxEigen`-fold over a premise sequence (for the variadic `K^r` equation)
 
 `iseqMaxEigen ds = max_{i < lh ds} maxEigen(znth ds i)` — the genuine fold (applies `maxEigen`
@@ -1038,7 +1063,8 @@ theorem maxEigen_zsubst (a t : V) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+      ⟨s, rfl, _⟩
     -- atom
     · simp [zsubst_zAtom]
     -- zIall (eigenvariable `e` preserved)
@@ -1061,10 +1087,11 @@ theorem maxEigen_zsubst (a t : V) :
         exact (hC _ (hmem i hi)).2
       simp only [iseqMaxEigen]
       rw [iseqMaxEigenAux_congr hpt _ (le_refl _), hlh]
-    -- zAxAll / zAxNeg / zAx1
+    -- zAxAll / zAxNeg / zAx1 / zAxBot
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
     · simp [zsubst_zAx1]
+    · simp [zsubst_zAxBot]
 
 /-! ### `iord_zsubst` — the eigensubst preserves the ordinal assignment (route-B I∀ bridge, lap 96)
 
@@ -1125,7 +1152,8 @@ theorem idg_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+      ⟨s, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, idg_zIall, idg_zIall, (hC d0 hd0).2]
     · rw [zsubst_zIneg, idg_zIneg, idg_zIneg, (hC d0 hd0).2]
@@ -1147,6 +1175,7 @@ theorem idg_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
     · simp [zsubst_zAx1]
+    · simp [zsubst_zAxBot]
 
 /-- **`iotil` (pre-ordinal `õ`) is invariant under the eigensubst.** Needs `IsUTerm t` for the axiom
 cases (`õ(Ax) = oAtomLk` reads the principal formula's `irk`, invariant under `fvSubst` of a real term). -/
@@ -1157,7 +1186,8 @@ theorem iotil_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩ |
+      ⟨s, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, iotil_zIall, iotil_zIall, (hC d0 hd0).2]
     · rw [zsubst_zIneg, iotil_zIneg, iotil_zIneg, (hC d0 hd0).2]
@@ -1185,6 +1215,8 @@ theorem iotil_zsubst {t : V} (ht : IsUTerm ℒₒᵣ t) (a : V) :
       rw [zsubst_zAxNeg, iotil_zAxNeg, iotil_zAxNeg, oAtomLk, oAtomLk, hirk]
     · -- zAx1: õ = oAtom1 C reads only the unsubstituted ordinal-payload C, so it is invariant
       simp [zsubst_zAx1]
+    · -- zAxBot: õ = 0, invariant
+      simp [zsubst_zAxBot]
 
 /-- **The eigensubst preserves the ordinal `iord`** (route-B I∀ bridge). With this, rewiring
 `red (zIall) = d0(a/n)` keeps the ε₀-descent (`iord (zsubst d0 e n) = iord d0`, so the banked
@@ -1477,13 +1509,18 @@ lemma maxEigen_lt_of_regular_zInd {s at' p d0 d1 : V} (h : ZRegular (zInd s at' 
 Since `zsubst` preserves both `maxEigen` (`maxEigen_zsubst`) and the eigenvariables themselves
 (`zsubst_zIall`/`zInd` keep the binder), every per-node freshness flag is unchanged, so `zReg` is
 invariant. This is the substitution step of "red preserves regularity" (O1). -/
+/-- `zReg` for the tag-8 ⊥-left leaf `zAxBot` (= 0; the dispatcher defaults unknown tags to `0`). -/
+@[simp] lemma zReg_zAxBot (s : V) : zReg (zAxBot s) = 0 := by
+  rw [zReg_eq_zRegNext (by simp [zAxBot]), zRegNext]; simp [zTag_zAxBot]
+
 theorem zReg_zsubst (a t : V) : ∀ d, ZDerivation d → zReg (zsubst d a t) = zReg d := by
   apply zDerivation_induction (P := fun d => zReg (zsubst d a t) = zReg d)
   · definability
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+      ⟨s, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, zReg_zIall, zReg_zIall, (hC d0 hd0).2,
         maxEigen_zsubst a t d0 (hC d0 hd0).1]
@@ -1506,6 +1543,7 @@ theorem zReg_zsubst (a t : V) : ∀ d, ZDerivation d → zReg (zsubst d a t) = z
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
     · simp [zsubst_zAx1]
+    · simp [zsubst_zAxBot]
 
 /-! ## `zFresh` — hereditary I∀ EIGENVARIABLE-CONDITION freshness (lap 126, soundness-inversion input)
 
@@ -1928,6 +1966,10 @@ the invariant is the implication `ZFresh d → ZFresh (zsubst d a (numeral n))`.
 `freshFlag_zsubst_eq_zero` (with the antecedent well-formedness now carried inside `freshFlag`); the chain
 step folds the premises via `zfresh_zK_of`/`zfresh_zK_premise`; the other rules fold premises directly. This
 is the substitution step of "`red` preserves `ZFresh`" (the freshness analogue of `ZRegular_red`). -/
+/-- `zFresh` for the tag-8 ⊥-left leaf `zAxBot` (= 0; the dispatcher defaults unknown tags to `0`). -/
+@[simp] lemma zFresh_zAxBot (s : V) : zFresh (zAxBot s) = 0 := by
+  rw [zFresh_eq_zFreshNext (by simp [zAxBot]), zFreshNext]; simp [zTag_zAxBot]
+
 theorem zFresh_zsubst (a n : V) : ∀ d, ZDerivation d →
     ZFresh d → ZFresh (zsubst d a (Bootstrapping.Arithmetic.numeral n)) := by
   apply zDerivation_induction
@@ -1936,7 +1978,8 @@ theorem zFresh_zsubst (a n : V) : ∀ d, ZDerivation d →
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, hwff⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+      ⟨s, rfl, _⟩
     · intro _; simp [ZFresh, zsubst_zAtom]
     · intro hfresh
       have hd0f : zFresh (zsubst d0 a (Bootstrapping.Arithmetic.numeral n)) = 0 :=
@@ -1979,6 +2022,7 @@ theorem zFresh_zsubst (a n : V) : ∀ d, ZDerivation d →
     · intro _; simp [ZFresh, zsubst_zAxAll]
     · intro _; simp [ZFresh, zsubst_zAxNeg]
     · intro _; simp [ZFresh, zsubst_zAx1]
+    · intro _; simp [ZFresh, zsubst_zAxBot]
 
 /-! ## `zSeqAnt` — hereditary antecedent **Seq-ness** (lap 133, the shared `Seq(seqAnt)` blocker)
 
@@ -2133,12 +2177,8 @@ lemma zSeqAnt_eq_zSeqAntNext {c : V} (hpos : 0 < c) :
 @[simp] lemma zSeqAnt_zAtom (s : V) : zSeqAnt (zAtom s) = seqAntSeqFlag s := by
   rw [zSeqAnt_eq_zSeqAntNext (by simp [zAtom]), zSeqAntNext, fstIdx_zAtom]; simp [zTag_zAtom]
 
-/-- `zReg`/`zFresh`/`zSeqAnt` for the tag-8 ⊥-left leaf `zAxBot` — mirror `zAtom` (dispatchers default
-unknown tags to `0`). -/
-@[simp] lemma zReg_zAxBot (s : V) : zReg (zAxBot s) = 0 := by
-  rw [zReg_eq_zRegNext (by simp [zAxBot]), zRegNext]; simp [zTag_zAxBot]
-@[simp] lemma zFresh_zAxBot (s : V) : zFresh (zAxBot s) = 0 := by
-  rw [zFresh_eq_zFreshNext (by simp [zAxBot]), zFreshNext]; simp [zTag_zAxBot]
+/-- `zSeqAnt` for the tag-8 ⊥-left leaf `zAxBot` — mirror `zAtom` (dispatchers default unknown tags to
+`0`). (`zReg_zAxBot`/`zFresh_zAxBot` are hoisted earlier, before their `zsubst`-soundness uses.) -/
 @[simp] lemma zSeqAnt_zAxBot (s : V) : zSeqAnt (zAxBot s) = seqAntSeqFlag s := by
   rw [zSeqAnt_eq_zSeqAntNext (by simp [zAxBot]), zSeqAntNext, fstIdx_zAxBot]; simp [zTag_zAxBot]
 
@@ -2233,8 +2273,8 @@ lemma Seq_seqAnt_tpReduce {I s n : V} (hs : Seq (seqAnt s)) : Seq (seqAnt (tpRed
 lemma zDerivation_pos {d : V} (hd : ZDerivation d) : 0 < d := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ |
     ⟨s, p, d0, rfl, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ <;>
-    simp [zAtom, zIall, zIneg, zInd, zK, zAxAll, zAxNeg, zAx1]
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩ <;>
+    simp [zAtom, zIall, zIneg, zInd, zK, zAxAll, zAxNeg, zAx1, zAxBot]
 
 /-- **The per-node `Seq (seqAnt sⱼ)` supplier** that `hAll`/`hNeg` consume: a chain premise of a
 `ZSeqAnt`-clean K-node (with the premise a genuine `ZDerivation`) has a `Seq` antecedent. -/
@@ -2273,7 +2313,8 @@ theorem zSeqAnt_zsubst (a t : V) : ∀ d, ZDerivation d → zSeqAnt (zsubst d a 
   · intro C hC d hphi
     rcases hphi with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, hd0, _, _⟩ |
       ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, _⟩ |
-      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+      ⟨s, r, ds, rfl, hseq, hmem, _⟩ | ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+      ⟨s, rfl, _⟩
     · simp [zsubst_zAtom]
     · rw [zsubst_zIall, zSeqAnt_zIall, seqAntSeqFlag_fvSubstSeqt, (hC d0 hd0).2]; simp
     · rw [zsubst_zIneg, zSeqAnt_zIneg, seqAntSeqFlag_fvSubstSeqt, (hC d0 hd0).2]; simp
@@ -2289,6 +2330,7 @@ theorem zSeqAnt_zsubst (a t : V) : ∀ d, ZDerivation d → zSeqAnt (zsubst d a 
     · simp [zsubst_zAxAll]
     · simp [zsubst_zAxNeg]
     · simp [zsubst_zAx1]
+    · simp [zsubst_zAxBot]
 
 /-! ## `red` preserves `ZSeqAnt` — structural + Ind cases (lap 133, mirror `ZFresh_red_of_not_zK`)
 
@@ -2317,7 +2359,7 @@ lemma ZSeqAnt_red_of_not_zK {d : V} (hZ : ZDerivation d) (hsa : ZSeqAnt d)
   unfold ZSeqAnt at hsa ⊢
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
   · rw [red_zAtom]; exact hsa
   · rw [red_zIall]; exact zSeqAnt_zsubst a (Bootstrapping.Arithmetic.numeral 0) d0 hd0
   · rw [red_zIneg]; rw [zSeqAnt_zIneg] at hsa
@@ -2332,6 +2374,7 @@ lemma ZSeqAnt_red_of_not_zK {d : V} (hZ : ZDerivation d) (hsa : ZSeqAnt d)
   · rw [red_zAxAll]; exact hsa
   · rw [red_zAxNeg]; exact hsa
   · rw [red_zAx1]; exact hsa
+  · rw [red_zAxBot]; exact hsa
 
 /-! ### Regularity of the corrected-reduct premises (engine re-key prerequisite, lap 119)
 
@@ -2348,13 +2391,15 @@ lemma ZRegular_zsubst_zIallPrem {e k : V} (he : ZDerivation e) (hreg : ZRegular 
     ZRegular (zsubst (zIallPrem e) (zIallEig e) (Bootstrapping.Arithmetic.numeral k)) := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at htag
   · rw [zIallPrem_zIall, zIallEig_zIall]
     unfold ZRegular
     rw [zReg_zsubst a (Bootstrapping.Arithmetic.numeral k) d0 hd0]
     unfold ZRegular at hreg; rw [zReg_zIall] at hreg
     exact nonpos_iff_eq_zero.mp (hreg ▸ le_max_right _ _)
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -2368,12 +2413,14 @@ lemma ZRegular_zInegPrem {e : V} (he : ZDerivation e) (hreg : ZRegular e) (htag 
     ZRegular (zInegPrem e) := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at htag
   · simp at htag
   · rw [zInegPrem_zIneg]
     unfold ZRegular at hreg ⊢
     rwa [zReg_zIneg] at hreg
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -2445,7 +2492,7 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
   unfold ZRegular at hreg ⊢
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
   · rw [red_zAtom]; simpa using hreg
   · rw [red_zIall, zReg_zsubst _ _ _ hd0]; rw [zReg_zIall] at hreg
     exact nonpos_iff_eq_zero.mp (hreg ▸ le_max_right _ _)
@@ -2460,6 +2507,7 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
   · rw [red_zAxAll]; simpa using hreg
   · rw [red_zAxNeg]; simpa using hreg
   · rw [red_zAx1]; simpa using hreg
+  · rw [red_zAxBot]; simpa using hreg
 
 /-! ### Reusable building blocks for the `zK` chain case (5.1/5.2.1/5.2.2)
 
@@ -2821,7 +2869,8 @@ lemma ZRegular_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
   -- reconstruct the selected premise dᵢ as a chain `zK s' r' ds'`
   rcases zDerivation_iff.mp hchain with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _⟩ |
     ⟨s', p, d0, heq, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _⟩ |
-    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
+    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩ |
+    ⟨s', heq, _⟩
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -2835,6 +2884,7 @@ lemma ZRegular_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
     refine ZRegular_red_zK_splice hds hreg h1 h2 htag ?_ ?_
     · rw [heq, red_zK_crit hcrit]; exact ZRegular_iRcritG_premise hregred zero_lt_two
     · rw [heq, red_zK_crit hcrit]; exact ZRegular_iRcritG_premise hregred one_lt_two
+  · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -2887,7 +2937,7 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
         ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ |
-        ⟨s, C, rfl, hin⟩
+        ⟨s, C, rfl, hin⟩ | ⟨s, rfl, hin⟩
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hreg (by simp [zTag_zAtom])
       · exact ZRegular_red_of_not_zK
@@ -2912,7 +2962,8 @@ theorem ZRegular_red : ∀ d : V, ZDerivation d → ZRegular d → ZRegular (red
             (Or.inr (Or.inl ⟨s, p, rfl, hp, hin, hin2⟩)))))))) hreg (by simp [zTag_zAxNeg])
       · exact ZRegular_red_of_not_zK
           (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-            (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hreg (by simp [zTag_zAx1])
+            (Or.inr (Or.inr (Or.inl ⟨s, C, rfl, hin⟩))))))))) hreg (by simp [zTag_zAx1])
+      · exact ZRegular_red_of_not_zK (zDerivation_zAxBot_intro hin) hreg (by simp [zTag_zAxBot])
   exact key
 
 /-! ## `red` preserves `ZFresh` — the structural and Ind cases (freshness analogue of `ZRegular_red`)
@@ -2942,7 +2993,7 @@ lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
   unfold ZFresh at hfresh ⊢
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
   · rw [red_zAtom]; simpa using hfresh
   · rw [zFresh_zIall] at hfresh
     rw [red_zIall]
@@ -2958,6 +3009,7 @@ lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
   · rw [red_zAxAll]; simpa using hfresh
   · rw [red_zAxNeg]; simpa using hfresh
   · rw [red_zAx1]; simpa using hfresh
+  · rw [red_zAxBot]; simpa using hfresh
 
 /-! ## `red` preserves `ZFresh` — the `zK` chain dispatch (freshness analogue of `ZRegular_red_zK`)
 
@@ -3076,7 +3128,8 @@ lemma ZFresh_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
     ZFresh (red (zK s r ds)) := by
   rcases zDerivation_iff.mp hchain with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _⟩ |
     ⟨s', p, d0, heq, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _⟩ |
-    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
+    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩ |
+    ⟨s', heq, _⟩
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -3089,6 +3142,7 @@ lemma ZFresh_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
     refine ZFresh_red_zK_splice hds hfresh h1 h2 htag ?_ ?_
     · rw [heq, red_zK_crit hcrit]; exact ZFresh_iRcritG_premise hfreshred zero_lt_two
     · rw [heq, red_zK_crit hcrit]; exact ZFresh_iRcritG_premise hfreshred one_lt_two
+  · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -3127,7 +3181,7 @@ theorem ZFresh_red : ∀ d : V, ZDerivation d → ZFresh d → ZFresh (red d) :=
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
         ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ |
-        ⟨s, C, rfl, hin⟩
+        ⟨s, C, rfl, hin⟩ | ⟨s, rfl, hin⟩
       · exact ZFresh_red_of_not_zK
           (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hfresh (by simp [zTag_zAtom])
       · exact ZFresh_red_of_not_zK
@@ -3152,7 +3206,8 @@ theorem ZFresh_red : ∀ d : V, ZDerivation d → ZFresh d → ZFresh (red d) :=
             (Or.inr (Or.inl ⟨s, p, rfl, hp, hin, hin2⟩)))))))) hfresh (by simp [zTag_zAxNeg])
       · exact ZFresh_red_of_not_zK
           (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-            (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hfresh (by simp [zTag_zAx1])
+            (Or.inr (Or.inr (Or.inl ⟨s, C, rfl, hin⟩))))))))) hfresh (by simp [zTag_zAx1])
+      · exact ZFresh_red_of_not_zK (zDerivation_zAxBot_intro hin) hfresh (by simp [zTag_zAxBot])
   exact key
 
 /-! ## `red` preserves `ZSeqAnt` — the `zK` chain dispatch (lap 133, mirror `ZFresh_red_zK`)
@@ -3232,10 +3287,12 @@ lemma ZSeqAnt_zsubst_zIallPrem {e k : V} (he : ZDerivation e) (htag : zTag e = 1
     ZSeqAnt (zsubst (zIallPrem e) (zIallEig e) (Bootstrapping.Arithmetic.numeral k)) := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at htag
   · rw [zIallPrem_zIall, zIallEig_zIall]
     exact zSeqAnt_zsubst a (Bootstrapping.Arithmetic.numeral k) d0 hd0
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -3250,12 +3307,14 @@ lemma ZSeqAnt_zInegPrem {e : V} (he : ZDerivation e) (hsa : ZSeqAnt e) (htag : z
     ZSeqAnt (zInegPrem e) := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at htag
   · simp at htag
   · rw [zInegPrem_zIneg]
     unfold ZSeqAnt at hsa ⊢; rw [zSeqAnt_zIneg] at hsa
     exact nonpos_iff_eq_zero.mp (hsa ▸ le_max_right _ _)
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -3378,7 +3437,8 @@ lemma ZSeqAnt_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
     ZSeqAnt (red (zK s r ds)) := by
   rcases zDerivation_iff.mp hchain with ⟨s', heq, _⟩ | ⟨s', a, p, d0, heq, _, _⟩ |
     ⟨s', p, d0, heq, _, _⟩ | ⟨s', at', p, d0, d1, heq, _, _⟩ |
-    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩
+    ⟨s', r', ds', heq, hds', _, _⟩ | ⟨s', p, k, heq, _, _⟩ | ⟨s', p, heq, _, _⟩ | ⟨s', C, heq, _⟩ |
+    ⟨s', heq, _⟩
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -3391,6 +3451,7 @@ lemma ZSeqAnt_red_zK_splice_of_chain {s r ds : V} (hds : Seq ds)
     refine ZSeqAnt_red_zK_splice hds hsa h1 h2 htag ?_ ?_
     · rw [heq, red_zK_crit hcrit]; exact ZSeqAnt_iRcritG_premise hsared zero_lt_two
     · rw [heq, red_zK_crit hcrit]; exact ZSeqAnt_iRcritG_premise hsared one_lt_two
+  · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
   · rw [heq] at htag; simp at htag
@@ -3427,7 +3488,7 @@ theorem ZSeqAnt_red : ∀ d : V, ZDerivation d → ZSeqAnt d → ZSeqAnt (red d)
       rcases hphi with ⟨s, rfl, hin⟩ | ⟨s, a, p, d0, rfl, hd0, hsc, hwff⟩ |
         ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, h0, h1, hwff⟩ |
         ⟨s, r, ds, rfl, hds, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin⟩ | ⟨s, p, rfl, hp, hin, hin2⟩ |
-        ⟨s, C, rfl, hin⟩
+        ⟨s, C, rfl, hin⟩ | ⟨s, rfl, hin⟩
       · exact ZSeqAnt_red_of_not_zK
           (zDerivation_iff.mpr (Or.inl ⟨s, rfl, hin⟩)) hsa (by simp [zTag_zAtom])
       · exact ZSeqAnt_red_of_not_zK
@@ -3452,7 +3513,8 @@ theorem ZSeqAnt_red : ∀ d : V, ZDerivation d → ZSeqAnt d → ZSeqAnt (red d)
             (Or.inr (Or.inl ⟨s, p, rfl, hp, hin, hin2⟩)))))))) hsa (by simp [zTag_zAxNeg])
       · exact ZSeqAnt_red_of_not_zK
           (zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-            (Or.inr (Or.inr ⟨s, C, rfl, hin⟩)))))))) hsa (by simp [zTag_zAx1])
+            (Or.inr (Or.inr (Or.inl ⟨s, C, rfl, hin⟩))))))))) hsa (by simp [zTag_zAx1])
+      · exact ZSeqAnt_red_of_not_zK (zDerivation_zAxBot_intro hin) hsa (by simp [zTag_zAxBot])
   exact key
 
 /-! ## `ZFresh_iRKcCrit` — the re-keyed critical reduct preserves freshness (O3 front of the engine swap)
@@ -3471,10 +3533,12 @@ lemma ZFresh_zsubst_zIallPrem {e k : V} (he : ZDerivation e) (hfresh : ZFresh e)
     ZFresh (zsubst (zIallPrem e) (zIallEig e) (Bootstrapping.Arithmetic.numeral k)) := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at htag
   · rw [zIallPrem_zIall, zIallEig_zIall]
     exact zFresh_zsubst a k d0 hd0 (zfresh_zIallPrem hfresh)
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -3488,12 +3552,14 @@ lemma ZFresh_zInegPrem {e : V} (he : ZDerivation e) (hfresh : ZFresh e) (htag : 
     ZFresh (zInegPrem e) := by
   rcases zDerivation_iff.mp he with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _, _⟩ |
     ⟨s, p, d0, rfl, hd0, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
-    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, r, ds, rfl, _, _, _⟩ | ⟨s, p, kk, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ |
+    ⟨s, rfl, _⟩
   · simp at htag
   · simp at htag
   · rw [zInegPrem_zIneg]
     unfold ZFresh at hfresh ⊢
     rwa [zFresh_zIneg] at hfresh
+  · simp at htag
   · simp at htag
   · simp at htag
   · simp at htag
@@ -3613,7 +3679,7 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     rcases hphi with ⟨s, rfl, hatom⟩ | ⟨s, e, p, d0, rfl, hd0, hsc, hwff⟩ |
       ⟨s, p, d0, rfl, hd0, hsc, hwff⟩ | ⟨s, at', p, d0, d1, rfl, hd0, hd1, hwff⟩ |
       ⟨s, r, ds, rfl, hseq, hmem, hvalid⟩ | ⟨s, p, k, rfl, hp, hin, hsucc⟩ |
-      ⟨s, p, rfl, hp, hin, hin2⟩ | ⟨s, C, rfl, hin⟩
+      ⟨s, p, rfl, hp, hin, hin2⟩ | ⟨s, C, rfl, hin⟩ | ⟨s, rfl, hbot⟩
     -- atom
     · intro _
       rw [zsubst_zAtom]
@@ -3780,10 +3846,18 @@ theorem ZDerivation_zsubst {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) :
     -- zAx1
     · intro _
       rw [zsubst_zAx1]
-      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨fvSubstSeqt a t s, C, rfl, ?_⟩)))))))
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+        ⟨fvSubstSeqt a t s, C, rfl, ?_⟩))))))))
       rw [seqSucc_fvSubstSeqt, seqAnt_fvSubstSeqt]
       exact inAnt_fvSubstSeq hin
+    -- zAxBot (⊥-left axiom): `⊥` is closed, so it stays `⊥` under `fvSubst`
+    · intro _
+      rw [zsubst_zAxBot]
+      refine zDerivation_iff.mpr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+        ⟨fvSubstSeqt a t s, rfl, ?_⟩))))))))
+      rw [seqAnt_fvSubstSeqt]
+      have h := inAnt_fvSubstSeq (a := a) (t := t) hbot
+      rwa [fvSubst_falsum (L := ℒₒᵣ)] at h
 
 /-! ## Route-B eigensubst reducts, discharged by `ZDerivation_zsubst` under a freshness bound
 

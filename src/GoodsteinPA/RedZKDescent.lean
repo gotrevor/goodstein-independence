@@ -35,7 +35,7 @@ lemma iRedDescent_zAxReduct_red_of_tp_isymLk {d k A : V} (htp : tp d = isymLk k 
     (hZ : ZDerivation d) : iRedDescent (zAxReduct (red d)) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, _, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k', rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, p, k', rfl, hp, _⟩ | ⟨s, p, rfl, hp, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · rw [tp_zIall] at htp; exact absurd htp (by simp)
   · rw [tp_zIneg] at htp; exact absurd htp (by simp)
@@ -44,6 +44,7 @@ lemma iRedDescent_zAxReduct_red_of_tp_isymLk {d k A : V} (htp : tp d = isymLk k 
   · rw [red_zAxAll]; exact iRedDescent_zAxReduct_zAxAll hp.isUFormula
   · rw [red_zAxNeg]; exact iRedDescent_zAxReduct_zAxNeg hp
   · rw [tp_zAx1] at htp; exact absurd htp (by simp)
+  · rw [tp_zAxBot] at htp; exact absurd htp (by simp)
 
 /-- **i-side `red`-ρ bundle** (R-redex premise): for an I-rule premise `d` (`tp d = R_A`), the wrapped
 genuine reduct `zAxReduct (red d)` satisfies the `iRedDescent` bundle. For I¬, `red = d0 = iR2`. For I∀,
@@ -54,7 +55,7 @@ lemma iRedDescent_zAxReduct_red_of_tp_isymR {d A : V} (htp : tp d = isymR A)
     (hZ : ZDerivation d) (hreg : ZRegular d) : iRedDescent (zAxReduct (red d)) d := by
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, hd0, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
-    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩
+    ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
   · rw [tp_zAtom] at htp; exact absurd htp (by simp)
   · -- I∀: red = zsubst d0 a 0
     have ht0 : IsSemiterm ℒₒᵣ 0 (Bootstrapping.Arithmetic.numeral 0 : V) := by simp
@@ -77,6 +78,7 @@ lemma iRedDescent_zAxReduct_red_of_tp_isymR {d A : V} (htp : tp d = isymR A)
   · rw [tp_zAxAll] at htp; exact absurd htp (by simp)
   · rw [tp_zAxNeg] at htp; exact absurd htp (by simp)
   · rw [tp_zAx1] at htp; exact absurd htp (by simp)
+  · rw [tp_zAxBot] at htp; exact absurd htp (by simp)
 
 /-- **THE critical-branch K-case descent for the GENUINE reduct `red`.** For a valid `K^r` chain whose
 selected premise is critical (`¬ permIdx < lh ds`), `red (zK s r ds) = iRcritG …` and the ordinal strictly
@@ -721,6 +723,22 @@ lemma red_zK_fixpoint_of_zAx1_selected {s r ds sᵢ Cᵢ : V}
     show tp (znth ds (permIdx (zK s r ds))) = isymRep from by rw [hax1, tp_zAx1],
     tpReduce_isymRep]
 
+/-- **`red`-fixpoint when the selected premise is the ⊥-left axiom `zAxBot`.** Mirror of
+`red_zK_fixpoint_of_zAx1_selected`: `zAxBot` is `red`-normal (`red_zAxBot`), `tp = isymRep` (`tp_zAxBot`),
+so the Rep-replace `iRKr` reinserts the same premise and keeps the conclusion — the whole node is a
+`red`-fixpoint. -/
+lemma red_zK_fixpoint_of_zAxBot_selected {s r ds sᵢ : V}
+    (hds : Seq ds) (h1 : permIdx (zK s r ds) < lh ds)
+    (hbot : znth ds (permIdx (zK s r ds)) = zAxBot sᵢ) :
+    red (zK s r ds) = zK s r ds := by
+  have htag : zTag (znth ds (permIdx (zK s r ds))) ≠ 4 := by rw [hbot]; simp
+  rw [red_zK_rep_nonchain h1 htag,
+    show red (znth ds (permIdx (zK s r ds))) = znth ds (permIdx (zK s r ds)) from by
+      rw [hbot, red_zAxBot],
+    seqUpdate_znth_self hds h1,
+    show tp (znth ds (permIdx (zK s r ds))) = isymRep from by rw [hbot, tp_zAxBot],
+    tpReduce_isymRep]
+
 /-- **Tag-explicit ⊥-orbit descent dichotomy** (lap 130). Upgrades `iRcrit_descends_or_nonleaf_isymRep`'s
 RIGHT disjunct from "a non-leaf `isymRep` premise exists" to the STRUCTURAL form "a `zInd` (tag 3) or `zK`
 (tag 4) premise exists" (via `isymRep_nonleaf_zInd_or_zK`). This is the clean entry the restructured
@@ -737,7 +755,7 @@ theorem iRcrit_descends_or_zInd_zK_premise {s r ds : V}
     (hreg : ∀ i < lh ds, ZRegular (znth ds i)) :
     icmp (iord (iRcrit (zK s r ds) (fun n => zAxReduct (red (znth ds n))))) (iord (zK s r ds)) = 0
     ∨ (∃ i < lh ds, (∃ s' at' p d0 d1, znth ds i = zInd s' at' p d0 d1) ∨
-        (∃ s' r' ds', znth ds i = zK s' r' ds')) := by
+        (∃ s' r' ds', znth ds i = zK s' r' ds') ∨ (∃ s', znth ds i = zAxBot s')) := by
   rcases iRcrit_descends_or_nonleaf_isymRep hZ hant hsucc hreg with hL | ⟨i, hi, hrep, hnleaf⟩
   · exact Or.inl hL
   · obtain ⟨_, hmem⟩ := zDerivation_zK_inv hZ
