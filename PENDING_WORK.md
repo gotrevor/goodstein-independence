@@ -59,6 +59,31 @@ arbitrary). I confirmed against the 8-rule `ZPhi` list (`InternalZ:5458`):
     recursion + the atom-validity close), reusing `leafCloseC`. This is route 4 — avoids the route-2 `zAxBot`
     datatype ripple entirely IF the atom-validity holds. Confirm the atom-validity FIRST (it gates the whole route).
 
+### ⭐⭐ DE-RISKED + SHARPENED (lap 161) — route 4 is pure ASSEMBLY; the DOMINANT shape `^∀^k⊥` closes cleanly
+- **The dominant ⊥-exit cut-formula shape is `^∀^k⊥`** (∀-tower over the CLOSED matrix `⊥`; established lap-155,
+  `p=⊥` via `zAxAllSuccWff`+`eq_falsum_of_substs1_falsum`). Its matrix is `⊥`, NOT an atom ⟹ route 4 closes it
+  cleanly as `zIall^k (zAtom)`: the innermost premise derives `Γ+eigenvars → ⊥`, a LEAF (`⊥∈Γ`). The atom gap
+  only bites for genuinely atom-MATRIXED succedents (rare/maybe-absent here). So build the `^∀^k⊥` + `inegF` +
+  `⊥`-itself cases first; leave a narrow atom-matrix sub-`sorry` if it can't be shown vacuous.
+- **All supporting infra EXISTS (verified lap 161) — the build is ASSEMBLY, not new infra:**
+  - cert template = `axNegCloseGen` (`Crux2Blueprint:3480`): `Or.inl ⟨reduct, zDerivation_iff.mpr(disjunct),
+    zReg_X, zFresh_X, (zSeqAnt_X).trans (seqAntSeqFlag_zK_of_ZSeqAnt hseqant), fstIdx-match, ⟨idg-drop,
+    iotil-drop, isNF⟩⟩`.
+  - `inegF p` case: reduct `zIneg s p (zAtom s')` with `s'` antecedent `seqAddAnt p (seqAnt s)`, succedent `⊥`
+    (leaf, `⊥∈seqAnt s ⊆ seqAddAnt p …`); validity = `zInegWff` (`InternalZ:1525`, = premise `Γ,p→⊥` + `IsUFormula
+    p`) + `zInegAntWff`. Builders: `zReg_zIneg`, `zFresh_zIneg`, `zSeqAnt_zIneg`, `fstIdx_zIneg`, `idg_zIneg`,
+    `iotil_zIneg` — ALL present. Match `fstIdx_zIneg = ⟨seqAnt s, inegF p⟩` to `fstIdx_zK` via `seqSucc s = inegF p`.
+  - `^∀ p` case: reduct `zIall s a p v'` (`zReg_zIall`/`zFresh_zIall`/`zSeqAnt_zIall`/`fstIdx_zIall`/`idg_zIall`/
+    `iotil_zIall` present); `v'` from the recursion on the matrix `p` (eigenvar `a` — the one fiddly bit; reuse
+    the `zFresh`/`zIallWff` eigenvariable handling already in the repo).
+  - ordinal drop: `idg = 0` for the fresh reduct (`idg_zIneg`/`idg_zIall` should reduce); `iotil` finite-head
+    `õ`-drops vs `zK` via `iotil_zK`+`finHead_iotil_lt_iseqNaddIdg` (the exact `axNegCloseGen` move).
+  - **discriminate `seqSucc s`'s shape** via `IsUFormula` cases / the `qq*`-constructor matchers (the chain's
+    `seqSucc s` is a UFormula from `zKValidF`'s succedent-wff conjunct `hss`).
+- **EXECUTION ORDER next lap:** (1) `inegF` case (no recursion, cleanest — get the cert tuple compiling); (2)
+  `^∀^k⊥` via the `zIall` recursion bottoming at `⊥`; (3) the atom-matrix case — show vacuous (atom succedent ⟹
+  atom∈Γ ⟹ `leafCloseC`) or leave a narrow sub-`sorry`. Closing all three DROPS `exFalsoClose`.
+
 ### The rest of the residual (unchanged from lap 160)
 (ii) C-exit R-intro replay (tag-1/2 major produces `C = seqSucc s` directly) — likely needs the major premise's own
 reduct, spliced same-end-sequent. (iii) tag-5/6 thread-escape — shared with `axMajorResidual` (:3735); factor a
