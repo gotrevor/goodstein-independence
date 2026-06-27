@@ -2921,7 +2921,52 @@ derivation CODE (Buchholz Theorem 2.1; NOT `iord`-recursion — that is PRWO/Gö
 replace plumbing is now discharged by `descent_step_K_replace`; the lone genuine residual of each is the
 smaller-premise reduct. -/
 
-/-- **has-redex leaf of the §14.254 chain reduction (`Γ→⊥`, `iord`-DESCENT principal cut) — NAMED
+/-- **Structured §14.254 reduct certificate (lap-151).** The FAITHFUL conclusion of the general
+`Γ→⊥` reduction `genReduct_botSucc`: a `Rep` node `d`'s reduct is EITHER (`Or.inl`) a single
+same-end-sequent `õ`-dropping REPLACE reduct `v` (`iRedDescent`; the non-principal cases, spliced via
+`descent_step_K_replace`), OR (`Or.inr`) the two FLATTEN halves `a = dⱼ{0} ⊢ Γ→B`, `b = dⱼ{1} ⊢ B,Γ→A`
+of `d`'s OWN principal cut (the §14.253 sub-case; spliced via `descent_step_K_spliceHalves`). The flatten
+branch is forced when `d`'s reduct degree-trades (`õ` RISES): a bare same-end-sequent replace is then
+NON-descending (lap-151 in-kernel finding, judge `E-2026-06-26-JUDGE-splice-flatten-not-seqUpdate.md`).
+BOTH branches carry `õ`-STRICT-drop on the spliced object(s) (`iRedDescent`/`icmp (iotil _) (iotil d)=0`),
+so the outer splice always lands in the `õ`-fold-drop engine, never the false degree-trade `seqUpdate`
+monotonicity. The `∀ B`-threading is in the BOUNDED `∀ k < lh` form to keep the recursion motive `𝚺₁`
+(`GenReductCert = certReplace ∨ certFlatten`, split so each branch's definability is provable separately). -/
+abbrev certReplace (d : V) : Prop :=
+  ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧
+      fstIdx v = fstIdx d ∧ iRedDescent v d
+
+/-- FLATTEN branch: the two principal-cut halves of `d` (cut-pair end-sequents + `õ`-drop). -/
+abbrev certFlatten (d : V) : Prop :=
+  ∃ a b, ZDerivation a ∧ ZDerivation b ∧
+      ZRegular a ∧ ZRegular b ∧ ZFresh a ∧ ZFresh b ∧ ZSeqAnt a ∧ ZSeqAnt b ∧
+      seqAnt (fstIdx a) = seqAnt (fstIdx d) ∧ seqSucc (fstIdx b) = seqSucc (fstIdx d) ∧
+      (∀ k < lh (seqAnt (fstIdx b)),
+          znth (seqAnt (fstIdx b)) k = seqSucc (fstIdx a) ∨
+          ∃ i < lh (seqAnt (fstIdx d)),
+            znth (seqAnt (fstIdx d)) i = znth (seqAnt (fstIdx b)) k) ∧
+      IsUFormula ℒₒᵣ (seqSucc (fstIdx a)) ∧ IsUFormula ℒₒᵣ (seqSucc (fstIdx b)) ∧
+      irk (seqSucc (fstIdx a)) + 1 ≤ idg d ∧
+      icmp (iotil a) (iotil d) = 0 ∧ icmp (iotil b) (iotil d) = 0 ∧
+      idg a ≤ idg d ∧ idg b ≤ idg d
+
+def GenReductCert (d : V) : Prop := certReplace d ∨ certFlatten d
+
+set_option maxHeartbeats 1600000 in
+instance certReplace_definable : 𝚺₁-Predicate (certReplace : V → Prop) := by
+  unfold certReplace ZRegular ZFresh ZSeqAnt
+  simp only [iRedDescent_iff]
+  definability
+
+set_option maxHeartbeats 1600000 in
+instance certFlatten_definable : 𝚺₁-Predicate (certFlatten : V → Prop) := by
+  unfold certFlatten ZRegular ZFresh ZSeqAnt; definability
+
+/-- The structured certificate is `𝚺₁`-definable — each branch isolated (so the motive stays cheap). -/
+instance GenReductCert_definable : 𝚺₁-Predicate (GenReductCert : V → Prop) := by
+  unfold GenReductCert; exact certReplace_definable.or certFlatten_definable
+
+/-- **has-redex leaf of the §14.254 chain reduction (`Γ→⊥`, FLATTEN certificate) — NAMED
 sub-`sorry`.** A `zK s r ds` chain deriving `Γ→⊥` with a redex pair `⟪i0,j1⟫` below its `isChainInf`
 ⊥-exit `j0` has the criticality-free principal-cut reduct `iRKcCrit (zK s r ds)` as a SAME-end-sequent
 strictly-`iord`-descending regular/fresh/seqAnt `ZDerivation`. ⚠️ **`iord`, NOT `iRedDescent`** (lap-150
@@ -2940,8 +2985,7 @@ lemma genReduct_chain_hasRedex {s r ds i0 j1 j0 : V}
         inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
     (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
     (hij : i0 < j1) (hj1 : j1 ≤ j0) (hpair : isRedexPair ds (⟪i0, j1⟫ : V)) :
-    ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = s ∧
-      icmp (iord v) (iord (zK s r ds)) = 0 := by
+    GenReductCert (zK s r ds) := by
   sorry
 
 /-- **no-redex leaf of the §14.254 chain reduction (`Γ→⊥`, recurse via the IH) — NAMED sub-`sorry`.** No
@@ -2964,10 +3008,8 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
     (IH : ∀ i < lh ds, ZRegular (znth ds i) → ZFresh (znth ds i) → ZSeqAnt (znth ds i) →
         seqSucc (fstIdx (znth ds i)) = (^⊥ : V) →
         (zTag (znth ds i) = 3 ∨ zTag (znth ds i) = 4) →
-        ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧
-          fstIdx v = fstIdx (znth ds i) ∧ icmp (iord v) (iord (znth ds i)) = 0) :
-    ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = s ∧
-      icmp (iord v) (iord (zK s r ds)) = 0 := by
+        GenReductCert (znth ds i)) :
+    GenReductCert (zK s r ds) := by
   sorry
 
 /-- **The §14.254 chain reduction step (tag-4 `zK`) — sorry-FREE DISPATCHER (lap 150), with the per-premise
@@ -2986,10 +3028,8 @@ lemma genReduct_botSucc_chain {s r ds : V}
     (IH : ∀ i < lh ds, ZRegular (znth ds i) → ZFresh (znth ds i) → ZSeqAnt (znth ds i) →
         seqSucc (fstIdx (znth ds i)) = (^⊥ : V) →
         (zTag (znth ds i) = 3 ∨ zTag (znth ds i) = 4) →
-        ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧
-          fstIdx v = fstIdx (znth ds i) ∧ icmp (iord v) (iord (znth ds i)) = 0) :
-    ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = s ∧
-      icmp (iord v) (iord (zK s r ds)) = 0 := by
+        GenReductCert (znth ds i)) :
+    GenReductCert (zK s r ds) := by
   obtain ⟨j0, hj0, hAj0, hthread0, hrank0⟩ := (zKValidF_of_ZDerivation_zK hZ).1
   have hbot0 : chainAsucc ds j0 = (^⊥ : V) := hAj0.elim (fun h => h.trans hsucc) id
   by_cases hlow : ∃ i0 j1, i0 < j1 ∧ j1 ≤ j0 ∧ isRedexPair ds (⟪i0, j1⟫ : V)
@@ -2997,34 +3037,28 @@ lemma genReduct_botSucc_chain {s r ds : V}
     exact genReduct_chain_hasRedex hZ hreg hfresh hseqant hsucc hj0 hbot0 hthread0 hrank0 hij hj1 hpair
   · exact genReduct_chain_noRedex hZ hreg hfresh hseqant hsucc hj0 hbot0 hthread0 hrank0 hlow IH
 
-/-- **General `Γ→⊥` one-step descending reduct — the §14.254 crux interface, by CODE-RECURSION (lap 150).**
-Any `Rep`-node `ZDerivation d` (tag ∈ {3,4}: a `zInd` or a sub-`zK` chain) deriving `Γ→⊥` with the
-regular/fresh/seqAnt invariants has a SAME-end-sequent, strictly-`iord`-descending regular/fresh/seqAnt
-`ZDerivation` reduct `v`. **Proved by `zDerivation_sigma_induction`** — strong induction on the derivation
-CODE at the `𝚺₁` level (the existence-form motive is `𝚺₁`: the matrix `icmp (iord v) (iord d) = 0` is
-`𝚫₁`), NOT `iord`-recursion (PRWO/Gödel-barred). ⚠️ The descent is the COMBINED `iord` (`icmp (iord v)
-(iord d) = 0`), NOT `iRedDescent` (lap-150 finding, judge-confirmed): a tag-4 chain reduct may drop via
-DEGREE (principal cut), which `iRedDescent`'s `õ`-strict-drop does NOT capture. The tags ∉ {3,4} are
-vacuous; **tag-3 (`zInd`) is PROVEN** via `ind_reduct_botSucc_of_fresh` (whose `iRedDescent` is converted to
-`iord` by `iord_descent_of_iRedDescent`); **tag-4 (`zK`) delegates to `genReduct_botSucc_chain`**, supplying
-the per-premise IH that the structural induction provides — the genuine §14.254 recursion isolated WITH its
-IH in hand. Consumed by the no-redex leaves via the §14.254 `iord`-splice (`descent_step_K_splice`). -/
+/-- **General `Γ→⊥` one-step reduct CERTIFICATE — the §14.254 crux interface, by CODE-RECURSION
+(lap 150 frame, lap-151 `GenReductCert`).** Any `Rep`-node `ZDerivation d` (tag ∈ {3,4}: a `zInd` or a
+sub-`zK` chain) deriving `Γ→⊥` with the regular/fresh/seqAnt invariants has a `GenReductCert d`: EITHER a
+single `õ`-dropping REPLACE reduct, OR the two FLATTEN halves of `d`'s own principal cut (the structured
+certificate that exposes the halves the §14.254 splice needs — see `GenReductCert`). **Proved by
+`zDerivation_sigma_induction`** — strong induction on the derivation CODE at the `𝚺₁` level (the certificate
+is `𝚺₁`, `GenReductCert_definable`), NOT `iord`-recursion (PRWO/Gödel-barred). The tags ∉ {3,4} are vacuous;
+**tag-3 (`zInd`) is PROVEN** as the REPLACE branch via `ind_reduct_botSucc_of_fresh` (`iRedDescent`, `õ`-drop);
+**tag-4 (`zK`) delegates to `genReduct_botSucc_chain`**, supplying the per-premise IH the structural induction
+provides — the genuine §14.254 recursion isolated WITH its IH in hand. Consumed by the no-redex leaves via
+`descent_step_K_replace` (REPLACE) / `descent_step_K_spliceHalves` (FLATTEN). -/
 lemma genReduct_botSucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh : ZFresh d)
     (hseqant : ZSeqAnt d) (hsucc : seqSucc (fstIdx d) = (^⊥ : V))
     (htag : zTag d = 3 ∨ zTag d = 4) :
-    ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = fstIdx d ∧
-      icmp (iord v) (iord d) = 0 := by
+    GenReductCert d := by
   -- Strong induction on the derivation CODE (the Buchholz §14.254 recursion), at the `𝚺₁` level.
   have key : ∀ d : V, ZDerivation d → ZRegular d → ZFresh d → ZSeqAnt d →
-      seqSucc (fstIdx d) = (^⊥ : V) → (zTag d = 3 ∨ zTag d = 4) →
-      ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = fstIdx d ∧
-        icmp (iord v) (iord d) = 0 := by
+      seqSucc (fstIdx d) = (^⊥ : V) → (zTag d = 3 ∨ zTag d = 4) → GenReductCert d := by
     apply zDerivation_sigma_induction
       (P := fun d : V => ZRegular d → ZFresh d → ZSeqAnt d → seqSucc (fstIdx d) = (^⊥ : V) →
-        (zTag d = 3 ∨ zTag d = 4) →
-        ∃ v, ZDerivation v ∧ ZRegular v ∧ ZFresh v ∧ ZSeqAnt v ∧ fstIdx v = fstIdx d ∧
-          icmp (iord v) (iord d) = 0)
-    · -- motive definability: the existence-form is `𝚺₁` (matrix `𝚫₁` via `iord`/`icmp`)
+        (zTag d = 3 ∨ zTag d = 4) → GenReductCert d)
+    · -- motive definability: `GenReductCert` via its banked instance; the antecedents are `𝚫₁`
       unfold ZRegular ZFresh ZSeqAnt; definability
     · -- the inductive step: dispatch on the rule; the IH `hC` gives `P` on every premise
       intro C hC d hphi
@@ -3036,7 +3070,7 @@ lemma genReduct_botSucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh
       · simp at htag                                       -- zAtom (tag 0)
       · simp at htag                                       -- zIall (tag 1)
       · simp at htag                                       -- zIneg (tag 2)
-      · -- zInd (tag 3): the general Ind reduct (PROVEN, lap 148/149)
+      · -- zInd (tag 3): the general Ind reduct (`õ`-DROP REPLACE, PROVEN lap 148/149)
         rw [fstIdx_zInd] at hsucc
         have hfreshΓ : freshFlag (π₁ at') (^⊥ : V) (seqAnt s) = 0 := by
           have hz : zFresh (zInd s at' p d0 d1) = 0 := hfresh
@@ -3044,10 +3078,9 @@ lemma genReduct_botSucc {d : V} (hZ : ZDerivation d) (hreg : ZRegular d) (hfresh
           exact nonpos_iff_eq_zero.mp (hz ▸ le_max_left _ _)
         obtain ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ :=
           ind_reduct_botSucc_of_fresh hZd hreg hfresh hseqant hsucc hfreshΓ
-        exact ⟨v, hZv, hregv, hfreshv, hseqantv, by rw [hvfst, fstIdx_zInd],
-          iord_descent_of_iRedDescent hdesc (isNF_iotil_of_ZDerivation _ hZd)⟩
+        exact Or.inl ⟨v, hZv, hregv, hfreshv, hseqantv, by rw [hvfst, fstIdx_zInd], hdesc⟩
       · -- zK (tag 4): delegate to the chain step, with the per-premise IH from `hC`
-        rw [fstIdx_zK] at hsucc ⊢
+        rw [fstIdx_zK] at hsucc
         refine genReduct_botSucc_chain hZd hreg hfresh hseqant hsucc ?_
         intro i hi hregi hfreshi hseqanti hsucci htagi
         exact (hC (znth ds i) (hmem i hi)).2 hregi hfreshi hseqanti hsucci htagi
@@ -3122,28 +3155,14 @@ theorem descent_step_K_spliceHalves {s r r' ds i j0 a b : V}
   · exact iord_descent_seqInsert' hds hi hnf hr'deg ha_otil hb_otil ha_idg hb_idg hNF
       (isNF_iotil_of_ZDerivation a hZa) (isNF_iotil_of_ZDerivation b hZb)
 
-/-- **§14.254 SPLICE — replace a chain premise by its same-end-sequent `iord`-descending reduct (NAMED
-sub-`sorry`).** The `iord`-DESCENT analog of `descent_step_K_replace` (`:2475`): the consumed reduct `v`
-descends only in the COMBINED `iord` (`icmp (iord v) (iord (znth ds i)) = 0`), NOT necessarily in `iotil`
-(a sub-chain cut trades degree for `õ`) — so the `iCritAux`/`iRedDescent`-based `descent_step_K_replace`
-does NOT apply. This is the genuine Buchholz §14.254 splice (lines 480-535): reduce the premise, splice its
-reduct into the chain's premise sequence, show the outer `iord` drops. ⚠️ **Documented bug-magnet** — the
-order/dispatch of the splice has been refuted in-kernel before (`ANALYSIS-…-lap87-splice-order-sensitivity`,
-`…-lap94-splice-dispatch-unfaithful`); pin the dispatch against those before grinding. The crux residual:
-prove the outer chain's `iord` is monotone under the premise replacement when the premise reduct's `iord`
-(not `iotil`) drops. -/
-theorem descent_step_K_splice {s r ds i v : V}
-    (hd : ZDerivesEmptyR (zK s r ds)) (hi : i < lh ds)
-    (hZv : ZDerivation v) (hregv : ZRegular v) (hfreshv : ZFresh v) (hseqantv : ZSeqAnt v)
-    (hvfst : fstIdx v = fstIdx (znth ds i))
-    (hdesc : icmp (iord v) (iord (znth ds i)) = 0) :
-    ∃ d', ZDerivesEmptyR d' ∧ icmp (iord d') (iord (zK s r ds)) = 0 := sorry
-
-/-- **§14.254a — `Rep` major premise (tags 3,4): replace it with its same-end-sequent reduct.** No redex below
-the exit `j0`; the faithful major premise `dₘ = znth ds (majorIdx)` is a `zInd` (3) or sub-`zK` (4), reduction
-`Rep` (same `Γₘ→⊥` end-sequent). BOTH tags route uniformly through `genReduct_botSucc` (tag-3 `zInd` PROVEN via
-the strengthened `zFresh` invariant; tag-4 `zK` = the general chain reduction) + the §14.254 `descent_step_K_splice`
-(`iord`-descent) at `i = majorIdx`. The lap-148 separate `_K` leaf is now subsumed by `genReduct_botSucc`. -/
+/-- **§14.254a — `Rep` major premise (tags 3,4): reduce it and SPLICE — sorry-FREE (lap 151).** No redex below
+the exit `j0`; the faithful major premise `dₘ = znth ds (majorIdx)` is a `zInd` (3) or sub-`zK` (4), `tp = Rep`.
+`genReduct_botSucc dₘ` returns the structured `GenReductCert`: either (`Or.inl`) a single `õ`-dropping REPLACE
+reduct → the banked `descent_step_K_replace`, or (`Or.inr`) the two FLATTEN halves of `dₘ`'s own principal cut
+→ the banked `descent_step_K_spliceHalves` at `i = majorIdx`. **This DROPS the false lap-150b
+`descent_step_K_splice`** (the single-premise `seqUpdate`+combined-`iord` splice, refuted in-kernel lap 151 —
+`õ` rises under a degree-traded premise, the outer `iord` does NOT descend). `majorIdx ≤ j0` because the
+`isChainInf` ⊥-exit `j0` is itself a major premise (`isMajorPrem`). -/
 theorem descent_step_K_noncrit_repMajor {s r ds j0 : V}
     (hd : ZDerivesEmptyR (zK s r ds))
     (hant : seqAnt s = (∅ : V)) (hsucc : seqSucc s = (^⊥ : V))
@@ -3157,13 +3176,36 @@ theorem descent_step_K_noncrit_repMajor {s r ds j0 : V}
   have hZ : ZDerivation (zK s r ds) := hd.1.1
   obtain ⟨hds, hmem⟩ := zDerivation_zK_inv hZ
   obtain ⟨hmlt, hmbot, _, _⟩ := majorIdx_botOrbit_reducible hZ hant hsucc
-  have hmemZ : ZDerivation (znth ds (majorIdx (zK s r ds))) := hmem _ hmlt
   have hregm : ZRegular (znth ds (majorIdx (zK s r ds))) := ZRegular_zK_premise hds hd.2.1 hmlt
   have hfreshm : ZFresh (znth ds (majorIdx (zK s r ds))) := ZFresh_zK_premise hds hd.2.2.1 hmlt
   have hseqantm : ZSeqAnt (znth ds (majorIdx (zK s r ds))) := ZSeqAnt_zK_premise hds hd.2.2.2 hmlt
-  obtain ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ :=
-    genReduct_botSucc hmemZ hregm hfreshm hseqantm hmbot htag
-  exact descent_step_K_splice hd hmlt hZv hregv hfreshv hseqantv hvfst hdesc
+  -- `majorIdx ≤ j0`: the ⊥-exit `j0` is a major premise (`chainAsucc ds j0 = ⊥ = seqSucc s`)
+  have hmaj0 : isMajorPrem ds s j0 := by show chainAsucc ds j0 = seqSucc s; rw [hbot0, hsucc]
+  have hmj0 : majorIdx (zK s r ds) ≤ j0 := by
+    rw [majorIdx, zKseq_zK, fstIdx_zK]
+    exact majorIdxAux_le_of_isMajorPrem ds s (lh ds) j0 hj0 hmaj0
+  rcases genReduct_botSucc (hmem _ hmlt) hregm hfreshm hseqantm hmbot htag with
+    ⟨v, hZv, hregv, hfreshv, hseqantv, hvfst, hdesc⟩ |
+    ⟨a, b, hZa, hZb, hrega, hregb, hfresha, hfreshb, hseqanta, hseqantb,
+      ha_ant, hb_succ, hb_thr, hfa_a, hfa_b, hrank_b, ha_otil, hb_otil, ha_idg, hb_idg⟩
+  · -- REPLACE (`õ`-drop single reduct) → the banked `descent_step_K_replace`
+    exact descent_step_K_replace hd hmlt hZv hregv hfreshv hseqantv hvfst hdesc
+  · -- FLATTEN (the principal-cut halves) → `descent_step_K_spliceHalves` (PROVEN lap 151)
+    have hidgm : idg (znth ds (majorIdx (zK s r ds))) ≤ iseqMaxIdg ds :=
+      le_iseqMaxIdgAux (lh ds) (majorIdx (zK s r ds)) hmlt
+    have hrankidg : irk (seqSucc (fstIdx a)) ≤ idg (zK s r ds) := by
+      rw [idg_zK s r ds hds]
+      exact le_trans (le_pred_of_lt (succ_le_iff_lt.mp (le_trans hrank_b hidgm)))
+        (le_max_right r (iseqMaxIdg ds - 1))
+    refine descent_step_K_spliceHalves hd hant hsucc hj0 hmj0 hbot0 hthread0 hrank0
+      hZa hZb hrega hregb hfresha hfreshb hseqanta hseqantb ha_ant hb_succ ?_ hfa_a hfa_b
+      (le_max_left r _) (le_max_right r _) (max_le (r_le_idg_zK s r ds hds) hrankidg)
+      ha_otil hb_otil ha_idg hb_idg
+    · intro B hB
+      obtain ⟨k, hk, hkB⟩ := hB
+      rcases hb_thr k hk with h | h
+      · exact Or.inl (hkB ▸ h)
+      · exact Or.inr (hkB ▸ h)
 
 /-- **§14.254b — L-axiom major premise (tags 5,6): replace its upstream `Rep` cut-partner (named
 sub-`sorry`).** No redex below the exit; the faithful major premise is `zAxAll`/`zAxNeg` (a `red`-FIXPOINT) with

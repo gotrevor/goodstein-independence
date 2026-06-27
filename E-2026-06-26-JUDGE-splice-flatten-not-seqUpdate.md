@@ -1,5 +1,15 @@
 # E — Judge: the §14.254 splice needs a FLATTEN, not a `seqUpdate` (Ren, 2026-06-26, fresh judge, ~lap 150)
 
+> **✅ RESOLVED lap 151 (`e204766`), as called.** The box refuted the `seqUpdate` splice and built the genuine
+> flatten engine `descent_step_K_spliceHalves` (Crux2Blueprint:3096) — **sorry-free**, descent via
+> `iord_descent_seqInsert'` (insert two halves in place of premise `i`), NOT a seqUpdate monotonicity. It also
+> strengthened the IH to a structured `GenReductCert` (:2934): `Or.inl` õ-drop→replace | `Or.inr` flatten-halves
+> exposing both halves' õ-bounds (`icmp (iotil a/b) (iotil d) = 0`) + the outer-rank condition
+> (`irk B + 1 ≤ idg d`) — the option-(a) interface enrichment predicted below, proven Σ₁-definable. The deep
+> ordinal question ("does the flatten descend?") is now PROVEN; the live residual relocated (not relabeled) to
+> PRODUCING the cert's halves from the principal cut (sorries :2977/:3001) + axMajor (:3215) + gDef (:3338) + M2.
+> The analysis below stands as the why.
+
 > **VALIDATE, don't trust.** Source-grounded in `scratchpad/buchholz-gentzen.txt` §14.254 (480-535) + the
 > `iord` algebra at HEAD `78a938a`: `iotil_zK` (InternalZ:2524), `idg_zK` (:2159), `iord_descent_cut` (:2667),
 > `iord = iotower (iotil) (idg)` (:2535). Trigger: validating the lap-150 frame + the box's stated NEXT move.

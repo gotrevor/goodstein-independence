@@ -30,7 +30,32 @@ strictly drops (F2 `ω^{õa}#ω^{õb} ≺ ω^{õ dⱼ}`). The genuine ordered-in
 `ZDerivesEmptyR`. Axiom-clean `[propext, choice, Quot.sound]`. **This is the bug-magnet engine the judge
 flagged — now machine-checked.**
 
-### ▶ NEXT (the DROP) — enrich the genReduct certificate to `replace | flatten`, delete `descent_step_K_splice`
+### ✅ THE DROP LANDED (lap 151b) — `GenReductCert` structured certificate; `descent_step_K_splice` DELETED
+Enriched `genReduct_botSucc`'s conclusion to `GenReductCert d` (`certReplace d ∨ certFlatten d`):
+`Or.inl` = a single `õ`-dropping REPLACE reduct (`iRedDescent`), `Or.inr` = the two FLATTEN halves with the
+cut-pair end-sequents + `õ`-drop. `descent_step_K_noncrit_repMajor` now `rcases` the cert → REPLACE routes
+to `descent_step_K_replace` (proven), FLATTEN routes to `descent_step_K_spliceHalves` (proven) — **sorry-FREE**.
+**`descent_step_K_splice` (the false sorry) DELETED** → net −1 live src sorry. `GenReductCert_definable`
+PROVEN axiom-clean. KEY definability gotchas (banked): (1) split the cert into `abbrev certReplace`/
+`certFlatten` + prove each `𝚺₁-Predicate` SEPARATELY then `.or` — `definability` exhausts on the 24-conjunct
+flat disjunction AND on the general `Γ-[m+1]` form (state at `𝚺₁` ONLY, the level `zDerivation_sigma_induction`
+needs); (2) `simp only [iRedDescent_iff]` BEFORE `definability` (a bare `iRedDescent v d` structure is NOT
+auto-decomposed by aesop); (3) inline `inAnt` as its bounded-`∃` (no `Γ-[m+1]-Relation inAnt` instance);
+(4) `set_option maxHeartbeats 1600000`. Headline 0 math axioms, no drift; build 🟢 1326.
+
+### ▶ NEXT — the three remaining genuine leaves (all in the FAITHFUL cert form now)
+1. **`genReduct_chain_hasRedex`** (`Crux2Blueprint`, the chain's own §14.253 principal cut → FLATTEN cert):
+   return `Or.inr` the halves = `iRKcCrit`'s `iCritReductSeq` components `d0,d1`; their `õ`-drop is FREE
+   (`iord_descent_iCritReduct`'s `h0o/h1o` inputs). Blocked on the **`Seq (seqAnt s)` / zSeqAnt tag-4 fold**
+   (the halves' soundness `ZDerivation d0/d1` needs `Seq (seqAnt s)`; do the fold — handoff lap-150). The
+   cut-pair end-sequents (`seqAnt(fstIdx d0)=Γ`, `seqSucc(fstIdx d1)=⊥`, `hb_thr`) come from the `iCritReduct`
+   structure; `irk B + 1 ≤ idg d` from T3.4 (`idg_zK_iCritReduct_lt`-adjacent).
+2. **`genReduct_chain_noRedex`** (§14.254 recurse): `majorPrem_tag_mem` ⟹ major tag ∈{3,4,5,6}; reduce major
+   (3/4) or Rep cut-partner (5/6) by the IH (which now hands back a `GenReductCert`), then re-package as the
+   PARENT's `GenReductCert` (REPLACE stays REPLACE; FLATTEN stays FLATTEN, re-based to the parent's end-sequent).
+3. **`descent_step_K_noncrit_axMajor`** (tags 5/6) + **gDef** (`exists_sigma1_descending_step`): unchanged.
+
+### (historical) the genReduct certificate enrichment plan (now DONE — kept for the reasoning trail)
 The lap-150 `genReduct_botSucc` conclusion (bare `∃ v, … ∧ icmp (iord v) (iord d)=0`) HIDES the halves the
 flatten needs (judge's "the IH reaches `dⱼ` but the conclusion it hands back hides `dⱼ{0}/dⱼ{1}`"). Fix
 (judge's PREFERRED option a — structured certificate):
