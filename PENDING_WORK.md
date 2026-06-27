@@ -24,9 +24,11 @@ the EXISTING CODE-induction (`zDerivation_sigma_induction`), NOT an outer degree
 ### The PORT plan (next lap, src) — generalize off `seqSucc=⊥`, RAISING the src count = progress
 Replace `axMajorResidual` by the producer-splice path; the refactor is exactly THREE generalized sub-lemmas
 (plus dropping the `⊥`-clause from the IH threaded through the chain entry). Port `wip/GenReductAnySucc.lean`:
-1. **`certReplace_of_premise_cert_anySucc`** — generalize `certReplace_of_premise_cert` `hbot0 :
-   chainAsucc ds j0 = ⊥` to the C-exit disjunct `chainAsucc ds j0 = seqSucc s` (used only as `Or.inr hbot0`
-   in `isChainInf_seqInsert`; flip to the `Or.inl` C-exit disjunct). Likely the SMALLEST drop — start here.
+1. ✅ **DONE (lap 158, in-place):** `certReplace_of_premise_cert` (`Crux2Blueprint:3283`) generalized off the
+   ⊥-exit — `hbot0 : chainAsucc ds j0 = ⊥` → `hexit : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = ⊥`
+   (passed straight to `isChainInf_seqInsert`, which already accepted that disjunction; REPLACE branch never
+   used it). Two call sites (tag-3/4) now pass `Or.inr hbot0`. Build 🟢 1326, no sorry change. The splice is
+   now general-succedent in the chain's exit — the enabler for the {3,4}-producer path.
 2. **`ind_reduct_anySucc`** — generalize `ind_reduct_botSucc_of_fresh` off `seqSucc=⊥`. On the residual the
    succedent `C` is a closed ∀-tower `^∀^k⊥`, so `p_ind = C` (`substs1 t p_ind = p_ind`, no free var) ⟹ the
    induction is VACUOUS and the reduct is `d0` (`õ`-drop). (General `C` = the lap-136 unfolding, but the

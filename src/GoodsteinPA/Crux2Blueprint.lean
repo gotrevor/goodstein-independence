@@ -3287,7 +3287,7 @@ lemma certReplace_of_premise_cert {s r ds m j0 : V}
     (hthread0 : ∀ i ≤ j0, ∀ B, inAnt B (chainAnt ds i) →
         inAnt B (seqAnt s) ∨ ∃ i' < i, B = chainAsucc ds i')
     (hrank0 : ∀ i < j0, irk (chainAsucc ds i) ≤ r)
-    (hbot0 : chainAsucc ds j0 = (^⊥ : V))
+    (hexit : chainAsucc ds j0 = seqSucc s ∨ chainAsucc ds j0 = (^⊥ : V))
     (hm : m < lh ds) (hmj0 : m ≤ j0)
     (hmcert : GenReductCert (znth ds m)) :
     certReplace (zK s r ds) := by
@@ -3332,7 +3332,7 @@ lemma certReplace_of_premise_cert {s r ds m j0 : V}
     have hr'deg : max r (irk (seqSucc (fstIdx a))) ≤ idg (zK s r ds) :=
       max_le (r_le_idg_zK s r ds hds) hrankidg
     have hci : isChainInf s (max r (irk (seqSucc (fstIdx a)))) (seqInsert ds m a b) :=
-      isChainInf_seqInsert hj0 hmj0 (Or.inr hbot0) hthread0 hrank0
+      isChainInf_seqInsert hj0 hmj0 hexit hthread0 hrank0
         ha_ant (le_max_right r _) hb_succ hb_ant (le_max_left r _)
     have hZ' : ZDerivation (zK s (max r (irk (seqSucc (fstIdx a)))) (seqInsert ds m a b)) :=
       ZDerivation_seqInsert_of hm hZ hZa hZb hci
@@ -3548,12 +3548,12 @@ lemma genReduct_chain_noRedex {s r ds j0 : V}
   · -- tag 3 (zInd): the major premise is a `Rep` node deriving `Γⱼ→⊥`. §14.254a — REDUCE it by the IH
     -- and SPLICE into the parent (`certReplace_of_premise_cert`, Γ-general). PROVEN.
     have htag : zTag (znth ds jstar) = 3 := by rw [h]; simp
-    exact Or.inl (certReplace_of_premise_cert hZ hreg hfresh hseqant hj0 hthread0 hrank0 hbot0
+    exact Or.inl (certReplace_of_premise_cert hZ hreg hfresh hseqant hj0 hthread0 hrank0 (Or.inr hbot0)
       hjlt hjle (IH jstar hjlt hregm hfreshm hseqantm hsucc' (Or.inl htag)))
   · -- tag 4 (zK): the major premise is a sub-chain `Rep` node deriving `Γⱼ→⊥`. §14.254a — REDUCE by the
     -- IH and SPLICE. PROVEN.
     have htag : zTag (znth ds jstar) = 4 := by rw [h]; simp
-    exact Or.inl (certReplace_of_premise_cert hZ hreg hfresh hseqant hj0 hthread0 hrank0 hbot0
+    exact Or.inl (certReplace_of_premise_cert hZ hreg hfresh hseqant hj0 hthread0 hrank0 (Or.inr hbot0)
       hjlt hjle (IH jstar hjlt hregm hfreshm hseqantm hsucc' (Or.inr htag)))
   · -- tag 5 (zAxAll): L-axiom `Ax^{k'}_{∀p'}` major (`red`-FIXPOINT). The ⊥-exit + `zAxAllSuccWff` force
     -- `p' = ⊥`, so the cut formula is `^∀⊥`. Thread it (`hthread0`): SUB-CASE (a) `^∀⊥ ∈ Γ` → fresh
