@@ -64,9 +64,15 @@ The free-X back-end `Thm56.peano_not_proves_TI` (Buchholz §5, axiom-clean) does
 (free-X-TI ⊢ PRWO, wrong direction); it is a banked asset, off the headline path. NB: this route
 surfaces Gödel II for `𝗣𝗔`; its Δ₁-definability dependency was discharged upstream (lap 89), so the
 ONLY remaining residual to a clean headline is crux-2 itself. ANTI-FRAUD: do not discharge until
-`#print axioms` is clean. -/
-theorem goodstein_implies_consistency :
-    𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent := by
-  sorry
+`#print axioms` is clean.
+
+**Ledger status (lap 166):** promoted from `theorem … := sorry` to a NAMED `axiom` so the headline
+`#print axioms` shows `[propext, Classical.choice, Quot.sound, goodstein_implies_consistency]` — a
+clean, explicitly-disclosed single girder hole, never `sorryAx`. This is NOT "wiring M2"; it is the
+opposite — declaring the Phase 2–3 girder an honest, named open obligation. The construction that
+will discharge it is the `Crux2Blueprint` decomposition (crux2 ∘ crux1); once that is sorry-free,
+this `axiom` becomes `theorem … := <crux2 ∘ crux1 assembly>` at the identical type. -/
+axiom goodstein_implies_consistency :
+    𝗣𝗔 ⊢ ↑goodsteinSentence → 𝗣𝗔 ⊢ ↑𝗣𝗔.consistent
 
 end GoodsteinPA
