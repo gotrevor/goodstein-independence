@@ -7,7 +7,24 @@
 > box. **Faithfulness > fluency** — route load-bearing claims to the paper/compiler, never a summary.
 > Updated 2026-06-24 (~lap 65); supersedes the lap-50 version. Re-run catch-up first — this WILL be stale.
 
-## ⏳ DO THIS FIRST — a live A/B effort experiment stops ~06:13
+## 🚦 ROUTE STATUS — CHECK THIS FIRST, every judge session (added 2026-06-28)
+The two pre-registered Route-A abort triggers (**T1** = M1/RedSound not proven by ~lap 123; **T2** = a
+2nd false summit on the cut-elim core) BOTH FIRED and went unacknowledged for ~40 laps — the judge AND
+the every-9th reflection both missed it, because **both only ever re-evaluated *within* the route, never
+*whether the route is still right*.** That is the failure that produced 30+ "direction KEPT" laps over a
+declining honest finishability (~70% → ~30–40%).
+- **Standing judge duty (before ANY seam/architecture work):** read `DIRECTION.md` "ROUTE GUARD", check
+  whether a registered trigger has fired, and if it has with no operator-ratified route in CURRENT
+  DIRECTIVE → **ESCALATE** (append to `ROUTE-ESCALATION-<date>.md`), do NOT resume seam-grinding.
+- **Non-independence rule:** you + Codex agreeing is **not** corroboration if you both read the same repo
+  docs (that exact correlated agreement masked the lap-147 "~80%"). A high-confidence claim needs an
+  INDEPENDENT ground — the source PDF, the compiler, a from-scratch estimate — not a second LLM's read of
+  the same handoff.
+- **Live state (2026-06-28):** triggers fired → operator ratified a **bounded 5-lap M2 probe** (verdict due
+  lap 171; full record `ROUTE-ESCALATION-2026-06-28.md`). The A-vs-B pivot is **LIVE, not settled.** The
+  "~80%" you may see quoted was a crux-2 *engine* sub-goal, never the headline (forensic in the same doc).
+
+## ⏳ (stale, lap-65) — A/B effort experiment — long done; ignore
 Two CoW-clone arms are running a 4.5h effort probe (identical start `2beac51` + prompt; only `--effort`
 differs): **`~/src/goodstein-ab-med`** (medium) and **`~/src/goodstein-ab-xhigh`** (xhigh), each
 `lean-treadmill <arm> --max-duration 4.5h --effort <e> --prompt "<§8 objective>"`.

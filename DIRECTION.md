@@ -14,6 +14,25 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
+**lap-167 (OPERATOR-RATIFIED ROUTE PROBE — supersedes the lap-166 grind directive).** Both pre-registered
+Route-A abort triggers FIRED (see ROUTE GUARD); escalated to the operator (Trevor), who ratified a **bounded
+5-lap M2 feasibility probe** as the deciding experiment before an A→B pivot. Full record + the corrected
+confidence forensic (the lap-147 "~80%" was a crux-2 *engine* sub-goal number, never the headline):
+`ROUTE-ESCALATION-2026-06-28.md`.
+- **THE objective (only this, 5 laps): scope M2 (the Foundation→Z bridge) as a `wip/` feasibility spike —
+  NOT headline wiring, NOT the 2 cut-elim engine sorries (those had their 18-lap test → false summits).**
+  1. STATE `foundation_bot_to_Z_empty : 𝗣𝗔.DerivationOf d ⊥ → ∃ z, ZDerivesEmpty z` (M-internal), real type,
+     in `wip/M2Probe.lean`.
+  2. LAND the cheap cases per the Bryce–Goré `Peano.v` blueprint (`scratchpad/Gentzen-bg/`): PA axioms → Z
+     atomic; **PA-induction → native Z-`Ind`** (Z's native `Ind` rule — the roadmap's "cheap part").
+  3. ASSESS the M-internal Σ₁ coding overhead: bounded plumbing, or does the coding balloon?
+- **HARD GATE — lap 171, no extension.** Verdict to `ROUTE-ESCALATION-2026-06-28.md` + hand to operator:
+  cheap cases land/clearly-will with bounded coding ⟹ `M2-PLAUSIBLE` (reconsider A, re-scoped budget, fresh
+  trigger); coding balloons / second internalization swamp ⟹ `PIVOT-B`. **Do NOT start lap 172 on A.**
+- **FORBIDDEN:** grinding `ind_reduct_anySucc`/`residual` (engine already tested to false summits); wiring
+  M2 into the headline (`goodstein_implies_consistency`); `red`/`iord`-recursion/`redLeast` (per lap-161);
+  treating the probe as open-ended (it is 5 laps to a VERDICT, not a build).
+
 **lap-166 (OPERATOR-DIRECTED LEDGER CONVERSION — not a math-direction change).** Adopted the
 named-axiom-blueprint discipline (KB note `named-axiom-blueprint`; see the rewritten ANTI-FRAUD guard
 below). `goodstein_implies_consistency` promoted `theorem … := sorry` → **named `axiom`**
@@ -154,10 +173,11 @@ through the abort conditions it was told to stop at. That is the failure this gu
 3. `CONTINUE` is permitted only when NO trigger is fired (or a fired trigger has been operator-ratified
    as "continue anyway, on these re-scoped terms").
 
-**Live status (2026-06-28):** both triggers FIRED → ESCALATED to the operator (Trevor). This is the
-first firing of this guard. The A-vs-B re-decision is PENDING. Until Trevor ratifies a route, grind
-laps are FROZEN on the crux-2 engine — no new route-committing work. `(3) bank-and-downgrade` is OFF
-the table per operator: the target is the top-level headline axiom-clean, or full abandonment.
+**Live status (2026-06-28, lap-167):** both triggers FIRED → escalated → operator **RATIFIED a bounded
+5-lap M2 feasibility probe** as the deciding experiment (CURRENT DIRECTIVE lap-167; record
+`ROUTE-ESCALATION-2026-06-28.md`). Grind is UNFROZEN for *only* this probe; **verdict due lap 171**, then
+re-escalate (`M2-PLAUSIBLE` → reconsider A re-scoped; `PIVOT-B` → switch). `(3) bank-and-downgrade` stays
+OFF the table: the target is the top-level headline axiom-clean, or full abandonment.
 
 ---
 
