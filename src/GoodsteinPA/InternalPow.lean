@@ -95,7 +95,7 @@ lemma ipow_le_ipow_right {b : V} (hb : 1 ≤ b) {x y : V} (h : x ≤ y) :
   obtain ⟨d, rfl⟩ := le_iff_exists_add.mp h
   rw [ipow_add]
   calc ipow b x = ipow b x * 1 := by simp
-    _ ≤ ipow b x * ipow b d := mul_le_mul_left' (one_le_ipow hb d) _
+    _ ≤ ipow b x * ipow b d := mul_le_mul_right (one_le_ipow hb d) _
 
 lemma ipow_lt_ipow_right {b : V} (hb : 1 < b) {x y : V} (h : x < y) :
     ipow b x < ipow b y := by
@@ -110,7 +110,7 @@ lemma ipow_lt_ipow_right {b : V} (hb : 1 < b) {x y : V} (h : x < y) :
   calc ipow b x = ipow b x * 1 := by simp
     _ < ipow b x * b := mul_lt_mul_of_pos_left hb (ipow_pos hb0 x)
     _ ≤ ipow b x * ipow b d := by
-        apply mul_le_mul_left'
+        apply _root_.mul_le_mul_right
         calc b = ipow b 1 := (ipow_one b).symm
           _ ≤ ipow b d := ipow_le_ipow_right hb1 (pos_iff_one_le.mp hd)
 

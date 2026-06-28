@@ -703,8 +703,8 @@ theorem boundedness
     ∀ {Δ : Seq LX} (α : Ordinal.{0}) (d : Deriv Δ),
       d.o ≤ β → d.cr = 0 → XFreeAx d → Partition lt prec α Δ →
       SatPos lt (α + 2 ^ d.o) Δ := by
-  induction β using Ordinal.induction with
-  | _ β outerIH =>
+  induction β using WellFoundedLT.induction with
+  | ind β outerIH =>
   intro Δ α d
   induction d generalizing α with
   | axL r v hp hn =>

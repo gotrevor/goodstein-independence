@@ -24,7 +24,7 @@ theorem toOrdinal_lt_iff (b : ℕ) (hb : 2 ≤ b) (m n : ℕ) :
   constructor
   · intro h
     by_contra hle
-    push_neg at hle
+    push Not at hle
     rcases lt_or_eq_of_le hle with h' | h'
     · exact absurd ((toOrdinal_mono_and_bound b hb m).1 n h') (by simpa using h.le)
     · simp [h'] at h
@@ -140,7 +140,7 @@ repr ω₁`; step `repr ωₙ < repr ωₙ₊₁ ⟹ ω^{repr ωₙ} < ω^{repr 
 theorem repr_omegaStack_strictMono : ∀ n, (omegaStack n).repr < (omegaStack (n + 1)).repr
   | 0 => by
     rw [repr_omegaStack_succ, omegaStack_zero, ONote.repr_one]
-    simpa using Ordinal.one_lt_omega0
+    simp [Ordinal.one_lt_omega0]
   | n + 1 => by
     have ih := repr_omegaStack_strictMono n
     rw [repr_omegaStack_succ, repr_omegaStack_succ]
@@ -188,8 +188,8 @@ theorem C_omega_mul_le : ∀ α : ONote, C (omegaO * α) ≤ C α + 1
     rw [ONote.oadd_mul]
     by_cases h : e₂ = 0
     · subst h
-      simp only [↓reduceIte, C_oadd, C_zero, C_one, PNat.mul_coe, PNat.one_coe, one_mul]
-      have hn : (1 : ℕ) ≤ (n₂ : ℕ) := n₂.one_le
+      simp only [↓reduceIte, C_oadd, C_zero, C_one, one_mul]
+      have hn : (1 : ℕ) ≤ (n₂ : ℕ) := Nat.succ_le_of_lt n₂.pos
       omega
     · rw [if_neg h]
       simp only [C_oadd] at ih ⊢
@@ -333,7 +333,7 @@ theorem repr_betaTail_boundary {αNext α : ONote} (hαN : αNext.NF) (hα : α.
   -- goal : ω * repr αNext + K < ω * repr α
   have hsucc : ω * αNext.repr + ω ≤ ω * α.repr := by
     calc ω * αNext.repr + ω = ω * (Order.succ αNext.repr) := (mul_succ _ _).symm
-      _ ≤ ω * α.repr := mul_le_mul_left' (Order.succ_le_of_lt hlt) _
+      _ ≤ ω * α.repr := mul_le_mul_right (Order.succ_le_of_lt hlt) _
   exact lt_of_lt_of_le ((add_lt_add_iff_left _).2 (natCast_lt_omega0 K)) hsucc
 
 /-! ## Rathjen Lemma 3.6 — the special Goodstein run from `T̂²_ω(β₀)` does not terminate
@@ -416,6 +416,6 @@ theorem lemma36_nonterminating (β : ℕ → ONote) (hNF : ∀ n, (β n).NF)
     rw [hev0, toOrdinal_zero] at hcr
     exact hcr.symm
   have hlt0 : (β (k + 1)).repr < 0 := by rw [← hcr0]; exact hdesc k
-  exact Ordinal.not_lt_zero _ hlt0
+  exact not_lt_zero hlt0
 
 end GoodsteinPA.Dom

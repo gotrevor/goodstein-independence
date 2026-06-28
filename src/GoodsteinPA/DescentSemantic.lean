@@ -232,7 +232,7 @@ theorem lx_least_number {M : Type} [Nonempty M] [Structure LX M] [Structure.Eq L
   letI oM : ORingStructure M := ReductModel.reductORing
   rintro ⟨a, ha⟩
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   -- `hcon : ∀ z, P z → ∃ y, y < z ∧ P y` (no `<`-least witness). Then `¬P` everywhere (order-induction),
   -- contradicting `ha`.
   have hNP : ∃ e : ℕ → M, ∃ φ : Semiformula LX ℕ 1, ∀ x, (¬ P x) ↔ Semiformula.Evalm M ![x] e φ := by

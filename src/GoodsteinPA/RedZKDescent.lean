@@ -203,7 +203,7 @@ theorem iRcrit_descends_or_nonleaf_isymRep {s r ds : V}
   by_cases h : ∃ i < lh ds, tp (znth ds i) = isymRep ∧
       ¬ ((∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck))
   · exact Or.inr h
-  · push_neg at h
+  · push Not at h
     exact Or.inl (iord_descent_iRcrit_botChain_leaves hZ hant hsucc hreg (fun i hi hrep => h i hi hrep))
 
 /-- **Critical-reduct halves descend below the chain — the splice sub-fact (lap 110).** For a valid

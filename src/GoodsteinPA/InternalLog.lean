@@ -31,7 +31,7 @@ lemma succ_le_ipow_succ {b : V} (hb : 2 ≤ b) (x : V) : x + 1 ≤ ipow b (x + 1
     have h1 : (1 : V) ≤ ipow b (x + 1) := one_le_ipow hb1 (x + 1)
     calc x + 1 + 1 ≤ ipow b (x + 1) + ipow b (x + 1) := add_le_add ih h1
       _ = ipow b (x + 1) * 2 := (mul_two _).symm
-      _ ≤ ipow b (x + 1) * b := mul_le_mul_left' hb _
+      _ ≤ ipow b (x + 1) * b := mul_le_mul_right hb _
 
 lemma lt_ipow_succ {b : V} (hb : 2 ≤ b) (x : V) : x < ipow b (x + 1) :=
   lt_of_lt_of_le (by simp) (succ_le_ipow_succ hb x)

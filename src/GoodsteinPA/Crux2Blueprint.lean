@@ -734,7 +734,7 @@ theorem ZDerivation_corrected_haux0_neg_botOrbit {s r ds j0 sⱼ p : V}
   · exact ZDerivation_corrected_haux0_neg hZ hj hdj hcut hCwff
       (fun i' hi' => hthread0 i' (le_trans hi' hle))
       (fun i' hi' => hrank0 i' (lt_of_lt_of_le hi' hle))
-  · push_neg at hle
+  · push Not at hle
     exact ZDerivation_corrected_haux0_neg_keepTip hZ hj hdj hcut hCwff hle hj0 hbot hthread0 hrank0
 
 /-- **THE corrected critical-cut inversion, ¬-case — SOUNDNESS PROVEN (modulo the §5 `A∈Γⱼ` orbit datum).**
@@ -1908,14 +1908,25 @@ theorem iord_red_iterate_descends {z : V} (hz : ZDerivesEmptyR z) (n : ℕ) :
 /-! ## M2 — the C0.5 Foundation→Z bridge
 `Z ⊇ 𝗣𝗔` on closed sequents, M-internal (Bryce–Goré `Peano.v` blueprint, B1–B3; the PA-induction axiom
 maps directly to Z's native `Ind`, skipping their biggest sub-tower). Populates `ZDerivesEmpty` from a
-Foundation ⊥-proof. -/
+Foundation ⊥-proof.
+
+⚠️ **Superseded gate note (2026-06-28).** The compiler-checked probe `wip/M2Probe.lean` shows that the
+stub below is not aligned with Foundation's consistency API. `¬(𝗣𝗔 : Theory ℒₒᵣ).Consistent V` unfolds
+to `∃ d, (𝗣𝗔 : Theory ℒₒᵣ).Proof d ⌜⊥⌝`, i.e. `DerivationOf d {⌜⊥⌝}`, not a derivation with
+`fstIdx d = ∅`. It also invalidates the cheap-reading that PA induction maps directly to native `zInd`:
+the hard case is a Foundation theory-axiom leaf `axm s p` with `p ∈ 𝗣𝗔.Δ₁Class`; for universal
+induction this goes through the internal recognizer `InductionUnivR p`. Treat M2 viability as unproven
+until the concrete `FoundationToZSequent` relation and that induction leaf are bounded. -/
 
 /-- **M2.** A model-internal `𝗣𝗔`-derivation of the (coded) empty/`⊥` sequent yields a `Z`-derivation
 of the empty sequent. ⚠️ **Signature to pin against Foundation's coded-provability API:** the confirmed
 primitive `Theory.DerivationOf (d s : V) := fstIdx d = s ∧ T.Derivation d` takes a *coded sequent*
 `s : V` (here `∅`/the `⊥`-sequent), NOT a `Sentence ℒₒᵣ` (the in-repo doc was loose); the exact
 `𝗣𝗔`-internal theory term `T` is the box's to fix (it is what `¬ 𝗣𝗔.Consistent M` unfolds to internally,
-cf. `Reduction.peano_not_proves_consistency`). -/
+cf. `Reduction.peano_not_proves_consistency`).
+
+⚠️ **Stale signature.** Kept only as an old blueprint placeholder. The corrected gate is
+`(𝗣𝗔 : Theory ℒₒᵣ).Proof d (⌜(⊥ : Sentence ℒₒᵣ)⌝ : V) → ∃ z, ZDerivesEmptyR z`. -/
 theorem foundation_bot_to_Z_empty {d : V} (hd : (𝗣𝗔 : Theory ℒₒᵣ).Derivation d) (h0 : fstIdx d = ∅) :
     ∃ z : V, ZDerivesEmptyR z := sorry
 
@@ -2208,7 +2219,7 @@ lemma redex_bound_disj_of_redexPair {s r ds i0 j1 : V}
     pair_unpair (redexCode (zK s r ds))
   have hpair_le : (⟪redexI (zK s r ds), redexJ (zK s r ds)⟫ : V) ≤ ⟪i0, j1⟫ := by
     rw [hpair_eq]; exact hcode_le
-  by_contra h; push_neg at h
+  by_contra h; push Not at h
   exact absurd (lt_of_lt_of_le (pair_lt_pair h.1 h.2) hpair_le) (_root_.lt_irrefl _)
 
 /-- **The pair-monotone redex bound, criticality-free.** Given the `isChainInf` exit `j0` and ANY in-region

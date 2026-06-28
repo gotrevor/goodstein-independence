@@ -1582,7 +1582,7 @@ instance seqWffFlag_defined : 𝚺₁-Function₁ (seqWffFlag : V → V) via seq
     · rcases H with ⟨H0, _⟩ | ⟨_, H1⟩
       · exact absurd H0 h
       · exact H1
-    · push_neg at h; exact h
+    · push Not at h; exact h
 instance seqWffFlag_definable : 𝚺₁-Function₁ (seqWffFlag : V → V) := seqWffFlag_defined.to_definable
 
 @[simp] lemma seqWffFlag_eq_zero_iff {Γ : V} :

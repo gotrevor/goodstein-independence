@@ -5253,7 +5253,7 @@ lemma permIdx_lt_of_not_zKCritical {s r ds : V} (h : ¬ zKCritical s ds) :
     permIdx (zK s r ds) < lh ds ∧ isPermPrem ds s (permIdx (zK s r ds)) := by
   have hex : ∃ i < lh ds, isPermPrem ds s i := by
     unfold zKCritical at h
-    push_neg at h
+    push Not at h
     obtain ⟨i, hi, hperm⟩ := h
     exact ⟨i, hi, hperm⟩
   have hf := permIdxAux_found ds s (lh ds) hex
@@ -6437,7 +6437,18 @@ by `¬ 𝗣𝗔.Consistent M` — i.e. `M` carries a coded **Foundation** (Tait-
 whole C1/C3 engine has no input. Scale: Bryce–Goré's analogue (`aarondroidbryce/Gentzen`,
 `theories/Logic/Peano.v`, `PA_closed_PA_omega`) is ~1,215 lines — a milestone, not a footnote.
 
-**Bridge lemma type.** Now that `ZDerivation : V → Prop` (the C0 Fixpoint) is built (above), define
+**⚠️ Superseded bridge lemma type (2026-06-28).** The displayed type in this old planning block is stale.
+The compiler-checked probe `wip/M2Probe.lean` shows that Foundation inconsistency gives
+`(𝗣𝗔 : Theory ℒₒᵣ).Proof d (⌜(⊥ : Sentence ℒₒᵣ)⌝ : V)`, definitionally
+`DerivationOf d {⌜⊥⌝}`, not `DerivationOf d (⊥ : Sentence ℒₒᵣ)` and not `fstIdx d = ∅`. The live gate is
+the corrected `M2Bridge` shape:
+
+```
+∀ {d : V}, (𝗣𝗔 : Theory ℒₒᵣ).Proof d (⌜(⊥ : Sentence ℒₒᵣ)⌝ : V) →
+  ∃ z : V, ZDerivesEmptyR z
+```
+
+Now that `ZDerivation : V → Prop` (the C0 Fixpoint) is built (above), define
 `ZDerivesEmpty d := ZDerivation d ∧ fstIdx d = (∅ : sequent code)` and prove the `Z ⊇ PA`-on-closed-
 sequents simulation, M-internal (`Σ₁` / per-model):
 
@@ -6447,6 +6458,13 @@ theorem foundation_bot_to_Z_empty
     {d : V} (hd : (𝗣𝗔).DerivationOf d (⊥ : Sentence ℒₒᵣ)) :
     ∃ z : V, ZDerivesEmpty z
 ```
+
+**⚠️ Cheap-case warning.** The following old "cheaper than the ~1215-line flag" reading is no longer a
+safe assumption. PA induction enters Foundation as a theory-axiom leaf `axm s p` with
+`p ∈ 𝗣𝗔.Δ₁Class`; for universal induction the concrete code predicate is `InductionUnivR p`. Native
+`zInd` is useful only after that membership has been decoded and translated to Z's two-sided sequent
+discipline. If the sequent relation or induction leaf becomes a new formalization, this route should
+pivot rather than narrow the probe again.
 
 **⭐ CHEAPER than the ~1215-line flag (judge `E-CRUX2-DECOMPOSITION` §5, 2026-06-24).** Pattern: discharge
 each PA axiom in Z + simulate each rule (MP → Z-cut → `K^r` chain rule; generalization → Z `I^a_∀`). The
@@ -8721,7 +8739,7 @@ lemma chainInf_redexI_data {s r ds : V} (hvalid : zKValid s r ds) :
     rw [hpair_eq]; exact hcode_le
   -- Contrapositive of joint monotonicity: `redexI ≤ i0 ∨ redexJ ≤ j1`.
   have hle_disj : redexI (zK s r ds) ≤ i0 ∨ redexJ (zK s r ds) ≤ j1 := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     exact absurd (lt_of_lt_of_le (pair_lt_pair h.1 h.2) hpair_le) (_root_.lt_irrefl _)
   -- Either disjunct forces `redexI < j₀`.
   have hI_lt_j0 : redexI (zK s r ds) < j0 := by
@@ -9981,7 +9999,7 @@ theorem inference_critical_pair_of_chain_reroute {s r ds j0 : V} {Tr Fa : V → 
     InductionOnHierarchy.least_number 𝚺 1 hQ2 ⟨hBi.symm, hi_le_j0⟩
   have hi'le_i : i' ≤ i := by
     by_contra h
-    push_neg at h
+    push Not at h
     exact hmin' i h ⟨hBi.symm, hi_le_j0⟩
   have hi'lt_j : i' < j := lt_of_le_of_lt hi'le_i hij
   have hi'le_j' : i' ≤ j' := le_of_lt (lt_of_lt_of_le hi'lt_j hjle')
@@ -10128,7 +10146,7 @@ theorem redex_or_nonleaf_isymRep_of_botChain {s r ds : V}
   by_cases h : ∃ i < lh ds, tp (znth ds i) = isymRep ∧
       ¬ ((∃ sk, znth ds i = zAtom sk) ∨ (∃ sk Ck, znth ds i = zAx1 sk Ck))
   · exact Or.inr h
-  · push_neg at h
+  · push Not at h
     exact Or.inl (inference_critical_pair_of_botChain hZ hant hsucc (fun i hi hrep => h i hi hrep))
 
 /-! ### The Option-B obstruction, formalized — why the ordinal-faithful `iR2` cannot preserve validity

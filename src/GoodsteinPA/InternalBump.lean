@@ -162,13 +162,13 @@ lemma self_lt_ipow {b : V} (hb : 2 ≤ b) (x : V) : x < ipow b x := by
   have hb0 : (0 : V) < b := lt_of_lt_of_le (by simp) hb
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simpa using ipow_pos hb0 0
+  case zero => exact ipow_pos hb0 0
   case succ x ih =>
     rw [ipow_succ]
     calc x + 1 ≤ ipow b x := lt_iff_succ_le.mp ih
       _ < ipow b x + ipow b x := lt_add_of_pos_right _ (ipow_pos hb0 x)
       _ = ipow b x * 2 := (mul_two _).symm
-      _ ≤ ipow b x * b := mul_le_mul_left' hb _
+      _ ≤ ipow b x * b := mul_le_mul_right hb _
 
 lemma znth_seqCons_self {s : V} (h : Seq s) (x : V) : znth (seqCons s x) (lh s) = x :=
   (h.seqCons x).znth_eq_of_mem (lh_mem_seqCons s x)

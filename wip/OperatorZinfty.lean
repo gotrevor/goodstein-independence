@@ -646,7 +646,7 @@ theorem norm_add_le : ∀ {α : ONote}, α.NF → ∀ {γ : ONote}, γ.NF →
         have hra : ONote.repr a < Ordinal.omega0 ^ ONote.repr e := hα.snd'.repr_lt
         have hgγ : Ordinal.omega0 ^ ONote.repr e ≤ ONote.repr γ := by
           by_contra hlt
-          push_neg at hlt
+          push Not at hlt
           have : ONote.repr a + ONote.repr γ < Ordinal.omega0 ^ ONote.repr e :=
             (Ordinal.isPrincipal_add_omega0_opow (ONote.repr e)) hra hlt
           rw [repr_add] at hge
@@ -1008,5 +1008,622 @@ theorem cutReduceAllAux {φ : SyntacticSemiformula ℒₒᵣ 1} {c k₀ dd₀ : 
           ha₁NF ha₂NF hsuccNF ha₁norm ha₂norm D₁' D₂'
       exact ZekdProv.of hsuccNF
         (lt_of_le_of_lt norm_osucc_le (by have := Zekd.norm_add_le hαNF hγNF; omega)) hCut
+
+/-! ### Path-B hard probe: the PA-induction leaf's witness side condition
+
+The unbounded `PXFc` induction-axiom construction in `EmbeddingBound.metaInduction_cong_bdd`
+uses an `∃`-introduction with witness `n` at the `n`-th step of the cut tower.  In `Zekd` that
+move is legal only when the witness is bounded by `hardy e (k+d)`.
+
+These lemmas isolate the decisive arithmetic.  A fixed numeric index cannot support all
+witnesses, but the running `allω` index `max k n` can.  So the induction leaf is not blocked
+at the witness side condition; any remaining difficulty is the structural port of the finite
+EM/cut/value-substitution tower.
+-/
+
+/-- A fixed numeric index cannot bound the witnesses `n` needed by the induction cut tower. -/
+theorem inductionLeaf_fixedIndex_witnessBound_impossible (e : ONote) (k d : ℕ) :
+    ¬ ∀ n : ℕ, n ≤ hardy e (k + d) := by
+  intro h
+  have := h (hardy e (k + d) + 1)
+  omega
+
+/-- The `n`-th `allω` premise runs at index `max k n`, which is large enough to pay for
+the `∃`-witness `n`. -/
+theorem inductionLeaf_runningIndex_witnessBound (e : ONote) (k d n : ℕ) :
+    n ≤ hardy e (max k n + d) :=
+  le_trans (by omega) (le_hardy e (max k n + d))
+
+/-- The actual `Zekd.exI` move needed in the induction-axiom leaf is legal at the running
+index.  This is the local replacement for the unbounded proof's free `PXFc.exI` step. -/
+theorem inductionLeaf_exI_runningIndex_probe {α β e : ONote} {k d c n : ℕ} {Γ : Seq}
+    {φ : SyntacticSemiformula ℒₒᵣ 1}
+    (hβ : β < α) (hβNF : β.NF) (hαNF : α.NF) (hτ : norm β < max k n + d)
+    (D : Zekd β e (max k n) d c (insert (φ/[nm n]) Γ)) :
+    Zekd α e (max k n) d c (insert (∃⁰ φ) Γ) :=
+  Zekd.exI φ n hβ hβNF hαNF hτ (inductionLeaf_runningIndex_witnessBound e k d n) D
+
+/-! #### Bounded embedding leaves: value-congruent atomic closure -/
+
+/-- The standard value of a closed arithmetic term, in the evaluator used by `atomTrue`. -/
+noncomputable abbrev stdClosedVal (t : SyntacticTerm ℒₒᵣ) : ℕ :=
+  Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) t
+
+/-- The standard value of the numeral term `nm m` is `m`. -/
+@[simp] lemma stdClosedVal_nm (m : ℕ) : stdClosedVal (nm m) = m := by
+  simp [stdClosedVal, nm]
+
+/-- Substitution-composition for extending an assignment by a numeral in the freed variable. -/
+lemma embedding_subst_q_cons {n : ℕ} (w : Fin n → SyntacticTerm ℒₒᵣ) (m : ℕ) :
+    (Rew.subst ![nm m]).comp (Rew.subst w).q = Rew.subst (nm m :> w) := by
+  ext x
+  · cases x using Fin.cases with
+    | zero => simp [Rew.comp_app]
+    | succ i => simp [Rew.comp_app]
+  · simp [Rew.comp_app]
+
+/-- Formula form of `embedding_subst_q_cons`. -/
+lemma embedding_subst_q_cons_app {n : ℕ} (w : Fin n → SyntacticTerm ℒₒᵣ) (m : ℕ)
+    (ψ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
+    ((Rew.subst w).q ▹ ψ)/[nm m] = Rew.subst (nm m :> w) ▹ ψ := by
+  show Rew.subst ![nm m] ▹ ((Rew.subst w).q ▹ ψ) = Rew.subst (nm m :> w) ▹ ψ
+  rw [← TransitiveRewriting.comp_app, embedding_subst_q_cons]
+
+/-- Standard-value congruence for renamed terms, ported to the `Zekd` embedding probes. -/
+lemma embedding_valm_subst_congr {n : ℕ} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, stdClosedVal (w i) = stdClosedVal (w' i))
+    (t : SyntacticSemiterm ℒₒᵣ n) :
+    stdClosedVal (Rew.subst w t) = stdClosedVal (Rew.subst w' t) := by
+  simp only [stdClosedVal, Semiterm.val_substs]
+  congr 1
+  funext x; exact hval x
+
+/-- Extending two value-equal assignments by the same numeral preserves pointwise value equality. -/
+lemma embedding_valm_cons_nm_congr {n : ℕ} (w w' : Fin n → SyntacticTerm ℒₒᵣ) (m : ℕ)
+    (hval : ∀ i, stdClosedVal (w i) = stdClosedVal (w' i)) :
+    ∀ i, stdClosedVal ((nm m :> w) i) = stdClosedVal ((nm m :> w') i) := by
+  intro i
+  cases i using Fin.cases with
+  | zero => simp
+  | succ j => simpa using hval j
+
+/-- Truth of a closed atomic relation only depends on the standard values of its terms. -/
+lemma atomTrue_rel_congr {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
+    (v v' : Fin ar → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, stdClosedVal (v i) = stdClosedVal (v' i)) :
+    atomTrue (Semiformula.rel r v) ↔ atomTrue (Semiformula.rel r v') := by
+  have hv : (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v i))
+      = (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v' i)) := by
+    funext i; exact hval i
+  simp only [atomTrue, Semiformula.eval_rel, hv]
+
+/-- Truth of a closed negated atomic relation only depends on the standard values of its terms. -/
+lemma atomTrue_nrel_congr {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
+    (v v' : Fin ar → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, stdClosedVal (v i) = stdClosedVal (v' i)) :
+    atomTrue (Semiformula.nrel r v) ↔ atomTrue (Semiformula.nrel r v') := by
+  have hv : (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v i))
+      = (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v' i)) := by
+    funext i; exact hval i
+  simp only [atomTrue, Semiformula.eval_nrel, hv]
+
+lemma atomTrue_nrel_iff_not_rel {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
+    (v : Fin ar → SyntacticTerm ℒₒᵣ) :
+    atomTrue (Semiformula.nrel r v) ↔ ¬ atomTrue (Semiformula.rel r v) := by
+  simp [atomTrue, Semiformula.eval_rel, Semiformula.eval_nrel]
+
+lemma atomTrue_rel_iff_not_nrel {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
+    (v : Fin ar → SyntacticTerm ℒₒᵣ) :
+    atomTrue (Semiformula.rel r v) ↔ ¬ atomTrue (Semiformula.nrel r v) := by
+  simp [atomTrue, Semiformula.eval_rel, Semiformula.eval_nrel]
+
+/--
+Bounded value-congruent atomic closure, relation-positive side.
+
+This is the `Zekd` base leaf needed by assignment-carrying embedding: if the sequent contains
+`R(v)` and `¬R(v')`, and the closed term vectors have equal standard values, a bounded truth leaf
+closes the sequent at any normal ordinal whose norm fits the current budget.
+-/
+theorem embedding_valueCongruentRelAtom_probe {α e : ONote} {k d c ar : ℕ} {Γ : Seq}
+    (r : (ℒₒᵣ).Rel ar) (v v' : Fin ar → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, stdClosedVal (v i) = stdClosedVal (v' i))
+    (hαNF : α.NF) (hτ : norm α < k + d)
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) :
+    Zekd α e k d c Γ := by
+  by_cases hrel : atomTrue (Semiformula.rel r v)
+  · exact Zekd.trueRel r v hrel hτ hαNF hp
+  · have hrel' : ¬ atomTrue (Semiformula.rel r v') := by
+      intro hv'
+      exact hrel ((atomTrue_rel_congr r v v' hval).mpr hv')
+    exact Zekd.trueNrel r v' ((atomTrue_nrel_iff_not_rel r v').mpr hrel') hτ hαNF hn
+
+/--
+Bounded value-congruent atomic closure, negated-relation-positive side.
+
+This is the polarity twin of `embedding_valueCongruentRelAtom_probe`.
+-/
+theorem embedding_valueCongruentNrelAtom_probe {α e : ONote} {k d c ar : ℕ} {Γ : Seq}
+    (r : (ℒₒᵣ).Rel ar) (v v' : Fin ar → SyntacticTerm ℒₒᵣ)
+    (hval : ∀ i, stdClosedVal (v i) = stdClosedVal (v' i))
+    (hαNF : α.NF) (hτ : norm α < k + d)
+    (hp : Semiformula.nrel r v ∈ Γ) (hn : Semiformula.rel r v' ∈ Γ) :
+    Zekd α e k d c Γ := by
+  by_cases hnrel : atomTrue (Semiformula.nrel r v)
+  · exact Zekd.trueNrel r v hnrel hτ hαNF hp
+  · have hnrel' : ¬ atomTrue (Semiformula.nrel r v') := by
+      intro hv'
+      exact hnrel ((atomTrue_nrel_congr r v v' hval).mpr hv')
+    exact Zekd.trueRel r v' ((atomTrue_rel_iff_not_nrel r v').mpr hnrel') hτ hαNF hn
+
+/-- Substituted-term form of the bounded value-congruent relation atom leaf. -/
+theorem embedding_valueCongruentRelSubstAtom_probe {α e : ONote} {k d c ar n : ℕ} {Γ : Seq}
+    (r : (ℒₒᵣ).Rel ar) (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (v : Fin ar → SyntacticSemiterm ℒₒᵣ n)
+    (hval : ∀ i, stdClosedVal (w i) = stdClosedVal (w' i))
+    (hαNF : α.NF) (hτ : norm α < k + d)
+    (hp : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ)
+    (hn : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ) :
+    Zekd α e k d c Γ :=
+  embedding_valueCongruentRelAtom_probe r
+    (fun i => Rew.subst w (v i)) (fun i => Rew.subst w' (v i))
+    (fun i => embedding_valm_subst_congr w w' hval (v i)) hαNF hτ hp hn
+
+/-- Substituted-term form of the bounded value-congruent negated-relation atom leaf. -/
+theorem embedding_valueCongruentNrelSubstAtom_probe {α e : ONote} {k d c ar n : ℕ} {Γ : Seq}
+    (r : (ℒₒᵣ).Rel ar) (w w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (v : Fin ar → SyntacticSemiterm ℒₒᵣ n)
+    (hval : ∀ i, stdClosedVal (w i) = stdClosedVal (w' i))
+    (hαNF : α.NF) (hτ : norm α < k + d)
+    (hp : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ)
+    (hn : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ) :
+    Zekd α e k d c Γ :=
+  embedding_valueCongruentNrelAtom_probe r
+    (fun i => Rew.subst w (v i)) (fun i => Rew.subst w' (v i))
+    (fun i => embedding_valm_subst_congr w w' hval (v i)) hαNF hτ hp hn
+
+/-- Closed-term specialization of the value-congruent relation atom leaf. -/
+theorem embedding_valueCongruentRelClosedTermAtom_probe
+    {α e : ONote} {k d c ar : ℕ} {Γ : Seq}
+    (r : (ℒₒᵣ).Rel ar) (s s' : SyntacticTerm ℒₒᵣ)
+    (v : Fin ar → SyntacticSemiterm ℒₒᵣ 1)
+    (hval : stdClosedVal s = stdClosedVal s')
+    (hαNF : α.NF) (hτ : norm α < k + d)
+    (hp : (Semiformula.rel r v)/[s] ∈ Γ)
+    (hn : (Semiformula.nrel r v)/[s'] ∈ Γ) :
+    Zekd α e k d c Γ := by
+  refine embedding_valueCongruentRelSubstAtom_probe r ![s] ![s'] v ?_ hαNF hτ ?_ ?_
+  · intro i
+    cases i using Fin.cases with
+    | zero => simpa using hval
+    | succ j => exact Fin.elim0 j
+  · simpa [Semiformula.rew_rel] using hp
+  · simpa [Semiformula.rew_nrel] using hn
+
+/-- Closed-term specialization of the value-congruent negated-relation atom leaf. -/
+theorem embedding_valueCongruentNrelClosedTermAtom_probe
+    {α e : ONote} {k d c ar : ℕ} {Γ : Seq}
+    (r : (ℒₒᵣ).Rel ar) (s s' : SyntacticTerm ℒₒᵣ)
+    (v : Fin ar → SyntacticSemiterm ℒₒᵣ 1)
+    (hval : stdClosedVal s = stdClosedVal s')
+    (hαNF : α.NF) (hτ : norm α < k + d)
+    (hp : (Semiformula.nrel r v)/[s] ∈ Γ)
+    (hn : (Semiformula.rel r v)/[s'] ∈ Γ) :
+    Zekd α e k d c Γ := by
+  refine embedding_valueCongruentNrelSubstAtom_probe r ![s] ![s'] v ?_ hαNF hτ ?_ ?_
+  · intro i
+    cases i using Fin.cases with
+    | zero => simpa using hval
+    | succ j => exact Fin.elim0 j
+  · simpa [Semiformula.rew_nrel] using hp
+  · simpa [Semiformula.rew_rel] using hn
+
+/-- Constant-true base case for the bounded value-congruent EM engine. -/
+theorem embedding_valueCongruentVerum_probe {α e : ONote} {k d c n : ℕ} {Γ : Seq}
+    (w : Fin n → SyntacticTerm ℒₒᵣ)
+    (hp : (Rew.subst w ▹ (⊤ : SyntacticSemiformula ℒₒᵣ n)) ∈ Γ) :
+    Zekd α e k d c Γ :=
+  Zekd.verumR (by simpa using hp)
+
+/-- Constant-false base case for the bounded value-congruent EM engine. -/
+theorem embedding_valueCongruentFalsum_probe {α e : ONote} {k d c n : ℕ} {Γ : Seq}
+    (w' : Fin n → SyntacticTerm ℒₒᵣ)
+    (hn : (∼(Rew.subst w' ▹ (⊥ : SyntacticSemiformula ℒₒᵣ n))) ∈ Γ) :
+    Zekd α e k d c Γ :=
+  Zekd.verumR (by simpa using hn)
+
+/--
+Bounded closed-term existential introduction, reduced to the genuine remaining EM/congruence premise.
+
+This is the assignment-carrying embedding adapter for Foundation's `exs` rule: after an open witness term
+has been closed by an assignment, its standard value `stdClosedVal s` is used as the numeral witness.
+The only non-structural input is the value-congruent premise converting `ψ[s]` to `ψ[nm (stdClosedVal s)]`.
+-/
+theorem embedding_closedTermExI_of_valueCongruentEM_probe
+    {βSrc βCong αCut αOut e : ONote} {k d c : ℕ} {Γ : Seq}
+    {ψ : SyntacticSemiformula ℒₒᵣ 1} (s : SyntacticTerm ℒₒᵣ)
+    (hψc : (ψ/[s]).complexity < c)
+    (hSrcLt : βSrc < αCut) (hCongLt : βCong < αCut) (hCutLt : αCut < αOut)
+    (hSrcNF : βSrc.NF) (hCongNF : βCong.NF) (hCutNF : αCut.NF) (hOutNF : αOut.NF)
+    (hτSrc : norm βSrc < k + d) (hτCong : norm βCong < k + d)
+    (hτCut : norm αCut < k + d)
+    (hbound : stdClosedVal s ≤ hardy e (k + d))
+    (dSrc : Zekd βSrc e k d c (insert (ψ/[s]) Γ))
+    (dCong : Zekd βCong e k d c
+      (insert (∼(ψ/[s])) (insert (ψ/[nm (stdClosedVal s)]) Γ))) :
+    Zekd αOut e k d c (insert (∃⁰ ψ) Γ) := by
+  have dSrc' : Zekd βSrc e k d c
+      (insert (ψ/[s]) (insert (ψ/[nm (stdClosedVal s)]) Γ)) :=
+    Zekd.wk (Finset.insert_subset_insert _ (Finset.subset_insert _ _)) dSrc
+  have dNumeral : Zekd αCut e k d c (insert (ψ/[nm (stdClosedVal s)]) Γ) :=
+    Zekd.cut (ψ/[s]) hψc hSrcLt hCongLt hSrcNF hCongNF hCutNF hτSrc hτCong
+      dSrc' dCong
+  exact Zekd.exI ψ (stdClosedVal s) hCutLt hCutNF hOutNF hτCut hbound dNumeral
+
+/--
+Conjunction step for the bounded value-congruent EM engine.
+
+Given child derivations closing `a` against its value-congruent negation and `b` against its
+value-congruent negation, this composes them into the parent sequent containing
+`(a ∧ b)[w]` and `¬(a ∧ b)[w']`.  The theorem is intentionally phrased with explicit child
+ordinals: the future recursive engine can choose any ordinal schedule and discharge these
+side conditions separately.
+-/
+theorem embedding_valueCongruentAndFromChildren_probe
+    {n : ℕ} {βA βB αAnd αOut e : ONote} {k d c : ℕ} {Γ : Seq}
+    (w w' : Fin n → SyntacticTerm ℒₒᵣ) (a b : SyntacticSemiformula ℒₒᵣ n)
+    (hA_lt : βA < αAnd) (hB_lt : βB < αAnd) (hAnd_lt : αAnd < αOut)
+    (hANF : βA.NF) (hBNF : βB.NF) (hAndNF : αAnd.NF) (hOutNF : αOut.NF)
+    (hτA : norm βA < k + d) (hτB : norm βB < k + d) (hτAnd : norm αAnd < k + d)
+    (hp : (Rew.subst w ▹ (a ⋏ b)) ∈ Γ)
+    (hn : (∼(Rew.subst w' ▹ (a ⋏ b))) ∈ Γ)
+    (dA : Zekd βA e k d c
+      (insert (Rew.subst w ▹ a)
+        (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ))))
+    (dB : Zekd βB e k d c
+      (insert (Rew.subst w ▹ b)
+        (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)))) :
+    Zekd αOut e k d c Γ := by
+  have hp' : ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b)) ∈ Γ := by
+    simpa using hp
+  have hn' : (∼(Rew.subst w' ▹ a) ⋎ ∼(Rew.subst w' ▹ b)) ∈ Γ := by
+    simpa using hn
+  have hand : Zekd αAnd e k d c
+      (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ)) := by
+    have h := Zekd.andI (Rew.subst w ▹ a) (Rew.subst w ▹ b)
+      hA_lt hB_lt hANF hBNF hAndNF hτA hτB dA dB
+    rw [Finset.insert_eq_self.mpr
+      (show ((Rew.subst w ▹ a) ⋏ (Rew.subst w ▹ b))
+          ∈ insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ) by
+        simp [hp'])] at h
+    exact h
+  have hor := Zekd.orI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b))
+    hAnd_lt hAndNF hOutNF hτAnd hand
+  rwa [Finset.insert_eq_self.mpr hn'] at hor
+
+/--
+Disjunction step for the bounded value-congruent EM engine.
+
+This is the polarity-dual parent constructor to
+`embedding_valueCongruentAndFromChildren_probe`: child closures for `a` and `b` build
+`¬a[w'] ∧ ¬b[w']`, then `Zekd.orI` packages the positive `a[w] ∨ b[w]` parent.
+-/
+theorem embedding_valueCongruentOrFromChildren_probe
+    {n : ℕ} {βA βB αAnd αOut e : ONote} {k d c : ℕ} {Γ : Seq}
+    (w w' : Fin n → SyntacticTerm ℒₒᵣ) (a b : SyntacticSemiformula ℒₒᵣ n)
+    (hA_lt : βA < αAnd) (hB_lt : βB < αAnd) (hAnd_lt : αAnd < αOut)
+    (hANF : βA.NF) (hBNF : βB.NF) (hAndNF : αAnd.NF) (hOutNF : αOut.NF)
+    (hτA : norm βA < k + d) (hτB : norm βB < k + d) (hτAnd : norm αAnd < k + d)
+    (hp : (Rew.subst w ▹ (a ⋎ b)) ∈ Γ)
+    (hn : (∼(Rew.subst w' ▹ (a ⋎ b))) ∈ Γ)
+    (dA : Zekd βA e k d c
+      (insert (∼(Rew.subst w' ▹ a))
+        (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ))))
+    (dB : Zekd βB e k d c
+      (insert (∼(Rew.subst w' ▹ b))
+        (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)))) :
+    Zekd αOut e k d c Γ := by
+  have hp' : ((Rew.subst w ▹ a) ⋎ (Rew.subst w ▹ b)) ∈ Γ := by
+    simpa using hp
+  have hn' : (∼(Rew.subst w' ▹ a) ⋏ ∼(Rew.subst w' ▹ b)) ∈ Γ := by
+    simpa using hn
+  have hand : Zekd αAnd e k d c
+      (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ)) := by
+    have h := Zekd.andI (∼(Rew.subst w' ▹ a)) (∼(Rew.subst w' ▹ b))
+      hA_lt hB_lt hANF hBNF hAndNF hτA hτB dA dB
+    rw [Finset.insert_eq_self.mpr
+      (show (∼(Rew.subst w' ▹ a) ⋏ ∼(Rew.subst w' ▹ b))
+          ∈ insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ) by
+        simp [hn'])] at h
+    exact h
+  have hor := Zekd.orI (Rew.subst w ▹ a) (Rew.subst w ▹ b)
+    hAnd_lt hAndNF hOutNF hτAnd hand
+  rwa [Finset.insert_eq_self.mpr hp'] at hor
+
+/-- Closed-term specialization of the conjunction parent constructor. -/
+theorem embedding_valueCongruentAndClosedTermFromChildren_probe
+    {βA βB αAnd αOut e : ONote} {k d c : ℕ} {Γ : Seq}
+    (s s' : SyntacticTerm ℒₒᵣ) (a b : SyntacticSemiformula ℒₒᵣ 1)
+    (hA_lt : βA < αAnd) (hB_lt : βB < αAnd) (hAnd_lt : αAnd < αOut)
+    (hANF : βA.NF) (hBNF : βB.NF) (hAndNF : αAnd.NF) (hOutNF : αOut.NF)
+    (hτA : norm βA < k + d) (hτB : norm βB < k + d) (hτAnd : norm αAnd < k + d)
+    (hp : ((a ⋏ b)/[s]) ∈ Γ)
+    (hn : (∼((a ⋏ b)/[s'])) ∈ Γ)
+    (dA : Zekd βA e k d c
+      (insert (a/[s]) (insert (∼(a/[s'])) (insert (∼(b/[s'])) Γ))))
+    (dB : Zekd βB e k d c
+      (insert (b/[s]) (insert (∼(a/[s'])) (insert (∼(b/[s'])) Γ)))) :
+    Zekd αOut e k d c Γ := by
+  refine embedding_valueCongruentAndFromChildren_probe ![s] ![s'] a b
+    hA_lt hB_lt hAnd_lt hANF hBNF hAndNF hOutNF hτA hτB hτAnd ?_ ?_ ?_ ?_
+  · simpa using hp
+  · simpa using hn
+  · simpa using dA
+  · simpa using dB
+
+/-- Closed-term specialization of the disjunction parent constructor. -/
+theorem embedding_valueCongruentOrClosedTermFromChildren_probe
+    {βA βB αAnd αOut e : ONote} {k d c : ℕ} {Γ : Seq}
+    (s s' : SyntacticTerm ℒₒᵣ) (a b : SyntacticSemiformula ℒₒᵣ 1)
+    (hA_lt : βA < αAnd) (hB_lt : βB < αAnd) (hAnd_lt : αAnd < αOut)
+    (hANF : βA.NF) (hBNF : βB.NF) (hAndNF : αAnd.NF) (hOutNF : αOut.NF)
+    (hτA : norm βA < k + d) (hτB : norm βB < k + d) (hτAnd : norm αAnd < k + d)
+    (hp : ((a ⋎ b)/[s]) ∈ Γ)
+    (hn : (∼((a ⋎ b)/[s'])) ∈ Γ)
+    (dA : Zekd βA e k d c
+      (insert (∼(a/[s'])) (insert (a/[s]) (insert (b/[s]) Γ))))
+    (dB : Zekd βB e k d c
+      (insert (∼(b/[s'])) (insert (a/[s]) (insert (b/[s]) Γ)))) :
+    Zekd αOut e k d c Γ := by
+  refine embedding_valueCongruentOrFromChildren_probe ![s] ![s'] a b
+    hA_lt hB_lt hAnd_lt hANF hBNF hAndNF hOutNF hτA hτB hτAnd ?_ ?_ ?_ ?_
+  · simpa using hp
+  · simpa using hn
+  · simpa using dA
+  · simpa using dB
+
+/--
+One bounded cut-tower step for the PA-induction leaf.
+
+This is the structural kernel behind `EmbeddingBound.metaInduction_cong_bdd`, ported to `Zekd`:
+given the finite excluded-middle premises for `ψ(n)` and `ψ(n+1)`, combine them into the bad-step
+formula, introduce `∃ badStep` using the running witness bound, then cut against the current
+`ψ(n)` derivation to obtain `ψ(n+1)`.
+
+The EM/value-substitution premises are still external to this probe.  The point of the theorem is
+that the witness-bounded `andI`/`exI`/`cut` wiring itself is tractable at index `max k n`.
+-/
+theorem inductionLeaf_cutTowerStep_probe
+    {βIH βA βB βAnd βEx α e : ONote} {k d c n : ℕ} {Δ : Seq}
+    {ψ step : SyntacticSemiformula ℒₒᵣ 1}
+    (hstep : (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[nm (n + 1)]))
+    (hmemEx : (∃⁰ ∼step) ∈ Δ)
+    (hψc : (ψ/[nm n]).complexity < c)
+    (hIHlt : βIH < α) (hExlt : βEx < α)
+    (hAlt : βA < βAnd) (hBlt : βB < βAnd) (hAndlt : βAnd < βEx)
+    (hIHNF : βIH.NF) (hANF : βA.NF) (hBNF : βB.NF)
+    (hAndNF : βAnd.NF) (hExNF : βEx.NF) (hαNF : α.NF)
+    (hτIH : norm βIH < max k n + d) (hτA : norm βA < max k n + d)
+    (hτB : norm βB < max k n + d) (hτAnd : norm βAnd < max k n + d)
+    (hτEx : norm βEx < max k n + d)
+    (dIH : Zekd βIH e (max k n) d c (insert (ψ/[nm n]) Δ))
+    (dA : Zekd βA e (max k n) d c
+      (insert (ψ/[nm n]) (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ))))
+    (dB : Zekd βB e (max k n) d c
+      (insert (∼(ψ/[nm (n + 1)])) (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ)))) :
+    Zekd α e (max k n) d c (insert (ψ/[nm (n + 1)]) Δ) := by
+  have hAnd : Zekd βAnd e (max k n) d c
+      (insert ((ψ/[nm n]) ⋏ ∼(ψ/[nm (n + 1)]))
+        (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ))) :=
+    Zekd.andI (ψ/[nm n]) (∼(ψ/[nm (n + 1)]))
+      hAlt hBlt hANF hBNF hAndNF hτA hτB dA dB
+  have hBadStep : Zekd βAnd e (max k n) d c
+      (insert ((∼step)/[nm n])
+        (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ))) := by
+    rw [hstep]
+    exact hAnd
+  have hEx : Zekd βEx e (max k n) d c
+      (insert (∃⁰ ∼step) (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ))) :=
+    Zekd.exI (∼step) n hAndlt hAndNF hExNF hτAnd
+      (inductionLeaf_runningIndex_witnessBound e k d n) hBadStep
+  have hEx' : Zekd βEx e (max k n) d c
+      (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ)) := by
+    rw [Finset.insert_eq_self.mpr
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmemEx))] at hEx
+    exact hEx
+  have hIH' : Zekd βIH e (max k n) d c
+      (insert (ψ/[nm n]) (insert (ψ/[nm (n + 1)]) Δ)) :=
+    Zekd.wk (Finset.insert_subset_insert _ (Finset.subset_insert _ _)) dIH
+  exact Zekd.cut (ψ/[nm n]) hψc hIHlt hExlt hIHNF hExNF hαNF hτIH hτEx hIH' hEx'
+
+/-- Value-substitution by a cut against a value-congruent excluded-middle premise.
+
+This is the `Zekd` analogue of the cut used by
+`EmbeddingBound.subst_value_subst_bdd`; the actual proof of the congruent EM premise is still
+outside this probe, but the cut interface and budgets are now checked. -/
+theorem inductionLeaf_valueSubst_cut_probe
+    {βSrc βCong α e : ONote} {k d c : ℕ} {Γ : Seq}
+    {ψ : SyntacticSemiformula ℒₒᵣ 1} {s t : SyntacticTerm ℒₒᵣ}
+    (hψc : (ψ/[s]).complexity < c)
+    (hSrcLt : βSrc < α) (hCongLt : βCong < α)
+    (hSrcNF : βSrc.NF) (hCongNF : βCong.NF) (hαNF : α.NF)
+    (hτSrc : norm βSrc < k + d) (hτCong : norm βCong < k + d)
+    (dSrc : Zekd βSrc e k d c (insert (ψ/[s]) Γ))
+    (dCong : Zekd βCong e k d c (insert (∼(ψ/[s])) (insert (ψ/[t]) Γ))) :
+    Zekd α e k d c (insert (ψ/[t]) Γ) :=
+  Zekd.cut (ψ/[s]) hψc hSrcLt hCongLt hSrcNF hCongNF hαNF hτSrc hτCong
+    (Zekd.wk (Finset.insert_subset_insert _ (Finset.subset_insert _ _)) dSrc) dCong
+
+/--
+The same cut-tower step, but with the successor occurrence still written as an arbitrary closed
+term `succT`.  After the bad-step cut yields `ψ/[succT]`, a value-substitution cut turns it into
+the numeral instance `ψ/[nm (n+1)]`.
+
+This mirrors the real `succInd` leaf more closely than `inductionLeaf_cutTowerStep_probe`.
+-/
+theorem inductionLeaf_cutTowerStepWithTerm_probe
+    {βIH βA βB βAnd βEx βCong αStep α e : ONote} {k d c n : ℕ} {Δ : Seq}
+    {ψ step : SyntacticSemiformula ℒₒᵣ 1} (succT : SyntacticTerm ℒₒᵣ)
+    (hstep : (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[succT]))
+    (hmemEx : (∃⁰ ∼step) ∈ Δ)
+    (hψc : (ψ/[nm n]).complexity < c) (hsuccc : (ψ/[succT]).complexity < c)
+    (hIHlt : βIH < αStep) (hExlt : βEx < αStep)
+    (hAlt : βA < βAnd) (hBlt : βB < βAnd) (hAndlt : βAnd < βEx)
+    (hStepLt : αStep < α) (hCongLt : βCong < α)
+    (hIHNF : βIH.NF) (hANF : βA.NF) (hBNF : βB.NF)
+    (hAndNF : βAnd.NF) (hExNF : βEx.NF) (hStepNF : αStep.NF)
+    (hCongNF : βCong.NF) (hαNF : α.NF)
+    (hτIH : norm βIH < max k n + d) (hτA : norm βA < max k n + d)
+    (hτB : norm βB < max k n + d) (hτAnd : norm βAnd < max k n + d)
+    (hτEx : norm βEx < max k n + d) (hτStep : norm αStep < max k n + d)
+    (hτCong : norm βCong < max k n + d)
+    (dIH : Zekd βIH e (max k n) d c (insert (ψ/[nm n]) Δ))
+    (dA : Zekd βA e (max k n) d c
+      (insert (ψ/[nm n]) (insert (∼(ψ/[nm n])) (insert (ψ/[succT]) Δ))))
+    (dB : Zekd βB e (max k n) d c
+      (insert (∼(ψ/[succT])) (insert (∼(ψ/[nm n])) (insert (ψ/[succT]) Δ))))
+    (dCong : Zekd βCong e (max k n) d c
+      (insert (∼(ψ/[succT])) (insert (ψ/[nm (n + 1)]) Δ))) :
+    Zekd α e (max k n) d c (insert (ψ/[nm (n + 1)]) Δ) := by
+  have hAnd : Zekd βAnd e (max k n) d c
+      (insert ((ψ/[nm n]) ⋏ ∼(ψ/[succT]))
+        (insert (∼(ψ/[nm n])) (insert (ψ/[succT]) Δ))) :=
+    Zekd.andI (ψ/[nm n]) (∼(ψ/[succT]))
+      hAlt hBlt hANF hBNF hAndNF hτA hτB dA dB
+  have hBadStep : Zekd βAnd e (max k n) d c
+      (insert ((∼step)/[nm n])
+        (insert (∼(ψ/[nm n])) (insert (ψ/[succT]) Δ))) := by
+    rw [hstep]
+    exact hAnd
+  have hEx : Zekd βEx e (max k n) d c
+      (insert (∃⁰ ∼step) (insert (∼(ψ/[nm n])) (insert (ψ/[succT]) Δ))) :=
+    Zekd.exI (∼step) n hAndlt hAndNF hExNF hτAnd
+      (inductionLeaf_runningIndex_witnessBound e k d n) hBadStep
+  have hEx' : Zekd βEx e (max k n) d c
+      (insert (∼(ψ/[nm n])) (insert (ψ/[succT]) Δ)) := by
+    rw [Finset.insert_eq_self.mpr
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hmemEx))] at hEx
+    exact hEx
+  have hIH' : Zekd βIH e (max k n) d c
+      (insert (ψ/[nm n]) (insert (ψ/[succT]) Δ)) :=
+    Zekd.wk (Finset.insert_subset_insert _ (Finset.subset_insert _ _)) dIH
+  have hStep : Zekd αStep e (max k n) d c (insert (ψ/[succT]) Δ) :=
+    Zekd.cut (ψ/[nm n]) hψc hIHlt hExlt hIHNF hExNF hStepNF hτIH hτEx hIH' hEx'
+  exact inductionLeaf_valueSubst_cut_probe hsuccc hStepLt hCongLt hStepNF hCongNF hαNF
+    hτStep hτCong hStep dCong
+
+/--
+Package a running finite induction chain into the `allω` rule.
+
+This is the outer shape of `EmbeddingBound.metaInduction_cong_bdd` in the witness-bounded
+`Zekd` calculus: the successor step is allowed to run at the old index `max k n`; monotonicity
+then raises it to the next `allω` premise index `max k (n+1)`.
+-/
+theorem inductionLeaf_allOmegaFromStep_probe
+    {αAll e : ONote} {k d c : ℕ} {Δ : Seq}
+    {ψ : SyntacticSemiformula ℒₒᵣ 1} (β : ℕ → ONote)
+    (hβlt : ∀ n, β n < αAll) (hβNF : ∀ n, (β n).NF)
+    (hαAllNF : αAll.NF) (hβτ : ∀ n, norm (β n) < max k n + d)
+    (hbase : Zekd (β 0) e k d c (insert (ψ/[nm 0]) Δ))
+    (hnext : ∀ n,
+      Zekd (β n) e (max k n) d c (insert (ψ/[nm n]) Δ) →
+      Zekd (β (n + 1)) e (max k n) d c (insert (ψ/[nm (n + 1)]) Δ)) :
+    Zekd αAll e k d c (insert (∀⁰ ψ) Δ) := by
+  have chain : ∀ n, Zekd (β n) e (max k n) d c (insert (ψ/[nm n]) Δ) := by
+    intro n
+    induction n with
+    | zero =>
+        simpa using hbase
+    | succ n ih =>
+        exact (hnext n ih).mono_k (by omega)
+  exact Zekd.allω ψ β hβlt hβNF hαAllNF hβτ chain
+
+/--
+The `allω` packaging for the numeral-successor cut tower.
+
+This is the value-congruence-free core of the bounded PA-induction leaf: the local step already concludes
+`ψ(n+1)`, so the outer finite induction and `allω` rule do not need any extra congruent-value premise.
+-/
+theorem inductionLeaf_allOmegaCutTowerNumeral_probe
+    {αAll e : ONote} {k d c : ℕ} {Δ : Seq}
+    {ψ step : SyntacticSemiformula ℒₒᵣ 1}
+    (β βA βB βAnd βEx : ℕ → ONote)
+    (hβAllLt : ∀ n, β n < αAll)
+    (hIHlt : ∀ n, β n < β (n + 1)) (hExlt : ∀ n, βEx n < β (n + 1))
+    (hAlt : ∀ n, βA n < βAnd n) (hBlt : ∀ n, βB n < βAnd n)
+    (hAndlt : ∀ n, βAnd n < βEx n)
+    (hβNF : ∀ n, (β n).NF) (hANF : ∀ n, (βA n).NF) (hBNF : ∀ n, (βB n).NF)
+    (hAndNF : ∀ n, (βAnd n).NF) (hExNF : ∀ n, (βEx n).NF)
+    (hαAllNF : αAll.NF)
+    (hβτ : ∀ n, norm (β n) < max k n + d)
+    (hAτ : ∀ n, norm (βA n) < max k n + d)
+    (hBτ : ∀ n, norm (βB n) < max k n + d)
+    (hAndτ : ∀ n, norm (βAnd n) < max k n + d)
+    (hExτ : ∀ n, norm (βEx n) < max k n + d)
+    (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[nm (n + 1)]))
+    (hmemEx : (∃⁰ ∼step) ∈ Δ)
+    (hψc : ∀ n, (ψ/[nm n]).complexity < c)
+    (hbase : Zekd (β 0) e k d c (insert (ψ/[nm 0]) Δ))
+    (dA : ∀ n, Zekd (βA n) e (max k n) d c
+      (insert (ψ/[nm n]) (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ))))
+    (dB : ∀ n, Zekd (βB n) e (max k n) d c
+      (insert (∼(ψ/[nm (n + 1)])) (insert (∼(ψ/[nm n])) (insert (ψ/[nm (n + 1)]) Δ)))) :
+    Zekd αAll e k d c (insert (∀⁰ ψ) Δ) :=
+  inductionLeaf_allOmegaFromStep_probe β hβAllLt hβNF hαAllNF hβτ hbase
+    (fun n dIH =>
+      inductionLeaf_cutTowerStep_probe (hstep n) hmemEx (hψc n)
+        (hIHlt n) (hExlt n) (hAlt n) (hBlt n) (hAndlt n)
+        (hβNF n) (hANF n) (hBNF n) (hAndNF n) (hExNF n) (hβNF (n + 1))
+        (hβτ n) (hAτ n) (hBτ n) (hAndτ n) (hExτ n)
+        dIH (dA n) (dB n))
+
+/--
+The `allω` packaging specialized to the bounded PA-induction cut tower.
+
+All finite EM/congruence premises are still explicit hypotheses.  The theorem checks the important
+interface: the local `andI`/`exI`/`cut`/value-substitution step composes through ordinary finite
+induction and then through `Zekd.allω` without losing the running witness index.
+-/
+theorem inductionLeaf_allOmegaCutTowerWithTerm_probe
+    {αAll e : ONote} {k d c : ℕ} {Δ : Seq}
+    {ψ step : SyntacticSemiformula ℒₒᵣ 1}
+    (β βA βB βAnd βEx βStep βCong : ℕ → ONote)
+    (succT : ℕ → SyntacticTerm ℒₒᵣ)
+    (hβAllLt : ∀ n, β n < αAll)
+    (hIHlt : ∀ n, β n < βStep n) (hExlt : ∀ n, βEx n < βStep n)
+    (hAlt : ∀ n, βA n < βAnd n) (hBlt : ∀ n, βB n < βAnd n)
+    (hAndlt : ∀ n, βAnd n < βEx n)
+    (hStepLt : ∀ n, βStep n < β (n + 1)) (hCongLt : ∀ n, βCong n < β (n + 1))
+    (hβNF : ∀ n, (β n).NF) (hANF : ∀ n, (βA n).NF) (hBNF : ∀ n, (βB n).NF)
+    (hAndNF : ∀ n, (βAnd n).NF) (hExNF : ∀ n, (βEx n).NF)
+    (hStepNF : ∀ n, (βStep n).NF) (hCongNF : ∀ n, (βCong n).NF)
+    (hαAllNF : αAll.NF)
+    (hβτ : ∀ n, norm (β n) < max k n + d)
+    (hAτ : ∀ n, norm (βA n) < max k n + d)
+    (hBτ : ∀ n, norm (βB n) < max k n + d)
+    (hAndτ : ∀ n, norm (βAnd n) < max k n + d)
+    (hExτ : ∀ n, norm (βEx n) < max k n + d)
+    (hStepτ : ∀ n, norm (βStep n) < max k n + d)
+    (hCongτ : ∀ n, norm (βCong n) < max k n + d)
+    (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[succT n]))
+    (hmemEx : (∃⁰ ∼step) ∈ Δ)
+    (hψc : ∀ n, (ψ/[nm n]).complexity < c)
+    (hsuccc : ∀ n, (ψ/[succT n]).complexity < c)
+    (hbase : Zekd (β 0) e k d c (insert (ψ/[nm 0]) Δ))
+    (dA : ∀ n, Zekd (βA n) e (max k n) d c
+      (insert (ψ/[nm n]) (insert (∼(ψ/[nm n])) (insert (ψ/[succT n]) Δ))))
+    (dB : ∀ n, Zekd (βB n) e (max k n) d c
+      (insert (∼(ψ/[succT n])) (insert (∼(ψ/[nm n])) (insert (ψ/[succT n]) Δ))))
+    (dCong : ∀ n, Zekd (βCong n) e (max k n) d c
+      (insert (∼(ψ/[succT n])) (insert (ψ/[nm (n + 1)]) Δ))) :
+    Zekd αAll e k d c (insert (∀⁰ ψ) Δ) :=
+  inductionLeaf_allOmegaFromStep_probe β hβAllLt hβNF hαAllNF hβτ hbase
+    (fun n dIH =>
+      inductionLeaf_cutTowerStepWithTerm_probe (succT n) (hstep n) hmemEx (hψc n) (hsuccc n)
+        (hIHlt n) (hExlt n) (hAlt n) (hBlt n) (hAndlt n)
+        (hStepLt n) (hCongLt n)
+        (hβNF n) (hANF n) (hBNF n) (hAndNF n) (hExNF n) (hStepNF n)
+        (hCongNF n) (hβNF (n + 1))
+        (hβτ n) (hAτ n) (hBτ n) (hAndτ n) (hExτ n) (hStepτ n) (hCongτ n)
+        dIH (dA n) (dB n) (dCong n))
 
 end GoodsteinPA.OperatorZinfty

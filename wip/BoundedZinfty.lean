@@ -629,7 +629,7 @@ theorem norm_add_le : ∀ {α : ONote}, α.NF → ∀ {γ : ONote}, γ.NF →
         have hra : ONote.repr a < Ordinal.omega0 ^ ONote.repr e := hα.snd'.repr_lt
         have hgγ : Ordinal.omega0 ^ ONote.repr e ≤ ONote.repr γ := by
           by_contra hlt
-          push_neg at hlt
+          push Not at hlt
           have : ONote.repr a + ONote.repr γ < Ordinal.omega0 ^ ONote.repr e :=
             (Ordinal.isPrincipal_add_omega0_opow (ONote.repr e)) hra hlt
           rw [repr_add] at hge

@@ -211,7 +211,7 @@ theorem widx_eq (W : ℕ → ℕ) (hpos : ∀ t, 1 ≤ W t) {cap i x : ℕ} (hin
     (hlo : wsum W i ≤ x) (hhi : x < wsum W (i + 1)) : widx W cap x = i := by
   refine le_antisymm ?_ (Nat.le_findGreatest hin hlo)
   by_contra hc
-  push_neg at hc
+  push Not at hc
   have hb := wsum_widx_le W cap x
   have : wsum W (i + 1) ≤ wsum W (widx W cap x) := (wsum_strictMono W hpos).monotone (by omega)
   omega
@@ -325,7 +325,7 @@ theorem blockIdx_eq (l : ℕ) {n : ℕ} (hn : 1 ≤ n) {i x : ℕ} (hin : i ≤ 
     blockIdx (F l) n x = i := by
   refine le_antisymm ?_ (Nat.le_findGreatest hin hlo)
   by_contra hc
-  push_neg at hc
+  push Not at hc
   have hb := psum_blockIdx_le (F l) n x
   have hmono : psum (F l) n (i + 1) ≤ psum (F l) n (blockIdx (F l) n x) :=
     (psum_strictMono l hn).monotone (by omega)
@@ -530,7 +530,7 @@ theorem MinExpGe_omega_mul {k : ℕ} : ∀ {o : ONote}, o.NF → MinExpGe k o �
     · subst e0
       have hk0 : k = 0 := by
         simp only [ONote.repr_zero] at hke
-        exact_mod_cast Ordinal.le_zero.1 hke
+        exact_mod_cast (nonpos_iff_eq_zero.1 hke)
       subst hk0
       simp only [↓reduceIte]
       exact ⟨by simp, trivial⟩
@@ -631,7 +631,7 @@ theorem g_desc : ∀ (l n m : ℕ), m < F l n → (g l n (m + 1)).repr < (g l n 
           rw [← Function.iterate_succ_apply' (F l) i n]; exact hwidth
         exact ih ((F l)^[i] n) j hcond
       · -- boundary: m+1 = psum(i+1), blockIdx(m+1) = i+1, blockOff(m+1) = 0
-        push_neg at hbnd
+        push Not at hbnd
         have hb_eq : m + 1 = psum (F l) n (i + 1) := by omega
         have hidx1 : blockIdx (F l) n (m + 1) = i + 1 := by
           refine blockIdx_eq l hn (by omega) (by omega) ?_

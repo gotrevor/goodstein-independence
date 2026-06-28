@@ -40,7 +40,7 @@ convert it to `Nat.le` via `LO.FirstOrder.Arithmetic.le_def`; the `<` underneath
       Nat.lt_pow_succ_log_self (by omega) n⟩
   · rcases not_and_or.mp h with h1 | h1
     · rw [LO.FirstOrder.Arithmetic.le_def] at h1
-      push_neg at h1
+      push Not at h1
       exact Nat.log_of_left_le_one (by omega) n
     · have : n = 0 := by omega
       subst this; simp
