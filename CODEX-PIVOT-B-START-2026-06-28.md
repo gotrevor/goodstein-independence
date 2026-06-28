@@ -244,10 +244,16 @@ Follow-up probe: the EM theorem now feeds the closed-term existential adapter di
 
 ```lean
 theorem embedding_closedTermExI_probe
+theorem closedTerm_witnessBound_of_budget
+theorem embedding_closedTermExI_raiseK_probe
 ```
 
 Given a bounded derivation of `ψ[s]`, it introduces `∃⁰ ψ` by generating the congruent EM premise
 internally from `embedding_valueCongruentEM_probe`.  The exposed side condition is now exactly the real
-term-bound obligation `stdClosedVal s ≤ hardy e (K+d)`, plus ordinal/norm bookkeeping.  So the next
-Path-B embedding work should target assignment-closed term bounds for Foundation witness terms, rather
-than more logical rule plumbing.
+term-bound obligation `stdClosedVal s ≤ hardy e (K+d)`, plus ordinal/norm bookkeeping.
+
+The `raiseK` adapter discharges that side condition locally by monotonicity: a derivation at `K` can be
+raised to `max K (stdClosedVal s)`, where `stdClosedVal s ≤ hardy e (max K (stdClosedVal s)+d)` follows
+from `le_hardy`.  So the remaining Path-B embedding work is not more logical rule plumbing; it is the
+global finite-budget pass that propagates these `K` raises through the proof embedding and extracts one
+terminal witness budget.

@@ -1771,6 +1771,42 @@ theorem embedding_closedTermExI_probe
   exact embedding_closedTermExI_of_valueCongruentEM_probe s hψc hSrcLt hCongLt hCutLt
     hSrcNF inferInstance hCutNF hOutNF hτSrc hτCong hτCut hbound dSrc dCong
 
+/-- A finite numeric budget bound on a closed witness term is enough for the `Zekd.exI`
+witness side condition, because every Hardy level is expansive. -/
+theorem closedTerm_witnessBound_of_budget
+    (e : ONote) {K d : ℕ} {s : SyntacticTerm ℒₒᵣ}
+    (hterm : stdClosedVal s ≤ K + d) :
+    stdClosedVal s ≤ hardy e (K + d) :=
+  le_trans hterm (le_hardy e (K + d))
+
+/--
+Closed-term existential introduction with the witness bound paid by raising the `K` index.
+
+This is the local `exs` budget adapter needed by the bounded embedding route: if a source derivation
+is available at index `K`, then it can be used at `max K (stdClosedVal s)`, where the closed witness
+term is automatically within the Hardy witness budget.  No extra logical premise is introduced.
+-/
+theorem embedding_closedTermExI_raiseK_probe
+    {βSrc αCut αOut e : ONote} {K d c q : ℕ} {Γ : Seq}
+    {ψ : SyntacticSemiformula ℒₒᵣ 1} (s : SyntacticTerm ℒₒᵣ)
+    (hψq : ψ.complexity ≤ q) (hψc : (ψ/[s]).complexity < c)
+    (hSrcLt : βSrc < αCut) (hCongLt : ONote.ofNat (2 * q) < αCut)
+    (hCutLt : αCut < αOut)
+    (hSrcNF : βSrc.NF) (hCutNF : αCut.NF) (hOutNF : αOut.NF)
+    (hτSrc : norm βSrc < K + d) (hτCong : norm (ONote.ofNat (2 * q)) < K + d)
+    (hτCut : norm αCut < K + d)
+    (hbudget : 2 * q < K + d)
+    (dSrc : Zekd βSrc e K d c (insert (ψ/[s]) Γ)) :
+    Zekd αOut e (max K (stdClosedVal s)) d c (insert (∃⁰ ψ) Γ) := by
+  refine embedding_closedTermExI_probe (K := max K (stdClosedVal s)) s hψq hψc
+    hSrcLt hCongLt hCutLt hSrcNF hCutNF hOutNF ?_ ?_ ?_ ?_ ?_ ?_
+  · exact lt_of_lt_of_le hτSrc (by omega)
+  · exact lt_of_lt_of_le hτCong (by omega)
+  · exact lt_of_lt_of_le hτCut (by omega)
+  · exact lt_of_lt_of_le hbudget (by omega)
+  · exact closedTerm_witnessBound_of_budget e (by omega)
+  · exact dSrc.mono_k (le_max_left K (stdClosedVal s))
+
 /--
 One bounded cut-tower step for the PA-induction leaf.
 
