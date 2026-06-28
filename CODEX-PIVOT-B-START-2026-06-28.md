@@ -239,3 +239,15 @@ witness `m` is paid at the running premise index `max K m` via
 Read: the bounded EM/value-congruence engine itself is no longer the suspected wall.  The next embedding
 work is to thread assignment-closed term bounds through the Foundation `exs` case and feed this EM theorem
 into the existing closed-term `exI` adapter.
+
+Follow-up probe: the EM theorem now feeds the closed-term existential adapter directly:
+
+```lean
+theorem embedding_closedTermExI_probe
+```
+
+Given a bounded derivation of `ψ[s]`, it introduces `∃⁰ ψ` by generating the congruent EM premise
+internally from `embedding_valueCongruentEM_probe`.  The exposed side condition is now exactly the real
+term-bound obligation `stdClosedVal s ≤ hardy e (K+d)`, plus ordinal/norm bookkeeping.  So the next
+Path-B embedding work should target assignment-closed term bounds for Foundation witness terms, rather
+than more logical rule plumbing.

@@ -1736,6 +1736,42 @@ theorem embedding_valueCongruentEM_probe :
           rwa [Finset.insert_eq_self.mpr hn'] at hallω
 
 /--
+Closed-term existential introduction using the checked bounded value-congruence EM engine.
+
+This is the direct `Zekd` adapter for the Foundation `exs` shape after an open witness term has been
+closed by an assignment.  The only semantic side condition still exposed is the real witness bound
+`stdClosedVal s ≤ hardy e (K+d)`.
+-/
+theorem embedding_closedTermExI_probe
+    {βSrc αCut αOut e : ONote} {K d c q : ℕ} {Γ : Seq}
+    {ψ : SyntacticSemiformula ℒₒᵣ 1} (s : SyntacticTerm ℒₒᵣ)
+    (hψq : ψ.complexity ≤ q) (hψc : (ψ/[s]).complexity < c)
+    (hSrcLt : βSrc < αCut) (hCongLt : ONote.ofNat (2 * q) < αCut)
+    (hCutLt : αCut < αOut)
+    (hSrcNF : βSrc.NF) (hCutNF : αCut.NF) (hOutNF : αOut.NF)
+    (hτSrc : norm βSrc < K + d) (hτCong : norm (ONote.ofNat (2 * q)) < K + d)
+    (hτCut : norm αCut < K + d)
+    (hbudget : 2 * q < K + d)
+    (hbound : stdClosedVal s ≤ hardy e (K + d))
+    (dSrc : Zekd βSrc e K d c (insert (ψ/[s]) Γ)) :
+    Zekd αOut e K d c (insert (∃⁰ ψ) Γ) := by
+  have hval : ∀ i, stdClosedVal ((![nm (stdClosedVal s)] : Fin 1 → SyntacticTerm ℒₒᵣ) i)
+      = stdClosedVal ((![s] : Fin 1 → SyntacticTerm ℒₒᵣ) i) := by
+    intro i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ j => exact Fin.elim0 j
+  have dCong : Zekd (ONote.ofNat (2 * q)) e K d c
+      (insert (∼(ψ/[s])) (insert (ψ/[nm (stdClosedVal s)]) Γ)) := by
+    refine embedding_valueCongruentEM_probe q
+      (![nm (stdClosedVal s)] : Fin 1 → SyntacticTerm ℒₒᵣ)
+      (![s] : Fin 1 → SyntacticTerm ℒₒᵣ) ψ hψq hval hbudget ?_ ?_
+    · simp
+    · simp
+  exact embedding_closedTermExI_of_valueCongruentEM_probe s hψc hSrcLt hCongLt hCutLt
+    hSrcNF inferInstance hCutNF hOutNF hτSrc hτCong hτCut hbound dSrc dCong
+
+/--
 One bounded cut-tower step for the PA-induction leaf.
 
 This is the structural kernel behind `EmbeddingBound.metaInduction_cong_bdd`, ported to `Zekd`:
