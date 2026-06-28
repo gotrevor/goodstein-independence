@@ -123,6 +123,44 @@ Re-verified (lap 161, real `#print axioms`, build 🟢 1326): headline `peano_no
 
 ---
 
+## 🧭 ROUTE GUARD — the blind-spot fix (standing governance; altitude + operator owned)
+
+**Diagnosis (why this exists).** This expedition's reflection cadence re-evaluates progress *within*
+the chosen route but never re-opens *whether the route is right*. Every altitude lap from lap 137→166
+recorded "direction KEPT"; meanwhile BOTH pre-registered Route-A abort conditions FIRED and no
+re-decision ever happened. A treadmill cannot make a route call — but it must not silently grind
+through the abort conditions it was told to stop at. That is the failure this guard closes.
+
+**Pre-registered route triggers (abort conditions — these are commitments, not vibes).**
+- **T1 — M1 overrun** (`E-CRUX2-ROADMAP-2026-06-24.md`): if M1 (`RedSound` = the cut-elim validity
+  core) is not a *proven theorem* within ~40 laps of lap 83 (≈ lap 123), STOP grinding and reweigh
+  Route B. **STATUS: FIRED** (now lap 166; `RedSound` is still 2 open sorries — `ind_reduct_anySucc`,
+  `residual`).
+- **T2 — second false summit** (`E-ROUTE-OPTIONS-2026-06-24.md`): if the genuine-reduct / cut-elim
+  core hits a *second* false summit, reweigh the meta / growth-rate pivot. **STATUS: FIRED** (≥4
+  false summits since lap 81: `redLeast`, the `seqUpdate` splice, same-degree `õ`-drop, the orphaned
+  ⊥-cluster chased for ~30 laps).
+
+**The rule (binding on every deep-reflection / every-9th altitude lap).**
+1. The lap MUST emit an explicit **ROUTE VERDICT** — exactly one of `CONTINUE` / `ESCALATE` —
+   *evaluated against the trigger table above*. A bare "direction KEPT" with no route verdict is
+   itself a process failure; do not write one.
+2. If **any trigger is FIRED**, the verdict MUST be `ESCALATE`: halt route-committing grind, write a
+   short `ROUTE-ESCALATION-<date>.md` (which trigger fired, current honest finishability, the A-vs-B
+   re-costing), and surface it to the operator. **The box does NOT choose the pivot** — the A-vs-B
+   route decision is OPERATOR-OWNED (it is two multi-month research bets; the grinding box is inside
+   the fog and structurally cannot see the summit is false). Resume grind only on an operator/judge-
+   ratified route written into CURRENT DIRECTIVE with a *fresh* trigger set.
+3. `CONTINUE` is permitted only when NO trigger is fired (or a fired trigger has been operator-ratified
+   as "continue anyway, on these re-scoped terms").
+
+**Live status (2026-06-28):** both triggers FIRED → ESCALATED to the operator (Trevor). This is the
+first firing of this guard. The A-vs-B re-decision is PENDING. Until Trevor ratifies a route, grind
+laps are FROZEN on the crux-2 engine — no new route-committing work. `(3) bank-and-downgrade` is OFF
+the table per operator: the target is the top-level headline axiom-clean, or full abandonment.
+
+---
+
 ## The goal (not a fixture — the destination) 🦸
 
 **Prove `Statement.peano_not_proves_goodstein : 𝗣𝗔 ⊬ ↑goodsteinSentence`** — Kirby–Paris (1982),
