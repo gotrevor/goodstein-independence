@@ -1,7 +1,7 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 165 (**KEYSTONE recursion**; HEAD `6732eb2`) · 2026-06-27 ·
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 166 (**named-axiom-blueprint ledger; headline wired through girder axiom, sorryAx OFF the headline**) · 2026-06-28 ·
 Direction KEPT (lap-161 still current). **Lap-165 PROVED + WIRED the keystone `closeNonRepProducer`** — the
 unified NON-Rep producer closer (a GLOBAL `least_number` over `{5,6,8}`-producers; sorry-FREE, `[propext,
 choice, Quot.sound]`). Both `axMajorResidual` (⊥) and `residual` (anySucc) now route every L-axiom producer
@@ -11,12 +11,16 @@ R1/R2 — **both VACUOUS at the headline `Γ=∅`**. NEXT = the GLOBAL-THREADING
 root-Γ=∅" through `genReduct_botSucc`'s code-induction → R1/R2 vacuous → DROP `axMajorResidual`. See
 `HANDOFF-2026-06-27-lap165.md`, `PENDING_WORK.md` lap-165. (Lap-163 had discharged escape (i) ⊥-exit ex-falso
 via `zAxBot`; the {3,4}-producer core was closed laps 159-160 by `repProducerClose`.)
-· Headline `peano_not_proves_goodstein = [propext, sorryAx, Classical.choice, Quot.sound]` (**0 math axioms**, bare-sorry
-headline); `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean; `false_of_ZDerivesEmpty` =
-`[propext, sorryAx, choice, Quot.sound]` (0 math axioms) (real `#print axioms`, lap 165, no drift). **ALTITUDE:** a
-sorry-free `false_of_ZDerivesEmpty` is NOT the headline — `goodstein_implies_consistency` (`Reduction.lean:68`) is a
-bare sorry, NOT YET wired to it; the M2/M4 embedding bridge is ~0% built (the dominant remaining feasibility
-unknown). "Only the crux left" ≠ "almost done." The lap that closes `false_of_ZDerivesEmpty` HANDS to altitude to re-plan M2.
+· **LEDGER (lap 166 — named-axiom-blueprint adopted):** Headline `peano_not_proves_goodstein =
+`[propext, Classical.choice, Quot.sound, goodstein_implies_consistency]` — **`sorryAx` is OFF the headline**; its only
+non-canonical dependency is the declared, faithful, allowlisted girder axiom. `goodstein_implies_consistency` promoted
+`theorem := sorry` → named `axiom` (`Reduction.lean`); headline wired `:= not_proves_of_implies_consistency
+goodstein_implies_consistency`. `goodsteinSentence_faithful` + `peano_not_proves_consistency` axiom-clean;
+`false_of_ZDerivesEmpty` = `[propext, sorryAx, choice, Quot.sound]` (0 math axioms) (real `#print axioms`, lap 166, no
+drift). Gate: `lean-axiom-gate -t peano_not_proves_goodstein -a goodstein_implies_consistency` ⇒ ✓. **ALTITUDE
+(UNCHANGED, binding):** this is a VISIBILITY change, NOT math progress — the girder axiom's *construction* (the M2/M4
+embedding bridge ~0% built + the crux-2 engine `false_of_ZDerivesEmpty`, still sorry-full) is the real remaining work.
+"Only the crux left" ≠ "almost done." The lap that closes `false_of_ZDerivesEmpty` HANDS to altitude to re-plan M2.
 
 > **⭐⭐⭐ Lap-165 — KEYSTONE `closeNonRepProducer` PROVEN + WIRED; both residuals narrowed to R1/R2. Read FIRST — current.**
 > Build 🟢 1326 (exit 0); real `#print axioms`: headline + `false_of_ZDerivesEmpty` = `[propext, sorryAx, choice,

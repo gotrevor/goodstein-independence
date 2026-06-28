@@ -14,6 +14,17 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
+**lap-166 (OPERATOR-DIRECTED LEDGER CONVERSION — not a math-direction change).** Adopted the
+named-axiom-blueprint discipline (KB note `named-axiom-blueprint`; see the rewritten ANTI-FRAUD guard
+below). `goodstein_implies_consistency` promoted `theorem … := sorry` → **named `axiom`**
+(`Reduction.lean`), and the headline `peano_not_proves_goodstein` is now a **real proof** wired through
+it (`:= not_proves_of_implies_consistency goodstein_implies_consistency`). Real `#print axioms`:
+headline = `[propext, Classical.choice, Quot.sound, goodstein_implies_consistency]` — **`sorryAx` is OFF
+the headline.** ⚠️ **This is a VISIBILITY change, NOT mathematical progress** (KB: "honesty comes from
+visibility, not structure; a blueprint axiom left undischarged forever is a cop-out, just labeled"). The
+ALTITUDE CAUTION below is UNCHANGED and binding: the girder axiom's *construction* (M2/M4 bridge + the
+crux-2 engine `false_of_ZDerivesEmpty`) is still ~0–partial; the math NEXT MOVE (close `residual`) stands.
+
 **lap-164 (FRESH-MIND REVIEW) — KEEP. Direction unchanged from lap-161 (existence-form pivot; finish
 `false_of_ZDerivesEmpty` = M1b-term). Lap-163 DISCHARGED escape (i) ⊥-exit ex-falso in-kernel (`zAxBot`
 tag-8 + `exFalsoClose`, axiom-clean — exactly what the lap-161 mandate ordered). Re-verified (real
@@ -170,14 +181,38 @@ in-kernel lap 132). Nothing here to do.
 
 ## ANTI-FRAUD guard (the one hard rule) 🚫
 
-A `sorry`'d headline is honest; a **fake** one is the worst outcome. You may replace
-`Statement.peano_not_proves_goodstein`'s `sorry` with a real proof **only if BOTH**:
-1. `#print axioms peano_not_proves_goodstein` = `[propext, Classical.choice, Quot.sound]`
-   (no `sorryAx`, no custom `axiom`), AND
-2. it genuinely chains through built lemmas (no `native_decide` on the headline, no
-   `axiom`-smuggling, no vacuous restatement).
-If you cannot do both, **leave the `sorry`** and report the gap. The host audits
-`#print axioms` on the headline every review lap. Inventing an axiom to "finish" = failure.
+A `sorry`'d headline is honest; a **fake** one is the worst outcome. The fraud this guards against
+is unchanged: a headline that *looks* finished while resting on something untrustworthy.
+
+**Named-axiom blueprint (lap-166 policy update; KB note `named-axiom-blueprint`).** Trevor's stance
+shifted: a not-yet-proven *milestone* stated as a NAMED `axiom` carrying a faithful, audited subgoal
+statement is the **clearer, more honest** blueprint node — strictly better than collapsing all debt
+to one opaque `sorryAx`. The headline may therefore be a *real proof* composing such axioms. The
+forcing function is unchanged: the result is **done** only when every blueprint axiom is discharged
+(`axiom` → `theorem`) and `#print axioms peano_not_proves_goodstein` = `[propext, Classical.choice,
+Quot.sound]` with NO custom axiom surviving.
+
+You may replace `Statement.peano_not_proves_goodstein`'s `sorry` with a real proof **only if ALL**:
+1. `#print axioms peano_not_proves_goodstein` ⊆ `[propext, Classical.choice, Quot.sound]` ∪
+   **{declared blueprint axioms on the allowlist}** — and NEVER `sorryAx`.
+2. Every blueprint axiom it rests on is **declared** (named, in `-a` allowlist), **faithfully
+   stated** (audited against its source — the axiom STATEMENT is the trust surface; a false axiom
+   proves `False`), and **intended to be discharged** (a sorry-builder or a real construction maps
+   to it). Off-path / known-false routes are NEVER axiomatized — they stay clearly-labeled refuted
+   `sorry`s (a `sorry` asserts nothing; a false `axiom` is catastrophic).
+3. It genuinely chains through built lemmas — no `native_decide` on the headline, no vacuous
+   restatement, no *undeclared* / off-allowlist axiom.
+
+If you cannot satisfy these, **leave the `sorry`** and report the gap. The host audits `#print
+axioms` on the headline every review lap via the **allowlist gate** (`lean-axiom-gate . -t
+GoodsteinPA.peano_not_proves_goodstein -a <eachBlueprintAxiom>`; `--exact` once fully discharged).
+The allowlist SHRINKS to the 3 canonical axioms as milestones discharge. An *undeclared* axiom, or a
+declared one that is false/unfaithful, or a non-shrinking allowlist parked forever = failure.
+
+**Current allowlist (lap 166):** `goodstein_implies_consistency` (the Phase 2–3 girder γ→Con(PA)
+inside PA, `Reduction.lean`). The headline is wired through it + the axiom-clean Gödel-II
+contraposition. `false_of_ZDerivesEmpty` / `exists_sigma1_descending_step` are crux-2 milestones
+promoted in the same discipline (off the headline's direct ledger; gated individually).
 
 ## LOCK — faithfulness anchors (do NOT edit) 🔒
 
