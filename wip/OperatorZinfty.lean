@@ -1812,6 +1812,62 @@ This matches the Path-B terminal shape, which extracts some finite witness budge
 def ZekdSomeK (α e : ONote) (d c : ℕ) (Γ : Seq) : Prop :=
   ∃ K : ℕ, Zekd α e K d c Γ
 
+namespace ZekdSomeK
+
+/-- Monotonicity in the sequent for the existential-budget wrapper. -/
+theorem wk {α e : ONote} {d c : ℕ} {Δ Γ : Seq}
+    (hsub : Δ ⊆ Γ) (dd : ZekdSomeK α e d c Δ) :
+    ZekdSomeK α e d c Γ := by
+  rcases dd with ⟨K, D⟩
+  exact ⟨K, Zekd.wk hsub D⟩
+
+/-- `andI` for the existential-budget wrapper: choose a finite index large enough for
+both premises and both norm side conditions. -/
+theorem andI {α βφ βψ e : ONote} {d c : ℕ} {Γ : Seq}
+    (φ ψ : Form) (hβφ : βφ < α) (hβψ : βψ < α)
+    (hβφNF : βφ.NF) (hβψNF : βψ.NF) (hαNF : α.NF)
+    (dφ : ZekdSomeK βφ e d c (insert φ Γ))
+    (dψ : ZekdSomeK βψ e d c (insert ψ Γ)) :
+    ZekdSomeK α e d c (insert (φ ⋏ ψ) Γ) := by
+  rcases dφ with ⟨Kφ, Dφ⟩
+  rcases dψ with ⟨Kψ, Dψ⟩
+  let K := max Kφ (max Kψ (max (norm βφ + 1) (norm βψ + 1)))
+  refine ⟨K, Zekd.andI φ ψ hβφ hβψ hβφNF hβψNF hαNF ?_ ?_ ?_ ?_⟩
+  · dsimp [K]; omega
+  · dsimp [K]; omega
+  · exact Dφ.mono_k (by dsimp [K]; omega)
+  · exact Dψ.mono_k (by dsimp [K]; omega)
+
+/-- `orI` for the existential-budget wrapper. -/
+theorem orI {α β e : ONote} {d c : ℕ} {Γ : Seq}
+    (φ ψ : Form) (hβ : β < α) (hβNF : β.NF) (hαNF : α.NF)
+    (dd : ZekdSomeK β e d c (insert φ (insert ψ Γ))) :
+    ZekdSomeK α e d c (insert (φ ⋎ ψ) Γ) := by
+  rcases dd with ⟨K0, D0⟩
+  let K := max K0 (norm β + 1)
+  refine ⟨K, Zekd.orI φ ψ hβ hβNF hαNF ?_ ?_⟩
+  · dsimp [K]; omega
+  · exact D0.mono_k (by dsimp [K]; omega)
+
+/-- `cut` for the existential-budget wrapper. -/
+theorem cut {α βφ βψ e : ONote} {d c : ℕ} {Γ : Seq}
+    (φ : Form) (hcompl : φ.complexity < c)
+    (hβφ : βφ < α) (hβψ : βψ < α)
+    (hβφNF : βφ.NF) (hβψNF : βψ.NF) (hαNF : α.NF)
+    (d₁ : ZekdSomeK βφ e d c (insert φ Γ))
+    (d₂ : ZekdSomeK βψ e d c (insert (∼φ) Γ)) :
+    ZekdSomeK α e d c Γ := by
+  rcases d₁ with ⟨K₁, D₁⟩
+  rcases d₂ with ⟨K₂, D₂⟩
+  let K := max K₁ (max K₂ (max (norm βφ + 1) (norm βψ + 1)))
+  refine ⟨K, Zekd.cut φ hcompl hβφ hβψ hβφNF hβψNF hαNF ?_ ?_ ?_ ?_⟩
+  · dsimp [K]; omega
+  · dsimp [K]; omega
+  · exact D₁.mono_k (by dsimp [K]; omega)
+  · exact D₂.mono_k (by dsimp [K]; omega)
+
+end ZekdSomeK
+
 /--
 Existential-budget version of closed-term `exI`.
 

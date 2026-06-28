@@ -247,6 +247,10 @@ theorem embedding_closedTermExI_probe
 theorem closedTerm_witnessBound_of_budget
 theorem embedding_closedTermExI_raiseK_probe
 def ZekdSomeK
+theorem ZekdSomeK.wk
+theorem ZekdSomeK.andI
+theorem ZekdSomeK.orI
+theorem ZekdSomeK.cut
 theorem embedding_closedTermExI_someK_probe
 ```
 
@@ -263,3 +267,7 @@ terminal witness budget.
 The `someK` version is the local interface for that pass: if the premise is derivable at some finite
 `K`, the closed-term existential conclusion is derivable at some larger finite `K`, with all local norm
 and witness side conditions paid internally.
+
+The first `someK` structural combinators also typecheck (`wk`, `andI`, `orI`, `cut`).  They choose a
+larger finite `K` from the premise budgets plus the rule's ordinal norm side conditions.  This is the
+right shape for replacing the old fixed-budget proof sketches with a finite-budget extraction pass.
