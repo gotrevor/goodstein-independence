@@ -215,12 +215,8 @@ reduces the bounded `exs` rule to two exact obligations:
 1. produce the value-congruent premise converting `ψ[s]` to `ψ[nm (stdClosedVal s)]`;
 2. prove the bound `stdClosedVal s ≤ hardy e (k+d)`.
 
-So the next embedding work is no longer vague: finish the recursive bounded value-congruent EM engine
-by plugging these base/parent kernels into the `Semiformula.cases'` induction, then thread
-assignment-closed term bounds through the Foundation `exs` case.
-
-Follow-up probe: the first recursive bounded value-congruence shell now typechecks for quantifier-free
-one-variable formulas:
+Follow-up probe: the recursive bounded value-congruence shell now typechecks.  First came the
+quantifier-free closed-term specialization:
 
 ```lean
 def QFreeForm
@@ -228,8 +224,18 @@ def QFreeForm
 theorem embedding_valueCongruentQFreeClosedTerm_probe
 ```
 
-It closes `ψ[s], ¬ψ[s']` at explicit finite height `ONote.ofNat (2*q)` when `ψ` is quantifier-free,
-`ψ.complexity ≤ q`, and the two closed terms have the same standard value. This banks the atom/and/or
-recursion against `Zekd`; the remaining full EM engine work is exactly the quantifier layer, where `∀`
-must package the constant-family recursion through `allω` and `∃` must use the closed-term `exI` adapter
-with a real witness bound.
+Then the arity-general theorem landed:
+
+```lean
+theorem embedding_valueCongruentEM_probe
+```
+
+It closes `ψ[w], ¬ψ[w']` at explicit finite height `ONote.ofNat (2*q)` for arbitrary formulas when
+`ψ.complexity ≤ q` and the closed assignments have pointwise equal standard values.  The quantifier
+cases are the important part: both `∀` and `∃` now package through `Zekd.allω`, and the paired `exI`
+witness `m` is paid at the running premise index `max K m` via
+`inductionLeaf_runningIndex_witnessBound`.
+
+Read: the bounded EM/value-congruence engine itself is no longer the suspected wall.  The next embedding
+work is to thread assignment-closed term bounds through the Foundation `exs` case and feed this EM theorem
+into the existing closed-term `exI` adapter.

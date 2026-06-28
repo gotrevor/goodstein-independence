@@ -1535,6 +1535,206 @@ theorem embedding_valueCongruentQFreeClosedTerm_probe :
       | hexs a =>
           simp at hqf
 
+set_option maxHeartbeats 1000000 in
+/--
+Bounded value-congruent EM for arbitrary formulas at explicit finite `ONote` height.
+
+This is the arity-general recursive shell needed by the bounded embedding route.  The quantifier
+cases are the decisive check: each `allω` premise runs at `max K m`, so the corresponding `exI`
+witness `m` is paid by `inductionLeaf_runningIndex_witnessBound`.
+-/
+theorem embedding_valueCongruentEM_probe :
+    ∀ (q : ℕ) {K d c : ℕ} {e : ONote} {Γ : Seq} {n : ℕ}
+      (w w' : Fin n → SyntacticTerm ℒₒᵣ) (ψ : SyntacticSemiformula ℒₒᵣ n),
+      ψ.complexity ≤ q →
+      (∀ i, stdClosedVal (w i) = stdClosedVal (w' i)) →
+      2 * q < K + d → (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ →
+      Zekd (ONote.ofNat (2 * q)) e K d c Γ := by
+  intro q
+  induction q with
+  | zero =>
+      intro K d c e Γ n w w' ψ hψq hval hbudget hp hn
+      cases ψ using Semiformula.cases' with
+      | hverum =>
+          exact embedding_valueCongruentVerum_probe w (by simpa using hp)
+      | hfalsum =>
+          exact embedding_valueCongruentFalsum_probe w' (by simpa using hn)
+      | hrel r v =>
+          exact embedding_valueCongruentRelSubstAtom_probe r w w' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by simpa [Semiformula.rew_rel] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hnrel r v =>
+          exact embedding_valueCongruentNrelSubstAtom_probe r w w' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by simpa [Semiformula.rew_nrel] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hand a b =>
+          simp only [Semiformula.complexity_and] at hψq
+          omega
+      | hor a b =>
+          simp only [Semiformula.complexity_or] at hψq
+          omega
+      | hall a =>
+          simp only [Semiformula.complexity_all] at hψq
+          omega
+      | hexs a =>
+          simp only [Semiformula.complexity_exs] at hψq
+          omega
+  | succ q ih =>
+      intro K d c e Γ n w w' ψ hψq hval hbudget hp hn
+      cases ψ using Semiformula.cases' with
+      | hverum =>
+          exact embedding_valueCongruentVerum_probe w (by simpa using hp)
+      | hfalsum =>
+          exact embedding_valueCongruentFalsum_probe w' (by simpa using hn)
+      | hrel r v =>
+          exact embedding_valueCongruentRelSubstAtom_probe r w w' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by simpa [Semiformula.rew_rel] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hnrel r v =>
+          exact embedding_valueCongruentNrelSubstAtom_probe r w w' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by simpa [Semiformula.rew_nrel] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hand a b =>
+          have haq : a.complexity ≤ q := by
+            simp only [Semiformula.complexity_and] at hψq
+            omega
+          have hbq : b.complexity ≤ q := by
+            simp only [Semiformula.complexity_and] at hψq
+            omega
+          have dA : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (Rew.subst w ▹ a)
+                (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e) (n := n) w w' a haq hval
+              (by omega) (by simp) (by simp)
+          have dB : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (Rew.subst w ▹ b)
+                (insert (∼(Rew.subst w' ▹ a)) (insert (∼(Rew.subst w' ▹ b)) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e) (n := n) w w' b hbq hval
+              (by omega) (by simp) (by simp)
+          exact embedding_valueCongruentAndFromChildren_probe
+            (βA := ONote.ofNat (2 * q)) (βB := ONote.ofNat (2 * q))
+            (αAnd := ONote.ofNat (2 * q + 1)) w w' a b
+            (embedding_ofNat_lt_of_lt (by omega)) (embedding_ofNat_lt_of_lt (by omega))
+            (embedding_ofNat_lt_of_lt (by omega))
+            inferInstance inferInstance inferInstance inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            hp hn dA dB
+      | hor a b =>
+          have haq : a.complexity ≤ q := by
+            simp only [Semiformula.complexity_or] at hψq
+            omega
+          have hbq : b.complexity ≤ q := by
+            simp only [Semiformula.complexity_or] at hψq
+            omega
+          have dA : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (∼(Rew.subst w' ▹ a))
+                (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e) (n := n) w w' a haq hval
+              (by omega) (by simp) (by simp)
+          have dB : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (∼(Rew.subst w' ▹ b))
+                (insert (Rew.subst w ▹ a) (insert (Rew.subst w ▹ b) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e) (n := n) w w' b hbq hval
+              (by omega) (by simp) (by simp)
+          exact embedding_valueCongruentOrFromChildren_probe
+            (βA := ONote.ofNat (2 * q)) (βB := ONote.ofNat (2 * q))
+            (αAnd := ONote.ofNat (2 * q + 1)) w w' a b
+            (embedding_ofNat_lt_of_lt (by omega)) (embedding_ofNat_lt_of_lt (by omega))
+            (embedding_ofNat_lt_of_lt (by omega))
+            inferInstance inferInstance inferInstance inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            hp hn dA dB
+      | hall a =>
+          have haq : a.complexity ≤ q := by
+            simp only [Semiformula.complexity_all] at hψq
+            omega
+          have hp' : (∀⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+          have hn' : (∃⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+          have fam : ∀ m, Zekd (ONote.ofNat (2 * q + 1)) e (max K m) d c
+              (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
+            intro m
+            have hvalm : ∀ i, stdClosedVal ((nm m :> w) i) = stdClosedVal ((nm m :> w') i) :=
+              embedding_valm_cons_nm_congr w w' m hval
+            have hx : Zekd (ONote.ofNat (2 * q)) e (max K m) d c
+                (insert (((Rew.subst w).q ▹ a)/[nm m])
+                  (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ)) :=
+              ih (K := max K m) (d := d) (c := c) (e := e) (n := n + 1)
+                (nm m :> w) (nm m :> w') a haq hvalm (by omega)
+                (by rw [← embedding_subst_q_cons_app]; simp)
+                (by rw [← embedding_subst_q_cons_app]; simp)
+            have hx' : Zekd (ONote.ofNat (2 * q)) e (max K m) d c
+                (insert ((((Rew.subst w').q ▹ ∼a)/[nm m])
+                  ) (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ)) := by
+              have heq : (((Rew.subst w').q ▹ ∼a)/[nm m])
+                  = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+              rw [heq, Finset.insert_comm]
+              exact hx
+            have hexI : Zekd (ONote.ofNat (2 * q + 1)) e (max K m) d c
+                (insert (∃⁰ ((Rew.subst w').q ▹ ∼a))
+                  (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ)) :=
+              Zekd.exI ((Rew.subst w').q ▹ ∼a) m
+                (embedding_ofNat_lt_of_lt (by omega)) inferInstance inferInstance
+                (by rw [embedding_norm_ofNat]; omega)
+                (inductionLeaf_runningIndex_witnessBound e K d m) hx'
+            rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hn')] at hexI
+            exact hexI
+          have hallω : Zekd (ONote.ofNat (2 * (q + 1))) e K d c
+              (insert (∀⁰ ((Rew.subst w).q ▹ a)) Γ) :=
+            Zekd.allω ((Rew.subst w).q ▹ a) (fun _ => ONote.ofNat (2 * q + 1))
+              (fun _ => embedding_ofNat_lt_of_lt (by omega))
+              (fun _ => inferInstance) inferInstance
+              (fun m => by rw [embedding_norm_ofNat]; omega) fam
+          rwa [Finset.insert_eq_self.mpr hp'] at hallω
+      | hexs a =>
+          have haq : a.complexity ≤ q := by
+            simp only [Semiformula.complexity_exs] at hψq
+            omega
+          have hp' : (∃⁰ ((Rew.subst w).q ▹ a)) ∈ Γ := by simpa using hp
+          have hn' : (∀⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
+          have fam : ∀ m, Zekd (ONote.ofNat (2 * q + 1)) e (max K m) d c
+              (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
+            intro m
+            have hvalm : ∀ i, stdClosedVal ((nm m :> w) i) = stdClosedVal ((nm m :> w') i) :=
+              embedding_valm_cons_nm_congr w w' m hval
+            have hx : Zekd (ONote.ofNat (2 * q)) e (max K m) d c
+                (insert (((Rew.subst w).q ▹ a)/[nm m])
+                  (insert (∼(((Rew.subst w').q ▹ a)/[nm m])) Γ)) :=
+              ih (K := max K m) (d := d) (c := c) (e := e) (n := n + 1)
+                (nm m :> w) (nm m :> w') a haq hvalm (by omega)
+                (by rw [← embedding_subst_q_cons_app]; simp)
+                (by rw [← embedding_subst_q_cons_app]; simp)
+            have hx' : Zekd (ONote.ofNat (2 * q)) e (max K m) d c
+                (insert (((Rew.subst w).q ▹ a)/[nm m])
+                  (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ)) := by
+              have heq : (((Rew.subst w').q ▹ ∼a)/[nm m])
+                  = ∼(((Rew.subst w').q ▹ a)/[nm m]) := by simp
+              rw [heq]
+              exact hx
+            have hexI : Zekd (ONote.ofNat (2 * q + 1)) e (max K m) d c
+                (insert (∃⁰ ((Rew.subst w).q ▹ a))
+                  (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ)) :=
+              Zekd.exI ((Rew.subst w).q ▹ a) m
+                (embedding_ofNat_lt_of_lt (by omega)) inferInstance inferInstance
+                (by rw [embedding_norm_ofNat]; omega)
+                (inductionLeaf_runningIndex_witnessBound e K d m) hx'
+            rw [Finset.insert_eq_self.mpr (Finset.mem_insert_of_mem hp')] at hexI
+            exact hexI
+          have hallω : Zekd (ONote.ofNat (2 * (q + 1))) e K d c
+              (insert (∀⁰ ((Rew.subst w').q ▹ ∼a)) Γ) :=
+            Zekd.allω ((Rew.subst w').q ▹ ∼a) (fun _ => ONote.ofNat (2 * q + 1))
+              (fun _ => embedding_ofNat_lt_of_lt (by omega))
+              (fun _ => inferInstance) inferInstance
+              (fun m => by rw [embedding_norm_ofNat]; omega) fam
+          rwa [Finset.insert_eq_self.mpr hn'] at hallω
+
 /--
 One bounded cut-tower step for the PA-induction leaf.
 
