@@ -87,4 +87,27 @@ Advisory is exactly what failed: "ALTITUDE CAUTION: only the crux left ≠ almos
 directive and was ignored ~30×. The layer that actually works in this repo is **mechanical** (`.githooks`
 build gate, `lean-axiom-gate` CI — they HALT, no judgment required). The route trigger needs the same: a
 host-side `lean-treadmill` gate that reads the laplog, checks registered triggers (lap deadline +
-false-summit count) each lap, and HALTS / forces an escalation lap when one fires. Proposed, not built.
+false-summit count) each lap, and HALTS / forces an escalation lap when one fires. **Superseded
+2026-06-28 (operator): NO deterministic guard** — a hard gate betrays the trust-the-instructed-LLM thesis
+and can't cleanly mechanize "false summit". The fix instead went to the **reflection-lap tooling**
+(`~/personal/claude/hooks/lean-reflect-lap.md`, altitude question #2 "Is the ROUTE still right?"), so every
+campaign's every-9th lap self-corrects on the route unattended; the per-repo `DIRECTION.md` only registers
+its triggers. The reflection lap is now the primary self-corrector; the judge role is a backstop.
+
+## 7. Codex review of the probe (2026-06-28) — gate CORRECTED + validated
+Codex built `wip/M2Probe.lean` (typechecked against the live Foundation API — independent compiler-grounded
+signal, not a shared-docs co-sign) and found the M2 plan mis-scoped. Judge-validated vs source:
+- **Input shape wrong (✅ confirmed in source):** the stub `foundation_bot_to_Z_empty` takes `fstIdx d = ∅`,
+  but `¬Consistent PA` yields `Proof d ⌜⊥⌝` = `DerivationOf d {⌜⊥⌝}` (root = singleton `{⌜⊥⌝}`). Wrong hyp.
+- **Output under-specified (✅ confirmed in source):** `ZDerivesEmptyR = ZDerivesEmpty ∧ ZRegular ∧ ZFresh ∧
+  ZSeqAnt` — the R-invariants are not automatic from a bare `ZDerivation`.
+- **"Cheap cases" misleading (credible, ~80%; not source-confirmed):** PA induction enters Foundation as a
+  `Δ₁Class` theory-axiom LEAF (`axm s p`), NOT a native rule — so the roadmap's "PA-induction → native Z-Ind
+  = the cheap part Bryce–Goré paid for" is FALSE for Foundation's Tait one-sided representation. The real
+  transfer problem is decoding the Δ₁Class induction leaf into a Z-provable induction sequent.
+
+**Net:** Codex frames it "M2 still viable if narrowed," but its findings ERODE the very reason M2 looked
+cheap (the Bryce–Goré comfort). Gate corrected (DIRECTION.md lap-167): test the input fix + the concrete
+simulation relation + one structural rule + **one induction-axiom leaf**; if the relation (2) or the leaf
+(4) balloons ⟹ `PIVOT-B`. This is the M2 "plumbing" label getting its first contact with reality, and
+reality pushed back — which raises the prior on PIVOT-B.

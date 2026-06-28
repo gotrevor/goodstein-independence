@@ -21,14 +21,21 @@ confidence forensic (the lap-147 "~80%" was a crux-2 *engine* sub-goal number, n
 `ROUTE-ESCALATION-2026-06-28.md`.
 - **THE objective (only this, 5 laps): scope M2 (the Foundation→Z bridge) as a `wip/` feasibility spike —
   NOT headline wiring, NOT the 2 cut-elim engine sorries (those had their 18-lap test → false summits).**
-  1. STATE `foundation_bot_to_Z_empty : 𝗣𝗔.DerivationOf d ⊥ → ∃ z, ZDerivesEmpty z` (M-internal), real type,
-     in `wip/M2Probe.lean`.
-  2. LAND the cheap cases per the Bryce–Goré `Peano.v` blueprint (`scratchpad/Gentzen-bg/`): PA axioms → Z
-     atomic; **PA-induction → native Z-`Ind`** (Z's native `Ind` rule — the roadmap's "cheap part").
-  3. ASSESS the M-internal Σ₁ coding overhead: bounded plumbing, or does the coding balloon?
-- **HARD GATE — lap 171, no extension.** Verdict to `ROUTE-ESCALATION-2026-06-28.md` + hand to operator:
-  cheap cases land/clearly-will with bounded coding ⟹ `M2-PLAUSIBLE` (reconsider A, re-scoped budget, fresh
-  trigger); coding balloons / second internalization swamp ⟹ `PIVOT-B`. **Do NOT start lap 172 on A.**
+  (GATE CORRECTED 2026-06-28 by the Codex review `CODEX-M2-PROBE-REVIEW-2026-06-28.md` + `wip/M2Probe.lean`,
+  judge-validated vs source: the old stub `foundation_bot_to_Z_empty` is MIS-STATED — input must be
+  `𝗣𝗔.Proof d ⌜⊥⌝` = `DerivationOf d {⌜⊥⌝}` (root = singleton `{⌜⊥⌝}`, NOT `fstIdx d = ∅`); output must meet
+  the `ZDerivesEmptyR` R-invariants `ZRegular ∧ ZFresh ∧ ZSeqAnt`. The "cheap cases" framing was WRONG: PA
+  induction enters Foundation as a `Δ₁Class` theory-axiom LEAF (`axm s p`), not a native rule, so Bryce–Goré's
+  Hilbert-style shared-syntax PA does NOT transfer the hard part.)
+  1. FIX the input shape: `foundation_proof_bot_to_Z_empty (hd : 𝗣𝗔.Proof d ⌜⊥⌝) : ∃ z, ZDerivesEmptyR z`.
+  2. DEFINE the concrete one-sided→two-sided `FoundationToZSequent` relation (no implicit translation); prove
+     the singleton-bottom case `toZ {⌜⊥⌝} (mkSeqt ∅ ^⊥)`.
+  3. PROVE one genuinely STRUCTURAL Foundation rule (cut / allIntro) — including the `ZDerivesEmptyR` invariants.
+  4. PROVE one **PA induction-axiom leaf** via the `axm s p` / `p ∈ 𝗣𝗔.Δ₁Class` interface — THE decisive case.
+- **HARD GATE — lap 171, no extension.** Verdict to `ROUTE-ESCALATION-2026-06-28.md` + hand to operator: if
+  the simulation relation (2) OR the induction-axiom leaf (4) expands into a large new formalization ⟹
+  `PIVOT-B`; if both land cleanly with bounded coding ⟹ `M2-PLAUSIBLE` (reconsider A, re-scoped budget, fresh
+  trigger). **Do NOT start lap 172 on A.**
 - **FORBIDDEN:** grinding `ind_reduct_anySucc`/`residual` (engine already tested to false summits); wiring
   M2 into the headline (`goodstein_implies_consistency`); `red`/`iord`-recursion/`redLeast` (per lap-161);
   treating the probe as open-ended (it is 5 laps to a VERDICT, not a build).
