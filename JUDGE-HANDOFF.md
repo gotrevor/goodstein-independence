@@ -33,8 +33,12 @@ git -C ~/src/goodstein-ab-xhigh log --oneline 2beac51..HEAD             # what x
   hope/excitement onto him.** (He corrected me on exactly this.)
 
 ## Where the PROOF stands (VERIFY against HEAD)
-- Headline `peano_not_proves_goodstein` = honest `sorry` (`[propext, sorryAx, choice, Quot.sound]`,
-  anti-fraud intact). `goodsteinSentence_faithful` clean. `peano_not_proves_TI` clean (+1 native_decide).
+- **⚠️ LAP-166 STANCE SHIFT (named-axiom blueprint).** Headline `peano_not_proves_goodstein` is now a
+  REAL proof resting on `[propext, Classical.choice, Quot.sound, goodstein_implies_consistency]` —
+  `sorryAx` is OFF the headline. The girder γ→Con(PA) is a DECLARED, allowlisted, intended-to-discharge
+  blueprint `axiom` (not the forbidden "abandon-and-cite" cop-out — see the superseded directive note
+  below + KB `named-axiom-blueprint`). `goodsteinSentence_faithful` clean. `peano_not_proves_TI` clean
+  (+1 native_decide). (Pre-166: headline was an honest bare `sorry`.)
 - **Route RESOLVED — Route A (Rathjen Cor 3.7):** `PA⊢γ →(§3) PA⊢PRWO(ε₀) →(Gentzen Thm 2.8) PA⊢Con(PA)` → Gödel II.
 - **crux-1 (γ→PRWO) is DONE + axiom-clean (lap 57).** The ONLY remaining math wall is **crux-2 (PRWO→Con)** —
   the Gentzen consistency proof arithmetized over coded derivations.
@@ -51,10 +55,18 @@ git -C ~/src/goodstein-ab-xhigh log --oneline 2beac51..HEAD             # what x
   Blueprint = Bryce-Goré `Peano.v`. **Do NOT port their `cut_elim.v`** (infinitary; wrong for our primrec route).
 - **Feasibility SETTLED:** Bryce-Goré (arXiv:2603.00487, Coq, Feb 2026) machine-checked Con(PA) via ordinal
   cut-elim. Finishability ~70%, multi-month but precedented + bounded. Clone: `scratchpad/Gentzen-bg/`.
-- **OPERATOR DIRECTIVE (BINDING):** axiom-free (trust base only) **or ABANDON**. NO Gentzen-as-axiom on the
-  headline (that cop-out is forbidden — I pitched it twice and was corrected). `PA_delta1Definable`
-  (Foundation axiom under Gödel II) must ALSO be discharged. You MAY state+prove PRWO→Con as its own result;
-  you may NOT rest the target on it. (See memory `feedback-formalization-no-axiom-copout`.)
+- **OPERATOR DIRECTIVE (BINDING, as recorded ≤lap 165):** axiom-free (trust base only) **or ABANDON**. NO
+  Gentzen-as-axiom on the headline (that cop-out is forbidden — I pitched it twice and was corrected).
+  `PA_delta1Definable` (Foundation axiom under Gödel II) must ALSO be discharged. You MAY state+prove
+  PRWO→Con as its own result; you may NOT rest the target on it. (See memory `feedback-formalization-no-axiom-copout`.)
+  - **⚠️ SUPERSEDED 2026-06-28 (lap 166, operator-approved).** The "NO Gentzen-as-axiom on the headline"
+    rule applied to the *abandon-and-cite* cop-out (a permanent citation of a theorem you won't prove).
+    Trevor's stance shifted to the **named-axiom blueprint** (KB `named-axiom-blueprint`): the girder is a
+    DECLARED, allowlisted, *intended-to-discharge* blueprint axiom with a forcing function (shrinking
+    allowlist → 3 canonical), which the KB explicitly calls "Not a reversal of the anti-cop-out rule." The
+    `axiom-free or ABANDON` END-STATE is UNCHANGED — the proof is *done* only when all blueprint axioms
+    discharge. What changed is the en-route ledger discipline (named axioms > opaque `sorryAx`). The
+    forcing function and the `PA_delta1Definable` discharge requirement still bind.
 - **OPERATOR DIRECTIVE (Trevor, 2026-06-25): M2 is SERIAL — do NOT parallelize.** The `E-CRUX2-ROADMAP`
   floated running M2 (Foundation→Z bridge) in a second box concurrently with M1. Trevor decided against it:
   **M2 runs serial in the one box, after M1. Do not spin a second worktree/treadmill for M2.** The roadmap's
