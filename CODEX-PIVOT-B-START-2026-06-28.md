@@ -248,6 +248,10 @@ theorem closedTerm_witnessBound_of_budget
 theorem embedding_closedTermExI_raiseK_probe
 def ZekdSomeK
 theorem ZekdSomeK.wk
+theorem ZekdSomeK.mono_d
+theorem ZekdSomeK.mono_c
+theorem ZekdSomeK.mono_e
+theorem ZekdSomeK.weak
 theorem ZekdSomeK.andI
 theorem ZekdSomeK.orI
 theorem ZekdSomeK.cut
@@ -268,6 +272,30 @@ The `someK` version is the local interface for that pass: if the premise is deri
 `K`, the closed-term existential conclusion is derivable at some larger finite `K`, with all local norm
 and witness side conditions paid internally.
 
-The first `someK` structural combinators also typecheck (`wk`, `andI`, `orI`, `cut`).  They choose a
-larger finite `K` from the premise budgets plus the rule's ordinal norm side conditions.  This is the
-right shape for replacing the old fixed-budget proof sketches with a finite-budget extraction pass.
+The `someK` monotonicity/structural combinators also typecheck (`wk`, `mono_d`, `mono_c`, `mono_e`,
+`weak`, `andI`, `orI`, `cut`).  They choose a larger finite `K` from the premise budgets plus the rule's
+ordinal/control norm side conditions.  This is the right shape for replacing the old fixed-budget proof
+sketches with a finite-budget extraction pass.
+
+Follow-up capstone ledger: `wip/PathBProbe.lean` now has nine explicit Path-B named capstone axioms,
+kept in `wip/` and therefore off the compiled headline path:
+
+```lean
+axiom pathB_goodsteinSentenceShape_capstone
+axiom pathB_peanoMinusAxiomLeaves_capstone
+axiom pathB_inductionAxiomShell_capstone
+axiom pathB_closedWitnessBudgets_capstone
+axiom pathB_someKStructuralEmbedding_capstone
+axiom pathB_operatorCutElimination_capstone
+axiom pathB_subformulaProjection_capstone
+axiom pathB_goodsteinFragmentExtraction_capstone
+axiom pathB_terminalRouteBridge_capstone
+
+def routeBBridgeFromCapstoneAxioms
+theorem peano_not_proves_goodstein_of_pathBCapstoneAxioms
+```
+
+Each capstone is a stable replacement target: when a milestone is genuinely proved, replace the
+corresponding `axiom` with a theorem of the same name and leave the bridge composition unchanged.  The
+small terminal math also records `routeBCapstone_iff_false`, a direct equivalence from the terminal
+Path-B object to contradiction using the promoted Towsner lower bound.

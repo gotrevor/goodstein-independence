@@ -1821,6 +1821,44 @@ theorem wk {α e : ONote} {d c : ℕ} {Δ Γ : Seq}
   rcases dd with ⟨K, D⟩
   exact ⟨K, Zekd.wk hsub D⟩
 
+/-- Monotonicity in the additive norm-budget component. -/
+theorem mono_d {α e : ONote} {d d' c : ℕ} {Γ : Seq}
+    (hd : d ≤ d') (dd : ZekdSomeK α e d c Γ) :
+    ZekdSomeK α e d' c Γ := by
+  rcases dd with ⟨K, D⟩
+  exact ⟨K, D.mono_d hd⟩
+
+/-- Monotonicity in the cut-rank/complexity bound. -/
+theorem mono_c {α e : ONote} {d c c' : ℕ} {Γ : Seq}
+    (hc : c ≤ c') (dd : ZekdSomeK α e d c Γ) :
+    ZekdSomeK α e d c' Γ := by
+  rcases dd with ⟨K, D⟩
+  exact ⟨K, D.mono_c hc⟩
+
+/-- Control-ordinal monotonicity for the existential-budget wrapper.  The wrapper can
+raise `K`, so the `norm e ≤ K+d` side condition of `Zekd.mono_e` is paid locally. -/
+theorem mono_e {α e e' : ONote} {d c : ℕ} {Γ : Seq}
+    (heNF : e.NF) (he'NF : e'.NF) (hlt : e < e')
+    (dd : ZekdSomeK α e d c Γ) :
+    ZekdSomeK α e' d c Γ := by
+  rcases dd with ⟨K0, D0⟩
+  let K := max K0 (norm e)
+  refine ⟨K, (D0.mono_k (by dsimp [K]; omega)).mono_e heNF he'NF hlt ?_⟩
+  dsimp [K]
+  omega
+
+/-- Ordinal/sequent weakening for the existential-budget wrapper: choose a finite
+index large enough for the source ordinal norm side condition. -/
+theorem weak {α β e : ONote} {d c : ℕ} {Δ Γ : Seq}
+    (hβ : β < α) (hβNF : β.NF) (hαNF : α.NF)
+    (hsub : Δ ⊆ Γ) (dd : ZekdSomeK β e d c Δ) :
+    ZekdSomeK α e d c Γ := by
+  rcases dd with ⟨K0, D0⟩
+  let K := max K0 (norm β + 1)
+  refine ⟨K, Zekd.weak hβ hβNF hαNF ?_ hsub (D0.mono_k ?_)⟩
+  · dsimp [K]; omega
+  · dsimp [K]; omega
+
 /-- `andI` for the existential-budget wrapper: choose a finite index large enough for
 both premises and both norm side conditions. -/
 theorem andI {α βφ βψ e : ONote} {d c : ℕ} {Γ : Seq}
