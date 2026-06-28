@@ -1381,6 +1381,160 @@ theorem embedding_valueCongruentOrClosedTermFromChildren_probe
   · simpa using dA
   · simpa using dB
 
+/-! #### A first recursive bounded value-congruence shell -/
+
+/-- Quantifier-free arithmetic formulas.  This is the first bounded EM shell needed by the
+embedding probes; the quantifier cases are handled separately by the `allω`/`exI` layer. -/
+def QFreeForm {ξ n} : Semiformula ℒₒᵣ ξ n → Prop :=
+  Semiformula.rec' (C := fun _ _ => Prop)
+    True True
+    (fun {_ _} _ _ => True)
+    (fun {_ _} _ _ => True)
+    (fun {_} _ _ p q => p ∧ q)
+    (fun {_} _ _ p q => p ∧ q)
+    (fun {_} _ _ => False)
+    (fun {_} _ _ => False)
+
+@[simp] lemma qFreeForm_verum {ξ n} : QFreeForm (⊤ : Semiformula ℒₒᵣ ξ n) := trivial
+@[simp] lemma qFreeForm_falsum {ξ n} : QFreeForm (⊥ : Semiformula ℒₒᵣ ξ n) := trivial
+@[simp] lemma qFreeForm_rel {ξ n ar} (r : (ℒₒᵣ).Rel ar) (v : Fin ar → Semiterm ℒₒᵣ ξ n) :
+    QFreeForm (Semiformula.rel r v) := trivial
+@[simp] lemma qFreeForm_nrel {ξ n ar} (r : (ℒₒᵣ).Rel ar) (v : Fin ar → Semiterm ℒₒᵣ ξ n) :
+    QFreeForm (Semiformula.nrel r v) := trivial
+@[simp] lemma qFreeForm_and {ξ n} (φ ψ : Semiformula ℒₒᵣ ξ n) :
+    QFreeForm (φ ⋏ ψ) ↔ QFreeForm φ ∧ QFreeForm ψ := Iff.rfl
+@[simp] lemma qFreeForm_or {ξ n} (φ ψ : Semiformula ℒₒᵣ ξ n) :
+    QFreeForm (φ ⋎ ψ) ↔ QFreeForm φ ∧ QFreeForm ψ := Iff.rfl
+@[simp] lemma qFreeForm_all {ξ n} (φ : Semiformula ℒₒᵣ ξ (n + 1)) :
+    QFreeForm (∀⁰ φ) ↔ False := Iff.rfl
+@[simp] lemma qFreeForm_exs {ξ n} (φ : Semiformula ℒₒᵣ ξ (n + 1)) :
+    QFreeForm (∃⁰ φ) ↔ False := Iff.rfl
+
+lemma embedding_ofNat_lt_of_lt {m n : ℕ} (h : m < n) : ONote.ofNat m < ONote.ofNat n := by
+  rw [ONote.lt_def, ONote.repr_ofNat, ONote.repr_ofNat]
+  exact_mod_cast h
+
+@[simp] lemma embedding_norm_ofNat (n : ℕ) : norm (ONote.ofNat n) = n := by
+  cases n with
+  | zero => rfl
+  | succ k => rw [ONote.ofNat_succ, norm_oadd, norm_zero]; simp
+
+/--
+Quantifier-free closed-term value-congruent EM at explicit finite `ONote` height.
+
+For a one-variable quantifier-free formula `ψ`, closed terms with the same standard value close any
+sequent containing `ψ[s]` and `¬ψ[s']` at height `ofNat (2*q)`, provided that finite height fits the
+current norm budget.
+-/
+theorem embedding_valueCongruentQFreeClosedTerm_probe :
+    ∀ (q : ℕ) {K d c : ℕ} {e : ONote} {Γ : Seq}
+      (s s' : SyntacticTerm ℒₒᵣ) (ψ : SyntacticSemiformula ℒₒᵣ 1),
+      ψ.complexity ≤ q → QFreeForm ψ → stdClosedVal s = stdClosedVal s' →
+      2 * q < K + d → (ψ/[s]) ∈ Γ → (∼(ψ/[s'])) ∈ Γ →
+      Zekd (ONote.ofNat (2 * q)) e K d c Γ := by
+  intro q
+  induction q with
+  | zero =>
+      intro K d c e Γ s s' ψ hψq hqf hval hbudget hp hn
+      cases ψ using Semiformula.cases' with
+      | hverum =>
+          exact embedding_valueCongruentVerum_probe ![s] (by simpa using hp)
+      | hfalsum =>
+          exact embedding_valueCongruentFalsum_probe ![s'] (by simpa using hn)
+      | hrel r v =>
+          exact embedding_valueCongruentRelClosedTermAtom_probe r s s' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega) hp
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hnrel r v =>
+          exact embedding_valueCongruentNrelClosedTermAtom_probe r s s' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega) hp
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hand a b =>
+          simp only [Semiformula.complexity_and] at hψq
+          omega
+      | hor a b =>
+          simp only [Semiformula.complexity_or] at hψq
+          omega
+      | hall a =>
+          simp at hqf
+      | hexs a =>
+          simp at hqf
+  | succ q ih =>
+      intro K d c e Γ s s' ψ hψq hqf hval hbudget hp hn
+      cases ψ using Semiformula.cases' with
+      | hverum =>
+          exact embedding_valueCongruentVerum_probe ![s] (by simpa using hp)
+      | hfalsum =>
+          exact embedding_valueCongruentFalsum_probe ![s'] (by simpa using hn)
+      | hrel r v =>
+          exact embedding_valueCongruentRelClosedTermAtom_probe r s s' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega) hp
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hnrel r v =>
+          exact embedding_valueCongruentNrelClosedTermAtom_probe r s s' v hval inferInstance
+            (by rw [embedding_norm_ofNat]; omega) hp
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+      | hand a b =>
+          have haq : a.complexity ≤ q := by
+            simp only [Semiformula.complexity_and] at hψq
+            omega
+          have hbq : b.complexity ≤ q := by
+            simp only [Semiformula.complexity_and] at hψq
+            omega
+          obtain ⟨hqfa, hqfb⟩ : QFreeForm a ∧ QFreeForm b := by simpa using hqf
+          have dA : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (a/[s]) (insert (∼(a/[s'])) (insert (∼(b/[s'])) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e)
+              (Γ := insert (a/[s]) (insert (∼(a/[s'])) (insert (∼(b/[s'])) Γ)))
+              s s' a haq hqfa hval (by omega) (by simp) (by simp)
+          have dB : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (b/[s]) (insert (∼(a/[s'])) (insert (∼(b/[s'])) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e)
+              (Γ := insert (b/[s]) (insert (∼(a/[s'])) (insert (∼(b/[s'])) Γ)))
+              s s' b hbq hqfb hval (by omega) (by simp) (by simp)
+          exact embedding_valueCongruentAndClosedTermFromChildren_probe
+            (βA := ONote.ofNat (2 * q)) (βB := ONote.ofNat (2 * q))
+            (αAnd := ONote.ofNat (2 * q + 1)) s s' a b
+            (embedding_ofNat_lt_of_lt (by omega)) (embedding_ofNat_lt_of_lt (by omega))
+            (embedding_ofNat_lt_of_lt (by omega))
+            inferInstance inferInstance inferInstance inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            hp hn dA dB
+      | hor a b =>
+          have haq : a.complexity ≤ q := by
+            simp only [Semiformula.complexity_or] at hψq
+            omega
+          have hbq : b.complexity ≤ q := by
+            simp only [Semiformula.complexity_or] at hψq
+            omega
+          obtain ⟨hqfa, hqfb⟩ : QFreeForm a ∧ QFreeForm b := by simpa using hqf
+          have dA : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (∼(a/[s'])) (insert (a/[s]) (insert (b/[s]) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e)
+              (Γ := insert (∼(a/[s'])) (insert (a/[s]) (insert (b/[s]) Γ)))
+              s s' a haq hqfa hval (by omega) (by simp) (by simp)
+          have dB : Zekd (ONote.ofNat (2 * q)) e K d c
+              (insert (∼(b/[s'])) (insert (a/[s]) (insert (b/[s]) Γ))) :=
+            ih (K := K) (d := d) (c := c) (e := e)
+              (Γ := insert (∼(b/[s'])) (insert (a/[s]) (insert (b/[s]) Γ)))
+              s s' b hbq hqfb hval (by omega) (by simp) (by simp)
+          exact embedding_valueCongruentOrClosedTermFromChildren_probe
+            (βA := ONote.ofNat (2 * q)) (βB := ONote.ofNat (2 * q))
+            (αAnd := ONote.ofNat (2 * q + 1)) s s' a b
+            (embedding_ofNat_lt_of_lt (by omega)) (embedding_ofNat_lt_of_lt (by omega))
+            (embedding_ofNat_lt_of_lt (by omega))
+            inferInstance inferInstance inferInstance inferInstance
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            (by rw [embedding_norm_ofNat]; omega)
+            hp hn dA dB
+      | hall a =>
+          simp at hqf
+      | hexs a =>
+          simp at hqf
+
 /--
 One bounded cut-tower step for the PA-induction leaf.
 

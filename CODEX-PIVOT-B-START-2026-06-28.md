@@ -218,3 +218,18 @@ reduces the bounded `exs` rule to two exact obligations:
 So the next embedding work is no longer vague: finish the recursive bounded value-congruent EM engine
 by plugging these base/parent kernels into the `Semiformula.cases'` induction, then thread
 assignment-closed term bounds through the Foundation `exs` case.
+
+Follow-up probe: the first recursive bounded value-congruence shell now typechecks for quantifier-free
+one-variable formulas:
+
+```lean
+def QFreeForm
+
+theorem embedding_valueCongruentQFreeClosedTerm_probe
+```
+
+It closes `ψ[s], ¬ψ[s']` at explicit finite height `ONote.ofNat (2*q)` when `ψ` is quantifier-free,
+`ψ.complexity ≤ q`, and the two closed terms have the same standard value. This banks the atom/and/or
+recursion against `Zekd`; the remaining full EM engine work is exactly the quantifier layer, where `∀`
+must package the constant-family recursion through `allω` and `∃` must use the closed-term `exI` adapter
+with a real witness bound.
