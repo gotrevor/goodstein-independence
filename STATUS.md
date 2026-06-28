@@ -2,15 +2,19 @@
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
 · **Build**: 🟢 green (1326 jobs) · **Updated**: lap 166 (**named-axiom-blueprint ledger; headline wired through girder axiom, sorryAx OFF the headline**) · 2026-06-28 ·
-Direction KEPT (lap-161 still current). **Lap-165 PROVED + WIRED the keystone `closeNonRepProducer`** — the
-unified NON-Rep producer closer (a GLOBAL `least_number` over `{5,6,8}`-producers; sorry-FREE, `[propext,
-choice, Quot.sound]`). Both `axMajorResidual` (⊥) and `residual` (anySucc) now route every L-axiom producer
-landing through it, narrowing the open core to exactly **(R1)** tag-6 `inegF q∈Γ` w/ `q` by an R-intro +
-**(R2)** tag-5 ∀-climb `^∀G∈Γ` (+ anySucc-only Family-C C-exit). The ⊥-version `axMajorResidual` is now PURELY
-R1/R2 — **both VACUOUS at the headline `Γ=∅`**. NEXT = the GLOBAL-THREADING REFRAME: carry "Γ_sub traces to
-root-Γ=∅" through `genReduct_botSucc`'s code-induction → R1/R2 vacuous → DROP `axMajorResidual`. See
-`HANDOFF-2026-06-27-lap165.md`, `PENDING_WORK.md` lap-165. (Lap-163 had discharged escape (i) ⊥-exit ex-falso
-via `zAxBot`; the {3,4}-producer core was closed laps 159-160 by `repProducerClose`.)
+**Lap-166 MATH (structural correction + a real DROP):** `axMajorResidual` (and its whole `genReduct_botSucc` →
+`genReduct_botSucc_chain` → `genReduct_chain_noRedex` ⊥-cluster) is **ORPHANED** — no live proof consumes
+`genReduct_botSucc`. The LIVE headline recursion is the any-succedent generalization: `ZDerivesEmptyR_descent_step`
+→ `descent_step_K_noncritical` → `descent_step_K_noncrit_recurse` → `genReduct_chain_noRedex_empty` (sorry-FREE,
+Γ=∅ vacuity) **+ IH `genReduct_anySucc`**. So the lap-165 "DROP `axMajorResidual` via the genReduct_botSucc
+reframe" targeted DEAD code. `axMajorResidual` itself is now **DROPPED** by discharging it through the more-general
+`genReduct_anySucc` (the subsumption its own docstring claimed; non-circular). **The genuine live crux-2 engine is
+now EXACTLY two src sorries:** `ind_reduct_anySucc` (`:3680`, general-`C` Ind reduct — needs the lap-136 k-fold
+`⟨d0,d1[a:=0..k-1]⟩`, k=⟦t⟧) and `residual` (`:4520` in `genReduct_chain_noRedex_anySucc`, the 4 escapes
+`hresidualIall/Ineg/All/Neg` = C-exit ∀/¬ R-intro-replay + R1/R2 Γ-cut — needs internal WEAKENING, depth ≈ how
+ex-falso needed `zAxBot`). Lap-165 keystone `closeNonRepProducer` (NON-Rep producer closer, sorry-FREE) still
+narrows both; {3,4}-producer core closed laps 159-160 (`repProducerClose`); ⊥-exit ex-falso done lap-163 (`zAxBot`).
+See `PENDING_WORK.md` lap-166, `HANDOFF-2026-06-28-lap166.md`.
 · **LEDGER (lap 166 — named-axiom-blueprint adopted):** Headline `peano_not_proves_goodstein =
 `[propext, Classical.choice, Quot.sound, goodstein_implies_consistency]` — **`sorryAx` is OFF the headline**; its only
 non-canonical dependency is the declared, faithful, allowlisted girder axiom. `goodstein_implies_consistency` promoted

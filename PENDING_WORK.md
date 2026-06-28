@@ -1,5 +1,59 @@
 # Pending work — open obligations & attack paths
 
+## Lap 166 — ⭐⭐⭐ STRUCTURAL CORRECTION: the reframe target was ORPHANED; live crux = exactly 2 src sorries
+
+**Build 🟢 1326. HEAD after the lap-166 commits.** Two threads this lap: (1) the named-axiom-blueprint LEDGER
+conversion (headline wired through `goodstein_implies_consistency`; see `HANDOFF-2026-06-28-lap166.md`); (2) the
+MATH below — a verified structural finding + one real src-sorry DROP.
+
+### The finding (verified by call-graph + a green build, no axiom drift)
+`axMajorResidual` and its entire enclosing ⊥-cluster — `genReduct_chain_noRedex` (`:4838`) ← `genReduct_botSucc_chain`
+(`:4867`) ← `genReduct_botSucc` (`:4895`) — are **ORPHANED**: nothing in any live proof consumes `genReduct_botSucc`
+(its only term-level reference is its own internal recursion). `descent_step_K_noncrit_axMajor` (`:5180`) is a
+sorry-free orphan DUPLICATE of the live `descent_step_K_noncrit_recurse`. `ind_reduct_botSucc_of_fresh` (`:2920`) is
+consumed only by the orphan `genReduct_botSucc`. **So the lap-164/165 plan — "GLOBAL-THREADING REFRAME through
+`genReduct_botSucc` to DROP `axMajorResidual`" — was aimed at DEAD code.**
+
+The **live headline recursion** is the any-succedent generalization:
+`ZDerivesEmptyR_descent_step` (`:5260`) → `descent_step_K_majorIdx` → `descent_step_K_noncritical` →
+`descent_step_K_noncrit_recurse` (`:5204`) → `genReduct_chain_noRedex_empty` (`:4948`, **sorry-FREE**, discharges
+R1/R2 by Γ=∅ vacuity) **with IH `genReduct_anySucc`** (`:4549`) → code-recursion → tag-3 `ind_reduct_anySucc`
+(`:3680`) / tag-4 `genReduct_anySucc_chain` → `genReduct_chain_noRedex_anySucc` (`:4504`, the `residual`).
+
+### What landed: `axMajorResidual` DROPPED (`genReduct_chain_noRedex` now sorry-free)
+Discharged `have axMajorResidual : GenReductCert (zK s r ds) := sorry` by
+`genReduct_anySucc hZ hreg hfresh hseqant (Or.inr (zTag_zK s r ds))` — a {3,4} `Rep` node deriving `Γ→F` for ANY
+`F` (here `F=⊥`) has a `GenReductCert`, so the ⊥-succedent wrapper is a special case of the any-succedent reduction.
+This REALIZES the subsumption `genReduct_anySucc`'s docstring already claims ("the single key that closes
+`axMajorResidual`"); the wiring was never done. Non-circular (`genReduct_anySucc` recurses via the *anySucc* chain,
+never back into `genReduct_chain_noRedex`). Verified: src crux-2 engine sorries DROP to **exactly 2**; headline +
+`false_of_ZDerivesEmpty_builder` `#print axioms` UNCHANGED (confirms orphan-hood).
+
+### 🎯 THE genuine live crux-2 engine = EXACTLY 2 src sorries (the real next targets)
+1. **`residual`** (`:4520` in `genReduct_chain_noRedex_anySucc`). Its `_core` (`:4265`) exposes FOUR escape hooks
+   (currently all caught by the single `residual` sorry):
+   - `hresidualIall`/`hresidualIneg` — **C-exit R-intro replay**: the chain exit `j` is itself a `zIall`/`zIneg`
+     deriving `Γ_j → C` where `C = seqSucc s` is the conclusion succedent. Reduct = re-base that R-intro's own
+     sub-derivation to `Γ → C` (drops the cut chain, `õ`-descends). NEEDS an **internal weakening** lemma
+     (`Γ_j ⊆ Γ` via `hthread0`; grow the antecedent — cf. `isChainInf_growAnt` `:3878`). Depth ≈ how ⊥-exit
+     ex-falso needed the new `zAxBot` constructor. **VACUOUS when `C=⊥`** (no R-intro produces `⊥`) — which is why
+     the dropped ⊥-version had no such hook. ⇒ FIRST genuine new piece to build.
+   - `hresidualAll` (R2: `^∀G ∈ Γ`) / `hresidualNeg` (R1: `inegF q ∈ Γ`) — genuine Γ-general ∀-cut / cut on `q`.
+   Cheap DROP-shaped first step (per DIRECTION.md): split `residual` into these 4 NAMED sub-sorries, then close the
+   C-exit pair via the new weakening lemma, leaving R1/R2 as the deep Buchholz general-cut leaves.
+2. **`ind_reduct_anySucc`** (`:3680`). General-`C` Ind reduct. The proven ⊥-twin `ind_reduct_botSucc_of_fresh`
+   (`:2920`) leans essentially on `p=⊥` (`eq_falsum_of_substs1_falsum`) to make the induction VACUOUS (`k=1` reduct).
+   For general `C` the reduct is the lap-136 k-fold `⟨d0, d1[a:=0..k-1]⟩`, `k=⟦t⟧` (the hard sub-problem; the repo
+   lacks `inadd_assoc` for general `k`). EASY sub-case: when `substs1 t p = p` (closed `p`, e.g. `C=^∀^k⊥`) the
+   reduct is just `d0` (a `certReplace`). Worth checking whether the recursion only feeds closed-`p` Ind nodes.
+
+### Cleanup (optional, non-urgent): the orphan ⊥-cluster
+`genReduct_botSucc`, `genReduct_botSucc_chain`, `genReduct_chain_noRedex`, `descent_step_K_noncrit_axMajor`,
+`ind_reduct_botSucc_of_fresh` are now all sorry-free dead code (superseded by the anySucc generalization). Park in
+`wip/` or delete to de-clutter the live path — left in place this lap (non-destructive; build-verified dead).
+
+---
+
 ## Lap 165 (M1b-term) — ⭐⭐⭐ KEYSTONE `closeNonRepProducer` PROVEN + WIRED; both residuals narrowed to R1/R2
 
 **Build 🟢 1326. HEAD `6732eb2` (3 commits `9a3d78e`,`5f03aee`,`6732eb2`).** No src sorry dropped (still 46),
