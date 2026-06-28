@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    paths-ignore: ['**.md']
+  pull_request:
+  workflow_dispatch:
+
+# Supersede stale runs on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # elan + `lake exe cache get` (prebuilt Mathlib oleans, via the Foundation→Mathlib dep) +
+      # `lake build`. NB: Foundation itself is a git dependency with no public olean cache, so CI
+      # rebuilds it from source (~1671 jobs) on top of the cached Mathlib — slower than the host's
+      # CoW'd lean-universe store. If this gets too heavy on the free runner, add a `.lake` cache
+      # keyed on the Foundation rev in lakefile.toml.
+      - uses: leanprover/lean-action@v1
+
+      # ── Axiom-clean gate (named-axiom blueprint, ALLOWLIST mode) ───────────────────────────────
+      # Prove the published claim's ledger: the headline `peano_not_proves_goodstein` is a REAL
+      # proof that NEVER depends on `sorryAx`, and rests only on the 3 canonical axioms plus the
+      # DECLARED, faithful, allowlisted blueprint axiom `goodstein_implies_consistency` (the open
+      # Phase 2–3 girder). The allowlist SHRINKS toward the 3 canonical as milestones discharge;
+      # the day the girder is built, drop it from ALLOW below and the gate becomes exact-match.
+      # See DIRECTION.md "ANTI-FRAUD guard" + the KB note `named-axiom-blueprint`. (Host-local,
+      # the equivalent one-liner is `lean-axiom-gate . -t GoodsteinPA.peano_not_proves_goodstein
+      # -a goodstein_implies_consistency`.)
+      - name: Axiom-clean gate (allowlist)
+        run: |
+          set -euo pipefail
+          # Declared blueprint-axiom allowlist (extended-regex alternation; qualified or short name).
+          ALLOW='propext|Classical\.choice|Quot\.sound|(GoodsteinPA\.)?goodstein_implies_consistency'
+          printf 'import GoodsteinPA.Statement\n#print axioms GoodsteinPA.peano_not_proves_goodstein\n' > axcheck.lean
+          lake env lean axcheck.lean 2>&1 | tee ax.out
+          # (1) Hard fail on any sorry on the headline.
+          if grep -q "sorryAx" ax.out; then
+            echo "::error::headline peano_not_proves_goodstein depends on sorryAx"; exit 1
+          fi
+          # (2) Flatten the wrapped `depends on axioms: [ a,\n b,\n c ]` block onto one line.
+          tr '\n' ' ' < ax.out | sed 's/]/]\n/g' > ax.norm
+          line=$(grep "peano_not_proves_goodstein" ax.norm || true)
+          if [ -z "$line" ]; then
+            echo "::error::could not find headline #print axioms output"; cat ax.out; exit 1
+          fi
+          # (3) Every axiom in the headline's set must be on the allowlist.
+          axset=$(echo "$line" | sed -E 's/.*depends on axioms: \[(.*)\].*/\1/')
+          leftover=$(echo "$axset" | tr ',' '\n' | sed 's/[[:space:]]//g' | grep -vE "^($ALLOW)$" || true)
+          if [ -n "$leftover" ]; then
+            echo "::error::headline has non-allowlisted axiom(s):"; echo "$leftover"; cat ax.out; exit 1
+          fi
+          echo "✓ headline axiom-clean modulo allowlist {propext, Classical.choice, Quot.sound, goodstein_implies_consistency}"
+          rm -f axcheck.lean ax.out ax.norm
