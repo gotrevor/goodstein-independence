@@ -252,6 +252,8 @@ theorem ZekdSomeK.mono_d
 theorem ZekdSomeK.mono_c
 theorem ZekdSomeK.mono_e
 theorem ZekdSomeK.weak
+theorem ZekdSomeK.mono
+theorem ZekdSomeK.lift
 theorem ZekdSomeK.andI
 theorem ZekdSomeK.orI
 theorem ZekdSomeK.cut
@@ -273,9 +275,10 @@ The `someK` version is the local interface for that pass: if the premise is deri
 and witness side conditions paid internally.
 
 The `someK` monotonicity/structural combinators also typecheck (`wk`, `mono_d`, `mono_c`, `mono_e`,
-`weak`, `andI`, `orI`, `cut`).  They choose a larger finite `K` from the premise budgets plus the rule's
-ordinal/control norm side conditions.  This is the right shape for replacing the old fixed-budget proof
-sketches with a finite-budget extraction pass.
+`weak`, `mono`, `lift`, `andI`, `orI`, `cut`).  They choose a larger finite `K` from the premise budgets
+plus the rule's ordinal/control norm side conditions.  The one-shot `lift` theorem is the intended
+embedding workhorse: raise derivation ordinal, control ordinal, numeric side budgets, and sequent at once,
+with finite `K` chosen internally.
 
 Follow-up capstone ledger: `wip/PathBProbe.lean` now has nine explicit Path-B named capstone axioms,
 kept in `wip/` and therefore off the compiled headline path:
@@ -295,7 +298,10 @@ def routeBBridgeFromCapstoneAxioms
 theorem peano_not_proves_goodstein_of_pathBCapstoneAxioms
 ```
 
-Each capstone is a stable replacement target: when a milestone is genuinely proved, replace the
-corresponding `axiom` with a theorem of the same name and leave the bridge composition unchanged.  The
-small terminal math also records `routeBCapstone_iff_false`, a direct equivalence from the terminal
-Path-B object to contradiction using the promoted Towsner lower bound.
+The primitive axioms are now paired with `_stage` theorems that compose them into the critical path.  This
+matters because an axiom cannot depend on another axiom; the dependency audit belongs on the stage theorem.
+For example, `#print axioms pathB_inductionAxiomShell_stage` reports the first three capstone axioms.  Each
+capstone remains a stable replacement target: when a milestone is genuinely proved, replace the primitive
+`axiom` with a theorem of the same name and leave the stage chain unchanged.  The small terminal math also
+records `routeBCapstone_iff_false`, a direct equivalence from the terminal Path-B object to contradiction
+using the promoted Towsner lower bound.

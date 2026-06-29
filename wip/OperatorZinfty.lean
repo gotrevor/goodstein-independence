@@ -1859,6 +1859,22 @@ theorem weak {α β e : ONote} {d c : ℕ} {Δ Γ : Seq}
   · dsimp [K]; omega
   · dsimp [K]; omega
 
+/-- Combined monotonicity in the two numeric side budgets. -/
+theorem mono {α e : ONote} {d d' c c' : ℕ} {Γ : Seq}
+    (hd : d ≤ d') (hc : c ≤ c') (dd : ZekdSomeK α e d c Γ) :
+    ZekdSomeK α e d' c' Γ :=
+  mono_c hc (mono_d hd dd)
+
+/-- One-shot lift used by proof embeddings: raise the derivation ordinal, control ordinal,
+numeric side budgets, and sequent at the same time, choosing a larger finite `K` internally. -/
+theorem lift {α β e e' : ONote} {d d' c c' : ℕ} {Δ Γ : Seq}
+    (hβ : β < α) (hβNF : β.NF) (hαNF : α.NF)
+    (heNF : e.NF) (he'NF : e'.NF) (he : e < e')
+    (hd : d ≤ d') (hc : c ≤ c') (hsub : Δ ⊆ Γ)
+    (dd : ZekdSomeK β e d c Δ) :
+    ZekdSomeK α e' d' c' Γ :=
+  mono hd hc (mono_e heNF he'NF he (weak hβ hβNF hαNF hsub dd))
+
 /-- `andI` for the existential-budget wrapper: choose a finite index large enough for
 both premises and both norm side conditions. -/
 theorem andI {α βφ βψ e : ONote} {d c : ℕ} {Γ : Seq}

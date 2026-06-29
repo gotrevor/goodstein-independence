@@ -104,8 +104,10 @@ The declarations below are the Path-B audit ledger.  They are intentionally in `
 `GoodsteinPA.lean`, so they do not change the compiled headline's axiom surface.  Each marker proposition
 is an empty inductive: the only way to inhabit it is through the correspondingly named capstone axiom.
 
-When a milestone is actually proved, replace its `axiom` with a theorem of the same name and keep the
-composition theorem below unchanged.
+The primitive axioms are the leaves.  The `_stage` theorems compose those leaves into a dependency chain:
+`#print axioms pathB_inductionAxiomShell_stage`, for example, reports the first three capstone axioms.
+When a milestone is actually proved, replace its primitive axiom with a theorem of the same name and keep
+the stage chain below unchanged.
 -/
 
 /-- Capstone marker: the encoded Goodstein sentence has been normalized to the exact
@@ -172,26 +174,55 @@ axiom pathB_goodsteinFragmentExtraction_capstone {hpa : 𝗣𝗔 ⊢ ↑goodstei
 axiom pathB_terminalRouteBridge_capstone {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
     RouteBGoodsteinFragmentExtraction hpa → RouteBCapstone
 
-/-- Compose the nine named Path-B capstones into the single bridge expected by the terminal assembly. -/
+/-- Stage 1: sentence-shape normalization. -/
+theorem pathB_goodsteinSentenceShape_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBGoodsteinSentenceShape hpa :=
+  pathB_goodsteinSentenceShape_capstone (hpa := hpa)
+
+/-- Stage 2: finite `𝗣𝗔⁻` and equality axiom leaves, after sentence-shape normalization. -/
+theorem pathB_peanoMinusAxiomLeaves_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBPeanoMinusAxiomLeaves hpa :=
+  pathB_peanoMinusAxiomLeaves_capstone (pathB_goodsteinSentenceShape_stage (hpa := hpa))
+
+/-- Stage 3: PA induction axiom shell, after the finite axiom leaves. -/
+theorem pathB_inductionAxiomShell_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBInductionAxiomShell hpa :=
+  pathB_inductionAxiomShell_capstone (pathB_peanoMinusAxiomLeaves_stage (hpa := hpa))
+
+/-- Stage 4: closed witness/existential budgets, after induction-shell simulation. -/
+theorem pathB_closedWitnessBudgets_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBClosedWitnessBudgets hpa :=
+  pathB_closedWitnessBudgets_capstone (pathB_inductionAxiomShell_stage (hpa := hpa))
+
+/-- Stage 5: whole-proof structural embedding into the `someK` bounded operator calculus. -/
+theorem pathB_someKStructuralEmbedding_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBSomeKStructuralEmbedding hpa :=
+  pathB_someKStructuralEmbedding_capstone (pathB_closedWitnessBudgets_stage (hpa := hpa))
+
+/-- Stage 6: bounded operator cut-elimination. -/
+theorem pathB_operatorCutElimination_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBOperatorCutElimination hpa :=
+  pathB_operatorCutElimination_capstone (pathB_someKStructuralEmbedding_stage (hpa := hpa))
+
+/-- Stage 7: subformula projection to Towsner's fragment. -/
+theorem pathB_subformulaProjection_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBSubformulaProjection hpa :=
+  pathB_subformulaProjection_capstone (pathB_operatorCutElimination_stage (hpa := hpa))
+
+/-- Stage 8: extraction of the concrete Goodstein fragment. -/
+theorem pathB_goodsteinFragmentExtraction_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBGoodsteinFragmentExtraction hpa :=
+  pathB_goodsteinFragmentExtraction_capstone (pathB_subformulaProjection_stage (hpa := hpa))
+
+/-- Stage 9: terminal Path-B bridge to the lower-bound target. -/
+theorem pathB_terminalRouteBridge_stage {hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence} :
+    RouteBCapstone :=
+  pathB_terminalRouteBridge_capstone (pathB_goodsteinFragmentExtraction_stage (hpa := hpa))
+
+/-- Compose the named Path-B stage chain into the single bridge expected by the terminal assembly. -/
 def routeBBridgeFromCapstoneAxioms : RouteBBridgeFromPAProof := by
   intro hpa
-  have h₁ : RouteBGoodsteinSentenceShape hpa :=
-    pathB_goodsteinSentenceShape_capstone (hpa := hpa)
-  have h₂ : RouteBPeanoMinusAxiomLeaves hpa :=
-    pathB_peanoMinusAxiomLeaves_capstone h₁
-  have h₃ : RouteBInductionAxiomShell hpa :=
-    pathB_inductionAxiomShell_capstone h₂
-  have h₄ : RouteBClosedWitnessBudgets hpa :=
-    pathB_closedWitnessBudgets_capstone h₃
-  have h₅ : RouteBSomeKStructuralEmbedding hpa :=
-    pathB_someKStructuralEmbedding_capstone h₄
-  have h₆ : RouteBOperatorCutElimination hpa :=
-    pathB_operatorCutElimination_capstone h₅
-  have h₇ : RouteBSubformulaProjection hpa :=
-    pathB_subformulaProjection_capstone h₆
-  have h₈ : RouteBGoodsteinFragmentExtraction hpa :=
-    pathB_goodsteinFragmentExtraction_capstone h₇
-  exact pathB_terminalRouteBridge_capstone h₈
+  exact pathB_terminalRouteBridge_stage (hpa := hpa)
 
 /-- The Path-B ledger theorem: once the nine named capstones are discharged, the terminal lower-bound
 theorem immediately gives the Kirby-Paris headline. -/
