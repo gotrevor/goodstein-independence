@@ -18,7 +18,15 @@ srcDir = "src"
 [[lean_lib]]
 name = "GoodsteinPA"
 
+[[lean_lib]]
+name = "GoodsteinPABlueprint"
+
 [[require]]
 name = "Foundation"
 git = "https://github.com/gotrevor/Foundation.git"
 rev = "e6e1ad149d3622b1e670c62092827f84fc276d1c"
+
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+rev = "3d425859e73fcfbef85b9638c2a91708ef4a22d4"

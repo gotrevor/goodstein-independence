@@ -4,12 +4,32 @@ namespace GoodsteinPA.Blueprint
 
 open Lean Elab
 
+/-- The audit category claimed by blueprint metadata.
+
+The audit tool computes the real category from the kernel axiom footprint and checks this claim. -/
+inductive BlueprintCategory where
+  | clean
+  | trusted
+  | debt
+  | broken
+  deriving BEq, Inhabited, Repr
+
+namespace BlueprintCategory
+
+def toString : BlueprintCategory → String
+  | clean => "clean"
+  | trusted => "trusted"
+  | debt => "debt"
+  | broken => "broken"
+
+end BlueprintCategory
+
 /-- Machine-readable blueprint metadata attached to a Lean declaration.  This is
 planning/review metadata, not proof content. -/
 structure BlueprintInfo where
   order : Nat
+  category : BlueprintCategory
   kind : String
-  status : String
   laps : String
   confidence : Nat
   stage : Name
@@ -24,8 +44,21 @@ syntax "[" ident,* "]" : blueprintNames
 declare_syntax_cat blueprintEvidence
 syntax "[" str,* "]" : blueprintEvidence
 
+declare_syntax_cat blueprintCategory
+syntax "clean" : blueprintCategory
+syntax "trusted" : blueprintCategory
+syntax "debt" : blueprintCategory
+syntax "broken" : blueprintCategory
+
 syntax (name := goodstein_blueprint)
-  "goodstein_blueprint" num str str str num ident blueprintNames blueprintEvidence str : attr
+  "goodstein_blueprint" num blueprintCategory str str num ident blueprintNames blueprintEvidence str : attr
+
+private def elabCategory : TSyntax `blueprintCategory → CoreM BlueprintCategory
+  | `(blueprintCategory| clean) => pure .clean
+  | `(blueprintCategory| trusted) => pure .trusted
+  | `(blueprintCategory| debt) => pure .debt
+  | `(blueprintCategory| broken) => pure .broken
+  | _ => throwUnsupportedSyntax
 
 private def elabNameArray : TSyntax `blueprintNames → CoreM (Array Name)
   | `(blueprintNames| [$[$ids:ident],*]) =>
@@ -48,8 +81,8 @@ initialize blueprintAttr : ParametricAttribute BlueprintInfo ←
       match stx with
       | `(attr| goodstein_blueprint
           $order:num
+          $category:blueprintCategory
           $kind:str
-          $status:str
           $laps:str
           $confidence:num
           $stage:ident
@@ -60,8 +93,8 @@ initialize blueprintAttr : ParametricAttribute BlueprintInfo ←
             realizeGlobalConstNoOverloadWithInfo stage
           pure {
             order := order.getNat
+            category := ← elabCategory category
             kind := kind.getString
-            status := status.getString
             laps := laps.getString
             confidence := confidence.getNat
             stage := stageName
@@ -91,20 +124,20 @@ private def evidenceBlock (items : Array String) : String :=
 the current Lean environment. -/
 def renderMarkdown (title : String) : CoreM String := do
   let env ← getEnv
-  let entries := (collectEntries env).filter fun e => e.2.status != "proved"
+  let entries := (collectEntries env).filter fun e => e.2.category != .clean
   let mut out := s!"# {title}\n\n"
   out := out ++ "Generated from `@[goodstein_blueprint ...]` attributes in Lean declarations.\n\n"
-  out := out ++ "| # | Declaration | Stage theorem | Status | Laps | Confidence | Uses |\n"
+  out := out ++ "| # | Declaration | Stage theorem | Category | Laps | Confidence | Uses |\n"
   out := out ++ "|---:|---|---|---:|---:|---:|---|\n"
   for (declName, info) in entries do
     out := out ++
-      s!"| {info.order} | `{declName}` | `{info.stage}` | {info.status} | {info.laps} | {info.confidence}% | {namesCell info.uses} |\n"
+      s!"| {info.order} | `{declName}` | `{info.stage}` | {info.category.toString} | {info.laps} | {info.confidence}% | {namesCell info.uses} |\n"
   out := out ++ "\n## Outline\n\n"
   for (declName, info) in entries do
     out := out ++ s!"### {info.order}. `{declName}`\n\n"
     out := out ++ s!"- Stage theorem: `{info.stage}`\n"
     out := out ++ s!"- Kind: `{info.kind}`\n"
-    out := out ++ s!"- Status: `{info.status}`\n"
+    out := out ++ s!"- Category claim: `{info.category.toString}`\n"
     out := out ++ s!"- Estimate: {info.laps} laps, {info.confidence}% confidence\n"
     out := out ++ s!"- Summary: {info.summary}\n"
     out := out ++ "- Literature / evidence:\n"

@@ -1,7 +1,7 @@
 /-
 # `Zᵉᵏᵈ` — the control-ordinal operator witness-bounded `Z_∞` calculus (Towsner §15 + §19, lap-8)
 
-The lap-7 ADDENDUM 4 finding: the split-index `(k,d)` calculus (`wip/SplitZinfty.lean`) closes the
+The lap-7 ADDENDUM 4 finding: the historical split-index `(k,d)` spike (`SplitZinfty`) closes the
 §19.6 **norm-budget** obstruction (the `d`-bump `d ↦ d + norm α`) but NOT the **witness-index** one —
 the principal `exI` cut's witness `hardy γ(·)` makes the witness bound grow super-linearly through
 commuting ω-rules, and a witness bound tied to the *derivation* ordinal `α` cannot absorb that under
@@ -19,8 +19,8 @@ The Hardy infrastructure this needs is **banked** (lap 8, `src/Hardy.lean` + `sr
   control index is still Goodstein-dominated, so the witness-bounded lower bound survives).
 
 This file: the inductive `Zekd` + structural layer (`mono_k`, `mono_d`, `mono_c`, `mono_e`, `weakening`).
-The inversion suite + §19.5/§19.6 cut reductions port from `wip/SplitZinfty.lean` (mechanical: thread
-the inert `e`, plus the §19.6 witness-control step using the banked Hardy lemmas).
+The inversion suite + §19.5/§19.6 cut reductions port the old `SplitZinfty` argument (mechanical:
+thread the inert `e`, plus the §19.6 witness-control step using the banked Hardy lemmas).
 -/
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Arithmetic.R0.Representation

@@ -1,0 +1,73 @@
+\chapter{Path B: Witness-Bounded Route}
+
+This chapter records the current Path B capstone chain.  The Lean declarations are importable through
+\texttt{GoodsteinPABlueprint}; every node is currently marked \texttt{\textbackslash notready}
+because the corresponding stage theorem still depends on named capstone axioms.
+
+\begin{theorem}\label{thm:pathBGoodsteinSentenceShape}
+  \lean{GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage}
+  \notready
+The encoded Goodstein sentence can be normalized to the exact closed one-formula sequent shape
+consumed by the bounded embedding.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBPeanoMinusAxiomLeaves}
+  \uses{thm:pathBGoodsteinSentenceShape}
+  \lean{GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage}
+  \notready
+All finite \(\mathrm{PA}^{-}\) and equality axiom leaves are derivable in the bounded operator
+calculus with finite extracted witness budget.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBInductionAxiomShell}
+  \uses{thm:pathBPeanoMinusAxiomLeaves}
+  \lean{GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage}
+  \notready
+The PA induction-axiom shell is simulated in the bounded operator calculus without losing the finite
+witness budget.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBClosedWitnessBudgets}
+  \uses{thm:pathBInductionAxiomShell}
+  \lean{GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage}
+  \notready
+Every Foundation existential and closed-witness step has a finite \(K\) budget.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBSomeKStructuralEmbedding}
+  \uses{thm:pathBClosedWitnessBudgets}
+  \lean{GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage}
+  \notready
+The whole PA proof embeds into the \(\mathrm{someK}\) bounded operator calculus.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBOperatorCutElimination}
+  \uses{thm:pathBSomeKStructuralEmbedding}
+  \lean{GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage}
+  \notready
+Bounded operator cut-elimination preserves finite witness budget after raising the control ordinal
+as needed.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBSubformulaProjection}
+  \uses{thm:pathBOperatorCutElimination}
+  \lean{GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage}
+  \notready
+The cut-free operator derivation projects to the subformula fragment used by Towsner's \(B\)
+calculus.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBGoodsteinFragmentExtraction}
+  \uses{thm:pathBSubformulaProjection}
+  \lean{GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage}
+  \notready
+The projected derivation is the concrete Goodstein-fragment terminal object.
+\end{theorem}
+
+\begin{theorem}\label{thm:pathBTerminalRouteBridge}
+  \uses{thm:pathBGoodsteinFragmentExtraction}
+  \lean{GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage}
+  \notready
+The full Path B capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out
+by the promoted lower-bound theorem.
+\end{theorem}

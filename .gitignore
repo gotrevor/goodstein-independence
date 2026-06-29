@@ -7,3 +7,9 @@
 papers/**/*.pdf
 papers/**/*.djvu
 papers/**/*.ps
+
+# leanblueprint generated outputs
+/blueprint/lean_decls
+/blueprint/web/
+/blueprint/print/
+/blueprint/src/*.paux
