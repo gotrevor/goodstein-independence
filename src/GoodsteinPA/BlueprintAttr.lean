@@ -24,8 +24,8 @@ syntax "[" ident,* "]" : blueprintNames
 declare_syntax_cat blueprintEvidence
 syntax "[" str,* "]" : blueprintEvidence
 
-syntax (name := blueprint)
-  "blueprint" num str str str num ident blueprintNames blueprintEvidence str : attr
+syntax (name := goodstein_blueprint)
+  "goodstein_blueprint" num str str str num ident blueprintNames blueprintEvidence str : attr
 
 private def elabNameArray : TSyntax `blueprintNames → CoreM (Array Name)
   | `(blueprintNames| [$[$ids:ident],*]) =>
@@ -42,11 +42,11 @@ Lean, attached to the declaration it describes, while leaving all estimates outs
 the kernel. -/
 initialize blueprintAttr : ParametricAttribute BlueprintInfo ←
   registerParametricAttribute {
-    name := `blueprint
+    name := `goodstein_blueprint
     descr := "GoodsteinPA blueprint metadata for milestone/report generation"
     getParam := fun _ stx => do
       match stx with
-      | `(attr| blueprint
+      | `(attr| goodstein_blueprint
           $order:num
           $kind:str
           $status:str
@@ -93,7 +93,7 @@ def renderMarkdown (title : String) : CoreM String := do
   let env ← getEnv
   let entries := (collectEntries env).filter fun e => e.2.status != "proved"
   let mut out := s!"# {title}\n\n"
-  out := out ++ "Generated from `@[blueprint ...]` attributes in Lean declarations.\n\n"
+  out := out ++ "Generated from `@[goodstein_blueprint ...]` attributes in Lean declarations.\n\n"
   out := out ++ "| # | Declaration | Stage theorem | Status | Laps | Confidence | Uses |\n"
   out := out ++ "|---:|---|---|---:|---:|---:|---|\n"
   for (declName, info) in entries do

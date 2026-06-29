@@ -1,6 +1,6 @@
 # Path B Blueprint: Open Capstones
 
-Generated from `@[blueprint ...]` attributes in Lean declarations.
+Generated from `@[goodstein_blueprint ...]` attributes in Lean declarations.
 
 | # | Declaration | Stage theorem | Status | Laps | Confidence | Uses |
 |---:|---|---|---:|---:|---:|---|
