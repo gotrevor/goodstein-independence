@@ -34,10 +34,12 @@ Multi-player build of the g-i blueprint layer.
 3. Init `blueprint/`; author the 9 Path B nodes: `\lean{...}`, `\uses{...}` matching the dependency chain, `\notready` on every open capstone. **Do NOT hand-assert `\leanok`.**
 4. `checkdecls` green; `leanblueprint web` + graph. **Skip `pdf`** until MacTeX lands.
 
-**CC-judge (Ren):**
-- A. Build `lake exe blueprint_audit`: for each tagged/blueprint decl, compute the `collectAxioms` footprint, classify into the 4 categories vs the trusted-axiom allowlist, **reconcile against the attribute claim + blueprint status**, emit a report.
-- B. Wire it as a **CI gate** (fail on `broken`; fail if a `clean`/`\leanok` node isn't actually clean; fail if a `trusted` node pulls an axiom off the allowlist). Prior art: lean-gallery's `#print axioms` CI gate.
-- C. Build **repo-agnostic** (allowlist parameterized) so it transplants to bounded_gaps / sum-product. First in g-i, then generalize.
+**CC-judge (Ren): ✅ DONE 2026-06-29** (`src/BlueprintAudit.lean`, `lake exe blueprint_audit`).
+- A. ✅ Built. Iterates every `@[goodstein_blueprint]`-tagged decl via `blueprintAttr.getParam?`, runs `Lean.collectAxioms` on `info.stage`, classifies into `clean|trusted|debt|broken` vs the allowlist, reconciles against the `category` claim (severity order `clean<trusted<debt<broken`), emits a Markdown report. Env-loaded `lake exe` (search-path seeded from `LEAN_PATH`, `enableInitializersExecution` + `importModules` — the checkdecls pattern, no Lake link needed).
+- B. ✅ CI-wired ("Blueprint status gate" step in `.github/workflows/ci.yml`). **Hard FAIL** on: claim overstated (reality worse than claim, e.g. claimed `clean` but really `debt`), `sorryAx` leaked (`broken`), stage theorem missing, or zero nodes (vacuous gate). **WARN** (non-fatal) when reality is *better* than the claim → upgrade the `category`. All three branches verified live. ⚠️ Fix that fell out: `GoodsteinPABlueprint` added to `defaultTargets` so bare `lake build` (CI's lean-action + the local hook) actually compiles the Path B nodes — else the audit reads stale/absent oleans.
+- C. ✅ Repo-agnostic: the trusted-axiom allowlist is a file param (`blueprint/trusted-axioms.txt`, empty for g-i). Two clearly-marked `EDIT-ON-TRANSPLANT` constants (attr ref + lib roots) are the only g-i-specific lines; copy the file + `BlueprintAttr.lean` to transplant to bounded_gaps / sum-product.
+
+Current run: 9/9 nodes consistent (`debt`/`debt`), 0 warnings, exit 0. ~6s.
 
 **Trevor:** LaTeX narrative + arbitration.
 

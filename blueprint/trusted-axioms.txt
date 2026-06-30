@@ -1,0 +1,14 @@
+# Trusted-axiom allowlist for `lake exe blueprint_audit`.
+#
+# One fully-qualified axiom name per line. Blank lines and `#` comments are ignored.
+# An axiom listed here is treated as a DELIBERATELY-trusted boundary: a node whose only
+# non-clean axioms are on this list classifies as `trusted` (a DONE boundary, its own color)
+# rather than `debt`. The three kernel-standard axioms (propext, Classical.choice, Quot.sound)
+# are ALWAYS allowed and need not be listed.
+#
+# For goodstein-independence this is intentionally EMPTY: the nine Path B capstones are open
+# debt we mean to discharge, not trusted literature axioms. As milestones land, capstones get
+# proven (dropping off the footprint) — they are never moved here.
+#
+# (Contrast bounded_gaps, where this file would list the paper-cited analytic axioms such as
+#  Bombieri–Vinogradov / Elliott–Halberstam that are impractical to formalize.)
