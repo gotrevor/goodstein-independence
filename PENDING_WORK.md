@@ -1,5 +1,50 @@
 # Pending work — open obligations & attack paths
 
+## Lap 169 — ⭐⭐⭐ M2 probe: induction-shell STRUCTURE composes (compiler-verified), but the STEP premise exposes a Z-calculus expressiveness GAP
+
+**On-directive (lap-167 M2 feasibility probe, laps 167–171, HARD GATE 171).** Build 🟢 1326;
+`wip/M2Probe.lean` typechecks 0 `sorry`; three new theorems `#print axioms` = `[propext, choice,
+Quot.sound]` (clean). HEAD after the lap-169 commit.
+
+This lap made the lap-168 finding-A claim ("the two-sided induction shell is bounded — every rule
+needed is present") CONCRETE and, in doing so, REFUTED its optimism at the step premise.
+
+### What compiler-verified this lap (`wip/M2Probe.lean`)
+- `zDerivation_of_zIall_R` — the `∀`-peel carries all three `ZDerivesEmptyR` invariants (mirror of
+  commit-6's native-Ind carrier). BOUNDED ✓.
+- `zDerivation_of_zAx1_R` — the identity-axiom leaf (`C = seqSucc s ∈ seqAnt s`) with invariants;
+  discharges the induction BASE premise `Γ → φ(0)` since `φ(0) ∈ Γ`. ✓.
+- `twoSidedInductionShell_R` — the full shell `zIall s a p (zInd q at' p d0 d1)` COMPOSES with
+  invariants GIVEN the two premise derivations `d0`(base)/`d1`(step). So the STRUCTURE is bounded, no
+  invariant explosion — the entire risk collapses onto the two premise hypotheses.
+- `PAInductionStepObligation Γ φ b` — the isolated step obligation `Γ, φ(b) → φ(b+1)`.
+
+### 🚨 The isolated obstruction (decision-relevant for the lap-171 gate)
+The STEP premise `Γ, φ(b) → φ(b+1)` (from `B = ∀x(φ(x)→φ(x+1)) ∈ Γ` and `φ(b) ∈ Γ`, at the free
+eigenvariable `b`) is **NOT closable by internal Z's listed rules**, on TWO independent counts:
+1. **No free-variable `∀`-left.** Z's only `∀`-left is `zAxAll`, succedent `substs1 (numeral k) p`
+   (`zAxAllSuccWff`, `InternalZ.lean:1576`) — instantiation at a NUMERAL only, never at `qqFvar b`.
+2. **No general `∨`-/`→`-left.** Even granting the instance `φ(b)→φ(b+1) = ∼φ(b) ^⋎ φ(b+1)`
+   (`Bootstrapping.imp`), that is a general disjunction, NOT the `_ ^⋎ ^⊥` shape `zIneg`/`zAxNeg`
+   handle. None of Z's nine `ZPhi` constructors (`InternalZ.lean:5512`) is `∨`-left or `→`-left.
+
+This is exactly the **finitary-`zInd` vs `PA_∞`-ω-rule design fork**: a genuine PA_∞ derives the
+induction axiom via NUMERAL instances only (matching `zAxAll`) + the ω-rule; the current finitary
+`zInd` (eigenvariable) needs a free-variable `∀`-left that is absent. **Leans PIVOT-B for the
+induction leaf as the calculus stands** — CONTRADICTS lap-168's "M2-PLAUSIBLE for step 4."
+
+### For the lap-171 review — re-weigh with THIS signal
+Lap-168's optimism ("every rule present") did not survive making the shell concrete. The induction
+leaf's STRUCTURE is bounded, but simulating the closed PA induction AXIOM as a standalone Z sequent
+hits a real expressiveness gap. Two escape hypotheses to test before verdict (either would reopen
+M2-PLAUSIBLE): (α) an admissible free-variable `∀`-left / substitution lemma converting a
+numeral-instantiated derivation family into a free-var one; (β) whether the M2 bridge can avoid
+deriving the closed axiom standalone (translate the axiom's USE-in-proof, not the leaf in isolation) —
+but Foundation's Hilbert-style `axm` leaf enters as a closed formula, so the standalone sequent looks
+required. If neither escape lands quickly, the verdict is PIVOT-B.
+
+---
+
 ## Lap 168 — ⭐⭐ `residual` DECOMPOSED into 4 named escapes; C-exit "pure weakening" plan REFUTED
 
 **Build 🟢 1326 (headline root) / 1266 (Crux2Blueprint). HEAD after the lap-168 commit.** Two advances,

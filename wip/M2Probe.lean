@@ -715,4 +715,139 @@ theorem paConsistent_of_prwo_focus_simR
   paConsistent_of_prwo_and_bridge (V := V) hprwo
     (M2Bridge_of_focus_simR (V := V) hsim)
 
+/-! ## The two-sided PA-induction shell: decomposition + the isolated step obstruction (lap 169)
+
+Lap-168 finding A claimed the two-sided induction shell is a BOUNDED construction because "every rule
+needed is present": peel the `∀`-succedent with `zIall`, discharge the induction with native `zInd`,
+and feed the base/step hypotheses from the antecedent with `zAx1`/`zK`.  This lap makes that claim
+CONCRETE and compiler-grounded, and in doing so surfaces a genuine obstruction the prose missed.
+
+The target sequent for the closed PA induction axiom, after the `toZ` `→`-peel, is
+
+    Γ  →  ^∀ p      where   Γ = { φ(0) , ∀x(φ(x) → φ(x+1)) }   and   p = φ.
+
+The shell is `z = zIall s a p (zInd q at' p d0 d1)`:
+* `zIall` peels `^∀ p` to the eigen instance `φ(a)`   (`zDerivation_of_zIall_R`, below — BOUNDED ✓);
+* `zInd` at conclusion-term `qqFvar a` reduces to two premises
+    - base   `d0 : Γ → φ(0)`         — `φ(0) ∈ Γ`, so `zAx1` closes it  (`zDerivation_of_zAx1_R` — ✓);
+    - step   `d1 : Γ, φ(b) → φ(b+1)` — consumes `B = ∀x(φ(x)→φ(x+1))` at the eigenvariable `b`.
+
+`twoSidedInductionShell_R` proves the composition rigorously: GIVEN the two premise derivations with
+their invariants + the (bounded) eigen/fresh/seq side-flags, the whole shell derivation exists and
+carries `ZRegular ∧ ZFresh ∧ ZSeqAnt`.  So the STRUCTURE composes — no invariant explosion.
+
+**The isolated obstruction (the real M2 risk, `PAInductionStepObligation`).** The step premise `d1`
+must derive `Γ, φ(b) → φ(b+1)` from `B = ∀x(φ(x)→φ(x+1)) ∈ Γ` and `φ(b) ∈ Γ`, at the *free
+eigenvariable* `b`.  Internal Z's ONLY `∀`-left rule is `zAxAll`, whose succedent is
+`substs1 (numeral k) p` — instantiation at a NUMERAL `k`, never at a free variable `qqFvar b`
+(`zAxAllSuccWff`, `InternalZ.lean:1576`).  And even granting the instance `φ(b)→φ(b+1)`, that formula
+is `Bootstrapping.imp = ∼φ(b) ^⋎ φ(b+1)` — a general disjunction, NOT the `_ ^⋎ ^⊥` shape that `zIneg`
+(`inegF A = neg A ^⋎ ^⊥`) / `zAxNeg` handle.  There is no `∨`-left / `→`-left rule among Z's nine
+constructors (`ZPhi`, `InternalZ.lean:5512`).  So the step premise `d1` is NOT closable by the "every
+rule is present" argument: the two-sided shell needs either (α) a free-variable `∀`-left instantiation
+or (β) a general implication-left elimination, and internal Z as formalized supplies NEITHER.
+
+This is a decision-relevant datapoint for the lap-171 gate: the induction leaf's STRUCTURE is bounded
+(this lap), but its STEP premise exposes a calculus-expressiveness gap.  The gap is exactly the
+Buchholz/PA_∞ design fork — a genuine `PA_∞` with the ω-rule derives the axiom via numeral instances
+only (matching `zAxAll`), whereas the current `zInd` (finitary, eigenvariable) rule needs a
+free-variable `∀`-left that is absent.  Recorded, isolated, and left as a named obligation. -/
+
+/-- **`∀`-peel with invariants** (task (a)): a `zIall` node over a premise `d0` deriving the eigen
+instance `substs1 (qqFvar a) p` carries all three `ZDerivesEmptyR` invariants, from the premise
+invariants plus the standard bounded eigenvariable/fresh/seq side-flags.  Mirror of the native-Ind
+carrier `zDerivation_of_nativeZIndInstance_R`; BOUNDED, no invariant explosion. -/
+theorem zDerivation_of_zIall_R {s a p d0 : V}
+    (hd0 : ZDerivation d0)
+    (hsucc : seqSucc s = (^∀ p : V))
+    (hwff : zIallWff s a p d0)
+    (hreg0 : ZRegular d0) (hfresh0 : ZFresh d0) (hseqant0 : ZSeqAnt d0)
+    (heig : ltFlag (maxEigen d0) a = 0)
+    (hfr : freshFlag a p (seqAnt s) = 0)
+    (hsa : seqAntSeqFlag s = 0) :
+    ∃ z : V, ZDerivation z ∧ fstIdx z = s ∧ ZRegular z ∧ ZFresh z ∧ ZSeqAnt z := by
+  have hr0 : zReg d0 = 0 := hreg0
+  have hf0 : zFresh d0 = 0 := hfresh0
+  have hs0 : zSeqAnt d0 = 0 := hseqant0
+  refine ⟨zIall s a p d0,
+    zDerivation_iff.mpr (Or.inr (Or.inl ⟨s, a, p, d0, rfl, hd0, hsucc, hwff⟩)), by simp, ?_, ?_, ?_⟩
+  · show zReg (zIall s a p d0) = 0
+    rw [zReg_zIall, heig, hr0]; simp
+  · show zFresh (zIall s a p d0) = 0
+    rw [zFresh_zIall, hfr, hf0]; simp
+  · show zSeqAnt (zIall s a p d0) = 0
+    rw [zSeqAnt_zIall, hsa, hs0]; simp
+
+/-- **Identity-axiom leaf with invariants** (task (b), base case): a `zAx1` node closing `Γ → C`
+whenever `C = seqSucc s ∈ seqAnt s`.  Discharges the induction base premise `Γ → φ(0)` since
+`φ(0) ∈ Γ`.  Invariants are free (`zReg_zAx1 = zFresh_zAx1 = 0`) except the bounded `seqAntSeqFlag`. -/
+theorem zDerivation_of_zAx1_R {s : V}
+    (hin : inAnt (seqSucc s) (seqAnt s))
+    (hsa : seqAntSeqFlag s = 0) :
+    ∃ z : V, ZDerivation z ∧ fstIdx z = s ∧ ZRegular z ∧ ZFresh z ∧ ZSeqAnt z := by
+  refine ⟨zAx1 s (seqSucc s),
+    zDerivation_iff.mpr
+      (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨s, seqSucc s, rfl, hin⟩)))))))),
+    by simp, ?_, ?_, ?_⟩
+  · show zReg (zAx1 s (seqSucc s)) = 0; exact zReg_zAx1 _ _
+  · show zFresh (zAx1 s (seqSucc s)) = 0; exact zFresh_zAx1 _ _
+  · show zSeqAnt (zAx1 s (seqSucc s)) = 0; rw [zSeqAnt_zAx1]; exact hsa
+
+/-- **The two-sided induction shell composes with invariants.**  Given the two native-`zInd` premise
+derivations (base `d0`, step `d1`) with their invariants and the bounded eigen/fresh/seq side-flags for
+BOTH the `zInd` node and the enclosing `zIall`, the full shell `zIall s a p (zInd q at' p d0 d1)` is a
+`ZDerivation` of `s` (`seqSucc s = ^∀ p`) carrying `ZRegular ∧ ZFresh ∧ ZSeqAnt`.  This isolates the
+entire feasibility risk of the induction leaf into the two premise hypotheses `d0`, `d1`: the base is
+free (`zDerivation_of_zAx1_R`), the STEP is the obstruction documented above. -/
+theorem twoSidedInductionShell_R
+    {s a q at' p d0 d1 : V}
+    (hd0 : ZDerivation d0) (hd1 : ZDerivation d1)
+    (hwffInd : zIndWff (zInd q at' p d0 d1))
+    (hreg0 : ZRegular d0) (hreg1 : ZRegular d1)
+    (hfresh0 : ZFresh d0) (hfresh1 : ZFresh d1)
+    (hseqant0 : ZSeqAnt d0) (hseqant1 : ZSeqAnt d1)
+    (heigInd : ltFlag (maxEigen d1) (π₁ at') = 0)
+    (hfrInd : freshFlag (π₁ at') (^⊥ : V) (seqAnt q) = 0)
+    (hsaInd : seqAntSeqFlag q = 0)
+    (hsucc : seqSucc s = (^∀ p : V))
+    (hant : seqAnt q = seqAnt s)
+    (hterm : seqSucc q = substs1 ℒₒᵣ (qqFvar a) p)
+    (hp : IsSemiformula ℒₒᵣ 1 p)
+    (heigAll : ltFlag (maxEigen (zInd q at' p d0 d1)) a = 0)
+    (hfrAll : freshFlag a p (seqAnt s) = 0)
+    (hsaAll : seqAntSeqFlag s = 0) :
+    ∃ z : V, ZDerivation z ∧ fstIdx z = s ∧ ZRegular z ∧ ZFresh z ∧ ZSeqAnt z := by
+  -- The native `zInd` node with its invariants (from `zDerivation_of_nativeZIndInstance_R`).
+  have hr0 : zReg d0 = 0 := hreg0
+  have hr1 : zReg d1 = 0 := hreg1
+  have hf0 : zFresh d0 = 0 := hfresh0
+  have hf1 : zFresh d1 = 0 := hfresh1
+  have hs0 : zSeqAnt d0 = 0 := hseqant0
+  have hs1 : zSeqAnt d1 = 0 := hseqant1
+  have hInd : ZDerivation (zInd q at' p d0 d1) :=
+    zDerivation_zInd_intro_probe hd0 hd1 hwffInd
+  have hIndReg : ZRegular (zInd q at' p d0 d1) := by
+    show zReg (zInd q at' p d0 d1) = 0; rw [zReg_zInd, heigInd, hr0, hr1]; simp
+  have hIndFresh : ZFresh (zInd q at' p d0 d1) := by
+    show zFresh (zInd q at' p d0 d1) = 0; rw [zFresh_zInd, hfrInd, hf0, hf1]; simp
+  have hIndSeqAnt : ZSeqAnt (zInd q at' p d0 d1) := by
+    show zSeqAnt (zInd q at' p d0 d1) = 0; rw [zSeqAnt_zInd, hsaInd, hs0, hs1]; simp
+  -- The `zIall` well-formedness glue (premise = the `zInd` node, whose `fstIdx` is `q`).
+  have hwffAll : zIallWff s a p (zInd q at' p d0 d1) := by
+    refine ⟨?_, ?_, hp⟩
+    · rw [fstIdx_zInd]; exact hant
+    · rw [fstIdx_zInd]; exact hterm
+  exact zDerivation_of_zIall_R hInd hsucc hwffAll hIndReg hIndFresh hIndSeqAnt heigAll hfrAll hsaAll
+
+/-- **The isolated step obligation** — the one piece the shell reduces to that internal Z, as
+formalized, cannot supply by its listed rules.  Deriving `Γ, φ(b) → φ(b+1)` requires instantiating the
+antecedent `∀`-hypothesis `B` at the free eigenvariable `b` (Z's `zAxAll` does numerals only) and then
+an implication-left elimination on `∼φ(b) ^⋎ φ(b+1)` (no `∨`-left or `→`-left rule exists).  Left as a named
+obligation: whether M2 is feasible on Route A turns on whether this closes (ω-rule redesign / admissible
+free-variable `∀`-left) or genuinely fails. -/
+def PAInductionStepObligation (Γ : V) (φ b : V) : Prop :=
+  ∃ z : V, ZDerivation z ∧ fstIdx z = mkSeqt (seqCons Γ (substs1 ℒₒᵣ (qqFvar b) φ))
+      (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd (qqFvar b) (Bootstrapping.Arithmetic.numeral 1)) φ)
+    ∧ ZRegular z ∧ ZFresh z ∧ ZSeqAnt z
+
 end GoodsteinPA.InternalZ
