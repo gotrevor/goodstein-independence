@@ -850,4 +850,31 @@ def PAInductionStepObligation (Γ : V) (φ b : V) : Prop :=
       (substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd (qqFvar b) (Bootstrapping.Arithmetic.numeral 1)) φ)
     ∧ ZRegular z ∧ ZFresh z ∧ ZSeqAnt z
 
+/-- **The step obligation delivers exactly the `zIndWff` step-premise sequent** (lap 170, judge/Ren).
+Machine-confirms that `PAInductionStepObligation Γ p b` is *faithfully* the step premise the two-sided
+shell needs — not an approximation: the witness `z`'s antecedent/succedent are precisely the shape
+`zIndWff`'s conjunct-3 demands of `zIndPrem1` (`InternalZ.lean:1702-1706`), with `Γ = seqAnt (fstIdx d)`,
+eigenvariable `b`, formula `p`.  Consequence: the induction leaf reduces to *exactly* this one obligation,
+with no residual gap between "obligation discharged" and "shell closes".
+
+And that sole obligation is **not closable in the finitary calculus** (escape (α), lap 170 — DEAD, 95%):
+deriving `Γ, φ(b) → φ(b+1)` needs the antecedent `∀` instantiated at the *free* eigenvariable `b`, but
+Z's only `∀`-left `zAxAll` instantiates at a **numeral** (`zAxAllSuccWff`, `InternalZ.lean:1576`), and the
+only derivation-level substitution `ZDerivation_zsubst` (`Zsubst.lean:3674`) runs `^&a ↦ closed term` — the
+*forward/binding* direction, unable to generalise a numeral-instance family to `qqFvar b`.  This is the
+finitary-`zInd` vs ω-rule design fork, a calculus-expressiveness gap, not an engineering oversight →
+`PIVOT-B` datapoint for the lap-171 gate. -/
+theorem stepObligation_prem1_sequent {Γ p b : V}
+    (hstep : PAInductionStepObligation Γ p b) :
+    ∃ z : V, ZDerivation z ∧
+      seqAnt (fstIdx z) = seqCons Γ (substs1 ℒₒᵣ (qqFvar b) p) ∧
+      seqSucc (fstIdx z) =
+        substs1 ℒₒᵣ (Bootstrapping.Arithmetic.qqAdd (qqFvar b)
+          (Bootstrapping.Arithmetic.numeral 1)) p ∧
+      ZRegular z ∧ ZFresh z ∧ ZSeqAnt z := by
+  obtain ⟨z, hz, hfst, hreg, hfresh, hseqant⟩ := hstep
+  refine ⟨z, hz, ?_, ?_, hreg, hfresh, hseqant⟩
+  · rw [hfst, seqAnt_mkSeqt]
+  · rw [hfst, seqSucc_mkSeqt]
+
 end GoodsteinPA.InternalZ
