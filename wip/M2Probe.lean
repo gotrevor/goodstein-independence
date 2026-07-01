@@ -325,6 +325,41 @@ theorem zDerivation_of_nativeZIndInstance {q K : V}
   rcases h with ⟨at', d0, d1, hd0, hd1, hwff⟩
   exact ⟨zInd q at' K d0 d1, zDerivation_zInd_intro_probe hd0 hd1 hwff, by simp⟩
 
+/-! ### M2 verdict probe (lap 168): the native-Ind step carries the `ZDerivesEmptyR` invariants
+
+The `FoundationToZSimulationR` target needs `ZRegular ∧ ZFresh ∧ ZSeqAnt`, not just a bare
+`ZDerivation`.  The probe question for the lap-171 gate is whether those invariants EXPLODE on the
+native `zInd` node.  They do not: `zReg_zInd`/`zFresh_zInd`/`zSeqAnt_zInd` show each is
+`max (one bounded eigen/seq side-flag) (max (premise invariant) (premise invariant))`, so the
+invariants compose from the two premise invariants plus THREE bounded flags
+(`ltFlag (maxEigen d1) (π₁ at')` — the eigenvariable-freshness side-condition,
+`freshFlag (π₁ at') ⊥ (seqAnt q)`, and `seqAntSeqFlag q`).  This is exactly the standard
+eigenvariable side-condition of an induction rule — bounded, not a new formalization.  Verdict signal:
+**M2-PLAUSIBLE for the native-Ind piece of the induction shell.** -/
+theorem zDerivation_of_nativeZIndInstance_R {q at' K d0 d1 : V}
+    (hd0 : ZDerivation d0) (hd1 : ZDerivation d1)
+    (hwff : zIndWff (zInd q at' K d0 d1))
+    (hreg0 : ZRegular d0) (hreg1 : ZRegular d1)
+    (hfresh0 : ZFresh d0) (hfresh1 : ZFresh d1)
+    (hseqant0 : ZSeqAnt d0) (hseqant1 : ZSeqAnt d1)
+    (heig : ltFlag (maxEigen d1) (π₁ at') = 0)
+    (hfr : freshFlag (π₁ at') (^⊥ : V) (seqAnt q) = 0)
+    (hsa : seqAntSeqFlag q = 0) :
+    ∃ z : V, ZDerivation z ∧ fstIdx z = q ∧ ZRegular z ∧ ZFresh z ∧ ZSeqAnt z := by
+  have hr0 : zReg d0 = 0 := hreg0
+  have hr1 : zReg d1 = 0 := hreg1
+  have hf0 : zFresh d0 = 0 := hfresh0
+  have hf1 : zFresh d1 = 0 := hfresh1
+  have hs0 : zSeqAnt d0 = 0 := hseqant0
+  have hs1 : zSeqAnt d1 = 0 := hseqant1
+  refine ⟨zInd q at' K d0 d1, zDerivation_zInd_intro_probe hd0 hd1 hwff, by simp, ?_, ?_, ?_⟩
+  · show zReg (zInd q at' K d0 d1) = 0
+    rw [zReg_zInd, heig, hr0, hr1]; simp
+  · show zFresh (zInd q at' K d0 d1) = 0
+    rw [zFresh_zInd, hfr, hf0, hf1]; simp
+  · show zSeqAnt (zInd q at' K d0 d1) = 0
+    rw [zSeqAnt_zInd, hsa, hs0, hs1]; simp
+
 /--
 The missing shell around native `zInd`: from an internal induction-axiom code `p = ∀* b` with recovered
 core `K`, build a Z derivation of the translated sequent for the closed axiom, not merely an instance

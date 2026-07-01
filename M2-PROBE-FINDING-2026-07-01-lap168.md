@@ -41,6 +41,15 @@ formalization — **this LEANS M2-PLAUSIBLE for step 4**, provided the translati
 peels the outer `→`s into antecedent members (a bounded syntactic decomposition, the real content of
 `FoundationToZSequent`).
 
+### Compiler-verified this lap (M2-PLAUSIBLE evidence)
+`wip/M2Probe.lean` now proves `zDerivation_of_nativeZIndInstance_R` (typechecks, no `sorry`): the native
+`zInd` step carries ALL THREE `ZDerivesEmptyR` invariants (`ZRegular ∧ ZFresh ∧ ZSeqAnt`) from the two
+premise invariants plus three BOUNDED side-flags (`ltFlag (maxEigen d1) (π₁ at')` = eigenvariable
+freshness, `freshFlag (π₁ at') ⊥ (seqAnt q)`, `seqAntSeqFlag q`) — via `zReg_zInd`/`zFresh_zInd`/
+`zSeqAnt_zInd`, each a `max` of a flag and the premise invariants. So the invariants do NOT explode on
+the induction rule; they are the standard eigenvariable side-condition. This is the first
+compiler-grounded M2-PLAUSIBLE datapoint for the induction leaf.
+
 ### Concrete next probe (laps 169–171, toward the verdict)
 Build, in `wip/M2Probe.lean`, the two-sided induction shell for a SIMPLE φ: a Z derivation of
 `{φ(0)-code, step-code} → ∀-succedent` via `zIall` (peel the ∀) → `zInd` (native induction, eigen
