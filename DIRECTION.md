@@ -14,6 +14,48 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
+**2026-07-01 (OPERATOR DECISION — FULL DISCHARGE OR ABANDON; overrides any "accept axiom" language anywhere below).**
+The end-state is **BINARY and non-negotiable**: either the headline `𝗣𝗔 ⊬ ↑goodsteinSentence` is proved
+**genuinely axiom-free** (`#print axioms` = `[propext, Classical.choice, Quot.sound]` + the documented
+`native_decide` base ONLY, with EVERY blueprint axiom discharged `axiom → theorem`), **OR the expedition is
+abandoned**. Shipping "modulo a named / citable / accepted axiom" is a **100% NON-STARTER** (operator,
+2026-07-01, verbatim: *"This is 100% a non-starter. The goal is full discharge or abandon. These are the
+only 2 options."*). This applies **equally** to `wainer_bound_of_pa_proves_goodstein` (Route B) AND
+`goodstein_implies_consistency` (Route A) — a named axiom is an *audit surface for a debt that must be
+paid*, never a shippable endpoint. **The accept-as-axiom fork is deleted**; ignore it wherever it still
+appears (`ROUTE-DECISION` "Next work" #2, the lap-171 "decide whether accepted" clause below). The only live
+strategic question is therefore: **does a route have a real path to ZERO axioms?** If neither does, the
+honest move is *abandon*, not accept. (This does not itself pick a route — see the PIVOT-B block below — it
+sets the bar every route must clear.)
+
+**lap-171 (OPERATOR DECISION — PIVOT-B = WAINER GROWTH-RATE).** The route gate is closed:
+`PIVOT-B`, with B explicitly meaning the **Wainer/Cichon/Caicedo growth-rate route**, not the
+Towsner operator A' lane. Record: `ROUTE-DECISION-2026-07-01-WAINER.md`.
+- **Why:** the M2 probe isolated the PA-induction leaf to `PAInductionStepObligation`; escape (α)
+  is dead against the live substitution API, and escape (β) is the omega-rule/meta route in disguise.
+  Continuing Route A would keep grinding the finitary internal-Z calculus at exactly the design seam
+  it lacks.
+- **THE objective now:** make `GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth` the
+  headline path by discharging its one remaining named debt:
+  `wainer_bound_of_pa_proves_goodstein`.
+- **Status:** the Cichon/Caicedo no-fixed-bound side is now a theorem in
+  `src/GoodsteinPA/WainerRoute.lean`, proved from
+  `GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing` at `osucc o` plus the successor-level
+  fast-growing gap `f_o(n) + 2 < f_{osucc o}(n)` for large `n`.
+- **First grind target:** build the smallest honest PA-provably-total interface needed to state the
+  Wainer classification bridge faithfully, then **discharge it** (per the 2026-07-01 full-discharge
+  mandate above — the "accept as a named external theorem" option is DELETED; the only outcomes are
+  `axiom → theorem` or abandon the route). Work in `src/GoodsteinPA/WainerRoute.lean` and
+  Foundation/Statement-facing wrapper files, not in `Crux2Blueprint`.
+- **FORBIDDEN unless the operator reopens Route A:** grinding `Crux2Blueprint` residuals,
+  `InternalZ` cut-elimination, M2 Foundation-to-Z simulation, or Towsner/A' capstones as the
+  mainline. Those are banked/reference material only.
+- **Source discipline:** Fairtlough--Wainer ch. III remains an access gap; do not pretend it is
+  reviewed locally. Use Cichon/Caicedo/Casteran/Towsner local corpus for the concrete route. Wainer
+  classification may sit as a *declared, faithful, allowlisted* blueprint `axiom` **while it is being
+  worked** (the honest audit surface), but per the 2026-07-01 mandate it is a debt to DISCHARGE, never
+  an accepted endpoint — `axiom → theorem` or abandon.
+
 **lap-167 (OPERATOR-RATIFIED ROUTE PROBE — supersedes the lap-166 grind directive).** Both pre-registered
 Route-A abort triggers FIRED (see ROUTE GUARD); escalated to the operator (Trevor), who ratified a **bounded
 5-lap M2 feasibility probe** as the deciding experiment before an A→B pivot. Full record + the corrected

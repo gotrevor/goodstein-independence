@@ -5,6 +5,23 @@
 > the deciding experiment (a bounded 5-lap M2 probe) the operator ratified. **Self-contained — pasteable
 > to an outside reviewer (Codex).**
 
+## 0. Verdict entered 2026-07-01
+
+**`PIVOT-B`**, where **B = Wainer/Cichon/Caicedo growth-rate route**.
+
+Reason: the M2 probe did not validate the "bounded plumbing" label for Route A. The PA-induction
+leaf reduces to a free-eigenvariable step obligation that internal Z cannot close with its numeral-only
+forall-left rule and no implication-left rule; escape (α) is dead against the live substitution API, and
+escape (β) is essentially the omega-rule/meta route. The pivot target is therefore not the Towsner A'
+operator lane by inertia; it is the growth-rate route whose hard residue is the named Wainer
+provably-total classification.
+
+Durable route record: `ROUTE-DECISION-2026-07-01-WAINER.md`.
+Lean route spine: `src/GoodsteinPA/WainerRoute.lean`.
+
+Update: the Cichon/Caicedo no-fixed-bound side is now proved in the route spine; the remaining
+hard residue is the Wainer provably-total classification bridge.
+
 ## 1. The triggers that fired (both pre-registered, both ignored)
 - **T1 — M1 overrun** (`E-CRUX2-ROADMAP-2026-06-24.md`, lap 83): *"if M1 (RedSound = the cut-elim
   validity core) is not a proven theorem within ~40 laps of lap 83 (≈ lap 123), STOP and reweigh Route

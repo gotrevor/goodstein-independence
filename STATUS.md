@@ -1,6 +1,29 @@
 # STATUS — GoodsteinPA 📊
 
-**`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
+**`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris). ROUTE PIVOTED 2026-07-01 → Wainer/Cichoń/Caicedo growth-rate route** (`ROUTE-DECISION-2026-07-01-WAINER.md`, `DIRECTION.md` lap-171). · **Build**: 🟢 green · **Verified**: 2026-07-01 (this review) ·
+
+> ## 🔀 CURRENT HEAD (2026-07-01) — two parallel one-axiom routes, verified in-kernel
+>
+> The expedition now has **two independent routes to the identical proposition** `𝗣𝗔 ⊬ ↑goodsteinSentence`, each resting on **exactly one deep named axiom** (real `#print axioms`, this review — no drift):
+>
+> | Route | Theorem | Remaining named debt |
+> |---|---|---|
+> | **A** (Gentzen → Con(PA) → Gödel II) — *canonical headline, banked* | `GoodsteinPA.peano_not_proves_goodstein` | `goodstein_implies_consistency` |
+> | **B** (Wainer growth-rate) — *new mainline per operator, sidecar* | `GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth` | `wainer_bound_of_pa_proves_goodstein` |
+>
+> **What Route B genuinely proved this lap (axiom-clean modulo the documented `native_decide` base):**
+> `fastGrowing_fixed_add_two_lt_successor` (successor-gap `f_o(m)+2 < f_{osucc o}(m)` for `m≥4`) is **`[propext, Classical.choice, Quot.sound]` — fully clean**; from it + the existing `Dom.goodsteinLength_dominates_fastGrowing` lower bound, `cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing` (no fixed `f_o` eventually bounds Goodstein length) is proved, footprint = the 3 canonical axioms + the 12 documented `Dom.goodsteinLength_base_cases._native.native_decide` base-case axioms (🟢 trust-base). **This is real, verified progress.**
+>
+> **⚠️ ALTITUDE (binding, honest):** the pivot **changed the audit surface, not the difficulty**. `wainer_bound_of_pa_proves_goodstein` bundles (i) a Goodstein-specific *provable-totality* bridge and (ii) **Wainer's classification proper** — "every PA-provably-total recursive function is eventually dominated by some `f_α`, `α<ε₀`." Wainer's theorem is **not in mathlib**, and its own proof *is* the ordinal analysis of PA (cut-elimination). So discharging it is arguably **as hard as, or harder than, the Route-A crux-2 wall the pivot fled** — it is NOT a session away. The pivot's real merit is narrow-but-real: it escaped a genuinely-dead internalization seam (M2's finitary-Z ∀-left gap, independently re-verified at the kernel 2026-07-01 — internal Z's only ∀-left `zAxAll` is numeral-instantiation only, no free-variable ∀-left, no general implication-left) and gives a **better-shaped** debt (port Castéran's external ε₀/Hardy/Wainer substrate vs. an unprecedented in-PA internalization). "One axiom left" ≠ "almost done."
+>
+> **🚦 OPERATOR DECISION (2026-07-01, CLOSED — full discharge or abandon):** the goal is **BINARY**: prove the headline **genuinely axiom-free** (every blueprint axiom `axiom → theorem`), **OR abandon** the expedition. Shipping "modulo a named / citable / accepted axiom" is a **100% NON-STARTER** (operator, verbatim) — applies to `wainer_bound_of_pa_proves_goodstein` AND Route A's `goodstein_implies_consistency` equally. A named axiom is a *live audit surface for a debt being paid*, never the ship. The accept-as-axiom fork is **deleted**; the only live question is **does a route have a real path to ZERO axioms?** — if neither does, the mandate says *abandon*, stated plainly. See `DIRECTION.md` (2026-07-01 block) + `ROUTE-DECISION` "Goal".
+>
+> **Both route theorems have the identical type `𝗣𝗔 ⊬ ↑goodsteinSentence`** — re-pointing the canonical headline to Route B is a one-line change *once* an axiom is closer to discharge. Do NOT re-point yet (Route B's axiom is not closer than Route A's).
+>
+> ---
+> *Below: the append-only Route-A crux-2 lap log (laps 132–168). BANKED reference — Route A is not being ground per the lap-171 pivot; kept for provenance + possible reopen. Newest Route-A state = lap 168.*
+
+**`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris) — Route A crux-2 log (BANKED).**
 · **Build**: 🟢 green (1326 jobs) · **Updated**: lap 168 (**crux-2 `residual` decomposed into 4 named escapes; prefix-subchain reduct VALIDATED in-kernel — `iRedDescent` needs only õ-descent, no rank-drop/weakening; õ-drop lemma `iseqNaddIdgAux_lt_of_lt` proven; Path-B blueprint audit re-verified ✓ 9 nodes, 0 warnings**) · 2026-07-01 ·
 > **Lap 168:** (1) split the single `residual` sorry in `genReduct_chain_noRedex_anySucc` into 4 named
 > src sub-sorries: `cExitReplayAll`/`cExitReplayNeg` (C-exit R-intro replay) + `gammaAllCut`/`gammaNegCut`
