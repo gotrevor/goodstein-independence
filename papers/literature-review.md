@@ -60,10 +60,15 @@ coded-derivation arithmetization.
   KS81 domination lemmas are all **fully formalized**. A bounded (non-research) Lean port; hits the known
   Lean WF-recursion guard-checker friction. Isabelle cross-check: `nested-multisets-...-isabelle...md`
   (ε₀ as hereditary multisets + a machine-checked Goodstein *sequence*).
-- **The missing piece in the literature corpus:** the **Wainer upper bound** (every PA-provably-recursive
-  function is `H_{<ε₀}`-dominated) — Castéran builds the hierarchies but leaves this classification as
-  future work; it is **un-formalized anywhere**, and its canonical reference, **Fairtlough–Wainer Handbook
-  ch. III, is paywalled / not on disk** (see Needs-access in `SOURCES.md`).
+- **The Wainer upper bound** (every PA-provably-recursive function is `H_{<ε₀}`-dominated) — Castéran builds
+  the hierarchies but leaves this classification as future work; it is **un-formalized anywhere** (still the
+  monument). ✅ **The source, however, is no longer a gap (2026-07-01):** its canonical statement + proof is
+  on disk, open, in **Buchholz–Wainer 1987** (`buchholz-wainer-1987-...`) and the **Wainer 2013 Stanford
+  slides** — superseding the paywalled Fairtlough–Wainer ch. III. ⚠️ Reading them confirms the upper bound's
+  proof is **PA ↪ ω-rule system + cut-elimination + ordinal assignment `<ε₀`** — i.e. the classification
+  route's capstone **is the ε₀ girder**, not an alternative to it. So "port not invent" (Castéran) covers
+  only the *lower* bound (already done: `goodsteinLength_dominates_fastGrowing`); the upper bound must be
+  originated and is Bryce–Goré-scale.
 
 ### Route C — model-theoretic ( Kirby–Paris original: nonstandard models + indicators )
 - **Source:** `kirby-paris-1982-accessible-independence.md` — the *original* proof, via nonstandard models
@@ -93,7 +98,8 @@ coded-derivation arithmetization.
   `Peano.v` bridge blueprint, not as the cut-elim method.
 
 ## Known literature gaps (candidate `ON-LINE-REQUEST`s)
-- **Fairtlough–Wainer** "Hierarchies of provably recursive functions" (Handbook ch. III) — paywalled; the
-  canonical Wainer-classification reference (Route B's missing capstone).
+- ~~**Fairtlough–Wainer** "Hierarchies of provably recursive functions" (Handbook ch. III) — paywalled.~~
+  ✅ **RESOLVED 2026-07-01** — the Wainer-classification capstone is now on disk, open, via **Buchholz–Wainer
+  1987** + **Wainer 2013 slides**. No longer an `ON-LINE-REQUEST` candidate.
 - **Gentzen 1936/1938/1943** originals — paywalled; content reconstructed in Buchholz/Buss (sufficient).
 - **Pohlers / Schütte / Takeuti** textbooks — paywalled; the modern PA∞ + ε₀ cut-elim references.

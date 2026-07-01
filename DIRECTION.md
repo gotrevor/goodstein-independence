@@ -50,11 +50,17 @@ Towsner operator A' lane. Record: `ROUTE-DECISION-2026-07-01-WAINER.md`.
 - **FORBIDDEN unless the operator reopens Route A:** grinding `Crux2Blueprint` residuals,
   `InternalZ` cut-elimination, M2 Foundation-to-Z simulation, or Towsner/A' capstones as the
   mainline. Those are banked/reference material only.
-- **Source discipline:** Fairtlough--Wainer ch. III remains an access gap; do not pretend it is
-  reviewed locally. Use Cichon/Caicedo/Casteran/Towsner local corpus for the concrete route. Wainer
-  classification may sit as a *declared, faithful, allowlisted* blueprint `axiom` **while it is being
-  worked** (the honest audit surface), but per the 2026-07-01 mandate it is a debt to DISCHARGE, never
-  an accepted endpoint — `axiom → theorem` or abandon.
+- **Source discipline:** ✅ the Wainer classification is now **sourced locally** (2026-07-01):
+  `papers/buchholz-wainer-1987-provably-computable-fast-growing.{pdf,md}` (open OA — proves BOTH
+  directions) + `papers/wainer-fast-growing-independence-slides.{pdf,md}`. The Fairtlough--Wainer ch. III
+  access gap is **CLOSED**. ⚠️ **And it settles the scope**: Buchholz--Wainer proves the converse (= the
+  axiom `wainer_bound_of_pa_proves_goodstein`) by **PA ↪ ω-rule + cut-elimination + ordinal assignment
+  `<ε₀`** — the converse **IS the ε₀ girder** (Phase 2), not a route around it. So under the FULL-DISCHARGE
+  mandate, discharging this axiom = **originating the Gentzen ordinal analysis of PA in Lean** (Bryce--Goré
+  scale, un-precedented in Lean, a human-architect research milestone per `EXPEDITION-PLAN.md`) — NOT a
+  dozen-lap decomposition. Wainer classification may sit as a *declared, faithful, allowlisted* blueprint
+  `axiom` **while that monument is being built**, but it is a debt to DISCHARGE — `axiom → theorem` or
+  abandon. See `ROUTE-SCOPE-REALITY-2026-07-01.md` for the full scope diagnosis.
 
 **lap-167 (OPERATOR-RATIFIED ROUTE PROBE — supersedes the lap-166 grind directive).** Both pre-registered
 Route-A abort triggers FIRED (see ROUTE GUARD); escalated to the operator (Trevor), who ratified a **bounded
@@ -230,19 +236,30 @@ OFF the table: the target is the top-level headline axiom-clean, or full abandon
 Peano Arithmetic does not prove Goodstein's theorem. That headline `sorry` is the *target*, not
 a thing to preserve. The whole campaign exists to discharge it honestly.
 
-## You (the box) own the full decomposition
+## The decomposition — and an honest scope warning ⚠️
 
-This is **formalization of a known proof**, not origination. Gentzen's ordinal analysis is ~90
-years old and in textbooks (Gentzen 1936, Schütte, Takeuti). Decomposing it into mathlib-shaped
-Lean lemmas is exactly treadmill work. The phases (see `EXPEDITION-PLAN.md` for the math):
+**Do NOT read this section as "the math is known, so it's just treadmill decomposition."** That framing
+(the old wording here) is exactly the scope-laundering that produced ~110 laps of false summits. The math
+IS ~90 years old and in textbooks (Gentzen 1936, Schütte, Takeuti, Buchholz) — but **`EXPEDITION-PLAN.md`
+is the binding scope statement, and it says the load-bearing girder "exists in no Lean library and must be
+*originated* … a research milestone, executed in phases, with a human architect … Not a solo
+autonomous-treadmill job."** Phases 0/1/3/4 are decomposition/assembly. **Phase 2 is origination of a
+Bryce–Goré-scale monument (~thousands of lines, un-precedented in Lean), NOT a dozen-lap grind** — and
+under the 2026-07-01 FULL-DISCHARGE mandate it is now the *whole ballgame* (see
+`ROUTE-SCOPE-REALITY-2026-07-01.md`). A grind lap's job on Phase 2 is to chip ONE honest mathlib-shaped
+lemma of that monument and bank it — not to "finish the girder." The phases (see `EXPEDITION-PLAN.md` for
+the math):
 
 - **Phase 0 — encoding.** ✅ DONE - Milestone **M1** complete (`goodsteinTerminates_re` + `computable_bump` proven, 0 sorries; verified 2026-06-26).
 - **Phase 1 — Gödel II hook.** Surface `Con(𝗣𝗔)` + `𝗣𝗔 ⊬ Con(𝗣𝗔)` from Foundation's *existing*
   Gödel II (`FirstOrder/Incompleteness/Second.lean`), and reduce the headline to the single
   implication `𝗣𝗔 ⊢ γ → 𝗣𝗔 ⊢ Con(𝗣𝗔)`. Assembly. Milestone **M2**.
-- **Phase 2 — the girder.** `TI(ε₀) ⊢ Con(𝗣𝗔)`: infinitary `PA_∞` (ω-rule), ordinal assignment
-  `< ε₀` to derivations, ε₀-bounded cut-elimination. The deep core. Decompose it; build on
-  mathlib's ε₀ (`SetTheory/Ordinal/Veblen`, `ONote`) + Foundation's finitary Hauptsatz. Milestones **M3…**.
+- **Phase 2 — the girder (THE monument; multi-lap → multi-month, human-architected).** `TI(ε₀) ⊢ Con(𝗣𝗔)`,
+  OR equivalently the Buchholz–Wainer "bounding" converse for the growth-rate route: infinitary `PA_∞`
+  (ω-rule), ordinal assignment `< ε₀` to derivations, ε₀-bounded cut-elimination, Σ₁-witness bounds. The
+  deep core. Un-precedented in Lean; precedented in Coq (Bryce–Goré, arXiv:2603.00487 — the scale marker +
+  a `Peano.v` bridge blueprint). Build on mathlib's ε₀ (`SetTheory/Ordinal/Veblen`, `ONote`) + Foundation's
+  finitary Hauptsatz. **This — not the wrapper route choice — is what "axiom-free" costs.** Milestones **M3…**.
 - **Phase 3 — `Goodstein ⟹ TI(ε₀)`.** Re-express, syntactically, the ordinal descent that the
   termination Engine (`lean-formalizations` `Logic/Goodstein`) already does model-side.
 - **Phase 4 — assemble.** `γ ⟹ TI(ε₀) ⟹ Con(𝗣𝗔)`, then Gödel II ⟹ `𝗣𝗔 ⊬ γ`. Discharge the
