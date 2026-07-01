@@ -3447,6 +3447,32 @@ lemma iseqNaddIdgAux_lt_replace {ds ds' i : V}
         _ (isNF_iseqNaddIdgAux' hNF i)
       rw [icmp_omega_pow]; exact hlt
 
+/-- **Prefix õ-drop (strict).** Extending the `#`-fold `iseqNaddIdgAux ds` by even one more entry
+strictly increases it (each entry contributes a positive `ω^{iotil}`), so a proper prefix `j < k` folds
+to something strictly smaller (`≺`). This is the ordinal descent that makes the C-exit **prefix
+sub-chain** a valid `certReplace` reduct: `iotil (zK s r (prefix)) ≺ iotil (zK s r ds)` whenever the
+distinguished exit is not the last premise (`jstar + 1 < lh ds`). -/
+lemma iseqNaddIdgAux_lt_of_lt {ds : V} (hNF : ∀ n, isNF (iotil (znth ds n))) :
+    ∀ k j, j < k → icmp (iseqNaddIdgAux ds j) (iseqNaddIdgAux ds k) = 0 := by
+  intro k
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => intro j h; exact absurd h (by simp)
+  case succ k ih =>
+    intro j hj
+    have hstep : icmp (iseqNaddIdgAux ds k) (iseqNaddIdgAux ds (k + 1)) = 0 := by
+      rw [iseqNaddIdgAux_succ]
+      have h := inadd_left_mono isNF_zero (isNF_omega_pow (hNF k))
+        (icmp_zero_ocOadd _ _ _) (iseqNaddIdgAux ds k) (isNF_iseqNaddIdgAux' hNF k)
+      rwa [inadd_zero_right _ (isNF_iseqNaddIdgAux' hNF k)] at h
+    rcases lt_or_eq_of_le (le_iff_lt_succ.mpr hj) with hjk | hjk
+    · exact icmp_trans
+        (max (iseqNaddIdgAux ds j) (max (iseqNaddIdgAux ds k) (iseqNaddIdgAux ds (k + 1))))
+        _ (le_max_left _ _)
+        _ (le_trans (le_max_left _ _) (le_max_right _ _))
+        _ (le_trans (le_max_right _ _) (le_max_right _ _)) (ih j hjk) hstep
+    · subst hjk; exact hstep
+
 /-- **N2, `idg`-side (monotone)** — the `idg` (max) fold is monotone under entrywise `idg`-domination. -/
 lemma iseqMaxIdgAux_mono {ds ds' : V} (hle : ∀ n, idg (znth ds' n) ≤ idg (znth ds n)) :
     ∀ j, iseqMaxIdgAux ds' j ≤ iseqMaxIdgAux ds j := by
