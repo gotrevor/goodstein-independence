@@ -1,7 +1,18 @@
 # STATUS — GoodsteinPA 📊
 
 **`𝗣𝗔 ⊬ Goodstein` (Kirby–Paris), axiom-free — single open girder = crux-2 (IΣ₁-internal Gentzen consistency).**
-· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 166 (**named-axiom-blueprint ledger; headline wired through girder axiom, sorryAx OFF the headline**) · 2026-06-28 ·
+· **Build**: 🟢 green (1326 jobs) · **Updated**: lap 168 (**crux-2 `residual` decomposed into 4 named escapes; prefix-subchain reduct VALIDATED in-kernel — `iRedDescent` needs only õ-descent, no rank-drop/weakening; õ-drop lemma `iseqNaddIdgAux_lt_of_lt` proven; Path-B blueprint audit re-verified ✓ 9 nodes, 0 warnings**) · 2026-07-01 ·
+> **Lap 168:** (1) split the single `residual` sorry in `genReduct_chain_noRedex_anySucc` into 4 named
+> src sub-sorries: `cExitReplayAll`/`cExitReplayNeg` (C-exit R-intro replay) + `gammaAllCut`/`gammaNegCut`
+> (R1/R2 Buchholz general cuts, Γ=∅-vacuous). (2) In-kernel REFUTED lap-166's "close C-exit by growing the
+> antecedent" — `isChainInf` threading gives `chainAnt ds jstar ⊆ seqAnt s ∪ {earlier-exit succedents}`,
+> not `⊆ seqAnt s`. (3) VALIDATED the correct reduct = prefix sub-chain `zK s r (ds ↾ under (jstar+1))`:
+> `iRedDescent` needs ONLY iotil/idg-descent (NOT the rank-drop prior laps assumed), so NO internal
+> weakening is needed — overturns the "depth ≈ zAxBot" framing. (4) proved the õ-descent heart
+> `iseqNaddIdgAux_lt_of_lt` (axiom-clean). Remaining build (~1 lap, mechanical) + edge case `jstar+1=lh ds`
+> in `PENDING_WORK.md` lap-168. Also: preserved codex's Path-B `ZekdBoundedTruth` embedding machinery
+> (axiom-clean) and discharged trivial blueprint capstones 1 & 9. **ALTITUDE unchanged: the crux-2 engine
+> `false_of_ZDerivesEmpty` + M2/M4 embedding are still the real remaining work; "only the crux left" ≠ "almost done."**
 **Lap-166 MATH (structural correction + a real DROP):** `axMajorResidual` (and its whole `genReduct_botSucc` →
 `genReduct_botSucc_chain` → `genReduct_chain_noRedex` ⊥-cluster) is **ORPHANED** — no live proof consumes
 `genReduct_botSucc`. The LIVE headline recursion is the any-succedent generalization: `ZDerivesEmptyR_descent_step`
