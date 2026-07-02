@@ -105,6 +105,13 @@ jobs:
              <a href="blueprint/index.html">Blueprint</a> ·
              <a href="docs/">API docs</a></p>
           HTML
+      # While the repo is private (no Pages on the free plan), the built site is
+      # still inspectable: download this artifact and serve it locally.
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site
       - name: Deploy to GitHub Pages
         if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v4
