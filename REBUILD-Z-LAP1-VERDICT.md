@@ -60,6 +60,14 @@ derivation across the (provably equal, `≤`-both-ways) operator/stage endpoints
 minimal `Zeh` core has only the six mandated constructors, the induction is strictly SHORTER
 than `Zekd`'s (no `andI`/`orI`/`verumR`/`trueRel`/`trueNrel`).
 
+The A3 clause's **companion inversions** are also discharged (§7, all axiom-clean):
+`orInv_Zeh`, `andInvL_Zeh`, `andInvR_Zeh` — the propositional inversions mirroring the
+banked `Zekd` suite.  They keep the same `(α, e, H, m, c)` (no stage/relativization re-key),
+and since the minimal core has no `andI`/`orI` intro rule, `φ ⋏ ψ`/`φ ⋎ ψ` is never
+principal — every case threads past a passive side formula.  Reused by the cut-elimination
+assembly (laps 5–7) for cuts on propositional formulas; independent of the §5 f-slot
+statements.
+
 ## A2 — the f-slot elimination statements (LOCK §3/§6, NOT-LOCKED — the judge gate)
 
 `§5`.  The E–W number-theoretic operator slot `f : ℕ → ℕ` (arXiv:1205.2879, Def. 23 +
