@@ -35,11 +35,18 @@ The lap-3 "awaiting architect ratification" stall is RESOLVED by review-lap auth
   read-off bound preserved) — the kernel witness that the lap-184 amendment is a CONSERVATIVE
   generalization (nothing the stage calculus proved is lost). **Blueprint ledger updated (lap 184):**
   pins 1–2 now carry `clean` `goodstein_blueprint` attributes (nodes 12/13); `lake exe
-  blueprint_audit` PASSES (13 nodes, claimed=computed=clean, exit 0). Residual P4 (optional,
-  non-blocking): (b) via `zeh_to_zef`, re-express the two stage-form §6 probes
-  (`probe_allomega_reassembly_Zf`, `two_level_config_Zeh`) + the stage `headline_readoff` in slot
-  form. **NOTE: `Zeh` CANNOT be fully retired** — pin 3 (`cutElimPass_Zf`) is stated over `Zeh`, and
-  its restatement is FORBIDDEN (lap-5 gate); so `Zeh`/`Zef` coexist until pin 3's lap-5 restatement.
+  blueprint_audit` PASSES (13 nodes, claimed=computed=clean, exit 0). **§6 seam migration COMPLETE
+  (lap 184):** all three §6 probes now live in the slot calculus — seam-1 `probe_cut_all_arm_Zf`,
+  seam-2 `probe_allomega_reassembly_Zef`, non-vacuity `two_level_config_Zef` (§8b, all axiom-clean);
+  the cut-elimination assembly (laps 5–7) now has its test infrastructure in the target calculus.
+  **NOTE: `Zeh` CANNOT be fully retired** — pin 3 (`cutElimPass_Zf`) is stated over `Zeh`, and its
+  restatement is FORBIDDEN (lap-5 gate); the stage-form probes + read-off stay as `Zeh` companions
+  until pin 3's lap-5 restatement. So `Zeh`/`Zef` coexist by design.
+
+  **PERMITTED SCOPE NOW EXHAUSTED for this run:** pins 1–2 discharged, bridge proven, ledger honest,
+  §6 migrated. Everything downstream (cut-elim assembly, Δ₀ read-off, integration) needs pin 3, which
+  is operator-FORBIDDEN (lap-5 gate). The next real advance is pin 3's faithful restatement — an
+  altitude/judge deliverable, NOT a grind-lap task this run.
 
 ### After the port: the live REBUILD-Z crux is now PIN 3 (`cutElimPass_Zf`) — but it stays the
 ### lap-5 entrance gate (statement mini-lock, discharge FORBIDDEN until its restatement is ratified).

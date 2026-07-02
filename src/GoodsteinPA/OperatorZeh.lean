@@ -1697,6 +1697,53 @@ theorem zeh_to_zef {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq}
   | @cut α βφ βψ e H m c Γ φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ d₂ ih₁ ih₂ =>
       exact Zef.cut φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ih₁ ih₂
 
+/-! ## §8b The two W4B seams, now in the SLOT judgment `Zef` (§6 migration complete)
+
+The stage-form seam probes (`two_level_config_Zeh`, `probe_allomega_reassembly_Zf`) re-expressed
+natively in `Zef` — the calculus the cut-elimination assembly (laps 5–7) will operate in.  In the
+slot judgment the numeric control IS the slot, so the reassembly needs no separate `NormControlled`
+conjunct: each ω-branch simply runs at the relativized slot `rel1 f n`. -/
+
+/-- **Non-vacuity in the slot judgment (slot form of `two_level_config_Zeh`, sorry-free).**  ONE
+`allω` node at `ω^ω` whose every branch is a rank-`c` principal ∀/∃ cut with premise ordinals
+`ω·(n+1)` — the branch-unbounded configuration that killed the `(k,d)` calculus, a legal `Zef`
+derivation at an arbitrary slot `f`. -/
+theorem two_level_config_Zef {ar : ℕ} (r : (ℒₒᵣ).Rel ar) (v : Fin ar → SyntacticTerm ℒₒᵣ)
+    (χ ψ : SyntacticSemiformula ℒₒᵣ 1) {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ : Seq}
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v ∈ Γ) :
+    Zef (expTower ONote.omega) e H f ((∀⁰ χ).complexity + 1) (insert (∀⁰ ψ) Γ) := by
+  refine Zef.allω ψ (fun n => osucc (wmul n))
+    (fun n => osucc_wmul_lt_expTower_omega n)
+    (fun n => osucc_NF (wmul_NF n))
+    (expTower_NF omegaO_NF)
+    (fun n => Cl.osucc (wmul_mem _ n))
+    (fun n => ?_)
+  refine Zef.cut (∀⁰ χ) (Nat.lt_succ_self _)
+    (Zekd.lt_osucc (wmul_NF n)) (Zekd.lt_osucc (wmul_NF n))
+    (wmul_NF n) (wmul_NF n) (osucc_NF (wmul_NF n))
+    (wmul_mem _ n) (wmul_mem _ n) ?_ ?_
+  · exact Zef.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn))
+  · exact Zef.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn))
+
+/-- **Seam-2 reassembly in the slot judgment (slot form of `probe_allomega_reassembly_Zf`,
+sorry-free).**  The ω-node re-assembles over the reduction-output class, each branch's control
+carried by the relativized slot `rel1 f n` — the branch-unbounded demand that overflowed the
+`(k,d)` counter, now paid by the function slot inside the judgment (no separate control conjunct). -/
+theorem probe_allomega_reassembly_Zef {e : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq}
+    {χ : SyntacticSemiformula ℒₒᵣ 1} {f : ℕ → ℕ}
+    (dd : ∀ n, Zef (osucc (wmul n + wmul n)) e (adjoin H n) (rel1 f n) c
+      (insert (χ/[nm n]) Γ)) :
+    Zef (expTower ONote.omega) e H f c (insert (∀⁰ χ) Γ) := by
+  refine Zef.allω χ (fun n => osucc (wmul n + wmul n))
+    (fun n => ?_) (fun n => ?_) (expTower_NF omegaO_NF)
+    (fun n => Cl.osucc (Cl.add (wmul_mem (adjoin H n) n) (wmul_mem (adjoin H n) n))) dd
+  · rw [wmul_add_wmul]
+    exact osucc_omega_coeff_lt _
+  · rw [wmul_add_wmul]
+    exact osucc_NF (nf_one.oadd _ NFBelow.zero)
+
 /-! ## Blueprint ledger — the DISCHARGED reduction pins (lap 184)
 
 Pins 1–2 are now `clean` nodes (real kernel footprint = trust base only); the audit reconciles
