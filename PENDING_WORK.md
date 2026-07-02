@@ -39,11 +39,19 @@ machinery. Kernel work this lap (`wip/HardyFastGrowingBridge.lean`):
   `hardy_omega_pow_coeff_le` (`hardy(oadd β (m+1) 0) n + 1 ≤ fastGrowing β^[m+1](n+1)`, parametrized
   by the outer IH at β), whose **base case (m=0) is proven**. Corollary
   `hardy_omega_pow_lt_fastGrowing` (`hardy(ω^{α'}) n < fastGrowing α'(n+1)`) derived.
-- **The SOLE remaining sorry** is the coefficient-induction step (`m→m+1`) of
-  `hardy_omega_pow_coeff_le`: `H_{ω^β·(m+2)}(n)+1 ≤ f_β^[m+2](n+1)` from the IH at `m+1`. The
-  fundamental sequence of `ω^β·(m+2)` branches on β's shape: β=0 is a finite SUCCESSOR (easy,
-  `hardy_succ`); β=succ/limit introduce a tail term `ω^δ·(i+1)` (the genuine Cichoń–Wainer core).
-  All in `wip/HardyFastGrowingBridge.lean` (out of build target).
+- **The coefficient-induction step is now PROVEN modulo one composition identity.** The step
+  `H_{ω^β·(m+2)}(n)+1 ≤ f_β^[m+2](n+1)` closes via: composition + the IH at `m` + iterate-
+  monotonicity (`fastGrowing_monotone`, `Function.iterate_succ_apply`) + `hbase`. So **the ENTIRE B4
+  bridge now reduces to a SINGLE sorry** — the composition lemma
+  `hardy_omega_pow_coeff_comp`:  `H_{ω^β·(k+2)}(n) = H_{ω^β·(k+1)}(H_{ω^β}(n))`  (kernel-verified
+  β∈{0,1,2}). This is the non-absorbing additive identity `H_{γ+ω^β}=H_γ∘H_{ω^β}` at `γ=ω^β·(k+1)`
+  (equal leading exponents `β` ⟹ NO absorption — the benign case, contrast `HardyAddProbe`'s
+  absorbing refutation).
+- **Immediate next step (permitted):** prove `hardy_omega_pow_coeff_comp` — i.e. the non-absorbing
+  LIMIT fs-homomorphism `fundamentalSequence (γ + δ) = (γ + ·)∘fs δ` (when δ's lead exp ≤ γ's trailing
+  exp), the branch `HardyAddProbe.lean` proved only for successors (`fundamentalSequence_add_succ`).
+  Discharging it collapses the whole B4 bridge → `hardy_omega_pow_lt_fastGrowing` → the P1
+  raised-control upper bound. All in `wip/HardyFastGrowingBridge.lean` (out of build target).
 - **This reduces P1's raised-control domination to E–W Lemma 19 in the form
   `fastGrowing α' (n+1) ≤ (iterate of input slot)`** — a fast-growing bound on STABLE defs, NOT the
   Zeh calculus. The `≤` bridge is grindable NOW as B4 (permitted, calculus-independent growth

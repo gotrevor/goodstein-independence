@@ -50,14 +50,22 @@ decisive).  The `native_decide` anchors above (α ∈ {0,1,2}, all successor/fin
 exactly the regime where `=` holds.  So the load-bearing target is the INEQUALITY below — and that is
 precisely the UPPER bound P1 needs. -/
 
+/-- **Composition lemma (the equal-exponent additive core) — the SOLE remaining open obligation.**
+`H_{ω^β·(k+2)}(n) = H_{ω^β·(k+1)}(H_{ω^β}(n))`: the non-absorbing additive identity
+`H_{γ + ω^β} = H_γ ∘ H_{ω^β}` at `γ = ω^β·(k+1)` (leading exponents both `β`, so NO absorption —
+contrast the absorbing case refuted in `HardyAddProbe.lean`).  Kernel-verified β ∈ {0,1,2}.  Follows
+from the non-absorbing LIMIT fs-homomorphism (`fundamentalSequence (γ + δ) = (γ + ·)∘fs δ` when
+`δ`'s leading exp ≤ `γ`'s trailing exp) — the branch `HardyAddProbe` proved only for successors.  -/
+theorem hardy_omega_pow_coeff_comp (β : ONote) (k n : ℕ) :
+    hardy (oadd β (Nat.succPNat (k + 1)) 0) n
+      = hardy (oadd β (Nat.succPNat k) 0) (hardy (oadd β 1 0) n) := by
+  sorry
+
 /-- **The coefficient intermediate** (the classical Cichoń–Wainer core), parametrized by the
 exponent-`β` base bound `hbase` (supplied by the outer IH in the successor case):
-`H_{ω^β·(m+1)}(n) + 1 ≤ f_β^{[m+1]}(n+1)`.  Kernel-verified for β ∈ {0,1} (`#eval`, scratch).
-Induction on the coefficient `m`:
-* `m = 0`: `ω^β·1 = ω^β`, `f_β^{[1]} = f_β` — exactly `hbase`.
-* `m+1`: relate `H_{ω^β·(m+2)}` to `H_{ω^β·(m+1)}` (IH) with one extra `f_β`-iterate.  The
-  fund. seq. of `ω^β·(m+2)` (= `reaches_coeff_step'` territory) branches on β's shape (0/succ/limit);
-  this is the OPEN step. -/
+`H_{ω^β·(m+1)}(n) + 1 ≤ f_β^{[m+1]}(n+1)`.  Kernel-verified for β ∈ {0,1}.  Induction on the
+coefficient `m`: base `m=0` is `hbase`; the step composes via `hardy_omega_pow_coeff_comp` + the IH +
+iterate-monotonicity — so this lemma is PROVEN modulo the composition lemma. -/
 theorem hardy_omega_pow_coeff_le {β : ONote}
     (hbase : ∀ n, hardy (oadd β 1 0) n + 1 ≤ fastGrowing β (n + 1)) :
     ∀ (m n : ℕ), hardy (oadd β (Nat.succPNat m) 0) n + 1 ≤ (fastGrowing β)^[m + 1] (n + 1) := by
@@ -69,8 +77,15 @@ theorem hardy_omega_pow_coeff_le {β : ONote}
       exact hbase n
   | succ m ih =>
       intro n
-      -- H_{ω^β·(m+2)}(n) + 1 ≤ f_β^{[m+2]}(n+1); OPEN (fund. seq. of ω^β·(m+2) branches on β).
-      sorry
+      -- H_{ω^β·(m+2)}(n) + 1 ≤ f_β^{[m+2]}(n+1): compose (lemma) + IH + iterate-monotonicity.
+      rw [hardy_omega_pow_coeff_comp β m n]
+      have h2 : hardy (oadd β 1 0) n + 1 ≤ fastGrowing β (n + 1) := hbase n
+      calc hardy (oadd β (Nat.succPNat m) 0) (hardy (oadd β 1 0) n) + 1
+          ≤ (fastGrowing β)^[m + 1] (hardy (oadd β 1 0) n + 1) := ih _
+        _ ≤ (fastGrowing β)^[m + 1] (fastGrowing β (n + 1)) :=
+            (fastGrowing_monotone β).iterate (m + 1) h2
+        _ = (fastGrowing β)^[m + 1 + 1] (n + 1) :=
+            (Function.iterate_succ_apply (fastGrowing β) (m + 1) (n + 1)).symm
 
 /-- **TARGET: the Hardy–fast-growing UPPER bound at `ω^α`** — `H_{ω^α}(n) + 1 ≤ f_α(n+1)`,
 unconditional.  Well-founded recursion on `α`:
