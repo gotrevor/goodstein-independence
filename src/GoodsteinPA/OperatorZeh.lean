@@ -1697,4 +1697,26 @@ theorem zeh_to_zef {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq}
   | @cut α βφ βψ e H m c Γ φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ d₂ ih₁ ih₂ =>
       exact Zef.cut φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ih₁ ih₂
 
+/-! ## Blueprint ledger — the DISCHARGED reduction pins (lap 184)
+
+Pins 1–2 are now `clean` nodes (real kernel footprint = trust base only); the audit reconciles
+their claimed status against `Lean.collectAxioms`.  Pin 3 (`cutElimPass_Zf`) stays `notready`
+(`sorryAx`-bearing) until its lap-5 restatement lands. -/
+
+attribute [goodstein_blueprint 12 clean "zeh_reduction_pin1" "0" 100 cutReduceAllAuxRunning_Zf
+  []
+  ["Eguchi–Weiermann arXiv:1205.2879 Lemma 25 (compose the slot at a principal cut)",
+   "Towsner §19.6 running-family cut-reduction; output slot g∘f at FIXED control",
+   "REBUILD-Z-LAP4-RATIFICATION-2026-07-02.md: discharged in the Zef function-slot judgment; the ℕ-stage Zeh form was kernel-refuted (principal_witness_exceeds_stage), R4-noncompliant"]
+  "Pin 1: the running-family cut-reduction, function-slot form (fixed control, output slot g∘f). Discharged sorry-free lap 184."]
+  cutReduceAllAuxRunning_Zf
+
+attribute [goodstein_blueprint 13 clean "zeh_step_pin2" "0" 100 stepAllω_Zf
+  []
+  ["Eguchi–Weiermann arXiv:1205.2879 Lemma 25; the common-control ∀/∃ step",
+   "Q3-unified (one ⋁-principal reduction; the ∀-side enters via allInv_Zef)",
+   "REBUILD-Z-LAP4-RATIFICATION-2026-07-02.md: discharged in the Zef function-slot judgment"]
+  "Pin 2: the common-control ∀/∃ step motive, function-slot form. Discharged sorry-free lap 184 (feeds pin 1 via allInv_Zef inversion)."]
+  stepAllω_Zf
+
 end GoodsteinPA.OperatorZeh

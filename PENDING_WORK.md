@@ -33,11 +33,13 @@ The lap-3 "awaiting architect ratification" stall is RESOLVED by review-lap auth
   (§8, axiom-clean `[propext, Classical.choice, Quot.sound]`; `rel1_rel1` helper): every stage-`m`
   derivation is a slot derivation at the canonical slot `rel1 (hardy e) m` (root `f 0 = hardy e m`,
   read-off bound preserved) — the kernel witness that the lap-184 amendment is a CONSERVATIVE
-  generalization (nothing the stage calculus proved is lost). Residual P4 (optional, non-blocking):
-  (a) re-point the `zeh_readoff_exit` blueprint attribute to `headline_readoff_Zef` (or add a slot
-  attribute); (b) via `zeh_to_zef`, re-express / retire the two stage-form §6 probes
-  (`probe_allomega_reassembly_Zf`, `two_level_config_Zeh`) + the stage `headline_readoff`; (c) retire
-  `Zeh` if fully subsumed. `Zeh`/`Zef` coexist green today.
+  generalization (nothing the stage calculus proved is lost). **Blueprint ledger updated (lap 184):**
+  pins 1–2 now carry `clean` `goodstein_blueprint` attributes (nodes 12/13); `lake exe
+  blueprint_audit` PASSES (13 nodes, claimed=computed=clean, exit 0). Residual P4 (optional,
+  non-blocking): (b) via `zeh_to_zef`, re-express the two stage-form §6 probes
+  (`probe_allomega_reassembly_Zf`, `two_level_config_Zeh`) + the stage `headline_readoff` in slot
+  form. **NOTE: `Zeh` CANNOT be fully retired** — pin 3 (`cutElimPass_Zf`) is stated over `Zeh`, and
+  its restatement is FORBIDDEN (lap-5 gate); so `Zeh`/`Zef` coexist until pin 3's lap-5 restatement.
 
 ### After the port: the live REBUILD-Z crux is now PIN 3 (`cutElimPass_Zf`) — but it stays the
 ### lap-5 entrance gate (statement mini-lock, discharge FORBIDDEN until its restatement is ratified).
