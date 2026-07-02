@@ -633,6 +633,23 @@ theorem normControlled_rel1 {f : ℕ → ℕ} {e : ONote} {m : ℕ} (h : NormCon
   rw [he] at hx
   simpa [rel1] using hx
 
+/-- Norm control is monotone in the slot (assembly plumbing: a dominating slot still
+controls; reused when a reduction outputs a larger-than-needed composed slot). -/
+theorem NormControlled.mono {f f' : ℕ → ℕ} {e : ONote} {m : ℕ}
+    (h : NormControlled f e m) (hff' : ∀ x, f x ≤ f' x) : NormControlled f' e m :=
+  fun x => le_trans (h x) (hff' x)
+
+/-- Norm control is antitone in the stage: a slot controlling stage `m` controls any
+smaller stage `m' ≤ m` (the `exI` bound only shrinks).  Reused when the reduction runs a
+premise at a lower stage than the conclusion. -/
+theorem NormControlled.stage_antitone {f : ℕ → ℕ} {e : ONote} {m m' : ℕ}
+    (h : NormControlled f e m) (hm : m' ≤ m) : NormControlled f e m' :=
+  fun x => le_trans (hardy_monotone e (by omega)) (h x)
+
+/-- `rel1` is monotone in the slot (feeds `NormControlled.mono` at ω-nodes). -/
+theorem rel1_mono {f f' : ℕ → ℕ} (hff' : ∀ x, f x ≤ f' x) (n : ℕ) :
+    ∀ x, rel1 f n x ≤ rel1 f' n x := fun x => hff' (max n x)
+
 /-- **PIN (disclosed sorry): the running-family reduction, f-slot form**
 (`cutReduceAllAuxRunning_Zf`).  Extends the Z1 pin `cutReduceAllAuxRunning_Zeh` with the
 E–W f-slots: the `∀`-family is `g`-controlled, the `∃`-side `f`-controlled, and the output
