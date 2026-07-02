@@ -31,10 +31,20 @@ per-branch-raise-then-unify death) evaporates too.  Option B (raise stays at red
 numeric slot to iteration → the "reduction" becomes a collapse → reject unless K1 info-free
 membership provably blocks the E-W fixed-`F` "run-at-`F[K]`-then-absorb" step (the ~20% escape).
 
-**Next (still judge-gated — do NOT grind pins pre-ratification):** judge rules Option A vs B.  If A,
-the §5 draft is amended (statement change, judge-owned) and lap-2 discharges
-`NormControlled (f∘g) e m` (should be near-immediate from the banked plumbing), with the real
-threading work relocated to `cutElimPass_Zf`'s iterated slot.
+**Companion finding (kernel-checked this lap): pin 3's existential `f'` is VACUOUS.**
+`∃ f', NormControlled f' e' m` is trivially true for any `e', m`
+(`⟨fun x => hardy e' (max m x), fun x => le_rfl⟩`, sorry-free), and since `ZehProv` is f-free, `f'`
+is decoupled from the derivation.  So `cutElimPass_Zf`'s numeric conjunct adds NO quantitative
+content — stronger than verdict Q2's "abstraction choice" framing: it is vacuous and
+**read-off-breaking** (E-W Lemma 31's `witness ≤ f(0)` needs the concrete iterate `f`).  Fix: `f'`
+MUST be pinned to the E-W iterate of the INPUT `f` (`f' = f^{…}`, Lemma 30), which is exactly where
+Option A relocates the real P1 work and where Lemma 19 (`N(α) ≤ f^{F^α(0)}(0)`) makes it achievable.
+(Pins 1–2 are NOT vacuous — their `f, g` are explicit params, `f∘g` determined.)
+
+**Next (still judge-gated — do NOT grind pins pre-ratification):** judge rules Option A vs B AND
+whether to pin `f'`.  If A + pin: (1) lap-2 discharges the reduction conjunct `NormControlled (f∘g)
+e m` (near-immediate from banked plumbing); (2) the real threading work is the pinned-iterate
+`NormControlled (f^{…}) (raise e α') m` at `cutElimPass_Zf`, discharged via the Lemma-19 norm bound.
 
 ## Lap 175 — ⭐⭐⭐ REBUILD-Z lap 1 (Scope-A) done; crux = the f-slot reduction, JUDGE-GATED
 

@@ -93,6 +93,34 @@ this looks like a re-entry of exactly the per-branch-raise-then-unify mechanism 
   E-W "run-at-`F[K]`-then-absorb-to-`F`" step, *forcing* a raise into the reduction. Even then the
   numeric slot must become iteration (Option B), and the R3/no-`mono_e` account is still owed.
 
+## Addendum (same lap, kernel-checked): pin 3's existential `f'` is VACUOUS — it breaks the read-off
+
+`cutElimPass_Zf` (line 690) concludes `∃ α' f', … ∧ ZehProv α' (raise e α') H m c Γ ∧
+NormControlled f' (raise e α') m`. Since the judgment `ZehProv` is **f-free** (LOCK §3), `f'`
+appears ONLY in the `NormControlled f'` conjunct — nowhere is it tied to the derivation. And that
+conjunct is trivially satisfiable on its own. Kernel-checked this lap (sorry-free):
+
+```lean
+example (e' : ONote) (m : ℕ) : ∃ f' : ℕ → ℕ, NormControlled f' e' m :=
+  ⟨fun x => hardy e' (max m x), fun x => le_rfl⟩
+```
+
+So the existential-`f'` conjunct of pin 3 adds **no quantitative content** — pick
+`f' := hardy (raise e α')` post hoc and it holds regardless of the collapse. This is stronger than
+verdict question #2's framing ("is the existential the right abstraction?"): the existential is not
+merely loose, it is **vacuous and read-off-breaking**. E-W's entire quantitative payoff is that the
+numeric operator is carried *faithfully as the iterate* `f ↦ f^{F^α(0)+1}` (Lemma 30) all the way
+down, so that Lemma 31 reads off `witness ≤ f(0)` for **that specific `f`**. An existential `f'`
+severs `f` from the derivation and the final `f(0)` bound has no concrete `f` to name.
+
+**Consequence for the gate:** `f'` MUST be pinned to the E-W iterate of the INPUT slot `f`
+(`f' = f^{…}`, index = the collapse's ordinal count), not left existential. This is the locus where
+lap-176's Option A relocates the real P1 work — and note it is *achievable* there: E-W's Lemma 19
+(`N(α) ≤ f^{F^α(0)}(0)`) is exactly the bound that a pinned iterate satisfies, which composition at
+the reduction could never deliver. Contrast pins 1–2: their `f, g` are explicit parameters and
+`f∘g` is determined, so their conjunct is a *real* obligation (not vacuous) — the vacuity is
+specific to pin 3's `∃ f'`.
+
 ## Recommended gate action
 
 Before opening laps 2–4: rule on Option A vs B. If A (recommended), amend the §5 draft so the
