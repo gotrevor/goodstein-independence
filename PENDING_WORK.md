@@ -1,5 +1,17 @@
 # Pending work — open obligations & attack paths
 
+## IN-FLIGHT (lap 181) — Aristotle headline faithfulness cross-check
+
+Sanctioned NL→formalization faithfulness audit of the headline (the ONE cross-check that carries
+value; permitted, non-gated, touches no §5 pin / no Route-A). Job `f56c8524-1108-4e2c-bc69-07260fc4811b`
+submitted with the Kirby–Paris theorem PROSE (`scratchpad/goodstein-headline-prose.txt`, MATH only —
+NEVER the Lean). **Next resume:** `aristotle show f56c8524-1108-4e2c-bc69-07260fc4811b`; when COMPLETE,
+`aristotle download` its `Main.lean` and check its `sorry`'d statement is logically equivalent to
+`peano_not_proves_goodstein : 𝗣𝗔 ⊬ ↑goodsteinSentence` (same shape: non-provability in first-order PA of
+a sentence expressing "every Goodstein sequence terminates"). Record the verdict in a
+`REBUILD-Z-LAP181-FAITHFULNESS-*.md` note. Do NOT resubmit; one job in flight. This is faithfulness
+hygiene on the LOCKED audit surface, not calculus proof work — stays inside Scope-A discipline.
+
 ## DONE (lap 180) — additive-Hardy INEQUALITY banked in `src/`
 
 **The lap-180 review's named permitted brick is CLOSED.** Lap 178 refuted the additive-Hardy
