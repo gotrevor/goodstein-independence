@@ -123,6 +123,34 @@ the reduction could never deliver. Contrast pins 1–2: their `f, g` are explici
 `f∘g` is determined, so their conjunct is a *real* obligation (not vacuous) — the vacuity is
 specific to pin 3's `∃ f'`.
 
+## Resolution of verdict judge-question #3 (source-grounded): do NOT split `stepAllω_Zf`
+
+Core check (lines 260–270): `allω` introduces `∀⁰φ` with premises over **every** branch `n`,
+relativized (`adjoin H n`, `max m n`) — exactly E-W's **(⋀)** rule `f[N(ι)], F[ord(ι)] ⊢ Γ,A_ι ∀ι`.
+`exI` introduces `∃⁰φ` from **one** premise at a bounded witness `n ≤ hardy e m` — exactly E-W's
+**(⋁)** rule (one `ι₀`, `N(ι₀) ≤ f(0)`).
+
+`stepAllω_Zf`'s principal cut is on the complementary pair `{∀χ, ∃¬χ}` (D₁ derives `Γ,∀χ`; D₂
+derives `Γ,∃¬χ`). In E-W this is a **single ⋁-principal cut-reduction** (Lemma 25 with `C = ∃¬χ`
+the ⋁-type, `¬C = ∀χ` the ⋀-type): extract the witness `n₀` from D₂'s `exI`, **invert** D₁ at `n₀`
+via `allInv_Zeh` (= Lemma 24, now proven), cut `χ(n₀)` vs `¬χ(n₀)` at lower complexity. So:
+
+**Answer: keep `stepAllω_Zf` unified — do NOT split into ∀- and ∃-principal steps.** `∀χ` and
+`∃¬χ` are the *same* cut (dual formulas); there is one reduction, not two. The ∀-side is never a
+separate reduction — it enters the single ⋁-principal reduction via inversion. Splitting would
+duplicate the ⋁ machinery and falsely model ∀ as having its own reduction rule (it does not; `∀χ`
+is always the `¬C` side, inverted). The only statement refinement worth making: the unified step's
+docstring should record the asymmetry (D₂ = witness-provider, D₁ = inverted) — the body is where
+`allInv_Zeh` lands, gated.
+
+## Complete judge-input package (this lap)
+
+| verdict Q | resolution (source-grounded, this lap) |
+|---|---|
+| #1 P1 conjunct locus | It is a **Lemma 25/30 conflation artifact** (main finding). Fix = Option A: fixed-control reduction (`NormControlled (f∘g) e m`, discharged in-kernel by banked `NormControlled.comp`); confine raise+iteration to the pass. P1 dissolves. |
+| #2 `cutElimPass_Zf` existential slot | The existential `f'` is **vacuous & read-off-breaking** (kernel-checked). Must be **pinned** to the E-W iterate `f^{…}` (Lemma 30); Lemma 19 makes it achievable. |
+| #3 split `stepAllω_Zf` ∀/∃? | **No** — one ⋁-principal reduction (E-W Lemma 25); ∀-side enters via `allInv_Zeh` inversion. |
+
 ## Recommended gate action
 
 Before opening laps 2–4: rule on Option A vs B. If A (recommended), amend the §5 draft so the
