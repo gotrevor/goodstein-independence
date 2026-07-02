@@ -30,6 +30,16 @@ There is **no `exInv`/`negInv`/`impInv`** in either calculus because ∃ (bounde
 and atoms are not invertible rules. So the companion inversion set is genuinely closed — A3 has no
 missing safe-grind target. This is the one place "Scope-A exhausted" could have been wrong; it is not.
 
+**No option-independent "pass infrastructure" exists either (lap 177, evidence-backed).** The tempting
+"build the E-W Lemma-19 norm bound `N(α) ≤ f^{F^α(0)}(0)` now, since pin 3 needs it under both options"
+is doubly blocked: (a) the substrate has `norm` (`Hardy.lean:635` = E-W `N`) but **no fast-growing `F`
+and no iterate `f^k`**, so stating Lemma 19 requires DEFINING new machinery = the "cut-elimination …
+FORBIDDEN until the judge ratifies" work; (b) pin 3 (`OperatorZeh.lean:700-701`) leaves the iterate
+**existential**, and whether to pin it is exactly the Q2 judge decision — so the shape is gated too.
+Lap 176 asserted this ("Q2-shape-dependent, hold"); lap 177 verified it with file/line evidence.
+**Conclusion: every remaining path requires grinding a gated/forbidden sorry, defining forbidden
+cut-elim machinery, or pre-empting the judge. Genuinely nothing permitted remains until the gate opens.**
+
 ## Lap 176 — ⭐⭐⭐ CRUX FINDING: the P1 obstruction is a statement-shape artifact (E-W Lemma 25/30 conflation)
 
 **Source cross-check (`papers/eguchi-weiermann-2012-…md`, Def 23 + Lemmas 24–31) of the three
