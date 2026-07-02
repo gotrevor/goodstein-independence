@@ -926,4 +926,33 @@ theorem andInvR_Zeh {φ ψ : Form} : ∀ {α e : ONote} {H : ONote → Prop} {m 
       have P₂ := Zeh.wk (inv1Push (φ ⋏ ψ) _ (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
       exact Zeh.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH P₁ P₂
 
+/-! ## §8 Structural monotonicity infrastructure (assembly plumbing, not judge-gated)
+
+Cut-rank monotonicity — banked in the `Zekd` suite (`OperatorZinfty.lean:146`), reused by
+the rank-lowering elimination pass (`cutElimPass_Zf`, which relates rank-`c+1` and rank-`c`
+derivations).  Structural, does NOT consume the §5 f-slot statements; safe pre-ratification
+infrastructure. -/
+
+namespace Zeh
+
+/-- **`c`-monotonicity** (cut rank): a derivation valid at rank `c` is valid at any `c' ≥ c`.
+Only the `cut` rule reads `c` (via `hcompl : φ.complexity < c`), so every other case threads. -/
+theorem mono_c : ∀ {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq},
+    Zeh α e H m c Γ → ∀ {c' : ℕ}, c ≤ c' → Zeh α e H m c' Γ := by
+  intro α e H m c Γ dd
+  induction dd with
+  | axL r v hp hn => intro c' _; exact Zeh.axL r v hp hn
+  | wk hsub _ ih => intro c' hc; exact Zeh.wk hsub (ih hc)
+  | weak hβ hβNF hαNF hβH hsub _ ih => intro c' hc; exact Zeh.weak hβ hβNF hαNF hβH hsub (ih hc)
+  | allω φ β hβ hβNF hαNF hβH _ ih =>
+      intro c' hc; exact Zeh.allω φ β hβ hβNF hαNF hβH (fun n => ih n hc)
+  | exI φ n hβ hβNF hαNF hβH hbound _ ih =>
+      intro c' hc; exact Zeh.exI φ n hβ hβNF hαNF hβH hbound (ih hc)
+  | cut φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      intro c' hc
+      exact Zeh.cut φ (lt_of_lt_of_le hcompl hc) hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH
+        (ih₁ hc) (ih₂ hc)
+
+end Zeh
+
 end GoodsteinPA.OperatorZeh

@@ -1,5 +1,42 @@
 # Pending work — open obligations & attack paths
 
+## Lap 175 — ⭐⭐⭐ REBUILD-Z lap 1 (Scope-A) done; crux = the f-slot reduction, JUDGE-GATED
+
+**Module: `src/GoodsteinPA/OperatorZeh.lean` (green, 1333 jobs).**  Open obligations here are
+exactly the **three §5 f-slot statement pins** (the only `sorry`s in the module):
+
+| pin | what | discharging lap |
+|-----|------|-----------------|
+| `cutReduceAllAuxRunning_Zf` | running-family §19.6 reduction; output `f∘g` at `raise e α` | 2–4 **(CRUX)** |
+| `stepAllω_Zf` | common-control (A2) principal ∀/∃ step | 5–7 |
+| `cutElimPass_Zf` | one rank-lowering pass `c+1→c`, f-slot iterated | 5–7 |
+
+**CRITICAL-PATH CRUX = `cutReduceAllAuxRunning_Zf`.**  It is **genuinely blocked, and the
+block is a GOVERNANCE gate, not hardness**: `DIRECTION.md` CURRENT DIRECTIVE + `REBUILD-Z-ORDER`
+Scope-A mark reduction discharge "**FORBIDDEN until the judge ratifies**
+`REBUILD-Z-LAP1-VERDICT.md`" (written THIS lap; no ratification yet).  So it may NOT be attacked
+until the judge passes.  Do not grind it pre-ratification.
+
+Three attack paths (for the discharging lap, once the gate opens):
+1. **Port the W4B running-family reduction body** onto the `Zeh` core using the now-PROVEN
+   `allInv_Zeh` (§4) for the ∀-side handoff (the arm `probe_cut_all_arm_Zf` already type-checks
+   the handoff).  The membership/ordinal side is closure-derived; the open piece is the
+   `NormControlled (f∘g) (raise e α) m` conjunct = **P1 hardy-domination-under-raise**.
+2. **BW87 cut-free fallback (pre-validated):** if P1 threading is kernel-refuted, DON'T thread —
+   eliminate cuts (ordinal may tower) and read off the cut-free derivation with the PROVEN
+   `readoff_sigma1`.  The cut-free output must still be a legal `Zeh` derivation.
+3. **Per-instance domination at the headline** (`e` concrete there): discharge P1 as an instance
+   fact, moving the conjunct off the reduction statement onto the headline exit (verdict
+   judge-question #1).
+
+**Permitted sibling work while the crux is gated** (infrastructure the assembly reuses, NOT
+consuming the f-slots — done/available this lap): `allInv_Zeh` + `orInv_Zeh`/`andInvL_Zeh`/
+`andInvR_Zeh` (§4/§7, axiom-clean); `Zeh.mono_c` rank-monotonicity (§8, axiom-clean);
+`Zeh.mono_H`, `ZehProv` combinators, the read-off exit (§2/§3).  Next permitted sibling if
+resumed pre-ratification: additional `ZehProv` plumbing (the ordinal-splice bookkeeping the
+reduction's `osucc (α+γ)` output consumes) and the norm/`raise` lemmas the P1 discharge needs —
+build them ahead so the gated lap is pure assembly.
+
 ## Lap 169 — ⭐⭐⭐ M2 probe: induction-shell STRUCTURE composes (compiler-verified), but the STEP premise exposes a Z-calculus expressiveness GAP
 
 **On-directive (lap-167 M2 feasibility probe, laps 167–171, HARD GATE 171).** Build 🟢 1326;
