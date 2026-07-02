@@ -118,20 +118,21 @@ SUPERSEDED = {
     "thm:pathBSubformulaProjection", "thm:pathBGoodsteinFragmentExtraction",
     "thm:pathBTerminalRouteBridge",
 }
-# Off-path / conceptual-monument nodes: real gaps (hardy/ti_schema/wainer_class)
-# or aspirational crown (infinitary_tower/gentzen_conpa/two_sided) that are NOT on
-# the live Route-B path to the axiom-free summit. leanblueprint has no standard
-# state for "off the pursued path" — orange (#FFAA33) officially means "not ready,
-# the blueprint needs more work", which misreads these as blocking. So, like the
-# BANKED Route-A nodes, we grey them (border -> grey, dashed) so ORANGE stays
-# reserved for genuine on-path remaining work: wainer_axiom + zeh_pass +
-# zeh_readoff_delta0. Each node's NODE_NOTE marker already says WHY it's off-path.
-OFF_PATH = {
+# NOT-REQUIRED nodes: conceptual gaps (hardy/ti_schema/wainer_class) + aspirational
+# monument (infinitary_tower/gentzen_conpa/two_sided) that the summit does NOT need
+# — the live orange work realizes or routes around them. These are NON-BLOCKING,
+# which is RADICALLY different from ABANDONED (Route A, hit the M2 wall — that stays
+# grey). leanblueprint has no state for "not required", and its orange means "not
+# ready, needs work" (misreads them as blocking); green would mean "formalized"
+# (falsely claims the unbuilt monument is done). So they get their own TEAL border,
+# dashed — "not in the way", without claiming done or dead. NODE_NOTE says why each.
+NOT_REQUIRED_COLOR = "#17A2B8"  # teal — distinct from green/orange/grey/blue
+NOT_REQUIRED = {
     "def:hardy", "def:ti_schema", "def:wainer_class",
     "thm:infinitary_tower", "thm:gentzen_conpa", "thm:two_sided",
 }
 
-FADED = BANKED | SUPERSEDED | OFF_PATH
+FADED = BANKED | SUPERSEDED | NOT_REQUIRED
 
 # Node-level PLANNING notes — the estimates the Lean ledger structurally CANNOT
 # carry, so they live here instead (hand-authored, sourced from
@@ -290,16 +291,17 @@ def main() -> int:
                     + 'label="' + s + '\\\\n(banked)",' + m.group(2) + 'style=dashed,')
         html = pat.sub(_grey, html, count=1)
 
-    # Off-path styling (see OFF_PATH): recolor the orange border to the banked grey
-    # + dash it, preserving the NODE_NOTE label already on the node. Idempotent —
-    # an already-greyed node no longer has the orange `#FFAA33` to match.
-    off = 0
-    for node in sorted(OFF_PATH):
+    # Not-required styling (see NOT_REQUIRED): recolor the orange border to teal +
+    # dash it, preserving the NODE_NOTE label. Distinct from the grey ABANDONED
+    # (Route A) nodes. Idempotent — an already-teal node has no orange to match.
+    nr = 0
+    for node in sorted(NOT_REQUIRED):
         pat = re.compile(r'("' + re.escape(node) + r'"\s*\[)color="#FFAA33",')
-        html, n = pat.subn(lambda m: m.group(1) + 'color="#8a9096",\n\tstyle=dashed,',
-                           html, count=1)
-        off += n
-    print(f"off-path grey: {off} node(s)")
+        html, n = pat.subn(
+            lambda m: m.group(1) + f'color="{NOT_REQUIRED_COLOR}",\n\tstyle=dashed,',
+            html, count=1)
+        nr += n
+    print(f"not-required (teal): {nr} node(s)")
 
     # Banked/superseded EDGE styling (see the BANKED/SUPERSEDED comments):
     # every edge with a faded endpoint recedes. Idempotent — already-faded
@@ -312,6 +314,20 @@ def main() -> int:
     html, _ = edge_pat.subn(_fade, html)
     faded = len(re.findall(re.escape(BANKED_EDGE_STYLE), html))
     print(f"banked/superseded-edge fade: {faded} edge(s) deprioritized")
+
+    # Legend: leanblueprint's legend only documents its own states, so add the two
+    # non-standard colors this script introduces. Anchored after the last stock
+    # entry; idempotent.
+    legend_anchor = "<dt>Dark green border</dt><dd>this is in Mathlib</dd>"
+    legend_extra = (
+        "\n      <dt>Teal border</dt><dd>not required for the summit — a conceptual "
+        "gap or aspirational monument the live proof routes around (real math, but nothing "
+        "blocks on it)</dd>"
+        "\n      <dt>Grey border, dashed</dt><dd>abandoned / parked — a path that hit "
+        "a wall (e.g. Route A), kept for provenance</dd>"
+    )
+    if legend_anchor in html and "Teal border" not in html:
+        html = html.replace(legend_anchor, legend_anchor + legend_extra, 1)
 
     HTML.write_text(html)
     print(f"annotated {changed} DOT labels / {len(matched)} matched nodes")
