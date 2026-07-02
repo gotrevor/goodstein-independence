@@ -641,10 +641,12 @@ These signatures are the lap-1 draft as **JUDGE-AMENDED** (2026-07-02,
 the reduction/step statements stay at **FIXED control** with the composed slot (E–W
 Lemma 25 — the raised-control conjunct of the original draft was refutable two independent
 ways: the K2b re-tag failure, and an `axL`-instantiation making the conjunct falsifiable
-outright).  ALL control-raising and numeric ITERATION is confined to `cutElimPass_Zf`
-(E–W Lemma 30), where the P1 domination obligation is paid by the pinned iterate — not by
-composition.  Pins 1–2 are DISCHARGED (§7, slot judgment `Zef`); pin 3 `cutElimPass_Zf` stays
-`sorry` (lap-5 entrance gate, discharge FORBIDDEN). -/
+outright).  ALL ordinal COLLAPSE and numeric ITERATION is confined to `cutElimPass_Zf`
+(E–W Lemma 27/30); per the lap-5 restatement (C1) the control `e` is UNTOUCHED — the ordinal
+collapses (`collapse α`) and the slot iterates (`iterSlot f α`), where the P1 domination obligation
+is paid by the pinned iterate — not by composition, not by a raised control.  Pins 1–2 are
+DISCHARGED (§7, slot judgment `Zef`); pin 3 `cutElimPass_Zf` stays `sorry` (lap-5 entrance gate,
+discharge FORBIDDEN). -/
 
 /-- The Eguchi–Weiermann max-relativization of a number-theoretic operator (spike §6). -/
 def rel1 (f : ℕ → ℕ) (n : ℕ) : ℕ → ℕ := fun x => f (max n x)
@@ -727,10 +729,11 @@ theorem normControlled_comp_running {f g : ℕ → ℕ} {e : ONote} {m₀ m : �
 sibling infrastructure — the `NormControlled.comp` precedent: a fact about the stable
 `NormControlled` def, consuming no f-slot pin, touching no gated body).  For ANY control `e`
 and stage `m`, `∃ f, NormControlled f e m` holds trivially — the Hardy witness itself is a
-slot.  Consequence: `cutElimPass_Zf`'s conjunct `∃ f', NormControlled f' (raise e α') m` adds
+slot.  Consequence: the retired draft's conjunct `∃ f', NormControlled f' (raise e α') m` added
 NO quantitative content, so the read-off (E–W Lemma 31, `witness ≤ f(0)`) forces `f'` to be
-PINNED to the E–W iterate of the input `f`, not left existential.  This LEMMA does not amend
-the pin (that is the judge's Q2 ruling); it machine-checks the vacuity the ruling rests on. -/
+PINNED to the E–W iterate of the input `f`, not left existential.  This is why the lap-5 pin-3
+restatement (`cutElimPass_Zf`, §7b) outputs `iterSlot f α`, NOT `∃ f'`.  This LEMMA machine-checks
+the vacuity the Q2 ruling rests on. -/
 theorem normControlled_exists_trivial (e : ONote) (m : ℕ) :
     ∃ f : ℕ → ℕ, NormControlled f e m :=
   ⟨fun x => hardy e (max m x), fun _ => le_rfl⟩
@@ -747,22 +750,105 @@ theorem principal_witness_exceeds_stage (m : ℕ) : m < hardy ONote.omega m := b
   rw [show ONote.omega = oadd 1 1 0 from rfl, hardy_omega]; omega
 
 
-/-- **PIN (disclosed sorry): one elimination pass, f-slot form** (`cutElimPass_Zf`, the
-collapse/iteration shape — E–W Lemma 30: the ONE place the control raises and the slot
-iterates).  ⚠️ **SIGNATURE IS DRAFT-INVALID — restatement is the lap-5 ENTRANCE gate
-(statement mini-lock, judge-gated); DISCHARGE OF THIS PIN AS WRITTEN IS FORBIDDEN.**
-The `∃ f'` conjunct is kernel-checked VACUOUS (`normControlled_exists_trivial`: any
-control/stage has a trivial slot, so the existential severs `f` from the derivation and
-breaks the E–W Lemma 31 read-off `witness ≤ f 0`).  Per the Q2 ruling, `f'` must be
-PINNED to the E–W iterate of the input slot (`f ↦ f^{…}`, index = the collapse's ordinal
-count, Lemma 19 makes it achievable); the exact index expression is the first deliverable
-of lap 5, written against the assembly's ordinal bookkeeping — not guessed here. -/
-theorem cutElimPass_Zf {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq} (f : ℕ → ℕ)
-    (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
-    (D : Zeh α e H m (c + 1) Γ) (hf : NormControlled f e m) :
-    ∃ (α' : ONote) (f' : ℕ → ℕ), α'.NF ∧ Cl H α' ∧
-      ZehProv α' (raise e α') H m c Γ ∧ NormControlled f' (raise e α') m := by
-  sorry
+/-! ## The numeric-slot ITERATE bricks (E–W Def 16 carriers; ported from `wip/ZefCutElim.lean`)
+
+`Function.iterate` (`f^[k]`) is the `k`-fold composition; it preserves exactly the operator
+conditions the reduction threads (monotone, inflationary, `NormControlled`) and composes to
+iterates (`iter_comp`: counts ADD — the `∃`-cut lane).  These are the numeric carrier the pin-3
+restatement's output slot (`iterSlot`, below) is built on.  All sorry-free — the ported bricks
+were `#print axioms`-clean in `wip/ZefCutElim.lean`. -/
+
+/-- The iterate is monotone if `f` is. -/
+theorem iter_monotone {f : ℕ → ℕ} (hf : Monotone f) : ∀ k, Monotone f^[k]
+  | 0 => monotone_id
+  | k + 1 => by rw [Function.iterate_succ]; exact (iter_monotone hf k).comp hf
+
+/-- The iterate is inflationary if `f` is. -/
+theorem iter_infl {f : ℕ → ℕ} (hf : ∀ x, x ≤ f x) : ∀ k x, x ≤ f^[k] x
+  | 0, x => le_rfl
+  | k + 1, x => by
+      rw [Function.iterate_succ']
+      exact le_trans (iter_infl hf k x) (hf _)
+
+/-- The iterate preserves `NormControlled` (for `k ≥ 1`): `f^[k+1] x ≥ f x ≥ hardy e (max m x)`,
+via `f^[k]` inflationary. -/
+theorem iter_normControlled {f : ℕ → ℕ} {e : ONote} {m : ℕ}
+    (hf : NormControlled f e m) (hf_infl : ∀ x, x ≤ f x) (k : ℕ) :
+    NormControlled f^[k + 1] e m := by
+  intro x
+  rw [Function.iterate_succ, Function.comp_apply]
+  exact le_trans (hf x) (iter_infl hf_infl k (f x))
+
+/-- Iterate monotone in the index count: `f^[j] ≤ f^[k]` pointwise for `j ≤ k`, `f` inflationary +
+monotone.  Feeds `mono_f` when a pass outputs a longer iterate than a sibling branch needs. -/
+theorem iter_le_of_le {f : ℕ → ℕ} (hf_mono : Monotone f) (hf_infl : ∀ x, x ≤ f x)
+    {j k : ℕ} (hjk : j ≤ k) : ∀ x, f^[j] x ≤ f^[k] x := by
+  intro x
+  obtain ⟨d, rfl⟩ := Nat.le.dest hjk
+  rw [Function.iterate_add_apply]
+  exact iter_monotone hf_mono j (iter_infl hf_infl d x)
+
+/-- **Iterates compose to iterates** (`f^[j] ∘ f^[k] = f^[j+k]`) — the numeric core of the
+`∃`-cut lane: composing two premise iterates of the SAME base ADDS the counts, so the slot stays
+`f^[·]`.  This is why pin 3's `f'` is a *pinned* iterate (Q2), not a free slot. -/
+theorem iter_comp (f : ℕ → ℕ) (j k : ℕ) : f^[j] ∘ f^[k] = f^[j + k] :=
+  (Function.iterate_add f j k).symm
+
+/-! ## §5b The collapse + ordinal-indexed iterate — pin-3's restatement carriers (LOCK Addendum 2,
+C2/C5)
+
+Pin 3 relates a rank-`c+1` derivation to a rank-`c` one by COLLAPSING the ordinal and ITERATING the
+slot.  Two explicit ONote-grounded definitions (design work of lap 5, E–W paper open):
+
+- `collapse α := ω^α` (`expTower`) — E–W Lemma 27's Ω-free predicative shadow `φ 0 β = ω^β` for one
+  rank step; iterated `c` times it is the rank-lowering tower `Ω_c(α) = Ω^{Ω_{c-1}(α)}`
+  (paper §5, `arai`-style tower).  NF-preserving + strictly monotone (the descent the collapse
+  induction needs) — both proven below (C5), reusing `expTower_NF`/`expTower_lt_expTower`.
+- `iterSlot f α := f^[iterCount α]` with `iterCount α := norm α + 1` — the ordinal-INDEXED iterate
+  (E–W Def 16's `f^α` realized as a plain `Function.iterate` at a count that READS the ordinal via
+  the repo norm `N`).  NOT a fixed `f^[k]`: at an `allω` node the branch slot `rel1 (iterSlot f (β n)) n`
+  has per-branch count `iterCount (β n)` growing with `n` (`β n` unbounded), so no single `f^[k]`
+  dominates — exactly the branch-unbounded demand the architect flagged (C2).  The `+1` mirrors
+  Lemma 30's `f^{F^α(0)+1}` and keeps `iterSlot f 0 = f^[1] = f` (α = 0 is the cut-free axiom, slot
+  unchanged).
+
+**T-Z5(iii) note.**  `iterCount := norm · + 1` is a concrete DEFENSIBLE readoff; whether it is a
+count LARGE enough for the `allω`-lane arithmetic (E–W Lemma 19: every witness norm `≤ f^[iterCount α] 0`)
+is the grind-lap C5 adequacy obligation, and the pre-registered `allω`-lane risk.  If `norm` proves
+too weak, the response is architect-level (a different collapse/count normal form), not a body grind. -/
+
+/-- **`collapse`** — the single-rank predicative height map `α ↦ ω^α` (E–W Lemma 27's Ω-free
+shadow; iterated it is the rank-lowering tower). -/
+def collapse (α : ONote) : ONote := expTower α
+
+/-- **`iterCount`** — the ℕ-valued ordinal readoff feeding the iterate index (E–W Lemma 19's count
+`N(α) ≤ f^{F^α(0)}(0)`, here `norm α + 1`; wip finding's `Fω α`). -/
+def iterCount (α : ONote) : ℕ := norm α + 1
+
+/-- **`iterSlot`** — the ordinal-INDEXED numeric-slot iterate `f ↦ f^[iterCount α]` (E–W Def 16's
+`f^α`; the index reads `α`, so it is NOT a fixed `f^[k]`). -/
+def iterSlot (f : ℕ → ℕ) (α : ONote) : ℕ → ℕ := f^[iterCount α]
+
+/-- **C5: `collapse` is NF-preserving** (so the assembly can splice at NF ordinals). -/
+theorem collapse_NF {α : ONote} (hα : α.NF) : (collapse α).NF := expTower_NF hα
+
+/-- **C5: `collapse` is strictly monotone** (`β < α → collapse β < collapse α`) — the descent the
+rank-lowering induction needs (the `Zekd.add_osucc_descent`-class compatibility). -/
+theorem collapse_strictMono {β α : ONote} (hβ : β.NF) (h : β < α) : collapse β < collapse α :=
+  expTower_lt_expTower hβ h
+
+/-- **C5: `iterSlot f α` is monotone** if `f` is (slot stays `Monotone` through the pass). -/
+theorem iterSlot_monotone {f : ℕ → ℕ} (hf : Monotone f) (α : ONote) : Monotone (iterSlot f α) :=
+  iter_monotone hf _
+
+/-- **C5: `iterSlot f α` is inflationary** if `f` is (slot stays inflationary through the pass). -/
+theorem iterSlot_infl {f : ℕ → ℕ} (hf : ∀ x, x ≤ f x) (α : ONote) : ∀ x, x ≤ iterSlot f α x :=
+  iter_infl hf _
+
+/-- **C5: `iterSlot f 0 = f`** — the α = 0 (cut-free axiom) case leaves the slot unchanged
+(`iterCount 0 = norm 0 + 1 = 1`, `f^[1] = f`). -/
+theorem iterSlot_zero (f : ℕ → ℕ) : iterSlot f 0 = f := by
+  simp [iterSlot, iterCount, norm]
 
 /-! ## §6 The two Z1 seams RE-EXPRESSED in the f-form (A2 — real proofs)
 
@@ -1660,6 +1746,44 @@ theorem headline_readoff_Zef {φ : SyntacticSemiformula ℒₒᵣ 1}
   · rw [Finset.mem_singleton] at hψ
     subst hψ
     rcases hlit with h | h <;> exact absurd h (by simp [ExsQuantifier.exs])
+
+/-- **PIN (disclosed sorry): one cut-ELIMINATION pass, slot-judgment form** (`cutElimPass_Zf` —
+E–W Lemma 27/30's single predicative rank step: the ONE place the ordinal COLLAPSES and the numeric
+slot ITERATES).  The lap-5 RESTATEMENT of the retired draft, per the entrance mini-lock C1–C2:
+- **C1** — the control `e` is untouched (no `raise e α`); the ordinal collapses, the slot iterates.
+- **C2** — the output slot is the PINNED ordinal-indexed iterate `iterSlot f α` (no `∃`, no fixed
+  `f^[k]`); the height drops to `collapse α`, the rank to `c`.  Slots stay `Monotone` + inflationary
+  (`iterSlot_monotone`/`iterSlot_infl`).
+
+Discharge is FORBIDDEN until the lap-5 verdict is ratified (grind laps 6–7).  The `∃`-cut lane
+threads via `iter_comp` (counts add); the `allω` lane is the E–W Lemma 19/20 arithmetic (the hard
+`allω`-lane pole, T-Z5(iii)).  Composed anti-vacuity check: `cutElimPass_exit_root` (§7b). -/
+theorem cutElimPass_Zf {α e : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq} (f : ℕ → ℕ)
+    (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
+    (D : Zef α e H f (c + 1) Γ) (hf_mono : Monotone f) (hf_infl : ∀ x, x ≤ f x) :
+    ZefProv (collapse α) e H (iterSlot f α) c Γ := by
+  sorry
+
+/-! ## §7b The C3 composed exit — the anti-vacuity test at statement level (LOCK Addendum 2, C3)
+
+The pin-3 restatement is only faithful if its output count is CONSUMED by the read-off.  This
+corollary composes ONE elimination pass (rank `1 → 0`) with `headline_readoff_Zef`, at the canonical
+root slot `f = rel1 (hardy e) m` (the `Zeh → Zef` embedding image, `f 0 = hardy e m`).  The resulting
+witness bound is `iterSlot (rel1 (hardy e) m) α 0 = (rel1 (hardy e) m)^[iterCount α] 0` — the count
+`iterCount α` is VISIBLE in the statement and is what the read-off reads.  This is the C3 test that
+distinguishes the pinned iterate from severed-slot (Q2) vacuity: a statement whose count the read-off
+never reads would not typecheck with the count in the bound.  Kernel-checked at statement level
+(pin body `sorry`, this corollary is a real derivation from the pin + the read-off). -/
+theorem cutElimPass_exit_root {α e : ONote} {H : ONote → Prop} {m : ℕ}
+    {φ : SyntacticSemiformula ℒₒᵣ 1}
+    (hφinst : ∀ n, ∃ ar, ∃ r : (ℒₒᵣ).Rel ar, ∃ v, φ/[nm n] = Semiformula.rel r v)
+    (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
+    (D : Zef α e H (rel1 (hardy e) m) (0 + 1) {(∃⁰ φ)}) :
+    ∃ n ≤ iterSlot (rel1 (hardy e) m) α 0, atomTrue (φ/[nm n]) := by
+  obtain ⟨α', _, _, _, D'⟩ :=
+    cutElimPass_Zf (rel1 (hardy e) m) heNF hαNF hαH D
+      (rel1_monotone (hardy_monotone e) m) (rel1_infl (le_hardy e) m)
+  exact headline_readoff_Zef hφinst D'
 
 /-! ## §8 The stage→slot embedding `Zeh → Zef` (P4 consolidation; the LOCK §1-A1/§3 amendment
 made faithful — `Zef` conservatively generalizes `Zeh`)
