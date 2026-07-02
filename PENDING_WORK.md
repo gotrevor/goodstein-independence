@@ -1,5 +1,26 @@
 # Pending work — open obligations & attack paths
 
+## Lap 177 — FRESH-MIND REVIEW: state confirmed, no trigger fired, awaiting judge (no in-scope grind)
+
+Independent re-audit (real `#print axioms`, build 🟢 1327) reproduces lap-176 with **no drift**:
+Route A headline `[propext, choice, Quot.sound, goodstein_implies_consistency]`, Route B headline
+trust-base + `wainer_bound_of_pa_proves_goodstein` + 12 native_decide artifacts — **sorryAx OFF both
+headlines**; `OperatorZeh` clean except the 3 §5 pins (`cutReduceAllAuxRunning_Zf`/`stepAllω_Zf`/
+`cutElimPass_Zf`) + `probe_cut_all_arm_Zf` (sole sorry-dep = the reduction pin).
+
+**Trigger T-R NOT fired.** Both Z1 seams re-checked axiom-clean in the f-form
+(`seam1_bump_absorbed_by_composition` = no axioms; `probe_allomega_reassembly_Zf` =
+`[propext,choice,Quot.sound]`), so the E–W carrier composes at both seams — this is NOT the A2
+"seam re-check fails in f-form → self-stop" case. The lap-176 P1 finding is **judge-input on
+statement shape** (Option A kernel-forced + validated), not a carrier failure.
+
+**No in-scope grind exists.** Scope-A (A1/A2/A3) is complete; the only open sorry *bodies* are the 3
+judge-gated §5 pins + the FORBIDDEN Route-A machinery; the non-forbidden Wainer infra
+(`Hardy.lean`/`Domination.lean`) is sorry-free. No in-flight Aristotle job; no pending
+`ON-LINE-REQUEST`. ALLOW_STOP=1 but the project is far from complete (2 undischarged 🟠 girder
+axioms + 19 src sorries) → stop sentinel NOT written; run is cap-bounded. **Resume = judge
+ratification of the verdict + finding (Option A vs B; pin `f'`).** Refreshed STATUS.md to the spine.
+
 ## Lap 176 — ⭐⭐⭐ CRUX FINDING: the P1 obstruction is a statement-shape artifact (E-W Lemma 25/30 conflation)
 
 **Source cross-check (`papers/eguchi-weiermann-2012-…md`, Def 23 + Lemmas 24–31) of the three
