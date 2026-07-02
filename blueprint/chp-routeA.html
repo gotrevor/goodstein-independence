@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Route A — internalized Gentzen cut-elimination (banked)</title>
+<link rel="next" href="chp-crown.html" title="Crown & horizon" />
+<link rel="prev" href="chp-routeB.html" title="Route B — Wainer growth rates (mainline)" />
+<link rel="up" href="index.html" title="Goodstein Independence Blueprint" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Goodstein Independence Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Program overview</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html"><span class="toc_ref">2</span> <span class="toc_entry">Two shores: the formalized girders</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-shores.html#a0000000003"><span class="toc_ref">2.1</span> <span class="toc_entry">mathlib: ordinal notation and the fast-growing hierarchy</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html#a0000000004"><span class="toc_ref">2.2</span> <span class="toc_entry">Foundation: first-order logic and incompleteness</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-foothills.html"><span class="toc_ref">3</span> <span class="toc_entry">Foothills: the reusable toolkit</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-foothills.html#a0000000005"><span class="toc_ref">3.1</span> <span class="toc_entry">The Goodstein object and its faithful encoding</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+ </li>
+<li class=" active current">
+  <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-crown.html"><span class="toc_ref">6</span> <span class="toc_entry">Crown &amp; horizon</span></a>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chp:routeA">5 Route A — internalized Gentzen cut-elimination (banked)</h1>
+
+<p>The route that led the expedition through \(\sim \)lap&#160;166. It reduces \(\gamma \) to \(\mathrm{Con}(\mathsf{PA})\) <em>inside</em> \(\mathsf{PA}\) and applies Gödel&#160;II by contraposition. This chapter is <b class="bfseries">banked</b> after the 2026-07-01 pivot: the lap-171 “M2” probe found the decisive obstruction — the PA-induction leaf of the internalized reduction demands a free-variable \(\forall \)-left / \(\to \)-left step that the finitary internal-\(Z\) calculus does not have (the finitary-vs-\(\omega \)-rule expressiveness wall). The clean Gödel-II wiring and the faithfulness anchors are reused unchanged; the crux-2 milestone chain below (the witness-bounded operator-calculus decomposition of the internalized cut-elimination) is <b class="bfseries">preserved</b> for reuse, not deleted. </p>
+<h1 id="a0000000006">5.1 The clean Gödel-II reduction (reused)</h1>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:godel2_reduction">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.1</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:godel2_reduction">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-shores.html#thm:godel2">Theorem 2.6</a></li>
+          
+          <li><a href="chp-foothills.html#def:encoding">Definition 3.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.not_proves_of_implies_consistency" class="lean_decl">GoodsteinPA.not_proves_of_implies_consistency</a></li>
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.peano_not_proves_consistency" class="lean_decl">GoodsteinPA.peano_not_proves_consistency</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Collapse to one implication (done, kernel-clean).</b> Gödel&#160;II surfaced for \(\mathsf{PA}\) (\(\mathsf{PA}\nvdash \mathrm{Con}(\mathsf{PA})\), an instance of Thm&#160;<a href="chp-shores.html#thm:godel2">2.6</a>), and the contraposition meta-reduction: if \(\mathsf{PA}\vdash \gamma \to \mathsf{PA}\vdash \mathrm{Con}(\mathsf{PA})\), then \(\mathsf{PA}\nvdash \gamma \). This is the honest “collapse the whole headline to one girder” deliverable; both declarations are axiom-clean. </p>
+
+  </div>
+</div>
+<h1 id="a0000000007">5.2 The crux-2 milestone chain (witness-bounded operator calculus, preserved)</h1>
+<p>The following nine nodes are the internalized-cut-elimination decomposition of the Phase 2–3 girder, imported through <span class="ttfamily">GoodsteinPABlueprint</span>. Status semantics here need care: each node’s <em>ledger</em> entry rates that node’s own <em>step</em> (its capstone), while the bound <em>stage</em> theorem is the <em>cumulative</em> chain up to that point. Stage&#160;1’s step is discharged and audited clean, and stage&#160;1 has no upstream, so that node is genuinely done. Stage&#160;9’s <em>step</em> is likewise discharged (<span class="ttfamily">0 laps</span>), but its stage theorem composes capstones 2–8 — all still named <span class="ttfamily">axiom</span>s classified <span class="ttfamily">debt</span> by <span class="ttfamily">blueprint_audit</span> — so nodes 2–9 remain <span class="ttfamily">\notready</span>. They are the “how would the internalization actually be built” skeleton, retained as a banked asset. </p>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBGoodsteinSentenceShape">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.2</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBGoodsteinSentenceShape">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-foothills.html#def:encoding">Definition 3.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   The encoded Goodstein sentence can be normalized to the exact closed one-formula sequent shape consumed by the bounded embedding. Discharged (ledger: <span class="ttfamily">clean</span>, audited via <span class="ttfamily">collectAxioms</span>); as the chain’s first stage it carries no upstream debt. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBPeanoMinusAxiomLeaves">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.3</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBPeanoMinusAxiomLeaves">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBGoodsteinSentenceShape">Theorem 5.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   All finite \(\mathrm{PA}^{-}\) and equality axiom leaves are derivable in the bounded operator calculus with finite extracted witness budget. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBInductionAxiomShell">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.4</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBInductionAxiomShell">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBPeanoMinusAxiomLeaves">Theorem 5.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   The PA induction-axiom shell is simulated in the bounded operator calculus without losing the finite witness budget. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBClosedWitnessBudgets">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.5</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBClosedWitnessBudgets">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBInductionAxiomShell">Theorem 5.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Every Foundation existential and closed-witness step has a finite \(K\) budget. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBSomeKStructuralEmbedding">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.6</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBSomeKStructuralEmbedding">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBClosedWitnessBudgets">Theorem 5.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   The whole PA proof embeds into the \(\mathrm{someK}\) bounded operator calculus. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBOperatorCutElimination">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.7</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBOperatorCutElimination">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBSomeKStructuralEmbedding">Theorem 5.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Bounded operator cut-elimination preserves finite witness budget after raising the control ordinal as needed. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBSubformulaProjection">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.8</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBSubformulaProjection">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBOperatorCutElimination">Theorem 5.7</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   The cut-free operator derivation projects to the subformula fragment used by Towsner’s \(B\) calculus. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBGoodsteinFragmentExtraction">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.9</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBGoodsteinFragmentExtraction">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBSubformulaProjection">Theorem 5.8</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   The projected derivation is the concrete Goodstein-fragment terminal object. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBTerminalRouteBridge">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.10</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:pathBTerminalRouteBridge">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBGoodsteinFragmentExtraction">Theorem 5.9</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   The full crux-2 capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out by the promoted lower-bound theorem. The bridge <em>step</em> itself is discharged (ledger: <span class="ttfamily">clean</span>, <span class="ttfamily">0 laps</span>), but this stage theorem composes capstones 2–8, so its kernel footprint carries their open axioms until the chain discharges. </p>
+
+  </div>
+</div>
+<h1 id="a0000000008">5.3 The Route-A girder and headline</h1>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:crux2_axiom">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.11</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:crux2_axiom">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:pathBTerminalRouteBridge">Theorem 5.10</a></li>
+          
+          <li><a href="chp-foothills.html#def:ti_schema">Definition 3.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodstein_implies_consistency" class="lean_decl">GoodsteinPA.goodstein_implies_consistency</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">The Phase 2–3 girder (Route-A debt axiom).</b> Inside \(\mathsf{PA}\), the Goodstein sentence implies \(\mathrm{Con}(\mathsf{PA})\). A named <span class="ttfamily">axiom</span> carrying an honest, audited subgoal: it is the <em>internalized</em> form of the crown result \(\mathrm{TI}(\varepsilon _0)\vdash \mathrm{Con}(\mathsf{PA})\) (Thm&#160;<a href="chp-crown.html#thm:gentzen_conpa">6.2</a>) — the Rathjen §3 descent composed with Gentzen’s \(\mathrm{PRWO}(\varepsilon _0)\to \mathrm{Con}(\mathsf{PA})\). The crux-2 chain above is the construction intended to discharge it; the lap-171 obstruction is why it remains an axiom (banked). </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:routeA_headline">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">5.12</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeA.html#thm:routeA_headline">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeA.html#thm:crux2_axiom">Theorem 5.11</a></li>
+          
+          <li><a href="chp-routeA.html#thm:godel2_reduction">Theorem 5.1</a></li>
+          
+          <li><a href="chp-foothills.html#def:encoding">Definition 3.5</a></li>
+          
+          <li><a href="chp-foothills.html#thm:bridge">Theorem 3.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein" class="lean_decl">GoodsteinPA.peano_not_proves_goodstein</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Kirby–Paris via internalization + Gödel&#160;II.</b> \(\mathsf{PA}\nvdash \gamma \), proved as \(\texttt{not\_ proves\_ of\_ implies\_ consistency}\  \texttt{goodstein\_ implies\_ consistency}\). A real proof whose only non-canonical dependency is the single girder axiom Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a> — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{goodstein\_ implies\_ consistency}\} \). Banked at the identical type to the mainline summit; converges with Route&#160;B at Thm&#160;<a href="chp-crown.html#thm:summit">6.4</a>. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="chp-routeB.html" title="Route B — Wainer growth rates (mainline)"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Goodstein Independence Blueprint"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chp-crown.html" title="Crown & horizon"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

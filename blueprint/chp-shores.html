@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Two shores: the formalized girders</title>
+<link rel="next" href="chp-foothills.html" title="Foothills: the reusable toolkit" />
+<link rel="prev" href="sect0001.html" title="Program overview" />
+<link rel="up" href="index.html" title="Goodstein Independence Blueprint" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Goodstein Independence Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Program overview</span></a>
+ </li>
+<li class=" active current">
+  <a href="chp-shores.html"><span class="toc_ref">2</span> <span class="toc_entry">Two shores: the formalized girders</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="chp-shores.html#a0000000003"><span class="toc_ref">2.1</span> <span class="toc_entry">mathlib: ordinal notation and the fast-growing hierarchy</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html#a0000000004"><span class="toc_ref">2.2</span> <span class="toc_entry">Foundation: first-order logic and incompleteness</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-foothills.html"><span class="toc_ref">3</span> <span class="toc_entry">Foothills: the reusable toolkit</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-foothills.html#a0000000005"><span class="toc_ref">3.1</span> <span class="toc_entry">The Goodstein object and its faithful encoding</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-crown.html"><span class="toc_ref">6</span> <span class="toc_entry">Crown &amp; horizon</span></a>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chp:shores">2 Two shores: the formalized girders</h1>
+
+<p>The program is pitched between two shores of pre-existing, kernel-clean formalization. These nodes are <em>green anchors</em> we build on, not obligations we owe. </p>
+<h1 id="a0000000003">2.1 mathlib: ordinal notation and the fast-growing hierarchy</h1>
+<div class="definition_thmwrapper theorem-style-definition" id="def:onote">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2.1</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#def:onote">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/ONote" class="lean_decl">ONote</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  mathlib’s constructive ordinal notation system <span class="ttfamily">ONote</span> (Cantor normal form as an inductive type), together with its normal-form predicate <span class="ttfamily">ONote.NF</span>. This is the concrete, computable carrier for every ordinal \({\lt}\varepsilon _0\) used throughout the program. (mathlib also has the semantic <span class="ttfamily">Ordinal.CNF</span> decomposition, but it is not in this build’s import closure; the notation system <span class="ttfamily">ONote</span> is what the growth theory runs on.) </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:veblen">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2.2</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#def:veblen">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/Ordinal.veblen" class="lean_decl">Ordinal.veblen</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  The two-argument Veblen function \(\varphi \), from which mathlib defines the \(\varepsilon \)-function \(\varepsilon _o = \texttt{veblen}\, 1\, o\) and hence the ceiling \(\varepsilon _0\). This is the semantic ordinal boundary that PA’s proof-theoretic ordinal must equal; <span class="ttfamily">ONote</span> notations are its below-\(\varepsilon _0\) codes. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:fastgrowing">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2.3</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#def:fastgrowing">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-shores.html#def:onote">Definition 2.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/ONote.fastGrowing" class="lean_decl">ONote.fastGrowing</a></li>
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/ONote.fundamentalSequence" class="lean_decl">ONote.fundamentalSequence</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   The fast-growing hierarchy \(f_o : \mathbb {N}\to \mathbb {N}\) on ordinal notations (\(f_0 = \mathrm{succ}\), \(f_{o+1}(n) = f_o^{[n]}(n)\), \(f_\lambda (n) = f_{\lambda [n]}(n)\) at limits via <span class="ttfamily">fundamentalSequence</span>). mathlib supplies the definition and small values but <em>none</em> of the growth theory (expansiveness, monotonicity, domination); those are developed in this program’s Hardy port and Domination modules. </p>
+
+  </div>
+</div>
+<h1 id="a0000000004">2.2 Foundation: first-order logic and incompleteness</h1>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:hauptsatz">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">2.4</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#thm:hauptsatz">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p> Foundation’s finitary first-order Gentzen <b class="bfseries">Hauptsatz</b> (cut-elimination), <span class="ttfamily">LO.FirstOrder.hauptsatz</span> (\(=\texttt{Hauptsatz.main}\)). It is proved and kernel-clean <em>in Foundation</em>, but is not imported into this build’s environment, so it carries no in-repo <span class="ttfamily">\lean</span> binding here. It is listed as a shore because the <em>infinitary</em>, \(\varepsilon _0\)-ordinal-assigned analogue of exactly this theorem is the crown gap (Thm&#160;<a href="chp-crown.html#thm:infinitary_tower">6.1</a>); the finitary Hauptsatz is the template, not the summit. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:delta1">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">2.5</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#thm:delta1">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/LO.FirstOrder.Arithmetic.PA_delta1Definable" class="lean_decl">LO.FirstOrder.Arithmetic.PA_delta1Definable</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  \(\mathsf{PA}\) is \(\Delta _1\)-definable (\(\mathsf{PA}.\Delta _1\)). Foundation formerly posited this as a bare <span class="ttfamily">axiom</span>; it now proves it as a real instance (<span class="ttfamily">InductionSchemeDelta1.lean</span>), which is exactly why this program’s Gödel-II surfacing is axiom-clean. This discharge was a genuine upstream gift (<span class="ttfamily">gotrevor/Foundation@e6e1ad1</span>). </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:godel2">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">2.6</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#thm:godel2">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-shores.html#thm:delta1">Theorem 2.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/LO.FirstOrder.Arithmetic.consistent_unprovable" class="lean_decl">LO.FirstOrder.Arithmetic.consistent_unprovable</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Gödel’s second incompleteness theorem</b>, for any \(\Delta _1\) arithmetic theory extending \(\mathsf{I}\Sigma _1\): \(T \nvdash \mathrm{Con}(T)\). The load-bearing external input on the Route-A face; instantiated at \(T = \mathsf{PA}\) via \(\Delta _1\)-definability (Thm&#160;<a href="chp-shores.html#thm:delta1">2.5</a>). </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:godel1">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">2.7</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-shores.html#thm:godel1">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-shores.html#thm:delta1">Theorem 2.5</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/LO.FirstOrder.Arithmetic.incomplete" class="lean_decl">LO.FirstOrder.Arithmetic.incomplete</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Gödel’s <b class="bfseries">first</b> incompleteness theorem for arithmetic theories. Recorded for context (a sibling of Gödel&#160;II on the same Foundation shore); it is not on either Goodstein route’s critical path, so this node is left <span class="ttfamily">\notready</span> as “not wired into the summit chain” even though the Foundation declaration is proved. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="sect0001.html" title="Program overview"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Goodstein Independence Blueprint"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chp-foothills.html" title="Foothills: the reusable toolkit"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

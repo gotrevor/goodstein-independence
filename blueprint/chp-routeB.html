@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Route B — Wainer growth rates (mainline)</title>
+<link rel="next" href="chp-routeA.html" title="Route A — internalized Gentzen cut-elimination (banked)" />
+<link rel="prev" href="chp-foothills.html" title="Foothills: the reusable toolkit" />
+<link rel="up" href="index.html" title="Goodstein Independence Blueprint" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Goodstein Independence Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Program overview</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html"><span class="toc_ref">2</span> <span class="toc_entry">Two shores: the formalized girders</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-shores.html#a0000000003"><span class="toc_ref">2.1</span> <span class="toc_entry">mathlib: ordinal notation and the fast-growing hierarchy</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html#a0000000004"><span class="toc_ref">2.2</span> <span class="toc_entry">Foundation: first-order logic and incompleteness</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-foothills.html"><span class="toc_ref">3</span> <span class="toc_entry">Foothills: the reusable toolkit</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-foothills.html#a0000000005"><span class="toc_ref">3.1</span> <span class="toc_entry">The Goodstein object and its faithful encoding</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-crown.html"><span class="toc_ref">6</span> <span class="toc_entry">Crown &amp; horizon</span></a>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chp:routeB">4 Route B — Wainer growth rates (mainline)</h1>
+
+<p>The route adopted after the 2026-07-01 route decision. It proves non-provability from <em>rates of growth</em> and, unlike Route&#160;A, needs no internalized cut-elimination and no Gödel-II wiring: if \(\mathsf{PA}\) proved \(\gamma \), Wainer would bound the Goodstein length function below one fixed \(f_o\) with \(o{\lt}\varepsilon _0\); but the Cichoń/Caicedo lower bound (already machine-checked) shows no fixed \(f_o\) can bound it. The lower-bound half is done and clean; the single remaining gap is the Wainer classification (Def&#160;<a href="chp-foothills.html#def:wainer_class">3.4</a>), surfaced here as one named axiom. </p>
+<div class="definition_thmwrapper theorem-style-definition" id="def:goodstein_length">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">4.1</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeB.html#def:goodstein_length">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-foothills.html#thm:goodstein_termination">Theorem 3.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.Dom.goodsteinLength" class="lean_decl">GoodsteinPA.Dom.goodsteinLength</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   The <b class="bfseries">Goodstein length function</b> \(\texttt{goodsteinLength}(m) = \mu N.\  \texttt{goodsteinSeq}\, m\, N = 0\) (total, via the axiom-clean termination witness). This is the fast-growing object whose PA-provable totality the route hypothesizes and then refutes. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:dom_lower">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">4.2</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeB.html#thm:dom_lower">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeB.html#def:goodstein_length">Definition 4.1</a></li>
+          
+          <li><a href="chp-shores.html#def:fastgrowing">Definition 2.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing" class="lean_decl">GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Cichoń/Caicedo lower bound (done).</b> For every normal-form \(o\), the Goodstein length function eventually dominates \(f_o\) up to the documented additive slack \(2\). Kernel axioms plus the project’s documented <em>finite</em> <span class="ttfamily">native_decide</span> base cases only — no math-debt axiom, no <span class="ttfamily">sorry</span> (the project’s 🟢 clean category). This is the only “port, don’t invent” asset of the whole climb, and it is banked. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-definition" id="lem:succ_gap">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">4.3</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeB.html#lem:succ_gap">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-shores.html#def:fastgrowing">Definition 2.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor" class="lean_decl">GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor</a></li>
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.add_le_iterate_of_lt" class="lean_decl">GoodsteinPA.WainerRoute.add_le_iterate_of_lt</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>   <b class="bfseries">Strict successor gap (done, fully kernel-clean).</b> For \(m\ge 4\), \(f_o(m) + 2 {\lt} f_{o+1}(m)\), via the elementary engine “iterating a strictly inflationary map adds at least the iteration count” (<span class="ttfamily">add_le_iterate_of_lt</span>). This is what lets the lower bound’s additive \(+2\) slack be swallowed at the notation-successor level. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:no_fixed_bound">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">4.4</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeB.html#thm:no_fixed_bound">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeB.html#thm:dom_lower">Theorem 4.2</a></li>
+          
+          <li><a href="chp-routeB.html#lem:succ_gap">Lemma 4.3</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing" class="lean_decl">GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing</a></li>
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing" class="lean_decl">GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">No fixed \(f_o\) bounds the Goodstein length (done).</b> Combining the lower bound at \(o+1\) with the successor gap gives \(f_o(m) {\lt} \texttt{goodsteinLength}(m)\) eventually, so <em>no</em> fixed \(f_o\) (\(o{\lt}\varepsilon _0\)) can eventually bound \(\texttt{goodsteinLength}\) from above. This is the exact contradiction target the Wainer bound must collide with; carries the same finite <span class="ttfamily">native_decide</span> base cases as Thm&#160;<a href="chp-routeB.html#thm:dom_lower">4.2</a>, no debt axiom. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:wainer_axiom">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">4.5</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeB.html#thm:wainer_axiom">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-foothills.html#def:wainer_class">Definition 3.4</a></li>
+          
+          <li><a href="chp-routeB.html#def:goodstein_length">Definition 4.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein" class="lean_decl">GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Wainer bound (the one Route-B debt axiom).</b> If \(\mathsf{PA}\vdash \gamma \), then \(\texttt{goodsteinLength}\) is eventually bounded by some fixed \(f_o\), \(o{\lt}\varepsilon _0\). This is the Wainer classification (Def&#160;<a href="chp-foothills.html#def:wainer_class">3.4</a>) specialized to this route — currently a named <span class="ttfamily">axiom</span> standing in for the un-built ordinal analysis of PA. It is the <em>entire</em> remaining mathematical debt of Route&#160;B. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:routeB_headline">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">4.6</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-routeB.html#thm:routeB_headline">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-routeB.html#thm:wainer_axiom">Theorem 4.5</a></li>
+          
+          <li><a href="chp-routeB.html#thm:no_fixed_bound">Theorem 4.4</a></li>
+          
+          <li><a href="chp-foothills.html#def:encoding">Definition 3.5</a></li>
+          
+          <li><a href="chp-foothills.html#thm:bridge">Theorem 3.6</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth" class="lean_decl">GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Kirby–Paris via Wainer/Cichoń/Caicedo.</b> \(\mathsf{PA}\nvdash \gamma \): if PA proved \(\gamma \), the Wainer bound (Thm&#160;<a href="chp-routeB.html#thm:wainer_axiom">4.5</a>) would put \(\texttt{goodsteinLength}\) below a fixed \(f_o\), contradicting Thm&#160;<a href="chp-routeB.html#thm:no_fixed_bound">4.4</a>. A <em>real proof</em> whose only open dependency is the single Wainer axiom — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{wainer\_ bound\_ of\_ pa\_ proves\_ goodstein}, \text{finite native\_ decide}\} \). </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="chp-foothills.html" title="Foothills: the reusable toolkit"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Goodstein Independence Blueprint"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chp-routeA.html" title="Route A — internalized Gentzen cut-elimination (banked)"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

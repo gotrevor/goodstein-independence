@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Program overview</title>
+<link rel="next" href="chp-shores.html" title="Two shores: the formalized girders" />
+<link rel="prev" href="index.html" title="Goodstein Independence Blueprint" />
+<link rel="up" href="index.html" title="Goodstein Independence Blueprint" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Goodstein Independence Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class=" active current">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Program overview</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html"><span class="toc_ref">2</span> <span class="toc_entry">Two shores: the formalized girders</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-shores.html#a0000000003"><span class="toc_ref">2.1</span> <span class="toc_entry">mathlib: ordinal notation and the fast-growing hierarchy</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html#a0000000004"><span class="toc_ref">2.2</span> <span class="toc_entry">Foundation: first-order logic and incompleteness</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-foothills.html"><span class="toc_ref">3</span> <span class="toc_entry">Foothills: the reusable toolkit</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-foothills.html#a0000000005"><span class="toc_ref">3.1</span> <span class="toc_entry">The Goodstein object and its faithful encoding</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-crown.html"><span class="toc_ref">6</span> <span class="toc_entry">Crown &amp; horizon</span></a>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000002">1 Program overview</h1>
+<p>This is a blueprint for a <em>proof theory / ordinal analysis of Peano Arithmetic, carried out in Lean&#160;4</em>. The summit of the program is the <b class="bfseries">Kirby–Paris independence theorem</b>: Peano Arithmetic does not prove that every Goodstein sequence terminates (\(\mathsf{PA} \nvdash \gamma \)). As of this writing that summit has <em>never</em> been formalized in <em>any</em> proof assistant, by any route — only the <em>termination</em> of Goodstein sequences is formalized (Coq <span class="ttfamily">hydra-battles</span>, Isabelle/AFP <span class="ttfamily">Goodstein_Lambda</span>, and Lean <span class="ttfamily">mathlib</span>/<span class="ttfamily">lean-gallery</span>), and abstract Gödel incompleteness is a separate lineage (Foundation, Paulson, O’Connor). A Lean proof of the independence is a first. </p>
+<p>Everything below is organized as a mountain. Chapter&#160;<a href="chp-shores.html">2</a> (<em>Two shores</em>) records the two bodies of <em>already-formalized</em> machinery this program stands between: mathlib’s ordinal apparatus and Foundation’s first-order + incompleteness apparatus. Chapter&#160;<a href="chp-foothills.html">3</a> (<em>Foothills</em>) is the reusable toolkit — the faithful encoding and faithfulness bridge (done), plus the deep gaps (Hardy/Wainer classification, arithmetic transfinite induction). Chapter&#160;<a href="chp-routeB.html">4</a> is the <b class="bfseries">mainline</b> route (Wainer growth rates); Chapter&#160;<a href="chp-routeA.html">5</a> is the <b class="bfseries">banked</b> route (internalized Gentzen cut-elimination), which carries the preserved crux-2 milestone chain. Chapter&#160;<a href="chp-crown.html">6</a> is the crown: the one ordinal-analysis monument both routes ultimately require, and the sibling summits it unlocks. </p>
+<p>The single, intrinsic obstruction shared by every route is the <em>ordinal analysis of PA</em> — the \(\varepsilon _0\)-bounded (infinitary) cut-elimination that yields \(\mathrm{TI}(\varepsilon _0)\vdash \mathrm{Con}(\mathsf{PA})\) (Route&#160;A face) or, equivalently, the Buchholz–Wainer bounding theorem (Route&#160;B face). It exists in no Lean library and must be <em>originated</em>; the only precedent is the Coq development of Bryce &amp; Goré (<span class="ttfamily">arXiv:2603.00487</span>). The lower-bound half of the climb (\(\text{goodsteinLength}\) dominates every fixed fast-growing level below \(\varepsilon _0\)) is already done and axiom-clean. </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="index.html" title="Goodstein Independence Blueprint"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Goodstein Independence Blueprint"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chp-shores.html" title="Two shores: the formalized girders"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

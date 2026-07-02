@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Foothills: the reusable toolkit</title>
+<link rel="next" href="chp-routeB.html" title="Route B — Wainer growth rates (mainline)" />
+<link rel="prev" href="chp-shores.html" title="Two shores: the formalized girders" />
+<link rel="up" href="index.html" title="Goodstein Independence Blueprint" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Goodstein Independence Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Program overview</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html"><span class="toc_ref">2</span> <span class="toc_entry">Two shores: the formalized girders</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-shores.html#a0000000003"><span class="toc_ref">2.1</span> <span class="toc_entry">mathlib: ordinal notation and the fast-growing hierarchy</span></a>
+ </li>
+<li class="">
+  <a href="chp-shores.html#a0000000004"><span class="toc_ref">2.2</span> <span class="toc_entry">Foundation: first-order logic and incompleteness</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="chp-foothills.html"><span class="toc_ref">3</span> <span class="toc_entry">Foothills: the reusable toolkit</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="chp-foothills.html#a0000000005"><span class="toc_ref">3.1</span> <span class="toc_entry">The Goodstein object and its faithful encoding</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+ </li>
+<li class="">
+  <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chp-crown.html"><span class="toc_ref">6</span> <span class="toc_entry">Crown &amp; horizon</span></a>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="chp:foothills">3 Foothills: the reusable toolkit</h1>
+
+<p>The faithful encoding and the faithfulness bridge (both done, kernel-clean) plus the three deep pieces of reusable machinery the summit needs and that exist nowhere yet. </p>
+<h1 id="a0000000005">3.1 The Goodstein object and its faithful encoding</h1>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:goodstein_termination">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">3.1</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-foothills.html#thm:goodstein_termination">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.Dom.goodstein_terminates" class="lean_decl">GoodsteinPA.Dom.goodstein_terminates</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  <b class="bfseries">Goodstein termination (the mathematical fact).</b> Every Goodstein sequence reaches \(0\): \(\forall m,\  \exists N,\  \texttt{goodsteinSeq}\, m\, N = 0\). Proved in-repo (<span class="ttfamily">Dom.goodstein_terminates</span>, the <span class="ttfamily">lean-gallery</span> artifact’s proof; mathlib carries the ingredients via <span class="ttfamily">ONote.fastGrowing</span> but upstreaming this theorem is a non-goal of this program). It plays two roles here: the <em>faithfulness target</em> the encoding is checked against (Thm&#160;<a href="chp-foothills.html#thm:bridge">3.6</a>), and the totality witness behind the length function (Def&#160;<a href="chp-routeB.html#def:goodstein_length">4.1</a>). A green anchor, not an obligation. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:hardy">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.2</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-foothills.html#def:hardy">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> <b class="bfseries">Hardy hierarchy &amp; its growth theory (gap).</b> The Hardy functions \(H_\alpha \) on ordinal notations and the ordinal-indexed growth/monotonicity theory relating \(H_\alpha \) to \(f_\alpha \). A partial function <span class="ttfamily">GoodsteinPA.FastGrowing.hardy</span> (with <span class="ttfamily">hardy_monotone</span>) is ported into the repo from Track&#160;1, but the <em>classification-strength</em> content — the piece feeding the Wainer bounding theorem — is absent. Portable in spirit from Castéran’s Coq <span class="ttfamily">hydra-battles</span> (\(F_\alpha \)/\(H_\alpha \), axiom-free). </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:ti_schema">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.3</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-foothills.html#def:ti_schema">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-shores.html#def:veblen">Definition 2.2</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  <b class="bfseries">Arithmetic transfinite induction \(\mathrm{TI}({{\lt}}\varepsilon _0)\) (gap).</b> The schema of transfinite induction up to each ordinal below \(\varepsilon _0\), expressed over <span class="ttfamily">ONote</span> codes as a family of PA-formulas. This is the object whose provability separates \(\mathsf{PA}\) from \(\mathrm{Con}(\mathsf{PA})\) (Gentzen): PA proves each instance below \(\varepsilon _0\) but not the schema at \(\varepsilon _0\). Net-new nowhere in Lean. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:wainer_class">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.4</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-foothills.html#def:wainer_class">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-foothills.html#def:hardy">Definition 3.2</a></li>
+          
+          <li><a href="chp-shores.html#def:fastgrowing">Definition 2.3</a></li>
+          
+          <li><a href="chp-shores.html#def:veblen">Definition 2.2</a></li>
+          
+          <li><a href="chp-shores.html#thm:hauptsatz">Theorem 2.4</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  <b class="bfseries">Wainer/Buchholz classification (the deep gap = ordinal analysis of PA).</b> A recursive function is \(\mathsf{PA}\)-provably total iff it is eventually dominated by some \(f_o\) with \(o{\lt}\varepsilon _0\). Its <em>converse</em> half (provably-total \(\Rightarrow \) \({\lt}\varepsilon _0\)-bounded) is proved in the literature by embedding PA into \(\omega \)-logic, applying cut-elimination, and reading off an ordinal assignment \({\lt}\varepsilon _0\) (Buchholz–Wainer 1987). Formalized in no proof assistant; this is the Route-B face of the one intrinsic monument. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="def:encoding">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3.5</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-foothills.html#def:encoding">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-foothills.html#thm:goodstein_termination">Theorem 3.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodsteinSentence" class="lean_decl">GoodsteinPA.goodsteinSentence</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>   The first-order <b class="bfseries">Goodstein sentence</b> \(\gamma = \texttt{goodsteinSentence}\), the faithful \(\mathcal{L}_{\mathrm{OR}}\)-encoding of “every Goodstein sequence terminates”. This is the object of the entire independence claim; if it is unfaithful, the whole result is worthless — hence the bridge below. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:bridge">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">3.6</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="chp-foothills.html#thm:bridge">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="chp-foothills.html#def:encoding">Definition 3.5</a></li>
+          
+          <li><a href="chp-foothills.html#thm:goodstein_termination">Theorem 3.1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodsteinSentence_faithful" class="lean_decl">GoodsteinPA.goodsteinSentence_faithful</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   <b class="bfseries">Faithfulness bridge (locked anchor).</b> The standard model satisfies the encoded sentence iff every genuine hereditary-base Goodstein sequence reaches \(0\): \(\; (\mathbb {N}\models \gamma )\iff \forall m,\exists N,\  \texttt{goodsteinSeq}\, m\, N = 0\). Proved and kernel-clean (\(\{ \texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\} \)). This is what makes a \(\mathsf{PA}\nvdash \gamma \) result about the <em>real</em> Goodstein theorem. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+  <a href="chp-shores.html" title="Two shores: the formalized girders"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Goodstein Independence Blueprint"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="chp-routeB.html" title="Route B — Wainer growth rates (mainline)"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>
