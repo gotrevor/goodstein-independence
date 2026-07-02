@@ -721,6 +721,31 @@ theorem seam2_function_slot_payable (dBase eNorm : ℕ) :
   simp [rel1]
   omega
 
+/-- **Non-vacuity (W4B §3's two-level configuration, `Zeh` form; sorry-free).**  ONE `allω`
+node at `ω^ω` whose EVERY branch `n` is a rank-`c` principal ∀/∃ cut with premise ordinals
+`ω·(n+1)` — the branch-unbounded configuration that killed the `(k,d)` calculus, realized as
+a legal `Zeh` derivation: every side condition is a membership, discharged by a REAL
+per-branch closure tree.  This is the inhabitedness witness the seam-2 reversal rests on
+(the reassembly probe would be vacuous without it). -/
+theorem two_level_config_Zeh {ar : ℕ} (r : (ℒₒᵣ).Rel ar) (v : Fin ar → SyntacticTerm ℒₒᵣ)
+    (χ ψ : SyntacticSemiformula ℒₒᵣ 1) {e : ONote} {H : ONote → Prop} {m : ℕ} {Γ : Seq}
+    (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v ∈ Γ) :
+    Zeh (expTower ONote.omega) e H m ((∀⁰ χ).complexity + 1) (insert (∀⁰ ψ) Γ) := by
+  refine Zeh.allω ψ (fun n => osucc (wmul n))
+    (fun n => osucc_wmul_lt_expTower_omega n)
+    (fun n => osucc_NF (wmul_NF n))
+    (expTower_NF omegaO_NF)
+    (fun n => Cl.osucc (wmul_mem _ n))
+    (fun n => ?_)
+  refine Zeh.cut (∀⁰ χ) (Nat.lt_succ_self _)
+    (Zekd.lt_osucc (wmul_NF n)) (Zekd.lt_osucc (wmul_NF n))
+    (wmul_NF n) (wmul_NF n) (osucc_NF (wmul_NF n))
+    (wmul_mem _ n) (wmul_mem _ n) ?_ ?_
+  · exact Zeh.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn))
+  · exact Zeh.axL r v (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hn))
+
 /-- **Seam-2 reversal probe, f-form (sorry-free):** the ω-node re-assembles over the
 reduction-output class, with each branch's control carried by the relativized f-slot
 `rel1 f n` (`normControlled_rel1`).  Mirrors the spike's `probe_allomega_reassembly_Zeh`
