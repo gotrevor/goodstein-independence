@@ -1921,4 +1921,67 @@ theorem hardy_omega_pow_lt_fastGrowing (α : ONote) (n : ℕ) :
 example : hardy (oadd (oadd 1 1 0) 1 0) 1 < fastGrowing (oadd 1 1 0) 2 :=
   hardy_omega_pow_lt_fastGrowing (oadd 1 1 0) 1
 
+/-- Pointwise domination lifts to iterates: `F ≤ g` pointwise and `g` monotone ⟹ `F^[m] ≤ g^[m]`. -/
+private theorem iterate_le_iterate_of_le {F g : ℕ → ℕ} (hFg : ∀ y, F y ≤ g y)
+    (hg : Monotone g) (m x : ℕ) : F^[m] x ≤ g^[m] x := by
+  induction m generalizing x with
+  | zero => exact le_rfl
+  | succ m ih =>
+      rw [Function.iterate_succ_apply, Function.iterate_succ_apply]
+      exact le_trans (ih (F x)) (hg.iterate m (hFg x))
+
+/-- **B4 LOWER bound at an arbitrary exponent `α`** — `f_α(n) ≤ H_{ω^α}(n)`, unconditional. The
+matching *lower* half of `hardy_omega_pow_add_one_le`: together they bracket
+`f_α(n) ≤ H_{ω^α}(n) < f_α(n+1)` (see `hardy_omega_pow_bracket`), the two-sided E–W Lemma 19
+sandwich of the Hardy hierarchy by the fast-growing hierarchy at `ω^α`. Well-founded recursion on
+`α`: `α = 0` is `n+1 = n+1`; `α` a limit is the IH verbatim (both sides pick index `α[n]` at
+argument `n`); `α = β+1` reduces via `hardy_oadd_coeff` to the iterate domination
+`(f_β)^[n](n) ≤ (H_{ω^β})^[n](n) ≤ (H_{ω^β})^[n+1](n)` (IH pointwise + `hardy_monotone` + `le_hardy`). -/
+theorem fastGrowing_le_hardy_omega_pow (α : ONote) : ∀ n : ℕ,
+    fastGrowing α n ≤ hardy (oadd α 1 0) n := by
+  haveI : WellFoundedLT ONote := ⟨InvImage.wf repr Ordinal.lt_wf⟩
+  induction α using WellFoundedLT.induction with
+  | _ α ih =>
+    intro n
+    rcases hα : fundamentalSequence α with (_ | β) | f
+    · have h0 : α = 0 := by
+        have hp := fundamentalSequence_has_prop α; rw [hα] at hp; exact hp
+      subst h0
+      have hfs1 : fundamentalSequence (oadd 0 1 0) = Sum.inl (some 0) := rfl
+      rw [fastGrowing_zero, hardy_succ (oadd 0 1 0) hfs1, hardy_zero]
+      simp only [id_eq]; omega
+    · have hlt : β < α := by
+        have hp := fundamentalSequence_has_prop α; rw [hα] at hp
+        rw [lt_def, hp.1]; exact Order.lt_succ _
+      have homega : fundamentalSequence (oadd α 1 0) = Sum.inr (fun i => oadd β i.succPNat 0) :=
+        fundamentalSequence_omega_pow_succ hα
+      rw [fastGrowing_succ α hα, hardy_limit (oadd α 1 0) homega]
+      show (fastGrowing β)^[n] n ≤ hardy (oadd β n.succPNat 0) n
+      rcases eq_or_ne β 0 with hβ0 | hβ0
+      · subst hβ0
+        rw [fastGrowing_zero, show oadd (0 : ONote) n.succPNat 0 = ofNat (n + 1) from (ofNat_succ n).symm,
+          hardy_ofNat, Nat.succ_iterate]
+        omega
+      · rw [hardy_oadd_coeff β hβ0 n n]
+        have hFg : ∀ y, fastGrowing β y ≤ hardy (oadd β 1 0) y := ih β hlt
+        have hg : Monotone (hardy (oadd β 1 0)) := hardy_monotone _
+        calc (fastGrowing β)^[n] n
+            ≤ (hardy (oadd β 1 0))^[n] n := iterate_le_iterate_of_le hFg hg n n
+          _ ≤ (hardy (oadd β 1 0))^[n + 1] n := by
+              rw [Function.iterate_succ_apply']; exact le_hardy (oadd β 1 0) _
+    · have hlim : fundamentalSequence (oadd α 1 0) = Sum.inr (fun i => oadd (f i) 1 0) :=
+        fundamentalSequence_omega_pow_limit hα
+      have hlt : f n < α := by
+        have hp := fundamentalSequence_has_prop α; rw [hα] at hp; exact (hp.2.1 n).2.1
+      rw [fastGrowing_limit α hα, hardy_limit (oadd α 1 0) hlim]
+      exact ih (f n) hlt n
+
+/-- **The two-sided E–W Lemma 19 bracket at `ω^α`:** `f_α(n) ≤ H_{ω^α}(n) < f_α(n+1)`, unconditional
+over every `α : ONote`. The Hardy hierarchy is sandwiched between consecutive fast-growing values —
+`H_{ω^α}` sits within one `f_α`-step of `f_α`. Combines `fastGrowing_le_hardy_omega_pow` (lower) and
+`hardy_omega_pow_lt_fastGrowing` (upper). -/
+theorem hardy_omega_pow_bracket (α : ONote) (n : ℕ) :
+    fastGrowing α n ≤ hardy (oadd α 1 0) n ∧ hardy (oadd α 1 0) n < fastGrowing α (n + 1) :=
+  ⟨fastGrowing_le_hardy_omega_pow α n, hardy_omega_pow_lt_fastGrowing α n⟩
+
 end GoodsteinPA.FastGrowing

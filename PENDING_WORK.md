@@ -24,7 +24,12 @@ Three paths on the crux (all judge-gated until lap-1 ratification — do NOT exe
    `readoff_sigma1` (needs the P2 Δ₀ matrix extension, ORDER laps 8–10).
 
 Permitted pure-growth sub-bricks (the only Scope-A-legal lane): the P1 UPPER bound is now BANKED
-(lap 179, see below). Remaining candidates are thin and of uncertain reuse:
+(lap 179, see below), AND its matching LOWER half — completing the **two-sided E–W Lemma 19 bracket**
+`fastGrowing α n ≤ hardy(ω^α) n < fastGrowing α (n+1)` (`hardy_omega_pow_bracket`, `Hardy.lean`,
+`[propext,choice,Quot.sound]`; lower = `fastGrowing_le_hardy_omega_pow`, WF recursion: α=0 trivial,
+limit = IH verbatim, successor = iterate domination via `hardy_oadd_coeff` + `iterate_le_iterate_of_le`
++ `le_hardy`). The Hardy hierarchy is now kernel-proven sandwiched by consecutive fast-growing values
+at every `ω^α`. Remaining candidates are thin and of uncertain reuse:
 - `f_α ≤ f_{ω^α}` (via `Reaches x (oadd α 1 0) α`) — **assessed hard + speculative this lap, do NOT
   re-attempt lightly.** The Reaches claim does NOT close under the WF IH: the successor-exponent case
   (`fs α = inl (some α')`) reduces, after the `omega_pow_succ` limit step + coeff chain, to
