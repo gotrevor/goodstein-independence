@@ -971,6 +971,17 @@ At an `allω` node deriving `insert (∀⁰ χ) Γ₀`, the branches run at the 
 existential `∃⁰ φ` (kept by a *contraction* on a lower `exI`), the branch's inductive witness bound
 is `≤ f n`, so `readoffD_aux`'s outer bound `≤ f 0` is NOT inductively maintained here.
 
+**NARROWED (lap-195) — the residue is now the non-monotone-matrix case only.**  The KEY structural
+fact `rel1 f 0 = f` (because `max 0 x = x`) means **branch `0` runs at the un-relativized slot `f`**:
+if `χ/[nm 0]` is FALSE, `readoffD_aux` recurses into branch 0 and closes at the SHARP bound
+`rel1 f 0 0 = f 0` with NO residue (proven in `readoffD_aux`'s `allω`/trapped case).  So the trap
+survives ONLY when `χ/[nm 0]` is TRUE while `∀⁰ χ` is false — i.e. the Δ₀ matrix `χ` is
+*non-monotone* in its numeral instances, all false branches sitting at index `≥ 1`.  This is exactly
+the case E–W's (Ax2) closes semantically; the added hypothesis `h0 : atomTrue (χ/[nm 0])` records
+the narrowing.  (A sufficient condition making the residue never fire: whenever `∀⁰ χ` is false its
+`0`-instance `χ/[nm 0]` is already false — e.g. `χ` a bounded-`∀` guard `y < t → ψ` with `ψ`
+downward-closed in `y` — since then the branch-0 recursion discharges it at bound `f 0`.)
+
 **Decisive diagnosis (lap-194c, grounded in the E–W Lemma 31 PROOF).**  The trap is a
 formulation artifact: it comes from `readoffD_aux` STRUCTURALLY descending the Δ₀ matrix via `allω`
 (which relativizes `f → rel1 f n`).  **E–W's Witnessing Lemma 31 AVOIDS this.**  In E–W Def 23:
@@ -1001,7 +1012,8 @@ theorem readoffD_trapped {φ χ : SyntacticSemiformula ℒₒᵣ 1}
     (hbranch : ∀ n, Zef2 (β n) e (adjoin H n) (rel1 f n) 0 (insert (χ/[nm n]) Γ₀))
     (htrap : (∃⁰ φ) ∈ Γ₀)
     (hfalse : ¬ atomTrue (∀⁰ χ))
-    (hΓ₀ : ∀ ψ ∈ Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ) :
+    (hΓ₀ : ∀ ψ ∈ Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ)
+    (h0 : atomTrue (χ/[nm 0])) :
     ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
   sorry
 
@@ -1050,9 +1062,21 @@ theorem readoffD_aux {φ : SyntacticSemiformula ℒₒᵣ 1} :
       have hΓ₀ : ∀ ψ ∈ Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ :=
         fun ψ hψ => hyp ψ (Finset.mem_insert_of_mem hψ)
       by_cases htrap : (∃⁰ φ) ∈ Γ₀
-      · -- TRAPPED contraction: the sole residue (slot relativizes, bound `f n` not `f 0`)
+      · -- TRAPPED contraction.  KEY: branch `0` runs at slot `rel1 f 0 = f` (since `max 0 x = x`),
+        -- so if `χ/[nm 0]` is FALSE the recursion into branch 0 closes at the SHARP bound `f 0`
+        -- (no relativization).  Only when `χ/[nm 0]` is TRUE (non-monotone matrix, all false
+        -- branches at index ≥ 1) does the genuine slot-growth residue remain.
         subst hc
-        exact readoffD_trapped dd htrap hχfalse hΓ₀
+        by_cases h0 : atomTrue (χ/[nm 0])
+        · exact readoffD_trapped dd htrap hχfalse hΓ₀ h0
+        · -- branch 0 at slot `rel1 f 0 = f`: recurse, landing the bound at `rel1 f 0 0 = f 0`
+          have hyp0 : ∀ ψ ∈ insert (χ/[nm 0]) Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ := by
+            intro ψ hψ
+            rcases Finset.mem_insert.mp hψ with rfl | hψΓ
+            · exact Or.inr h0
+            · exact hΓ₀ ψ hψΓ
+          have hb0 := ih 0 rfl hyp0
+          rwa [show (rel1 f 0) 0 = f 0 from by simp [rel1]] at hb0
       · -- NOT trapped: branch `k₀` has all members false ⇒ `sound0` contradiction
         exfalso
         have hbranch := dd k₀
