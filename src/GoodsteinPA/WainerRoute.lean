@@ -159,6 +159,7 @@ port; until then this row carries the sum. -/
 attribute [goodstein_blueprint 14 debt "wainer_axiom" "20-40" 65 wainer_bound_of_pa_proves_goodstein
   []
   ["WAINER-LADDER-2026-07-02.md: rungs P 4-7@70 + R 1@90 + D 2-3@80 + E 8-20@65 + W 2-4@75; supersedes the MASTERPLAN 30-60@60 monolith estimate",
+   "Lap-8 (OperatorZef2.lean): rungs erected as named Zef2 pins — P cutElimPass_Zef2, R rankToZero_Zef2, D readoff_delta0_Zef2, E embedding_Zef2 (trap-9 escalation-flagged), W wainer_splice_Zef2; on the tex dep-graph (sorry pins cannot be @[goodstein_blueprint]-tagged: BlueprintAudit computes broken)",
    "Buchholz-Wainer 1987: the classification is proved by omega-logic + cut-elimination — the someK/Zeh substrate"]
   "The specialized Wainer classification axiom; discharged by the wainer ladder over the Z^e operator calculus (embed -> pass -> rank-0 -> Delta_0 read-off -> splice)."]
   wainer_bound_of_pa_proves_goodstein
