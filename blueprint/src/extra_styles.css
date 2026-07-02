@@ -66,10 +66,12 @@ div.proof_content {
   #graph svg .edge path { stroke: #9aa0a6; }
   #graph svg .edge polygon { stroke: #9aa0a6; fill: #9aa0a6; }
   /* leanblueprint fills: proved (light green) / ready-to-formalize (light blue)
-     -> darken so the light text stays readable */
-  #graph svg [fill="#B0ECA3"] { fill: #33582b; }
-  #graph svg [fill="#A3D6FF"] { fill: #274b73; }
-  #graph svg [fill="#1CAC78"] { fill: #1d6b4e; }
+     -> darken so the light text stays readable. NB: Graphviz lowercases hex
+     colors in its SVG output and attribute selectors are case-sensitive,
+     hence the `i` flag. */
+  #graph svg [fill="#b0eca3" i] { fill: #33582b; }
+  #graph svg [fill="#a3d6ff" i] { fill: #274b73; }
+  #graph svg [fill="#1cac78" i] { fill: #1d6b4e; }
   /* low-contrast border colors on dark backgrounds */
   #graph svg .node [stroke="blue"] { stroke: #6ea8fe; }
   #graph svg .node [stroke="green"] { stroke: #4cc25a; }

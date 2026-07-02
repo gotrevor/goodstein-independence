@@ -380,7 +380,7 @@ by the promoted lower-bound theorem.
 \textbf{The Phase 2--3 girder (Route-A debt axiom).}  Inside \(\mathsf{PA}\), the Goodstein sentence
 implies \(\mathrm{Con}(\mathsf{PA})\).  A named \texttt{axiom} carrying an honest, audited subgoal: it
 is the \emph{internalized} form of the crown result \(\mathrm{TI}(\varepsilon_0)\vdash
-\mathrm{Con}(\mathsf{PA})\) (Thm~\ref{thm:d1_conpa}) --- the Rathjen §3 descent composed with Gentzen's
+\mathrm{Con}(\mathsf{PA})\) (Thm~\ref{thm:gentzen_conpa}) --- the Rathjen §3 descent composed with Gentzen's
 \(\mathrm{PRWO}(\varepsilon_0)\to\mathrm{Con}(\mathsf{PA})\).  The crux-2 chain above is the construction
 intended to discharge it; the lap-171 obstruction is why it remains an axiom (banked).
 \end{theorem}
@@ -416,7 +416,7 @@ analogue of the finitary Hauptsatz (Thm~\ref{thm:hauptsatz}).  Formalized only i
 from mathlib and every other prover.  \(\sim\)6--7k Lean lines, human-architected, multi-month.
 \end{theorem}
 
-\begin{theorem}\label{thm:d1_conpa}
+\begin{theorem}\label{thm:gentzen_conpa}
   \uses{thm:infinitary_tower, def:ti_schema}
   \notready
 \textbf{\(\mathrm{TI}(\varepsilon_0)\vdash\mathrm{Con}(\mathsf{PA})\) (Gentzen's consistency proof).}
@@ -428,7 +428,7 @@ primitive-recursive \(\varepsilon_0\)-descent, forbidden by transfinite inductio
 \end{theorem}
 
 \begin{theorem}\label{thm:two_sided}
-  \uses{thm:d1_conpa, def:ti_schema}
+  \uses{thm:gentzen_conpa, def:ti_schema}
   \notready
 \textbf{The proof-theoretic ordinal of PA is \(\varepsilon_0\).}  Both directions:
 \(\mathsf{PA}\) proves \(\mathrm{TI}(\alpha)\) for each \(\alpha<\varepsilon_0\), and
@@ -442,7 +442,7 @@ ordinal analysis, of which either Goodstein route is one corollary.
 \textbf{Summit: \(\mathsf{PA}\nvdash\gamma\), axiom-free.}  The Kirby--Paris independence with a clean
 \(\texttt{\#print axioms}\) (\(\{\texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\}\)
 only).  Reached the instant either route's debt axiom is discharged against the crown --- Route~B's
-Wainer bound or Route~A's internalized girder, both grounded in Thm~\ref{thm:d1_conpa}.  A first in any
+Wainer bound or Route~A's internalized girder, both grounded in Thm~\ref{thm:gentzen_conpa}.  A first in any
 proof assistant.
 \end{theorem}
 
