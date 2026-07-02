@@ -1071,4 +1071,21 @@ theorem ZehProv.exI {β e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq}
   exact ⟨osucc β, le_rfl, osucc_NF hβNF, Cl.osucc hβH,
     Zeh.exI φ n (lt_of_le_of_lt hle (Zekd.lt_osucc hβNF)) hNF' (osucc_NF hβNF) hH' hbound d⟩
 
+/-- **`ZehProv`-level `allω` combinator** (assembly plumbing): reassemble an ω-node at the
+wrapper level.  Each branch's `≤`-slack witness is threaded through (`< α` survives since
+`β' n ≤ β n < α`); the output witness is `α` itself (needs `Cl H α`).  Reused by the
+assembly to rebuild ω-nodes over the branch family. -/
+theorem ZehProv.allω {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq}
+    (φ : SyntacticSemiformula ℒₒᵣ 1) (β : ℕ → ONote)
+    (hβ : ∀ n, β n < α) (hαNF : α.NF) (hαH : Cl H α)
+    (D : ∀ n, ZehProv (β n) e (adjoin H n) (max m n) c (insert (φ/[nm n]) Γ)) :
+    ZehProv α e H m c (insert (∀⁰ φ) Γ) :=
+  ⟨α, le_rfl, hαNF, hαH,
+    Zeh.allω φ (fun n => (D n).choose)
+      (fun n => lt_of_le_of_lt (D n).choose_spec.1 (hβ n))
+      (fun n => (D n).choose_spec.2.1)
+      hαNF
+      (fun n => (D n).choose_spec.2.2.1)
+      (fun n => (D n).choose_spec.2.2.2)⟩
+
 end GoodsteinPA.OperatorZeh
