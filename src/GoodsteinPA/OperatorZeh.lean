@@ -972,4 +972,34 @@ theorem mono_c : ∀ {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq},
 
 end Zeh
 
+/-! ### Ordinal-splice descent bricks (assembly plumbing, not judge-gated)
+
+The §19.6 reduction outputs ordinal `osucc (α + γ)`; its inner descent cites these pure
+`ONote` facts (no `Zeh` manipulation — reused by, but distinct from, the gated reduction).
+Each composes the banked `Zekd` ordinal lemmas.  Built ahead so the discharge lap is pure
+assembly. -/
+
+/-- The reduction-output ordinal is NF whenever its components are. -/
+theorem osucc_add_NF {α γ : ONote} (hα : α.NF) (hγ : γ.NF) : (osucc (α + γ)).NF :=
+  osucc_NF (ONote.add_nf α γ)
+
+/-- **Splice descent, `osucc` form:** `γ' < γ ⟹ osucc (α + γ') < osucc (α + γ)` (the branch
+premise's ordinal strictly drops below the spliced output). -/
+theorem osucc_add_lt_osucc_add {α γ' γ : ONote} (hα : α.NF) (hγ' : γ'.NF) (hγ : γ.NF)
+    (h : γ' < γ) : osucc (α + γ') < osucc (α + γ) :=
+  Zekd.osucc_lt_osucc (ONote.add_nf α γ') (ONote.add_nf α γ)
+    (Zekd.add_lt_add_left_NF hα hγ' hγ h)
+
+/-- **Splice descent, bare form:** `γ' < γ ⟹ α + γ' < osucc (α + γ)` (a premise below `γ`
+lies strictly below the spliced output — the direct `weak`/`exI` descent witness). -/
+theorem add_lt_osucc_add {α γ' γ : ONote} (hα : α.NF) (hγ' : γ'.NF) (hγ : γ.NF)
+    (h : γ' < γ) : α + γ' < osucc (α + γ) :=
+  Zekd.lt_osucc_of_lt (ONote.add_nf α γ) (Zekd.add_lt_add_left_NF hα hγ' hγ h)
+
+/-- Membership of the reduction-output ordinal by closure (the seam-1 brick, named for the
+reduction's use site: `osucc (α + γ)` is a member whenever `α`, `γ` are). -/
+theorem osucc_add_mem {S : ONote → Prop} {α γ : ONote} (hα : Cl S α) (hγ : Cl S γ) :
+    Cl S (osucc (α + γ)) :=
+  Cl.osucc (Cl.add hα hγ)
+
 end GoodsteinPA.OperatorZeh
