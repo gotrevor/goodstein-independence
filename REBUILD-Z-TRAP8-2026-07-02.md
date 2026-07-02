@@ -62,6 +62,23 @@ bounded-witness `∃⁰φ` sequent is `exI` (mod `wk`/`weak`), which needs a sub
 sub-derivation's slot, which is pinned to `iterSlot f β` by the theorem's own conclusion applied
 at height `β`. `ZefProv`'s existential only slackens the *height*, never the *slot*.
 
+### 3a. The SHARP form — no fixed-argument slot works at all (`no_fixed_arg_monotone_unbounded_slot`)
+
+This is not "the diagonalizing iterate happens to dip; pick a better one." **No** output-slot map
+`S : ONote → ℕ` read at a FIXED argument can be both ordinal-monotone and unbounded along the finite
+ordinals (both of which the pass requires):
+
+- **monotone** `β < α → S β ≤ S α` — needed for the `weak`/`exI`/`cut` lift above;
+- **unbounded** `n ≤ S (ofNat n)` — forced, since the exit witness bound grows with the
+  derivation's ordinal (a bounded slot cannot capture cut-elimination growth).
+
+Kernel proof (`wip/Trap8Probe.lean`, `no_fixed_arg_monotone_unbounded_slot`): `ofNat n < ω` for
+every `n`, so monotonicity gives `S (ofNat n) ≤ S ω`, whence `n ≤ S ω` for all `n` — impossible for
+the fixed natural `S ω`. (The well-order fact: a monotone `ONote → ℕ` cannot dominate its own values
+along a limit's fundamental sequence.) So the conflict between trap-7 (needs growth) and trap-8
+(needs monotonicity) is *irreducible at any fixed argument* — it forces the fix in §4 to change the
+slot's *reading*, not its *shape*.
+
 ## 4. The tension the fix must reconcile (architect-owned — NOT decided here)
 
 - **trap-7 demands DIAGONALIZATION** (branch index rides a large argument) so the `allω` node's

@@ -64,4 +64,31 @@ theorem trap8_dips_at_limit_base :
     iterSlot ftest (oadd 1 1 0) 0 < iterSlot ftest 2 0 := by
   rw [iterSlot_two_zero, iterSlot_omega_zero]; omega
 
+/-- **The SHARP obstruction — statement-level impossibility, not merely an `iterSlot` defect.**
+NO output-slot map `S : ONote → ℕ` read at a FIXED argument can be BOTH:
+  (a) **ordinal-monotone** `β < α → S β ≤ S α` (needed to lift a `β < α` sub-derivation's slot to
+      the parent's via `Zef.mono_f`), AND
+  (b) **unbounded along the finite ordinals** `n ≤ S (ofNat n)` (forced: the exit witness bound
+      grows with the derivation's ordinal — a bounded slot cannot capture cut-elimination growth).
+Reason: `ofNat n < ω` for every `n`, so (a) gives `S (ofNat n) ≤ S ω`, whence (b) gives `n ≤ S ω`
+for all `n` — impossible for the single natural number `S ω`.  (This is the well-order fact that a
+monotone `ONote → ℕ` cannot dominate its own restriction to a fundamental sequence of a limit.)
+
+So trap 8 is NOT "pick a better iterate at argument 0": every fixed-argument slot-read fails.  The
+C2 fix MUST make the slot-read **node-relative** — the argument at which the slot is consulted has
+to grow with the ordinal (the diagonalization aligning with the node's level), so
+`iterSlot_le_of_reaches` monotonicity (which holds at LARGE argument) applies at every node. -/
+theorem no_fixed_arg_monotone_unbounded_slot :
+    ¬ ∃ S : ONote → ℕ,
+      (∀ β α, β.NF → α.NF → β < α → S β ≤ S α) ∧ (∀ n : ℕ, n ≤ S (ONote.ofNat n)) := by
+  rintro ⟨S, hmono, hunb⟩
+  have hlt : ∀ n : ℕ, (ONote.ofNat n) < oadd 1 1 0 := by
+    intro n
+    rw [lt_def, repr_ofNat]
+    have h : (oadd 1 1 0 : ONote).repr = Ordinal.omega0 := by simp
+    rw [h]; exact Ordinal.natCast_lt_omega0 n
+  have key : ∀ n : ℕ, n ≤ S (oadd 1 1 0) := fun n =>
+    le_trans (hunb n) (hmono _ _ (nf_ofNat n) (NF.oadd_zero 1 1) (hlt n))
+  exact Nat.not_succ_le_self (S (oadd 1 1 0)) (key (S (oadd 1 1 0) + 1))
+
 end GoodsteinPA.OperatorZeh
