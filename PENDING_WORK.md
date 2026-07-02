@@ -1,16 +1,16 @@
 # Pending work — open obligations & attack paths
 
-## IN-FLIGHT (lap 181) — Aristotle headline faithfulness cross-check
+## DONE (lap 181) — Aristotle headline faithfulness cross-check → PASS
 
-Sanctioned NL→formalization faithfulness audit of the headline (the ONE cross-check that carries
-value; permitted, non-gated, touches no §5 pin / no Route-A). Job `f56c8524-1108-4e2c-bc69-07260fc4811b`
-submitted with the Kirby–Paris theorem PROSE (`scratchpad/goodstein-headline-prose.txt`, MATH only —
-NEVER the Lean). **Next resume:** `aristotle show f56c8524-1108-4e2c-bc69-07260fc4811b`; when COMPLETE,
-`aristotle download` its `Main.lean` and check its `sorry`'d statement is logically equivalent to
-`peano_not_proves_goodstein : 𝗣𝗔 ⊬ ↑goodsteinSentence` (same shape: non-provability in first-order PA of
-a sentence expressing "every Goodstein sequence terminates"). Record the verdict in a
-`REBUILD-Z-LAP181-FAITHFULNESS-*.md` note. Do NOT resubmit; one job in flight. This is faithfulness
-hygiene on the LOCKED audit surface, not calculus proof work — stays inside Scope-A discipline.
+Sanctioned NL→formalization faithfulness audit of the headline (permitted, non-gated, touches no §5
+pin / no Route-A). Job `f56c8524` (`Build: succeeded`, single intended `sorry`) formalized the
+Kirby–Paris PROSE independently (never shown the repo Lean) and landed on
+`∃ φ, DefinesGoodsteinGraph φ ∧ ¬ PAProves (goodsteinSentenceOf φ)` over PA⁻+full-induction, with
+concrete `goodsteinSeq` (base `k+2`, hereditary-bump-minus-1) and the graph-definability anti-vacuity
+anchor. **Adjudicated logically equivalent** to `peano_not_proves_goodstein : 𝗣𝗔 ⊬ ↑goodsteinSentence`
+(the repo's fixed-sentence + proven `Bridge.lean` form is the stronger/more-specific variant of the
+same claim). Verdict banked: `REBUILD-Z-LAP181-FAITHFULNESS-2026-07-02.md`. LOCKED anchors stand; no
+audit-surface action. Do NOT resubmit this cross-check.
 
 ## DONE (lap 180) — additive-Hardy INEQUALITY banked in `src/`
 
