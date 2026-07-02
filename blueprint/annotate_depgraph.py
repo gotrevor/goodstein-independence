@@ -1,10 +1,16 @@
 #!/usr/bin/env -S uv run --quiet python3
-"""Annotate the leanblueprint dep graph with lap/confidence estimates.
+"""Sync blueprint statuses + annotate the dep graph, from the Lean ledger.
 
 Single source of truth = the `@[goodstein_blueprint <order> <category>
 "<stage>" "<laps>" <confidence> ...]` attribute sites in src/**/*.lean.
-This script transports them into blueprint/web/dep_graph_document.html:
+This script transports them into the blueprint:
 
+  * STATUS SYNC (anti-drift): each ledger-matched node's `\\leanok`/`\\notready`
+    tag in blueprint/src/content.tex is REWRITTEN from the ledger category
+    (clean/trusted -> \\leanok, debt/broken -> \\notready). Hand-edited statuses
+    on covered nodes get overwritten -- per the blueprint doctrine, status is
+    machine-derived, never hand-kept. (Nodes without an attribute site are left
+    alone: they are still hand-claims until they get a ledger entry.)
   * each matched node's label in the embedded DOT gains a second line,
     e.g.  pathBOperatorCutElimination
           ~5-10 laps | 65%
@@ -80,14 +86,62 @@ def estimate_text(info: dict) -> str:
     return f"{prefix}{info['laps']} laps | {info['confidence']}%"
 
 
-def main() -> int:
-    if "--web" in sys.argv:
-        subprocess.run(["leanblueprint", "web"], cwd=REPO, check=True)
+STATUS_FOR = {"clean": "\\leanok", "trusted": "\\leanok",
+              "debt": "\\notready", "broken": "\\notready"}
 
+
+def sync_tex_statuses(ann: dict) -> bool:
+    """Rewrite each ledger-matched node's status tag in content.tex from the
+    ledger category. Returns True if the file changed."""
+    text = TEX.read_text()
+    changes = []
+
+    def fix(m):
+        env, label, body = m.groups()
+        lm = re.search(r'\\lean\{([^}]*)\}', body)
+        if not lm:
+            return m.group(0)
+        info = next(
+            (ann[d] for d in (norm(x.strip()) for x in lm.group(1).split(",")) if d in ann),
+            None,
+        )
+        if info is None:
+            return m.group(0)
+        want = STATUS_FOR[info["category"]]
+        if re.search(r'(?<!textbackslash )\\leanok\b' if want == "\\leanok"
+                     else r'(?<!textbackslash )\\notready\b', body) and not re.search(
+                     r'(?<!textbackslash )\\notready\b' if want == "\\leanok"
+                     else r'(?<!textbackslash )\\leanok\b', body):
+            return m.group(0)  # already exactly right
+        # strip any existing status tag lines, then insert the wanted one
+        # right after the \lean{} line (prose uses \textbackslash forms, safe)
+        body2 = re.sub(r'[ \t]*(?<!textbackslash )\\(leanok|notready)\b[ \t]*\n?', '', body)
+        body3 = re.sub(r'(\\lean\{[^}]*\}[ \t]*\n)',
+                       lambda mm: mm.group(1) + "  " + want + "\n",
+                       body2, count=1)
+        changes.append(f"{label}: -> {want} (ledger: {info['category']})")
+        return f"\\begin{{{env}}}\\label{{{label}}}{body3}\\end{{{env}}}"
+
+    new = NODE_RE.sub(fix, text)
+    if new != text:
+        TEX.write_text(new)
+    for c in changes:
+        print("status sync:", c)
+    return bool(changes)
+
+
+def main() -> int:
     ann = lean_annotations()
     if not ann:
         print("no @[goodstein_blueprint] annotations found", file=sys.stderr)
         return 1
+
+    changed = sync_tex_statuses(ann)
+    if "--web" in sys.argv:
+        subprocess.run(["leanblueprint", "web"], cwd=REPO, check=True)
+    elif changed:
+        print("warn: content.tex statuses were re-synced from the ledger; "
+              "re-run with --web to rebuild the site", file=sys.stderr)
 
     matched = {
         node: ann[d]

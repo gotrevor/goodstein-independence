@@ -54,20 +54,30 @@ Current run: 9/9 nodes consistent (`debt`/`debt`), 0 warnings, exit 0. ~6s.
 
 - `leanblueprint pdf` — blocked on MacTeX download. Revisit when `pdflatex` is on PATH.
 
-## Lap/confidence estimates in the dep graph (added 2026-07-01)
+## Statuses + lap/confidence estimates in the dep graph (added 2026-07-01)
 
-The `@[goodstein_blueprint]` ledger's `"<laps>"` + `<confidence>` fields are
-surfaced on the dep graph by `blueprint/annotate_depgraph.py`: each matched
-node's DOT label gains a second line (`~5-10 laps | 65%`) and its click-modal
-gains the same "Ledger estimate" line. Transport is verbatim from the Lean
-(single source of truth); the script never adjudicates status. Matching is
-tex `\lean{}` name vs. attribute stage ident, modulo `_stage`/`_capstone`.
+`blueprint/annotate_depgraph.py` is the ledger→blueprint reconciler; the
+`@[goodstein_blueprint]` attribute sites in the Lean are the single source of
+truth:
 
-A plain `leanblueprint web` WIPES the annotations, so the one-command refresh is:
+- **Status sync (anti-drift):** every ledger-matched node's `\leanok`/`\notready`
+  tag in `content.tex` is REWRITTEN from the ledger category (clean/trusted →
+  `\leanok`; debt/broken → `\notready`). Hand edits on covered nodes are
+  overwritten — status is machine-derived, never hand-kept (the doctrine's core
+  rule, now enforced rather than requested).
+- **Estimates:** each matched node's DOT label gains a second line
+  (`~5-10 laps | 65%`) and its click-modal a "Ledger estimate" line, verbatim
+  from the `"<laps>"` + `<confidence>` attribute fields.
+
+Matching is tex `\lean{}` name vs. attribute stage ident, modulo
+`_stage`/`_capstone`. A plain `leanblueprint web` WIPES the annotations, so the
+one-command refresh is:
 
     blueprint/annotate_depgraph.py --web
 
 Nodes without an attribute site (currently everything outside the 9 Path B
-capstones, e.g. `wainer_axiom` / `crux2_axiom` / `infinitary_tower`) carry no
-estimate; give them `@[goodstein_blueprint ...]` sites in the Lean and they
-flow through automatically.
+capstones, e.g. `wainer_axiom` / `crux2_axiom` / `infinitary_tower`) are still
+HAND-CLAIMS for both status and estimate; give them `@[goodstein_blueprint ...]`
+sites in the Lean and both flow through automatically. That is the standing gap
+(27 of 36 nodes) — closing it also needs `blueprint_audit` to verify those new
+sites' categories, same as the Path B nine.
