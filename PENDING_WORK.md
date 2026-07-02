@@ -31,10 +31,17 @@ Ran the ratified laps-6–7 order (`E-2026-07-02-JUDGE-rebuild-z-lap5-validation
   works (monotone ⊕ unbounded is impossible: `ofNat n < ω ∀n` ⟹ `n ≤ S ω ∀n`), so the fix must make
   the slot-READ node-relative, not swap the iterate. (ii) `iterSlot_le_of_lt` (src §5b, axiom-clean)
   = the budgeted ordinal-monotonicity `β<α, x ≥ norm β ⟹ iterSlot f β x ≤ iterSlot f α x` (mirror
-  `hardy_le_of_lt`) — the crux lemma any node-relative fix splices in. **NEXT grind lap (wip-only):**
-  prototype a node-relative-slot pass reading the slot at argument `≥ norm α` (e.g.
-  `rel1 (iterSlot f α) (norm α)`) and check the four cases thread via `iterSlot_le_of_lt` (lift) +
-  the reaches arithmetic (`allω`), BEFORE the architect fixes C2.
+  `hardy_le_of_lt`) — the crux lemma any node-relative fix splices in. (iii) **Budget refinement**
+  (`trap8_budget_not_norm_alpha`): the node-relative read-budget canNOT be `norm α` — `norm` is not
+  monotone (`ofNat 5 < ω` yet `norm ω = 1 < 5 = norm(ofNat 5)`), and `iterSlot_le_of_lt` needs
+  argument `≥ norm β` for a child `β < α`; the budget must DOMINATE sub-derivation norms, i.e. be the
+  E–W count `F^α(0)`, not `norm α`. The trap-8 analysis thus lands exactly on E–W Lemma 19's design
+  (transfinite count, not syntactic norm). **NEXT grind lap (wip-only, in-authority):** define the
+  count `Cα := F^{collapse α}(0)`-class (candidate `fastGrowing (collapse α) 0` or a `norm`-majorizing
+  count) and prove the majorization `∀ β reachable below α at budget x, norm β ≤ Cα` — the budget
+  the node-relative slot routes through. THEN prototype the node-relative pass in `wip/`
+  (slot `rel1 (iterSlot f α) Cα`) threading `weak`/`exI`/`cut` via `iterSlot_le_of_lt` + `allω` via
+  reaches. This is the architect's C2 shape decision (do NOT put a chosen shape in `src` — VOID).
 
 ## LAP 5 (185) — PIN-3 RESTATED (statement lap done) → judge-gated grind is the open work
 
