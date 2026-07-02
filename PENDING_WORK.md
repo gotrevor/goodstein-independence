@@ -21,6 +21,15 @@ judge-gated §5 pins + the FORBIDDEN Route-A machinery; the non-forbidden Wainer
 axioms + 19 src sorries) → stop sentinel NOT written; run is cap-bounded. **Resume = judge
 ratification of the verdict + finding (Option A vs B; pin `f'`).** Refreshed STATUS.md to the spine.
 
+**A3 completeness VERIFIED (lap 177, not asserted — don't re-check on resume).** Compared the banked
+`Zekd` inversion suite against the ported `Zeh` set directly: `OperatorZinfty.lean` has exactly four
+invertible-rule theorems — `orInv`:221, `andInvL`:326, `andInvR`:404, `allInv`:484 (plus their
+`Zekd`-wrapper ∃-K forms at :2187/2194/2201/2209) — and all four are ported to `Zeh`
+(`orInv_Zeh`:842, `andInvL_Zeh`:892, `andInvR_Zeh`:939, `allInv_Zeh`:513, + helper push/pull lemmas).
+There is **no `exInv`/`negInv`/`impInv`** in either calculus because ∃ (bounded-witness `exI`), ¬,
+and atoms are not invertible rules. So the companion inversion set is genuinely closed — A3 has no
+missing safe-grind target. This is the one place "Scope-A exhausted" could have been wrong; it is not.
+
 ## Lap 176 — ⭐⭐⭐ CRUX FINDING: the P1 obstruction is a statement-shape artifact (E-W Lemma 25/30 conflation)
 
 **Source cross-check (`papers/eguchi-weiermann-2012-…md`, Def 23 + Lemmas 24–31) of the three
