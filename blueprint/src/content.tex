@@ -297,17 +297,22 @@ deliverable; both declarations are axiom-clean.
 \section{The crux-2 milestone chain (witness-bounded operator calculus, preserved)}
 
 The following nine nodes are the internalized-cut-elimination decomposition of the Phase 2--3 girder,
-imported through \texttt{GoodsteinPABlueprint}.  Every node is \texttt{\textbackslash notready}: each
-stage theorem still depends on named capstone axioms (all classified \texttt{debt} by
-\texttt{blueprint\_audit}).  They are the ``how would the internalization actually be built'' skeleton,
-retained as a banked asset.
+imported through \texttt{GoodsteinPABlueprint}.  Status semantics here need care: each node's
+\emph{ledger} entry rates that node's own \emph{step} (its capstone), while the bound \emph{stage}
+theorem is the \emph{cumulative} chain up to that point.  Stage~1's step is discharged and audited
+clean, and stage~1 has no upstream, so that node is genuinely done.  Stage~9's \emph{step} is likewise
+discharged (\texttt{0 laps}), but its stage theorem composes capstones 2--8 --- all still named
+\texttt{axiom}s classified \texttt{debt} by \texttt{blueprint\_audit} --- so nodes 2--9 remain
+\texttt{\textbackslash notready}.  They are the ``how would the internalization actually be built''
+skeleton, retained as a banked asset.
 
 \begin{theorem}\label{thm:pathBGoodsteinSentenceShape}
   \lean{GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage}
   \uses{def:encoding}
-  \notready
+  \leanok
 The encoded Goodstein sentence can be normalized to the exact closed one-formula sequent shape
-consumed by the bounded embedding.
+consumed by the bounded embedding.  Discharged (ledger: \texttt{clean}, audited via
+\texttt{collectAxioms}); as the chain's first stage it carries no upstream debt.
 \end{theorem}
 
 \begin{theorem}\label{thm:pathBPeanoMinusAxiomLeaves}
@@ -368,7 +373,9 @@ The projected derivation is the concrete Goodstein-fragment terminal object.
   \lean{GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage}
   \notready
 The full crux-2 capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out
-by the promoted lower-bound theorem.
+by the promoted lower-bound theorem.  The bridge \emph{step} itself is discharged (ledger:
+\texttt{clean}, \texttt{0 laps}), but this stage theorem composes capstones 2--8, so its kernel
+footprint carries their open axioms until the chain discharges.
 \end{theorem}
 
 \section{The Route-A girder and headline}
