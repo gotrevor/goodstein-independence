@@ -24,6 +24,13 @@ entail `hg_base`, and isolates exactly where the seam bites.
 The upshot for the grind: the base floor `g 0 + k ≤ g k` is a *relative-to-`g 0`* lower bound, and
 `g 0` JUMPS under `rel1` (`(rel1 t n) 0 = t n`, the plateau top), so — unlike the absolute lower
 bound `2m+1 ≤ g m` — it is not `rel1`-stable.  See `basefloor_not_rel1_stable` below.
+
+**Ruling-grade guarantee (judge check, lap-194).**  The refuting slot `gRel = rel1 tBase 3`
+SATISFIES the pass's full threaded kit — `gRel_mono` (Monotone), `gRel_infl` (`∀x, x ≤ gRel x`),
+`gRel_low` (`∀m, 2m+1 ≤ gRel m`) are all kernel-proven below — so it is exactly a slot the pass can
+produce at a `rel1`-relativized `allω` branch.  A floor-failure from a non-pass-producible `s` would
+refute nothing; `basefloor_not_rel1_stable` bundles the four facts (mono ∧ infl ∧ 2m+1 ∧ ¬hg_base)
+into a single kernel-checked witness, so the refutation is ruling-grade, not a shape artifact.
 -/
 
 namespace GoodsteinPA.OperatorZeh

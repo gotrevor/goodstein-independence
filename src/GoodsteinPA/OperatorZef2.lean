@@ -883,6 +883,196 @@ theorem rankToZero_Zef2 {α e : ONote} {H : ONote → Prop} {d : ℕ} {Γ : Seq}
     Zef2Prov (collapseIter d α) e H (ewIterTower f d α) 0 Γ :=
   rankToZeroAux e heNF d D hf1.monotone hf1.infl hf1.2 hαNF hαH
 
+/-- The numeral term `nm n` (`OperatorZinfty.nm`) evaluates to `n` under any standard-model
+assignment — the value of a closed numeral const is assignment-independent.  Local companion of
+`stdClosedVal_nm`, phrased with `valm ℕ` so it `rw`s inside `eval_substs` read-offs. -/
+@[simp] lemma valm_nm (n : ℕ) (f : ℕ → ℕ) :
+    Semiterm.valm ℕ ![] f (nm n) = n := by simp [nm]
+
+/-- **Rank-0 `Zef2` soundness** (the reusable truth core of the Δ₀ read-off).  A cut-free
+derivation of `Γ` has a standard-model-true member.  The `allω` (Π) case combines: either some
+branch's true member is in the shared context `Γ` (done), or every branch is true at its own
+instance `φ/[nm n]` — whence `∀⁰ φ` is true (`atomTrue (∀⁰ φ) = ∀ k, atomTrue (φ/[nm k])`).
+Slot-INDEPENDENT (truth does not see `f`).  Ported from `wip/Lap13ReadoffDeltaProbe.lean`. -/
+theorem sound0 : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+    Zef2 α e H f c Γ → c = 0 → ∃ ψ ∈ Γ, atomTrue ψ := by
+  intro α e H f c Γ dd
+  induction dd with
+  | @axL α e H f c Γ ar hαN r v hp hn =>
+      intro _
+      by_cases htrue : atomTrue (Semiformula.rel r v)
+      · exact ⟨_, hp, htrue⟩
+      · refine ⟨_, hn, ?_⟩
+        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel] using htrue
+  | @wk α e H f c Δ Γ hαN hsub _ ih =>
+      intro hc
+      obtain ⟨ψ, hψ, htrue⟩ := ih hc
+      exact ⟨ψ, hsub hψ, htrue⟩
+  | @weak α β e H f c Δ Γ hαN hβ hβNF hαNF hβH hsub _ ih =>
+      intro hc
+      obtain ⟨ψ, hψ, htrue⟩ := ih hc
+      exact ⟨ψ, hsub hψ, htrue⟩
+  | @allω α e H f c Γ hαN φ β hβ hβNF hαNF hβH _ ih =>
+      intro hc
+      rcases Classical.em (∃ n : ℕ, ∃ ψ ∈ Γ, atomTrue ψ) with hctx | hctx
+      · obtain ⟨n, ψ, hψ, htrue⟩ := hctx
+        exact ⟨ψ, Finset.mem_insert_of_mem hψ, htrue⟩
+      · refine ⟨∀⁰ φ, Finset.mem_insert_self _ _, ?_⟩
+        have hall : ∀ n, atomTrue (φ/[nm n]) := by
+          intro n
+          obtain ⟨ψ, hψ, htrue⟩ := ih n hc
+          rcases Finset.mem_insert.mp hψ with rfl | hψΓ
+          · exact htrue
+          · exact absurd ⟨n, ψ, hψΓ, htrue⟩ hctx
+        simp only [atomTrue, Semiformula.eval_all]
+        intro x
+        have hx := hall x
+        simpa [atomTrue, Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton] using hx
+  | @exI α β e H f c Γ hαN φ n hβ hβNF hαNF hβH hbound _ ih =>
+      intro hc
+      obtain ⟨ψ, hψ, htrue⟩ := ih hc
+      rcases Finset.mem_insert.mp hψ with rfl | hψΓ
+      · refine ⟨∃⁰ φ, Finset.mem_insert_self _ _, ?_⟩
+        simp only [atomTrue, Semiformula.eval_ex]
+        exact ⟨n, by
+          simpa [atomTrue, Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton] using htrue⟩
+      · exact ⟨ψ, Finset.mem_insert_of_mem hψΓ, htrue⟩
+  | @cut α βφ βψ e H f c Γ hαN φ hcompl hcutRead _ _ _ _ _ _ _ _ _ _ _ =>
+      intro hc; subst hc
+      exact absurd hcompl (by omega)
+
+/-- `atomTrue (∀⁰ χ) ↔ ∀ k, atomTrue (χ/[nm k])` — a standard ω-universal is standard-model-true
+iff every numeral instance is true.  (`∀⁰` at the top of a Δ₀ read-off descends to its instances.) -/
+theorem atomTrue_all_iff (χ : SyntacticSemiformula ℒₒᵣ 1) :
+    atomTrue (∀⁰ χ) ↔ ∀ k, atomTrue (χ/[nm k]) := by
+  simp only [atomTrue, Semiformula.eval_all]
+  constructor
+  · intro h k
+    have hk := h k
+    simpa [Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton] using hk
+  · intro h x
+    have hx := h x
+    simpa [Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton] using hx
+
+/-- `atomTrue (∃⁰ χ) ↔ ∃ k, atomTrue (χ/[nm k])` — dual of `atomTrue_all_iff`. -/
+theorem atomTrue_ex_iff (χ : SyntacticSemiformula ℒₒᵣ 1) :
+    atomTrue (∃⁰ χ) ↔ ∃ k, atomTrue (χ/[nm k]) := by
+  simp only [atomTrue, Semiformula.eval_ex]
+  constructor
+  · rintro ⟨x, hx⟩
+    exact ⟨x, by simpa [Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton] using hx⟩
+  · rintro ⟨k, hk⟩
+    exact ⟨k, by simpa [Semiformula.eval_substs, valm_nm, Matrix.constant_eq_singleton] using hk⟩
+
+/-- **RESIDUE (trapped contraction) — the SOLE open sub-case of `readoffD_aux`.**
+
+At an `allω` node deriving `insert (∀⁰ χ) Γ₀`, the branches run at the *relativized* slot
+`rel1 f n` (`rel1 f n 0 = f n`, NOT `f 0`).  When the shared context `Γ₀` still carries the goal
+existential `∃⁰ φ` (kept by a contraction on a lower `exI`), the branch's inductive witness bound is
+`≤ f n`, so `readoffD_aux`'s outer bound `≤ f 0` is NOT inductively maintained here.  Extracting a
+`≤ f 0` witness in this configuration is the Towsner §5.4 witnessing content — the growth-coupled
+argument (`𝒢(n) > h_α(k)`, Thm 17.1 clause (ii)) rather than a pure structural read-off.
+
+Scoped concretely: with the branch derivations `hbranch` at `rel1 f n`, `∃⁰ φ ∈ Γ₀`, `∀⁰ χ` false,
+and every other `Γ₀`-member `= ∃⁰ φ` or false, produce the bounded witness.  The non-trapped
+(`∃⁰ φ ∉ Γ₀`) sub-case is closed inside `readoffD_aux` via `sound0` (all branch members false ⇒
+contradiction), and the `exI`/`wk`/`weak`/`axL` cases keep the slot `f` and are fully proven; this
+is the only remaining obligation.  See `PENDING_WORK.md` (lap-194) for the sharpened obstruction. -/
+theorem readoffD_trapped {φ χ : SyntacticSemiformula ℒₒᵣ 1}
+    {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ₀ : Seq} {β : ℕ → ONote}
+    (hbranch : ∀ n, Zef2 (β n) e (adjoin H n) (rel1 f n) 0 (insert (χ/[nm n]) Γ₀))
+    (htrap : (∃⁰ φ) ∈ Γ₀)
+    (hfalse : ¬ atomTrue (∀⁰ χ))
+    (hΓ₀ : ∀ ψ ∈ Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ) :
+    ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
+  sorry
+
+/-- **`readoffD_aux` — the strengthened read-off invariant** (falsity form).  From a rank-0 `Zef2`
+derivation of any `Γ` all of whose members are either the goal existential `∃⁰ φ` or standard-model
+FALSE, extract the bounded witness `n ≤ f 0` with `φ/[nm n]` true.  Proven by induction on the
+derivation for all rules; the `allω` node splits on whether `∃⁰ φ` is trapped in the shared context
+(the `readoffD_trapped` residue) vs. absent (closed by `sound0`).  `exI`/`wk`/`weak` keep the slot
+`f`; `axL`/`cut` are vacuous at rank 0. -/
+theorem readoffD_aux {φ : SyntacticSemiformula ℒₒᵣ 1} :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2 α e H f c Γ → c = 0 → (∀ ψ ∈ Γ, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ) →
+      ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
+  intro α e H f c Γ dd
+  induction dd with
+  | @axL α e H f c Γ ar hαN r v hp hn =>
+      intro _ hyp
+      -- one of the complementary literals is true, contradicting `hyp` (literals ≠ `∃⁰ φ`)
+      by_cases htrue : atomTrue (Semiformula.rel r v)
+      · rcases hyp _ hp with h | h
+        · exact absurd h (by simp [ExsQuantifier.exs])
+        · exact absurd htrue h
+      · have hntrue : atomTrue (Semiformula.nrel r v) := by
+          simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel] using htrue
+        rcases hyp _ hn with h | h
+        · exact absurd h (by simp [ExsQuantifier.exs])
+        · exact absurd hntrue h
+  | @wk α e H f c Δ Γ hαN hsub _ ih =>
+      intro hc hyp
+      exact ih hc (fun ψ hψ => hyp ψ (hsub hψ))
+  | @weak α β e H f c Δ Γ hαN hβ hβNF hαNF hβH hsub _ ih =>
+      intro hc hyp
+      exact ih hc (fun ψ hψ => hyp ψ (hsub hψ))
+  | @allω α e H f c Γ₀ hαN χ β hβ hβNF hαNF hβH dd ih =>
+      intro hc hyp
+      -- `∀⁰ χ ≠ ∃⁰ φ`, so by `hyp` it is FALSE ⇒ some branch instance `χ/[nm k₀]` is false
+      have hχfalse : ¬ atomTrue (∀⁰ χ) := by
+        rcases hyp (∀⁰ χ) (Finset.mem_insert_self _ _) with h | h
+        · exact absurd h (by simp [UnivQuantifier.all, ExsQuantifier.exs])
+        · exact h
+      obtain ⟨k₀, hk₀⟩ : ∃ k, ¬ atomTrue (χ/[nm k]) := by
+        by_contra hcon
+        push_neg at hcon
+        exact hχfalse ((atomTrue_all_iff χ).mpr hcon)
+      -- the shared context `Γ₀` inherits the falsity/`∃⁰ φ` dichotomy
+      have hΓ₀ : ∀ ψ ∈ Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ :=
+        fun ψ hψ => hyp ψ (Finset.mem_insert_of_mem hψ)
+      by_cases htrap : (∃⁰ φ) ∈ Γ₀
+      · -- TRAPPED contraction: the sole residue (slot relativizes, bound `f n` not `f 0`)
+        subst hc
+        exact readoffD_trapped dd htrap hχfalse hΓ₀
+      · -- NOT trapped: branch `k₀` has all members false ⇒ `sound0` contradiction
+        exfalso
+        have hbranch := dd k₀
+        obtain ⟨ψ, hψ, htrueψ⟩ := sound0 hbranch hc
+        rcases Finset.mem_insert.mp hψ with rfl | hψΓ
+        · exact hk₀ htrueψ
+        · rcases hΓ₀ ψ hψΓ with rfl | hfψ
+          · exact htrap hψΓ
+          · exact hfψ htrueψ
+  | @exI α β e H f c Γ₀ hαN χ n hβ hβNF hαNF hβH hbound dd ih =>
+      intro hc hyp
+      by_cases hχφ : χ = φ
+      · subst hχφ
+        -- `subst` eliminated `φ` (replacing it by `χ`); the goal now reads off `χ`
+        -- the introduced witness `n ≤ f 0`; either `χ/[nm n]` is already true, or recurse
+        by_cases hinst : atomTrue (χ/[nm n])
+        · exact ⟨n, hbound, hinst⟩
+        · refine ih hc ?_
+          intro ψ hψ
+          rcases Finset.mem_insert.mp hψ with rfl | hψΓ
+          · exact Or.inr hinst
+          · exact hyp ψ (Finset.mem_insert_of_mem hψΓ)
+      · -- `∃⁰ χ ≠ ∃⁰ φ` ⇒ `∃⁰ χ` false ⇒ `χ/[nm n]` false; recurse at slot `f`
+        have hexχfalse : ¬ atomTrue (∃⁰ χ) := by
+          rcases hyp (∃⁰ χ) (Finset.mem_insert_self _ _) with h | h
+          · exact absurd ((Semiformula.exs_inj _ _).mp h) hχφ
+          · exact h
+        have hχn : ¬ atomTrue (χ/[nm n]) := fun ht =>
+          hexχfalse ((atomTrue_ex_iff χ).mpr ⟨n, ht⟩)
+        refine ih hc ?_
+        intro ψ hψ
+        rcases Finset.mem_insert.mp hψ with rfl | hψΓ
+        · exact Or.inr hχn
+        · exact hyp ψ (Finset.mem_insert_of_mem hψΓ)
+  | @cut α βφ βψ e H f c Γ hαN φ' hcompl hcutRead _ _ _ _ _ _ _ _ _ _ _ =>
+      intro hc _; subst hc
+      exact absurd hcompl (by omega)
+
 /-- **RUNG D (L-D) `readoff_delta0_Zef2`** — the Δ₀ (bounded-∀ matrix) read-off extension
 (Towsner §5.4 pattern), re-homed to `Zef2`.  **R-4 RESTATEMENT (SERIES-1 order):** the old
 `matrixTrue` form is deleted; `<BoundedInstance>` is discharged to the repo-native Foundation Δ₀
@@ -905,7 +1095,14 @@ theorem readoff_delta0_Zef2 {φ : SyntacticSemiformula ℒₒᵣ 1}
     {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ}
     (dd : Zef2 α e H f 0 {(∃⁰ φ)}) :
     ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
-  sorry
+  -- Reduce to the strengthened falsity-invariant `readoffD_aux`.  On the singleton the sole member
+  -- is the goal existential (left disjunct), so the invariant's hypothesis is immediate.  (The
+  -- `hφbdd` Δ₀ premise is not consumed by this route — the falsity invariant carries the read-off
+  -- without a syntactic Δ₀ descent; see `readoffD_trapped` / `PENDING_WORK.md` lap-194.)
+  refine readoffD_aux dd rfl ?_
+  intro ψ hψ
+  rw [Finset.mem_singleton] at hψ
+  exact Or.inl hψ
 
 /-- **RUNG E (L-E) `embedding_Zef2`** — the embedding rung (E–W Lemmas 32–36), re-based onto
 `Zef2` per the JUDGE AMENDMENTS (ruling §5):

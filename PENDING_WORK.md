@@ -1,5 +1,60 @@
 # Pending work — open obligations & attack paths
 
+## LAP 194 (grind, lane D) — read-off `readoff_delta0_Zef2` DECOMPOSED to a SINGLE named residue `readoffD_trapped`; `sound0` + invariant PROVEN in `src`
+
+Rung D (`OperatorZef2.lean:readoff_delta0_Zef2`) is no longer a monolithic `sorry`. It is now a
+`readoffD_aux` reduction, and `readoffD_aux` is proven in `src` for **every** rule except a single
+precisely-scoped sub-case. Landed in `src/GoodsteinPA/OperatorZef2.lean` (build 🟢 1328 jobs,
+headline undrifted, `sound0`/`atomTrue_all_iff`/`atomTrue_ex_iff` axiom-clean):
+
+- **`sound0` ported to `src`** (rank-0 `Zef2` soundness, the reusable truth core; axiom-clean).
+- **`valm_nm` local lemma** — `Semiterm.valm ℕ ![] f (nm n) = n` for the `OperatorZinfty.nm`
+  numeral, proven `by simp [nm]`. (Importing `GoodsteinPA.Embedding` to reuse its `valm_nm` was a
+  DEAD END: it surfaces `Γ₀` parse-token clashes in existing proofs of `OperatorZef2` — avoided.)
+- **`atomTrue_all_iff` / `atomTrue_ex_iff`** — `atomTrue (∀⁰χ) ↔ ∀k, atomTrue(χ/[nm k])` and the ∃
+  dual; the ω-quantifier ↔ numeral-instances bridges the read-off descends on. Axiom-clean.
+- **`readoffD_aux` (the strengthened FALSITY invariant)** — the key re-framing:
+  `Zef2 α e H f 0 Γ → (∀ ψ∈Γ, ψ = ∃⁰φ ∨ ¬atomTrue ψ) → ∃ n ≤ f 0, atomTrue(φ/[nm n])`.
+  PROVEN for `axL` (a true literal contradicts the all-false hyp), `wk`/`weak` (subset-inherit hyp,
+  slot `f` fixed), `exI` (χ=φ: the introduced witness `n ≤ f 0` — either `φ/[nm n]` true (done) or
+  recurse at slot `f`; χ≠φ: `∃⁰χ` false ⇒ `χ/[nm n]` false ⇒ recurse), `cut` (vacuous at rank 0),
+  and the `allω` **non-trapped** branch (`∃⁰φ ∉ Γ₀` ⇒ pick a false branch, all members false ⇒
+  `sound0` contradiction).
+- **`readoff_delta0_Zef2` now PROVEN modulo `readoffD_trapped`** — the singleton hyp is `Or.inl rfl`.
+
+### KEY FINDINGS (route-decisive, escalation-grade)
+
+1. **The Δ₀ hypothesis `hφbdd` is NOT consumed by the read-off.** The falsity-invariant route needs
+   no syntactic Δ₀ descent — `atomTrue` is total on ℕ, so "`= ∃⁰φ` or false" is self-maintaining
+   through every rule with no Δ₀ premise. `hφbdd` is now an unused hypothesis of the ratified R-4
+   statement (kept verbatim; only a linter warning). *Implication for the series-end judge:* the
+   `<BoundedInstance> = DeltaZero` choice (lap 193) is harmless but not load-bearing for the read-off
+   as proven; the real difficulty is entirely the slot-relativization residue below.
+
+2. **The SOLE residue is `readoffD_trapped` — trapped contraction, `OperatorZef2.lean` (sorry).**
+   At an `allω` node deriving `insert (∀⁰χ) Γ₀` with the goal existential `∃⁰φ ∈ Γ₀` (kept by a
+   lower-`exI` contraction), branches run at `rel1 f n` (`rel1 f n 0 = f n`, NOT `f 0`), so the
+   inductive witness bound is `≤ f n`, breaking the outer `≤ f 0`. **Concrete worst-case scenario
+   (kernel-plausible, not yet a kernel counterexample):** a derivation may witness `∃⁰φ` ONLY deep
+   inside an `allω` branch at bound `f n > f 0` (via `wk` to `{∃⁰φ, ∀⁰χ}` with `∀⁰χ` false, then
+   `allω`, then `exI` on the trapped `∃⁰φ` at slot `rel1 f n`). Monotonicity of `f` does NOT rescue
+   it (`f n ≥ f 0`, wrong direction). This is the Towsner §5.4 / Thm 17.1 clause-(ii) **growth-
+   coupled** witnessing (`𝒢(n) > h_α(k)`), NOT a pure structural read-off — the bound is re-derived
+   at each level via the ordinal descent + fast-growing domination, not propagated syntactically.
+
+### NEXT (attack `readoffD_trapped`)
+- **Option A (statement-shape / caller):** strengthen the read-off to carry a shape hypothesis that
+  FORBIDS `∃⁰φ` from being trapped in an `allω` context (as `readoff_sigma1`'s `ReadoffShapeF`
+  makes `allω` dead) — then the caller (the reduction exit) must establish it. Check whether the
+  `rankToZero` exit derivation is contraction-free / principal enough to supply such a shape. This
+  may be the intended factoring (mirrors the sigma1 template exactly).
+- **Option B (growth-coupled):** thread the fast-growing separation (`hardy`/`fastGrowing` brackets,
+  already banked) into the invariant à la Thm 17.1 clause (ii). Heavier; couples the read-off to the
+  Part-2 lower bound. Likely > 1 lap.
+- Decide A-vs-B by inspecting whether the pipeline's rank-0 exit derivation can carry a
+  no-trap shape. If neither is clean, this is escalation input (the read-off statement may need a
+  contraction-free / principal-derivation hypothesis added — a judged amendment, not self-ratified).
+
 ## LAP 193b (grind, lane D) — rank-0 soundness CORE `sound0` PROVEN (the hard Π/`allω` case); bounded-witness layer precisely scoped
 
 `wip/Lap13ReadoffDeltaProbe.lean` (compiles clean, off-build) proves **`sound0`**:

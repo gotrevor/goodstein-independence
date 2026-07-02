@@ -181,3 +181,52 @@ series-end judge pass:
 
 **Productive lane (this review's mandate):** lane D `readoff_delta0_Zef2` — independent of the
 escalated crux. See DIRECTION.md CURRENT DIRECTIVE (lap-192 block) + PENDING_WORK.md (lap-192 top).
+
+---
+
+## Lap 194 (grind, lane D) — rung-D read-off DECOMPOSED to one named residue; `sound0` + `readoffD_aux` proven in `src`
+
+Build 🟢 `lake build GoodsteinPA` 1328 jobs; headline
+`peano_not_proves_goodstein = [propext, Classical.choice, goodstein_implies_consistency, Quot.sound]`
+(sorryAx OFF, undrifted, re-verified).
+
+**Advance.** `readoff_delta0_Zef2` (rung D, `OperatorZef2.lean`) went from a monolithic `sorry` to a
+`readoffD_aux` reduction. New in `src`, all axiom-clean except the disclosed residue:
+- `sound0` (rank-0 `Zef2` soundness, ported from `wip/Lap13ReadoffDeltaProbe.lean`);
+- `valm_nm` (local numeral-eval, `simp [nm]`); `atomTrue_all_iff` / `atomTrue_ex_iff`
+  (ω-quantifier ↔ numeral instances);
+- `readoffD_aux` — the strengthened **falsity invariant**
+  `Zef2 α e H f 0 Γ → (∀ψ∈Γ, ψ=∃⁰φ ∨ ¬atomTrue ψ) → ∃ n ≤ f0, atomTrue(φ/[nm n])` —
+  PROVEN for `axL`/`wk`/`weak`/`exI`/`cut` and the `allω` **non-trapped** branch (`sound0`
+  contradiction). `readoff_delta0_Zef2` = `readoffD_aux` on the singleton.
+
+**SOLE residue = `readoffD_trapped`** (named `sorry` in `src`): the `allω` node with `∃⁰φ` trapped in
+the shared context by contraction. Slot relativizes `f → rel1 f n` (`rel1 f n 0 = f n ≠ f 0`), so
+the branch witness bound is `≤ f n`, not `≤ f 0`. Monotone `f` does NOT rescue it (wrong direction).
+This is Towsner §5.4 / Thm 17.1 clause-(ii) **growth-coupled** witnessing, not a pure structural
+read-off. Attack next lap: Option A (a no-trap SHAPE hypothesis the reduction-exit caller supplies,
+mirroring `readoff_sigma1`'s `ReadoffShapeF`) vs Option B (thread the fast-growing separation). See
+PENDING_WORK.md (lap-194) for both.
+
+**FINDING (judge-relevant).** The R-4 Δ₀ hypothesis `hφbdd : ∀n, DeltaZero(φ/[nm n])` is **not
+consumed** by the read-off as proven — `atomTrue` is total on ℕ so the falsity invariant is
+self-maintaining with no syntactic Δ₀ descent. `hφbdd` is kept verbatim (ratified statement; unused-
+variable linter warning only). The `<BoundedInstance>=DeltaZero` choice is harmless but not load-
+bearing; the entire difficulty is the slot-relativization residue.
+
+### Ledger hygiene (series-judge relay, lap 194)
+
+1. **Job count 1341 → 1328 (−13):** the drop predates this lap — it is the lap-192/193 R-4 cleanup
+   (trap-10 VOID deletions: the stale `matrixTrue` L-D placeholder and the L-E placeholder were
+   removed, and `readoff_delta0_Zef2` was restated leaner). This lap ADDED `sound0` + `readoffD_aux`
+   + 3 helper lemmas but the count held at 1328 (net compile-unit-neutral). No consolidation this lap.
+2. **Rung-E sorry `OperatorZef2.lean:embedding_Zef2`** (was `:916`, now ~`:1120` after the lap-194
+   inserts): this is the **ratified parametric rung-E statement** (existential budget `∃B` +
+   `ewRootSlot`-class slot over a parametric `Γ_G`), NOT the deleted trap-10 L-E placeholder (that
+   one was deleted at lap 192). It stays as a disclosed `sorry`; rung E is architect-gated (Ax2-
+   adequacy pre-probe) per the laps-8–9 judge ruling. Named here for the sorry reconciliation.
+3. **`wip/Lap11CutFloorProbe.lean` hardened to ruling-grade:** the header now states explicitly that
+   the refuting slot `gRel = rel1 tBase 3` satisfies the pass's full threaded kit
+   (`gRel_mono`/`gRel_infl`/`gRel_low` = Monotone ∧ infl ∧ 2m+1, all kernel-proven), so it is
+   pass-producible and `basefloor_not_rel1_stable` bundles all four facts — the `hg_base` refutation
+   is not a shape artifact.
