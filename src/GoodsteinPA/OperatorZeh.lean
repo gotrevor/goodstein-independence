@@ -1896,6 +1896,79 @@ theorem andInvR_Zef {φ ψ : Form} : ∀ {α e : ONote} {H : ONote → Prop} {f 
       have P₂ := Zef.wk (inv1Push (φ ⋏ ψ) _ (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
       exact Zef.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH P₁ P₂
 
+/-! ## §8d Assembly plumbing in the slot judgment `Zef` (safe pre-ratification infrastructure)
+
+Slot-form ports of `Zeh.mono_c` (cut-rank monotonicity) and the `ZehProv` wrapper combinators
+(`cut`/`exI`/`allω`) — the structural layer the cut-elimination assembly (laps 5–7) reuses to
+introduce cuts before eliminating them and to rebuild ω-nodes.  None consumes pin 3 or raises the
+control; all reuse the `Zeh`-agnostic ONote splice bricks (`osucc_add_NF`, `add_le_add_NF`, …). -/
+
+/-- **`c`-monotonicity** (cut rank): a derivation valid at rank `c` is valid at any `c' ≥ c`.
+Only the `cut` rule reads `c` (via `hcompl : φ.complexity < c`), so every other case threads. -/
+theorem Zef.mono_c : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+    Zef α e H f c Γ → ∀ {c' : ℕ}, c ≤ c' → Zef α e H f c' Γ := by
+  intro α e H f c Γ dd
+  induction dd with
+  | axL r v hp hn => intro c' _; exact Zef.axL r v hp hn
+  | wk hsub _ ih => intro c' hc; exact Zef.wk hsub (ih hc)
+  | weak hβ hβNF hαNF hβH hsub _ ih => intro c' hc; exact Zef.weak hβ hβNF hαNF hβH hsub (ih hc)
+  | allω φ β hβ hβNF hαNF hβH _ ih =>
+      intro c' hc; exact Zef.allω φ β hβ hβNF hαNF hβH (fun n => ih n hc)
+  | exI φ n hβ hβNF hαNF hβH hbound _ ih =>
+      intro c' hc; exact Zef.exI φ n hβ hβNF hαNF hβH hbound (ih hc)
+  | cut φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      intro c' hc
+      exact Zef.cut φ (lt_of_lt_of_le hcompl hc) hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH
+        (ih₁ hc) (ih₂ hc)
+
+/-- **`ZefProv`-level cut combinator** (assembly plumbing, NOT the gated reduction): package
+the cut RULE at the wrapper level — combine proofs of `φ` and `∼φ` (with `φ.complexity < c`)
+into a proof of `Γ` at ordinal `osucc (βφ + βψ)`, SAME rank and control (no rank-lowering, no
+control-raise — those are the judge-gated `cutElimPass_Zf`/reduction).  The step/reduction
+assembly reuses this to introduce cuts before eliminating them. -/
+theorem ZefProv.cut {βφ βψ e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq} (φ : Form)
+    (hβφNF : βφ.NF) (hβψNF : βψ.NF) (hcompl : φ.complexity < c)
+    (D₁ : ZefProv βφ e H f c (insert φ Γ)) (D₂ : ZefProv βψ e H f c (insert (∼φ) Γ)) :
+    ZefProv (osucc (βφ + βψ)) e H f c Γ := by
+  obtain ⟨α₁, hle₁, hNF₁, hH₁, d₁⟩ := D₁
+  obtain ⟨α₂, hle₂, hNF₂, hH₂, d₂⟩ := D₂
+  refine ⟨osucc (α₁ + α₂),
+    osucc_le_osucc (ONote.add_nf α₁ α₂) (ONote.add_nf βφ βψ)
+      (add_le_add_NF hNF₁ hβφNF hNF₂ hβψNF hle₁ hle₂),
+    osucc_add_NF hNF₁ hNF₂, osucc_add_mem hH₁ hH₂,
+    Zef.cut φ hcompl
+      (lt_of_le_of_lt (Zekd.le_add_right_NF hNF₁ hNF₂) (Zekd.lt_osucc (ONote.add_nf α₁ α₂)))
+      (lt_of_le_of_lt (Zekd.le_add_left_NF hNF₁ hNF₂) (Zekd.lt_osucc (ONote.add_nf α₁ α₂)))
+      hNF₁ hNF₂ (osucc_add_NF hNF₁ hNF₂) hH₁ hH₂ d₁ d₂⟩
+
+/-- **`ZefProv`-level `exI` combinator** (assembly plumbing): package the `∃`-rule at the
+wrapper level — the output ordinal `osucc β` is fully determined, no rank/control change.
+Reused by the assembly to introduce existentials at the prov level. -/
+theorem ZefProv.exI {β e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq}
+    (φ : SyntacticSemiformula ℒₒᵣ 1) (n : ℕ) (hβNF : β.NF) (hβH : Cl H β)
+    (hbound : n ≤ f 0) (D : ZefProv β e H f c (insert (φ/[nm n]) Γ)) :
+    ZefProv (osucc β) e H f c (insert (∃⁰ φ) Γ) := by
+  obtain ⟨β', hle, hNF', hH', d⟩ := D
+  exact ⟨osucc β, le_rfl, osucc_NF hβNF, Cl.osucc hβH,
+    Zef.exI φ n (lt_of_le_of_lt hle (Zekd.lt_osucc hβNF)) hNF' (osucc_NF hβNF) hH' hbound d⟩
+
+/-- **`ZefProv`-level `allω` combinator** (assembly plumbing): reassemble an ω-node at the
+wrapper level.  Each branch's `≤`-slack witness is threaded through (`< α` survives since
+`β' n ≤ β n < α`); the output witness is `α` itself (needs `Cl H α`).  Reused by the
+assembly to rebuild ω-nodes over the branch family. -/
+theorem ZefProv.allω {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq}
+    (φ : SyntacticSemiformula ℒₒᵣ 1) (β : ℕ → ONote)
+    (hβ : ∀ n, β n < α) (hαNF : α.NF) (hαH : Cl H α)
+    (D : ∀ n, ZefProv (β n) e (adjoin H n) (rel1 f n) c (insert (φ/[nm n]) Γ)) :
+    ZefProv α e H f c (insert (∀⁰ φ) Γ) :=
+  ⟨α, le_rfl, hαNF, hαH,
+    Zef.allω φ (fun n => (D n).choose)
+      (fun n => lt_of_le_of_lt (D n).choose_spec.1 (hβ n))
+      (fun n => (D n).choose_spec.2.1)
+      hαNF
+      (fun n => (D n).choose_spec.2.2.1)
+      (fun n => (D n).choose_spec.2.2.2)⟩
+
 /-! ## Blueprint ledger — the DISCHARGED reduction pins (lap 184)
 
 Pins 1–2 are now `clean` nodes (real kernel footprint = trust base only); the audit reconciles
