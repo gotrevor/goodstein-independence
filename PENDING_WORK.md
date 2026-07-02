@@ -1,5 +1,38 @@
 # Pending work — open obligations & attack paths
 
+## TOP OF QUEUE (lap 180 review) — the one permitted brick: additive-Hardy INEQUALITY
+
+**Correction to lap-179's "growth lane comprehensively mined":** one concrete permitted brick remains,
+and it is the natural continuation of the lap-178→179 arc. Lap 178 kernel-**refuted** the additive-Hardy
+*equality* `H_{e+β}=H_e∘H_β` (false under absorption, `1+ω=ω`). The surviving **inequality** is the exact
+bridge P1 needs and is NOT refuted:
+
+> **`hardy_add_le_comp`** *(new, target `src/GoodsteinPA/Hardy.lean`)*:
+> for NF `e`, NF `β`, all `x`:  `hardy (e + β) x ≤ hardy e (hardy β x)`.
+
+**Why it advances the crux (P1):** the P1 obligation bounds the *raised* control `hardy (e + ω^α)`.
+This lemma (with `β = ω^α`) rewrites that as `≤ hardy e (hardy (ω^α) x)`, and lap-179's banked
+`hardy_omega_pow_lt_fastGrowing` gives `hardy (ω^α) x < f_α(x+1)` — so the raised control is dominated by
+`hardy e ∘ f_α`, a composition the f-slot can carry. It is calculus-independent (a standalone `Hardy.lean`
+lemma consuming **no** §5 pin), hence **permitted in Scope-A** exactly like all of lap-179's E–W Lemma 19
+work; only its eventual *wiring* into `cutElimPass_Zf`/`cutReduceAllAuxRunning_Zf` is judge-gated.
+
+**Decomposition (case split on ONote `+`'s absorb/merge/concat at each level; `oadd_add`/`addAux`, cmp
+of `e`'s leading exp vs `lead(a+β)`):**
+- **Non-absorbing** (`β = 0 ∨ β.repr < ω^(lastExp e).repr`): banked **`hardy_add_comp`** gives the
+  *equality* → `le_of_eq`. Free.
+- **Full absorption** (`e + β = β`, i.e. `lead(e) < lead(β)` or `e = 0`): then `hardy (e+β) x = hardy β x
+  ≤ hardy e (hardy β x)` by **`le_hardy e (hardy β x)`** (inflationary). Need `e + β = β` via `repr_inj`.
+- **Partial absorption** (leading exps equal — `ω^p·k` terms merge: `ω^p·k + β = ω^p·k' + β'`): the REAL
+  content. Induct on `e` via `oadd_add`; the `Ordering.eq` branch of `addAux` merges coefficients. Peel
+  with `hardy_oadd_tail`; the IH at the tail `a` (below exponent `lead β`) plus `hardy_monotone e` should
+  close it. **This is the ~1-lap chunk with moderate ONote-plumbing risk** (three-way `cmp` at each
+  level). Attempt in a `wip/` probe first; promote to `src/Hardy.lean` only when green + axiom-clean.
+
+If it lands → real P1 prerequisite banked. If it resists after honest attempts → record the exact
+ONote-addition obstruction and end the lap (that record is the crux advance). Do NOT leave an orphan
+`sorry` in `Hardy.lean` — either prove it fully or keep the probe in `wip/`.
+
 ## CRITICAL-PATH CRUX MAP (lap 179 refresh — unblock-playbook §2.5/§3)
 
 **The crux** = `wainer_bound_of_pa_proves_goodstein` (`WainerRoute.lean:118`), i.e. originating the

@@ -335,8 +335,8 @@ theorem fastGrowing_monotone_omega : Monotone (fastGrowing (oadd 1 1 0)) := by
     _ ≤ fastGrowing (ofNat (n + 2)) (n + 1) :=
         fastGrowing_ofNat_mono (Nat.le_succ (n + 1)) (Nat.succ_le_succ (Nat.zero_le n))
 
-/-- **The Bachmann reachability crux (A3, structural form).**  *(disclosed `sorry` — the
-genuine hard core, now stated entirely structurally, free of `fastGrowing`.)*
+/-- **The Bachmann reachability crux (A3, structural form) — PROVEN, axiom-clean**
+(`[propext, choice, Quot.sound]`; body below is a complete structural recursion on `o`, no `sorry`).
 
 For a limit notation `o` with fundamental sequence `f`, the *next* index `f (n+1)`
 structurally reaches the *current* index `f n` with budget `n+1`:
@@ -345,13 +345,13 @@ structurally reaches the *current* index `f n` with budget `n+1`:
 This is the **Bachmann property** of the standard CNF fundamental sequences: the descent
 of `f (n+1)` (at the fixed index `n+1`) passes *exactly* through `f n` — because the
 `ONote` fundamental sequence descends tails first and the coefficients pass through every
-integer value, so no tail "overshoots". Once this is proved, *all* index monotonicity of
-the fast-growing hierarchy follows from `fastGrowing_le_of_reaches` (already proved).
+integer value, so no tail "overshoots". From it, *all* index monotonicity of the
+fast-growing hierarchy follows via `fastGrowing_le_of_reaches` (see `fastGrowing_fundSeq_step`).
 
-This is strictly sharper than the old analytic `sorry`: it isolates the difficulty into a
-pure statement about `fundamentalSequence`, attackable by structural induction on `o` and
-verifiable by `native_decide` on concrete notations. The successor-chain and `ω^2` cases
-are already discharged (`fastGrowing_fundSeq_step_of_succ`, `fastGrowing_omega_sq_…`). -/
+The proof is a structural recursion on `o` (leading-term cases via `reaches_coeff_step'`;
+`ω^{limit}` residue via `reaches_omega_pow_lift`; limit-tail via `Reaches.oadd_tail`). This
+replaced the old analytic `sorry`; the successor-chain and `ω^2` cases are the specialisations
+`fastGrowing_fundSeq_step_of_succ` / `fastGrowing_omega_sq_…`. -/
 theorem fastGrowing_bachmann_reach {o : ONote} {f : ℕ → ONote}
     (h : fundamentalSequence o = Sum.inr f) (n : ℕ) :
     Reaches (n + 1) (f (n + 1)) (f n) := by

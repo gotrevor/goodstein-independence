@@ -1,3 +1,5 @@
-import GoodsteinPA.Zsubst
-open LO.FirstOrder.Arithmetic GoodsteinPA.InternalZ
-#print axioms GoodsteinPA.InternalZ.fvSubstSeq_seqCons
+import GoodsteinPA.Hardy
+open GoodsteinPA.FastGrowing
+#print axioms fastGrowing_bachmann_reach
+#print axioms hardy_omega_pow_lt_fastGrowing
+#print axioms hardy_omega_pow_bracket
