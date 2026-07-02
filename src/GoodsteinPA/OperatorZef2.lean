@@ -968,16 +968,27 @@ theorem atomTrue_ex_iff (χ : SyntacticSemiformula ℒₒᵣ 1) :
 
 At an `allω` node deriving `insert (∀⁰ χ) Γ₀`, the branches run at the *relativized* slot
 `rel1 f n` (`rel1 f n 0 = f n`, NOT `f 0`).  When the shared context `Γ₀` still carries the goal
-existential `∃⁰ φ` (kept by a contraction on a lower `exI`), the branch's inductive witness bound is
-`≤ f n`, so `readoffD_aux`'s outer bound `≤ f 0` is NOT inductively maintained here.  Extracting a
-`≤ f 0` witness in this configuration is the Towsner §5.4 witnessing content — the growth-coupled
-argument (`𝒢(n) > h_α(k)`, Thm 17.1 clause (ii)) rather than a pure structural read-off.
+existential `∃⁰ φ` (kept by a *contraction* on a lower `exI`), the branch's inductive witness bound
+is `≤ f n`, so `readoffD_aux`'s outer bound `≤ f 0` is NOT inductively maintained here.
 
-Scoped concretely: with the branch derivations `hbranch` at `rel1 f n`, `∃⁰ φ ∈ Γ₀`, `∀⁰ χ` false,
-and every other `Γ₀`-member `= ∃⁰ φ` or false, produce the bounded witness.  The non-trapped
-(`∃⁰ φ ∉ Γ₀`) sub-case is closed inside `readoffD_aux` via `sound0` (all branch members false ⇒
-contradiction), and the `exI`/`wk`/`weak`/`axL` cases keep the slot `f` and are fully proven; this
-is the only remaining obligation.  See `PENDING_WORK.md` (lap-194) for the sharpened obstruction. -/
+**Decisive characterization (lap-194b).  This lemma is UNDER-hypothesized as stated — the branch
+data alone cannot produce a `≤ f 0` witness.**  In this calculus the ONLY source of an `f 0`-bounded
+witness is an `exI` on `∃⁰ φ` fired at the *unrelativized* slot `f` (its `hbound : n ≤ f 0`); and no
+such `exI` occurs inside this subtree (everything below the `allω` runs at `rel1 f ·` or deeper).
+So the `f 0` witness, if it exists, must come from the ROOT-side of the derivation, which is not in
+`hbranch`'s scope.  Two consequences:
+  • The trap arises IFF `∃⁰ φ` is *contracted* (duplicated) at an `exI` (`exI` keeps `∃⁰ φ` in its
+    premise `Γ`).  In a **contraction-free** derivation `∃⁰ φ` is dropped on its `exI`, is never in a
+    later `allω`'s `Γ₀`, and `readoffD_aux` closes with NO residue (the atomic `readoff_sigma1_Zef`
+    works for exactly this reason — atomic instances have no `∀⁰` subformula, so `allω` never fires
+    below the `exI`, so there is nothing to trap).
+  • Therefore the clean discharge is **Option A**: prove/inherit *contraction admissibility* for the
+    rank-0 `Zef2` singleton read-off (or show the reduction-exit derivation is already contraction-
+    free), NOT a branch-local structural induction (refuted here).  Option B (couple the fast-growing
+    separation `𝒢(n) > h_α(k)`, Towsner §5.4 / Thm 17.1 clause (ii)) is the semantic fallback.
+
+The non-trapped (`∃⁰ φ ∉ Γ₀`) sub-case is closed inside `readoffD_aux` via `sound0`; `exI`/`wk`/
+`weak`/`axL`/`cut` are fully proven.  See `PENDING_WORK.md` (lap-194b) for the Option-A attack. -/
 theorem readoffD_trapped {φ χ : SyntacticSemiformula ℒₒᵣ 1}
     {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ₀ : Seq} {β : ℕ → ONote}
     (hbranch : ∀ n, Zef2 (β n) e (adjoin H n) (rel1 f n) 0 (insert (χ/[nm n]) Γ₀))

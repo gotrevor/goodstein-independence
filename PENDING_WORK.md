@@ -1,5 +1,45 @@
 # Pending work — open obligations & attack paths
 
+## LAP 194b (grind, lane D) — `readoffD_trapped` DECISIVELY characterized: branch-local data is INSUFFICIENT; the fix is root-side witness accumulation (Option A)
+
+Pushed the sole rung-D residue `readoffD_trapped` to a decisive characterization (docstring in
+`OperatorZef2.lean` sharpened; build 🟢, headline undrifted):
+
+- **The lemma as stated is UNDER-hypothesized — no branch-local structural induction can close it.**
+  In this calculus the ONLY source of an `f 0`-bounded witness is an `exI` on `∃⁰ φ` fired at the
+  UNRELATIVIZED slot `f` (its `hbound : n ≤ f 0`). Inside the trapped `allω` subtree everything runs
+  at `rel1 f ·` or deeper, so NO slot-`f` `exI` occurs there; the `f 0` witness, if any, lives on the
+  ROOT-side of the derivation, out of `hbranch`'s scope. Branch-local induction is REFUTED.
+- **Root cause = `∃⁰ φ` retained in an `exI`'s side-context** (Finset `Seq` ⇒ no multiplicative
+  contraction; the trap is `insert (∃⁰φ) Γ` with `∃⁰φ ∈ Γ`, i.e. the `exI` fires "in place" keeping
+  `∃⁰φ`). If `∃⁰φ` is dropped on its `exI`, it is never in a later `allω`'s `Γ₀` and `readoffD_aux`
+  closes with NO residue — exactly why the atomic `readoff_sigma1_Zef` needs no such case (atomic
+  instances have no `∀⁰` subformula ⇒ `allω` never fires below the `exI`).
+- **Δ₀ IS load-bearing after all (corrects lap-194 finding #1's over-reach):** the goodstein matrix
+  arithmetizes to Δ₀ with a bounded-`∀` "every step valid" clause, which is exactly the `∀⁰χ` that
+  `allω`-descends and enables the trap. The falsity invariant doesn't *consume* `hφbdd` syntactically,
+  but the trap it leaves open is precisely the bounded-`∀` node — so the Δ₀ structure is where the
+  Towsner §5.4 witnessing must bite.
+
+### NEXT — path selection (accumulation REFUTED; two paths remain)
+- **Accumulation (naive Option A) — REFUTED this lap.** The idea was to carry the root-nearest
+  slot-`f` `exI` witness (`n ≤ f 0`) down and return it in the trapped branch. It fails: an `exI`'s
+  chosen witness `n ≤ f 0` need NOT make `φ/[nm n]` TRUE (the derivation can pick a false witness and
+  continue via other members / deeper structure), so there is no *true* bounded witness to
+  accumulate. Truth only emerges at `axL` leaves / via `sound0`, by which point the `f 0` bound is
+  gone. So no invariant that threads a true `≤ f 0` witness is inductive.
+- **Option A′ (caller shape / contraction-free exit) — still viable, needs investigation.** Show the
+  reduction-exit derivation (`rankToZero` output) never fires an in-place `exI` on `∃⁰ φ` (never
+  retains `∃⁰ φ` in a side-context), so `∃⁰ φ` is dropped on its `exI`, no `allω` below traps it, and
+  `readoffD_aux` closes with no residue. Requires reading the embedding/reduction construction to
+  confirm the exit shape — a separate investigation, but keeps the read-off statement pure.
+- **Option B (growth-coupled) — the semantic fallback, likely the real content.** The bounded witness
+  must exist because a derivation at slot `f` with NO true witness `≤ f 0` cannot exist at all — a
+  soundness+completeness/growth argument (Towsner §5.4 / Thm 17.1 clause (ii), `𝒢(n) > h_α(k)`), not
+  a structural read-off. Couples the read-off to the banked Part-2 fast-growing lower bound.
+- If neither A′ nor B threads, the read-off statement may need a contraction-free / principal-
+  derivation hypothesis — a JUDGED amendment, escalation input (do not self-ratify).
+
 ## LAP 194 (grind, lane D) — read-off `readoff_delta0_Zef2` DECOMPOSED to a SINGLE named residue `readoffD_trapped`; `sound0` + invariant PROVEN in `src`
 
 Rung D (`OperatorZef2.lean:readoff_delta0_Zef2`) is no longer a monolithic `sorry`. It is now a
