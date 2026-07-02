@@ -97,12 +97,8 @@ statement shape that routes every slot-read through such a budget.
 **Residual constraint on the budget (`trap8_budget_not_norm_alpha`, kernel-checked):** the budget
 canNOT be `norm α`. `iterSlot_le_of_lt` lifts a child `β < α` only at arguments `≥ norm β`, and
 `norm` is not monotone along `<` — a child can have `norm β > norm α` (`ofNat 5 < ω` yet
-`norm ω = 1 < 5 = norm (ofNat 5)`). The read-budget must **dominate the sub-derivation's norms**,
-i.e. be the E–W count `F^α(0)` (which majorizes `norm β` for every `β` reachable below `α`), not
-`norm α`. This is precisely why E–W Lemma 19 uses the transfinite count `F^α(0)` rather than a
-syntactic norm — the trap-8 analysis lands exactly on the paper's design. The architect's C2 shape
-should route the slot-read through a budget of that grade (a fixed value `K` with the pass carrying
-`K ≥ F^α(0)`, or the count folded into the iterate index itself). Candidate directions for the architect (all are C2 statement changes, hence off-limits to a
+`norm ω = 1 < 5 = norm (ofNat 5)`). The read-budget must **dominate the sub-derivation's norms**.
+See §8 for why this cannot be a static count either, and where the fix therefore lands. Candidate directions for the architect (all are C2 statement changes, hence off-limits to a
 grind lap):
 - **Relativize the whole output slot**, not just `allω` branches: output `rel1 (iterSlot f α) K`
   (or `fun x => iterSlot f α (K + x)`) with `K` a node-budget, so the slot is read at argument
@@ -139,3 +135,34 @@ Amend C2's output-slot shape (positive-budget / relativized read, per §4) so `i
 reaches-monotonicity is usable at every node, then re-open the pass grind against the amended
 statement. Until then pin 3 is architect-gated, not grind-open — the same disposition traps 6/7
 received at their catch.
+
+## 8. Deeper — the fix may exceed C2 (a `Zef`-level, i.e. reflection/architect, question)
+
+Pushing the node-relative analysis (grind lap 6, in-authority wip prototyping) exposes that the
+budget cannot be a **static count** either — not `norm α`, and not the E–W count `F^α(0)` read
+naively as a single natural:
+
+**`no_count_bounds_subnorms` (kernel-checked):** for every `K : ℕ` there is `β < ω` (NF) with
+`norm β ≥ K` (witness `ofNat K`). Below a limit the sub-norms are UNBOUNDED, so no fixed `K`
+majorizes `norm β` for all children `β < α`. Hence the lift-budget cannot be a static parameter the
+pass carries.
+
+Where the budget must come from instead: the **`allω` relativization** already present in `Zef` —
+branch `n` reads its slot at argument `≥ n` (`rel1 f n`), and along `ω`'s fundamental sequence
+`norm (ω[n]) = n+1 ≈ n`, so the growing branch argument tracks the branch norm and the per-branch
+lift closes at the branch's own argument. The branches are therefore NOT the obstruction. The
+**immovable point is the ROOT `exI`** (and any `exI`/`cut` not under an `allω`): its bound is
+`n ≤ f 0` — the slot read at argument **0** — and `Zef.exI` is a **FROZEN** constructor (pins 1–2
+depend on it). At argument 0 no relativization budget is available, and `iterSlot`'s base-argument
+smallness (§2) bites with no growing index to rescue it.
+
+**Consequence.** Closing trap 8 faithfully may require relativizing the `exI` (and `cut`)
+witness-read so the slot is consulted at an argument `≥ norm` of the node — a change to the `Zef`
+calculus itself, not merely the C2 output slot. That is a **frozen surface** (judge-owned,
+hash-checked), so it exceeds a grind lap's authority and exceeds even a pure C2 amendment. This is a
+**reflection/architect** escalation: either (a) find a C2 output-slot shape that makes the root-`exI`
+argument-0 read succeed without touching `Zef` (unclear one exists, given §2 + §3a), or (b)
+re-open the frozen `Zef` to relativize the witness-reads (the E–W "doubly operator-controlled"
+bound `N(α) ≤ f^{F^α(0)}(0)` is stated on a calculus whose exI-analog already reads at a controlled
+argument — so the divergence is precisely here). Banked lemmas (`iterSlot_monotone`,
+`iterSlot_le_of_reaches`, `iterSlot_le_of_lt`) carry to whichever route the architect takes.

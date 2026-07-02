@@ -105,4 +105,26 @@ theorem trap8_budget_not_norm_alpha :
   have h : (oadd 1 1 0 : ONote).repr = Ordinal.omega0 := by simp
   rw [h]; exact Ordinal.natCast_lt_omega0 5
 
+/-- **Deeper — NO fixed count bounds all sub-norms below a limit.**  A node-relative fix wanted a
+budget `K` dominating `norm β` for every child `β < α` (so `iterSlot_le_of_lt` lifts each).  But
+below `ω` the norms are UNBOUNDED: for every `K`, `ofNat K < ω` with `norm (ofNat K) = K`.  So no
+fixed `K` (in particular not `F^α(0)`, a single natural) majorizes all sub-norms.  Consequence: the
+budget cannot be a static parameter carried by the pass — the lift budget must ride the `allω`
+relativization (branch `n` reads its slot at argument `≥ n`, and along `ω`'s fundamental sequence
+`norm (ω[n]) = n+1 ≈ n`, so the growing branch argument matches the branch norm).  The IMMOVABLE
+point is the ROOT `exI`, which reads the slot at argument 0 — and `Zef.exI`'s bound `n ≤ f 0` is a
+FROZEN part of the calculus.  So closing trap 8 may require relativizing the `exI` witness-read (a
+`Zef`-level change, currently frozen), i.e. it can exceed a pure C2 output-slot amendment.  This is
+the reflection/architect escalation the finding lands on. -/
+theorem no_count_bounds_subnorms (K : ℕ) :
+    ∃ β : ONote, β.NF ∧ β < oadd 1 1 0 ∧ K ≤ norm β := by
+  refine ⟨ONote.ofNat K, nf_ofNat K, ?_, ?_⟩
+  · rw [lt_def, repr_ofNat]
+    have h : (oadd 1 1 0 : ONote).repr = Ordinal.omega0 := by simp
+    rw [h]; exact Ordinal.natCast_lt_omega0 K
+  · -- norm (ofNat K) = K
+    cases K with
+    | zero => simp
+    | succ k => simp [ONote.ofNat, norm_oadd]
+
 end GoodsteinPA.OperatorZeh
