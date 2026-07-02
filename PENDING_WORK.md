@@ -1,5 +1,45 @@
 # Pending work — open obligations & attack paths
 
+## LAP 5 (185) — PIN-3 RESTATED (statement lap done) → judge-gated grind is the open work
+
+The lap-5 STATEMENT deliverables are DONE and committed (`435ed72`): pin 3 `cutElimPass_Zf` is
+restated per the entrance-lock C1–C2, `collapse`/`iterCount`/`iterSlot` are defined against ONote
+with all five C5 lemmas proven, and the C3 anti-vacuity corollary `cutElimPass_exit_root` typechecks
+with the count-bearing bound. The run STOPPED for the judge (`REBUILD-Z-LAP5-VERDICT.md`). The open
+work is **judge-gated laps 6–7** (the pass grind); nothing else is permitted this run.
+
+### The pin-3 restatement (the live crux, `src/GoodsteinPA/OperatorZeh.lean`)
+
+```
+cutElimPass_Zf : Zef α e H f (c+1) Γ → e.NF → α.NF → Cl H α →
+    Monotone f → (∀ x, x ≤ f x) → ZefProv (collapse α) e H (iterSlot f α) c Γ    -- body sorry
+```
+with `collapse α = ω^α`, `iterSlot f α = f^[norm α + 1]`. Sole `src` §5 sorry.
+
+### NEXT (laps 6–7, AFTER judge ratification of the lap-5 verdict) — the pass grind
+
+- Induction on the `Zef` derivation `D`. Structural cases (`axL`/`wk`/`weak`) thread.
+- **`∃`-cut lane** (`cut` case): compose the two premise iterates via `iter_comp` (counts ADD);
+  `iterSlot`'s count on the combined ordinal must dominate the summed sub-counts (`norm`-arithmetic
+  on `osucc (βφ + βψ)`).
+- **`allω` lane** (THE hard pole, T-Z5(iii)): branch `n` slot is `rel1 (iterSlot f (β n)) n`; the
+  per-branch count `iterCount (β n) = norm (β n) + 1` grows with `n`. The E–W Lemma 19/20 arithmetic
+  (`N(α) ≤ f^[iterCount α] 0`) is the obligation — whether `norm · + 1` is a large-enough count is
+  the live risk. If kernel-obstructed, ESCALATE (architect swaps the count/collapse normal form; do
+  NOT grind the body).
+- Gate every lap: build 🟢 + headline `#print axioms` undrifted + `blueprint_audit` PASSES.
+
+### Banked carriers the grind reuses (all axiom-clean, `src`)
+
+- Iterate bricks: `iter_monotone`/`iter_infl`/`iter_normControlled`/`iter_le_of_le`/`iter_comp` (§5b).
+- C5 lemmas: `collapse_NF`/`collapse_strictMono`/`iterSlot_monotone`/`iterSlot_infl`/`iterSlot_zero`.
+- `rel1_comp` (`allω` reassembly), `normControlled_comp_running` (fixed-control conjunct), the `Zef`
+  inversion suite + `ZefProv.cut`/`exI`/`allω` combinators.
+- E–W Lemma 19 ordinal-side arithmetic banked in `src/GoodsteinPA/Hardy.lean` (`hardy_add_le_comp`,
+  `hardy_omega_pow_*`) — the ordinal domination inputs the `allω` count arithmetic will need.
+
+---
+
 ## LAP 4 (184) REVIEW — SLOT-JUDGMENT AMENDMENT RATIFIED → the PORT is the open work
 
 The lap-3 "awaiting architect ratification" stall is RESOLVED by review-lap authority
