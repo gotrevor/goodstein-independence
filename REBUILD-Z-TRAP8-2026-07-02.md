@@ -90,9 +90,19 @@ A slot form satisfying both is likely one that is **only ever read at arguments 
 where `iterSlot` *is* ordinal-monotone. **This is now a banked theorem** — `iterSlot_le_of_lt`
 (src §5b, axiom-clean): for `β < α` (NF) and budget `x ≥ norm β`, `iterSlot f β x ≤ iterSlot f α x`
 (mirror of `hardy_le_of_lt`, via `reaches_of_lt` + `iterSlot_le_of_reaches` + `iterSlot_monotone`).
-So a node-relative read at argument `≥ norm α` restores the `weak`/`exI`/`cut` lift the bare slot
+So a node-relative read at a sufficient budget restores the `weak`/`exI`/`cut` lift the bare slot
 cannot supply — the crux lemma of the fix is proven; what remains for the architect is the
-statement shape that routes every slot-read through such a budget. Candidate directions for the architect (all are C2 statement changes, hence off-limits to a
+statement shape that routes every slot-read through such a budget.
+
+**Residual constraint on the budget (`trap8_budget_not_norm_alpha`, kernel-checked):** the budget
+canNOT be `norm α`. `iterSlot_le_of_lt` lifts a child `β < α` only at arguments `≥ norm β`, and
+`norm` is not monotone along `<` — a child can have `norm β > norm α` (`ofNat 5 < ω` yet
+`norm ω = 1 < 5 = norm (ofNat 5)`). The read-budget must **dominate the sub-derivation's norms**,
+i.e. be the E–W count `F^α(0)` (which majorizes `norm β` for every `β` reachable below `α`), not
+`norm α`. This is precisely why E–W Lemma 19 uses the transfinite count `F^α(0)` rather than a
+syntactic norm — the trap-8 analysis lands exactly on the paper's design. The architect's C2 shape
+should route the slot-read through a budget of that grade (a fixed value `K` with the pass carrying
+`K ≥ F^α(0)`, or the count folded into the iterate index itself). Candidate directions for the architect (all are C2 statement changes, hence off-limits to a
 grind lap):
 - **Relativize the whole output slot**, not just `allω` branches: output `rel1 (iterSlot f α) K`
   (or `fun x => iterSlot f α (K + x)`) with `K` a node-budget, so the slot is read at argument

@@ -91,4 +91,18 @@ theorem no_fixed_arg_monotone_unbounded_slot :
     le_trans (hunb n) (hmono _ _ (nf_ofNat n) (NF.oadd_zero 1 1) (hlt n))
   exact Nat.not_succ_le_self (S (oadd 1 1 0)) (key (S (oadd 1 1 0) + 1))
 
+/-- **Refinement for the node-relative FIX — the read-budget cannot be `norm α`.**  The banked
+`iterSlot_le_of_lt` lifts a child `β < α` only at arguments `≥ norm β`.  But `norm` is NOT monotone
+along `<`, so a child can have `norm β > norm α`: `ofNat 5 < ω` yet `norm ω = 1 < 5 = norm (ofNat 5)`.
+So a node-relative output slot `rel1 (iterSlot f α) K` with `K = norm α` FAILS the `x ≥ norm β`
+premise for such a child.  The read-budget must dominate the sub-derivation's norms, not the
+parent's — i.e. it must be the E–W count `F^α(0)` (which majorizes `norm β` for all `β` reachable
+below `α`), NOT `norm α`.  This is the residual the architect's C2 shape must route through. -/
+theorem trap8_budget_not_norm_alpha :
+    (ONote.ofNat 5) < oadd 1 1 0 ∧ norm (oadd 1 1 0) < norm (ONote.ofNat 5) := by
+  refine ⟨?_, by native_decide⟩
+  rw [lt_def, repr_ofNat]
+  have h : (oadd 1 1 0 : ONote).repr = Ordinal.omega0 := by simp
+  rw [h]; exact Ordinal.natCast_lt_omega0 5
+
 end GoodsteinPA.OperatorZeh
