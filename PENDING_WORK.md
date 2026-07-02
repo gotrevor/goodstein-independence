@@ -1,5 +1,44 @@
 # Pending work — open obligations & attack paths
 
+## Lap 179 — P1 CRUX ADVANCE: the E–W Lemma 19 upper bound is CLOSED and BANKED in `src/`
+
+The sole remaining sorry of the P1 fast-growing-domination bridge —
+`hardy_omega_pow_coeff_comp` (the equal-exponent additive composition
+`H_{ω^β·(k+2)}(n) = H_{ω^β·(k+1)}(H_{ω^β}(n))`) — is **proven** and the whole bridge is now
+sorry-free and kernel-clean (`[propext, choice, Quot.sound]`).
+
+**The key finding: the "sole remaining open obligation" was already 90% in the repo.** Hardy.lean
+already carried `hardy_oadd_coeff_step` (`:1536`) — literally `hardy_omega_pow_coeff_comp` verbatim
+except for a `β ≠ 0` hypothesis, proven via the banked non-absorbing additive law `hardy_oadd_tail`.
+The lap-178 baton didn't spot it (it planned a fresh non-absorbing LIMIT fs-homomorphism proof). The
+only genuine gap was the `β = 0` (finite) case, which is one `omega` after rewriting
+`oadd 0 m.succPNat 0 = ofNat (m+1)` and `H_{ofNat c}(x) = x + c` (`hardy_ofNat`). So
+`hardy_omega_pow_coeff_comp` = `rcases β=0`: finite arm (`ofNat_succ` + `hardy_ofNat` + `omega`) /
+`β≠0` arm (`hardy_oadd_coeff_step`). Done.
+
+**Relocated to `src/GoodsteinPA/Hardy.lean`** (before the `end`, as the new "B4 at an arbitrary
+transfinite exponent" section — the natural generalization of the finite/successor
+`hardy_omega_pow_ofNat`/`_omega` already there). The four now-sorry-free lemmas + `native_decide`
+anchors, migrated verbatim; `wip/HardyFastGrowingBridge.lean` deleted (fully subsumed). Full repo
+build green (1333 jobs), headline audit surfaces unchanged (`peano_not_proves_goodstein` still
+`[propext, choice, goodstein_implies_consistency, Quot.sound]`, sorryAx off, no drift).
+
+Banked in `src/` (all `[propext, choice, Quot.sound]`):
+- `hardy_omega_pow_coeff_comp` — equal-exponent additive composition, unconditional in `β`.
+- `hardy_omega_pow_coeff_le` — the Cichoń–Wainer coefficient intermediate `H_{ω^β·(m+1)}(n)+1 ≤ f_β^[m+1](n+1)`.
+- `hardy_omega_pow_add_one_le` — **the E–W Lemma 19 upper bound `H_{ω^α}(n)+1 ≤ f_α(n+1)`,
+  UNCONDITIONAL over every `α : ONote`** (WF recursion; base=equality, successor=coeff intermediate,
+  limit=IH + fastGrowing index-monotonicity).
+- `hardy_omega_pow_lt_fastGrowing` — the strict corollary `H_{ω^α}(n) < f_α(n+1)` P1 consumes.
+
+**What this means for P1.** The raised-control obligation (P1) reduces to `fastGrowing α'(n+1) ≤
+(iterate of the input slot)` via `hardy_omega_pow_lt_fastGrowing`: the raised control
+`≈ hardy(ω^{α'})` (absorbing regime, lap 178) is now KERNEL-dominated by `f_{α'}` at the shifted
+argument. The Lemma-19 *upper* half is banked; the residual is the *iterate-domination* half
+`f_{α'}(n+1) ≤ f^{[iterate]}(n+1)` (pin-3's essential iterate index) — the calculus-side work that
+stays **judge-gated** behind the lap-1 verdict. Do NOT wire this into pin-3 / `cutElimPass_Zf`
+until the judge ratifies (that is reduction discharge, forbidden in Scope-A).
+
 ## Lap 178 — CRUX PROBE: additive-identity shortcut to P1 kernel-REFUTED (absorption wall)
 
 Under sustained governor push (cap-bounded, still awaiting judge), attacked the hardest open

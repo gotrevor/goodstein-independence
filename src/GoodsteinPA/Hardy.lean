@@ -1813,5 +1813,112 @@ decreasing_by all_goals exact hlt
 /-- Anti-vacuity for `hardy_le_fastGrowing` at a genuine limit: `H_ω(2) = 5 ≤ f_ω(2) = 2048`. -/
 example : hardy (oadd 1 1 0) 2 ≤ fastGrowing (oadd 1 1 0) 2 := hardy_le_fastGrowing _ _ (by norm_num)
 
+/-! ### B4 at an ARBITRARY (transfinite) exponent — the unconditional inequality `H_{ω^α}(n)+1 ≤ f_α(n+1)`
+
+`hardy_omega_pow_ofNat`/`_omega` above give B4 as an *equality* at finite/successor exponents; at a
+LIMIT exponent the equality degrades (the `ω[n]=n+1` convention makes `H` and `f` pick different
+tower levels — e.g. `H_{ω^ω}(1)+1 = 8 ≠ f_ω(2) = 2048`). The UNCONDITIONAL, load-bearing truth,
+proven here for *every* `α : ONote` by well-founded recursion, is the **inequality**
+
+    hardy (oadd α 1 0) n + 1 ≤ fastGrowing α (n + 1)              -- H_{ω^α}(n) < f_α(n+1)
+
+— exactly the E–W Lemma 19 upper bound the raised-control (P1) obligation needs: with the cut-elim
+`raise e α' = e + ω^{α'}` in the absorbing regime, the raised control is `≈ hardy (ω^{α'})`, so this
+bound reduces P1 to the fast-growing domination `fastGrowing α' ≤ (iterate of the input slot)`.
+Pure Hardy/`fastGrowing` growth theory about the stable defs — calculus-independent. -/
+
+/-! Faithfulness anchors — the exact `+1` shift and the falsity of the bare equality are kernel-checked. -/
+example : hardy (oadd 0 1 0) 3 + 1 = fastGrowing 0 (3 + 1) := by native_decide
+example : hardy (oadd 1 1 0) 3 + 1 = fastGrowing 1 (3 + 1) := by native_decide
+example : hardy (oadd 2 1 0) 2 + 1 = fastGrowing 2 (2 + 1) := by native_decide
+-- and the EQUALITY `H_{ω^α} = f_α` is FALSE (off by ≥1), so no lap re-attempts it:
+example : hardy (oadd 1 1 0) 3 ≠ fastGrowing 1 3 := by native_decide
+
+/-- **Coefficient composition, unconditional in `β`** (the non-absorbing equal-exponent additive
+core): `H_{ω^β·(k+2)}(n) = H_{ω^β·(k+1)}(H_{ω^β}(n))`. For `β ≠ 0` this is the banked
+`hardy_oadd_coeff_step`; for `β = 0` everything is finite (`oadd 0 m.succPNat 0 = ofNat (m+1)`,
+`H_{ofNat c}(x) = x + c`). -/
+theorem hardy_omega_pow_coeff_comp (β : ONote) (k n : ℕ) :
+    hardy (oadd β (Nat.succPNat (k + 1)) 0) n
+      = hardy (oadd β (Nat.succPNat k) 0) (hardy (oadd β 1 0) n) := by
+  rcases eq_or_ne β 0 with hβ | hβ
+  · subst hβ
+    have e1 : oadd (0 : ONote) (Nat.succPNat (k + 1)) 0 = ofNat (k + 2) := (ofNat_succ (k + 1)).symm
+    have e2 : oadd (0 : ONote) (Nat.succPNat k) 0 = ofNat (k + 1) := (ofNat_succ k).symm
+    have e3 : oadd (0 : ONote) 1 0 = ofNat 1 := (ofNat_succ 0).symm
+    rw [e1, e2, e3]
+    simp only [hardy_ofNat]
+    omega
+  · exact hardy_oadd_coeff_step β hβ k n
+
+/-- **The coefficient intermediate** (the classical Cichoń–Wainer core), parametrized by the
+exponent-`β` base bound `hbase` (supplied by the outer IH in the successor case):
+`H_{ω^β·(m+1)}(n) + 1 ≤ f_β^{[m+1]}(n+1)`. Induction on the coefficient `m`: base `m=0` is `hbase`;
+the step composes via `hardy_omega_pow_coeff_comp` + the IH + iterate-monotonicity. -/
+theorem hardy_omega_pow_coeff_le {β : ONote}
+    (hbase : ∀ n, hardy (oadd β 1 0) n + 1 ≤ fastGrowing β (n + 1)) :
+    ∀ (m n : ℕ), hardy (oadd β (Nat.succPNat m) 0) n + 1 ≤ (fastGrowing β)^[m + 1] (n + 1) := by
+  intro m
+  induction m with
+  | zero =>
+      intro n
+      show hardy (oadd β 1 0) n + 1 ≤ fastGrowing β (n + 1)
+      exact hbase n
+  | succ m ih =>
+      intro n
+      rw [hardy_omega_pow_coeff_comp β m n]
+      have h2 : hardy (oadd β 1 0) n + 1 ≤ fastGrowing β (n + 1) := hbase n
+      calc hardy (oadd β (Nat.succPNat m) 0) (hardy (oadd β 1 0) n) + 1
+          ≤ (fastGrowing β)^[m + 1] (hardy (oadd β 1 0) n + 1) := ih _
+        _ ≤ (fastGrowing β)^[m + 1] (fastGrowing β (n + 1)) :=
+            (fastGrowing_monotone β).iterate (m + 1) h2
+        _ = (fastGrowing β)^[m + 1 + 1] (n + 1) :=
+            (Function.iterate_succ_apply (fastGrowing β) (m + 1) (n + 1)).symm
+
+/-- **B4 upper bound at an arbitrary exponent `α`** — `H_{ω^α}(n) + 1 ≤ f_α(n+1)`, unconditional.
+Well-founded recursion on `α`: `α = 0` is the equality; `α` a successor exponent reduces to the
+coefficient intermediate `hardy_omega_pow_coeff_le` at the IH; `α` a limit uses the IH plus
+`fastGrowing` index-monotonicity across the fundamental sequence. -/
+theorem hardy_omega_pow_add_one_le (α : ONote) : ∀ n : ℕ,
+    hardy (oadd α 1 0) n + 1 ≤ fastGrowing α (n + 1) := by
+  haveI : WellFoundedLT ONote := ⟨InvImage.wf repr Ordinal.lt_wf⟩
+  induction α using WellFoundedLT.induction with
+  | _ α ih =>
+    intro n
+    rcases hα : fundamentalSequence α with (_ | β) | f
+    · have h0 : α = 0 := by
+        have hp := fundamentalSequence_has_prop α; rw [hα] at hp; exact hp
+      subst h0
+      have hfs1 : fundamentalSequence (oadd 0 1 0) = Sum.inl (some 0) := rfl
+      rw [hardy_succ (oadd 0 1 0) hfs1, hardy_zero, fastGrowing_zero]
+      simp only [id_eq]; omega
+    · have hlt : β < α := by
+        have hp := fundamentalSequence_has_prop α; rw [hα] at hp
+        rw [lt_def, hp.1]; exact Order.lt_succ _
+      have homega : fundamentalSequence (oadd α 1 0) = Sum.inr (fun i => oadd β i.succPNat 0) :=
+        fundamentalSequence_omega_pow_succ hα
+      rw [hardy_limit (oadd α 1 0) homega, fastGrowing_succ α hα]
+      exact hardy_omega_pow_coeff_le (ih β hlt) n n
+    · have hlim_h : fundamentalSequence (oadd α 1 0) = Sum.inr (fun i => oadd (f i) 1 0) :=
+        fundamentalSequence_omega_pow_limit hα
+      have hlt : f n < α := by
+        have hp := fundamentalSequence_has_prop α; rw [hα] at hp; exact (hp.2.1 n).2.1
+      rw [hardy_limit (oadd α 1 0) hlim_h, fastGrowing_limit α hα]
+      calc hardy (oadd (f n) 1 0) n + 1
+          ≤ fastGrowing (f n) (n + 1) := ih (f n) hlt n
+        _ ≤ fastGrowing (f (n + 1)) (n + 1) :=
+            fastGrowing_le_of_reaches (Nat.succ_le_succ (Nat.zero_le n))
+              (fastGrowing_bachmann_reach hα n)
+
+/-- **The P1 corollary:** `H_{ω^α}(n) < f_α(n+1)`, the strict upper bound the raised-control
+obligation consumes, from the `+1 ≤` form. -/
+theorem hardy_omega_pow_lt_fastGrowing (α : ONote) (n : ℕ) :
+    hardy (oadd α 1 0) n < fastGrowing α (n + 1) := by
+  have h := hardy_omega_pow_add_one_le α n
+  omega
+
+-- anti-vacuity at a genuine LIMIT exponent (where the bare equality is false): `H_{ω^ω}(1) = 7 < f_ω(2)`.
+example : hardy (oadd (oadd 1 1 0) 1 0) 1 < fastGrowing (oadd 1 1 0) 2 :=
+  hardy_omega_pow_lt_fastGrowing (oadd 1 1 0) 1
 
 end GoodsteinPA.FastGrowing
