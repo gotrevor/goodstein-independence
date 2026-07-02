@@ -1,5 +1,46 @@
 # Pending work — open obligations & attack paths
 
+## LAP 4 (184) REVIEW — SLOT-JUDGMENT AMENDMENT RATIFIED → the PORT is the open work
+
+The lap-3 "awaiting architect ratification" stall is RESOLVED by review-lap authority
+(`REBUILD-Z-LAP4-RATIFICATION-2026-07-02.md`): LOCK §1-A1/§3 amended to the function-slot judgment
+`Zef` (the R4-compliant form the wip kernel-verified). The math for pins 1–2 + read-off is DONE in
+`wip/ZefSlotCalculus.lean` (all `[propext,choice,Quot.sound]`). The remaining work is the staged
+`src` port. **CURRENT DIRECTIVE (DIRECTION.md lap-184 block) is binding.**
+
+### SLOT-JUDGMENT PORT — decomposition (each step ends GREEN; gate: build 🟢 + headline no-drift + §6 seams)
+
+- **P1 — introduce `Zef` into `src/GoodsteinPA/OperatorZeh.lean`** (alongside `Zeh`, do NOT delete
+  `Zeh` yet). Port from `wip/ZefSlotCalculus.lean` verbatim (namespace already
+  `GoodsteinPA.OperatorZeh`): the `Zef` inductive (6 constructors), `Zef.weakening`, `Zef.mono_f`
+  (slot weakening), `Zef.change_H`, `Zef.mono_Hf`, `ZefProv` + its `of`/`mono`/`weakening`, the
+  slot algebra (`rel1_monotone`, `rel1_infl`, `reslot_family`, `reslot_exside`), and `allInv_Zef`.
+  Nothing depends on the pins yet ⟹ trivially green. **This is the smallest first green step.**
+- **P2 — port `redDeriv_slot`** (the FULL §19.6 running-family reduction, output slot `g∘f`) and
+  `stepAllω_Zef`. Verbatim from wip. Green (still not wired to the src pins).
+- **P3 — restate + discharge pins 1–2.** Change `cutReduceAllAuxRunning_Zf` / `stepAllω_Zf` in
+  `src` §5 to the slot-judgment form (derivation conjunct over `ZefProv`, output slot `g∘f`),
+  discharge via `redDeriv_slot`/`stepAllω_Zef` — **the `sorry`s at lines 829/845 disappear**.
+  Update the §6 seam probes (`seam1`/`seam2`/non-vacuity) to the slot form; they must stay green
+  (they ARE the composition test). Delete the now-dead `redDeriv` stage-gap proof + its
+  `principal_witness_exceeds_stage` witness (or keep the witness as a documented obstruction lemma).
+- **P4 — read-off / bridge + `Zeh` retirement.** Port `readoff_sigma1_Zef` / `headline_readoff_Zef`
+  (bound `f 0`; at root `f := rel1 (hardy e) m` gives `f 0 = hardy e m`, so the LOCK §4 exit bound
+  is preserved). Re-point the §6 read-off exit + the blueprint attribute (`zeh_readoff_exit`). If
+  every `Zeh` use is subsumed by `Zef`, retire `Zeh`; else keep the embedding
+  `Zeh α e H m c Γ → Zef α e H (rel1 (hardy e) m) c Γ` as the bridge.
+
+**Watch-outs:** (1) src `Zeh` carries MORE than the wip minimal clone (read-off, seams, `mono_H`,
+blueprint attributes) — P3/P4 must re-key all of them. (2) The composition order is `g∘f` in pin
+naming (E–W's `f∘g` under the swapped f/g labelling); the src pins currently say `f∘g` — that is
+the kernel-refuted order, fix it. (3) `rel1_comp` (`OperatorZeh.lean:642`) is the `allω` reassembly
+brick — already banked. (4) Keep the discharged 2nd conjunct route (`normControlled_comp_running`)
+but with roles swapped for `g∘f`.
+
+**Still FORBIDDEN:** pin 3 (`cutElimPass_Zf`), Route-A, Δ₀ read-off extension.
+
+---
+
 ## LAP 3 (183) — pins 1–2 PROVEN PROVABLE in the slot calculus; permitted lane MINED, awaiting architect ratification
 
 The lap-2 gap (below) is **DISSOLVED**.  `wip/ZefSlotCalculus.lean` carries the complete
