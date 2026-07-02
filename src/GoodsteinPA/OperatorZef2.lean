@@ -191,12 +191,81 @@ theorem headline_readoff_Zef2 {φ : SyntacticSemiformula ℒₒᵣ 1}
     ∃ n ≤ f 0, atomTrue (φ/[nm n]) :=
   headline_readoff_Zef hφinst dd.toZef
 
+/-! ## ewN arithmetic — the size norm is sub-additive under `+` and near-additive under `osucc`
+
+These are the size-control facts the reduction's synthesized `osucc (α + γ)` roots need: the gate
+`ewN (osucc (α + γ)) ≤ ewN α + ewN γ + 1`.  Banked here (kernel-verified, unconditional for `+`,
+`NF` for `osucc`) toward the P-d discharge. -/
+
+/-- `ewN` is sub-additive over `addAux`. -/
+theorem ewN_addAux_le (e : ONote) (n : ℕ+) (o : ONote) :
+    ewN (addAux e n o) ≤ ewN e + (n : ℕ) + ewN o := by
+  unfold addAux
+  cases o with
+  | zero => simp [ewN]
+  | oadd e' n' a' =>
+      simp only
+      cases h : ONote.cmp e e' with
+      | lt => simp only [ewN_oadd]; omega
+      | eq =>
+          have he : e = e' := eq_of_cmp_eq h
+          subst he
+          simp only [ewN_oadd, PNat.add_coe]; omega
+      | gt => simp only [ewN_oadd]; omega
+
+/-- `ewN` is sub-additive over ordinal addition (unconditional). -/
+theorem ewN_add_le : ∀ (a o : ONote), ewN (a + o) ≤ ewN a + ewN o := by
+  intro a
+  induction a with
+  | zero => intro o; simp [ewN]
+  | oadd e n b ihe ih =>
+      intro o
+      rw [oadd_add]
+      refine le_trans (ewN_addAux_le e n (b + o)) ?_
+      have := ih o
+      simp only [ewN_oadd]; omega
+
+/-- `ewN` grows by at most one under the notation successor (for normal forms). -/
+theorem ewN_osucc_le : ∀ {o : ONote}, o.NF → ewN (osucc o) ≤ ewN o + 1
+  | 0, _ => by simp [osucc, ewN]
+  | oadd 0 n a, h => by
+      have ha0 : a = 0 := by
+        have hlt : a.repr < ω ^ (0 : ONote).repr := h.snd'.repr_lt
+        rw [repr_zero, opow_zero] at hlt
+        exact (@repr_inj a 0 h.snd NF.zero).1 (by rw [repr_zero]; exact Order.lt_one_iff.1 hlt)
+      subst ha0
+      show ewN (oadd 0 (n + 1) 0) ≤ ewN (oadd 0 n 0) + 1
+      simp only [ewN_oadd, ewN_zero, PNat.add_coe, PNat.one_coe]; omega
+  | oadd (oadd e' n' a') m b, h => by
+      show ewN (oadd (oadd e' n' a') m (osucc b)) ≤ ewN (oadd (oadd e' n' a') m b) + 1
+      have hIH := ewN_osucc_le h.snd
+      simp only [ewN_oadd] at hIH ⊢; omega
+
+/-- The composite the reduction roots need: `ewN (osucc (α + γ)) ≤ ewN α + ewN γ + 1`. -/
+theorem ewN_osucc_add_le {α γ : ONote} (hαNF : α.NF) (hγNF : γ.NF) :
+    ewN (osucc (α + γ)) ≤ ewN α + ewN γ + 1 := by
+  refine le_trans (ewN_osucc_le (ONote.add_nf α γ)) ?_
+  have := ewN_add_le α γ
+  omega
+
 /-! ## Pins 1–2 over `Zef2` (P-d) — re-proven natively (disclosed sub-pins, laps-9+) -/
 
 /-- **PIN (disclosed sub-pin, P-d): the running-family cut-reduction over `Zef2`.**  Port of
-`cutReduceAllAuxRunning_Zf` with the ewN/cut-read gate re-threaded at every rebuilt node.  The
-gate arithmetic at the synthesized `osucc (α + γ)` roots is the ewN-side obligation (`f.1`-class
-growth on `g∘f`); discharge is its own grind (laps-9+). -/
+`cutReduceAllAuxRunning_Zf` with the ewN/cut-read gate re-threaded at every rebuilt node.
+
+**LAP-8 FINDING — the synthesized `osucc (α + γ)` roots hit a GATE-COMPOSITION obstruction (a
+candidate reduction-level trap; architect-owned, not self-ratifiable).**  The `allω`/`cut`/`exI`
+roots the reduction builds sit at `osucc (α + γ)`; over `Zef2` each needs a gate
+`ewN (osucc (α + γ)) ≤ (g ∘ f) 0 = g (f 0)`.  The banked `ewN_osucc_add_le` reduces this to
+`ewN α + ewN γ + 1 ≤ g (f 0)`.  The available gates are `ewN γ ≤ f 0` (the node's own gate, at
+the ∃-side base slot `f`) and `ewN α ≤ g 0` (the ∀-family gate from `fam`, at the ∀-side base
+slot `g`).  With `EwF1 g` (`g (f 0) ≥ 2·f 0 + 1`) the bound closes IFF `ewN α ≤ f 0` — i.e. the
+∀-family ordinal must be gated at the **∃-side** base.  But `fam`'s gate lives at the ∀-side base
+`g`, and `ewN` is NOT ordinal-monotone (the very trap-8 pathology), so no `α' ≤ …` slack recovers
+it.  The cross-slot gate `ewN α ≤ f 0` is neither derivable nor an `f.1`-class hypothesis, so
+baking it in would be a statement change → escalation.  The resolution is entangled with how
+`cutElimPass_Zef2` wires the two premise slots (are they both dominated by a common base?), which
+is the FORBIDDEN pass — hence architect-owned.  See `REBUILD-Z-LAP8-VERDICT.md`. -/
 theorem cutReduceAllAuxRunning_Zf2 {φ : SyntacticSemiformula ℒₒᵣ 1} {c : ℕ} {α e : ONote} {Γ : Seq}
     {g : ℕ → ℕ} (hφc : φ.complexity < c) (hαNF : α.NF) (heNF : e.NF)
     (hg_mono : Monotone g) (hg_infl : ∀ x, x ≤ g x)
