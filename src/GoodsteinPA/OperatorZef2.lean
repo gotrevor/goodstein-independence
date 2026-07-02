@@ -605,6 +605,36 @@ theorem stepAllω_Zf2 {E : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq}
   exact hred.weakening
     (Finset.union_subset (Finset.erase_insert_subset _ _) (Finset.Subset.refl Γ))
 
+/-- **`stepAllω_Zf2_bnd`** — the bound-EXPOSING variant of `stepAllω_Zf2`.  Same principal ∀/∃
+cut-reduction, but the output witness ordinal is bounded by `P₁ + P₂` (the sum of the two premises'
+ordinals), which the cut-elimination pass needs to place the eliminated cut strictly under
+`collapse α` (via `collapse_add_lt`).  The generic `stepAllω_Zf2` hides `δ`; here we keep the two
+`≤`-bounds from the `Zef2Prov` witnesses and add-monotone them (`repr_add` + `add_le_add`). -/
+theorem stepAllω_Zf2_bnd {E : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq}
+    {χ : SyntacticSemiformula ℒₒᵣ 1} {P₁ P₂ : ONote} {f g : ℕ → ℕ}
+    (hP₁ : P₁.NF) (hP₂ : P₂.NF)
+    (hENF : E.NF) (hχc : χ.complexity < c)
+    (hg_mono : Monotone g) (hg_infl : ∀ x, x ≤ g x) (hg_base : ∀ k, g 0 + k ≤ g k)
+    (hf_mono : Monotone f) (hf_infl : ∀ x, x ≤ f x) (hχRead : χ.complexity ≤ f 0)
+    (D₁ : Zef2Prov P₁ E H g c (insert (∀⁰ χ) Γ))
+    (D₂ : Zef2Prov P₂ E H f c (insert (∃⁰ ∼χ) Γ)) :
+    Zef2Prov (P₁ + P₂) E H (g ∘ f) c Γ := by
+  obtain ⟨α₁, hα₁le, hNF₁, _, _, d₁⟩ := D₁
+  obtain ⟨γ₁, hγ₁le, hNF₂, _, _, d₂⟩ := D₂
+  have fam : ∀ n (H' : ONote → Prop), Zef2 α₁ E H' (rel1 g n) c (insert (χ/[nm n]) Γ) := by
+    intro n H'
+    have hinv := allInv_Zef2 n d₁ hg_mono (Finset.mem_insert_self _ _)
+    exact (hinv.wk (Zef2.gate hinv)
+      (Finset.insert_subset_insert _ (Finset.erase_insert_subset _ _))).change_H
+  have hred := cutReduceAllAuxRunning_Zf2 hχc hNF₁ hENF hg_mono hg_infl hg_base fam
+    d₂ hNF₂ hf_mono hf_infl hχRead (Finset.mem_insert_self _ _)
+  have hbnd : α₁ + γ₁ ≤ P₁ + P₂ := by
+    haveI := hNF₁; haveI := hNF₂; haveI := hP₁; haveI := hP₂
+    rw [le_def, repr_add, repr_add]
+    exact add_le_add (le_def.mp hα₁le) (le_def.mp hγ₁le)
+  exact ((hred.weakening
+    (Finset.union_subset (Finset.erase_insert_subset _ _) (Finset.Subset.refl Γ))).mono hbnd)
+
 /-! ## The cut-elimination pass (P-e) — Stage-3 grind (UNLOCKED); `passAux` is the induction -/
 
 /-- **`passAux`** — the cut-elimination pass as a generalized induction, threading
