@@ -688,7 +688,34 @@ theorem passAux (c : ℕ) {e : ONote} (heNF : e.NF) :
         ((Da.mono_f hslot).wk (le_trans hag (hslot 0)) (Finset.Subset.refl _))
   | @cut α βφ βψ e H f r Γ hαN χ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF' hβφH hβψH d₁ d₂ ih₁ ih₂ =>
       intro hr hmono hinfl hlow hαNF hαH
-      sorry
+      have hg := ewN_collapse_le hlow hαN
+      have hf0 : f 0 ≤ ewIter f α 0 := by
+        by_cases h0 : α = 0
+        · subst h0; simp
+        · have h0α : (0 : ONote) < α := by
+            cases α with
+            | zero => exact (h0 rfl).elim
+            | oadd e n a => exact oadd_pos e n a
+          have := ewIter_le_of_lt (f := f) hinfl (β := 0) (α := α) (m := 0) h0α (Nat.zero_le _)
+          simpa [ewIter_zero] using this
+      by_cases hc : χ.complexity < c
+      · -- SUB-RANK cut: cut formula below the pass's max rank — keep the cut, rebuild at rank `c`
+        -- with both premises IH-reduced and slot-lifted to the common `ewIter f α`.
+        obtain ⟨aφ, haφle, haφNF, haφH, haφg, Dφ⟩ :=
+          ih₁ heNF hr hmono hinfl hlow hβφNF (Cl_of_NF hβφNF)
+        obtain ⟨aψ, haψle, haψNF, haψH, haψg, Dψ⟩ :=
+          ih₂ heNF hr hmono hinfl hlow hβψNF (Cl_of_NF hβψNF)
+        have hsφ := ewIter_slot_le hmono hinfl hβφ (Zef2.gate d₁)
+        have hsψ := ewIter_slot_le hmono hinfl hβψ (Zef2.gate d₂)
+        have haφcol : aφ < collapse α := lt_of_le_of_lt haφle (collapse_strictMono hβφNF hβφ)
+        have haψcol : aψ < collapse α := lt_of_le_of_lt haψle (collapse_strictMono hβψNF hβψ)
+        refine Zef2Prov.of (collapse_NF hαNF) (Cl_of_NF (collapse_NF hαNF)) hg ?_
+        exact Zef2.cut hg χ hc (le_trans hcutRead hf0) haφcol haψcol
+          haφNF haψNF (collapse_NF hαNF) haφH haψH (Dφ.mono_f hsφ) (Dψ.mono_f hsψ)
+      · -- TOP-RANK cut: `χ.complexity = c`.  ELIMINATE the cut (E–W Lemma 26 principal step).
+        -- ∀/∃-shaped `χ` → `stepAllω`-style inversion + slot composition (`ewIter_comp_le`);
+        -- the `c = 0` atomic case needs an atom-cut lemma.  TODO(SERIES-1 Stage-3 cut top-rank).
+        sorry
 
 /-- **PIN → THEOREM (Stage-3, in grind): one cut-ELIMINATION pass over `Zef2`.**  E–W Lemma 26/27's
 single predicative rank step: the ordinal COLLAPSES (`collapse α`) and the numeric slot ITERATES
