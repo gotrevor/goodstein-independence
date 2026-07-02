@@ -14,8 +14,29 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
+**2026-07-02 (JUDGE PASS on lap 7 — PASS at statement level; trap 9 did NOT fire; the E–W
+ruling is KERNEL-VERIFIED. This is the current binding block.)** Ruling:
+`E-2026-07-02-JUDGE-rebuild-z-lap7-validation.md`. Lap 7 delivered wip-only as ordered:
+`wip/EwIter.lean` (Def-16-verbatim norm-gated max iterate over the constructor norm `ewN` +
+finite `ewBall` with sorry-free completeness; **P1 the lift is KERNEL-PURE** — the exact
+proposition trap 8 refuted for `iterSlot` holds for `ewIter`, from mono+infl alone; P2/P3
+proven ∀x) + `wip/Zef2Calculus.lean` (`Zef2` per Z5: HYP `ewN α ≤ f 0` every node, exI at 0,
+cut lh-shadow, rel1 branches; pass pin Z6-verbatim; C3 exit consumes `ewIter (ewRootSlot e m) α 0`;
+exactly 3 disclosed sorries). T-Z7(i) fired + handled by the sanctioned fallback (repo CNF norm
+has infinite fibers — kernel witness; `ewN` adopted). ⚖️ Judge amendments on P4 (binding):
+the embedding budget must be EXISTENTIAL (Zeh is Prop — no function-of-derivation), and rung E
+targets the PA-proof-sourced W3 pipeline re-based onto `Zef2` — arbitrary-`Zeh` transport is
+REFUSED (ω-branching + information-free membership; pre-empted ninth trap). 🚦 NEXT FIRE:
+**lap 8 = the judged src port + wainer-ladder erection** per
+`REBUILD-Z-LAP8-ENTRANCE-2026-07-02.md` (`--max-laps 2 --max-duration 6h`): port EwIter+Zef2 to
+src, discharge both read-off pins via the forgetful `Zef2.toZef` (MANDATED), re-prove pins 1–2 +
+inversions over `Zef2`, erect ladder pins L-R/L-D/L-E/L-W with ledger rows 17+, verdict, STOP
+for the judge. FORBIDDEN: grinding the pass; old-`Zef`/`Zeh`/pin-3 statement tokens (docstring
+supersession notes only); arbitrary-`Zeh` embedding pins; self-ratification (VOID).
+
 **2026-07-02 (JUDGE PASS on the laps-6–7 run — PARTIAL PASS + EIGHTH statement trap RATIFIED;
-pin 3 ARCHITECT-GATED; the E–W rebuild order is open. This is the current binding block.)**
+pin 3 ARCHITECT-GATED; the E–W rebuild order OPEN. Superseded by the lap-7 judge block above;
+rulings still binding.)**
 Ruling: `E-2026-07-02-JUDGE-rebuild-z-laps6-7-validation.md`. Lap 186 discharged the C5 pin
 `iterSlot_monotone` (ratified, axiom-clean) and then correctly ESCALATED the pass induction: the
 lap-5-amended output slot (fs-recursion diagonalizing `iterSlot f α`) is unprovable-as-stated —
