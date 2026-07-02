@@ -1,5 +1,41 @@
 # Pending work — open obligations & attack paths
 
+## LAP 194c (grind, lane D) — `readoffD_trapped` ROOT-CAUSED via the E–W Lemma 31 PROOF: it needs the (Ax2) amendment (architect-gated, SHARED with rung E)
+
+Read the actual E–W Lemma 31 proof from the PDF (`papers/eguchi-weiermann-2012-…`, extracted). It
+resolves the residue's true nature and connects it to rung E:
+
+- **E–W code `∃` as `⋁`-type (operator UNCHANGED under `(⋁)`, witness `N(t) ≤ f(0)`) and `∀` as
+  `⋀`-type (operator RELATIVIZED `f → f[N(ι)]` under `(⋀)`)** — exactly our `exI` (keeps `f`) vs
+  `allω` (`rel1 f ·`, relativizes). E–W ALSO have **(Ax2): a true closed literal `Γ ∩ TRUE₀ ≠ ∅`
+  closes the sequent** — which this `Zef2` LACKS (only `axL` = complementary PAIR).
+- **Lemma 31's induction extracts the l TOP-LEVEL `∃`-witnesses via `(⋁)` at operator `f` (all
+  `≤ f(0)`) and verifies the Δ₀ matrix instances SEMANTICALLY** (the proof: "`B(t)` must be true in
+  ℕ" via soundness — it NEVER structurally re-derives the matrix). So `(⋀)`/`allω` relativization is
+  confined to *deriving* Δ₀ instances and never touches the top-`∃` witness budget.
+- **Our `readoffD_trapped` is the artifact of `readoffD_aux` STRUCTURALLY descending the matrix via
+  `allω`** (relativizing the slot) — precisely what E–W's witnessing avoids.
+
+### Root cause + fix
+The trap traces to `Zef2` missing E–W's **(Ax2)** true-literal rule. Without it, a false `∀⁰χ`
+branch cannot close on a true Δ₀ literal, so it is forced to consume the trapped `∃⁰ φ` deep (bound
+`f n > f 0`). **Fix = mirror E–W:** (a) add (Ax2) to `Zef2`; (b) prove the read-off by extracting the
+top-`∃⁰ φ` witness via `exI` at slot `f` and verifying `φ/[nm n]` truth via `sound0` (semantic),
+WITHOUT recursing into `allω` matrix branches.
+
+### STRATEGIC CONSEQUENCE (escalation-grade)
+Adding (Ax2) is the **architect-gated Ax2-adequacy** already flagged for rung E (`Zekd` has
+`trueRel`/`trueNrel`, `Zef2` has none, E–W Def 23 has (Ax2), per `spike-z1-pass…` / the laps-8–9
+ruling). **So the rung-D read-off residue and rung E's gate are ONE calculus-faithfulness decision.**
+If the architect ratifies adding (Ax2) to `Zef2`, BOTH become tractable together. This is NOT a
+self-ratifiable change (a judged/architect calculus amendment, like the `rel1` redesign).
+
+### Remaining pure-proof alternative (in-scope, if (Ax2) is not ratified)
+Show trap-derivations do NOT EXIST in `Zef2`-without-(Ax2): with fewer leaves (no true-literal
+closure), the false `∀⁰χ` branch may be underivable, making the residue vacuous. This needs a
+normalization/occurrence meta-argument on the singleton derivation (not the branch-local induction,
+which is refuted) — substantial but not gated.
+
 ## LAP 194b (grind, lane D) — `readoffD_trapped` DECISIVELY characterized: branch-local data is INSUFFICIENT; the fix is root-side witness accumulation (Option A)
 
 Pushed the sole rung-D residue `readoffD_trapped` to a decisive characterization (docstring in

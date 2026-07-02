@@ -230,3 +230,28 @@ bearing; the entire difficulty is the slot-relativization residue.
    (`gRel_mono`/`gRel_infl`/`gRel_low` = Monotone ∧ infl ∧ 2m+1, all kernel-proven), so it is
    pass-producible and `basefloor_not_rel1_stable` bundles all four facts — the `hg_base` refutation
    is not a shape artifact.
+
+---
+
+## Lap 194c (grind, lane D) — `readoffD_trapped` ROOT-CAUSED to the missing (Ax2) rule via the E–W Lemma 31 proof; SHARED with rung E
+
+Build 🟢 `GoodsteinPA` 1328 jobs; headline undrifted, sorryAx OFF. Docstring (`readoffD_trapped`) +
+PENDING_WORK.md (lap-194c) carry the full analysis.
+
+Read the E–W Lemma 31 (Witnessing) proof from the PDF. Findings:
+- E–W code `∃`=`⋁`-type (`(⋁)` keeps operator `f`, witness `N(t) ≤ f(0)`), `∀`=`⋀`-type (`(⋀)`
+  relativizes `f→f[N(ι)]`) — matching our `exI`/`allω` (`rel1`). E–W ALSO have **(Ax2)**: a true
+  closed literal closes the sequent; `Zef2` has only `axL` (complementary PAIR), no true-literal rule.
+- Lemma 31 extracts the top-level `∃`-witnesses via `(⋁)` at operator `f` (all `≤ f(0)`) and verifies
+  the Δ₀ matrix instances SEMANTICALLY (soundness), NEVER structurally descending the matrix.
+- Our `readoffD_trapped` is the artifact of `readoffD_aux` structurally descending the matrix via
+  `allω` (relativizing the slot). Without (Ax2), a false `∀⁰χ` branch cannot close on a true literal,
+  forcing it to consume the trapped `∃⁰φ` deep (bound `f n > f 0`).
+
+**ESCALATION (architect-owned):** the fix = add E–W's **(Ax2)** true-literal rule to `Zef2` +
+prove the read-off à la Lemma 31 (top-`∃` via `exI` at slot `f`, matrix truth via `sound0`). Adding
+(Ax2) is the **Ax2-adequacy already flagged architect-gated for rung E** — so the rung-D read-off
+residue and rung E's gate are ONE calculus-faithfulness decision. Ratifying (Ax2) unblocks both.
+Not self-ratifiable (a judged calculus amendment, cf. the `rel1` redesign). In-scope alternative if
+(Ax2) is declined: prove trap-derivations don't exist in `Zef2`-without-(Ax2) (a normalization
+meta-argument).

@@ -971,24 +971,31 @@ At an `allω` node deriving `insert (∀⁰ χ) Γ₀`, the branches run at the 
 existential `∃⁰ φ` (kept by a *contraction* on a lower `exI`), the branch's inductive witness bound
 is `≤ f n`, so `readoffD_aux`'s outer bound `≤ f 0` is NOT inductively maintained here.
 
-**Decisive characterization (lap-194b).  This lemma is UNDER-hypothesized as stated — the branch
-data alone cannot produce a `≤ f 0` witness.**  In this calculus the ONLY source of an `f 0`-bounded
-witness is an `exI` on `∃⁰ φ` fired at the *unrelativized* slot `f` (its `hbound : n ≤ f 0`); and no
-such `exI` occurs inside this subtree (everything below the `allω` runs at `rel1 f ·` or deeper).
-So the `f 0` witness, if it exists, must come from the ROOT-side of the derivation, which is not in
-`hbranch`'s scope.  Two consequences:
-  • The trap arises IFF `∃⁰ φ` is *contracted* (duplicated) at an `exI` (`exI` keeps `∃⁰ φ` in its
-    premise `Γ`).  In a **contraction-free** derivation `∃⁰ φ` is dropped on its `exI`, is never in a
-    later `allω`'s `Γ₀`, and `readoffD_aux` closes with NO residue (the atomic `readoff_sigma1_Zef`
-    works for exactly this reason — atomic instances have no `∀⁰` subformula, so `allω` never fires
-    below the `exI`, so there is nothing to trap).
-  • Therefore the clean discharge is **Option A**: prove/inherit *contraction admissibility* for the
-    rank-0 `Zef2` singleton read-off (or show the reduction-exit derivation is already contraction-
-    free), NOT a branch-local structural induction (refuted here).  Option B (couple the fast-growing
-    separation `𝒢(n) > h_α(k)`, Towsner §5.4 / Thm 17.1 clause (ii)) is the semantic fallback.
+**Decisive diagnosis (lap-194c, grounded in the E–W Lemma 31 PROOF).**  The trap is a
+formulation artifact: it comes from `readoffD_aux` STRUCTURALLY descending the Δ₀ matrix via `allω`
+(which relativizes `f → rel1 f n`).  **E–W's Witnessing Lemma 31 AVOIDS this.**  In E–W Def 23:
+  • `∃` is `⋁`-type — witnessed by their `(⋁)` rule with the operator `f` **UNCHANGED** and the
+    witness norm `N(t) ≤ f(0)`; `∀` is `⋀`-type — decomposed by `(⋀)` with the operator RELATIVIZED
+    `f → f[N(ι)]`.  (Exactly our `exI` keeps `f`, our `allω` = `rel1 f ·`.)
+  • They also have **(Ax2): a true closed PA-literal `Γ ∩ TRUE₀ ≠ ∅` closes the sequent** — which
+    THIS `Zef2` LACKS (only `axL` = a complementary literal *pair*).
+  Lemma 31's induction extracts the l TOP-LEVEL `∃`-witnesses via `(⋁)` at operator `f` (all bounds
+  `≤ f(0)`), and verifies the Δ₀ matrix instances `B_j(t)` **SEMANTICALLY** — its proof says "`B(t)`
+  must be true (in ℕ)" via soundness, and NEVER structurally re-derives the matrix.  So the `(⋀)`/
+  `allω` relativization is confined to *deriving* Δ₀ instances and never touches the top-`∃` witness
+  budget.  Our structural descent breaks exactly this separation.
+
+**Fix (calculus-gated) = mirror E–W.**  Prove the read-off by extracting the top-`∃⁰ φ` witness via
+`exI` at slot `f` (`n ≤ f 0`) and verifying `φ/[nm n]` truth via `sound0` (semantic), WITHOUT
+structurally recursing into `allω`-decomposed matrix branches — and add the E–W **(Ax2)** true-literal
+rule to `Zef2` so true Δ₀ leaves close without forcing the trapped `∃⁰ φ`.  Adding (Ax2) is the
+**architect-gated Ax2-adequacy** already flagged for rung E (`Zekd` has `trueRel`/`trueNrel`, `Zef2`
+has none, E–W Def 23 has (Ax2)) — so this residue and rung E share ONE calculus-faithfulness
+decision.  Open pure-proof alternative: show trap-derivations do not EXIST in `Zef2`-without-(Ax2)
+(fewer leaves ⇒ the false branch may be underivable), which would make the residue vacuous.
 
 The non-trapped (`∃⁰ φ ∉ Γ₀`) sub-case is closed inside `readoffD_aux` via `sound0`; `exI`/`wk`/
-`weak`/`axL`/`cut` are fully proven.  See `PENDING_WORK.md` (lap-194b) for the Option-A attack. -/
+`weak`/`axL`/`cut` are fully proven.  See `PENDING_WORK.md` (lap-194c) + the ledger. -/
 theorem readoffD_trapped {φ χ : SyntacticSemiformula ℒₒᵣ 1}
     {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ₀ : Seq} {β : ℕ → ONote}
     (hbranch : ∀ n, Zef2 (β n) e (adjoin H n) (rel1 f n) 0 (insert (χ/[nm n]) Γ₀))
