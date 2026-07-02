@@ -1,11 +1,310 @@
-\chapter{Path B: Witness-Bounded Route}
+% ======================================================================================
+%  Goodstein Independence Blueprint — landscape dependency graph
+%
+%  This is the reviewer-facing proof map (LaTeX narrative + `\lean{}` bindings + `\uses{}`
+%  dependency edges + `\leanok`/`\notready` status).  It is ONE of two status layers; the
+%  other is the machine-derived `@[goodstein_blueprint]` attribute ledger audited by
+%  `lake exe blueprint_audit` (status computed from `Lean.collectAxioms`, never hand-kept).
+%
+%  DISCIPLINE (see BLUEPRINT-PLAN.md):
+%    * `\leanok`  — ONLY on nodes bound to a genuinely proved, kernel-clean declaration
+%                   (established mathlib/Foundation library results, and the g-i lemmas that
+%                   are already axiom-clean, including those clean-modulo the documented
+%                   finite `native_decide` base cases — the project's 🟢 category).
+%    * `\notready`— on every node backed by an open `axiom`, a `sorry`, a `debt` decl, or an
+%                   aspirational construct with no Lean witness yet.
+%    * Nodes with NO Lean declaration carry no `\lean{}` at all and are described in prose.
+% ======================================================================================
 
-This chapter records the current Path B capstone chain.  The Lean declarations are importable through
-\texttt{GoodsteinPABlueprint}; every node is currently marked \texttt{\textbackslash notready}
-because the corresponding stage theorem still depends on named capstone axioms.
+\chapter{Program overview}
+
+This is a blueprint for a \emph{proof theory / ordinal analysis of Peano Arithmetic, carried out in
+Lean~4}.  The summit of the program is the \textbf{Kirby--Paris independence theorem}: Peano
+Arithmetic does not prove that every Goodstein sequence terminates
+(\(\mathsf{PA} \nvdash \gamma\)).  As of this writing that summit has \emph{never} been formalized in
+\emph{any} proof assistant, by any route --- only the \emph{termination} of Goodstein sequences is
+formalized (Coq \texttt{hydra-battles}, Isabelle/AFP \texttt{Goodstein\_Lambda}, and Lean
+\texttt{mathlib}/\texttt{lean-gallery}), and abstract Gödel incompleteness is a separate lineage
+(Foundation, Paulson, O'Connor).  A Lean proof of the independence is a first.
+
+Everything below is organized as a mountain.  Chapter~\ref{chp:shores} (\emph{Two shores}) records
+the two bodies of \emph{already-formalized} machinery this program stands between: mathlib's ordinal
+apparatus and Foundation's first-order + incompleteness apparatus.  Chapter~\ref{chp:foothills}
+(\emph{Foothills}) is the reusable toolkit --- the faithful encoding and faithfulness bridge (done),
+plus the deep gaps (Hardy/Wainer classification, arithmetic transfinite induction).
+Chapter~\ref{chp:routeB} is the \textbf{mainline} route (Wainer growth rates); Chapter~\ref{chp:routeA}
+is the \textbf{banked} route (internalized Gentzen cut-elimination), which carries the preserved
+crux-2 milestone chain.  Chapter~\ref{chp:crown} is the crown: the one ordinal-analysis monument both
+routes ultimately require, and the sibling summits it unlocks.
+
+The single, intrinsic obstruction shared by every route is the \emph{ordinal analysis of PA} --- the
+\(\varepsilon_0\)-bounded (infinitary) cut-elimination that yields \(\mathrm{TI}(\varepsilon_0)\vdash
+\mathrm{Con}(\mathsf{PA})\) (Route~A face) or, equivalently, the Buchholz--Wainer bounding theorem
+(Route~B face).  It exists in no Lean library and must be \emph{originated}; the only precedent is the
+Coq development of Bryce \& Goré (\texttt{arXiv:2603.00487}).  The lower-bound half of the climb
+(\(\text{goodsteinLength}\) dominates every fixed fast-growing level below \(\varepsilon_0\)) is
+already done and axiom-clean.
+
+
+\chapter{Two shores: the formalized girders}\label{chp:shores}
+
+The program is pitched between two shores of pre-existing, kernel-clean formalization.  These nodes are
+\emph{green anchors} we build on, not obligations we owe.
+
+\section{mathlib: ordinal notation and the fast-growing hierarchy}
+
+\begin{definition}\label{def:onote}
+  \lean{ONote}
+  \leanok
+mathlib's constructive ordinal notation system \texttt{ONote} (Cantor normal form as an inductive
+type), together with its normal-form predicate \texttt{ONote.NF}.  This is the concrete, computable
+carrier for every ordinal \(<\varepsilon_0\) used throughout the program.  (mathlib also has the
+semantic \texttt{Ordinal.CNF} decomposition, but it is not in this build's import closure; the notation
+system \texttt{ONote} is what the growth theory runs on.)
+\end{definition}
+
+\begin{definition}\label{def:veblen}
+  \lean{Ordinal.veblen}
+  \leanok
+The two-argument Veblen function \(\varphi\), from which mathlib defines the \(\varepsilon\)-function
+\(\varepsilon_o = \texttt{veblen}\,1\,o\) and hence the ceiling \(\varepsilon_0\).  This is the
+semantic ordinal boundary that PA's proof-theoretic ordinal must equal; \texttt{ONote} notations are
+its below-\(\varepsilon_0\) codes.
+\end{definition}
+
+\begin{definition}\label{def:fastgrowing}
+  \lean{ONote.fastGrowing, ONote.fundamentalSequence}
+  \uses{def:onote}
+  \leanok
+The fast-growing hierarchy \(f_o : \mathbb{N}\to\mathbb{N}\) on ordinal notations
+(\(f_0 = \mathrm{succ}\), \(f_{o+1}(n) = f_o^{[n]}(n)\), \(f_\lambda(n) = f_{\lambda[n]}(n)\) at limits
+via \texttt{fundamentalSequence}).  mathlib supplies the definition and small values but \emph{none} of
+the growth theory (expansiveness, monotonicity, domination); those are developed in this program's
+Hardy port and Domination modules.
+\end{definition}
+
+\section{Foundation: first-order logic and incompleteness}
+
+\begin{theorem}\label{thm:hauptsatz}
+  \notready
+Foundation's finitary first-order Gentzen \textbf{Hauptsatz} (cut-elimination), \texttt{LO.FirstOrder.hauptsatz}
+(\(=\texttt{Hauptsatz.main}\)).  It is proved and kernel-clean \emph{in Foundation}, but is not imported
+into this build's environment, so it carries no in-repo \texttt{\textbackslash lean} binding here.  It is
+listed as a shore because the \emph{infinitary}, \(\varepsilon_0\)-ordinal-assigned analogue of exactly
+this theorem is the crown gap (Thm~\ref{thm:infinitary_tower}); the finitary Hauptsatz is the template,
+not the summit.
+\end{theorem}
+
+\begin{theorem}\label{thm:delta1}
+  \lean{LO.FirstOrder.Arithmetic.PA_delta1Definable}
+  \leanok
+\(\mathsf{PA}\) is \(\Delta_1\)-definable (\(\mathsf{PA}.\Delta_1\)).  Foundation formerly posited this as
+a bare \texttt{axiom}; it now proves it as a real instance
+(\texttt{InductionSchemeDelta1.lean}), which is exactly why this program's Gödel-II surfacing is
+axiom-clean.  This discharge was a genuine upstream gift (\texttt{gotrevor/Foundation@e6e1ad1}).
+\end{theorem}
+
+\begin{theorem}\label{thm:godel2}
+  \lean{LO.FirstOrder.Arithmetic.consistent_unprovable}
+  \uses{thm:delta1}
+  \leanok
+\textbf{Gödel's second incompleteness theorem}, for any \(\Delta_1\) arithmetic theory extending
+\(\mathsf{I}\Sigma_1\): \(T \nvdash \mathrm{Con}(T)\).  The load-bearing external input on the Route-A
+face; instantiated at \(T = \mathsf{PA}\) via \(\Delta_1\)-definability
+(Thm~\ref{thm:delta1}).
+\end{theorem}
+
+\begin{theorem}\label{thm:godel1}
+  \lean{LO.FirstOrder.Arithmetic.incomplete}
+  \uses{thm:delta1}
+  \notready
+Gödel's \textbf{first} incompleteness theorem for arithmetic theories.  Recorded for context (a sibling
+of Gödel~II on the same Foundation shore); it is not on either Goodstein route's critical path, so this
+node is left \texttt{\textbackslash notready} as ``not wired into the summit chain'' even though the
+Foundation declaration is proved.
+\end{theorem}
+
+
+\chapter{Foothills: the reusable toolkit}\label{chp:foothills}
+
+The faithful encoding and the faithfulness bridge (both done, kernel-clean) plus the three deep pieces
+of reusable machinery the summit needs and that exist nowhere yet.
+
+\section{The Goodstein object and its faithful encoding}
+
+\begin{theorem}\label{thm:goodstein_termination}
+  \lean{GoodsteinPA.Dom.goodstein_terminates}
+  \leanok
+\textbf{Goodstein termination (the mathematical fact).}  Every Goodstein sequence reaches \(0\):
+\(\forall m,\ \exists N,\ \texttt{goodsteinSeq}\,m\,N = 0\).  Proved in-repo
+(\texttt{Dom.goodstein\_terminates}, the \texttt{lean-gallery} artifact's proof; mathlib carries the
+ingredients via \texttt{ONote.fastGrowing} but upstreaming this theorem is a non-goal of this program).
+It plays two roles here: the \emph{faithfulness target} the encoding is checked against
+(Thm~\ref{thm:bridge}), and the totality witness behind the length function
+(Def~\ref{def:goodstein_length}).  A green anchor, not an obligation.
+\end{theorem}
+
+\begin{definition}\label{def:hardy}
+  \notready
+\textbf{Hardy hierarchy \& its growth theory (gap).}  The Hardy functions \(H_\alpha\) on ordinal
+notations and the ordinal-indexed growth/monotonicity theory relating \(H_\alpha\) to \(f_\alpha\).  A
+partial function \texttt{GoodsteinPA.FastGrowing.hardy} (with \texttt{hardy\_monotone}) is ported into
+the repo from Track~1, but the \emph{classification-strength} content --- the piece feeding the Wainer
+bounding theorem --- is absent.  Portable in spirit from Castéran's Coq \texttt{hydra-battles}
+(\(F_\alpha\)/\(H_\alpha\), axiom-free).
+\end{definition}
+
+\begin{definition}\label{def:ti_schema}
+  \uses{def:veblen}
+  \notready
+\textbf{Arithmetic transfinite induction \(\mathrm{TI}({<}\varepsilon_0)\) (gap).}  The schema of
+transfinite induction up to each ordinal below \(\varepsilon_0\), expressed over \texttt{ONote} codes as
+a family of PA-formulas.  This is the object whose provability separates \(\mathsf{PA}\) from
+\(\mathrm{Con}(\mathsf{PA})\) (Gentzen): PA proves each instance below \(\varepsilon_0\) but not the
+schema at \(\varepsilon_0\).  Net-new nowhere in Lean.
+\end{definition}
+
+\begin{definition}\label{def:wainer_class}
+  \uses{def:hardy, def:fastgrowing, def:veblen, thm:hauptsatz}
+  \notready
+\textbf{Wainer/Buchholz classification (the deep gap = ordinal analysis of PA).}  A recursive function
+is \(\mathsf{PA}\)-provably total iff it is eventually dominated by some \(f_o\) with \(o<\varepsilon_0\).
+Its \emph{converse} half (provably-total \(\Rightarrow\) \(<\varepsilon_0\)-bounded) is proved in the
+literature by embedding PA into \(\omega\)-logic, applying cut-elimination, and reading off an ordinal
+assignment \(<\varepsilon_0\) (Buchholz--Wainer 1987).  Formalized in no proof assistant; this is the
+Route-B face of the one intrinsic monument.
+\end{definition}
+
+\begin{definition}\label{def:encoding}
+  \lean{GoodsteinPA.goodsteinSentence}
+  \uses{thm:goodstein_termination}
+  \leanok
+The first-order \textbf{Goodstein sentence} \(\gamma = \texttt{goodsteinSentence}\), the faithful
+\(\mathcal{L}_{\mathrm{OR}}\)-encoding of ``every Goodstein sequence terminates''.  This is the object of
+the entire independence claim; if it is unfaithful, the whole result is worthless --- hence the bridge
+below.
+\end{definition}
+
+\begin{theorem}\label{thm:bridge}
+  \lean{GoodsteinPA.goodsteinSentence_faithful}
+  \uses{def:encoding, thm:goodstein_termination}
+  \leanok
+\textbf{Faithfulness bridge (locked anchor).}  The standard model satisfies the encoded sentence iff
+every genuine hereditary-base Goodstein sequence reaches \(0\):
+\(\;(\mathbb{N}\models\gamma)\iff\forall m,\exists N,\ \texttt{goodsteinSeq}\,m\,N = 0\).  Proved and
+kernel-clean (\(\{\texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\}\)).  This is what
+makes a \(\mathsf{PA}\nvdash\gamma\) result about the \emph{real} Goodstein theorem.
+\end{theorem}
+
+
+\chapter{Route B --- Wainer growth rates (mainline)}\label{chp:routeB}
+
+The route adopted after the 2026-07-01 route decision.  It proves non-provability from \emph{rates of
+growth} and, unlike Route~A, needs no internalized cut-elimination and no Gödel-II wiring: if
+\(\mathsf{PA}\) proved \(\gamma\), Wainer would bound the Goodstein length function below one fixed
+\(f_o\) with \(o<\varepsilon_0\); but the Cichoń/Caicedo lower bound (already machine-checked) shows no
+fixed \(f_o\) can bound it.  The lower-bound half is done and clean; the single remaining gap is the
+Wainer classification (Def~\ref{def:wainer_class}), surfaced here as one named axiom.
+
+\begin{definition}\label{def:goodstein_length}
+  \lean{GoodsteinPA.Dom.goodsteinLength}
+  \uses{thm:goodstein_termination}
+  \leanok
+The \textbf{Goodstein length function} \(\texttt{goodsteinLength}(m) = \mu N.\ \texttt{goodsteinSeq}\,m\,N = 0\)
+(total, via the axiom-clean termination witness).  This is the fast-growing object whose PA-provable
+totality the route hypothesizes and then refutes.
+\end{definition}
+
+\begin{theorem}\label{thm:dom_lower}
+  \lean{GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing}
+  \uses{def:goodstein_length, def:fastgrowing}
+  \leanok
+\textbf{Cichoń/Caicedo lower bound (done).}  For every normal-form \(o\), the Goodstein length function
+eventually dominates \(f_o\) up to the documented additive slack \(2\).  Kernel axioms plus the
+project's documented \emph{finite} \texttt{native\_decide} base cases only --- no math-debt axiom, no
+\texttt{sorry} (the project's 🟢 clean category).  This is the only ``port, don't invent'' asset of the
+whole climb, and it is banked.
+\end{theorem}
+
+\begin{lemma}\label{lem:succ_gap}
+  \lean{GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor, GoodsteinPA.WainerRoute.add_le_iterate_of_lt}
+  \uses{def:fastgrowing}
+  \leanok
+\textbf{Strict successor gap (done, fully kernel-clean).}  For \(m\ge 4\),
+\(f_o(m) + 2 < f_{o+1}(m)\), via the elementary engine ``iterating a strictly inflationary map adds at
+least the iteration count'' (\texttt{add\_le\_iterate\_of\_lt}).  This is what lets the lower bound's
+additive \(+2\) slack be swallowed at the notation-successor level.
+\end{lemma}
+
+\begin{theorem}\label{thm:no_fixed_bound}
+  \lean{GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing, GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing}
+  \uses{thm:dom_lower, lem:succ_gap}
+  \leanok
+\textbf{No fixed \(f_o\) bounds the Goodstein length (done).}  Combining the lower bound at \(o+1\) with
+the successor gap gives \(f_o(m) < \texttt{goodsteinLength}(m)\) eventually, so \emph{no} fixed
+\(f_o\) (\(o<\varepsilon_0\)) can eventually bound \(\texttt{goodsteinLength}\) from above.  This is the
+exact contradiction target the Wainer bound must collide with; carries the same finite
+\texttt{native\_decide} base cases as Thm~\ref{thm:dom_lower}, no debt axiom.
+\end{theorem}
+
+\begin{theorem}\label{thm:wainer_axiom}
+  \lean{GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein}
+  \uses{def:wainer_class, def:goodstein_length}
+  \notready
+\textbf{Wainer bound (the one Route-B debt axiom).}  If \(\mathsf{PA}\vdash\gamma\), then
+\(\texttt{goodsteinLength}\) is eventually bounded by some fixed \(f_o\), \(o<\varepsilon_0\).  This is
+the Wainer classification (Def~\ref{def:wainer_class}) specialized to this route --- currently a named
+\texttt{axiom} standing in for the un-built ordinal analysis of PA.  It is the \emph{entire} remaining
+mathematical debt of Route~B.
+\end{theorem}
+
+\begin{theorem}\label{thm:routeB_headline}
+  \lean{GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth}
+  \uses{thm:wainer_axiom, thm:no_fixed_bound, def:encoding, thm:bridge}
+  \notready
+\textbf{Kirby--Paris via Wainer/Cichoń/Caicedo.}  \(\mathsf{PA}\nvdash\gamma\): if PA proved
+\(\gamma\), the Wainer bound (Thm~\ref{thm:wainer_axiom}) would put \(\texttt{goodsteinLength}\) below a
+fixed \(f_o\), contradicting Thm~\ref{thm:no_fixed_bound}.  A \emph{real proof} whose only open
+dependency is the single Wainer axiom --- \(\texttt{\#print axioms}\) shows exactly
+\(\{\text{3 kernel}, \texttt{wainer\_bound\_of\_pa\_proves\_goodstein}, \text{finite native\_decide}\}\).
+\end{theorem}
+
+
+\chapter{Route A --- internalized Gentzen cut-elimination (banked)}\label{chp:routeA}
+
+The route that led the expedition through \(\sim\)lap~166.  It reduces \(\gamma\) to
+\(\mathrm{Con}(\mathsf{PA})\) \emph{inside} \(\mathsf{PA}\) and applies Gödel~II by contraposition.  This
+chapter is \textbf{banked} after the 2026-07-01 pivot: the lap-171 ``M2'' probe found the decisive
+obstruction --- the PA-induction leaf of the internalized reduction demands a free-variable
+\(\forall\)-left / \(\to\)-left step that the finitary internal-\(Z\) calculus does not have (the
+finitary-vs-\(\omega\)-rule expressiveness wall).  The clean Gödel-II wiring and the faithfulness
+anchors are reused unchanged; the crux-2 milestone chain below (the witness-bounded operator-calculus
+decomposition of the internalized cut-elimination) is \textbf{preserved} for reuse, not deleted.
+
+\section{The clean Gödel-II reduction (reused)}
+
+\begin{theorem}\label{thm:godel2_reduction}
+  \lean{GoodsteinPA.not_proves_of_implies_consistency, GoodsteinPA.peano_not_proves_consistency}
+  \uses{thm:godel2, def:encoding}
+  \leanok
+\textbf{Collapse to one implication (done, kernel-clean).}  Gödel~II surfaced for \(\mathsf{PA}\)
+(\(\mathsf{PA}\nvdash\mathrm{Con}(\mathsf{PA})\), an instance of Thm~\ref{thm:godel2}), and the
+contraposition meta-reduction: if \(\mathsf{PA}\vdash\gamma\to\mathsf{PA}\vdash\mathrm{Con}(\mathsf{PA})\),
+then \(\mathsf{PA}\nvdash\gamma\).  This is the honest ``collapse the whole headline to one girder''
+deliverable; both declarations are axiom-clean.
+\end{theorem}
+
+\section{The crux-2 milestone chain (witness-bounded operator calculus, preserved)}
+
+The following nine nodes are the internalized-cut-elimination decomposition of the Phase 2--3 girder,
+imported through \texttt{GoodsteinPABlueprint}.  Every node is \texttt{\textbackslash notready}: each
+stage theorem still depends on named capstone axioms (all classified \texttt{debt} by
+\texttt{blueprint\_audit}).  They are the ``how would the internalization actually be built'' skeleton,
+retained as a banked asset.
 
 \begin{theorem}\label{thm:pathBGoodsteinSentenceShape}
   \lean{GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage}
+  \uses{def:encoding}
   \notready
 The encoded Goodstein sentence can be normalized to the exact closed one-formula sequent shape
 consumed by the bounded embedding.
@@ -68,6 +367,100 @@ The projected derivation is the concrete Goodstein-fragment terminal object.
   \uses{thm:pathBGoodsteinFragmentExtraction}
   \lean{GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage}
   \notready
-The full Path B capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out
+The full crux-2 capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out
 by the promoted lower-bound theorem.
+\end{theorem}
+
+\section{The Route-A girder and headline}
+
+\begin{theorem}\label{thm:crux2_axiom}
+  \lean{GoodsteinPA.goodstein_implies_consistency}
+  \uses{thm:pathBTerminalRouteBridge, def:ti_schema}
+  \notready
+\textbf{The Phase 2--3 girder (Route-A debt axiom).}  Inside \(\mathsf{PA}\), the Goodstein sentence
+implies \(\mathrm{Con}(\mathsf{PA})\).  A named \texttt{axiom} carrying an honest, audited subgoal: it
+is the \emph{internalized} form of the crown result \(\mathrm{TI}(\varepsilon_0)\vdash
+\mathrm{Con}(\mathsf{PA})\) (Thm~\ref{thm:d1_conpa}) --- the Rathjen §3 descent composed with Gentzen's
+\(\mathrm{PRWO}(\varepsilon_0)\to\mathrm{Con}(\mathsf{PA})\).  The crux-2 chain above is the construction
+intended to discharge it; the lap-171 obstruction is why it remains an axiom (banked).
+\end{theorem}
+
+\begin{theorem}\label{thm:routeA_headline}
+  \lean{GoodsteinPA.peano_not_proves_goodstein}
+  \uses{thm:crux2_axiom, thm:godel2_reduction, def:encoding, thm:bridge}
+  \notready
+\textbf{Kirby--Paris via internalization + Gödel~II.}  \(\mathsf{PA}\nvdash\gamma\), proved as
+\(\texttt{not\_proves\_of\_implies\_consistency}\ \texttt{goodstein\_implies\_consistency}\).  A real
+proof whose only non-canonical dependency is the single girder axiom Thm~\ref{thm:crux2_axiom} ---
+\(\texttt{\#print axioms}\) shows exactly \(\{\text{3 kernel}, \texttt{goodstein\_implies\_consistency}\}\).
+Banked at the identical type to the mainline summit; converges with Route~B at
+Thm~\ref{thm:summit}.
+\end{theorem}
+
+
+\chapter{Crown \& horizon}\label{chp:crown}
+
+The summit both routes require, and the ranges it opens.  Every node here is aspirational: no Lean
+declaration exists yet, so none carries a \texttt{\textbackslash lean} binding.  They are the honest map
+of what remains --- ``the entire remaining deliverable'' after the 2026-07-01 ``axiom-free or abandon''
+decision.
+
+\begin{theorem}\label{thm:infinitary_tower}
+  \uses{thm:hauptsatz, def:veblen, def:wainer_class}
+  \notready
+\textbf{Infinitary \(\mathsf{PA}_\omega\) cut-elimination (the monument).}  The \(\omega\)-logic
+proof system for PA with the \(\omega\)-rule, an ordinal assignment \(o(d)<\varepsilon_0\) to derivations,
+and cut-elimination that lowers the assigned ordinal --- the \(\varepsilon_0\)-graded, infinitary
+analogue of the finitary Hauptsatz (Thm~\ref{thm:hauptsatz}).  Formalized only in Coq
+(Sinclaire; Bryce \& Goré, \texttt{arXiv:2603.00487}, \(\sim\)18k lines, \texttt{PA\_omega.v}); absent
+from mathlib and every other prover.  \(\sim\)6--7k Lean lines, human-architected, multi-month.
+\end{theorem}
+
+\begin{theorem}\label{thm:d1_conpa}
+  \uses{thm:infinitary_tower, def:ti_schema}
+  \notready
+\textbf{\(\mathrm{TI}(\varepsilon_0)\vdash\mathrm{Con}(\mathsf{PA})\) (Gentzen's consistency proof).}
+From the ordinal-assigned cut-elimination, an empty-sequent PA-derivation would yield an infinite
+primitive-recursive \(\varepsilon_0\)-descent, forbidden by transfinite induction up to
+\(\varepsilon_0\); hence \(\mathrm{Con}(\mathsf{PA})\).  This is the shared engine: its
+\emph{internalized-in-\(\mathsf{PA}\)} shadow is the Route-A girder (Thm~\ref{thm:crux2_axiom}); its
+\emph{growth-rate contrapositive} is the Route-B Wainer bound (Thm~\ref{thm:wainer_axiom}).
+\end{theorem}
+
+\begin{theorem}\label{thm:two_sided}
+  \uses{thm:d1_conpa, def:ti_schema}
+  \notready
+\textbf{The proof-theoretic ordinal of PA is \(\varepsilon_0\).}  Both directions:
+\(\mathsf{PA}\) proves \(\mathrm{TI}(\alpha)\) for each \(\alpha<\varepsilon_0\), and
+\(\mathrm{TI}(\varepsilon_0)\) proves \(\mathrm{Con}(\mathsf{PA})\) (so PA cannot prove it).  The complete
+ordinal analysis, of which either Goodstein route is one corollary.
+\end{theorem}
+
+\begin{theorem}\label{thm:summit}
+  \uses{thm:routeA_headline, thm:routeB_headline}
+  \notready
+\textbf{Summit: \(\mathsf{PA}\nvdash\gamma\), axiom-free.}  The Kirby--Paris independence with a clean
+\(\texttt{\#print axioms}\) (\(\{\texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\}\)
+only).  Reached the instant either route's debt axiom is discharged against the crown --- Route~B's
+Wainer bound or Route~A's internalized girder, both grounded in Thm~\ref{thm:d1_conpa}.  A first in any
+proof assistant.
+\end{theorem}
+
+\begin{theorem}\label{thm:siblings}
+  \uses{thm:two_sided}
+  \notready
+\textbf{Sibling summits.}  Once the ordinal analysis of PA exists in Lean, the same girder unlocks the
+neighboring concrete PA-independences with the same \(\varepsilon_0\) flavor --- the Kirby--Paris
+\emph{hydra} theorem and Paris--Harrington --- none of which is formalized in any prover.  They reuse
+Thm~\ref{thm:two_sided} and differ only in the lower-bound half.
+\end{theorem}
+
+\begin{theorem}\label{thm:horizon}
+  \uses{def:veblen}
+  \notready
+\textbf{Horizon: theory-parametric ordinal analysis.}  Beyond PA, the same apparatus scales up the
+Veblen hierarchy --- e.g. the analysis of \(\mathrm{ATR}_0\) at \(\Gamma_0\) --- pointing at a reusable,
+theory-parametric ``ordinal analysis in Lean'' framework built on mathlib's \texttt{Ordinal.veblen}
+(Def~\ref{def:veblen}).  The long-range reason ``ordinal analysis of PA in Lean'' is worth originating
+as its own library.
 \end{theorem}

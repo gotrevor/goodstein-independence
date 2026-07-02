@@ -2,10 +2,12 @@
 
 \usepackage{amssymb, amsthm, amsmath}
 \usepackage{hyperref}
-\usepackage[showmore, dep_graph, coverage, project=../../, thms=theorem]{blueprint}
+\usepackage[showmore, dep_graph, coverage, project=../../, thms=theorem+definition+lemma]{blueprint}
 
 \theoremstyle{definition}
 \newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
 
 \home{https://github.com/gotrevor/goodstein-independence}
 \github{https://github.com/gotrevor/goodstein-independence}
