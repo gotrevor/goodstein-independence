@@ -1,5 +1,32 @@
 # Pending work — open obligations & attack paths
 
+## LAP 193b (grind, lane D) — rank-0 soundness CORE `sound0` PROVEN (the hard Π/`allω` case); bounded-witness layer precisely scoped
+
+`wip/Lap13ReadoffDeltaProbe.lean` (compiles clean, off-build) proves **`sound0`**:
+`Zef2 α e H f 0 Γ → ∃ ψ ∈ Γ, atomTrue ψ` — rank-0 `Zef2` soundness. The genuine new content over the
+atomic `readoff_sigma1_Zef` is the **`allω` (Π) combination**: for a `∀⁰` node, either some branch's
+true member is in the shared context (return it), or every branch is true at its own instance ⇒
+`∀⁰ φ` is true (`atomTrue (∀⁰ φ) = ∀ k, atomTrue (φ/[nm k])`, discharged via `eval_all`/`eval_substs`
++ `valm_nm` + `Matrix.constant_eq_singleton`). Slot-independent. The `exI`/`axL`/`cut` cases port
+from `readoff_sigma1_Zef`. **`sound0` is the reusable truth core the full read-off calls.**
+
+**Obstruction found + precisely scoped (the residual Towsner §5.4 content, ~1-2 laps):** the R-4
+bound `∃ n ≤ f 0, atomTrue (φ/[nm n])` (E–W witnessing) is NOT a uniform inductive payload — the
+attempted `sound0_bdd` (return, for an existential member, a witness `≤ f 0`) is **kernel-false**:
+- **The witness bound is SLOT-LOCAL and `allω` relativizes the slot.** An `allω` conclusion is at
+  slot `f`; its branches are at `rel1 f n` (`rel1 f n 0 = f n ≠ f 0`, and there is NO `Monotone f`).
+  A context member extracted from branch `n` carries a witness `≤ f n`, not `≤ f 0`.
+- A contracted `∃⁰ φ` can be TRAPPED in an `allω` branch's context and only re-`exI`'d deeper at a
+  relativized slot (witness `≤ f k`).
+So the bound layer must thread the LOCAL slot + a contraction/well-foundedness argument.
+**Simplification banked:** for NON-contracted derivations of the singleton `{∃⁰ φ}`, `exI` keeps slot
+`f` and `{∃⁰ φ}` has no `∀⁰` member (so `allω` never fires at top level) ⇒ the bound is immediate
+from the top `exI`; the contraction case is the sole residue.
+
+**NEXT:** (i) port `sound0` to `src` (reusable, will be consumed); (ii) build the bounded layer —
+either a contraction-elimination lemma, or a `sound0`-variant returning a witness at the derivation's
+OWN slot at 0 with a slot-monotone weakening only where valid; then specialize to R-4.
+
 ## LAP 193 (grind, lane D) — R-4 restatement DONE + `<BoundedInstance>` chosen (`DeltaZero`); read-off grind is next
 
 Executed lane-D Stage-1 per the SERIES-1 order R-4 (the current src stub was still the stale
