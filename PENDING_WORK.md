@@ -1,6 +1,36 @@
 # Pending work — open obligations & attack paths
 
-## LAP 2 (REBUILD-Z laps 2–4 gate-open) — pins 1–2 reduced to ONE localized gap; candidate SIXTH trap → ESCALATED
+## LAP 3 (183) — pins 1–2 PROVEN PROVABLE in the slot calculus; permitted lane MINED, awaiting architect ratification
+
+The lap-2 gap (below) is **DISSOLVED**.  `wip/ZefSlotCalculus.lean` carries the complete
+resolution-(2) slot calculus `Zef` (`Zeh` with stage `m` → carried slot `f : ℕ → ℕ`, `exI` bound
+`n ≤ f 0`, `allω` branch `rel1 f n`) with the FULL E–W chain **end-to-end, all sorry-free /
+axiom-clean** (`[propext, Classical.choice, Quot.sound]`):
+- `redDeriv_slot` — the running-family cut-reduction (the lap-2 "unprovable" gap; output slot
+  **`g∘f`**, NOT `f∘g` — the pins' order was backwards, `reslot_fog_FAILS` kernel-refutes it).
+- `allInv_Zef` — ∀-inversion (feeds the reduction from a ∀-side derivation).
+- `stepAllω_Zef` — pin 2 (invert ∀-side → reduction).
+- `readoff_sigma1_Zef` / `headline_readoff_Zef` — the §3 EXIT (witness ≤ `f 0`, = E–W Lemma 31).
+- lap-3 numeric probe `wip/ZefResolutionProbe.lean` (the `g∘f` decision).
+
+**So pins 1–2 are proven provable.**  The remaining work is NON-math and OUT-OF-LANE for a grind
+lap: the architect's **LOCK §1 amendment** (adopt the slot judgment: carry `f`, `exI` bound
+`n ≤ f 0`, `allω` branch `rel1 f n`, pins output `g∘f`; `NormControlled` slots are
+monotone+inflationary = the two carried side conditions) + the mechanical `Zeh → Zef` `src`
+migration behind ratification (the `wip` proofs port verbatim modulo namespace).
+
+**Permitted lane status:** MINED.  The slot calculus's remaining E–W piece is the cut-ELIMINATION
+pass (Lemmas 26/27/30) = pin 3's territory = FORBIDDEN (lap-5 gate).  Route-A / Δ₀ extension
+FORBIDDEN.  So further `src` progress on pins 1–2 is judge-gated; a resumed lap with no ratification
+should confirm state (build 🟢, headline no drift) and end, or extend orthogonal `wip` evidence
+only.  The math obstruction the escalation flagged is GONE.
+
+Findings: `REBUILD-Z-LAP3-FINDING-2026-07-02-gof-order-resolves-slot-reduction.md`;
+baton `HANDOFF-2026-07-02-lap183.md`.
+
+---
+
+## LAP 2 (REBUILD-Z laps 2–4 gate-open) — pins 1–2 reduced to ONE localized gap; candidate SIXTH trap → ESCALATED (SUPERSEDED by LAP 3 above)
 
 Gate-open work (DIRECTION 2026-07-02 laps 2–4): discharge pins 1–2
 (`cutReduceAllAuxRunning_Zf`, `stepAllω_Zf`) against the judge-AMENDED fixed-control §5
