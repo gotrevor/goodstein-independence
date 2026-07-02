@@ -43,10 +43,16 @@ The lap-3 "awaiting architect ratification" stall is RESOLVED by review-lap auth
   restatement is FORBIDDEN (lap-5 gate); the stage-form probes + read-off stay as `Zeh` companions
   until pin 3's lap-5 restatement. So `Zeh`/`Zef` coexist by design.
 
+  **`Zef` inversion suite COMPLETE (lap 184):** `allInv_Zef` + the three propositional inversions
+  `orInv_Zef` / `andInvL_Zef` / `andInvR_Zef` (§8c, ported from the `Zeh` suite, all axiom-clean) —
+  the cut-elimination assembly (laps 5–7) now has its full inversion toolkit in the target calculus.
+
   **PERMITTED SCOPE NOW EXHAUSTED for this run:** pins 1–2 discharged, bridge proven, ledger honest,
-  §6 migrated. Everything downstream (cut-elim assembly, Δ₀ read-off, integration) needs pin 3, which
-  is operator-FORBIDDEN (lap-5 gate). The next real advance is pin 3's faithful restatement — an
-  altitude/judge deliverable, NOT a grind-lap task this run.
+  §6 seams migrated, `Zef` inversion suite complete. Everything downstream (cut-elim assembly, Δ₀
+  read-off, integration) needs **pin 3** (`cutElimPass_Zf`), which is operator-FORBIDDEN (lap-5
+  gate). The next real advance is pin 3's faithful restatement (E–W Lemma 30 iterate `f ↦ f^{Fω α}`
+  + control raise) — an altitude/judge deliverable requiring ratification, NOT a grind-lap task this
+  run. The `Zef` substrate the assembly will run on is now fully built out.
 
 ### After the port: the live REBUILD-Z crux is now PIN 3 (`cutElimPass_Zf`) — but it stays the
 ### lap-5 entrance gate (statement mini-lock, discharge FORBIDDEN until its restatement is ratified).

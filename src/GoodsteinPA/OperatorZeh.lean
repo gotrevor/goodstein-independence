@@ -1744,6 +1744,158 @@ theorem probe_allomega_reassembly_Zef {e : ONote} {H : ONote → Prop} {c : ℕ}
   · rw [wmul_add_wmul]
     exact osucc_NF (nf_one.oadd _ NFBelow.zero)
 
+/-! ## §8c Propositional inversions in the slot judgment `Zef` (assembly prerequisite)
+
+Slot-form ports of `orInv_Zeh`/`andInvL_Zeh`/`andInvR_Zeh` — the propositional inversions the
+cut-elimination assembly (laps 5–7) reuses for cuts on `⋏`/`⋎` formulas.  Control-preserving (same
+`(α, e, H, f, c)`); since the minimal core has no `andI`/`orI` intro rule, `φ ⋏ ψ` / `φ ⋎ ψ` is
+never principal, so every case threads the inversion past a passive side formula.  Completes the
+`Zef` inversion suite (`allInv_Zef` + these three), mirroring the banked `Zeh` suite. -/
+
+/-- **∨-inversion, `Zef` form** (Towsner §19.3): replace `φ ⋎ ψ` by `φ, ψ`, same
+`(α, e, H, f, c)`. -/
+theorem orInv_Zef {φ ψ : Form} : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+    Zef α e H f c Γ → (φ ⋎ ψ) ∈ Γ →
+    Zef α e H f c (insert φ (insert ψ (Γ.erase (φ ⋎ ψ)))) := by
+  intro α e H f c Γ dd
+  induction dd with
+  | @axL α e H f c Γ ar r v hp hn =>
+      intro _
+      refine Zef.axL r v ?_ ?_ <;>
+        exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), by assumption⟩))
+  | @wk α e H f c Δ Γ hsub dd ih =>
+      intro hmem
+      by_cases hd : (φ ⋎ ψ) ∈ Δ
+      · exact Zef.wk (Finset.insert_subset_insert _ (Finset.insert_subset_insert _
+          (Finset.erase_subset_erase _ hsub))) (ih hd)
+      · refine Zef.wk ?_ dd
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩))
+  | @weak α β e H f c Δ Γ hβ hβNF hαNF hβH hsub dd ih =>
+      intro hmem
+      by_cases hd : (φ ⋎ ψ) ∈ Δ
+      · exact Zef.weak hβ hβNF hαNF hβH (Finset.insert_subset_insert _
+          (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub))) (ih hd)
+      · refine Zef.weak hβ hβNF hαNF hβH ?_ dd
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨fun e => hd (e ▸ hx), hsub hx⟩))
+  | @allω α e H f c Γ₀ χ β hβ hβNF hαNF hβH dd ih =>
+      intro hmem
+      have hhead : (∀⁰ χ) ≠ (φ ⋎ ψ) := by intro h; simp [UnivQuantifier.all, Vee.vee] at h
+      have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have key : ∀ n, Zef (β n) e (adjoin H n) (rel1 f n) c
+          (insert (χ/[nm n]) (insert φ (insert ψ (Γ₀.erase (φ ⋎ ψ))))) := fun n =>
+        Zef.wk (invPush (φ ⋎ ψ) (χ/[nm n]) Γ₀) (ih n (Finset.mem_insert_of_mem hmem0))
+      exact Zef.wk (invPull (φ ⋎ ψ) hhead Γ₀) (Zef.allω χ β hβ hβNF hαNF hβH key)
+  | @exI α β e H f c Γ₀ χ n hβ hβNF hαNF hβH hbound dd ih =>
+      intro hmem
+      have hhead : (∃⁰ χ) ≠ (φ ⋎ ψ) := by intro h; simp [ExsQuantifier.exs, Vee.vee] at h
+      have hmem0 : (φ ⋎ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zef.wk (invPush (φ ⋎ ψ) (χ/[nm n]) Γ₀) (ih (Finset.mem_insert_of_mem hmem0))
+      exact Zef.wk (invPull (φ ⋎ ψ) hhead Γ₀) (Zef.exI χ n hβ hβNF hαNF hβH hbound P)
+  | @cut α βφ βψ e H f c Γ₀ χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ d₂ ih₁ ih₂ =>
+      intro hmem
+      have P₁ := Zef.wk (invPush (φ ⋎ ψ) χ Γ₀) (ih₁ (Finset.mem_insert_of_mem hmem))
+      have P₂ := Zef.wk (invPush (φ ⋎ ψ) (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
+      exact Zef.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH P₁ P₂
+
+/-- **∧-inversion, left, `Zef` form** (Towsner §19.3): replace `φ ⋏ ψ` by `φ`, same
+`(α, e, H, f, c)`. -/
+theorem andInvL_Zef {φ ψ : Form} : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+    Zef α e H f c Γ → (φ ⋏ ψ) ∈ Γ →
+    Zef α e H f c (insert φ (Γ.erase (φ ⋏ ψ))) := by
+  intro α e H f c Γ dd
+  induction dd with
+  | @axL α e H f c Γ ar r v hp hn =>
+      intro _
+      refine Zef.axL r v ?_ ?_ <;>
+        exact Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), by assumption⟩)
+  | @wk α e H f c Δ Γ hsub dd ih =>
+      intro hmem
+      by_cases hh : (φ ⋏ ψ) ∈ Δ
+      · exact Zef.wk (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hh)
+      · refine Zef.wk ?_ dd
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hh (e ▸ hx), hsub hx⟩)
+  | @weak α β e H f c Δ Γ hβ hβNF hαNF hβH hsub dd ih =>
+      intro hmem
+      by_cases hh : (φ ⋏ ψ) ∈ Δ
+      · exact Zef.weak hβ hβNF hαNF hβH
+          (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hh)
+      · refine Zef.weak hβ hβNF hαNF hβH ?_ dd
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hh (e ▸ hx), hsub hx⟩)
+  | @allω α e H f c Γ₀ χ β hβ hβNF hαNF hβH dd ih =>
+      intro hmem
+      have hhead : (∀⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [UnivQuantifier.all, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have key : ∀ n, Zef (β n) e (adjoin H n) (rel1 f n) c
+          (insert (χ/[nm n]) (insert φ (Γ₀.erase (φ ⋏ ψ)))) := fun n =>
+        Zef.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih n (Finset.mem_insert_of_mem hmem0))
+      exact Zef.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zef.allω χ β hβ hβNF hαNF hβH key)
+  | @exI α β e H f c Γ₀ χ n hβ hβNF hαNF hβH hbound dd ih =>
+      intro hmem
+      have hhead : (∃⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [ExsQuantifier.exs, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zef.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih (Finset.mem_insert_of_mem hmem0))
+      exact Zef.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zef.exI χ n hβ hβNF hαNF hβH hbound P)
+  | @cut α βφ βψ e H f c Γ₀ χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ d₂ ih₁ ih₂ =>
+      intro hmem
+      have P₁ := Zef.wk (inv1Push (φ ⋏ ψ) _ χ Γ₀) (ih₁ (Finset.mem_insert_of_mem hmem))
+      have P₂ := Zef.wk (inv1Push (φ ⋏ ψ) _ (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
+      exact Zef.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH P₁ P₂
+
+/-- **∧-inversion, right, `Zef` form** (Towsner §19.3): replace `φ ⋏ ψ` by `ψ`, same
+`(α, e, H, f, c)`. -/
+theorem andInvR_Zef {φ ψ : Form} : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+    Zef α e H f c Γ → (φ ⋏ ψ) ∈ Γ →
+    Zef α e H f c (insert ψ (Γ.erase (φ ⋏ ψ))) := by
+  intro α e H f c Γ dd
+  induction dd with
+  | @axL α e H f c Γ ar r v hp hn =>
+      intro _
+      refine Zef.axL r v ?_ ?_ <;>
+        exact Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨Semiformula.ne_of_ne_complexity (by simp), by assumption⟩)
+  | @wk α e H f c Δ Γ hsub dd ih =>
+      intro hmem
+      by_cases hh : (φ ⋏ ψ) ∈ Δ
+      · exact Zef.wk (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hh)
+      · refine Zef.wk ?_ dd
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hh (e ▸ hx), hsub hx⟩)
+  | @weak α β e H f c Δ Γ hβ hβNF hαNF hβH hsub dd ih =>
+      intro hmem
+      by_cases hh : (φ ⋏ ψ) ∈ Δ
+      · exact Zef.weak hβ hβNF hαNF hβH
+          (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hh)
+      · refine Zef.weak hβ hβNF hαNF hβH ?_ dd
+        intro x hx
+        exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨fun e => hh (e ▸ hx), hsub hx⟩)
+  | @allω α e H f c Γ₀ χ β hβ hβNF hαNF hβH dd ih =>
+      intro hmem
+      have hhead : (∀⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [UnivQuantifier.all, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have key : ∀ n, Zef (β n) e (adjoin H n) (rel1 f n) c
+          (insert (χ/[nm n]) (insert ψ (Γ₀.erase (φ ⋏ ψ)))) := fun n =>
+        Zef.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih n (Finset.mem_insert_of_mem hmem0))
+      exact Zef.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zef.allω χ β hβ hβNF hαNF hβH key)
+  | @exI α β e H f c Γ₀ χ n hβ hβNF hαNF hβH hbound dd ih =>
+      intro hmem
+      have hhead : (∃⁰ χ) ≠ (φ ⋏ ψ) := by intro h; simp [ExsQuantifier.exs, Wedge.wedge] at h
+      have hmem0 : (φ ⋏ ψ) ∈ Γ₀ := (Finset.mem_insert.mp hmem).resolve_left fun e => hhead e.symm
+      have P := Zef.wk (inv1Push (φ ⋏ ψ) _ (χ/[nm n]) Γ₀) (ih (Finset.mem_insert_of_mem hmem0))
+      exact Zef.wk (inv1Pull (φ ⋏ ψ) _ hhead Γ₀) (Zef.exI χ n hβ hβNF hαNF hβH hbound P)
+  | @cut α βφ βψ e H f c Γ₀ χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ d₂ ih₁ ih₂ =>
+      intro hmem
+      have P₁ := Zef.wk (inv1Push (φ ⋏ ψ) _ χ Γ₀) (ih₁ (Finset.mem_insert_of_mem hmem))
+      have P₂ := Zef.wk (inv1Push (φ ⋏ ψ) _ (∼χ) Γ₀) (ih₂ (Finset.mem_insert_of_mem hmem))
+      exact Zef.cut χ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH P₁ P₂
+
 /-! ## Blueprint ledger — the DISCHARGED reduction pins (lap 184)
 
 Pins 1–2 are now `clean` nodes (real kernel footprint = trust base only); the audit reconciles
