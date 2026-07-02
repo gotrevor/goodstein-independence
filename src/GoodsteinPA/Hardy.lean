@@ -1984,4 +1984,12 @@ theorem hardy_omega_pow_bracket (α : ONote) (n : ℕ) :
     fastGrowing α n ≤ hardy (oadd α 1 0) n ∧ hardy (oadd α 1 0) n < fastGrowing α (n + 1) :=
   ⟨fastGrowing_le_hardy_omega_pow α n, hardy_omega_pow_lt_fastGrowing α n⟩
 
+/-- **Coefficient-general lower bound:** `(f_α)^[k+1](n) ≤ H_{ω^α·(k+1)}(n)` (for `α ≠ 0`).
+The `hardy_oadd_coeff` companion of the `ω^α` lower bracket: `H_{ω^α·(k+1)} = (H_{ω^α})^[k+1]`
+dominates `(f_α)^[k+1]` because `f_α ≤ H_{ω^α}` pointwise and `H_{ω^α}` is monotone. -/
+theorem fastGrowing_iterate_le_hardy_coeff (α : ONote) (hα : α ≠ 0) (k n : ℕ) :
+    (fastGrowing α)^[k + 1] n ≤ hardy (oadd α k.succPNat 0) n := by
+  rw [hardy_oadd_coeff α hα k n]
+  exact iterate_le_iterate_of_le (fastGrowing_le_hardy_omega_pow α) (hardy_monotone _) (k + 1) n
+
 end GoodsteinPA.FastGrowing
