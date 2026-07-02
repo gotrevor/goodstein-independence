@@ -6,7 +6,9 @@
 > (`papers/eguchi-weiermann-2012-operator-controlled-id1.md`, arXiv:1205.2879, Def. 23 +
 > Lemmas 24–31). It touches **no gated body** — statement-shape audit only. It does **not**
 > challenge a LOCKED form; §5 is exactly the judge-gated draft the judge is meant to weigh.
-> Confidence the tension is real and decision-relevant: **~80%.**
+> Confidence: originally ~80%; the ~20% escape (Option B) is now **CLOSED in-kernel** (see the
+> "escape is CLOSED" section — `mono_e_membership_gate_refuted` makes a reduction-level control-raise
+> unsound). **Option A is kernel-forced.**
 
 ## The two E-W lemmas the reduction/pass must mirror
 
@@ -86,14 +88,35 @@ to one. Under **Option A** this evaporates: reductions keep `e` fixed, the pass 
 the design owes an account of how per-step raises reconcile with "once per pass" absent `mono_e`;
 this looks like a re-entry of exactly the per-branch-raise-then-unify mechanism SPIKE-W4B killed.
 
+## The ~20% escape is CLOSED in-kernel — Option A is FORCED, not merely recommended
+
+The remaining doubt was: could Zeh's info-free `H`-membership (K1) block E-W's
+"run-at-`F[K]`-then-absorb-to-`F`" step and *force* a raise into the reduction (Option B)? **No —
+the existing theorem `mono_e_membership_gate_refuted` (`OperatorZeh.lean:224`) settles it.** It
+proves `∃ e e' m, e' = raise e 1 ∧ e.NF ∧ e'.NF ∧ (∀S, Cl S e ∧ Cl S e') ∧ hardy e' m < hardy e m`
+(concretely `hardy ω 0 = 1 < 5 = hardy 5 0`), with the docstring's exact conclusion: *"no `Zeh`-rule
+package of (NF, `<`, membership) facts can re-establish the `exI` bound after a raise."*
+
+Consequence for the reduction: a reduct concluding at control `raise e α` from premises at `e` must
+re-establish every `exI` witness bound `n ≤ hardy e m` as `n ≤ hardy (raise e α) m`. Since
+`hardy (raise e α)` can be *strictly smaller* (K2b) and there is no `mono_e`, that re-tag is
+**unsound** — the calculus has no way to produce it. So pins 1–2's `raise e α` output is not merely
+unfaithful to E-W Lemma 25; it is **unprovable/unsound as a reduction** (its numeric partner `f∘g`
+cannot pay bounds that even a control-raise's own machinery can't re-establish). **Option A is
+therefore forced, not a preference.**
+
+Why the *pass* (pin 3) may legally raise where the reduction may not: the collapse (E-W Lemma 30)
+does not *re-tag* an existing derivation — it *constructs* one at the raised control with the
+**iterated** slot `f'` growing fast enough to dominate `hardy (raise e α')`. That is exactly why `f'`
+must be the pinned iterate (Addendum): the raise is legal *only* when accompanied by the iteration
+that pays the new bounds. Reduction = compose, no raise (Lemma 25); pass = raise, iterate (Lemma
+30). The two are now kernel-separated, not merely stylistically distinct.
+
 ## What is NOT claimed
 
 - Not claimed: a LOCKED form is wrong (§5 is NOT-LOCKED by design; this is input to the gate).
 - Not claimed: `T-R(i)` fires. The E–W carrier still composes at both seams (verdict stands); this
   is about *where* the raise/iteration sit across the three lemmas, not whether the carrier works.
-- Not claimed with certainty: the ~20% escape is that Zeh's info-free `H`-membership (K1) blocks the
-  E-W "run-at-`F[K]`-then-absorb-to-`F`" step, *forcing* a raise into the reduction. Even then the
-  numeric slot must become iteration (Option B), and the R3/no-`mono_e` account is still owed.
 
 ## Addendum (same lap, kernel-checked): pin 3's existential `f'` is VACUOUS — it breaks the read-off
 

@@ -41,7 +41,15 @@ MUST be pinned to the E-W iterate of the INPUT `f` (`f' = f^{…}`, Lemma 30), w
 Option A relocates the real P1 work and where Lemma 19 (`N(α) ≤ f^{F^α(0)}(0)`) makes it achievable.
 (Pins 1–2 are NOT vacuous — their `f, g` are explicit params, `f∘g` determined.)
 
-**Option A now VALIDATED in-kernel (not just recommended):** the fixed-control reduction conjunct
+**Option A is now KERNEL-FORCED (the ~20% Option-B escape is closed):** a reduction concluding at
+`raise e α` from premises at `e` would have to re-establish every `exI` bound `n ≤ hardy e m` at
+`n ≤ hardy (raise e α) m`, but `mono_e_membership_gate_refuted` (`OperatorZeh.lean:224`) proves that
+is impossible (`hardy (raise e α)` can be strictly smaller — `hardy ω 0 = 1 < 5`; no `mono_e`).  So
+pins 1–2's `raise e α` output is not merely unfaithful — it is UNSOUND as a reduction.  The pass
+(pin 3) may raise only because it CONSTRUCTS at the raised control with a fast-growing ITERATE `f'`
+that pays the new bounds (E-W Lemma 30) — which is exactly why `f'` must be pinned, not existential.
+
+**Option A also VALIDATED in-kernel (the fix works):** the fixed-control reduction conjunct
 `NormControlled (f∘g) e m` is discharged by the new banked lemma `NormControlled.comp`
 (`OperatorZeh.lean`, §5; `[propext, choice, Quot.sound]`): `NormControlled g e m → (∀y, y ≤ f y) →
 NormControlled (f∘g) e m`.  The inflationary hypothesis `∀y, y ≤ f y` is exactly E-W's `(f.1)`
