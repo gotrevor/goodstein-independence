@@ -1,5 +1,31 @@
 # Pending work — open obligations & attack paths
 
+## LAP 193 (grind, lane D) — R-4 restatement DONE + `<BoundedInstance>` chosen (`DeltaZero`); read-off grind is next
+
+Executed lane-D Stage-1 per the SERIES-1 order R-4 (the current src stub was still the stale
+pre-R-4 `matrixTrue` form — it was never restated during the lane-P-focused SERIES-1 grind):
+
+**Landed (build 🟢 1328, headline undrifted):**
+- **`<BoundedInstance>` mini-probe committed** (`wip/Lap12BoundedInstanceProbe.lean`, compiles clean,
+  order-required before any Stage-5 grind consumes the choice). Probed 2 candidates:
+  (A) Foundation-native `LO.FirstOrder.Arithmetic.DeltaZero` (= `Hierarchy 𝚺 0`) — **ADOPTED**;
+  (B) a repo-local calculus-exact ∀/∃-tower `QTower` — rejected (not repo-native; drops the Δ₀ bound).
+  Key kernel-grounded finding recorded in the probe: the `Zeh`/`Zef2` core has only
+  `axL`/`allω`/`exI`/`cut` — **no `∧`/`∨` rule** — so the read-off descends the instance through
+  quantifiers/atoms only; `DeltaZero`'s `∧`/`∨` heads are DEAD branches for the singleton `{∃⁰ φ}`
+  read-off (a singleton `{A ⋏ B}` is not `axL`-closable and has no ∧-rule ⇒ underivable).
+- **`readoff_delta0_Zef2` restated** to the R-4 form (`OperatorZef2.lean:892`): hypothesis
+  `hφbdd : ∀ n, DeltaZero (φ/[nm n])`, conclusion `∃ n ≤ f 0, atomTrue (φ/[nm n])`, body `sorry`.
+
+**NEXT (the read-off discharge, ~1-2 laps):** induct on `dd` (mirror `readoff_sigma1_Zef` at
+`OperatorZeh.lean:1823`). Cases `axL`/`wk`/`weak`/`exI`/`cut` port largely verbatim (the `cut` case
+is vacuous at rank 0; `exI` picks the witness `n ≤ f 0`). **The genuine new content is the `allω`
+(Π) case:** reading `atomTrue (∀⁰ χ) = ∀ k, Evalm (χ/[nm k])` off an `allω` node needs (i) each
+branch to expose its matrix instance as the true disjunct, and (ii) the Δ₀ bound (`hφbdd`) to bound
+the finitely-many load-bearing branches (Towsner §5.4). Likely needs a strengthened read-off
+motive/`ReadoffShape`-analog for Δ₀ sequents (the singleton stays a quantifier tower as it descends,
+so the shape invariant must carry "every member is a Δ₀ instance or a literal").
+
 ## LAP 192 (FRESH-MIND REVIEW) — lane B REFUTED; top-rank crux is a judge-owned TRILEMMA; productive lane = D
 
 **Verdict:** the lap-191 top-rank-cut escalation is CORRECT (the pre-registered `rel1`/(f.1)

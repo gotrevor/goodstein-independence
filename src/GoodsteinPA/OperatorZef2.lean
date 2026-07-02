@@ -884,17 +884,27 @@ theorem rankToZero_Zef2 {α e : ONote} {H : ONote → Prop} {d : ℕ} {Γ : Seq}
   rankToZeroAux e heNF d D hf1.monotone hf1.infl hf1.2 hαNF hαH
 
 /-- **RUNG D (L-D) `readoff_delta0_Zef2`** — the Δ₀ (bounded-∀ matrix) read-off extension
-(Towsner §5.4 pattern), re-homed to `Zef2`.  Where `readoff_sigma1_Zef2` reads off an ATOMIC
-matrix, this reads off a bounded-∀ matrix: from a rank-0 `Zef2` derivation of `{∃⁰ φ}` whose
-instances `φ/[nm n]` are bounded formulas true-under a decidable `matrixTrue`, extract a witness
-`n ≤ f 0`.  Parametrized by the bounded-truth predicate `matrixTrue` (the concrete Δ₀ evaluator
-is supplied at discharge).  **Ledger: debt, "2-3", 80** (rung D). -/
-theorem readoff_delta0_Zef2 {φ : SyntacticSemiformula ℒₒᵣ 1} (matrixTrue : Form → Prop)
-    (hφbdd : ∀ n, ¬ (∃ ar, ∃ r : (ℒₒᵣ).Rel ar, ∃ v, φ/[nm n] = Semiformula.rel r v) →
-      (matrixTrue (φ/[nm n]) ∨ ¬ matrixTrue (φ/[nm n])))
+(Towsner §5.4 pattern), re-homed to `Zef2`.  **R-4 RESTATEMENT (SERIES-1 order):** the old
+`matrixTrue` form is deleted; `<BoundedInstance>` is discharged to the repo-native Foundation Δ₀
+predicate `LO.FirstOrder.Arithmetic.DeltaZero` (= `Hierarchy 𝚺 0`) and the conclusion reads off the
+standard-model truth `atomTrue = Evalm ℕ` of the instance directly.
+
+Where `readoff_sigma1_Zef2` reads off an ATOMIC matrix (`hφinst : φ/[nm n]` atomic), this reads off
+a Δ₀ instance: from a rank-0 `Zef2` derivation of the singleton `{∃⁰ φ}` whose instances
+`φ/[nm n]` are Δ₀, extract a witness `n ≤ f 0` with `atomTrue (φ/[nm n])`.
+
+**`<BoundedInstance>` = `DeltaZero`, justified in `wip/Lap12BoundedInstanceProbe.lean` (committed,
+2 candidates probed):** the `Zeh`/`Zef2` core has only `axL`/`allω`/`exI`/`cut` (no `∧`/`∨` rule), so
+the read-off descends the instance through quantifiers/atoms only; `DeltaZero` is the repo-native Δ₀
+notion, and its `∧`/`∨` heads are dead branches for the singleton read-off (a singleton `{A ⋏ B}` is
+not `axL`-closable and has no ∧-rule ⇒ underivable).  The genuine grind is the `allω` (Π) case —
+`atomTrue (∀⁰ χ) = ∀ k, Evalm (χ/[nm k])` needs every branch's matrix as its true disjunct + the Δ₀
+bound to bound the load-bearing branches (Towsner §5.4).  **Ledger: debt, "2-3", 80** (rung D). -/
+theorem readoff_delta0_Zef2 {φ : SyntacticSemiformula ℒₒᵣ 1}
+    (hφbdd : ∀ n, LO.FirstOrder.Arithmetic.DeltaZero (φ/[nm n]))
     {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ}
     (dd : Zef2 α e H f 0 {(∃⁰ φ)}) :
-    ∃ n ≤ f 0, matrixTrue (φ/[nm n]) := by
+    ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
   sorry
 
 /-- **RUNG E (L-E) `embedding_Zef2`** — the embedding rung (E–W Lemmas 32–36), re-based onto
