@@ -24,6 +24,7 @@ named axiom is the Wainer PA-provably-total classification bridge.
 -/
 import GoodsteinPA.Statement
 import GoodsteinPA.Domination
+import GoodsteinPA.BlueprintAttr
 
 namespace GoodsteinPA.WainerRoute
 
@@ -147,5 +148,28 @@ theorem peano_not_proves_goodstein_growth : 𝗣𝗔 ⊬ ↑goodsteinSentence :=
   intro hpa
   obtain ⟨o, ho, hbound⟩ := wainer_bound_of_pa_proves_goodstein hpa
   exact cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing o ho hbound
+
+/- Blueprint ledger: THE remaining route-B debt — the specialized Wainer
+classification, held as the sole axiom. The whole Zᵉ operator-calculus substrate
+(the rebuild) exists to discharge this. Estimate transported verbatim from
+`MASTERPLAN-2026-07-01-ZERO-AXIOMS.md` (this is a planning claim, not a kernel
+fact; category `debt` is machine-audited by `lake exe blueprint_audit`). -/
+attribute [goodstein_blueprint 14 debt "wainer_axiom" "30-60" 60 wainer_bound_of_pa_proves_goodstein
+  []
+  ["MASTERPLAN-2026-07-01-ZERO-AXIOMS.md: ~30-60 grind laps + 6-8 architect/judge sessions, 2-4 months; engine completes ~55-65%",
+   "Buchholz-Wainer 1987: the classification is proved by omega-logic + cut-elimination — the someK/Zeh substrate"]
+  "The specialized Wainer classification axiom; discharged by the Z^e operator cut-elimination + Sigma_1 read-off substrate."]
+  wainer_bound_of_pa_proves_goodstein
+
+/- Blueprint ledger: the route-B headline (PA ⊬ Goodstein via growth rates).
+Proved in Lean modulo the Wainer axiom above (3-line assembly over Cichon/Caicedo),
+so it inherits `debt` until that axiom lands; the estimate is the final
+packaging/assembly step (masterplan W6). -/
+attribute [goodstein_blueprint 15 debt "routeB_headline" "1-2" 90 peano_not_proves_goodstein_growth
+  []
+  ["MASTERPLAN-2026-07-01-ZERO-AXIOMS.md W6 (assembly, corollaries, full independence): 1-2 laps, 90%",
+   "Proof body is done mod the axiom: intro hpa; obtain from wainer_bound; exact cichon_caicedo"]
+  "Route-B independence headline: PA ⊬ Goodstein from Wainer's fixed-f_o bound vs Cichon/Caicedo no-fixed-bound. Assembly done; debt inherited from the Wainer axiom."]
+  peano_not_proves_goodstein_growth
 
 end GoodsteinPA.WainerRoute

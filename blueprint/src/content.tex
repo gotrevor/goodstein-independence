@@ -86,10 +86,11 @@ Hardy port and Domination modules.
 \section{Foundation: first-order logic and incompleteness}
 
 \begin{theorem}\label{thm:hauptsatz}
-  \notready
+  \lean{LO.FirstOrder.hauptsatz}
+  \leanok
 Foundation's finitary first-order Gentzen \textbf{Hauptsatz} (cut-elimination), \texttt{LO.FirstOrder.hauptsatz}
-(\(=\texttt{Hauptsatz.main}\)).  It is proved and kernel-clean \emph{in Foundation}, but is not imported
-into this build's environment, so it carries no in-repo \texttt{\textbackslash lean} binding here.  It is
+(\(=\texttt{Hauptsatz.main}\)).  It is proved and kernel-clean \emph{in Foundation}, and is now imported
+into this build (via the blueprint root), so this node is a real green shore.  It is
 listed as a shore because the \emph{infinitary}, \(\varepsilon_0\)-ordinal-assigned analogue of exactly
 this theorem is the crown gap (Thm~\ref{thm:infinitary_tower}); the finitary Hauptsatz is the template,
 not the summit.
@@ -499,7 +500,7 @@ intended to discharge it; the lap-171 obstruction is why it remains an axiom (ba
 proof whose only non-canonical dependency is the single girder axiom Thm~\ref{thm:crux2_axiom} ---
 \(\texttt{\#print axioms}\) shows exactly \(\{\text{3 kernel}, \texttt{goodstein\_implies\_consistency}\}\).
 Banked at the identical type to the mainline summit; converges with Route~B at
-Thm~\ref{thm:summit}.
+Thm~\ref{thm:pa_not_proves_goodstein}.
 \end{theorem}
 
 
@@ -541,7 +542,7 @@ primitive-recursive \(\varepsilon_0\)-descent, forbidden by transfinite inductio
 ordinal analysis, of which either Goodstein route is one corollary.
 \end{theorem}
 
-\begin{theorem}\label{thm:summit}
+\begin{theorem}\label{thm:pa_not_proves_goodstein}
   \uses{thm:routeA_headline, thm:routeB_headline}
   \notready
 \textbf{Summit: \(\mathsf{PA}\nvdash\gamma\), axiom-free.}  The Kirby--Paris independence with a clean

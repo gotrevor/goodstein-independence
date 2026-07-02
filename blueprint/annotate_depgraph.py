@@ -118,7 +118,52 @@ SUPERSEDED = {
     "thm:pathBSubformulaProjection", "thm:pathBGoodsteinFragmentExtraction",
     "thm:pathBTerminalRouteBridge",
 }
-FADED = BANKED | SUPERSEDED
+# Off-path / conceptual-monument nodes: real gaps (hardy/ti_schema/wainer_class)
+# or aspirational crown (infinitary_tower/gentzen_conpa/two_sided) that are NOT on
+# the live Route-B path to the axiom-free summit. leanblueprint has no standard
+# state for "off the pursued path" — orange (#FFAA33) officially means "not ready,
+# the blueprint needs more work", which misreads these as blocking. So, like the
+# BANKED Route-A nodes, we grey them (border -> grey, dashed) so ORANGE stays
+# reserved for genuine on-path remaining work: wainer_axiom + zeh_pass +
+# zeh_readoff_delta0. Each node's NODE_NOTE marker already says WHY it's off-path.
+OFF_PATH = {
+    "def:hardy", "def:ti_schema", "def:wainer_class",
+    "thm:infinitary_tower", "thm:gentzen_conpa", "thm:two_sided",
+}
+
+FADED = BANKED | SUPERSEDED | OFF_PATH
+
+# Node-level PLANNING notes — the estimates the Lean ledger structurally CANNOT
+# carry, so they live here instead (hand-authored, sourced from
+# MASTERPLAN-2026-07-01-ZERO-AXIOMS.md; NOT audit-backed like the ledger rows).
+# Two reasons a node lands here rather than in the ledger:
+#   * a sorry-bearing decl (e.g. cutElimPass_Zf, the lap-5 gate) — tagging it
+#     would make `blueprint_audit` compute `broken` and turn CI red;
+#   * a prose/aspirational node has no Lean decl at all to attach an attribute to.
+# Colors stay whatever content.tex declares; this only adds one label line.
+NODE_NOTE = {
+    # Live Route-B remaining work — real lap costs (masterplan W-phases).
+    "thm:zeh_pass":                "~5-10 laps | 60%",   # W4 operator cut-elimination (sorry: lap-5 gate)
+    "thm:zeh_readoff_delta0":      "~5-11 laps | 70%",   # W5 Σ₁/Δ₀ read-off extension
+    # Summit: the SAME statement as routeB_headline, but axiom-free (the actual
+    # deliverable). No independent lap cost — it flips green the instant the routes
+    # are clean; its only marginal is the W7 native_decide burndown.
+    "thm:pa_not_proves_goodstein": "(axiom-free goal · +W7 burndown)",
+    # OPEN GAPS — the general ordinal-analysis monument. These are NOT on the
+    # treadmill's per-lap path: the live plan AXIOMATIZES the needed slice
+    # (wainer_axiom) and discharges THAT via the Zᵉ substrate, rather than building
+    # these. So no lap number — the markers condense each node's OWN blueprint
+    # status (see its modal), which is the authoritative source, not a hand-guess.
+    "def:hardy":                   "(gap: fn ported, growth theory absent)",
+    "def:ti_schema":               "(gap: net-new in Lean)",
+    "def:wainer_class":            "(deep gap: ordinal analysis of PA)",
+    "thm:infinitary_tower":        "(crown monument: ~6-7k lines, multi-month)",
+    "thm:gentzen_conpa":           "(shared monument engine)",
+    "thm:two_sided":               "(crown: full ordinal analysis)",
+    # Green node (Foundation Hauptsatz, imported + bound): note clarifies it's the
+    # FINITARY template, not the infinitary monument, so green isn't misread.
+    "thm:hauptsatz":               "(finitary template)",
+}
 
 
 def sync_tex_statuses(ann: dict) -> bool:
@@ -203,6 +248,29 @@ def main() -> int:
                 html,
                 count=1,
             )
+
+    # Node-level planning notes (see NODE_NOTE above): estimates for nodes the
+    # ledger can't reach (sorry-bearing or prose). Idempotent — skips a node whose
+    # label already carries a second line.
+    node_notes = 0
+    for node, note in sorted(NODE_NOTE.items()):
+        suffix = node.split(":", 1)[-1]
+        old = f"label={suffix},"
+        new = f'label="{suffix}\\\\n{note}",'
+        if old in html:
+            html = html.replace(old, new, 1)
+            node_notes += 1
+        elif f'label="{suffix}\\\\n' not in html:
+            print(f"warn: no DOT label found for node-note {node}", file=sys.stderr)
+        anchor_re = re.compile(r'(<a class="latex_link" href="[^"]*#' + re.escape(node) + '">)')
+        if f'data-note="{node}"' not in html:
+            html = anchor_re.sub(
+                f'<p class="node-estimate" data-note="{node}">Plan note (not audit-backed): {note}</p>\n    \\1',
+                html,
+                count=1,
+            )
+    print(f"node-level planning notes: {node_notes} label(s)")
+
     # Summit at the TOP: rank flow bottom-to-top, so dependencies climb
     # shores -> foothills -> routes -> crown (matches the mountain metaphor).
     html = html.replace(
@@ -221,6 +289,17 @@ def main() -> int:
             return (m.group(1) + 'color="#8a9096",' + m.group(2)
                     + 'label="' + s + '\\\\n(banked)",' + m.group(2) + 'style=dashed,')
         html = pat.sub(_grey, html, count=1)
+
+    # Off-path styling (see OFF_PATH): recolor the orange border to the banked grey
+    # + dash it, preserving the NODE_NOTE label already on the node. Idempotent —
+    # an already-greyed node no longer has the orange `#FFAA33` to match.
+    off = 0
+    for node in sorted(OFF_PATH):
+        pat = re.compile(r'("' + re.escape(node) + r'"\s*\[)color="#FFAA33",')
+        html, n = pat.subn(lambda m: m.group(1) + 'color="#8a9096",\n\tstyle=dashed,',
+                           html, count=1)
+        off += n
+    print(f"off-path grey: {off} node(s)")
 
     # Banked/superseded EDGE styling (see the BANKED/SUPERSEDED comments):
     # every edge with a faded endpoint recedes. Idempotent — already-faded
