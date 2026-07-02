@@ -249,13 +249,15 @@ exact contradiction target the Wainer bound must collide with; carries the same 
 
 \begin{theorem}\label{thm:wainer_axiom}
   \lean{GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein}
-  \uses{def:wainer_class, def:goodstein_length}
+  \uses{def:wainer_class, def:goodstein_length, thm:zeh_pass, thm:zeh_readoff_delta0}
   \notready
 \textbf{Wainer bound (the one Route-B debt axiom).}  If \(\mathsf{PA}\vdash\gamma\), then
 \(\texttt{goodsteinLength}\) is eventually bounded by some fixed \(f_o\), \(o<\varepsilon_0\).  This is
-the Wainer classification (Def~\ref{def:wainer_class}) specialized to this route --- currently a named
-\texttt{axiom} standing in for the un-built ordinal analysis of PA.  It is the \emph{entire} remaining
-mathematical debt of Route~B.
+the Wainer classification (Def~\ref{def:wainer_class}) specialized to this route --- a named
+\texttt{axiom} standing in for the ordinal analysis of PA, \emph{now under construction} as the
+\(Z^{e}\) operator calculus (Section~\ref{sec:zeh}): embed the PA proof, eliminate cuts
+(Thm~\ref{thm:zeh_pass}), read the witness bound off the cut-free root
+(Thm~\ref{thm:zeh_readoff_delta0}).  It is the \emph{entire} remaining mathematical debt of Route~B.
 \end{theorem}
 
 \begin{theorem}\label{thm:routeB_headline}
@@ -267,6 +269,90 @@ mathematical debt of Route~B.
 fixed \(f_o\), contradicting Thm~\ref{thm:no_fixed_bound}.  A \emph{real proof} whose only open
 dependency is the single Wainer axiom --- \(\texttt{\#print axioms}\) shows exactly
 \(\{\text{3 kernel}, \texttt{wainer\_bound\_of\_pa\_proves\_goodstein}, \text{finite native\_decide}\}\).
+\end{theorem}
+
+\section{The \(Z^{e}\) operator calculus (the Wainer-axiom discharge substrate)}\label{sec:zeh}
+
+Green-lit 2026-07-02 after four deciding spikes (W3/W4 PASS, W4B FAIL fired the fork, Z1 PASS) and
+a judge-ratified statement lap: the \((k,d)\) numeric-budget calculus is kernel-dead at the
+principal \(\forall/\exists\) cut under \(\omega\)-nodes, and the replacement is Buchholz-style
+\emph{operator-controlled} derivations with Eguchi--Weiermann \emph{function-valued} numeric slots
+(arXiv:1205.2879: composition at cut-reduction, iteration at the collapse).  Statuses below are
+machine-synced from the \texttt{goodstein\_blueprint} ledger where covered; the three pins are
+judge-gated statement pins with named discharging laps.
+
+\begin{definition}\label{def:zeh_calculus}
+  \lean{GoodsteinPA.OperatorZeh.Zeh}
+  \leanok
+\textbf{The \(Z^{e}\) judgment.}  \(\texttt{Zeh}\;\alpha\;e\;H\;m\;c\;\Gamma\): derivation ordinal
+\(\alpha\), control \(e\) (constant through a derivation; \(\texttt{exI}\) witnesses bounded by
+\(H_e(m)\)), operator \emph{generator} slot \(H\) (side conditions are closure membership
+\(\texttt{Cl}\,H\)), stage \(m\) (threaded \(\max(m,n)\) at \(\omega\)-premises), cut rank \(c\).
+Kernel findings K1--K3: membership at \(\varepsilon_0\) is \emph{information-free} (every NF
+notation lies in every closure), so no numeric fact may route through \(H\) --- the numeric carrier
+is the \((e,m)\) axis plus the function slots below.
+\end{definition}
+
+\begin{theorem}\label{thm:zeh_inversion}
+  \lean{GoodsteinPA.OperatorZeh.allInv_Zeh}
+  \uses{def:zeh_calculus}
+  \leanok
+\textbf{Inversion suite (done, axiom-clean).}  \(\forall\)-inversion at the relativization and
+running stage (\(\texttt{allInv\_Zeh}\), mirroring the banked \(\texttt{Zekd.allInv}\)) plus the
+complete propositional companions (\(\texttt{orInv\_Zeh}\), \(\texttt{andInvL\_Zeh}\),
+\(\texttt{andInvR\_Zeh}\)).  Suite completeness is checked, not asserted: the minimal core admits
+no fifth inversion.
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_readoff}
+  \lean{GoodsteinPA.OperatorZeh.headline_readoff}
+  \uses{def:zeh_calculus}
+  \leanok
+\textbf{Bounding read-off (done, proven --- the fixed exit).}  A rank-0 \(Z^{e}\) derivation of the
+\(\Sigma_1\) headline shape \(\{\exists^0\varphi\}\) (atomic matrix) yields a witness
+\(n \le H_e(m)\) with \(\varphi(n)\) true --- the Buchholz--Wainer Bounding-Lemma analog,
+per-instance, no evaluator, consuming \emph{no} \(H\)-data (which dissolved the
+``\(\Sigma_1\)-definability of \(H\)'' risk).
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_reduction}
+  \lean{GoodsteinPA.OperatorZeh.cutReduceAllAuxRunning_Zf}
+  \uses{thm:zeh_inversion}
+  \notready
+\textbf{Running-family reduction (pin; laps 2--4).}  The \S19.6 \(\forall/\exists\) reduction at
+\emph{fixed} control (E--W Lemma~25, judge-amended 2026-07-02: the drafted raised-control conjunct
+was refutable two independent ways), output slot the \emph{composition} \(f\circ g\)
+(\(\texttt{NormControlled}\) conjunct dischargeable via the banked \(\texttt{NormControlled.comp}\)).
+Both W4B seams are already re-composed against this statement (kernel-real seam probes).
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_step}
+  \lean{GoodsteinPA.OperatorZeh.stepAllω_Zf}
+  \uses{thm:zeh_reduction}
+  \notready
+\textbf{Principal \(\forall/\exists\) step (pin; laps 2--4).}  One \(\vee\)-principal
+cut-reduction (kept unified per the Q3 ruling: the \(\forall\)-side has no separate reduction ---
+it enters via inversion), IHs at one control, fixed-control output, composed slot.
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_pass}
+  \lean{GoodsteinPA.OperatorZeh.cutElimPass_Zf}
+  \uses{thm:zeh_step}
+  \notready
+\textbf{Elimination pass (pin; lap-5 entrance gate).}  Rank \(c+1 \to c\) at the towered control
+--- the ONE place the control raises and the numeric slot \emph{iterates} (E--W Lemma~30).  The
+drafted \(\exists f'\) is kernel-checked vacuous, so the signature is DRAFT-INVALID: its
+restatement with the explicit iterate \(f \mapsto f^{(\cdot)}\) is the lap-5 entrance statement
+mini-lock, and discharging it as written is forbidden.
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_readoff_delta0}
+  \uses{thm:zeh_readoff}
+  \notready
+\textbf{\(\Delta_0\)-matrix read-off extension (laps 8--10).}  The proven read-off covers atomic
+matrices; the Goodstein sentence's matrix is \(\Delta_0\) (bounded quantifiers introduce
+\(\omega\)-nodes the \(\forall\)-free lemma excludes).  Towsner-\S5.4-style extension --- scheduled
+work, an explicit node so the exit genuinely connects to Thm~\ref{thm:wainer_axiom}.
 \end{theorem}
 
 
