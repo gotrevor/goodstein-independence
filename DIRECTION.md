@@ -80,8 +80,10 @@ is information-free, so the numeric carrier is the Eguchi–Weiermann **function
 `REBUILD-Z-ORDER-2026-07-02.md`** (~7–11 laps; lap 1 = f-slot statement lap, judge-gated before
 grinding; pre-registered trigger **T-R**). The rebuild starts when the operator fires it.
 **Treadmill laps execute the order's Scope-A ONLY** (verbatim seed + f-slot statement drafting
-+ the pre-ratified inversion-suite grind), then **SELF-STOP** — reduction discharge and
-everything beyond is judge-gated behind `REBUILD-Z-LAP1-VERDICT.md`.
++ the pre-ratified inversion-suite grind); a Scope-A-exhausted lap writes its baton and ends
+(the run is bounded by launch caps — self-stop can't arm here, `src/` carries Route-A
+sorries). Reduction discharge and everything beyond is judge-gated behind
+`REBUILD-Z-LAP1-VERDICT.md`.
 
 **lap-171 (OPERATOR DECISION — PIVOT-B = WAINER GROWTH-RATE).** The route gate is closed:
 `PIVOT-B`, with B explicitly meaning the **Wainer/Cichon/Caicedo growth-rate route**, not the

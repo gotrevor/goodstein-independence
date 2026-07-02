@@ -66,9 +66,13 @@ A treadmill fired against this order executes **Scope-A only**, then self-stops:
   inversions mirroring the banked, PROVEN `Zekd` suite. Their statements were audited in the
   Z1 judge pass and do not consume the f-slot statements — safe grind regardless of how A2
   lands. Park hard cases with named blockers rather than forcing them.
-- **SELF-STOP when Scope-A is exhausted** (A2's verdict written + A3 discharged-or-parked).
-  Everything else — reduction discharge, cut-elimination, the Δ₀ read-off extension — is
-  **judge-gated behind the lap-1 verdict** and FORBIDDEN until the judge ratifies it.
+- **When Scope-A is exhausted** (A2's verdict written + A3 discharged-or-parked): write the
+  baton and END THE LAP cleanly — the RUN is bounded by its launch caps
+  (`--max-laps`/`--max-duration`), NOT by self-stop (the governor's self-stop gate is
+  `src/` sorry-clean, which this repo's banked Route-A material precludes — don't thrash
+  trying). Everything else — reduction discharge, cut-elimination, the Δ₀ read-off
+  extension — is **judge-gated behind the lap-1 verdict** and FORBIDDEN until the judge
+  ratifies it.
 
 ## Session rules (per lap)
 
