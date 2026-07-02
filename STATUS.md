@@ -1,6 +1,6 @@
 # STATUS — GoodsteinPA 📊
 
-**Prove `𝗣𝗔 ⊬ ↑goodsteinSentence` (Kirby–Paris 1982) genuinely axiom-free.** · **Build**: 🟢 green (1333 jobs) · **Updated**: lap 185 · 2026-07-02 · `435ed72` (STATEMENT LAP: pin 3 `cutElimPass_Zf` RESTATED per the lap-5 mini-lock C1–C5 + `collapse`/`iterCount`/`iterSlot` defined against ONote + C3 anti-vacuity check green — STOP for the judge, `REBUILD-Z-LAP5-VERDICT.md`)
+**Prove `𝗣𝗔 ⊬ ↑goodsteinSentence` (Kirby–Paris 1982) genuinely axiom-free.** · **Build**: 🟢 green (1333 jobs) · **Updated**: lap 186 · 2026-07-02 (GRIND lap 6: item 1 `iterSlot_monotone` DISCHARGED sorry-free/axiom-clean; item 2 pass-induction → candidate EIGHTH trap — bare `iterSlot f α` output slot is not ordinal-monotone, `weak`/`exI`/`cut` slot-lift kernel-refuted; ESCALATED architect-gated, `REBUILD-Z-TRAP8-2026-07-02.md` + `wip/Trap8Probe.lean`; locked statement UNTOUCHED). Prior: lap 185 `435ed72` pin-3 restatement statement lap.
 
 ## Where it stands
 

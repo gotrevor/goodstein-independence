@@ -1873,7 +1873,19 @@ slot ITERATES).  The lap-5 RESTATEMENT of the retired draft, per the entrance mi
 
 Discharge is FORBIDDEN until the lap-5 verdict is ratified (grind laps 6–7).  The `∃`-cut lane
 threads via `iter_comp` (counts add); the `allω` lane is the E–W Lemma 19/20 arithmetic (the hard
-`allω`-lane pole, T-Z5(iii)).  Composed anti-vacuity check: `cutElimPass_exit_root` (§7b). -/
+`allω`-lane pole, T-Z5(iii)).  Composed anti-vacuity check: `cutElimPass_exit_root` (§7b).
+
+**LAP 6 (global 186) FINDING — candidate EIGHTH statement trap; discharge now ARCHITECT-gated, not
+grind-open** (`REBUILD-Z-TRAP8-2026-07-02.md`; kernel evidence `wip/Trap8Probe.lean`).  The bare
+diagonalizing `iterSlot f α` is NOT ordinal-monotone (`iterSlot f 2 0 = 3 > 2 = iterSlot f ω 0` —
+it dips at a limit base, riding `ω[0] = 1`).  Every induction case with a `β < α` sub-derivation
+(`weak`/`exI`/`allω`/`cut`) must lift its slot `iterSlot f β` up to `iterSlot f α` via `Zef.mono_f`
+(slots only RAISE), needing `iterSlot f β ≤ iterSlot f α` — kernel-false.  Statement-intrinsic (the
+output slot is rigidly `iterSlot f α`; `ZefProv` slackens only the height).  trap-7's diagonalization
+fix (large-argument for `allω`) reintroduced base-argument smallness that bites at `weak`/`exI`/`cut`
+(slot read near argument 0).  Fix = C2 output-slot amendment (positive-budget / relativized read so
+reaches-monotonicity applies) — architect-owned, do NOT self-ratify.  Banked toward any fix:
+`iterSlot_monotone` (C5, discharged) + `iterSlot_le_of_reaches` (the reaches lever). -/
 theorem cutElimPass_Zf {α e : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq} (f : ℕ → ℕ)
     (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
     (D : Zef α e H f (c + 1) Γ) (hf_mono : Monotone f) (hf_infl : ∀ x, x ≤ f x) :

@@ -1,5 +1,31 @@
 # Pending work — open obligations & attack paths
 
+## LAP 6 (186) — item 1 DISCHARGED (`iterSlot_monotone`); item 2 → candidate TRAP 8 (architect-gated)
+
+Ran the ratified laps-6–7 order (`E-2026-07-02-JUDGE-rebuild-z-lap5-validation.md` §5).
+
+- **Item 1 DONE (committed `c39f08e`):** the disclosed C5 pin `iterSlot_monotone` is now a real,
+  sorry-free, axiom-clean proof (`[propext, Classical.choice, Quot.sound]`), mirroring
+  `hardy_monotone` on the diagonalizing `iterSlot`. Added the base-`f` value-transfer lemma
+  `iterSlot_le_of_reaches` (mirror of `hardy_le_of_reaches`; successor arg-shift `x → f x` absorbed
+  by inflationarity), the limit case riding `fastGrowing_bachmann_reach` exactly as `hardy_monotone`.
+
+- **Item 2 (the pass induction on `cutElimPass_Zf`) → candidate EIGHTH statement trap; ESCALATED,
+  NOT self-ratified** (`REBUILD-Z-TRAP8-2026-07-02.md`; kernel probe `wip/Trap8Probe.lean`, compiles
+  clean). The **locked** bare output slot `iterSlot f α` is NOT ordinal-monotone —
+  `iterSlot f 2 0 = 3 > 2 = iterSlot f ω 0` (dips at a limit base, riding `ω[0] = 1`). Every
+  induction case with a `β < α` sub-derivation (`weak`/`exI`/`allω`/`cut`) must lift its slot
+  `iterSlot f β` up to `iterSlot f α` via `Zef.mono_f` (slots only RAISE), needing
+  `iterSlot f β ≤ iterSlot f α` — kernel-false. **Statement-intrinsic** (output slot rigidly
+  `iterSlot f α`; `ZefProv` slackens only the height — see the root-`exI` argument in the doc §3).
+  Root cause: trap-7's diagonalization fix bought `allω`-branch large-argument domination at the
+  cost of base-argument smallness, which now bites at `weak`/`exI`/`cut` (slot read near arg 0).
+  **NEXT (architect/judge):** amend C2's output slot to a positive-budget / relativized read
+  (`rel1 (iterSlot f α) K` or `fun x => iterSlot f α (K+x)`) so `iterSlot_le_of_reaches`
+  monotonicity applies at every node; then re-check the C3 exit consumes the count and re-open the
+  grind. Grind laps must NOT touch C2 (VOID). `iterSlot_monotone` + `iterSlot_le_of_reaches` carry
+  over to any fix. **Do NOT re-attempt the bare-`iterSlot f α` pass induction** (kernel-refuted here).
+
 ## LAP 5 (185) — PIN-3 RESTATED (statement lap done) → judge-gated grind is the open work
 
 The lap-5 STATEMENT deliverables are DONE and committed (`435ed72`): pin 3 `cutElimPass_Zf` is
