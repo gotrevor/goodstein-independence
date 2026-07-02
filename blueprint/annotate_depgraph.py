@@ -22,6 +22,13 @@ equals the last component of any \\lean{} name on the node, modulo a
 trailing `_stage`/`_capstone` (the ledger names some sites by capstone
 where the tex binds the stage theorem).
 
+A tex node WITHOUT a \\lean{} binding is matched by NAME instead: an attribute
+whose stage string equals the node's label suffix (e.g. ledger stage
+"pa_not_proves_goodstein" -> tex thm:pa_not_proves_goodstein, the crown
+re-point row). A name-claimed attribute is withdrawn from decl matching, so a
+\\lean-alias node binding the same decl (thm:routeA_headline binds
+peano_not_proves_goodstein) keeps its own hand status + banked styling.
+
 The numbers are transported verbatim (including `0 laps | 100%` on ledger-clean
 nodes) -- this script never adjudicates status, it only surfaces the ledger.
 
@@ -56,28 +63,27 @@ NODE_RE = re.compile(
 )
 
 
-def lean_annotations() -> dict:
-    """stage-decl last component -> {category, laps, confidence}"""
-    out = {}
+def lean_annotations() -> list:
+    """[(stage string, stage-decl last component, {category, laps, confidence})]"""
+    rows = []
     for f in sorted((REPO / "src").rglob("*.lean")):
         for m in ATTR_RE.finditer(f.read_text()):
-            _order, cat, _stage, laps, conf, decl = m.groups()
-            out[norm(decl)] = {
+            _order, cat, stage, laps, conf, decl = m.groups()
+            rows.append((stage, norm(decl), {
                 "category": cat,
                 "laps": laps,
                 "confidence": int(conf),
-            }
-    return out
+            }))
+    return rows
 
 
 def tex_node_decls() -> dict:
-    """tex node id -> [last components of its \\lean{} names]"""
+    """tex node id -> [last components of its \\lean{} names] ([] = no binding)"""
     nodes = {}
     for m in NODE_RE.finditer(TEX.read_text()):
         _env, label, body = m.groups()
         lm = re.search(r'\\lean\{([^}]*)\}', body)
-        if lm:
-            nodes[label] = [norm(d.strip()) for d in lm.group(1).split(",")]
+        nodes[label] = [norm(d.strip()) for d in lm.group(1).split(",")] if lm else []
     return nodes
 
 
@@ -143,13 +149,14 @@ FADED = BANKED | SUPERSEDED | NOT_REQUIRED
 #   * a prose/aspirational node has no Lean decl at all to attach an attribute to.
 # Colors stay whatever content.tex declares; this only adds one label line.
 NODE_NOTE = {
-    # Live Route-B remaining work — real lap costs (masterplan W-phases).
-    "thm:zeh_pass":                "~5-10 laps | 60%",   # W4 operator cut-elimination (sorry: lap-5 gate)
-    "thm:zeh_readoff_delta0":      "~5-11 laps | 70%",   # W5 Σ₁/Δ₀ read-off extension
-    # Summit: the SAME statement as routeB_headline, but axiom-free (the actual
-    # deliverable). No independent lap cost — it flips green the instant the routes
-    # are clean; its only marginal is the W7 native_decide burndown.
-    "thm:pa_not_proves_goodstein": "(axiom-free goal · +W7 burndown)",
+    # Live Route-B remaining work — real lap costs (rebased 2026-07-02, trap-8
+    # judge pass + WAINER-LADDER-2026-07-02.md rung P: lap-7 E–W statement lap +
+    # lap-8 judged port + the pass grind on Zef2).
+    "thm:zeh_pass":                "~4-7 laps | 70%",    # rung P (E–W rebuild; sorry: pin-3 gate)
+    "thm:zeh_readoff_delta0":      "~2-3 laps | 80%",    # rung D (Towsner-5.4 pattern; re-based per the ladder)
+    # thm:pa_not_proves_goodstein (the summit) now carries LEDGER row 16 — the
+    # rung-C re-point (1 lap @ 95% once routeB_headline is clean, + W7 burndown).
+    # It is NAME-matched above (decl-less tex node), so no hand note here.
     # OPEN GAPS — the general ordinal-analysis monument. These are NOT on the
     # treadmill's per-lap path: the live plan AXIOMATIZES the needed slice
     # (wainer_axiom) and discharges THAT via the Zᵉ substrate, rather than building
@@ -208,10 +215,23 @@ def sync_tex_statuses(ann: dict) -> bool:
 
 
 def main() -> int:
-    ann = lean_annotations()
-    if not ann:
+    rows = lean_annotations()
+    if not rows:
         print("no @[goodstein_blueprint] annotations found", file=sys.stderr)
         return 1
+
+    nodes = tex_node_decls()
+    # NAME-matching for decl-less tex nodes (see docstring). A name-claimed
+    # attribute is withdrawn from decl matching so a \lean-alias node binding
+    # the same decl keeps its own hand status/styling.
+    stage_matched = {}
+    for node in sorted(n for n, ds in nodes.items() if not ds):
+        suffix = node.split(":", 1)[-1]
+        info = next((i for (s, _d, i) in rows if s == suffix), None)
+        if info is not None:
+            stage_matched[node] = info
+    claimed = {n.split(":", 1)[-1] for n in stage_matched}
+    ann = {d: i for (s, d, i) in rows if s not in claimed}
 
     changed = sync_tex_statuses(ann)
     if "--web" in sys.argv:
@@ -222,10 +242,11 @@ def main() -> int:
 
     matched = {
         node: ann[d]
-        for node, decls in tex_node_decls().items()
+        for node, decls in nodes.items()
         for d in decls
         if d in ann
     }
+    matched.update(stage_matched)
 
     html = HTML.read_text()
     changed = 0
