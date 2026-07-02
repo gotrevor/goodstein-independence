@@ -151,14 +151,16 @@ theorem peano_not_proves_goodstein_growth : 𝗣𝗔 ⊬ ↑goodsteinSentence :=
 
 /- Blueprint ledger: THE remaining route-B debt — the specialized Wainer
 classification, held as the sole axiom. The whole Zᵉ operator-calculus substrate
-(the rebuild) exists to discharge this. Estimate transported verbatim from
-`MASTERPLAN-2026-07-01-ZERO-AXIOMS.md` (this is a planning claim, not a kernel
-fact; category `debt` is machine-audited by `lake exe blueprint_audit`). -/
-attribute [goodstein_blueprint 14 debt "wainer_axiom" "30-60" 60 wainer_bound_of_pa_proves_goodstein
+(the rebuild) exists to discharge this. Estimate re-based 2026-07-02 from the
+WAINER-LADDER decomposition (rungs P/R/D/E/W, sum ≈ 20–40 laps; a planning
+claim, not a kernel fact; category `debt` is machine-audited by
+`lake exe blueprint_audit`). The rungs get their own ledger rows at the lap-8
+port; until then this row carries the sum. -/
+attribute [goodstein_blueprint 14 debt "wainer_axiom" "20-40" 65 wainer_bound_of_pa_proves_goodstein
   []
-  ["MASTERPLAN-2026-07-01-ZERO-AXIOMS.md: ~30-60 grind laps + 6-8 architect/judge sessions, 2-4 months; engine completes ~55-65%",
+  ["WAINER-LADDER-2026-07-02.md: rungs P 4-7@70 + R 1@90 + D 2-3@80 + E 8-20@65 + W 2-4@75; supersedes the MASTERPLAN 30-60@60 monolith estimate",
    "Buchholz-Wainer 1987: the classification is proved by omega-logic + cut-elimination — the someK/Zeh substrate"]
-  "The specialized Wainer classification axiom; discharged by the Z^e operator cut-elimination + Sigma_1 read-off substrate."]
+  "The specialized Wainer classification axiom; discharged by the wainer ladder over the Z^e operator calculus (embed -> pass -> rank-0 -> Delta_0 read-off -> splice)."]
   wainer_bound_of_pa_proves_goodstein
 
 /- Blueprint ledger: the route-B headline (PA ⊬ Goodstein via growth rates).

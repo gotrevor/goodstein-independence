@@ -54,6 +54,16 @@ blueprint instead of one orange monolith, and after lap 8 the rungs P / D / E ar
 independent — parallel worktree grinds become an option (operator's call; coordination cost is
 real).
 
+## Blueprint representation (live as of 2026-07-02)
+
+The ladder is ON the dep graph now: rungs P/D were already nodes (`thm:zeh_pass`,
+`thm:zeh_readoff_delta0`); rungs R/E/W added as decl-less aspirational nodes
+(`thm:zeh_rank_zero`, `thm:zeh_embedding`, `thm:wainer_splice`) with hand-note estimates
+(NODE_NOTE in `blueprint/annotate_depgraph.py`), wired E→(P)→R→D→W→`thm:wainer_axiom`; rung C =
+ledger row 16 on the summit. Ledger row 14 (`wainer_axiom`) re-based `30-60@60` → `20-40@65`
+(the rung sum). Rung statuses are hand-claims until the lap-8 port erects the named pins with
+their own ledger rows — at which point row 14's estimate collapses into the rungs' machine rows.
+
 ## Sequencing
 
 1. **Lap 7** (next fire, wip-only): `Zef2` + `ewIter` statement lap per the entrance order.

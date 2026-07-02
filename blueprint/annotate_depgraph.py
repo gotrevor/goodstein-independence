@@ -154,6 +154,11 @@ NODE_NOTE = {
     # lap-8 judged port + the pass grind on Zef2).
     "thm:zeh_pass":                "~4-7 laps | 70%",    # rung P (E–W rebuild; sorry: pin-3 gate)
     "thm:zeh_readoff_delta0":      "~2-3 laps | 80%",    # rung D (Towsner-5.4 pattern; re-based per the ladder)
+    # The rest of the wainer ladder (decl-less until the lap-8 port erects the
+    # named pins + ledger rows; estimates = WAINER-LADDER-2026-07-02.md).
+    "thm:zeh_rank_zero":           "~1 lap | 90%",       # rung R (plain induction over the pass)
+    "thm:zeh_embedding":           "~8-20 laps | 65%",   # rung E (the long pole after P)
+    "thm:wainer_splice":           "~2-4 laps | 75%",    # rung W (Hardy brackets banked lap 179)
     # thm:pa_not_proves_goodstein (the summit) now carries LEDGER row 16 — the
     # rung-C re-point (1 lap @ 95% once routeB_headline is clean, + W7 burndown).
     # It is NAME-matched above (decl-less tex node), so no hand note here.

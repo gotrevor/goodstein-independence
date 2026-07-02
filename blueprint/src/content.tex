@@ -250,15 +250,19 @@ exact contradiction target the Wainer bound must collide with; carries the same 
 
 \begin{theorem}\label{thm:wainer_axiom}
   \lean{GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein}
-  \uses{def:wainer_class, def:goodstein_length, thm:zeh_pass, thm:zeh_readoff_delta0}
+  \uses{def:wainer_class, thm:wainer_splice}
   \notready
 \textbf{Wainer bound (the one Route-B debt axiom).}  If \(\mathsf{PA}\vdash\gamma\), then
 \(\texttt{goodsteinLength}\) is eventually bounded by some fixed \(f_o\), \(o<\varepsilon_0\).  This is
 the Wainer classification (Def~\ref{def:wainer_class}) specialized to this route --- a named
 \texttt{axiom} standing in for the ordinal analysis of PA, \emph{now under construction} as the
-\(Z^{e}\) operator calculus (Section~\ref{sec:zeh}): embed the PA proof, eliminate cuts
-(Thm~\ref{thm:zeh_pass}), read the witness bound off the cut-free root
-(Thm~\ref{thm:zeh_readoff_delta0}).  It is the \emph{entire} remaining mathematical debt of Route~B.
+\(Z^{e}\) operator calculus (Section~\ref{sec:zeh}).  Its discharge is DECOMPOSED as the
+\textbf{wainer ladder} (\texttt{WAINER-LADDER-2026-07-02.md}): embedding (rung~E,
+Thm~\ref{thm:zeh_embedding}) \(\to\) elimination pass (rung~P, Thm~\ref{thm:zeh_pass}) \(\to\)
+rank-to-zero (rung~R, Thm~\ref{thm:zeh_rank_zero}) \(\to\) \(\Delta_0\) read-off (rung~D,
+Thm~\ref{thm:zeh_readoff_delta0}) \(\to\) the splice (rung~W, Thm~\ref{thm:wainer_splice}), which
+flips this node \(\texttt{axiom}\to\texttt{theorem}\).  Rung estimates are hand-claims until the
+lap-8 port erects them as named pins with ledger rows.
 \end{theorem}
 
 \begin{theorem}\label{thm:routeB_headline}
@@ -350,10 +354,41 @@ mini-lock, and discharging it as written is forbidden.
 \begin{theorem}\label{thm:zeh_readoff_delta0}
   \uses{thm:zeh_readoff}
   \notready
-\textbf{\(\Delta_0\)-matrix read-off extension (laps 8--10).}  The proven read-off covers atomic
+\textbf{\(\Delta_0\)-matrix read-off extension (ladder rung D).}  The proven read-off covers atomic
 matrices; the Goodstein sentence's matrix is \(\Delta_0\) (bounded quantifiers introduce
 \(\omega\)-nodes the \(\forall\)-free lemma excludes).  Towsner-\S5.4-style extension --- scheduled
 work, an explicit node so the exit genuinely connects to Thm~\ref{thm:wainer_axiom}.
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_rank_zero}
+  \uses{thm:zeh_pass}
+  \notready
+\textbf{Rank-to-zero (ladder rung R).}  Iterate the elimination pass down the cut rank
+\(d \to 0\): ordinal tower \(\mathrm{expTower}^{[d]}\), slot tower the composed E--W iterate.
+A plain induction over Thm~\ref{thm:zeh_pass} once it lands --- no new mathematics.
+(\texttt{WAINER-LADDER-2026-07-02.md} rung R; erected as a named pin at the lap-8 port.)
+\end{theorem}
+
+\begin{theorem}\label{thm:zeh_embedding}
+  \uses{def:zeh_calculus, def:encoding}
+  \notready
+\textbf{The controlled embedding (ladder rung E).}  From \(\mathsf{PA}\vdash\gamma\), a controlled
+derivation of the translated sequent in the slot calculus --- tower \(e\), root slot, cut rank
+\(d\), and (post-trap-8) the per-node norm side conditions, sourced at the leaves via the
+f-relativization (E--W Lemmas~32--36).  The W3 spike ratified the statement shape
+(Towsner-\S16 K-hypothesis form); it re-bases onto the E--W-amended judgment at the lap-8 port.
+The long pole after the pass.  (\texttt{WAINER-LADDER-2026-07-02.md} rung E.)
+\end{theorem}
+
+\begin{theorem}\label{thm:wainer_splice}
+  \uses{thm:zeh_embedding, thm:zeh_rank_zero, thm:zeh_readoff_delta0, def:goodstein_length}
+  \notready
+\textbf{The splice (ladder rung W): \(\texttt{wainer\_bound}\) as a theorem.}  Compose
+embedding \(\to\) rank-to-zero \(\to\) \(\Delta_0\) read-off, convert the exit bound into the
+axiom's hardy/fast-growing vocabulary via the banked Lemma-19 brackets (\texttt{Hardy.lean},
+lap 179 --- banked \emph{for} this rung), and contradict the banked lower bound
+(Thm~\ref{thm:dom_lower}).  Discharges Thm~\ref{thm:wainer_axiom}
+(\(\texttt{axiom}\to\texttt{theorem}\)).  (\texttt{WAINER-LADDER-2026-07-02.md} rung W.)
 \end{theorem}
 
 
