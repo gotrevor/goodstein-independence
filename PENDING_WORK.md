@@ -1,5 +1,36 @@
 # Pending work — open obligations & attack paths
 
+## LAP 11 (191) — `passAux` 5/6 cases discharged; top-rank CUT hits the `hg_base` floor seam (kernel-refuted, resolution lane scoped)
+
+**Landed (green, axiom-clean `[propext, Classical.choice, Quot.sound]`):** four of the five open
+`passAux` sub-`sorry`s from the lap-189 handoff — **`exI`** (∃-node rebuild, bound `n ≤ ewIter f α 0`
+via `ewIter_le_of_lt`), **`allω`** (ω-branch reassembly via `ewIter_rel1_le` + `ewIter_le_of_lt` into
+`rel1 (ewIter f α) n`), **`cut` SUB-RANK** (`χ.complexity < c`: rebuild the cut at rank `c`, both
+premises slot-lifted to the common `ewIter f α`). Also banked **`stepAllω_Zf2_bnd`** — the
+bound-exposing (`δ ≤ P₁+P₂`) principal ∀/∃ reduction for the cut composition. `passAux` is now
+**5/6**; only the TOP-RANK cut (`χ.complexity = c`) remains.
+
+**The remaining crux — top-rank cut — and its seam (`wip/Lap11CutFloorProbe.lean`, kernel-clean):**
+the designed discharge (IH-reduce both premises → `stepAllω_Zf2`) needs `hg_base : ∀k, g 0 + k ≤ g k`
+on the reduced ∀-side slot `g = ewIter s βφ`. The pass threads only `Monotone ∧ infl ∧ (2m+1 ≤ s m)`
+(chosen lap-189 for `rel1`-stability). **KERNEL-REFUTED that this entails `hg_base`:**
+- `basefloor_not_rel1_stable`: `g = rel1 (2m+1) 3` has the full invariant but `g 0 + 1 = 8 > 7 = g 1`
+  (the `max`-plateau eats the increment; the floor is relative-to-`g 0` and `g 0` JUMPS under `rel1`).
+- `ewIter_one` (`ewIter s 1 = s∘s`) + `ewIter_one_floor_fails`: even at the PRINCIPAL-reachable `β=1`
+  (ball `{δ<1}={0}`, no ball-growth) the floor fails — `ewIter gRel 1` inherits the plateau. **Kills
+  the "ball-growth restores the floor at βφ≠0" escape.**
+
+**Resolution lane to pursue NEXT (lane B in the probe — PROOF-only, no statement change):** re-gate
+the reduction via the `2m+1` floor on `ewIter s βφ` (`g(f'0) ≥ 2 f'0 + 1`) + a TIGHT family-ordinal
+bound `ewN α₁ ≤ s 0 + 1`, instead of `hg_base`. Then `ewN(α₁+γ') ≤ (s0+1)+f'0 ≤ 2 f'0+1 ≤ g(f'0)`
+(using `f'0 ≥ s 0`). Requires (i) a floor-based re-proof of `cutReduceAllAuxRunning`'s gate discharge
+and (ii) `passAux` to EXPOSE `ewN(witness) ≤ f 0 + 1`. **Open sub-problem (ii):** the tight bound is
+inductive through `axL`/`wk`/`weak`/`exI`/`allω`/`cut`-sub-rank (collapse-shaped witness, `ewN α + 1
+≤ f0+1` via node gate) but the top-rank `cut` OUTPUT has `ewN ~ 2(f0)+2` — so either relax the tight
+bound for cut outputs, or show a principal cut's ∀-premise reduces to a collapse-shaped (tight-norm)
+witness via its `allω`-headed spine. Decisive design question for next lap. If (ii) can't close →
+escalate to the ledger (statement change, judge-gated). Do NOT self-ratify.
+
 ## LAP 9 (188) — reduction gate-composition crux SHARPENED: the obstruction is the `osucc` `+1`, kernel-proven irreducible under any `(f.1)-class` hypothesis (architect-owned)
 
 Resumed with the judge asleep and lap-8 STOPPED for a ruling on two escalations. Rather than run

@@ -128,3 +128,28 @@ DISCHARGED axiom-clean (validated first in `wip/Lap10PassProbe.lean`):
   `collapse_add_lt` + `ewIter_comp_le`. ⚠️ c=0 ATOMIC cut still needs an atom-cut lemma.
 
 **Gates**: build 🟢 1341 jobs · headline UNDRIFTED · all lemmas axiom-clean · no new axiom.
+
+---
+
+## Stage 3 — lap 11 (191): `passAux` 5/6; top-rank CUT hits the `hg_base` floor seam
+
+**DISCHARGED (green, axiom-clean):** `exI`, `allω`, `cut`-SUB-RANK (`χ.complexity < c`) — see
+`passAux` in `OperatorZef2.lean`. Banked `stepAllω_Zf2_bnd` (bound-exposing `δ ≤ P₁+P₂` principal
+∀/∃ reduction). `passAux` now 5/6; sole remaining sub-`sorry` = TOP-RANK cut (`χ.complexity = c`).
+
+**SEAM FOUND (kernel-clean, `wip/Lap11CutFloorProbe.lean`) — the top-rank discharge as designed does
+not fire.** `stepAllω_Zf2` requires `hg_base : ∀k, g 0 + k ≤ g k` on the reduced ∀-side slot
+`ewIter s βφ`. The pass's `rel1`-stable invariant (`Monotone ∧ infl ∧ 2m+1≤s m`) does NOT entail it:
+- `basefloor_not_rel1_stable` — `rel1 (2m+1) 3` meets the invariant, violates the floor (`8 > 7`).
+- `ewIter_one`/`ewIter_one_floor_fails` — floor fails even at PRINCIPAL `β=1` (`ewIter s 1 = s∘s`,
+  singleton ball, inherits the plateau). Refutes the ball-growth escape.
+
+**LIVE RESOLUTION (PROOF-only, lane B):** re-gate `cutReduceAllAuxRunning` via the `2m+1` floor on
+`ewIter s βφ` (`g(f'0) ≥ 2f'0+1`) + a tight family-ordinal bound `ewN α₁ ≤ s 0 + 1`, replacing
+`hg_base` — no statement change. **Open sub-problem:** the tight bound `ewN(witness) ≤ f 0 + 1` is
+inductive through every `passAux` case EXCEPT top-rank `cut` output (`ewN ~ 2f0+2`). Next lap: relax
+it for cut outputs, or prove a principal cut's ∀-premise reduces to a collapse-shaped tight-norm
+witness. If unclosable → statement escalation (judge-gated); do NOT self-ratify.
+
+**Gates:** build 🟢 · headline UNDRIFTED · all landed lemmas axiom-clean · no new axiom · probe
+`wip/`-only (not in build).
