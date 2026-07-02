@@ -28,6 +28,22 @@ strategic question is therefore: **does a route have a real path to ZERO axioms?
 honest move is *abandon*, not accept. (This does not itself pick a route — see the PIVOT-B block below — it
 sets the bar every route must clear.)
 
+**2026-07-01 (OPERATOR-COMMISSIONED FEASIBILITY SPIKES — the ROUTE-DECISION "Next work #3" gate, made
+concrete).** The operator commissioned TWO bounded spike sessions to decide whether the someK/operator
+lane is the real path-to-zero-axioms (per `MASTERPLAN-2026-07-01-ZERO-AXIOMS.md` §3: Buchholz–Wainer
+prove the Wainer classification BY ω-rule + cut-elim, so the `OperatorZinfty` machinery is the
+candidate discharge substrate for `wainer_bound_of_pa_proves_goodstein` — not a separate "A' route").
+- **Work orders (binding, one session each): `SPIKE-W3-STATEMENT.md`, then `SPIKE-W4-CONTROL.md`.**
+  A spike session executes ITS order only: typed skeleton + binary verdict file
+  (`SPIKE-W{3,4}-VERDICT.md`) + commit + STOP. Sorries expected; NO new `axiom` declarations; no
+  grinding past the order's mandate.
+- **Scope carve-out:** for these two sessions ONLY, the lap-171 FORBIDDEN clause "Towsner/A' capstones
+  as the mainline" is suspended as applied to the `OperatorZinfty`/`ZekdSomeK` substrate — that
+  substrate is exactly what is under evaluation. Everything else FORBIDDEN below stays FORBIDDEN
+  (Crux2Blueprint, InternalZ, M2, `red`, etc.).
+- **After both verdicts:** hand to the operator. PASS+PASS ⟹ ratify MASTERPLAN W0–W7 as the standing
+  directive. Either FAIL ⟹ trigger T-W3/T-W4 fired: operator decides fallback-architecture vs abandon.
+
 **lap-171 (OPERATOR DECISION — PIVOT-B = WAINER GROWTH-RATE).** The route gate is closed:
 `PIVOT-B`, with B explicitly meaning the **Wainer/Cichon/Caicedo growth-rate route**, not the
 Towsner operator A' lane. Record: `ROUTE-DECISION-2026-07-01-WAINER.md`.
