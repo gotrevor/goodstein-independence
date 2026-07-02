@@ -1,5 +1,59 @@
 # Pending work — open obligations & attack paths
 
+## LAP 9 (188) — reduction gate-composition crux SHARPENED: the obstruction is the `osucc` `+1`, kernel-proven irreducible under any `(f.1)-class` hypothesis (architect-owned)
+
+Resumed with the judge asleep and lap-8 STOPPED for a ruling on two escalations. Rather than run
+the designated fallback (rung R, plumbing over the pass `sorry`), attacked the route-decisive crux
+head-on: **does pin-1 (`cutReduceAllAuxRunning_Zf2`) re-thread over `Zef2`?** The entrance's P-d
+clause explicitly permits adding "(f.1)-class hypotheses as needed" to pins 1–2 without escalating,
+so the live question was whether `EwF1`/`EwF2` on the two slots discharges the gate-composition trap
+lap 8 isolated. **Answer, now KERNEL-GROUNDED: no.**
+
+**The finding (`wip/Lap9GateProbe.lean`, both facts `#print axioms`-clean).** The reduction's fresh
+`allω`/`cut`/`exI` node sits at `osucc (α + γ)` over slot `g ∘ f`; its `Zef2` gate is
+`ewN (osucc (α+γ)) ≤ g (f 0)`, and by the banked `ewN_osucc_add_le` this is (in the saturating case)
+`ewN α + ewN γ + 1 ≤ g (f 0)`. Available gates: `ewN α ≤ g 0`, `ewN γ ≤ f 0`.
+- `noOsucc_closes`: WITHOUT the `+1` (i.e. an additive-norm output `ewN α + ewN γ`), `StrictMono g`
+  ALONE closes it — `a ≤ g 0 → b ≤ f 0 → a + b ≤ g (f 0)`, because strict mono gives
+  `g (f 0) ≥ g 0 + f 0` (the exact additive budget). So the growth bounds ARE enough for the sum.
+- `osucc_plus_one_refutes`: WITH the `+1`, concrete `EwF1` slots refute it — `g 0 = 2`, `f 0 = 1`,
+  `g (f 0) = g 1 = 3`, `a = 2 ≤ g 0`, `b = 1 ≤ f 0`, yet `a + b + 1 = 4 > 3`. The counterexample
+  works because `EwF1` permits a *minimal* step `g 0 → g 1` (`gBad m = if m=0 then 2 else 2m+1`),
+  leaving no room for the successor's `+1`. Reachable in the reduction: a premise ordinal can
+  saturate `ewN(α+γ) = g(f0)` while `ewN α ≤ g0`, `ewN γ ≤ f0` (norms add via `ewN_add_le`), forcing
+  the fresh node to `osucc(α+γ)` with `ewN = g(f0)+1`.
+
+**Why no in-statement dodge (checked, not assumed).** `Zef2Prov (osucc(α+γ))` lets us root at any
+`α' ≤ osucc(α+γ)`. `ewN` is NOT monotone, so a *larger* ordinal can have smaller `ewN` — but the
+`osucc(α+γ)` ceiling is too tight to exploit it: when a premise reaches `α+γ` (successor case,
+`γ = osucc βφ`, IH witness `= osucc(α+βφ) = α+γ`), the fresh node is forced to exactly `osucc(α+γ)`,
+whose only sub-ceiling dominating the premise is itself. The `+1` is intrinsic to a single cut
+producing a strictly larger ordinal against a *fixed* base `g(f0)` with no growth slack.
+
+**The fix is statement-level (architect-owned; escalation SHARPENED, not resolved).** Two candidates,
+both a redesign VOID to self-ratify:
+  (a) an output ordinal whose `ewN` is exactly additive (natural-sum / Hessenberg shape) so no `+1` —
+      then `noOsucc_closes` shows `StrictMono g` suffices; but `Ordinal.nadd` was deleted at v4.31
+      (`mathlib-nadd-removed-v431.md`) and ONote has no natural sum, so ~bespoke (~700 lines).
+  (b) a gate that absorbs the norm into the slot ARGUMENT (`f (ewN α + ·)`, the genuine E–W design in
+      `ewStep`: `K = f (ewN α + m)`) instead of comparing to the fixed base `f 0` — but the headline
+      read-off (`headline_readoff`) needs the base-0 witness bound `n ≤ f 0`, so this trades one
+      invariant for another and must be re-reconciled against the exit.
+
+**Advance vs lap 8:** lap 8 said "cross-gate `ewN α ≤ f 0` unavailable → escalate." Lap 9 proves the
+deeper fact: *even granting the cross-gate's growth content via `EwF1 f ∧ EwF1 g`, the pin is
+kernel-false*, because the defect is the successor `+1`, not the growth relation. The judge's ruling
+#1 (verdict §5) can now be made precisely: EITHER accept an additive-norm output ordinal (fix a),
+OR redesign the gate to argument-absorbing (fix b). No third option survives the counterexample.
+
+**NEXT (this lap or next, in-authority, wip-only):** if wanting to pre-scope fix (a): prototype an
+ONote additive-norm combinator `α ⊕ γ` with `ewN (α ⊕ γ) = ewN α + ewN γ` and strict domination
+`β < γ → α ⊕ β < α ⊕ γ`, in `wip/`, to hand the architect a ready splice. Do NOT edit `Zef2` /
+`cutReduceAllAuxRunning_Zf2` statements (VOID). Rung R (`rankToZero_Zef2`) remains the plumbing
+fallback but stays sorry-tainted (consumes the pass pin) and does not touch this crux.
+
+---
+
 ## LAP 6 (186) — item 1 DISCHARGED (`iterSlot_monotone`); item 2 → candidate TRAP 8 (architect-gated)
 
 Ran the ratified laps-6–7 order (`E-2026-07-02-JUDGE-rebuild-z-lap5-validation.md` §5).
