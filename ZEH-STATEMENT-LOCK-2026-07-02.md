@@ -107,3 +107,19 @@ slot (`f∘g`, Lemma 25); the elimination pass alone raises the control and ITER
 rail violation. Pin 3's iterate must be EXPLICIT (a bare `∃ f'` is kernel-checked vacuous,
 `normControlled_exists_trivial`); its restatement is the lap-5 entrance statement mini-lock.
 `stepAllω_Zf` stays unified (one ⋁-principal reduction; the ∀-side enters via `allInv_Zeh`).
+
+**Addendum 2 (2026-07-02, post-laps-2–4 judge ruling — §1-A1/§3 AMENDED, now LOCKED):** the
+sixth statement trap (`E-2026-07-02-JUDGE-rebuild-z-laps2-4-validation.md` §3) killed the
+ℕ-stage form of the reduction pins: A1's stage is the reduction motive's numeric budget, which
+R4 forbids — kernel-localized (`principal_witness_exceeds_stage`, `redDeriv` all-cases-but-one,
+`redDerivFixed`). The elimination suite therefore runs in the **function-slot judgment `Zef`**
+(`Zeh` with stage `m` ⤳ slot `f : ℕ → ℕ`; `exI` bound `n ≤ f 0`; `allω` branch slot
+`rel1 f n`; all `Cl H` side conditions verbatim). **`Zeh` stays LOCKED, f-free, and RETAINED**
+as the embedding-side judgment; `zeh_to_zef` (kernel-proven) is the sanctioned lift at the
+canonical slot `rel1 (hardy e) m` (so `f 0 = hardy e m` — Lemma-31 read-off bound preserved
+verbatim). The reduction output slot is **`g∘f`** (∀-family ∘ ∃-side; the literal `f∘g` is
+kernel-refuted, `reslot_fog_FAILS` — E–W Lemma 25's "f∘g" under E–W's own naming IS `g∘f` in
+pin naming). Slots in reduction/step statements carry `Monotone` + inflationary hypotheses;
+`Zef.mono_f` (slot-raise) is the only slot monotonicity — there is still no `mono_e`, and note
+`e` is a *phantom* in `Zef` (no rule reads it): pin 3's restatement iterates the SLOT, it does
+not "raise the control."
