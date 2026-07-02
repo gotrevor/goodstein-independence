@@ -24,9 +24,19 @@ Three paths on the crux (all judge-gated until lap-1 ratification — do NOT exe
    `readoff_sigma1` (needs the P2 Δ₀ matrix extension, ORDER laps 8–10).
 
 Permitted pure-growth sub-bricks (the only Scope-A-legal lane): the P1 UPPER bound is now BANKED
-(lap 179, see below). Remaining candidates are thin and of uncertain reuse (`f_α ≤ f_{ω^α}` via a
-Reaches ω^α→α descent — non-trivial, not obviously needed; the E–W Lemma 19/20 iterate-flattening is
-operator-controlled = gated). Next substantive move is the judge, then ORDER lap 2.
+(lap 179, see below). Remaining candidates are thin and of uncertain reuse:
+- `f_α ≤ f_{ω^α}` (via `Reaches x (oadd α 1 0) α`) — **assessed hard + speculative this lap, do NOT
+  re-attempt lightly.** The Reaches claim does NOT close under the WF IH: the successor-exponent case
+  (`fs α = inl (some α')`) reduces, after the `omega_pow_succ` limit step + coeff chain, to
+  `Reaches x (oadd α' 1 0) (osucc α')` — i.e. "ω^{α'} reaches `osucc α'`", a *different* shape than the
+  IH `ω^{α'}` reaches `α'`; and the fixed budget `x` likely must grow along the descent. No identified
+  gated-side consumer needs this specific bound (the read-off↔Wainer bridge is already served by the
+  banked `hardy_le_fastGrowing` + `hardy_omega_pow_lt_fastGrowing`). native_decide can't help (ω-scale
+  `fastGrowing` values blow up the evaluator — confirmed).
+- E–W Lemma 19/20 (`N(α) ≤ f^{F^α(0)}(0)`; nested-iterate flattening) — live on the paper's
+  operator-controlled `F`/`f` substrate = the gated `Zeh` calculus, NOT a pure mathlib-Hardy fact.
+
+Next substantive move is the judge ratifying `REBUILD-Z-LAP1-VERDICT.md`, then ORDER lap 2.
 
 ## Lap 179 — P1 CRUX ADVANCE: the E–W Lemma 19 upper bound is CLOSED and BANKED in `src/`
 
