@@ -1,2 +1,0 @@
-import GoodsteinPA.Statement
-#print axioms GoodsteinPA.peano_not_proves_goodstein

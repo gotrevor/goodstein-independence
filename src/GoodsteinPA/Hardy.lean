@@ -1688,6 +1688,128 @@ theorem hardy_add_collapse {e α : ONote} (he : e.NF) (hα : α.NF)
     hardy (e + α) x = hardy e (hardy α x) :=
   hardy_add_comp e he α hα hbelow x
 
+/-! ### The additive-Hardy INEQUALITY (P1 raised-control bridge)
+
+Lap 178 kernel-refuted the additive-Hardy *equality* `H_{e+β}=H_e∘H_β` (false under absorption,
+`1+ω=ω`). The **inequality** `H_{e+β}(x) ≤ H_e(H_β(x))` survives absorption and is the exact bridge
+the raised control `raise e α = e + ω^α` needs: with `β = ω^α` it bounds `H_{e+ω^α}` by
+`H_e(H_{ω^α}(·))`, and `hardy_omega_pow_lt_fastGrowing` gives `H_{ω^α} < f_α`. Unlike the equality,
+this holds for **every** NF `e, β`.  Proof: induction on `e` matching ONote `+`'s `addAux` recursion;
+with `s = a₁ + β = oadd e' n' a'` the case split on `cmp e₁ e'` is lt (e absorbed) / gt (concat) /
+eq (coefficient merge), each closed by the tail-peel `hardy_oadd_tail` + IH + `le_hardy`/monotonicity,
+the eq case additionally by coefficient additivity. -/
+
+/-- Single finite term: `H_{ω^0·p}(y) = y + p` (via `oadd 0 p 0 = ofNat p`). -/
+theorem hardy_oadd0 (p : ℕ+) (y : ℕ) : hardy (oadd 0 p 0) y = y + (p : ℕ) := by
+  obtain ⟨k, rfl⟩ : ∃ k : ℕ, p = k.succPNat := ⟨p.natPred, (PNat.succPNat_natPred p).symm⟩
+  rw [show oadd 0 k.succPNat 0 = ofNat (k + 1) from (ofNat_succ k).symm, hardy_ofNat,
+    Nat.succPNat_coe]
+
+/-- Coefficient-as-iterate, restated for a `ℕ+` coefficient (`e ≠ 0`):
+`H_{ω^e·p}(x) = (H_{ω^e})^[p](x)`. -/
+theorem hardy_single_coeff (e : ONote) (he : e ≠ 0) (p : ℕ+) (x : ℕ) :
+    hardy (oadd e p 0) x = (hardy (oadd e 1 0))^[(p : ℕ)] x := by
+  obtain ⟨k, rfl⟩ : ∃ k : ℕ, p = k.succPNat := ⟨p.natPred, (PNat.succPNat_natPred p).symm⟩
+  rw [hardy_oadd_coeff e he k x, Nat.succPNat_coe]
+
+/-- Coefficient additivity at a single term (`e ≠ 0`):
+`H_{ω^e·(m+n)}(x) = H_{ω^e·m}(H_{ω^e·n}(x))`. -/
+theorem hardy_coeff_add (e : ONote) (he : e ≠ 0) (m n : ℕ+) (x : ℕ) :
+    hardy (oadd e (m + n) 0) x = hardy (oadd e m 0) (hardy (oadd e n 0) x) := by
+  rw [hardy_single_coeff e he (m + n) x, hardy_single_coeff e he m,
+    hardy_single_coeff e he n x, PNat.add_coe, Function.iterate_add_apply]
+
+/-- **The additive-Hardy inequality** — for NF `e, β`: `H_{e+β}(x) ≤ H_e(H_β(x))`.
+Lap 178 refuted the equality; this `≤` survives absorption and is P1's raised-control bridge
+(`raise e α = e + ω^α`, then `hardy_omega_pow_lt_fastGrowing`). -/
+theorem hardy_add_le_comp : ∀ (e : ONote), e.NF → ∀ (β : ONote), β.NF → ∀ x,
+    hardy (e + β) x ≤ hardy e (hardy β x) := by
+  intro e
+  induction e with
+  | zero =>
+    intro _ β _ x
+    simp [ONote.zero_add, hardy_zero]
+  | oadd e₁ n₁ a₁ _ihe₁ iha₁ =>
+    intro he β hβ x
+    rcases eq_or_ne β 0 with rfl | hβ0
+    · rw [show oadd e₁ n₁ a₁ + 0 = oadd e₁ n₁ a₁ from
+          repr_inj.mp (by rw [repr_add, repr_zero, add_zero])]
+      simp [hardy_zero]
+    have he₁ : e₁.NF := he.fst
+    have hba₁ : NFBelow a₁ e₁.repr := he.snd'
+    have ha₁ : a₁.NF := ⟨⟨e₁.repr, hba₁⟩⟩
+    obtain ⟨bβ, hbβ⟩ := hβ.out
+    have hsNF : (a₁ + β).NF :=
+      ⟨⟨max e₁.repr bβ,
+        add_nfBelow (hba₁.mono (le_max_left _ _)) (hbβ.mono (le_max_right _ _))⟩⟩
+    have hs0 : a₁ + β ≠ 0 := by
+      intro h
+      apply hβ0
+      have : ONote.repr (a₁ + β) = 0 := by rw [h, repr_zero]
+      rw [repr_add] at this
+      exact repr_inj.mp (by rw [(Ordinal.add_eq_zero_iff.mp this).2, repr_zero])
+    rw [oadd_add]
+    cases hh : a₁ + β with
+    | zero => exact absurd hh hs0
+    | oadd e' n' a' =>
+      have he'NF : e'.NF := (hh ▸ hsNF).fst
+      cases hcmpc : e₁.cmp e' with
+      | lt =>
+        simp only [addAux, hcmpc]
+        rw [← hh]
+        calc hardy (a₁ + β) x
+            ≤ hardy a₁ (hardy β x) := iha₁ ha₁ β hβ x
+          _ ≤ hardy (oadd e₁ n₁ a₁) (hardy β x) := by
+              rw [hardy_oadd_tail e₁ n₁ a₁ (hardy β x)]
+              exact le_hardy (oadd e₁ n₁ 0) (hardy a₁ (hardy β x))
+      | gt =>
+        simp only [addAux, hcmpc]
+        rw [← hh]
+        calc hardy (oadd e₁ n₁ (a₁ + β)) x
+            = hardy (oadd e₁ n₁ 0) (hardy (a₁ + β) x) := hardy_oadd_tail e₁ n₁ (a₁ + β) x
+          _ ≤ hardy (oadd e₁ n₁ 0) (hardy a₁ (hardy β x)) := hardy_monotone _ (iha₁ ha₁ β hβ x)
+          _ = hardy (oadd e₁ n₁ a₁) (hardy β x) := (hardy_oadd_tail e₁ n₁ a₁ (hardy β x)).symm
+      | eq =>
+        have hee : e₁ = e' := by
+          have := @cmp_compares e₁ e' he₁ he'NF; rw [hcmpc] at this; exact this
+        subst hee
+        simp only [addAux, hcmpc]
+        rcases eq_or_ne e₁ 0 with he₁0 | he₁0
+        · subst he₁0
+          have ha1z : a₁ = 0 := by
+            cases a₁ with
+            | zero => rfl
+            | oadd e'' n'' a'' =>
+                have hlt := NFBelow.lt hba₁; rw [repr_zero] at hlt
+                exact absurd hlt (Ordinal.not_lt_zero _)
+          have ha'z : a' = 0 := by
+            cases a' with
+            | zero => rfl
+            | oadd e'' n'' a'' =>
+                have hlt := NFBelow.lt (hh ▸ hsNF).snd'; rw [repr_zero] at hlt
+                exact absurd hlt (Ordinal.not_lt_zero _)
+          subst ha1z; subst ha'z
+          have hβeq : β = oadd 0 n' 0 := by rw [← ONote.zero_add β]; exact hh
+          rw [hβeq]
+          rw [hardy_oadd0 (n₁ + n') x, hardy_oadd0 n₁, hardy_oadd0 n' x, PNat.add_coe]
+          omega
+        · have hcoeff : ∀ z, hardy (oadd e₁ (n₁ + n') a') z
+              = hardy (oadd e₁ n₁ 0) (hardy (oadd e₁ n' a') z) := by
+            intro z
+            rw [hardy_oadd_tail e₁ (n₁ + n') a' z, hardy_oadd_tail e₁ n' a' z,
+              hardy_coeff_add e₁ he₁0 n₁ n' (hardy a' z)]
+          calc hardy (oadd e₁ (n₁ + n') a') x
+              = hardy (oadd e₁ n₁ 0) (hardy (oadd e₁ n' a') x) := hcoeff x
+            _ = hardy (oadd e₁ n₁ 0) (hardy (a₁ + β) x) := by rw [hh]
+            _ ≤ hardy (oadd e₁ n₁ 0) (hardy a₁ (hardy β x)) := hardy_monotone _ (iha₁ ha₁ β hβ x)
+            _ = hardy (oadd e₁ n₁ a₁) (hardy β x) := (hardy_oadd_tail e₁ n₁ a₁ (hardy β x)).symm
+
+/-- **The additive-Hardy inequality at a principal raise** (`β = ω^α = oadd α 1 0`) — the exact P1
+shape: `H_{e + ω^α}(x) ≤ H_e(H_{ω^α}(x))`. -/
+theorem hardy_add_omega_pow_le {e α : ONote} (he : e.NF) (hα : α.NF) (x : ℕ) :
+    hardy (e + oadd α 1 0) x ≤ hardy e (hardy (oadd α 1 0) x) :=
+  hardy_add_le_comp e he (oadd α 1 0) (NF.oadd hα 1 NFBelow.zero) x
+
 /-- Leading exponent of a notation's Cantor normal form (`0` for `0`). Companion to
 `lastExp`; used to build a single `ω^Q` notation dominating a given `α`. -/
 def lead : ONote → ONote

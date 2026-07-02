@@ -1,37 +1,29 @@
 # Pending work — open obligations & attack paths
 
-## TOP OF QUEUE (lap 180 review) — the one permitted brick: additive-Hardy INEQUALITY
+## DONE (lap 180) — additive-Hardy INEQUALITY banked in `src/`
 
-**Correction to lap-179's "growth lane comprehensively mined":** one concrete permitted brick remains,
-and it is the natural continuation of the lap-178→179 arc. Lap 178 kernel-**refuted** the additive-Hardy
-*equality* `H_{e+β}=H_e∘H_β` (false under absorption, `1+ω=ω`). The surviving **inequality** is the exact
-bridge P1 needs and is NOT refuted:
+**The lap-180 review's named permitted brick is CLOSED.** Lap 178 refuted the additive-Hardy
+*equality* `H_{e+β}=H_e∘H_β` (absorption); the surviving **inequality** is now proven axiom-clean
+(`[propext, choice, Quot.sound]`, build 🟢 1333, no headline drift) in `src/GoodsteinPA/Hardy.lean`:
 
-> **`hardy_add_le_comp`** *(new, target `src/GoodsteinPA/Hardy.lean`)*:
-> for NF `e`, NF `β`, all `x`:  `hardy (e + β) x ≤ hardy e (hardy β x)`.
+> **`hardy_add_le_comp`** : for NF `e, β`, all `x`: `hardy (e + β) x ≤ hardy e (hardy β x)`.
+> **`hardy_add_omega_pow_le`** (P1 corollary): `hardy (e + ω^α) x ≤ hardy e (hardy (ω^α) x)`.
+> Helpers: `hardy_oadd0` (`H_{ω^0·p}=·+p`), `hardy_single_coeff` (coeff-as-iterate, ℕ+),
+> `hardy_coeff_add` (coefficient additivity `H_{ω^e·(m+n)}=H_{ω^e·m}∘H_{ω^e·n}`).
 
-**Why it advances the crux (P1):** the P1 obligation bounds the *raised* control `hardy (e + ω^α)`.
-This lemma (with `β = ω^α`) rewrites that as `≤ hardy e (hardy (ω^α) x)`, and lap-179's banked
-`hardy_omega_pow_lt_fastGrowing` gives `hardy (ω^α) x < f_α(x+1)` — so the raised control is dominated by
-`hardy e ∘ f_α`, a composition the f-slot can carry. It is calculus-independent (a standalone `Hardy.lean`
-lemma consuming **no** §5 pin), hence **permitted in Scope-A** exactly like all of lap-179's E–W Lemma 19
-work; only its eventual *wiring* into `cutElimPass_Zf`/`cutReduceAllAuxRunning_Zf` is judge-gated.
+Proof: induction on `e` matching ONote `+`'s `addAux` recursion; with `s = a₁+β = oadd e' n' a'`,
+case split `cmp e₁ e'` = lt (e absorbed: IH + `le_hardy` + tail-peel) / gt (concat: tail-peel + IH +
+monotone) / eq (coeff merge: tail-peels + `hardy_coeff_add`/`hardy_oadd0` + IH). **No ordinal-absorption
+argument was needed** — the earlier "partial absorption is the hard part" worry dissolved: the eq case
+rewrites `a₁+β = oadd e' n' a'` (from cmp) and applies coefficient additivity directly.
 
-**Decomposition (case split on ONote `+`'s absorb/merge/concat at each level; `oadd_add`/`addAux`, cmp
-of `e`'s leading exp vs `lead(a+β)`):**
-- **Non-absorbing** (`β = 0 ∨ β.repr < ω^(lastExp e).repr`): banked **`hardy_add_comp`** gives the
-  *equality* → `le_of_eq`. Free.
-- **Full absorption** (`e + β = β`, i.e. `lead(e) < lead(β)` or `e = 0`): then `hardy (e+β) x = hardy β x
-  ≤ hardy e (hardy β x)` by **`le_hardy e (hardy β x)`** (inflationary). Need `e + β = β` via `repr_inj`.
-- **Partial absorption** (leading exps equal — `ω^p·k` terms merge: `ω^p·k + β = ω^p·k' + β'`): the REAL
-  content. Induct on `e` via `oadd_add`; the `Ordering.eq` branch of `addAux` merges coefficients. Peel
-  with `hardy_oadd_tail`; the IH at the tail `a` (below exponent `lead β`) plus `hardy_monotone e` should
-  close it. **This is the ~1-lap chunk with moderate ONote-plumbing risk** (three-way `cmp` at each
-  level). Attempt in a `wip/` probe first; promote to `src/Hardy.lean` only when green + axiom-clean.
-
-If it lands → real P1 prerequisite banked. If it resists after honest attempts → record the exact
-ONote-addition obstruction and end the lap (that record is the crux advance). Do NOT leave an orphan
-`sorry` in `Hardy.lean` — either prove it fully or keep the probe in `wip/`.
+**Consumer (judge-gated, do NOT wire in Scope-A):** the P1 obligation
+`NormControlled (f∘g) (raise e α) m` bounds `hardy (e+ω^α)`; `hardy_add_omega_pow_le` +
+`hardy_omega_pow_lt_fastGrowing` (banked lap 179) reduce it to `hardy e ∘ f_α`, a composition the
+f-slot carries. This is the last calculus-independent brick the discharge needs; the remaining work
+(actually filling `cutElimPass_Zf`/`cutReduceAllAuxRunning_Zf` with it) IS reduction discharge —
+FORBIDDEN until the judge ratifies `REBUILD-Z-LAP1-VERDICT.md`. **The permitted growth lane is now
+genuinely exhausted** (E–W Lemma 19 + additive bridge both banked).
 
 ## CRITICAL-PATH CRUX MAP (lap 179 refresh — unblock-playbook §2.5/§3)
 
