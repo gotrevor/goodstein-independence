@@ -819,15 +819,69 @@ noncomputable def ewIterTower : (ℕ → ℕ) → ℕ → ONote → (ℕ → ℕ
   | f, 0, _ => f
   | f, (d + 1), α => ewIter (ewIterTower f d α) (collapseIter d α)
 
+/-- **Collapse-tower shift** — `collapseIter d (collapse α) = collapse (collapseIter d α)`
+(`= collapseIter (d+1) α`).  Lets the rung-R induction stay on EXACT ordinals: one pass promotes
+`α → collapse α`, and the remaining `d` passes commute the outer `collapse` through. -/
+theorem collapseIter_collapse (α : ONote) :
+    ∀ d, collapseIter d (collapse α) = collapse (collapseIter d α)
+  | 0 => rfl
+  | (d + 1) => by
+      show collapse (collapseIter d (collapse α)) = collapse (collapse (collapseIter d α))
+      rw [collapseIter_collapse α d]
+
+/-- **Slot-tower shift** — `ewIterTower (ewIter f α) d (collapse α) = ewIterTower f (d+1) α`.  The
+companion of `collapseIter_collapse` for the slot side: `d` passes starting from the once-passed
+`(ewIter f α, collapse α)` equal `d+1` passes from `(f, α)`. -/
+theorem ewIterTower_collapse (f : ℕ → ℕ) (α : ONote) :
+    ∀ d, ewIterTower (ewIter f α) d (collapse α) = ewIterTower f (d + 1) α
+  | 0 => rfl
+  | (d + 1) => by
+      show ewIter (ewIterTower (ewIter f α) d (collapse α)) (collapseIter d (collapse α))
+         = ewIter (ewIterTower f (d + 1) α) (collapse (collapseIter d α))
+      rw [ewIterTower_collapse f α d, collapseIter_collapse α d]
+
+/-- **`rankToZeroAux`** — the EwLow-threaded rung-R induction.  Threads
+`Monotone ∧ inflationary ∧ (2m+1 ≤ ·)` (NOT `EwF1`: `ewIter` does not inherit strict monotonicity,
+but it DOES inherit these three via `ewIter_monotone`/`_infl`/`_low`, so the pass ITERATES).  Each
+step applies one `passAux`, promotes the reduced witness UP to `collapse α` exactly (`Zef2.weak`,
+gate `ewN_collapse_le`), recurses, and rewrites via the two tower-shift lemmas. -/
+theorem rankToZeroAux (e : ONote) (heNF : e.NF) :
+    ∀ (d : ℕ) {α : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ : Seq},
+      Zef2 α e H f d Γ → Monotone f → (∀ x, x ≤ f x) → (∀ m, 2 * m + 1 ≤ f m) →
+      α.NF → Cl H α →
+      Zef2Prov (collapseIter d α) e H (ewIterTower f d α) 0 Γ := by
+  intro d
+  induction d with
+  | zero =>
+      intro α H f Γ D hmono hinfl hlow hαNF hαH
+      exact Zef2Prov.of hαNF hαH (Zef2.gate D) D
+  | succ d ih =>
+      intro α H f Γ D hmono hinfl hlow hαNF hαH
+      obtain ⟨β, hβle, hβNF, hβH, hβgate, Dβ⟩ :=
+        passAux d heNF D rfl hmono hinfl hlow hαNF hαH
+      have hg := ewN_collapse_le hlow (Zef2.gate D)
+      have Dcol : Zef2 (collapse α) e H (ewIter f α) d Γ := by
+        rcases lt_or_eq_of_le (le_def.mp hβle) with hlt | heq
+        · exact Zef2.weak hg (lt_def.mpr hlt) hβNF (collapse_NF hαNF) hβH
+            (Finset.Subset.refl Γ) Dβ
+        · have hβeq : β = collapse α := by
+            haveI := hβNF; haveI := collapse_NF hαNF
+            exact repr_inj.mp heq
+          exact hβeq ▸ Dβ
+      have hrec := ih Dcol (ewIter_monotone hmono hinfl α) (ewIter_infl hinfl α)
+        (fun m => ewIter_low hinfl hlow α m) (collapse_NF hαNF) (Cl_of_NF (collapse_NF hαNF))
+      rw [collapseIter_collapse α d, ewIterTower_collapse f α d] at hrec
+      exact hrec
+
 /-- **RUNG R (L-R) `rankToZero_Zef2`** — iterate `cutElimPass_Zef2` down the cut rank `d → 0`.
-A plain induction over the pass: `d` applications collapse the ordinal to `collapseIter d α` and
-tower the slot to `ewIterTower f d α`, landing at rank 0.  Discharge (laps-9+) reuses the pass.
-**Ledger: debt, "1", 90** (rung R). -/
+A plain induction over the pass (`rankToZeroAux`): `d` applications collapse the ordinal to
+`collapseIter d α` and tower the slot to `ewIterTower f d α`, landing at rank 0.  Now a REAL
+derivation (reuses the pass; `EwF1 → EwLow` at the top).  **Ledger: debt, "1", 90** (rung R). -/
 theorem rankToZero_Zef2 {α e : ONote} {H : ONote → Prop} {d : ℕ} {Γ : Seq} (f : ℕ → ℕ)
     (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
     (D : Zef2 α e H f d Γ) (hf1 : EwF1 f) (hf2 : EwF2 f) :
-    Zef2Prov (collapseIter d α) e H (ewIterTower f d α) 0 Γ := by
-  sorry
+    Zef2Prov (collapseIter d α) e H (ewIterTower f d α) 0 Γ :=
+  rankToZeroAux e heNF d D hf1.monotone hf1.infl hf1.2 hαNF hαH
 
 /-- **RUNG D (L-D) `readoff_delta0_Zef2`** — the Δ₀ (bounded-∀ matrix) read-off extension
 (Towsner §5.4 pattern), re-homed to `Zef2`.  Where `readoff_sigma1_Zef2` reads off an ATOMIC
