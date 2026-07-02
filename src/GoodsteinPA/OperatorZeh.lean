@@ -1661,5 +1661,40 @@ theorem headline_readoff_Zef {φ : SyntacticSemiformula ℒₒᵣ 1}
     subst hψ
     rcases hlit with h | h <;> exact absurd h (by simp [ExsQuantifier.exs])
 
+/-! ## §8 The stage→slot embedding `Zeh → Zef` (P4 consolidation; the LOCK §1-A1/§3 amendment
+made faithful — `Zef` conservatively generalizes `Zeh`)
+
+The ℕ-stage judgment `Zeh` embeds into the function-slot judgment `Zef` at the **root slot**
+`rel1 (hardy e) m` (so `f 0 = hardy e (max m 0) = hardy e m`: the read-off bound is preserved,
+LOCK §4).  The `allω` branch threads by `rel1_rel1` (stage `max m n` ⤳ slot
+`rel1 (rel1 (hardy e) m) n = rel1 (hardy e) (max m n)`); the `exI` bound
+`n ≤ hardy e m = (rel1 (hardy e) m) 0` is definitional.  This is the kernel witness that the
+lap-184 amendment is a CONSERVATIVE generalization — every stage-`m` derivation is a slot
+derivation at the canonical slot — so nothing the stage calculus proved is lost. -/
+
+/-- `rel1 (rel1 f m) n = rel1 f (max m n)` — the max-associativity identity that threads the
+stage→slot embedding through `allω`. -/
+theorem rel1_rel1 (f : ℕ → ℕ) (m n : ℕ) : rel1 (rel1 f m) n = rel1 f (max m n) := by
+  funext x
+  simp only [rel1]
+  rw [max_assoc]
+
+/-- **Stage→slot embedding `Zeh → Zef`** at the root slot `rel1 (hardy e) m`.  Witnesses that the
+LOCK §1-A1/§3 amendment (ℕ-stage ⤳ function-slot) is a conservative generalization. -/
+theorem zeh_to_zef {α e : ONote} {H : ONote → Prop} {m c : ℕ} {Γ : Seq}
+    (d : Zeh α e H m c Γ) : Zef α e H (rel1 (hardy e) m) c Γ := by
+  induction d with
+  | axL r v hp hn => exact Zef.axL r v hp hn
+  | wk hsub _ ih => exact Zef.wk hsub ih
+  | weak hβ hβNF hαNF hβH hsub _ ih => exact Zef.weak hβ hβNF hαNF hβH hsub ih
+  | @allω α e H m c Γ φ β hβ hβNF hαNF hβH dd ih =>
+      refine Zef.allω φ β hβ hβNF hαNF hβH (fun n => ?_)
+      rw [rel1_rel1]
+      exact ih n
+  | @exI α β e H m c Γ φ n hβ hβNF hαNF hβH hbound dd ih =>
+      refine Zef.exI φ n hβ hβNF hαNF hβH ?_ ih
+      simpa [rel1] using hbound
+  | @cut α βφ βψ e H m c Γ φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ d₂ ih₁ ih₂ =>
+      exact Zef.cut φ hcompl hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ih₁ ih₂
 
 end GoodsteinPA.OperatorZeh

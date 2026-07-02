@@ -27,14 +27,17 @@ The lap-3 "awaiting architect ratification" stall is RESOLVED by review-lap auth
   non-vacuity (`two_level_config_Zeh`) untouched + green. `principal_witness_exceeds_stage` kept as
   the documented LOCK-§1-A1 obstruction lemma. Build 🟢 1333, headline NO DRIFT. Only `sorry` left
   in OperatorZeh = pin 3 `cutElimPass_Zf` (forbidden).
-- **P4 — read-off already ported; remaining = cleanup/consolidation (NEXT lap, optional-order).**
-  `readoff_sigma1_Zef` / `headline_readoff_Zef` (slot form, bound `f 0`) are live in §7. Remaining
-  P4 items, none blocking the discharge: (a) decide whether to re-point the blueprint attribute
-  `zeh_readoff_exit` from the stage `headline_readoff` to `headline_readoff_Zef` (or add a slot one);
-  (b) prove the embedding bridge `Zeh α e H m c Γ → Zef α e H (rel1 (hardy e) m) c Γ` (root
-  `f 0 = hardy e m`) so the two stage-form §6 probes (`probe_allomega_reassembly_Zf`,
-  `two_level_config_Zeh`) and the stage read-off can be re-expressed / retired; (c) if every `Zeh`
-  use is subsumed, retire `Zeh`. Deferrable — `Zeh` and `Zef` coexist green today.
+- **P4 — read-off ported + embedding bridge DONE (lap 184); residual = optional retirement.**
+  `readoff_sigma1_Zef` / `headline_readoff_Zef` (slot form, bound `f 0`) are live in §7. **The
+  embedding bridge `zeh_to_zef : Zeh α e H m c Γ → Zef α e H (rel1 (hardy e) m) c Γ` is PROVEN**
+  (§8, axiom-clean `[propext, Classical.choice, Quot.sound]`; `rel1_rel1` helper): every stage-`m`
+  derivation is a slot derivation at the canonical slot `rel1 (hardy e) m` (root `f 0 = hardy e m`,
+  read-off bound preserved) — the kernel witness that the lap-184 amendment is a CONSERVATIVE
+  generalization (nothing the stage calculus proved is lost). Residual P4 (optional, non-blocking):
+  (a) re-point the `zeh_readoff_exit` blueprint attribute to `headline_readoff_Zef` (or add a slot
+  attribute); (b) via `zeh_to_zef`, re-express / retire the two stage-form §6 probes
+  (`probe_allomega_reassembly_Zf`, `two_level_config_Zeh`) + the stage `headline_readoff`; (c) retire
+  `Zeh` if fully subsumed. `Zeh`/`Zef` coexist green today.
 
 ### After the port: the live REBUILD-Z crux is now PIN 3 (`cutElimPass_Zf`) — but it stays the
 ### lap-5 entrance gate (statement mini-lock, discharge FORBIDDEN until its restatement is ratified).
