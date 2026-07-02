@@ -43,7 +43,14 @@ permissions:
 
 jobs:
   # Cheap (~seconds) gate: did this change touch a docs-breaking file?
+  #
+  # VISIBILITY GATE: while the repo is PRIVATE, everything below is skipped —
+  # no Pages on the free plan means a deploy would serve nothing, and private
+  # Actions minutes are capped. Build locally instead: docbuild/build-site.py.
+  # The workflow un-gates itself automatically when the repo goes public;
+  # `workflow_dispatch` stays available for a manual run either way.
   changes:
+    if: github.event.repository.private == false || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       sensitive: ${{ steps.filter.outputs.sensitive }}
@@ -77,34 +84,14 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           build: false
-      - name: Build API docs (docbuild sub-project)
-        run: |
-          cd docbuild
-          lake exe cache get || true
-          lake build GoodsteinPA:docs
-      # doc-gen4 renders the WHOLE import closure (Mathlib + Foundation, ~GBs). Keep
-      # only GoodsteinPA's pages; deps link out to hosted mathlib4_docs / Foundation
-      # docs. See docbuild/trim-docs.py for the why.
-      - name: Trim docs (link deps to hosted mathlib4_docs / Foundation docs)
-        run: python3 docbuild/trim-docs.py docbuild/.lake/build/doc GoodsteinPA
-      - name: Build blueprint (with ledger estimates)
+      # Same driver as a local build (docbuild/build-site.py): doc-gen4 build,
+      # trim (keep GoodsteinPA; deps link out to hosted mathlib4_docs / Foundation
+      # docs), blueprint with ledger estimates, assemble site/ (/docs + /blueprint).
+      # --ci additionally pulls the Mathlib olean cache first.
+      - name: Build site (docs + blueprint)
         run: |
           pip install leanblueprint
-          python3 blueprint/annotate_depgraph.py --web
-      - name: Assemble site (/docs + /blueprint)
-        run: |
-          mkdir -p site
-          cp -R docbuild/.lake/build/doc site/docs
-          cp -R blueprint/web site/blueprint
-          cat > site/index.html << 'HTML'
-          <!DOCTYPE html>
-          <meta charset="utf-8">
-          <meta http-equiv="refresh" content="0; url=blueprint/dep_graph_document.html">
-          <title>goodstein-independence</title>
-          <p><a href="blueprint/dep_graph_document.html">Blueprint dependency graph</a> ·
-             <a href="blueprint/index.html">Blueprint</a> ·
-             <a href="docs/">API docs</a></p>
-          HTML
+          python3 docbuild/build-site.py --ci
       # While the repo is private (no Pages on the free plan), the built site is
       # still inspectable: download this artifact and serve it locally.
       - name: Upload site artifact

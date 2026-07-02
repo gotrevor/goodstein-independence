@@ -297,14 +297,13 @@ deliverable; both declarations are axiom-clean.
 \section{The crux-2 milestone chain (witness-bounded operator calculus, preserved)}
 
 The following nine nodes are the internalized-cut-elimination decomposition of the Phase 2--3 girder,
-imported through \texttt{GoodsteinPABlueprint}.  Status semantics here need care: each node's
-\emph{ledger} entry rates that node's own \emph{step} (its capstone), while the bound \emph{stage}
-theorem is the \emph{cumulative} chain up to that point.  Stage~1's step is discharged and audited
-clean, and stage~1 has no upstream, so that node is genuinely done.  Stage~9's \emph{step} is likewise
-discharged (\texttt{0 laps}), but its stage theorem composes capstones 2--8 --- all still named
-\texttt{axiom}s classified \texttt{debt} by \texttt{blueprint\_audit} --- so nodes 2--9 remain
-\texttt{\textbackslash notready}.  They are the ``how would the internalization actually be built''
-skeleton, retained as a banked asset.
+imported through \texttt{GoodsteinPABlueprint}.  Status semantics: a node's color rates that node's
+\emph{own} step --- green means ``this node has done its job; if everything upstream held, so would
+this'' --- while chain-completeness is a property of the \emph{ancestry} (the legend's dark green).
+Steps 1 and 9 are discharged and audited clean (green); capstones 2--8 are still named
+\texttt{axiom}s classified \texttt{debt} by \texttt{blueprint\_audit}
+(\texttt{\textbackslash notready}, with per-step lap/confidence estimates on the nodes).  They are
+the ``how would the internalization actually be built'' skeleton, retained as a banked asset.
 
 \begin{theorem}\label{thm:pathBGoodsteinSentenceShape}
   \lean{GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage}
@@ -370,12 +369,14 @@ The projected derivation is the concrete Goodstein-fragment terminal object.
 
 \begin{theorem}\label{thm:pathBTerminalRouteBridge}
   \uses{thm:pathBGoodsteinFragmentExtraction}
-  \lean{GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage}
-  \notready
-The full crux-2 capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out
-by the promoted lower-bound theorem.  The bridge \emph{step} itself is discharged (ledger:
-\texttt{clean}, \texttt{0 laps}), but this stage theorem composes capstones 2--8, so its kernel
-footprint carries their open axioms until the chain discharges.
+  \lean{GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_capstone}
+  \leanok
+The terminal bridge step: unpack the \(\mathrm{RouteBCapstone}\) carried by the fragment-extraction
+marker, which is ruled out by the promoted lower-bound theorem.  Discharged (ledger: \texttt{clean},
+audited via \texttt{collectAxioms}) --- this node's own job is done; what remains open lives entirely
+upstream in capstones 2--8 (the \texttt{\textbackslash uses} chain).  The \emph{cumulative}
+composition is \texttt{pathB\_terminalRouteBridge\_stage}, whose kernel footprint clears exactly when
+the whole chain does.
 \end{theorem}
 
 \section{The Route-A girder and headline}
