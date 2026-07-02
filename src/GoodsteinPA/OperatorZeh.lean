@@ -663,6 +663,19 @@ theorem NormControlled.comp {f g : ℕ → ℕ} {e : ONote} {m : ℕ}
     (hg : NormControlled g e m) (hf : ∀ y, y ≤ f y) : NormControlled (f ∘ g) e m :=
   fun x => le_trans (hg x) (hf (g x))
 
+/-- **The bare `∃`-slot is VACUOUS** (kernel-backing for the lap-176 companion finding
+`REBUILD-Z-LAP1-FINDING-2026-07-02-fslot-control-raise.md`, Q2; banked lap 177 as permitted
+sibling infrastructure — the `NormControlled.comp` precedent: a fact about the stable
+`NormControlled` def, consuming no f-slot pin, touching no gated body).  For ANY control `e`
+and stage `m`, `∃ f, NormControlled f e m` holds trivially — the Hardy witness itself is a
+slot.  Consequence: `cutElimPass_Zf`'s conjunct `∃ f', NormControlled f' (raise e α') m` adds
+NO quantitative content, so the read-off (E–W Lemma 31, `witness ≤ f(0)`) forces `f'` to be
+PINNED to the E–W iterate of the input `f`, not left existential.  This LEMMA does not amend
+the pin (that is the judge's Q2 ruling); it machine-checks the vacuity the ruling rests on. -/
+theorem normControlled_exists_trivial (e : ONote) (m : ℕ) :
+    ∃ f : ℕ → ℕ, NormControlled f e m :=
+  ⟨fun x => hardy e (max m x), fun _ => le_rfl⟩
+
 /-- **PIN (disclosed sorry): the running-family reduction, f-slot form**
 (`cutReduceAllAuxRunning_Zf`).  Extends the Z1 pin `cutReduceAllAuxRunning_Zeh` with the
 E–W f-slots: the `∀`-family is `g`-controlled, the `∃`-side `f`-controlled, and the output

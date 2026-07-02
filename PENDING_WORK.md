@@ -40,6 +40,16 @@ Lap 176 asserted this ("Q2-shape-dependent, hold"); lap 177 verified it with fil
 **Conclusion: every remaining path requires grinding a gated/forbidden sorry, defining forbidden
 cut-elim machinery, or pre-empting the judge. Genuinely nothing permitted remains until the gate opens.**
 
+**Banked one permitted sibling lemma (lap 177): `normControlled_exists_trivial`** (`OperatorZeh.lean`,
+axiom-clean `[propext, choice, Quot.sound]`) — `∃ f, NormControlled f e m` for any `e, m`, the
+kernel backing for the finding's Q2 (`cutElimPass_Zf`'s `∃ f'` slot is vacuous → `f'` must be pinned
+to the E-W iterate, not existential). Same permitted category as lap-176's `NormControlled.comp`:
+fact about the stable `NormControlled` def, consumes no f-slot pin, touches no gated body, rules on
+no judge question. **⚠️ BUILD GOTCHA (verified lap 177):** `OperatorZeh` is in the `GoodsteinPABlueprint`
+lib, NOT the `GoodsteinPA` root — `lake build GoodsteinPA` will NOT recompile it (leaves a stale olean).
+Use bare **`lake build`** (defaultTargets = both libs) or `lake build GoodsteinPA.OperatorZeh` when
+editing this module, else `#print axioms` reads a stale olean.
+
 ## Lap 176 — ⭐⭐⭐ CRUX FINDING: the P1 obstruction is a statement-shape artifact (E-W Lemma 25/30 conflation)
 
 **Source cross-check (`papers/eguchi-weiermann-2012-…md`, Def 23 + Lemmas 24–31) of the three
