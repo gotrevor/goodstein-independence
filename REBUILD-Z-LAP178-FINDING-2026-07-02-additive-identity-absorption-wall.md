@@ -68,3 +68,37 @@ control `hardy e` at all.  Therefore:
 `fundamentalSequence_oadd_succ`); relocate to `Hardy.lean` if a later lap needs the successor
 homomorphism outside the finite slice.  The refutation is why the LIMIT homomorphism is NOT banked
 (it is false), and why nothing was pushed to `src/`.
+
+---
+
+## ADDENDUM (same lap) — lap-177's "no fast-growing `F`" is WRONG; the real bridge is a DOMINATION
+
+Chasing the surviving route (E–W Lemma 19, the fast-growing side), I checked lap-177's premise that
+"the substrate has `norm` but no fast-growing `F` and no iterate `f^k`."  **That is false.**
+`ONote.fastGrowing : ONote → ℕ → ℕ` is defined in mathlib and the repo carries its full growth
+theory (`Hardy.lean` §Basic: `le_fastGrowing`, `fastGrowing_le_of_reaches`, `fastGrowing_*`), and
+`f^k` is just `Function.iterate`.  So E–W Lemma 19 is STATEABLE with existing stable-def machinery —
+no new cut-elim definitions required for the fast-growing bound itself.
+
+The repo's own B4 note (`Hardy.lean:1082`) calls the connecting identity `H_{ω^α} = f_α`.  **That
+EQUALITY is kernel-FALSE** (a second convincing-identity trap this session): `hardy(ω^1) 3 = 7` but
+`fastGrowing 1 3 = 6` (`native_decide`), off by a shift.  Kernel `#eval` over α ∈ {0,1,2} pins the
+EXACT relation:
+
+    hardy (oadd α 1 0) n + 1 = fastGrowing α (n + 1)     -- H_{ω^α}(n) = f_α(n+1) − 1
+
+(anchored by `native_decide` in `wip/HardyFastGrowingBridge.lean`; α=2 data: hardy = 7,23,63 vs
+fastGrowing(n+1) = 8,24,64 — exact −1).  **Consequence for P1:** in the absorbing regime the raised
+control is `≈ hardy(ω^{α'})`, and this bridge gives the UPPER bound
+`hardy(ω^{α'}) n < fastGrowing α' (n+1)` (`hardy_omega_pow_lt_fastGrowing`, proven from the target).
+So P1's raised-control domination REDUCES to E–W Lemma 19 in the form
+`fastGrowing α' (n+1) ≤ (iterate of the input slot)` — a fast-growing bound stateable/attackable
+with existing stable-def machinery.
+
+Banked in `wip/HardyFastGrowingBridge.lean` (out of build target): the exact-bridge TARGET
+`hardy_omega_pow_add_one` (**base case α=0 proven**; successor/limit steps = open B4 grind, the
+classical Cichoń–Wainer correspondence via the `H_{ω^β·k}` intermediate), the corollary
+`hardy_omega_pow_lt_fastGrowing`, and `native_decide` anchors (incl. the equality-is-false anchor so
+no lap re-attempts `H_{ω^α} = f_α`).  This REOPENS a concrete, permitted, stable-def attack path on
+the P1 domination that lap-177 wrongly declared closed — advance it (prove the exact bridge, then
+Lemma 19) once the judge opens the pin gate; the bridge itself is grindable now as B4.

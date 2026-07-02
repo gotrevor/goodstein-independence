@@ -24,10 +24,23 @@ The cut-elimination `raise` grows `ω^{α'}` INTO the absorbing regime, so:
   shortcut that WOULD sidestep it is kernel-false. Full detail:
   `REBUILD-Z-LAP178-FINDING-2026-07-02-additive-identity-absorption-wall.md`.
 
-**Next attack (still judge-gated for the pin body):** the surviving route to pin-3 is the genuine
-fast-growing domination `N(α') = norm(ω^{α'}) ≤ hardy-iterate` bound (E–W Lemma 19), which needs the
-fast-growing `F` + iterate `f^k` machinery — the FORBIDDEN cut-elim work. No unforbidden shortcut
-remains. Resume = judge ratification (Option A/B; pin `f'`); do NOT grind the gated pins.
+**Next attack — a PERMITTED, stable-def path REOPENED (corrects lap-177).** Lap 177 said the fast-
+growing side "needs the fast-growing `F` + iterate `f^k` machinery = FORBIDDEN cut-elim work." That
+premise is WRONG: `ONote.fastGrowing` is a mathlib def with full repo growth theory (`Hardy.lean`
+§Basic), and `f^k` is `Function.iterate`. So E–W Lemma 19 is stateable with existing stable-def
+machinery. Kernel work this lap (`wip/HardyFastGrowingBridge.lean`):
+- The repo's B4 identity `H_{ω^α}=f_α` is kernel-FALSE as an EQUALITY (off by a shift). The EXACT
+  relation is `hardy(oadd α 1 0) n + 1 = fastGrowing α (n+1)` (`native_decide`-anchored α∈{0,1,2}).
+  Target `hardy_omega_pow_add_one` stated, **base case α=0 proven**; succ/limit = open B4 grind
+  (Cichoń–Wainer, via the `H_{ω^β·k}` intermediate). Corollary `hardy_omega_pow_lt_fastGrowing`
+  (upper bound `hardy(ω^{α'}) n < fastGrowing α' (n+1)`) derived.
+- **This reduces P1's raised-control domination to E–W Lemma 19 in the form
+  `fastGrowing α' (n+1) ≤ (iterate of input slot)`** — a fast-growing bound on STABLE defs, NOT the
+  Zeh calculus. The exact bridge is grindable NOW as B4 (permitted, calculus-independent growth
+  theory); Lemma 19 + wiring into pin-3 stay judge-gated.
+
+Resume = judge ratification (Option A/B; pin `f'`); do NOT grind the gated pins. But B4 (the exact
+`hardy_omega_pow_add_one` bridge) is a permitted, load-bearing grind available regardless.
 
 ## Lap 177 — FRESH-MIND REVIEW: state confirmed, no trigger fired, awaiting judge (no in-scope grind)
 
