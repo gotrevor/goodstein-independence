@@ -61,6 +61,15 @@ whether to pin `f'`.  If A + pin: (1) lap-2's reduction conjunct is `NormControl
 (near-immediate, plumbing banked); (2) the real threading work is the pinned-iterate
 `NormControlled (f^{…}) (raise e α') m` at `cutElimPass_Zf`, discharged via the Lemma-19 norm bound.
 
+**SAFE CRUX SURFACE EXHAUSTED for this gate (lap 176 checked, don't re-derive on resume).**  The
+finding is complete + kernel-decisive (Option A forced, validated, localized; all 3 verdict
+judge-questions answered).  Every remaining crux thread now crosses the gate or builds against the
+proven-mis-stated / judge-un-ruled §5 shape: (i) amending pins to Option A = statement change on a
+draft already submitted to the judge (desyncs the verdict; hold); (ii) the pass's E-W iteration
+machinery (`f^α` Def 16 + Lemma 19) = the gated cut-elimination hard content, and Q2-shape-dependent
+(hold); (iii) discharging any pin = judge-gated/FORBIDDEN.  Aristotle: reachable but no in-scope open
+target (exit is proven+locked; pins are gated).  Resume = judge ratification of verdict + finding.
+
 ## Lap 175 — ⭐⭐⭐ REBUILD-Z lap 1 (Scope-A) done; crux = the f-slot reduction, JUDGE-GATED
 
 **Module: `src/GoodsteinPA/OperatorZeh.lean` (green, 1333 jobs).**  Open obligations here are
