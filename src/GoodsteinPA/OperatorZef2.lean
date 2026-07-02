@@ -648,7 +648,23 @@ theorem passAux (c : ℕ) {e : ONote} (heNF : e.NF) :
       sorry
   | @exI α β e H f r Γ hαN χ n hβ hβNF hαNF' hβH hbound dχ ih =>
       intro hr hmono hinfl hlow hαNF hαH
-      sorry
+      obtain ⟨a, hale, haNF, haH, hag, Da⟩ := ih heNF hr hmono hinfl hlow hβNF (Cl_of_NF hβNF)
+      have hslot := ewIter_slot_le hmono hinfl hβ (Zef2.gate dχ)
+      have haltcol : a < collapse α := lt_of_le_of_lt hale (collapse_strictMono hβNF hβ)
+      have hg := ewN_collapse_le hlow hαN
+      have hf0 : f 0 ≤ ewIter f α 0 := by
+        by_cases h0 : α = 0
+        · subst h0; simp
+        · have h0α : (0 : ONote) < α := by
+            cases α with
+            | zero => exact (h0 rfl).elim
+            | oadd e n a => exact oadd_pos e n a
+          have := ewIter_le_of_lt (f := f) hinfl (β := 0) (α := α) (m := 0) h0α (Nat.zero_le _)
+          simpa [ewIter_zero] using this
+      have hbound' : n ≤ ewIter f α 0 := le_trans hbound hf0
+      refine Zef2Prov.of (collapse_NF hαNF) (Cl_of_NF (collapse_NF hαNF)) hg ?_
+      exact Zef2.exI hg χ n haltcol haNF (collapse_NF hαNF) haH hbound'
+        ((Da.mono_f hslot).wk (le_trans hag (hslot 0)) (Finset.Subset.refl _))
   | @cut α βφ βψ e H f r Γ hαN χ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF' hβφH hβψH d₁ d₂ ih₁ ih₂ =>
       intro hr hmono hinfl hlow hαNF hαH
       sorry
