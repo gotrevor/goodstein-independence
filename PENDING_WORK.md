@@ -1,5 +1,28 @@
 # PENDING WORK
 
+## Lap 207 (2026-07-03, grind) — route-(c) steps (2)-root + (3) BOTH CLOSED sorry-free
+
+- **`gated_of_sigma1`** (`wip/ReadoffValueGate.lean`, commit `f883dd8`): the root discharge
+  `Hierarchy 𝚺 1 ψ → (∀ B, gvb ψ B ≤ P (max V B)) → Gated P V ψ` — kernel-clean, no sorryAx.
+  Pieces: `sigma1_all_inv` (𝚺1 ∀-head inverts to ball ONLY), `gate_extract` (false ball instance
+  pins `k < tvB t 0`, positivity makes the guard value instance-independent), `tvB_le_gvb_ball`;
+  WF-recursion on complexity, coupled hypothesis self-threads via `gvb_substs_le` + max-algebra.
+  Probe record: `wip/GateRootProbe.lean`.
+- **`readoffVTC_core` + `readoff_value_Zef2TC`** (`wip/E1EmbeddingGrind.lean`, commit `5b26b4b`):
+  the V-threaded value-budget read-off, **SORRY-FREE** — the `allω` trap is DISSOLVED (no
+  branch-0 split at all: `Gated` gate always yields a false branch `k₀ ≤ P V`; `rel1_rel1`
+  collapses the slot frame; `T3_descent'` absorbs all budget bumps incl. exI's `max V n`).
+  Both `[propext, Classical.choice, Quot.sound]`. Old `readoffTC_core` (trap sorry) superseded,
+  left in place.
+- **NEXT**: (i) wire the root certificate: the pipeline φ-instance is 𝚺1 ⟹ `Gated` via
+  `gated_of_sigma1` with `P := fun B => gvb φ (max V B)` (copy the gvb/tvB layer into
+  E1EmbeddingGrind at wiring time, or keep the certificate as a hypothesis); (ii) piece 2a
+  structural wiring: root plumbing → `rankToZeroAuxTC` (EwLow entry) → `readoff_value_Zef2TC`
+  (check the slot frame the pass output hands over vs the `Sslot` seed); (iii) 2b growth
+  conversion (the `∃ o, o.NF ∧ …` splice target absorbs the looser `ewIter (Sslot …)` bound via
+  the banked Hardy brackets). Judge package unchanged (do NOT self-ratify).
+
+
 ## Reflection — 2026-07-03 (lap 206, DEEP REFLECTION) — routes (a)/(b) for the read-off trap are DEAD on the real matrix; route (c) = the E–W-faithful VALUE-BUDGET read-off is MANDATED
 
 **ROUTE VERDICT: CONTINUE** (destination + route sound; no unhandled fired trigger), **with a
