@@ -129,3 +129,39 @@ touching `rel1` or the additive output ordinal. This is the strongest of the thr
 and was the one the lap-192 review believed impossible.
 
 ---
+
+## Stage C-1 — lane-D Option-B splice feasibility (wip probe) — ✅ YES, structurally FREE (lap 197)
+
+**File**: `wip/OptionBSpliceProbe.lean` (compiles standalone; NOT in any lib — `src` untouched).
+
+**QUESTION**: does the splice consumer close if rung D concludes at the ACHIEVABLE bound
+`∃ n ≤ ewIter f α 0` instead of the ratified-but-(Ax2)-gated `∃ n ≤ f 0`?
+
+**ANSWER: YES — the cost is exactly ONE tower level, i.e. nothing.** Kernel facts:
+- `optionB_tower_step` (**`rfl`**, axiom-clean): the Option-B exit bound at the rank-0 pair,
+  `ewIter (ewIterTower f d α) (collapseIter d α)`, IS `ewIterTower f (d+1) α` BY DEFINITION.
+  The splice's final-bound functional shape is unchanged; whatever Hardy-bracket domination
+  handles depth `d` handles depth `d+1` (both fixed per PA proof).
+- `ewIterTower_mono_infl` (axiom-clean): the slot tower preserves Monotone + inflationary.
+- `optionB_splice_exit`: the generic composition — from ANY Option-B-shaped read-off
+  (`readoffB : Zef2 α' e H f' 0 {∃⁰ φ} → ∃ n ≤ ewIter f' α' 0, …`) and a rank-`d` derivation,
+  `rankToZeroAux` composes to `∃ n ≤ ewIterTower f (d+1) α 0`; the `Zef2Prov` ordinal slack is
+  absorbed by gated ordinal-monotonicity (`ewIter_le_of_lt`, gate from the Prov norm bound).
+  NO hypotheses beyond the EwLow triple rung R already threads. ⚠️ Inherits rung R's disclosed
+  `sorryAx` (`passAux` top-rank cut = the escalated crux); the composition itself adds none.
+
+**R-4′ restatement draft (ruling input, text only, in the probe docstring)**: R-4 with exit
+bound `f 0 → ewIter f α 0`. Consequence: with `readoffD_trapped_of_mono` covering the
+monotone-matrix fragment, **(Ax2) would be needed by NEITHER the read-off NOR the splice on the
+headline path** — it stays solely a rung-E calculus-faithfulness question (Stage B).
+
+**Honest caveat recorded**: this verifies the CONSUMER side. The PRODUCER side (that
+`readoff_delta0_Zef2'` itself closes structurally at the `allω` trapped case under the
+`ewIter f α` budget) is post-ruling Series-3 grind; feasibility evidence = lap-195's diagnosis
+(the trap is exactly an `f 0`-vs-`rel1`-growth budget mismatch, covered by construction).
+
+**Ruling (2) input status**: Stage C now provides the missing feasibility evidence for the
+"restate rung D" horn of ruling (2) [Ax2 vs restatement]. Stage B (Ax2-adequacy) remains the
+other horn's evidence.
+
+---
