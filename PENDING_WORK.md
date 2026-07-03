@@ -1,5 +1,30 @@
 # PENDING WORK
 
+### 2b analysis (this lap, paper-level — kernel-probe the refutation next)
+
+- **m-uniformization**: the pipeline bound's m-dependence = (i) slot stage K_m = max(C, m)
+  (a rel1 pre-max — now commutes out: `ewIterTower_rel1_le` via the new `ewIter_mono_slot`,
+  both GREEN) + (ii) P_m = gvb of the m-instance — contracts to a FIXED P* via the
+  gvb_rew_le class at ω = (Rew.subst ![nm m]).q (bank next: `gvb (ω.q ▹ ψ) B ≤ gvb ψ (max B m)`
+  instance, lives in ReadoffValueGate). After both: bound ≤ ewIter S* γ (S* (max m C)) with
+  ONE fixed S*, γ — a single function of m.
+- **THE 2b crux = ewIter→hardy domination.** ⚠️ Nlog-GATED hardy ordinal-monotonicity
+  (`β < α ∧ Nlog β ≤ x → H_β(x) ≤ H_α(x)`) is FALSE on paper: β = ω·4, α = ω², x = 2 —
+  Nlog(ω·4) ≈ 2 ≤ 2 but H_{ω·4}(2) ≈ 2⁴·3 ≫ H_{ω²}(2) = H_{ω·2}(2) ≈ 2²·3 (coefficient 2^x
+  beats argument x; the banked `hardy_le_of_lt` needs the LINEAR norm ≤ x, and
+  norm ≈ 2^Nlog). KERNEL-PROBE this refutation before designing around it.
+- Consequent design: the ewIter→hardy master lemma must climb an exponent per level to absorb
+  the norm/log mismatch (E–W §6 Lemmas 40-41 majorization; their s^α ≈ H_α "up to norm-gating").
+  Candidate: induction on α bounding `ewIter f α m ≤ hardy (g α) (c + m)` with
+  g α = ω^(α+1)-shape, composition via `hardy_add_comp` (exact when no absorption) /
+  coefficient lemmas (`hardy_coeff_add`), branch-sup via `hardy_le_of_lt` with the LINEAR
+  norm gate paid by an argument that has already absorbed 2^K — the open question is whether
+  the K = f(Nlog α + m) ball bound gives norm β ≤ 2^K ≤ (available argument). If NOT provable
+  at fixed exponent-jump, fall back to E–W S^α successor-collapse majorization.
+- Semantic link still to bank: atomTrue(χ_m/[nm n]) → goodsteinLength m ≤ n (igoodstein_nat
+  faithfulness; scope vs Dom.goodsteinLength / DescentSemantic).
+
+
 ## Lap 207 (2026-07-03, grind) — route-(c) steps (2)-root + (3) BOTH CLOSED sorry-free
 
 - **`gated_of_sigma1`** (`wip/ReadoffValueGate.lean`, commit `f883dd8`): the root discharge

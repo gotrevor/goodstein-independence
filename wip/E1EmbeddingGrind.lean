@@ -4779,8 +4779,68 @@ theorem readoff_value_goodstein
   refine ⟨χ, K, hχeq, hchiS, fun P V hP_mono hroot => ?_⟩
   exact readoff_value_pipeline hP_mono heNF hαNF hαH D V hroot
 
+/-! ### 2b prep — m-uniformization of the pipeline bound
+
+The read-off bound's `m`-dependence enters ONLY through (i) the slot stage `K_m` (a `rel1`
+pre-max on the tower base) and (ii) the instance value bound `P_m` (a `gvb` numeral
+contraction).  The two lemmas here collapse (i): `ewIter` is pointwise monotone in the SLOT
+(bigger slot ⟹ bigger ball and bigger branches), hence the `rel1` pre-max commutes out of the
+whole tower — `ewIterTower (rel1 f K) d α x ≤ ewIterTower f d α (max K x)` — leaving ONE fixed
+tower with the `m`-dependence pushed into the argument. -/
+
+/-- **Pointwise slot-domination of `ewIter`**: a pointwise-dominated slot yields a
+pointwise-dominated iterate (the ball only grows, and each branch value is dominated by
+IH + `ewIter_lower` on the dominating side). -/
+theorem ewIter_mono_slot {f g : ℕ → ℕ} (hfg : ∀ x, f x ≤ g x)
+    (hg_mono : Monotone g) (hg_infl : ∀ m, m ≤ g m) :
+    ∀ (α : ONote) (m : ℕ), ewIter f α m ≤ ewIter g α m := by
+  intro α m
+  by_cases hα : α = 0
+  · subst hα
+    simpa [ewIter_zero] using hfg m
+  · conv_lhs => rw [ewIter_unfold f α m]
+    rw [ewStep]
+    simp only [dif_neg hα]
+    apply Finset.max'_le
+    intro y hy
+    rcases Finset.mem_image.mp hy with ⟨δ, hδmem, rfl⟩
+    have hδlt : (δ : ONote) < α := (Finset.mem_filter.mp δ.2).2.1
+    have hδNF : (δ : ONote).NF := (mem_NlogBall.mp (Finset.mem_filter.mp δ.2).1).1
+    have hδgate : Nlog (δ : ONote) ≤ f (Nlog α + m) := (Finset.mem_filter.mp δ.2).2.2
+    have hδgate' : Nlog (δ : ONote) ≤ g (Nlog α + m) := le_trans hδgate (hfg _)
+    have ih1 : ewIter f (δ : ONote) m ≤ ewIter g (δ : ONote) m :=
+      ewIter_mono_slot hfg hg_mono hg_infl δ m
+    have ih2 : ewIter f (δ : ONote) (ewIter f (δ : ONote) m)
+        ≤ ewIter g (δ : ONote) (ewIter g (δ : ONote) m) :=
+      le_trans (ewIter_mono_slot hfg hg_mono hg_infl δ _)
+        (ewIter_monotone hg_mono hg_infl (δ : ONote) ih1)
+    exact le_trans ih2 (ewIter_lower hδNF hδlt hδgate')
+termination_by α _ => α
+decreasing_by
+  all_goals exact hδlt
+
+/-- **The tower/`rel1` commutation** — the slot-stage pre-max `K` commutes out of the whole
+`d`-fold tower into the argument: ONE fixed tower dominates all stages. -/
+theorem ewIterTower_rel1_le {f : ℕ → ℕ} (hmono : Monotone f) (hinfl : ∀ m, m ≤ f m)
+    (K : ℕ) (α : ONote) : ∀ (d : ℕ) (x : ℕ),
+    ewIterTower (rel1 f K) d α x ≤ ewIterTower f d α (max K x)
+  | 0, x => le_of_eq (by simp [ewIterTower, rel1])
+  | (d + 1), x => by
+      have hTmono : Monotone (ewIterTower f d α) := ewIterTower_monotone hmono hinfl α d
+      have hTinfl : ∀ m, m ≤ ewIterTower f d α m := ewIterTower_infl hinfl α d
+      have hpt : ∀ x', ewIterTower (rel1 f K) d α x' ≤ rel1 (ewIterTower f d α) K x' :=
+        fun x' => ewIterTower_rel1_le hmono hinfl K α d x'
+      calc ewIter (ewIterTower (rel1 f K) d α) (collapseIter d α) x
+          ≤ ewIter (rel1 (ewIterTower f d α) K) (collapseIter d α) x :=
+            ewIter_mono_slot hpt (rel1_monotone hTmono K) (rel1_infl hTinfl K)
+              (collapseIter d α) x
+        _ ≤ ewIter (ewIterTower f d α) (collapseIter d α) (max K x) :=
+            ewIter_rel1_le hTmono hTinfl (collapseIter d α) K x
+
 end GoodsteinPA.E1EmbeddingGrind
 
+#print axioms GoodsteinPA.E1EmbeddingGrind.ewIter_mono_slot
+#print axioms GoodsteinPA.E1EmbeddingGrind.ewIterTower_rel1_le
 #print axioms GoodsteinPA.E1EmbeddingGrind.goodsteinBodyE_inst_shape
 #print axioms GoodsteinPA.E1EmbeddingGrind.readoff_value_goodstein
 #print axioms GoodsteinPA.E1EmbeddingGrind.readoff_value_pipeline
