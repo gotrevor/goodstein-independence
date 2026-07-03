@@ -1,5 +1,16 @@
 # PENDING WORK
 
+## Lap 211 (2026-07-03) — judge package Block 1 STAMPED + B-1 CRACKED; see HANDOFF-2026-07-03-lap211.md
+
+- ✅ `REBUILD-Z-SERIES-4-LEDGER.md` Block 1 (Lane-S evidence: verbatim-type summit, pairing table,
+  fresh #print transcript, sorryAx disclosure) — `ea40a0c`.
+- ✅ B-1 CRACKED (`edb400f`): `wip/KernelBaseCases.lean` `base_cases_kernel` = verbatim
+  `goodsteinLength_base_cases` KERNEL-ONLY (no ofReduceBool). Checkpoint-survival lemma
+  (`glen_ge_of_seq_value` via `le_bump`) ⇒ only k ≤ 4 forward steps needed, not 65551.
+- ⏭️ NEXT: (1) B-1 src swap in `Domination.lean` (mechanical; statement frozen; full lake build +
+  before/after #print axioms on the growth headline → ledger Block 3); (2) B-2 the 15 src sorries
+  re-point/retirement proposals; (3) stamp final package → SERIES-4 judge STOP.
+
 ## Lap 210 (2026-07-03, grind) — SERIES-4 LANE S COMPLETE (S-1…S-5); see HANDOFF-2026-07-03-lap210.md
 
 **`wainer_bound_witness` (E1) GREEN kernel-clean at the axiom's VERBATIM type** (`649b1e4`), with
