@@ -1048,8 +1048,149 @@ theorem Sstar_dom_pad (e : ONote) (he : e.NF) (m K d : ℕ) (α : ONote) (hα : 
   obtain ⟨E, c, hE, hE0, _, _, hmax⟩ := dom_pad_max hE₁ hE₂ htower hPdom
   exact ⟨E, c, hE, hE0, hmax⟩
 
+/-- `2^x` sits under `H_{ω²}` — the floor fact that lets an `Nlog` certificate pay a linear
+`norm` gate (via `norm < 2^{Nlog+1}`). -/
+theorem two_pow_le_hardy_Wpow2 (x : ℕ) : 2 ^ x ≤ hardy (Wpow (ofNat 2)) x := by
+  have h := hardy_omega_pow_ofNat 2 x
+  have h2 : fastGrowing (ofNat 2) (x + 1) = 2 ^ (x + 1) * (x + 1) := by
+    rw [show (ofNat 2 : ONote) = 2 from rfl, ONote.fastGrowing_two]
+  rw [h2] at h
+  show 2 ^ x ≤ hardy (oadd (ofNat 2) 1 0) x
+  have hexp : 2 ^ (x + 1) = 2 * 2 ^ x := by rw [pow_succ]; ring
+  have hone : 1 ≤ 2 ^ x := Nat.one_le_two_pow
+  have hmul : 2 * 2 ^ x * 1 ≤ 2 * 2 ^ x * (x + 1) :=
+    Nat.mul_le_mul_left _ (by omega)
+  rw [hexp] at h
+  omega
+
+/-- **The `α'`-uniform level cap** (SERIES-4 S-3 brick).  The read-off hands a per-`m`
+ordinal `α' ≤ γ` together with its `Nlog α'` certificate; the double-Hardy bound of
+`ewIter_hardy_le_of_dom_pad` then caps at the FIXED level `ω^{e₀+2+1+γ+1}`: the outer
+norm-gate `norm(ω^{e₀+2+1+α'}) ≤ normSum(e₀+2+1) + norm α' + 1` with `norm α' < 2^{Nlog α'+1}`
+is paid by the INNER Hardy value, which exceeds `2^{Nlog α' + q}` (`H_{ω^{e₀+2}} ≥ H_{ω²} ≥ 2^·`
+since `e₀ ≠ 0`).  `Nlog α'` stays in the argument — the caller bounds it from the
+`Zef2TCProv` certificate. -/
+theorem ewIter_dom_pad_levelcap {f : ℕ → ℕ} {e₀ γ : ONote} {c : ℕ}
+    (he₀ : e₀.NF) (he₀0 : e₀ ≠ 0) (hγ : γ.NF)
+    (hdom : ∀ z, f z ≤ hardy (Wpow e₀) (z + c)) :
+    ∃ q : ℕ, ∀ (α' : ONote), α'.NF → α' ≤ γ → ∀ x,
+      ewIter f α' x
+        ≤ hardy (Wpow (e₀ + 2 + 1 + γ + 1))
+            (hardy (Wpow (e₀ + 2)) (Nlog α' + x + q)) := by
+  haveI := he₀
+  haveI : (2 : ONote).NF := nf_ofNat 2
+  haveI hNFe2 : (e₀ + 2).NF := ONote.add_nf e₀ 2
+  haveI hNFe21 : (e₀ + 2 + 1).NF := ONote.add_nf (e₀ + 2) 1
+  haveI := hγ
+  haveI hNFg : (e₀ + 2 + 1 + γ).NF := ONote.add_nf (e₀ + 2 + 1) γ
+  haveI hNFL : (e₀ + 2 + 1 + γ + 1).NF := ONote.add_nf (e₀ + 2 + 1 + γ) 1
+  have he₀pos : (1 : Ordinal) ≤ e₀.repr :=
+    Order.one_le_iff_ne_zero.mpr
+      (fun h0 => he₀0 (repr_inj.mp (by rw [h0, repr_zero])))
+  refine ⟨(norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+      + (normSum (e₀ + 2 + 1) + 1) + 2, fun α' hα' hle x => ?_⟩
+  haveI := hα'
+  haveI hNFA : (e₀ + 2 + 1 + α').NF := ONote.add_nf (e₀ + 2 + 1) α'
+  have h0 := ewIter_hardy_le_of_dom_pad he₀ he₀0 hdom α' hα' x
+  have h1 : ewIter f α' x
+      ≤ hardy (Wpow (e₀ + 2 + 1 + α'))
+          (hardy (Wpow (e₀ + 2))
+            (Nlog α' + x + ((norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1)
+              + norm (e₀ + 2) + 8 + c) + (normSum (e₀ + 2 + 1) + 1) + 2))) :=
+    le_trans h0 (hardy_monotone _ (hardy_monotone _ (by omega)))
+  -- the inner Hardy value pays the outer norm gate
+  have hY2 : 2 ^ (Nlog α' + x + ((norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1)
+        + norm (e₀ + 2) + 8 + c) + (normSum (e₀ + 2 + 1) + 1) + 2))
+      ≤ hardy (Wpow (e₀ + 2)) (Nlog α' + x + ((norm (e₀ + 1) + norm e₀
+        + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+        + (normSum (e₀ + 2 + 1) + 1) + 2)) := by
+    refine le_trans (two_pow_le_hardy_Wpow2 _) ?_
+    have hlt2 : (ofNat 2 : ONote) < e₀ + 2 := by
+      rw [lt_def, ONote.repr_add e₀ 2, repr_ofNat,
+        show ((2 : ONote)).repr = ((2 : ℕ) : Ordinal) from repr_ofNat 2]
+      have h1lt : (1 : Ordinal) < e₀.repr + 1 := lt_of_le_of_lt he₀pos (lt_add_one _)
+      have hsucc : (1 : Ordinal) + 1 < (e₀.repr + 1) + 1 := by
+        rw [Ordinal.add_one_eq_succ, Ordinal.add_one_eq_succ]
+        exact Order.succ_lt_succ h1lt
+      calc ((2 : ℕ) : Ordinal) = 1 + 1 := by push_cast; exact one_add_one_eq_two.symm
+        _ < (e₀.repr + 1) + 1 := hsucc
+        _ = e₀.repr + ((2 : ℕ) : Ordinal) := by
+            rw [add_assoc, one_add_one_eq_two]; push_cast; rfl
+    have hn2 : norm (Wpow (ofNat 2)) = 2 := by
+      simp [Wpow, ofNat_succ, norm_oadd]
+    exact hardy_le_of_lt (Wpow_NF (nf_ofNat 2)) (Wpow_NF hNFe2) (Wpow_lt hlt2)
+      (by rw [hn2]; omega)
+  have hnormW : norm (Wpow (e₀ + 2 + 1 + α'))
+      ≤ normSum (e₀ + 2 + 1) + norm α' + 1 := by
+    show norm (oadd (e₀ + 2 + 1 + α') 1 0) ≤ _
+    rw [norm_oadd]
+    have hna := norm_add_le (e₀ + 2 + 1) α'
+    simp only [norm_zero, PNat.one_coe]
+    omega
+  have hnorm_a : norm α' < 2 ^ (Nlog α' + 1) := norm_lt_two_pow_Nlog α'
+  -- 2-power arithmetic: P·q pays K₀ + P
+  have hgate : norm (Wpow (e₀ + 2 + 1 + α'))
+      ≤ hardy (Wpow (e₀ + 2)) (Nlog α' + x + ((norm (e₀ + 1) + norm e₀
+        + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+        + (normSum (e₀ + 2 + 1) + 1) + 2)) := by
+    refine le_trans hnormW (le_trans ?_ hY2)
+    · -- normSum(e₀+2+1) + norm α' + 1 ≤ 2^(Nlog α' + x + q)
+      have hsplit : 2 ^ ((Nlog α' + 1) + ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1))
+          ≤ 2 ^ (Nlog α' + x + ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 2)) :=
+        Nat.pow_le_pow_right (by omega) (by omega)
+      have hpow_add : 2 ^ ((Nlog α' + 1) + ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1))
+          = 2 ^ (Nlog α' + 1) * 2 ^ ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1) := pow_add 2 _ _
+      have hP2 : 2 ≤ 2 ^ (Nlog α' + 1) := by
+        calc 2 = 2 ^ 1 := rfl
+          _ ≤ 2 ^ (Nlog α' + 1) := Nat.pow_le_pow_right (by omega) (by omega)
+      have hQq : (norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1
+          ≤ 2 ^ ((norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1) :=
+        Nat.le_of_lt Nat.lt_two_pow_self
+      have hmul : 2 ^ (Nlog α' + 1) * ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1)
+          ≤ 2 ^ (Nlog α' + 1) * 2 ^ ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1) :=
+        Nat.mul_le_mul_left _ hQq
+      have hexpand : 2 ^ (Nlog α' + 1) * ((norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + (normSum (e₀ + 2 + 1) + 1) + 1)
+          = 2 ^ (Nlog α' + 1) * (norm (e₀ + 1) + norm e₀
+            + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 + c)
+            + 2 ^ (Nlog α' + 1) * (normSum (e₀ + 2 + 1) + 1)
+            + 2 ^ (Nlog α' + 1) := by ring
+      have hK : normSum (e₀ + 2 + 1) + 1
+          ≤ 2 ^ (Nlog α' + 1) * (normSum (e₀ + 2 + 1) + 1) :=
+        Nat.le_mul_of_pos_left _ (by omega)
+      omega
+  exact le_trans h1 (hardy_le_of_lt (Wpow_NF hNFA) (Wpow_NF hNFL)
+    (Wpow_lt (by
+      rw [lt_def, ONote.repr_add (e₀ + 2 + 1) α',
+        show (e₀ + 2 + 1 + γ + 1).repr = (e₀ + 2 + 1).repr + γ.repr + 1 by
+          rw [ONote.repr_add (e₀ + 2 + 1 + γ) 1, ONote.repr_add (e₀ + 2 + 1) γ,
+            ONote.repr_one]
+          push_cast
+          rfl]
+      calc (e₀ + 2 + 1).repr + α'.repr
+          ≤ (e₀ + 2 + 1).repr + γ.repr := (add_le_add_iff_left _).mpr (repr_le_repr hle)
+        _ < (e₀ + 2 + 1).repr + γ.repr + 1 := lt_add_one _))
+    hgate)
+
 #print axioms GoodsteinPA.HardyMajorization.dom_pad_max
 #print axioms GoodsteinPA.HardyMajorization.Sstar_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.two_pow_le_hardy_Wpow2
+#print axioms GoodsteinPA.HardyMajorization.ewIter_dom_pad_levelcap
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewRootSlot_dom_pad
