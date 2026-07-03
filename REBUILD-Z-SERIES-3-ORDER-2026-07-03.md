@@ -117,8 +117,10 @@ Un-diff-verified ledger claims. Idle/padding laps.
 
 ## Fire shape (operator)
 
-`--max-laps 12 --max-duration 10h --review-every 3 --allow-stop` (grind estimates run 2–4×
-optimistic; the lap/duration caps bound it; Lane E alone can absorb any surplus). Expected
+`--max-laps 12 --max-duration 10h --model fable --effort low --review-every 4 --allow-stop`
+(Fable 5 on low — validated by Series 2, where the gates held and two false statements were
+caught; grind estimates run 2–4× optimistic; the lap/duration caps bound it; Lane E alone can
+absorb any surplus). Expected
 value: N-2 lands the pass (⇒ rungs P+R go green), D-3 lands rung D, E banks the draft + probe +
 early embedding bricks, W shrinks the splice sorry to the E-seam — with the next judge pass
 ruling (Ax2) and ratifying the rung-E statement.
