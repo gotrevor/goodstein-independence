@@ -202,3 +202,31 @@ ratified; the `Zef2T` adoption decision stays with the rung-E ruling.
 
 **Ladder state**: rungs P + R + **D** GREEN.  Remaining: E-0/E-1 (rung E statement + Ax2 probe
 — the vacuity theorem IS most of the Ax2-need answer), W-1 (splice composition).
+
+---
+
+## Block 5 — E-0 EXECUTED: rung-E statement DRAFT + Ax2-need probe ANSWERED YES (lap 199b)
+
+**File**: `wip/E0Ax2NeedProbe.lean` (src untouched; DRAFT marked DRAFT). Claims diff-verifiable.
+
+1. **Ax2-need probe — YES, kernel-proven at the current `Nlog` gates.** `Zef2T` re-cloned
+   post-swap (verbatim `Zef2` constructors + `trueRel`/`trueNrel`; `Zef2T.gate`, `Zef2T.ofZef2`
+   proven). The concrete pair the order asked for: `zef2T_derives_paRefl` — the PA
+   equality-axiom leaf `{∀x (x = x)}` closes in `Zef2T` at rank 0 (root ordinal 1, slot `·+1`,
+   one `allω` + `trueRel` leaves); `zef2_not_derives_paRefl` — `Zef2` provably CANNOT (from
+   lap-199's spine-head theorem via `zef2_rank0_singleton_underivable`: ANY singleton is
+   uniform-spine, hence rank-0 underivable in `Zef2`). All standard triple. B(iii) confirmed
+   per-leaf AND globally: **the rung-E embedding must target `Zef2T`**; adoption stays with the
+   judge.
+2. **Rung-E statement DRAFT** (`embedding_Zef2T_DRAFT`, typechecks, body `sorry`, wip-only):
+   source `hpa : 𝗣𝗔 ⊢ ↑goodsteinSentence`; budgets `∃ B d e` EXISTENTIAL and instance-uniform
+   (W3 discipline); per-instance NF ordinal + operator inside `∀ m`; target `Zef2T` at slot
+   `ewRootSlot e B`; `Γ_G` bound CONCRETELY to `{goodsteinBodyE/[nm m]}` with the faithfulness
+   anchor `goodsteinSentence_eq_all_body : goodsteinSentence = ∀⁰ goodsteinBody` (`rfl`-grade,
+   kernel-checked — no improvised translation). Flagged alternative for the ruling: hoist `∃ α`
+   uniform (E–W Lemma 33).
+3. **Consequence for the ruling**: with rung D vacuous over `Zef2` (block 4) and the leaves
+   requiring (Ax2), the judged (Ax2) adoption now carries the WHOLE pipeline: on adoption,
+   P/R read-off obligations re-home to `Zef2T` at the measured Stage-B costs (reduction
+   mechanical, read-offs native re-proof — spine-head vacuity intentionally does not survive
+   (Ax2)).
