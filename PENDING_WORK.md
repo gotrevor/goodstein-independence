@@ -2,6 +2,22 @@
 
 ## LAP 195 (grind, lane D) — `readoffD_trapped` NARROWED in-kernel to the NON-MONOTONE-MATRIX case (branch-0 sharp bound via `rel1 f 0 = f`)
 
+> ⚠️ **BUILD-GATE CORRECTION (verify this before trusting any `OperatorZef2` green):** `OperatorZef2`
+> is **NOT** in the `lake build GoodsteinPA` dependency graph — NOTHING in the `GoodsteinPA` lib root
+> imports it (it is the parallel Route-B calculus). It is compiled only via the **second lean_lib
+> `GoodsteinPABlueprint`** (`src/GoodsteinPABlueprint.lean:10 import GoodsteinPA.OperatorZef2`). So
+> `lake build GoodsteinPA` (1328 jobs) reports 🟢 **without recompiling `OperatorZef2`** — editing it
+> and running only that command verifies a STALE olean. **Correct gate = `lake build` (both libs,
+> 1341 jobs) or `lake build GoodsteinPA.OperatorZef2` / `lake build GoodsteinPABlueprint`.** Prior
+> handoffs' "Build 🟢 `lake build GoodsteinPA`" line is insufficient for Route-B edits.
+
+**Also banked this lap (sorry-free, axiom-clean `[propext, Classical.choice, Quot.sound]`):**
+`readoffD_trapped_of_mono` — the residue is DISCHARGED when the local monotone-instance condition
+`atomTrue (χ/[nm 0]) → atomTrue (∀⁰ χ)` holds (then `h0` contradicts `hfalse`). Proves the branch-0
+mechanism fully closes the well-behaved (downward-closed-guard) fragment without E–W's (Ax2) — a
+ready building block for a monotone-guarded specialization of `readoff_delta0_Zef2`.
+
+
 Landed a real narrowing of the sole rung-D residue (build 🟢 1328, headline undrifted, sorryAx OFF;
 commit on `plan`). **The whole monotone/branch-0-false portion of the trap is now DISCHARGED
 in-kernel**, isolating the obstruction to a strictly smaller case.

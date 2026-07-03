@@ -1017,6 +1017,25 @@ theorem readoffD_trapped {φ χ : SyntacticSemiformula ℒₒᵣ 1}
     ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
   sorry
 
+/-- **The residue is SORRY-FREE under the local monotone-instance condition** (lap-195).  The
+branch-0 mechanism (`rel1 f 0 = f`) already discharges every case where `χ/[nm 0]` is *false*; the
+only survivor is `χ/[nm 0]` TRUE while `∀⁰ χ` is false.  If the matrix `χ` satisfies the natural
+"`0`-instance is the easiest" condition `atomTrue (χ/[nm 0]) → atomTrue (∀⁰ χ)` (a downward-closed
+guard, as for the Goodstein bounded-`∀` clauses), that survivor is contradictory: `h0` forces
+`atomTrue (∀⁰ χ)`, contradicting `hfalse`.  So under `hmono` the trap NEVER fires — this is the exact
+fragment the structural read-off reaches without E–W's (Ax2).  A ready building block for a
+monotone-guarded specialization of `readoff_delta0_Zef2`. -/
+theorem readoffD_trapped_of_mono {φ χ : SyntacticSemiformula ℒₒᵣ 1}
+    {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ₀ : Seq} {β : ℕ → ONote}
+    (_hbranch : ∀ n, Zef2 (β n) e (adjoin H n) (rel1 f n) 0 (insert (χ/[nm n]) Γ₀))
+    (_htrap : (∃⁰ φ) ∈ Γ₀)
+    (hfalse : ¬ atomTrue (∀⁰ χ))
+    (_hΓ₀ : ∀ ψ ∈ Γ₀, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ)
+    (h0 : atomTrue (χ/[nm 0]))
+    (hmono : atomTrue (χ/[nm 0]) → atomTrue (∀⁰ χ)) :
+    ∃ n ≤ f 0, atomTrue (φ/[nm n]) :=
+  absurd (hmono h0) hfalse
+
 /-- **`readoffD_aux` — the strengthened read-off invariant** (falsity form).  From a rank-0 `Zef2`
 derivation of any `Γ` all of whose members are either the goal existential `∃⁰ φ` or standard-model
 FALSE, extract the bounded witness `n ≤ f 0` with `φ/[nm n]` true.  Proven by induction on the
