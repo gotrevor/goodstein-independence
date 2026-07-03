@@ -61,15 +61,31 @@ Cross-checked the two source read-offs:
 - **E–W's Lemma 31** dodges it only via **(Ax2)** (verify a true Δ₀ matrix leaf SEMANTICALLY, never
   descend it) — the rule `Zef2` lacks.
 
-**Conclusion (escalation-grade):** the generic `readoff_delta0_Zef2` residue is closable by exactly
-two routes, both substantial: **(A)** add (Ax2) to `Zef2` [architect-gated, shared with rung E]; or
-**(B)** re-cast `readoffD_aux`'s *internal* invariant as a growth-coupled one (Towsner (ii)-style,
-tying the witness bound to `ewN α` / the `ewIter` tower and the banked Part-2 fast-growing lower
-bound) — this reformulates MY OWN helper (not the ratified `readoff_delta0_Zef2` statement), so it is
-IN-SCOPE proof-only work, but it is a multi-lap effort coupling to the Hardy/Wainer bank.  **Route B
-is the mandated proof-only continuation** (the top-level statement is untouched); begin by stating the
-growth-coupled `readoffD_aux'` invariant and proving `axL`/`exI`/`wk`/`weak`, isolating the coupling
-lemma at the `allω` node.
+**Conclusion (escalation-grade) — CORRECTED after reading the `ewIter`/`ewN` gate algebra
+(`EwIter.lean`) and the splice consumer (`wainer_splice_Zef2`):** the ratified conclusion `n ≤ f 0`
+is **ordinal-INDEPENDENT**, but the structural `allω` descent can only ever achieve an
+**ordinal-DEPENDENT** bound: branch `k₀`'s witness is bounded by its slot-at-0 `rel1 f k₀ 0 = f k₀`
+(and deeper, `f(max path index)`), which `ewIter_lower`-monotonicity aggregates to `≤ ewIter f α 0` —
+**strictly weaker than `f 0`** for `α ≠ 0` / monotone growing `f`.  No structural invariant
+(growth-coupled or not) recovers `f 0`; that bound genuinely relies on E–W's **(Ax2)** semantic
+matrix-verification shortcut (which stops the descent).  *(So the earlier "Route B growth-coupled
+invariant recovers `f 0`" idea is REFUTED — an ordinal drop `β k₀ < α` cannot lower the witness's
+own slot-at-0.)*  Hence the residue closes by exactly two routes, **both judged/architect-owned**:
+- **(A) add (Ax2) to `Zef2`** — architect-gated, shared with rung E's Ax2-adequacy.  **Sanctioned
+  next step = a WIP-ONLY probe** (handoff-194c NEXT option 1): in `wip/`, add the (Ax2) true-literal
+  rule to a copy of `Zef2` and re-prove the read-off à la E–W Lemma 31 (extract top-`∃⁰φ` via `exI` at
+  slot `f`, verify `φ/[nm n]` via `sound0`, NO `allω` descent).  Demonstrating it discharges the
+  read-off is decisive escalation input.  **Do NOT add (Ax2) to `src`.**
+- **(B) amend the statement** to the achievable `n ≤ ewIter f α 0` (which the splice consumes an
+  `ewIter … α 0` quantity anyway — check whether the weaker bound suffices for `wainer_splice_Zef2`).
+  This changes the R-4-ratified `readoff_delta0_Zef2` conclusion ⇒ a judged amendment, NOT
+  self-ratifiable.
+
+**Disposition:** lane D's generic residue is **GATED** (the DIRECTION lap-192 premise "sole open
+PROOF-only lane" is refuted for the residue by this lap's algebra check).  The maximal structural
+fragment IS banked sorry-free (`readoffD_trapped_of_mono` + the branch-0 narrowing).  The productive
+in-scope move that remains is the **wip-only (Ax2) probe** (route A) — escalation input for the
+series-end judge, who owns both the (Ax2) decision (D & E share it) and the option-(B) restatement.
 
 ## LAP 194c (grind, lane D) — `readoffD_trapped` ROOT-CAUSED via the E–W Lemma 31 PROOF: it needs the (Ax2) amendment (architect-gated, SHARED with rung E)
 
