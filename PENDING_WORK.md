@@ -17,8 +17,18 @@
   peano_not_proves_goodstein = [propext, Classical.choice, Quot.sound]`** — `goodstein_implies_consistency`
   DROPPED off the headline. Node 16 `clean`; `blueprint_audit` PASSED (16/16, full footprint clean).
   ⇒ **2 of 3 STOP conditions MET** (headline clean + audit green); remaining = `lean-sorry src/ = 0`.
-- ⏭️ **NEXT = SERIES-5 Lane C** (DIRECTION SERIES-4 judge block §3): prune `src` sorries → 0.
-  All remaining sorries are now OFF the clean headline (route-A/crux-2 girder + E1 read-off trap).
+- ✅ **Lane C progressed 20 → 13** (commits 10647fd, 34ab0f8, 19b09fc): retired the dead
+  TC-embedding draft cluster (DRAFT/DRAFT2/master+axm/all) and TC read-off pair
+  (readoffTC_core/readoff_delta0_Zef2TC) — both superseded by `embedding_Zef2TC_V3` /
+  value-budget read-off (**E1EmbeddingGrind now sorry-free**); discharged `wainer_splice_Zef2`
+  by re-point (**WainerLadder sorry-free**). All compiler-verified.
+- 🚦 **STOP status: 2 of 3 met** — headline `[propext,choice,Quot.sound]` ✅, audit ✅,
+  `lean-sorry src/ = 13` ⏳. The remaining 13 are the **superseded Route-A crux-2 frontier**
+  (Crux2Blueprint ×10 = Buchholz cut-elim core, DescentSemantic Rathjen §3-in-M, OperatorZeh
+  pin-3) — heroic-open research, NOT dead code. Zeroing them = either heroic multi-lap proof OR
+  a governance-scale **wholesale Route-A retirement** (delete `goodstein_implies_consistency`
+  axiom + routeA + crux-2 apparatus + their blueprint nodes). See `HANDOFF-2026-07-03-lap213.md`
+  §disposition — this belongs to an altitude/judge lap, not grind. Headline objective is DONE.
   - Lane C: prune `src` sorries toward 0 (`lean-sorry src/`). Live: Crux2Blueprint (10),
     E1EmbeddingGrind (5: readoffTC_core `allω`-trap + W1/W2 `axm`), WainerLadder, Reduction,
     OperatorZeh (pin-3), DescentSemantic:550 (Rathjen §3 in M). ⚠️ Block-4 retirement proposals
