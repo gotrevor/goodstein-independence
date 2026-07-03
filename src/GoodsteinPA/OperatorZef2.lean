@@ -1165,38 +1165,16 @@ theorem readoff_delta0_Zef2 {φ : SyntacticSemiformula ℒₒᵣ 1}
   rw [Finset.mem_singleton] at hψ
   exact Or.inl hψ
 
-/-- **RUNG E (L-E) `embedding_Zef2`** — the embedding rung (E–W Lemmas 32–36), re-based onto
-`Zef2` per the JUDGE AMENDMENTS (ruling §5):
-  (i)  the budget is EXISTENTIAL (`∃ B`, `Zef2`/provability are Prop — no function-of-derivation);
-  (ii) the slot is `ewRootSlot`-class (the budgeted root slot), NOT an arbitrary-`Zeh` transport.
+/- **Rungs E (embedding) and W (splice) MOVED to `GoodsteinPA/WainerLadder.lean`** (Series-2
+Stage A, order R-5/R-6).
 
-**ESCALATION FLAG (potential trap 9, architect-owned).**  A FAITHFUL statement must bind the
-target sequent `Γ_G` to the concrete `𝗣𝗔`-goodstein translation and hypothesize
-`𝗣𝗔 ⊢ ↑goodsteinSentence` (the PA-proof source, ruling §5(ii)).  That translation apparatus is
-not available at `Zef2`-statement level this lap (it lives in the `Statement`/`WainerRoute`
-modules and would cross-import).  Rather than IMPROVISE a possibly-unfaithful concrete
-translation, the rung is stated PARAMETRICALLY over `Γ_G` with the judge's existential-budget +
-`ewRootSlot`-class shape; binding `Γ_G` to the PA translation is the escalation locus.  See
-`REBUILD-Z-LAP8-VERDICT.md` §E.  **Ledger: debt, "8-20", 65** (rung E). -/
-theorem embedding_Zef2 (Γ_G : Seq) (e : ONote) (heNF : e.NF) :
-    ∃ B : ℕ, ∃ α : ONote, α.NF ∧ ∃ d : ℕ, ∃ H : ONote → Prop,
-      Zef2 α e H (ewRootSlot e B) d Γ_G := by
-  sorry
-
-/-- **RUNG W (L-W) `wainer_splice_Zef2`** — the splice: compose E → R → D and convert the exit
-witness bound to the `hardy`/`fastGrowing` vocabulary via the banked Hardy Lemma-19 brackets,
-contradicting the banked lower bound `goodsteinLength_dominates_fastGrowing`.  This is the rung
-that flips `wainer_bound_of_pa_proves_goodstein` from `axiom` to `theorem`.
-
-Stated PARAMETRICALLY over the exit witness `w` and the target growth function `G` (the concrete
-`goodsteinLength`/`goodsteinSentence` binding lives in `WainerRoute` and would cross-import): from
-the rung composites' exit bound (an `ewIterTower`-class iterate at 0) plus the two-sided Hardy
-brackets, produce a fixed-`fastGrowing` `EventuallyLE`-style bound.  The composition is REAL where
-the rung statements allow; the `sorry` sits exactly where the rung pins (E/R/D) are consumed.
-**Ledger: debt, "2-4", 75** (rung W). -/
-theorem wainer_splice_Zef2 (e : ONote) (heNF : e.NF) (B : ℕ) (α : ONote) (hαNF : α.NF) :
-    ∃ o : ONote, o.NF ∧ ∀ N : ℕ, ewIter (ewRootSlot e B) α 0 ≤ N →
-      ewIter (ewRootSlot e B) α 0 ≤ fastGrowing o N := by
-  sorry
+- The old parametric `wainer_splice_Zef2 (e B α …) : … ewIter (ewRootSlot e B) α 0 ≤ …` was the
+  lap-8-ruling L-W VOIDed-as-trivial shape; it is DELETED here and RESTATED at its ratified
+  non-parametric shape (`(𝗣𝗔 ⊢ ↑goodsteinSentence) → ∃ o, …`) in `WainerLadder.lean`, which can
+  import the translation apparatus without the `OperatorZef2`-level cross-import obstruction.
+- The old parametric `embedding_Zef2 (Γ_G e …)` was the lap-8-ruling §4 VOIDed placeholder (R-6
+  debt); its faithful, translation-bound restatement is the Stage-B rung-E statement lap and
+  stays a `wip/Ax2AdequacyProbe.lean` draft until the judge ratifies it.  A `TODO` for it lives
+  in `WainerLadder.lean`. -/
 
 end GoodsteinPA.OperatorZeh

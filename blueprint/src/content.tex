@@ -370,7 +370,6 @@ gated on the shared (Ax2)/restatement decision (ruling \S4.2).
 \begin{theorem}\label{thm:zeh_rank_zero}
   \lean{GoodsteinPA.OperatorZeh.rankToZero_Zef2}
   \uses{thm:zeh_pass}
-  \notready
 \textbf{Rank-to-zero (ladder rung R).}  Iterate the elimination pass down the cut rank
 \(d \to 0\): ordinal tower \(\mathrm{expTower}^{[d]}\), slot tower the composed E--W iterate.
 DISCHARGED SERIES-1 Stage~4 as a real \(\texttt{rankToZeroAux}\) induction --- proven
@@ -390,6 +389,7 @@ The long pole after the pass.  (\texttt{WAINER-LADDER-2026-07-02.md} rung E.)
 \end{theorem}
 
 \begin{theorem}\label{thm:wainer_splice}
+  \lean{GoodsteinPA.WainerLadder.wainer_splice_Zef2}
   \uses{thm:zeh_embedding, thm:zeh_rank_zero, thm:zeh_readoff_delta0, def:goodstein_length}
   \notready
 \textbf{The splice (ladder rung W): \(\texttt{wainer\_bound}\) as a theorem.}  Compose
