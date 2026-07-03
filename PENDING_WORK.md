@@ -35,9 +35,26 @@ judge)**:
 - (b) **φ-shape argument** — show the embedding's `goodsteinBodyE = ∃⁰(matrix)` has no leading
   substituted bounded-`∀`, so the vacuous-`exI`→`allω` path that buries `∃⁰ φ` never arises ⇒ the
   trap is vacuous for the pipeline's derivations (cleaner if it holds; inspect `goodsteinBody`).
-- Then **E-seam piece 2** = `wip/SpliceAssembly.lean`: compose `embedding_Zef2TC_V3` →
-  `rankToZero_TC` → `readoff_delta0_Zef2TC` into `wainer_splice_Zef2`'s shape. Slot plumbing: the
-  embedding outputs `rel1 (ewRootSlot e B) K` (EwF1 ⇒ inflationary ⇒ feeds `f0_le_ewIter`).
+- Then **E-seam piece 2** — the composition, homed in `wip/E1EmbeddingGrind.lean` (E1EmbeddingGrind
+  is NOT an importable module, so no separate `SpliceAssembly.lean`; append here). Two sub-parts:
+  - **(2a) STRUCTURAL wiring → per-`m` bounded witness** (mostly plumbing, provable now modulo the
+    piece-1 sorry): `embedding_Zef2TC_V3 h` gives per `m`: `K, H, Cl H α, D : Zef2TC α e H
+    (rel1 (ewRootSlot e B) K) d {goodsteinBodyE/[nm m]}`. Root slot is **NOT EwF1** (`rel1` plateau
+    below `K` breaks StrictMono) ⇒ feed **`rankToZeroAuxTC`** (EwLow entry) NOT `rankToZero_TC`:
+    `hmono = rel1_monotone (ewRootSlot_f1 e B).monotone K`, `hinfl = rel1_infl … .infl K`,
+    `hlow = rel1_low … K`, `h3 = three_le_rel1_rootSlot e B K` (**BANKED lap 205**). → `Zef2TCProv
+    (collapseIter d α) e H (ewIterTower (rel1 (ewRootSlot e B) K) d α) 0 {…}`; unpack to `Zef2TC α'
+    … 0 {…}` (`α' ≤ collapseIter d α`). Rewrite `goodsteinBodyE/[nm m] = ∃⁰ φ_m` (via
+    `Rewriting.app_exs` + `goodsteinBody = ∃⁰ inner`; goodsteinBody `= ∃ N, !igoodsteinDef 0 m N`).
+    Apply `readoff_delta0_Zef2TC (ewIterTower_infl hinfl α d) D'` (**`ewIterTower_infl` BANKED lap
+    205**) → `∃ N ≤ ewIter (ewIterTower … d α) α' 0, atomTrue (φ_m/[nm N])`.
+  - **(2b) GROWTH conversion → `wainer_splice_Zef2`** (the substantial multi-lap part): convert the
+    concrete `ewIter (ewIterTower …) α' 0` bound + `atomTrue (φ_m/[nm N])` ("goodstein(m) hits 0 by
+    step N") into `∃ o NF, EventuallyLE goodsteinLength (fastGrowing o)` via the banked Hardy
+    Lemma-19 brackets (`src/GoodsteinPA/Hardy.lean`: `hardy_omega_pow_lt_fastGrowing`,
+    `hardy_add_le_comp`). This is the E–W growth-domination glue; scope it against `WainerRoute`'s
+    `EventuallyLE`/`goodsteinLength`. rung-E statement promotion (splice sorry-free) is
+    post-judge-ratification.
 - rung-E statement + `Zef2TC` amendment + read-off statement shape (guard vs φ-shape) → next judge
   pass. Do NOT self-ratify into src.
 

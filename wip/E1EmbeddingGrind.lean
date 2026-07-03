@@ -4186,6 +4186,27 @@ theorem sound0_TC : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c
       intro hc; subst hc
       exact absurd hcompl (by omega)
 
+/-! ### E-seam piece (2) prerequisites: the root-slot EwLow facts + tower inflationarity
+
+The composition `embedding_Zef2TC_V3 → rankToZeroAuxTC → readoff_delta0_Zef2TC` runs at the root
+slot `rel1 (ewRootSlot e B) K`, which is NOT `EwF1` (the `rel1` plateau below `K` breaks
+`StrictMono`) — so it feeds `rankToZeroAuxTC` (the EwLow entry: `Monotone ∧ infl ∧ 2m+1 ∧ 3≤·0`),
+NOT the `rankToZero_TC` `EwF1` wrapper.  `readoff_delta0_Zef2TC` then needs the OUTPUT tower slot
+`ewIterTower … d α` inflationary.  These two lemmas bank exactly those prerequisites. -/
+
+/-- `3 ≤ (rel1 (ewRootSlot e B) K) 0` — the root slot pays `rankToZeroAuxTC`'s `3 ≤ f 0` gate
+(`ewRootSlot _ _ x = 2·(…) + 3 ≥ 3`). -/
+theorem three_le_rel1_rootSlot (e : ONote) (B K : ℕ) :
+    3 ≤ (rel1 (ewRootSlot e B) K) 0 := by
+  simp only [rel1, ewRootSlot]; omega
+
+/-- **`ewIterTower_infl`** — the `d`-fold slot tower inherits inflationarity from its base slot
+(each pass is `ewIter`, inflationary by `ewIter_infl`).  Feeds `readoff_delta0_Zef2TC`'s `hinfl`. -/
+theorem ewIterTower_infl {f : ℕ → ℕ} (hinfl : ∀ m, m ≤ f m) (α : ONote) :
+    ∀ (d : ℕ) (m : ℕ), m ≤ ewIterTower f d α m
+  | 0, m => hinfl m
+  | (d + 1), m => ewIter_infl (ewIterTower_infl hinfl α d) (collapseIter d α) m
+
 /-! ### E-seam piece (1): the BOUNDED rank-0 `Zef2TC` read-off
 
 `sound0_TC` gives the UNBOUNDED true member of a rank-0 sequent; the read-off needs the WITNESS
@@ -4399,3 +4420,5 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.f0_le_ewIter
 #print axioms GoodsteinPA.E1EmbeddingGrind.readoffTC_core
 #print axioms GoodsteinPA.E1EmbeddingGrind.readoff_delta0_Zef2TC
+#print axioms GoodsteinPA.E1EmbeddingGrind.three_le_rel1_rootSlot
+#print axioms GoodsteinPA.E1EmbeddingGrind.ewIterTower_infl
