@@ -4971,8 +4971,123 @@ theorem readoff_value_goodstein'
   refine ⟨χ, hχeq, hchiS, fun P V hP_mono hroot => ?_⟩
   exact readoff_value_pipeline' hP_mono heNF hαNF hαH D V hroot
 
+/-! ### Lap 210 (SERIES-4 S-5) — the EventuallyLE package at the axiom's VERBATIM type
+
+Hypothesis-passing across the sibling wip modules (they cannot import each other; each
+hypothesis is the VERBATIM statement of a theorem proven kernel-clean in its module):
+- `Hcert` = `GoodsteinPA.ReadoffValueGate.gated_certificate_uniform` (`Gated` is this file's
+  duplicate of the same definition),
+- `HSdom` = `GoodsteinPA.HardyMajorization.Scirc_dom_pad`,
+- `Hconv` = `GoodsteinPA.HardyMajorization.master_conversion`.
+The read-off (`readoff_value_goodstein'`), the m-uniformization, and the semantic link are
+discharged HERE.  The conclusion is the exact type of the sole route axiom
+`WainerRoute.wainer_bound_of_pa_proves_goodstein` (`src/GoodsteinPA/WainerRoute.lean:119`). -/
+theorem wainer_bound_witness
+    (Hcert : ∀ {G : ℕ → ℕ}, Monotone G → (∀ x, x + 1 ≤ G x) →
+      (∀ a b, a + b ≤ G (max a b)) → (∀ a b, a * b ≤ G (max a b)) →
+      ∀ (body : SyntacticSemiformula ℒₒᵣ 2), ∃ k : ℕ, ∀ (m V : ℕ)
+        (χ : SyntacticSemiformula ℒₒᵣ 1),
+        χ = (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q ▹ body →
+        Arithmetic.Hierarchy 𝚺 1 (∃⁰ χ) →
+        ∃ P : ℕ → ℕ, Monotone P ∧ Gated P V (∃⁰ χ) ∧
+          ∀ z, P z ≤ G^[k] (max (max V m) z))
+    (HSdom : ∀ (e : ONote), e.NF → ∀ (Bb d k : ℕ) (α : ONote), α.NF →
+      ∃ (E : ONote) (c : ℕ), E.NF ∧ E ≠ 0 ∧
+        ∀ z, max (ewIterTower (ewRootSlot e Bb) d α z)
+            ((hardy (oadd (ofNat 2) 1 0))^[k] z)
+          ≤ hardy (oadd E 1 0) (z + c))
+    (Hconv : ∀ {S : ℕ → ℕ} {E_S γ : ONote} {c_S : ℕ}, E_S.NF → E_S ≠ 0 → γ.NF →
+      (∀ z, S z ≤ hardy (oadd E_S 1 0) (z + c_S)) → (∀ z, z ≤ S z) → ∀ K₀ : ℕ,
+      ∃ o : ONote, o.NF ∧ ∃ N : ℕ, ∀ m, N ≤ m →
+        ∀ α' : ONote, α'.NF → α' ≤ γ → ∀ n : ℕ,
+          Nlog α' ≤ S (max K₀ m) →
+          n ≤ ewIter S α' (S (max K₀ m)) →
+          n ≤ fastGrowing o m)
+    (h : 𝗣𝗔 ⊢ ↑GoodsteinPA.goodsteinSentence) :
+    ∃ o : ONote, o.NF ∧
+      GoodsteinPA.WainerRoute.EventuallyLE GoodsteinPA.Dom.goodsteinLength
+        (fun n => fastGrowing o n) := by
+  obtain ⟨B, d, K₀, e, α, heNF, hαNF, hall⟩ := readoff_value_goodstein' h
+  -- ONE iterate count k for the whole numeral family, at the FIXED matrix B₀
+  obtain ⟨k, hk⟩ := Hcert (G := Gexp) Gexp_monotone succ_le_Gexp add_le_Gexp_max
+    mul_le_Gexp_max
+    ((Rew.emb : Rew ℒₒᵣ Empty 1 ℕ 1).q ▹
+      ((((↑(LO.FirstOrder.Arithmetic.igoodsteinDef))/[(‘0’ : Semiterm ℒₒᵣ Empty 2), #1, #0])
+        : Semisentence ℒₒᵣ 2)))
+  -- the fixed slot S° and its domination
+  obtain ⟨E_S, c_S, hES, hES0, hSdom⟩ := HSdom e heNF B d k α hαNF
+  have hf1 := ewRootSlot_f1 e B
+  have hTmono : Monotone (ewIterTower (ewRootSlot e B) d α) :=
+    ewIterTower_monotone hf1.monotone hf1.infl α d
+  have hSmono : Monotone (fun x => max (ewIterTower (ewRootSlot e B) d α x)
+      ((hardy (oadd (ofNat 2) 1 0))^[k] x)) :=
+    fun a b hab => max_le_max (hTmono hab) ((Gexp_iter_monotone k) hab)
+  have hSinfl : ∀ x, x ≤ max (ewIterTower (ewRootSlot e B) d α x)
+      ((hardy (oadd (ofNat 2) 1 0))^[k] x) :=
+    fun x => le_trans (le_Gexp_iter k x) (le_max_right _ _)
+  have hγNF : (collapseIter d α).NF := collapseIter_NF hαNF d
+  obtain ⟨o, hoNF, N, hN⟩ := Hconv hES hES0 hγNF hSdom hSinfl K₀
+  refine ⟨o, hoNF, N, fun m hm => ?_⟩
+  obtain ⟨χ, hχeq, hSig, hmain⟩ := hall m
+  have hχB : χ = (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q ▹
+      ((Rew.emb : Rew ℒₒᵣ Empty 1 ℕ 1).q ▹
+        ((((↑(LO.FirstOrder.Arithmetic.igoodsteinDef))/[(‘0’ : Semiterm ℒₒᵣ Empty 2), #1, #0])
+          : Semisentence ℒₒᵣ 2))) :=
+    (Semiformula.exs.inj hχeq).symm
+  obtain ⟨P, hPmono, hPgated, hPle⟩ := hk m 0 χ hχB hSig
+  obtain ⟨α', hle, hα'NF, hNcert, n, hn, htrue⟩ := hmain P 0 hPmono hPgated
+  have hglen : GoodsteinPA.Dom.goodsteinLength m ≤ n :=
+    goodsteinBodyE_semantic_link hχeq htrue
+  -- m-uniformization: fold the rel1-staged tower and the per-m P into the fixed slot
+  have hT_m : ∀ x, ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α x
+      ≤ ewIterTower (ewRootSlot e B) d α (max (max K₀ m) x) :=
+    ewIterTower_rel1_le hf1.monotone hf1.infl (max K₀ m) α d
+  have hP' : ∀ x, P x ≤ (hardy (oadd (ofNat 2) 1 0))^[k] (max (max K₀ m) x) := by
+    intro x
+    refine le_trans (hPle x) ((Gexp_iter_monotone k) (by omega))
+  have hSl : ∀ x, Sslot (ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α) P x
+      ≤ rel1 (fun x => max (ewIterTower (ewRootSlot e B) d α x)
+          ((hardy (oadd (ofNat 2) 1 0))^[k] x)) (max K₀ m) x :=
+    fun x => max_le_max (hT_m x) (hP' x)
+  have hrmono := rel1_monotone hSmono (max K₀ m)
+  have hrinfl := rel1_infl hSinfl (max K₀ m)
+  have hy : Sslot (ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α) P 0
+      ≤ max (ewIterTower (ewRootSlot e B) d α (max K₀ m))
+          ((hardy (oadd (ofNat 2) 1 0))^[k] (max K₀ m)) := by
+    have := hSl 0
+    rwa [show rel1 (fun x => max (ewIterTower (ewRootSlot e B) d α x)
+        ((hardy (oadd (ofNat 2) 1 0))^[k] x)) (max K₀ m) 0
+      = max (ewIterTower (ewRootSlot e B) d α (max K₀ m))
+          ((hardy (oadd (ofNat 2) 1 0))^[k] (max K₀ m)) by
+        show (fun x => max _ _) (max (max K₀ m) 0) = _
+        rw [Nat.max_zero]] at this
+  have h5 := ewIter_mono_slot hSl hrmono hrinfl α'
+    (Sslot (ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α) P 0)
+  have h6 := ewIter_monotone hrmono hrinfl α' hy
+  have h7 := ewIter_rel1_le hSmono hSinfl α' (max K₀ m)
+    (max (ewIterTower (ewRootSlot e B) d α (max K₀ m))
+      ((hardy (oadd (ofNat 2) 1 0))^[k] (max K₀ m)))
+  have h8 : max (max K₀ m) (max (ewIterTower (ewRootSlot e B) d α (max K₀ m))
+      ((hardy (oadd (ofNat 2) 1 0))^[k] (max K₀ m)))
+      = max (ewIterTower (ewRootSlot e B) d α (max K₀ m))
+          ((hardy (oadd (ofNat 2) 1 0))^[k] (max K₀ m)) :=
+    max_eq_right (hSinfl (max K₀ m))
+  rw [h8] at h7
+  have hNcert' : Nlog α' ≤ max (ewIterTower (ewRootSlot e B) d α (max K₀ m))
+      ((hardy (oadd (ofNat 2) 1 0))^[k] (max K₀ m)) := by
+    refine le_trans hNcert (le_trans ?_ (le_max_left _ _))
+    have := hT_m 0
+    rwa [Nat.max_zero] at this
+  have hfinal : n ≤ ewIter (fun x => max (ewIterTower (ewRootSlot e B) d α x)
+      ((hardy (oadd (ofNat 2) 1 0))^[k] x)) α'
+      ((fun x => max (ewIterTower (ewRootSlot e B) d α x)
+        ((hardy (oadd (ofNat 2) 1 0))^[k] x)) (max K₀ m)) :=
+    le_trans hn (le_trans h5 (le_trans h6 h7))
+  exact le_trans hglen (hN m hm α' hα'NF hle n hNcert' hfinal)
+
 end GoodsteinPA.E1EmbeddingGrind
 
+#print axioms GoodsteinPA.E1EmbeddingGrind.wainer_bound_witness
 #print axioms GoodsteinPA.E1EmbeddingGrind.readoff_value_pipeline'
 #print axioms GoodsteinPA.E1EmbeddingGrind.readoff_value_goodstein'
 #print axioms GoodsteinPA.E1EmbeddingGrind.embedding_Zef2TC_V3_linearK
