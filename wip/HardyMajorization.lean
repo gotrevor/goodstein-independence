@@ -1294,11 +1294,124 @@ theorem dom_pad_eventuallyLE {f : ℕ → ℕ} {L : ONote} {C : ℕ} (hL : L.NF)
   ⟨osucc L, osucc_NF hL, C + 3, fun m hm =>
     le_trans (hdom m) (le_of_lt (hardy_pad_lt_fastGrowing_osucc L hL C m hm))⟩
 
+/-- **The fixed pipeline slot `S°` is padded-Hardy-dominated** — `Sstar_dom_pad` at the
+`rel1`-free base and CONCRETE `P = Gexp^[k]` (`Gexp = hardy ω²` written `oadd (ofNat 2) 1 0`
+so the statement is legible without `Wpow`; the m-uniformization moves all `m`-dependence into
+the ARGUMENT, so this single bound serves every `m`). -/
+theorem Scirc_dom_pad (e : ONote) (he : e.NF) (Bb d k : ℕ) (α : ONote) (hα : α.NF) :
+    ∃ (E : ONote) (c : ℕ), E.NF ∧ E ≠ 0 ∧
+      ∀ z, max (ewIterTower (ewRootSlot e Bb) d α z)
+          ((hardy (oadd (ofNat 2) 1 0))^[k] z)
+        ≤ hardy (oadd E 1 0) (z + c) := by
+  haveI := he
+  haveI : (2 : ONote).NF := nf_ofNat 2
+  haveI h1 : (e + 1).NF := ONote.add_nf e 1
+  haveI hL : ((e + 1) + 2).NF := ONote.add_nf (e + 1) 2
+  have hL0 : (e + 1) + 2 ≠ 0 := by
+    intro h
+    have hh := congrArg ONote.repr h
+    rw [ONote.repr_add (e + 1) 2,
+      show ((2 : ONote)).repr = ((2 : ℕ) : Ordinal) from repr_ofNat 2, repr_zero] at hh
+    push_cast at hh
+    exact (lt_of_lt_of_le zero_lt_two le_add_self).ne' hh
+  obtain ⟨E₁, c₁, hE₁, hE₁0, htower⟩ :=
+    ewIterTower_dom_pad hL hL0 (ewRootSlot_dom_pad e he Bb) α hα d
+  obtain ⟨E₂, c₂, hE₂, hE₂0, _, hiter⟩ := hardy_Wpow_iter_dom_pad (ofNat 2) (nf_ofNat 2) k
+  have hiter' : ∀ z, (hardy (oadd (ofNat 2) 1 0))^[k] z ≤ hardy (Wpow E₂) (z + c₂) := hiter
+  obtain ⟨E, c, hE, hE0, _, _, hmax⟩ := dom_pad_max hE₁ hE₂ htower hiter'
+  exact ⟨E, c, hE, hE0, hmax⟩
+
+/-- `2y + q` sits under `H_{ω²}(y)` once `y ≥ max(q,1)` (the Hardy value is `≥ 4y+3`). -/
+theorem two_mul_add_le_hardy_omega_sq {y q : ℕ} (hq : q ≤ y) (hy : 1 ≤ y) :
+    2 * y + q ≤ hardy (oadd (ofNat 2) 1 0) y := by
+  have h := hardy_omega_pow_ofNat 2 y
+  have h2 : fastGrowing (ofNat 2) (y + 1) = 2 ^ (y + 1) * (y + 1) := by
+    rw [show (ofNat 2 : ONote) = 2 from rfl, ONote.fastGrowing_two]
+  rw [h2] at h
+  have h4 : 4 ≤ 2 ^ (y + 1) := by
+    calc 4 = 2 ^ 2 := rfl
+      _ ≤ 2 ^ (y + 1) := Nat.pow_le_pow_right (by omega) (by omega)
+  have hmul : 4 * (y + 1) ≤ 2 ^ (y + 1) * (y + 1) := Nat.mul_le_mul_right _ h4
+  omega
+
+/-- **THE MASTER CONVERSION** (SERIES-4 S-3 capstone, slot-abstract form).  Given ANY slot `S`
+padded-Hardy-dominated and inflationary, ONE fixed `fastGrowing o` eventually dominates every
+value `n` the uniformized read-off produces: `n ≤ ewIter S α' (S (max K₀ m))` at any per-`m`
+`α' ≤ γ` carrying its `Nlog` certificate.  Chain: `ewIter_dom_pad_levelcap` (fixed level, α'
+absorbed) → the `Nlog` certificate + `two_mul_add_le_hardy_omega_sq` absorb the inner argument
+into `Gexp(S(max K₀ m))` (eventually, `m ≥ q`) → three `dom_pad_comp`s collapse the
+Hardy stack to ONE `H_{E₅}(m+c₅)` → `hardy_pad_lt_fastGrowing_osucc`. -/
+theorem master_conversion {S : ℕ → ℕ} {E_S γ : ONote} {c_S : ℕ}
+    (hES : E_S.NF) (hES0 : E_S ≠ 0) (hγ : γ.NF)
+    (hSdom : ∀ z, S z ≤ hardy (oadd E_S 1 0) (z + c_S))
+    (hSinfl : ∀ z, z ≤ S z) (K₀ : ℕ) :
+    ∃ o : ONote, o.NF ∧ ∃ N : ℕ, ∀ m, N ≤ m →
+      ∀ α' : ONote, α'.NF → α' ≤ γ → ∀ n : ℕ,
+        Nlog α' ≤ S (max K₀ m) →
+        n ≤ ewIter S α' (S (max K₀ m)) →
+        n ≤ fastGrowing o m := by
+  haveI := hES
+  haveI : (2 : ONote).NF := nf_ofNat 2
+  haveI hNF2 : (E_S + 2).NF := ONote.add_nf E_S 2
+  haveI hNF21 : (E_S + 2 + 1).NF := ONote.add_nf (E_S + 2) 1
+  haveI := hγ
+  haveI hNFg : (E_S + 2 + 1 + γ).NF := ONote.add_nf (E_S + 2 + 1) γ
+  haveI hNFL : (E_S + 2 + 1 + γ + 1).NF := ONote.add_nf (E_S + 2 + 1 + γ) 1
+  have hSdom' : ∀ z, S z ≤ hardy (Wpow E_S) (z + c_S) := hSdom
+  obtain ⟨q, hq⟩ := ewIter_dom_pad_levelcap hES hES0 hγ hSdom'
+  -- composition chain: Gexp ∘ (H_{E_S}(·+K₀+c_S)) → E₃; H_{E_S+2} ∘ E₃ → E₄; H_LL ∘ E₄ → E₅
+  obtain ⟨E₃, c₃, hE₃, hE₃0, hcomp₁⟩ :=
+    dom_pad_comp (f := hardy (Wpow (ofNat 2))) (g := fun z => hardy (Wpow E_S) (z + (K₀ + c_S)))
+      (c₁ := 0) (c₂ := K₀ + c_S)
+      (nf_ofNat 2) hES (fun z => by simp) (fun z => le_rfl)
+  obtain ⟨E₄, c₄, hE₄, hE₄0, hcomp₂⟩ :=
+    dom_pad_comp (f := hardy (Wpow (E_S + 2))) (g := fun z => hardy (Wpow E₃) (z + c₃))
+      (c₁ := 0) (c₂ := c₃)
+      hNF2 hE₃ (fun z => by simp) (fun z => le_rfl)
+  obtain ⟨E₅, c₅, hE₅, hE₅0, hcomp₃⟩ :=
+    dom_pad_comp (f := hardy (Wpow (E_S + 2 + 1 + γ + 1))) (g := fun z => hardy (Wpow E₄) (z + c₄))
+      (c₁ := 0) (c₂ := c₄)
+      hNFL hE₄ (fun z => by simp) (fun z => le_rfl)
+  refine ⟨osucc E₅, osucc_NF hE₅, q + c₅ + 3, fun m hm α' hα' hle n hNcert hn => ?_⟩
+  -- the m-side value x := S (max K₀ m)
+  have hx_ge : max K₀ m ≤ S (max K₀ m) := hSinfl _
+  have hx_ge_m : m ≤ S (max K₀ m) := le_trans (le_max_right _ _) hx_ge
+  have hx_ge_q : q ≤ S (max K₀ m) := le_trans (by omega) hx_ge_m
+  have hx_ge_1 : 1 ≤ S (max K₀ m) := le_trans (by omega) hx_ge_m
+  -- inner argument absorbed into Gexp x
+  have hinner : Nlog α' + S (max K₀ m) + q ≤ 2 * S (max K₀ m) + q := by omega
+  have hinner₂ : 2 * S (max K₀ m) + q ≤ hardy (oadd (ofNat 2) 1 0) (S (max K₀ m)) :=
+    two_mul_add_le_hardy_omega_sq hx_ge_q hx_ge_1
+  -- x ≤ H_{E_S}(m + (K₀ + c_S))
+  have hx_dom : S (max K₀ m) ≤ hardy (Wpow E_S) (m + (K₀ + c_S)) :=
+    le_trans (hSdom' _) (hardy_monotone _ (by omega))
+  have hGx : hardy (oadd (ofNat 2) 1 0) (S (max K₀ m))
+      ≤ hardy (Wpow (ofNat 2)) (hardy (Wpow E_S) (m + (K₀ + c_S))) :=
+    hardy_monotone _ hx_dom
+  have hE₃b : hardy (Wpow (ofNat 2)) (hardy (Wpow E_S) (m + (K₀ + c_S)))
+      ≤ hardy (Wpow E₃) (m + c₃) := hcomp₁ m
+  -- assemble
+  have hmain := hq α' hα' hle (S (max K₀ m))
+  have hstep1 : hardy (Wpow (E_S + 2)) (Nlog α' + S (max K₀ m) + q)
+      ≤ hardy (Wpow (E_S + 2)) (hardy (Wpow E₃) (m + c₃)) :=
+    hardy_monotone _ (le_trans hinner (le_trans hinner₂ (le_trans hGx hE₃b)))
+  have hstep2 : hardy (Wpow (E_S + 2)) (hardy (Wpow E₃) (m + c₃))
+      ≤ hardy (Wpow E₄) (m + c₄) := hcomp₂ m
+  have hstep3 : hardy (Wpow (E_S + 2 + 1 + γ + 1)) (hardy (Wpow E₄) (m + c₄))
+      ≤ hardy (Wpow E₅) (m + c₅) := hcomp₃ m
+  have hchain : ewIter S α' (S (max K₀ m)) ≤ hardy (Wpow E₅) (m + c₅) :=
+    le_trans hmain (le_trans (hardy_monotone _ (le_trans hstep1 hstep2)) hstep3)
+  have hfin : hardy (Wpow E₅) (m + c₅) < fastGrowing (osucc E₅) m :=
+    hardy_pad_lt_fastGrowing_osucc E₅ hE₅ c₅ m (by omega)
+  omega
+
 #print axioms GoodsteinPA.HardyMajorization.dom_pad_max
 #print axioms GoodsteinPA.HardyMajorization.Sstar_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.dom_pad_comp
 #print axioms GoodsteinPA.HardyMajorization.hardy_pad_lt_fastGrowing_osucc
 #print axioms GoodsteinPA.HardyMajorization.dom_pad_eventuallyLE
+#print axioms GoodsteinPA.HardyMajorization.Scirc_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.master_conversion
 #print axioms GoodsteinPA.HardyMajorization.two_pow_le_hardy_Wpow2
 #print axioms GoodsteinPA.HardyMajorization.ewIter_dom_pad_levelcap
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
