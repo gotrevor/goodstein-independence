@@ -1,5 +1,25 @@
 # PENDING WORK
 
+## Lap 213 (2026-07-03, grind) — SERIES-5 LANE A LANDED (route-B axiom DISCHARGED); commit c5474ed
+
+- ✅ **Lane A splice landed.** Gated-duplication snag resolved: `E1EmbeddingGrind` now
+  `import GoodsteinPA.ReadoffValueGate` + selective-`open`s the canonical `Gated`/accessors/`Gated_mono`
+  (E1's forced duplicate def+6 decls deleted). `WainerBound.wainer_bound_of_pa_proves_goodstein`
+  body = the one-liner `wainer_bound_witness gated_certificate_uniform Scirc_dom_pad master_conversion h`.
+  `#print axioms` on the discharged theorem, `peano_not_proves_goodstein_growth`, and the growth
+  headline `goodsteinLength_eventually_dominates_fixed_fastGrowing` = **`[propext,choice,Quot.sound]`**
+  (sorryAx OFF). Blueprint nodes 14/15 flipped `debt`→`clean`; `blueprint_audit` PASSED (16 nodes,
+  0 warnings). Full build GREEN 1346 jobs.
+- ⏭️ **NEXT = SERIES-5 Lane B + Lane C** (DIRECTION SERIES-4 judge block §3):
+  - Lane B: crown re-point — break `WainerRoute → Statement` import cycle, re-point body only
+    (TYPE FROZEN) → node 16 `clean`. (Re-check whether still needed now Lane A is in.)
+  - Lane C: prune `src` sorries toward 0 (`lean-sorry src/`). Live: Crux2Blueprint (10),
+    E1EmbeddingGrind (5: readoffTC_core `allω`-trap + W1/W2 `axm`), WainerLadder, Reduction,
+    OperatorZeh (pin-3), DescentSemantic:550 (Rathjen §3 in M). ⚠️ Block-4 retirement proposals
+    UNRELIABLE (judge §4: 2 verified WRONG) — re-derive each against the compiler.
+  - Headline `peano_not_proves_goodstein` still rests on `goodstein_implies_consistency` (the OTHER
+    girder — crux-2 frontier); route-B growth is now fully proven.
+
 ## Lap 211 (2026-07-03) — judge package Block 1 STAMPED + B-1 CRACKED; see HANDOFF-2026-07-03-lap211.md
 
 - ✅ `REBUILD-Z-SERIES-4-LEDGER.md` Block 1 (Lane-S evidence: verbatim-type summit, pairing table,
