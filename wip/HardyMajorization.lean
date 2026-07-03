@@ -422,4 +422,163 @@ decreasing_by
 
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le
 
+/-! ## Concrete engine instantiation — `e' := e₀ + 2` discharges `hEng`
+
+From a plain Hardy domination `f ≤ H_{ω^{e₀}}` (`e₀ ≠ 0`, NF): the engine chain is
+`LHS ≤ H_{ω²}(y)` (closed form `H_{ω²}(y)+1 = 2^{y+1}(y+1)` pays the exponential) at
+`y := H_{ω^{e₀}}(x+p)`, raise `ω² ≤ ω^{e₀+1}` (equality possible at `e₀ = 1` — split), exact
+composition `H_{ω^{e₀+1}}∘H_{ω^{e₀}} = H_{ω^{e₀+1}+ω^{e₀}}`, and a final raise under
+`ω^{e₀+2}`.  All norm gates are `e₀`-constants absorbed by the pad `p`. -/
+
+/-- Closed form at `ω²`: `H_{ω²}(y) + 1 = 2^{y+1}·(y+1)` (finite B4 + `fastGrowing_two`). -/
+theorem hardy_omega_sq (y : ℕ) :
+    hardy (oadd (ofNat 2) 1 0) y + 1 = 2 ^ (y + 1) * (y + 1) := by
+  rw [hardy_omega_pow_ofNat 2 y, show (ofNat 2 : ONote) = 2 from rfl, fastGrowing_two]
+
+/-- The engine arithmetic: anything below `5y + 2^{y+1}` fits under `H_{ω²}(y)` (`y ≥ 2`). -/
+theorem engine_arith {L y : ℕ} (h2 : 2 ≤ y) (hL : L ≤ 5 * y + 2 ^ (y + 1)) :
+    L ≤ hardy (oadd (ofNat 2) 1 0) y := by
+  have hcf := hardy_omega_sq y
+  have hP : 8 ≤ 2 ^ (y + 1) := by
+    calc (8 : ℕ) = 2 ^ 3 := by norm_num
+      _ ≤ 2 ^ (y + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
+  have hexp : 2 ^ (y + 1) * (y + 1) = 2 ^ (y + 1) * y + 2 ^ (y + 1) := by ring
+  rw [hexp] at hcf
+  have hmul : 8 * y ≤ 2 ^ (y + 1) * y := Nat.mul_le_mul_right y hP
+  generalize 2 ^ (y + 1) * y = R at hcf hmul
+  generalize 2 ^ (y + 1) = Q at hcf hL
+  omega
+
+/-- **The concrete engine.**  `e' := e₀ + 2` discharges `ewIter_hardy_le`'s `hEng` from the
+domination `∀ z, f z ≤ H_{ω^{e₀}}(z)`, for any pad `p` above the `e₀`-norm constants. -/
+theorem hEng_of_dom {f : ℕ → ℕ} {e₀ : ONote} {p : ℕ}
+    (he₀ : e₀.NF) (he₀0 : e₀ ≠ 0)
+    (hdom : ∀ z, f z ≤ hardy (Wpow e₀) z)
+    (hp : norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8 ≤ p) :
+    ∀ x, x + 2 * f x + 2 ^ (f x + 1) + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 2 * p + 4
+        ≤ hardy (Wpow (e₀ + 2)) (x + p) := by
+  intro x
+  haveI := he₀
+  haveI hNF1 : (1 : ONote).NF := NF.oadd NF.zero 1 NFBelow.zero
+  haveI hNF2 : (2 : ONote).NF := nf_ofNat 2
+  haveI hNFe1 : (e₀ + 1).NF := ONote.add_nf e₀ 1
+  haveI hNFe2 : (e₀ + 2).NF := ONote.add_nf e₀ 2
+  have hrepr1 : (e₀ + 1).repr = e₀.repr + 1 := by
+    rw [ONote.repr_add, ONote.repr_one]; norm_num
+  have hrepr2 : (e₀ + 2).repr = e₀.repr + 2 := by
+    rw [ONote.repr_add, show ((2 : ONote)).repr = ((2 : ℕ) : Ordinal) from repr_ofNat 2]
+    norm_num
+  haveI hWe1 : (Wpow (e₀ + 1)).NF := Wpow_NF hNFe1
+  haveI hWe0 : (Wpow e₀).NF := Wpow_NF he₀
+  have he₀pos : (1 : Ordinal) ≤ e₀.repr :=
+    Order.one_le_iff_ne_zero.mpr
+      (fun h0 => he₀0 (repr_inj.mp (by rw [h0, repr_zero])))
+  -- the inflated engine argument
+  have hy1 : x + p ≤ hardy (Wpow e₀) (x + p) := le_hardy _ _
+  have hy2 : 2 * (x + p) ≤ hardy (Wpow e₀) (x + p) :=
+    two_mul_le_hardy_pow he₀0 he₀ (by omega)
+  have hfx : f x ≤ hardy (Wpow e₀) (x + p) :=
+    le_trans (hdom x) (hardy_monotone _ (by omega))
+  have hpow : 2 ^ (f x + 1) ≤ 2 ^ (hardy (Wpow e₀) (x + p) + 1) :=
+    Nat.pow_le_pow_right (by norm_num) (by omega)
+  -- step A: everything fits under H_{ω²} at the inflated argument
+  have hA : x + 2 * f x + 2 ^ (f x + 1) + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 2 * p + 4
+      ≤ hardy (oadd (ofNat 2) 1 0) (hardy (Wpow e₀) (x + p)) := by
+    apply engine_arith (by omega)
+    generalize hQ : 2 ^ (hardy (Wpow e₀) (x + p) + 1) = Q at hpow
+    generalize 2 ^ (f x + 1) = A at hpow ⊢
+    omega
+  -- step B: raise ω² to ω^{e₀+1} (equality possible at e₀ = 1)
+  have hB : hardy (oadd (ofNat 2) 1 0) (hardy (Wpow e₀) (x + p))
+      ≤ hardy (Wpow (e₀ + 1)) (hardy (Wpow e₀) (x + p)) := by
+    have hle : ((ofNat 2 : ONote)).repr ≤ (e₀ + 1).repr := by
+      rw [repr_ofNat, hrepr1]
+      have : ((2 : ℕ) : Ordinal) = 1 + 1 := by norm_num
+      rw [this]
+      exact add_le_add he₀pos le_rfl
+    rcases eq_or_lt_of_le hle with heq | hlt
+    · rw [show (oadd (ofNat 2) 1 0 : ONote) = Wpow (e₀ + 1) by
+        show Wpow (ofNat 2) = Wpow (e₀ + 1)
+        rw [repr_inj.mp heq]]
+    · apply hardy_le_of_lt (Wpow_NF (nf_ofNat 2)) (Wpow_NF hNFe1)
+        (Wpow_lt (lt_def.mpr hlt))
+      have hn2 : norm (Wpow (ofNat 2)) = 2 := by
+        simp [Wpow, ofNat_succ, norm_oadd]
+      show norm (Wpow (ofNat 2)) ≤ _
+      rw [hn2]
+      omega
+  -- step C: exact composition H_{ω^{e₀+1}} ∘ H_{ω^{e₀}} = H_{ω^{e₀+1}+ω^{e₀}}
+  have hC : hardy (Wpow (e₀ + 1)) (hardy (Wpow e₀) (x + p))
+      = hardy (Wpow (e₀ + 1) + Wpow e₀) (x + p) := by
+    refine (hardy_add_comp _ (Wpow_NF hNFe1) _ (Wpow_NF he₀) (Or.inr ?_) (x + p)).symm
+    have hlast : lastExp (Wpow (e₀ + 1)) = e₀ + 1 := rfl
+    rw [hlast, hrepr1]
+    show ω ^ e₀.repr * (1 : ℕ) + 0 < ω ^ (e₀.repr + 1)
+    simpa using (Ordinal.opow_lt_opow_iff_right (by norm_num : (1 : Ordinal) < ω)).mpr
+      (lt_add_of_pos_right _ zero_lt_one)
+  -- step D: final raise under ω^{e₀+2}
+  haveI hDNF : (Wpow (e₀ + 1) + Wpow e₀).NF := ONote.add_nf _ _
+  have hDlt : Wpow (e₀ + 1) + Wpow e₀ < Wpow (e₀ + 2) := by
+    rw [lt_def, ONote.repr_add]
+    show (Wpow (e₀ + 1)).repr + (Wpow e₀).repr < ω ^ (e₀ + 2).repr * (1 : ℕ) + 0
+    have h1 : (Wpow (e₀ + 1)).repr = ω ^ (e₀.repr + 1) := by
+      show ω ^ (e₀ + 1).repr * (1 : ℕ) + 0 = ω ^ (e₀.repr + 1)
+      rw [hrepr1]; simp
+    have h0 : (Wpow e₀).repr = ω ^ e₀.repr := by
+      show ω ^ e₀.repr * (1 : ℕ) + 0 = ω ^ e₀.repr
+      simp
+    rw [h1, h0, hrepr2]
+    have hstep : ω ^ e₀.repr < ω ^ (e₀.repr + 1) :=
+      (Ordinal.opow_lt_opow_iff_right (by norm_num : (1 : Ordinal) < ω)).mpr
+        (lt_add_of_pos_right _ zero_lt_one)
+    calc ω ^ (e₀.repr + 1) + ω ^ e₀.repr
+        < ω ^ (e₀.repr + 1) + ω ^ (e₀.repr + 1) := (add_lt_add_iff_left _).2 hstep
+      _ = ω ^ (e₀.repr + 1) * 2 := by
+          rw [show (2 : Ordinal) = 1 + 1 by norm_num, mul_add, mul_one]
+      _ < ω ^ (e₀.repr + 1) * ω :=
+          mul_lt_mul_of_pos_left (by simpa using Ordinal.natCast_lt_omega0 2)
+            (Ordinal.opow_pos _ omega0_pos)
+      _ = ω ^ (e₀.repr + 2) := by
+          have hpow2 : ω ^ (e₀.repr + 2) = ω ^ (e₀.repr + 1) * ω := by
+            rw [show e₀.repr + 2 = (e₀.repr + 1) + 1 by rw [add_assoc]; norm_num]
+            conv_lhs => rw [Ordinal.opow_add, Ordinal.opow_one]
+          exact hpow2.symm
+      _ ≤ ω ^ (e₀.repr + 2) * (1 : ℕ) + 0 := by simp
+  have hDnorm : norm (Wpow (e₀ + 1) + Wpow e₀) ≤ x + p := by
+    have h := norm_add_le (Wpow (e₀ + 1)) (Wpow e₀)
+    have h1 : normSum (Wpow (e₀ + 1)) = max (norm (e₀ + 1)) 1 := by
+      show max (norm (e₀ + 1)) ((1 : ℕ+) : ℕ) + normSum 0 = max (norm (e₀ + 1)) 1
+      simp [normSum]
+    have h2 : norm (Wpow e₀) = max (norm e₀) (max 1 0) := rfl
+    rw [h1, h2] at h
+    have hm1 := le_max_left (norm (e₀ + 1)) 1
+    have hm2 := le_max_left (norm e₀) (max 1 0)
+    have hmm1 : max (norm (e₀ + 1)) 1 ≤ norm (e₀ + 1) + 1 := by omega
+    have hmm2 : max (norm e₀) (max 1 0) ≤ norm e₀ + 1 := by omega
+    omega
+  calc x + 2 * f x + 2 ^ (f x + 1) + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 2 * p + 4
+      ≤ hardy (oadd (ofNat 2) 1 0) (hardy (Wpow e₀) (x + p)) := hA
+    _ ≤ hardy (Wpow (e₀ + 1)) (hardy (Wpow e₀) (x + p)) := hB
+    _ = hardy (Wpow (e₀ + 1) + Wpow e₀) (x + p) := hC
+    _ ≤ hardy (Wpow (e₀ + 2)) (x + p) :=
+        hardy_le_of_lt hDNF (Wpow_NF hNFe2) hDlt hDnorm
+
+/-- **The end-to-end majorization at a concrete engine**: from `f ≤ H_{ω^{e₀}}`,
+`ewIter f α m ≤ H_{ω^{e₀+3+α}}(H_{ω^{e₀+2}}(Nlog α + m + p))` at the explicit pad. -/
+theorem ewIter_hardy_le_of_dom {f : ℕ → ℕ} {e₀ : ONote}
+    (he₀ : e₀.NF) (he₀0 : e₀ ≠ 0)
+    (hdom : ∀ z, f z ≤ hardy (Wpow e₀) z)
+    (α : ONote) (hα : α.NF) (m : ℕ) :
+    ewIter f α m ≤ hardy (Wpow (e₀ + 2 + 1 + α))
+      (hardy (Wpow (e₀ + 2))
+        (Nlog α + m + (norm (e₀ + 1) + norm e₀ + normSum (e₀ + 2 + 1) + norm (e₀ + 2) + 8))) := by
+  haveI := he₀
+  haveI hNF2 : (2 : ONote).NF := nf_ofNat 2
+  haveI hNFe2 : (e₀ + 2).NF := ONote.add_nf e₀ 2
+  exact ewIter_hardy_le hNFe2 (by omega)
+    (hEng_of_dom he₀ he₀0 hdom le_rfl) α hα m
+
+#print axioms GoodsteinPA.HardyMajorization.hEng_of_dom
+#print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom
+
 end GoodsteinPA.HardyMajorization
