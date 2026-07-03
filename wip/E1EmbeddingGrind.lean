@@ -1511,6 +1511,118 @@ theorem budgetedEmbedsV3_all {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     rw [Finset.insert_eq_self.mpr hmem] at hall
     exact hall
 
+/-- **V3 `and`** — two-premise join, all structural: control `osucc (e₁ + e₂)`, root
+`osucc (α₁ + α₂)`, `B := max B₁ B₂ + norm e₁ + norm e₂ + 2` (covers the `Nlog` invariant AND
+the `relSlot_le` norm gates), `N := max N₁ N₂`, `d := max d₁ d₂`.  Unlike block-8, the root
+gate is FREE from the structural invariant (`Nlog root ≤ B ≤ slot 0`) — no succ-gap rung. -/
+theorem budgetedEmbedsV3_and {Γ : Finset (SyntacticFormula ℒₒᵣ)}
+    {φ ψ : SyntacticFormula ℒₒᵣ} (h : φ ⋏ ψ ∈ Γ)
+    (ihp : BudgetedEmbedsV3 (insert φ Γ)) (ihq : BudgetedEmbedsV3 (insert ψ Γ)) :
+    BudgetedEmbedsV3 Γ := by
+  obtain ⟨B₁, d₁, N₁, e₁, α₁, he₁, hα₁NF, hN₁, ih₁⟩ := ihp
+  obtain ⟨B₂, d₂, N₂, e₂, α₂, he₂, hα₂NF, hN₂, ih₂⟩ := ihq
+  have headdNF : (e₁ + e₂).NF := by haveI := he₁; haveI := he₂; exact ONote.add_nf e₁ e₂
+  have heNF : (osucc (e₁ + e₂)).NF := osucc_NF headdNF
+  have hlt₁ : e₁ < osucc (e₁ + e₂) :=
+    lt_of_le_of_lt (Zekd.le_add_right_NF he₁ he₂) (Zekd.lt_osucc headdNF)
+  have hlt₂ : e₂ < osucc (e₁ + e₂) :=
+    lt_of_le_of_lt (Zekd.le_add_left_NF he₁ he₂) (Zekd.lt_osucc headdNF)
+  have haddNF : (α₁ + α₂).NF := by haveI := hα₁NF; haveI := hα₂NF; exact ONote.add_nf α₁ α₂
+  set B := max B₁ B₂ + norm e₁ + norm e₂ + 2 with hB
+  refine ⟨B, max d₁ d₂, max N₁ N₂, osucc (e₁ + e₂), osucc (α₁ + α₂),
+    heNF, osucc_NF haddNF, ?_, fun env => ?_⟩
+  · have hs := Nlog_osucc_le haddNF
+    have ha := Nlog_add_le_max_succ α₁ hα₁NF α₂ hα₂NF
+    omega
+  · have hff₁ : ∀ x, rel1 (ewRootSlot e₁ B₁) (envSup env N₁) x
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) x :=
+      relSlot_le he₁ heNF hlt₁ (by omega)
+        (envSup_mono_N env (le_max_left N₁ N₂)) (by omega)
+    have hff₂ : ∀ x, rel1 (ewRootSlot e₂ B₂) (envSup env N₂) x
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) x :=
+      relSlot_le he₂ heNF hlt₂ (by omega)
+        (envSup_mono_N env (le_max_right N₁ N₂)) (by omega)
+    have D₁ := ih₁ env
+    have D₂ := ih₂ env
+    rw [Finset.image_insert] at D₁ D₂
+    have D₁' := ((D₁.change_e (osucc (e₁ + e₂))).mono_f hff₁).mono_c (le_max_left d₁ d₂)
+    have D₂' := ((D₂.change_e (osucc (e₁ + e₂))).mono_f hff₂).mono_c (le_max_right d₁ d₂)
+    have hg : Nlog (osucc (α₁ + α₂))
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) 0 := by
+      have hs := Nlog_osucc_le haddNF
+      have ha := Nlog_add_le_max_succ α₁ hα₁NF α₂ hα₂NF
+      have hb := le_relSlot_zero (osucc (e₁ + e₂)) B (envSup env (max N₁ N₂))
+      omega
+    have hand := Zef2TC.andI (α := osucc (α₁ + α₂)) hg
+      (Embedding.asg env ▹ φ) (Embedding.asg env ▹ ψ)
+      (lt_of_le_of_lt (Zekd.le_add_right_NF hα₁NF hα₂NF) (Zekd.lt_osucc haddNF))
+      (lt_of_le_of_lt (Zekd.le_add_left_NF hα₁NF hα₂NF) (Zekd.lt_osucc haddNF))
+      hα₁NF hα₂NF (osucc_NF haddNF) (clT α₁) (clT α₂) D₁' D₂'
+    have hmem : (Embedding.asg env ▹ φ ⋏ Embedding.asg env ▹ ψ)
+        ∈ Γ.image (fun χ => Embedding.asg env ▹ χ) := by
+      have := Finset.mem_image_of_mem (fun χ => Embedding.asg env ▹ χ) h
+      simpa using this
+    rwa [Finset.insert_eq_self.mpr hmem] at hand
+
+/-- **V3 `cut`** — the two-premise join of `and` with the cut rank `max`ed against
+`φ.complexity + 1` and the read gate paid by absorbing `φ.complexity` into `B`
+(rewriting preserves `complexity`, so this stays env-independent). -/
+theorem budgetedEmbedsV3_cut {Γ : Finset (SyntacticFormula ℒₒᵣ)}
+    {φ : SyntacticFormula ℒₒᵣ}
+    (ihp : BudgetedEmbedsV3 (insert φ Γ)) (ihn : BudgetedEmbedsV3 (insert (∼φ) Γ)) :
+    BudgetedEmbedsV3 Γ := by
+  obtain ⟨B₁, d₁, N₁, e₁, α₁, he₁, hα₁NF, hN₁, ih₁⟩ := ihp
+  obtain ⟨B₂, d₂, N₂, e₂, α₂, he₂, hα₂NF, hN₂, ih₂⟩ := ihn
+  have headdNF : (e₁ + e₂).NF := by haveI := he₁; haveI := he₂; exact ONote.add_nf e₁ e₂
+  have heNF : (osucc (e₁ + e₂)).NF := osucc_NF headdNF
+  have hlt₁ : e₁ < osucc (e₁ + e₂) :=
+    lt_of_le_of_lt (Zekd.le_add_right_NF he₁ he₂) (Zekd.lt_osucc headdNF)
+  have hlt₂ : e₂ < osucc (e₁ + e₂) :=
+    lt_of_le_of_lt (Zekd.le_add_left_NF he₁ he₂) (Zekd.lt_osucc headdNF)
+  have haddNF : (α₁ + α₂).NF := by haveI := hα₁NF; haveI := hα₂NF; exact ONote.add_nf α₁ α₂
+  set B := max B₁ B₂ + norm e₁ + norm e₂ + φ.complexity + 2 with hB
+  refine ⟨B, max (max d₁ d₂) (φ.complexity + 1), max N₁ N₂, osucc (e₁ + e₂),
+    osucc (α₁ + α₂), heNF, osucc_NF haddNF, ?_, fun env => ?_⟩
+  · have hs := Nlog_osucc_le haddNF
+    have ha := Nlog_add_le_max_succ α₁ hα₁NF α₂ hα₂NF
+    omega
+  · have hff₁ : ∀ x, rel1 (ewRootSlot e₁ B₁) (envSup env N₁) x
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) x :=
+      relSlot_le he₁ heNF hlt₁ (by omega)
+        (envSup_mono_N env (le_max_left N₁ N₂)) (by omega)
+    have hff₂ : ∀ x, rel1 (ewRootSlot e₂ B₂) (envSup env N₂) x
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) x :=
+      relSlot_le he₂ heNF hlt₂ (by omega)
+        (envSup_mono_N env (le_max_right N₁ N₂)) (by omega)
+    have D₁ := ih₁ env
+    have D₂ := ih₂ env
+    rw [Finset.image_insert] at D₁ D₂
+    have D₁' := ((D₁.change_e (osucc (e₁ + e₂))).mono_f hff₁).mono_c
+      (c' := max (max d₁ d₂) (φ.complexity + 1))
+      (le_trans (le_max_left d₁ d₂) (le_max_left _ _))
+    have D₂' := ((D₂.change_e (osucc (e₁ + e₂))).mono_f hff₂).mono_c
+      (c' := max (max d₁ d₂) (φ.complexity + 1))
+      (le_trans (le_max_right d₁ d₂) (le_max_left _ _))
+    rw [show Embedding.asg env ▹ (∼φ) = ∼(Embedding.asg env ▹ φ) by simp] at D₂'
+    have hb := le_relSlot_zero (osucc (e₁ + e₂)) B (envSup env (max N₁ N₂))
+    have hg : Nlog (osucc (α₁ + α₂))
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) 0 := by
+      have hs := Nlog_osucc_le haddNF
+      have ha := Nlog_add_le_max_succ α₁ hα₁NF α₂ hα₂NF
+      omega
+    have hread : (Embedding.asg env ▹ φ).complexity
+        ≤ rel1 (ewRootSlot (osucc (e₁ + e₂)) B) (envSup env (max N₁ N₂)) 0 := by
+      simp only [Semiformula.complexity_rew]
+      omega
+    have hcompl : (Embedding.asg env ▹ φ).complexity
+        < max (max d₁ d₂) (φ.complexity + 1) := by
+      simp only [Semiformula.complexity_rew]
+      omega
+    exact Zef2TC.cut hg (Embedding.asg env ▹ φ) hcompl hread
+      (lt_of_le_of_lt (Zekd.le_add_right_NF hα₁NF hα₂NF) (Zekd.lt_osucc haddNF))
+      (lt_of_le_of_lt (Zekd.le_add_left_NF hα₁NF hα₂NF) (Zekd.lt_osucc haddNF))
+      hα₁NF hα₂NF (osucc_NF haddNF) (clT α₁) (clT α₂) D₁' D₂'
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -1519,3 +1631,5 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_or
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_shift
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_all
+#print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_and
+#print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_cut
