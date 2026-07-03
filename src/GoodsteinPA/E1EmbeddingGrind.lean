@@ -2,6 +2,7 @@ import GoodsteinPA.OperatorZef2
 import GoodsteinPA.WainerRoute
 import GoodsteinPA.Embedding
 import GoodsteinPA.InternalBridge
+import GoodsteinPA.ReadoffValueGate
 
 /-!
 # E-1 grind (Series-3) — `Zef2TC` (full E–W Def-23 rule set) + the budgeted EM lemma
@@ -4389,67 +4390,11 @@ false branch `k₀ ≤ P V`, and the T3 descent inequality absorbs the budget bu
 `wip/ReadoffValueGadgetProbe.lean` (wip files are not importable); the ROOT discharge
 `gated_of_sigma1` (`Hierarchy 𝚺 1` + guard-value bound ⟹ `Gated`) lives in the former. -/
 
-/-- The hereditary value gate (copy of `ReadoffValueGate.Gated`). -/
-def Gated (P : ℕ → ℕ) : ℕ → Form → Prop
-  | _, Semiformula.rel _ _ => True
-  | _, Semiformula.nrel _ _ => True
-  | _, Semiformula.verum => True
-  | _, Semiformula.falsum => True
-  | V, Semiformula.and χ₁ χ₂ => Gated P V χ₁ ∧ Gated P V χ₂
-  | V, Semiformula.or χ₁ χ₂ => Gated P V χ₁ ∧ Gated P V χ₂
-  | V, Semiformula.all χ =>
-      (¬ atomTrue (Semiformula.all χ) → ∃ k, k ≤ P V ∧ ¬ atomTrue (χ/[nm k])) ∧
-      ∀ k, Gated P (max V k) (χ/[nm k])
-  | V, Semiformula.exs χ => ∀ n, Gated P (max V n) (χ/[nm n])
-termination_by _ φ => φ.complexity
-decreasing_by
-  all_goals simp [Semiformula.complexity_rew]
-
-theorem Gated_and_iff {P : ℕ → ℕ} {V : ℕ} {χ₁ χ₂ : Form} :
-    Gated P V (χ₁ ⋏ χ₂) ↔ Gated P V χ₁ ∧ Gated P V χ₂ := by
-  rw [show (χ₁ ⋏ χ₂) = Semiformula.and χ₁ χ₂ from rfl, Gated]
-
-theorem Gated_or_iff {P : ℕ → ℕ} {V : ℕ} {χ₁ χ₂ : Form} :
-    Gated P V (χ₁ ⋎ χ₂) ↔ Gated P V χ₁ ∧ Gated P V χ₂ := by
-  rw [show (χ₁ ⋎ χ₂) = Semiformula.or χ₁ χ₂ from rfl, Gated]
-
-theorem Gated_all_iff {P : ℕ → ℕ} {V : ℕ} {χ : SyntacticSemiformula ℒₒᵣ 1} :
-    Gated P V (∀⁰ χ) ↔
-      ((¬ atomTrue (∀⁰ χ) → ∃ k, k ≤ P V ∧ ¬ atomTrue (χ/[nm k])) ∧
-        ∀ k, Gated P (max V k) (χ/[nm k])) := by
-  rw [show (∀⁰ χ) = Semiformula.all χ from rfl, Gated]
-
-theorem Gated_exs_iff {P : ℕ → ℕ} {V : ℕ} {χ : SyntacticSemiformula ℒₒᵣ 1} :
-    Gated P V (∃⁰ χ) ↔ ∀ n, Gated P (max V n) (χ/[nm n]) := by
-  rw [show (∃⁰ χ) = Semiformula.exs χ from rfl, Gated]
-
-theorem Gated_mono {P : ℕ → ℕ} (hP : Monotone P) :
-    ∀ (φ : Form) (V V' : ℕ), V ≤ V' → Gated P V φ → Gated P V' φ
-  | Semiformula.rel _ _, _, _, _, _ => by rw [Gated]; trivial
-  | Semiformula.nrel _ _, _, _, _, _ => by rw [Gated]; trivial
-  | Semiformula.verum, _, _, _, _ => by rw [Gated]; trivial
-  | Semiformula.falsum, _, _, _, _ => by rw [Gated]; trivial
-  | Semiformula.and χ₁ χ₂, V, V', h, hg => by
-      rw [Gated] at hg ⊢
-      exact ⟨Gated_mono hP χ₁ V V' h hg.1, Gated_mono hP χ₂ V V' h hg.2⟩
-  | Semiformula.or χ₁ χ₂, V, V', h, hg => by
-      rw [Gated] at hg ⊢
-      exact ⟨Gated_mono hP χ₁ V V' h hg.1, Gated_mono hP χ₂ V V' h hg.2⟩
-  | Semiformula.all χ, V, V', h, hg => by
-      rw [Gated] at hg ⊢
-      refine ⟨fun hf => ?_, fun k => ?_⟩
-      · obtain ⟨k, hk, hkf⟩ := hg.1 hf
-        exact ⟨k, le_trans hk (hP h), hkf⟩
-      · exact Gated_mono hP (χ/[nm k]) (max V k) (max V' k)
-          (max_le_max h le_rfl) (hg.2 k)
-  | Semiformula.exs χ, V, V', h, hg => by
-      rw [Gated] at hg ⊢
-      intro n
-      exact Gated_mono hP (χ/[nm n]) (max V n) (max V' n)
-        (max_le_max h le_rfl) (hg n)
-termination_by φ _ _ _ _ => φ.complexity
-decreasing_by
-  all_goals simp [Semiformula.complexity_rew]
+-- SERIES-5 Lane A dedup: `Gated` and its accessors are now the single canonical copy in
+-- `ReadoffValueGate`; E1's former duplicate is deleted so `wainer_bound_witness`'s `Hcert`
+-- unifies with `gated_certificate_uniform` (both over `ReadoffValueGate.Gated`).
+open GoodsteinPA.ReadoffValueGate (Gated Gated_and_iff Gated_or_iff Gated_all_iff Gated_exs_iff
+  Gated_mono)
 
 /-- The combined value-budget step `S x := max (f₀ x) (P x)`. -/
 def Sslot (f₀ P : ℕ → ℕ) : ℕ → ℕ := fun x => max (f₀ x) (P x)

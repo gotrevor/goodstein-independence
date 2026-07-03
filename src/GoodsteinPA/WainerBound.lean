@@ -41,19 +41,15 @@ verbatim former-axiom type. -/
 theorem wainer_bound_of_pa_proves_goodstein :
     (𝗣𝗔 ⊢ ↑goodsteinSentence) ->
       ∃ o : ONote, o.NF ∧ EventuallyLE GoodsteinPA.Dom.goodsteinLength (fun n => fastGrowing o n) :=
-  -- ⚠️ TREADMILL TASK (near-done — one integration snag): the intended splice is the one-liner
-  --   `fun h => E1EmbeddingGrind.wainer_bound_witness gated_certificate_uniform
-  --              Scirc_dom_pad master_conversion h`
-  -- which fails ONLY on a Gated-DUPLICATION mismatch: `gated_certificate_uniform` yields
-  -- `ReadoffValueGate.Gated`, but `wainer_bound_witness`'s `Hcert` expects `E1EmbeddingGrind.Gated`
-  -- — E1's forced duplicate (the wip modules couldn't import each other, so E1 kept its own copy).
-  -- Now that all three are in src and CAN import each other, FIX by de-duplicating: make
-  -- `E1EmbeddingGrind` import `ReadoffValueGate` and use `ReadoffValueGate.Gated` (delete E1's copy,
-  -- retype `wainer_bound_witness`'s `Hcert`), OR bridge the two `Gated` defs under the binders.
-  -- Then this body becomes the one-liner above and nodes 14/15 flip `debt` -> `clean`.
-  sorry
+  -- SERIES-5 Lane A splice (Gated-duplication snag resolved: E1EmbeddingGrind now imports
+  -- ReadoffValueGate and shares the single canonical `Gated`, so `Hcert` unifies with
+  -- `gated_certificate_uniform`). Copy-not-compose: the three hypothesis types are the verbatim
+  -- statements of the three theorems.
+  fun h => E1EmbeddingGrind.wainer_bound_witness
+    ReadoffValueGate.gated_certificate_uniform
+    HardyMajorization.Scirc_dom_pad HardyMajorization.master_conversion h
 
-attribute [goodstein_blueprint 14 debt "wainer_axiom" "0-1" 95 wainer_bound_of_pa_proves_goodstein
+attribute [goodstein_blueprint 14 clean "wainer_axiom" "0" 100 wainer_bound_of_pa_proves_goodstein
   []
   ["SERIES-4 (laps 209-212 + judge pass 2026-07-03): discharged axiom -> theorem. Lane S built wainer_bound_witness at the axiom's VERBATIM type (kernel-clean [propext,choice,Quot.sound]); the three hypotheses gated_certificate_uniform (RVG) / Scirc_dom_pad + master_conversion (HM) are all kernel-clean; the judge pass promoted the three wip modules into src and spliced.",
    "Splice = wainer_bound_witness gated_certificate_uniform Scirc_dom_pad master_conversion h (copy-not-compose; the hypothesis types are the theorem statements verbatim)."]
@@ -67,7 +63,7 @@ theorem peano_not_proves_goodstein_growth : 𝗣𝗔 ⊬ ↑goodsteinSentence :=
   obtain ⟨o, ho, hbound⟩ := wainer_bound_of_pa_proves_goodstein hpa
   exact cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing o ho hbound
 
-attribute [goodstein_blueprint 15 debt "routeB_headline" "0-1" 95 peano_not_proves_goodstein_growth
+attribute [goodstein_blueprint 15 clean "routeB_headline" "0" 100 peano_not_proves_goodstein_growth
   []
   ["Route-B independence headline: PA ⊬ Goodstein from Wainer's fixed-f_o bound vs Cichon/Caicedo no-fixed-bound. Assembly (intro; obtain from wainer_bound; exact cichon_caicedo) over the now-discharged wainer_bound_of_pa_proves_goodstein."]
   "Route-B independence headline: PA ⊬ Goodstein via growth rates; clean once the Wainer bound landed."]
