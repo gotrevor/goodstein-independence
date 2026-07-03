@@ -2651,6 +2651,182 @@ theorem budgetedEmbeddingV3 {Γ : Finset (SyntacticFormula ℒₒᵣ)}
   | @shift Γ _d ih => exact budgetedEmbedsV3_shift ih
   | @cut Γ φ _dp _dn ihp ihn => exact budgetedEmbedsV3_cut ihp ihn
 
+/-! ### allω INVERSION — the E→R/D seam converter
+
+The rungs R/D consume per-instance SINGLETONS `{body/[nm m]}`, while the V3 master ladder
+concludes at the ∀-sentence.  Inversion replays the derivation at branch slot `rel1 f m`,
+replacing `∀⁰ φ` by its `m`-th numeral instance throughout.  Operators are phantoms in
+`Zef2TC` (`change_H`), so only the slot/gate bookkeeping is live: every gate `≤ f 0` lifts
+to `≤ rel1 f m 0` by monotonicity, and nested ω-branches commute via `rel1_rel1`+`max_comm`. -/
+
+set_option maxHeartbeats 1600000 in
+theorem allω_inversion {φ : SyntacticSemiformula ℒₒᵣ 1} (m : ℕ) :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2TC α e H f c Γ → Monotone f →
+      Zef2TC α e H (rel1 f m) c (insert (φ/[nm m]) (Γ.erase (∀⁰ φ))) := by
+  have hkey : ∀ (f : ℕ → ℕ), Monotone f → ∀ x, f x ≤ rel1 f m x := by
+    intro f hmono x
+    exact hmono (le_max_right m x)
+  -- re-shape an inverted premise `insert inst ((insert χ Γ).erase ∀φ)` into the
+  -- rebuilt rule's premise `insert χ (insert inst (Γ.erase ∀φ))`
+  have hreshape : ∀ (χ : Form) (Γ : Seq),
+      insert (φ/[nm m]) ((insert χ Γ).erase (∀⁰ φ))
+        ⊆ insert χ (insert (φ/[nm m]) (Γ.erase (∀⁰ φ))) := by
+    intro χ Γ x hx
+    simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+    tauto
+  -- targets: conclusion reshaping `insert χ (insert inst (Γ.erase ∀φ)) ⊇ goal` when χ ∈ Γ-form
+  intro α e H F c Γ dd
+  induction dd with
+  | axL hαN r v hp hn =>
+      intro hmono
+      refine Zef2TC.axL (le_trans hαN (hkey _ hmono 0)) r v ?_ ?_
+      · exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hp⟩)
+      · exact Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hn⟩)
+  | trueRel hαN r v htrue hmem =>
+      intro hmono
+      exact Zef2TC.trueRel (le_trans hαN (hkey _ hmono 0)) r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩))
+  | trueNrel hαN r v htrue hmem =>
+      intro hmono
+      exact Zef2TC.trueNrel (le_trans hαN (hkey _ hmono 0)) r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩))
+  | verumR hαN h =>
+      intro hmono
+      exact Zef2TC.verumR (le_trans hαN (hkey _ hmono 0))
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, h⟩))
+  | wk hαN hsub _ ih =>
+      intro hmono
+      exact Zef2TC.wk (le_trans hαN (hkey _ hmono 0))
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hmono)
+  | @weak α' β' e' H' F' c' Δ' Γ' hαN hβ hβNF hαNF hβH hsub _ ih =>
+      intro hmono
+      exact Zef2TC.weak (le_trans hαN (hkey _ hmono 0)) hβ hβNF hαNF hβH
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) (ih hmono)
+  | @andI α' βφ' βψ' e' H' F' c' Γ' hαN χ₁ χ₂ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      intro hmono
+      have hne : χ₁ ⋏ χ₂ ≠ ∀⁰ φ := by simp
+      rw [Finset.erase_insert_of_ne hne]
+      rw [Finset.insert_comm]
+      refine Zef2TC.andI (le_trans hαN (hkey _ hmono 0)) χ₁ χ₂ hβφ hβψ hβφNF hβψNF hαNF
+        hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk (ih₁ hmono).gate (hreshape χ₁ Γ') (ih₁ hmono)
+      · exact Zef2TC.wk (ih₂ hmono).gate (hreshape χ₂ Γ') (ih₂ hmono)
+  | @orI α' β' e' H' F' c' Γ' hαN χ₁ χ₂ hβ hβNF hαNF hβH _ ih =>
+      intro hmono
+      have hne : χ₁ ⋎ χ₂ ≠ ∀⁰ φ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.orI (le_trans hαN (hkey _ hmono 0)) χ₁ χ₂ hβ hβNF hαNF hβH ?_
+      have h := ih hmono
+      refine Zef2TC.wk h.gate ?_ h
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @allω α' e' H' F' c' Γ' hαN χ β hβ hβNF hαNF hβH dd ih =>
+      intro hmono
+      by_cases hchi : (∀⁰ χ : Form) = ∀⁰ φ
+      · -- PRINCIPAL: take branch m, re-invert it, drop the duplicate instance
+        have hφχ : χ = φ := by simpa using hchi
+        subst hφχ
+        have hbr := (ih m) (rel1_monotone hmono m)
+        -- slot: rel1 (rel1 F m) m = rel1 F m
+        rw [rel1_rel1, max_self] at hbr
+        -- context: insert inst ((insert inst Γ').erase ∀χ) = insert inst (Γ'.erase ∀χ)
+        have hctx : insert ((χ : SyntacticSemiformula ℒₒᵣ 1)/[nm m])
+              ((insert (χ/[nm m]) Γ').erase (∀⁰ χ))
+            = insert (χ/[nm m]) (Γ'.erase (∀⁰ χ)) := by
+          rw [Finset.erase_insert_of_ne (by
+            intro h
+            have := congrArg Semiformula.complexity h
+            simp at this)]
+          exact Finset.insert_idem _ _
+        rw [hctx] at hbr
+        have hbr' := hbr.change_H (H' := H')
+        refine Zef2TC.weak (le_trans hαN (hkey _ hmono 0)) (hβ m) (hβNF m) hαNF
+          (Cl_of_NF (hβNF m)) ?_ hbr'
+        intro x hx
+        simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        tauto
+      · -- NON-PRINCIPAL: rebuild the ω-rule over the inverted branches
+        rw [Finset.erase_insert_of_ne hchi, Finset.insert_comm]
+        refine Zef2TC.allω (le_trans hαN (hkey _ hmono 0)) χ β hβ hβNF hαNF
+          (fun n => hβH n) ?_
+        intro n
+        have h := (ih n) (rel1_monotone hmono n)
+        rw [rel1_rel1, max_comm n m, ← rel1_rel1] at h
+        have h' := h.change_H (H' := adjoin H' n)
+        refine Zef2TC.wk h'.gate ?_ h'
+        intro x hx
+        simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        tauto
+  | @exI α' β' e' H' F' c' Γ' hαN χ n hβ hβNF hαNF hβH hbound _ ih =>
+      intro hmono
+      have hne : (∃⁰ χ : Form) ≠ ∀⁰ φ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.exI (le_trans hαN (hkey _ hmono 0)) χ n hβ hβNF hαNF hβH
+        (le_trans hbound (hkey _ hmono 0)) ?_
+      have h := ih hmono
+      refine Zef2TC.wk h.gate ?_ h
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @cut α' βφ' βψ' e' H' F' c' Γ' hαN χ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      intro hmono
+      refine Zef2TC.cut (le_trans hαN (hkey _ hmono 0)) χ hcompl
+        (le_trans hcutRead (hkey _ hmono 0)) hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk (ih₁ hmono).gate (hreshape χ Γ') (ih₁ hmono)
+      · exact Zef2TC.wk (ih₂ hmono).gate (hreshape (∼χ) Γ') (ih₂ hmono)
+
+/-! ### The rung-E statement, REALIZED (V3 + inversion; judge input, NOT ratified) -/
+
+/-- The embedded goodstein sentence is the ∀-closure of the embedded body. -/
+theorem coe_goodsteinSentence_eq :
+    (↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ) = ∀⁰ goodsteinBodyE := by
+  rw [goodsteinSentence_eq_all_body]
+  simp [goodsteinBodyE, Rewriting.emb]
+
+/-- **Rung E, the V3 realization** (the DRAFT2 `∃ K` shape, STRENGTHENED: the node ordinal
+`α` is also `m`-uniform).  From a PA proof of the goodstein sentence: uniform structural
+budgets `B, d`, control `e`, node `α`, and per-instance derivations of the Σ₁ instance
+singletons at slot `rel1 (ewRootSlot e B) K` — exactly the shape rungs R/D consume.
+Proof = `toDerivation2` ∘ `budgetedEmbeddingV3` ∘ `allω_inversion`. -/
+theorem embedding_Zef2TC_V3 :
+    (𝗣𝗔 ⊢ ↑GoodsteinPA.goodsteinSentence) →
+      ∃ B d : ℕ, ∃ e α : ONote, e.NF ∧ α.NF ∧ ∀ m : ℕ, ∃ K : ℕ,
+        ∃ H : ONote → Prop, Cl H α ∧
+          Zef2TC α e H (rel1 (ewRootSlot e B) K) d {(goodsteinBodyE/[nm m])} := by
+  intro h
+  obtain ⟨b⟩ := h
+  have d2 := Derivation.toDerivation2 _ b
+  have hV3 : BudgetedEmbedsV3 {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by
+    have : ([(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)]).toFinset
+        = {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by simp
+    rw [← this]
+    exact budgetedEmbeddingV3 d2
+  obtain ⟨B, d, N, e, α, he, hαNF, hNlogB, hD⟩ := hV3
+  refine ⟨B, d, e, α, he, hαNF, fun m => ?_⟩
+  have hD0 := hD (fun _ => 0)
+  have himg : ({(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} :
+        Finset (SyntacticFormula ℒₒᵣ)).image
+        (fun φ => Embedding.asg (fun _ => 0) ▹ φ)
+      = {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by
+    rw [Finset.image_singleton, asg_emb_fix]
+  rw [himg, coe_goodsteinSentence_eq] at hD0
+  have hf1 := ewRootSlot_f1 e B
+  have hmono : Monotone (rel1 (ewRootSlot e B) (envSup (fun _ => 0) N)) :=
+    rel1_monotone hf1.1.monotone _
+  have hinv := allω_inversion (φ := goodsteinBodyE) m hD0 hmono
+  rw [rel1_rel1] at hinv
+  refine ⟨max (envSup (fun _ => 0) N) m, fun _ => True, Cl_of_NF hαNF, ?_⟩
+  have hctx : insert (goodsteinBodyE/[nm m])
+        (({(∀⁰ goodsteinBodyE : SyntacticFormula ℒₒᵣ)} :
+          Finset (SyntacticFormula ℒₒᵣ)).erase (∀⁰ goodsteinBodyE))
+      = {(goodsteinBodyE/[nm m])} := by
+    rw [Finset.erase_singleton]
+    rfl
+  rw [hctx] at hinv
+  exact hinv.change_H
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -2673,3 +2849,5 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_succInd
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_axm
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbeddingV3
+#print axioms GoodsteinPA.E1EmbeddingGrind.allω_inversion
+#print axioms GoodsteinPA.E1EmbeddingGrind.embedding_Zef2TC_V3
