@@ -2262,6 +2262,241 @@ theorem allClosure_peel {e : ONote} {d : ℕ} {f₀ : ℕ → ℕ} :
       exact h
 
 
+/-! ### The induction-schema kit, part 2 — `clog` gate arithmetic + the ω-root -/
+
+/-- `2·⌈log⌉` is dominated by the argument (+3): `2·log₂(m+1) ≤ m+3`. -/
+theorem two_mul_clog_le (m : ℕ) : 2 * clog m ≤ m + 3 := by
+  have hkey : ∀ k : ℕ, 2 * k ≤ 2 ^ k + 2 := by
+    intro k
+    induction k with
+    | zero => omega
+    | succ k ih =>
+        have h2 : 2 ^ k ≥ 1 := Nat.one_le_two_pow
+        have : 2 ^ (k + 1) = 2 ^ k + 2 ^ k := by ring
+        omega
+  have hpow : 2 ^ Nat.log 2 (m + 1) ≤ m + 1 := Nat.pow_log_le_self 2 (by omega)
+  have := hkey (Nat.log 2 (m + 1))
+  simp only [clog]
+  omega
+
+/-- `clog` submultiplicativity: `clog (a·b) ≤ clog a + clog b + 1`. -/
+theorem clog_mul_le (a b : ℕ) : clog (a * b) ≤ clog a + clog b + 1 := by
+  rcases Nat.eq_zero_or_pos a with ha | ha
+  · subst ha; simp
+  rcases Nat.eq_zero_or_pos b with hb | hb
+  · subst hb; simp
+  have h1 : a + 1 < 2 ^ (clog a + 1) := by
+    simpa [clog] using Nat.lt_pow_succ_log_self (by norm_num : 1 < 2) (a + 1)
+  have h2 : b + 1 < 2 ^ (clog b + 1) := by
+    simpa [clog] using Nat.lt_pow_succ_log_self (by norm_num : 1 < 2) (b + 1)
+  have hle : a * b + 1 < 2 ^ (clog a + 1) * 2 ^ (clog b + 1) := by
+    have hexp : (a + 1) * (b + 1) = a * b + a + b + 1 := by ring
+    have : a * b + 1 ≤ (a + 1) * (b + 1) := by omega
+    exact lt_of_le_of_lt this (Nat.mul_lt_mul'' h1 h2)
+  rw [← pow_add] at hle
+  have hfin : clog (a * b) < clog a + 1 + (clog b + 1) := by
+    simpa [clog] using Nat.log_lt_of_lt_pow (by omega : a * b + 1 ≠ 0) hle
+  omega
+
+/-- **The tower-gate bound**: linear-in-`k` `ofNat` towers have `clog`-gates dominated by
+`max n C` for the constant `C = 2·clog a + 12` — exactly what an arbitrary
+monotone+inflationary slot pays at branch `n`. -/
+theorem clog_tower_gate (a : ℕ) {k n : ℕ} (hk : k ≤ n) :
+    clog (a * (k + 1)) ≤ max n (2 * clog a + 12) := by
+  have h1 := clog_mul_le a (k + 1)
+  have h2 : clog (k + 1) ≤ clog (n + 1) := clog_mono (by omega)
+  have h3 := two_mul_clog_le (n + 1)
+  omega
+
+/-- The `ONote` `ω` is the closure element `expTower (ofNat 1)` — in every `Cl S`. -/
+theorem omega_eq_expTower : (ONote.omega : ONote) = expTower (ONote.ofNat 1) := rfl
+
+theorem omega_NF : (ONote.omega : ONote).NF := by
+  rw [omega_eq_expTower]; exact expTower_NF (ONote.nf_ofNat 1)
+
+theorem Cl_omega (S : ONote → Prop) : Cl S ONote.omega := by
+  rw [omega_eq_expTower]; exact Cl.expTower (Cl.ofNat 1)
+
+theorem ofNat_lt_omega (m : ℕ) : ONote.ofNat m < ONote.omega := by
+  rw [ONote.lt_def, ONote.repr_ofNat,
+    show ONote.omega.repr = Ordinal.omega0 from by simp [ONote.omega]]
+  exact Ordinal.natCast_lt_omega0 m
+
+theorem Nlog_omega : Nlog ONote.omega = 2 := by
+  show Nlog (ONote.oadd 1 1 0) = 2
+  have h2 : Nat.log 2 2 = 1 := by decide
+  show max (Nlog (1 : ONote) + clog 1) (Nlog 0) = 2
+  have h1 : Nlog (1 : ONote) = 1 := by
+    show max (Nlog 0 + clog 1) (Nlog 0) = 1
+    simp [clog, h2]
+  simp [h1, clog, h2]
+
+/-! ### The induction-schema kit, part 3 — `succInd` rewriting naturality over `ℒₒᵣ`
+(ports of `EmbeddingX.subst1_comp_bShift` / `rew_subst1_comm_q` / `rew_succInd` /
+`succInd_nnf` off `LX`). -/
+
+/-- A degree-1 substitution fixes a `bShift`ed term. -/
+theorem subst1_comp_bShift' (t : Semiterm ℒₒᵣ ℕ 1) :
+    (Rew.subst ![t]).comp Rew.bShift = (Rew.bShift : Rew ℒₒᵣ ℕ 0 ℕ 1) := by
+  ext y
+  · exact Fin.elim0 y
+  · simp [Rew.comp_app]
+
+/-- `g.q` commutes with substituting a `g.q`-fixed term for the leading bvar. -/
+theorem rew_subst1_comm_q' (g : SyntacticRew ℒₒᵣ 0 0) (φ : SyntacticSemiformula ℒₒᵣ 1)
+    (t : Semiterm ℒₒᵣ ℕ 1) (ht : g.q t = t) :
+    g.q ▹ (φ/[t]) = (g.q ▹ φ)/[t] := by
+  show g.q ▹ (Rew.subst ![t] ▹ φ) = Rew.subst ![t] ▹ (g.q ▹ φ)
+  have heq : (g.q).comp (Rew.subst ![t]) = (Rew.subst ![t]).comp g.q := by
+    ext x
+    · cases x using Fin.cases with
+      | zero => simp [Rew.comp_app, ht]
+      | succ i => exact Fin.elim0 i
+    · rw [Rew.comp_app, Rew.comp_app, Rew.subst_fvar, Rew.q_fvar]
+      show Rew.bShift (g &x) = ((Rew.subst ![t]).comp Rew.bShift) (g &x)
+      rw [subst1_comp_bShift']
+  rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, heq]
+
+/-- **`succInd` commutes with a closed rewriting** (`ℒₒᵣ` port of `EmbeddingX.rew_succInd`). -/
+theorem rew_succInd' (g : SyntacticRew ℒₒᵣ 0 0) (ψ : Semiformula ℒₒᵣ ℕ 1) :
+    g ▹ (Arithmetic.succInd ψ) = Arithmetic.succInd (g.q ▹ ψ) := by
+  unfold Arithmetic.succInd
+  simp only [Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue, Rewriting.subst1_bvar0_eq,
+    LogicalConnective.HomClass.map_imply, Rewriting.app_all, Semiformula.imp_inj,
+    Semiformula.all_inj, true_and, and_true]
+  refine ⟨?_, ?_⟩
+  · rw [Embedding.rew_subst_term g ψ (↑(0 : ℕ))]
+    congr 1
+    simp
+  · rw [rew_subst1_comm_q' g ψ (‘(#0 + 1)’ : Semiterm ℒₒᵣ ℕ 1) (by simp)]
+
+/-- The NNF of `succInd ψ` — the three Tait components. -/
+theorem succInd_nnf' (ψ : Semiformula ℒₒᵣ ℕ 1) :
+    Arithmetic.succInd ψ = (∼ψ/[(↑(0 : ℕ) : Semiterm ℒₒᵣ ℕ 0)]) ⋎
+      ((∃⁰ ∼((∼ψ/[(#0 : Semiterm ℒₒᵣ ℕ 1)]) ⋎ ψ/[(‘(#0 + 1)’ : Semiterm ℒₒᵣ ℕ 1)])) ⋎
+        (∀⁰ ψ/[(#0 : Semiterm ℒₒᵣ ℕ 1)])) := by
+  conv_lhs => unfold Arithmetic.succInd
+  simp only [Semiformula.imp_eq, Semiformula.neg_all]
+
+/-! ### The induction-schema kit, part 4 — the succInd cut-tower at root `ω`
+
+Per numeral branch `n`, a `≤ n`-long chain of cuts `D_k ⊢ ψ(k), Δ` climbs the linear `ofNat`
+ladder `a·(k+1)` (`a := 2·complexity+4`): `D_0` is the value-congruent EM at `(nm 0, t0)`,
+`D_{k+1}` cuts `ψ(nm k)` against the fired step disjunct (`exI` at witness `k`, `andI`, EM +
+value-congruent EM at `(nm (k+1), succT k)`).  The branch ordinals are UNBOUNDED but all
+`< ω`, and their `Nlog ≈ clog(a·(k+1))` gates are paid by the branch slot `rel1 f n`
+via `clog_tower_gate` (`max n C`-domination — log beats linear).  The `allω` root is `ω`. -/
+
+set_option maxHeartbeats 1000000 in
+theorem metaInduction_Zef2TC (ψ step : SyntacticSemiformula ℒₒᵣ 1)
+    (t0 : SyntacticTerm ℒₒᵣ) (succT : ℕ → SyntacticTerm ℒₒᵣ)
+    (hval0 : stdClosedVal t0 = 0)
+    (hsval : ∀ n, stdClosedVal (succT n) = n + 1)
+    (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[succT n]))
+    {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ : Seq}
+    (hmono : Monotone f) (hinfl : ∀ m, m ≤ f m)
+    (hg1 : 2 * clog (2 * ψ.complexity + 4) + 12 ≤ f 0)
+    (hg2 : ψ.complexity ≤ f 0) :
+    Zef2TC ONote.omega e H f (ψ.complexity + 1)
+      (insert (∀⁰ ψ) (insert (∼(ψ/[t0])) (insert (∃⁰ (∼step)) Γ))) := by
+  set c : ℕ := ψ.complexity + 1 with hc
+  set a : ℕ := 2 * ψ.complexity + 4 with ha
+  set Δ : Seq := insert (∼(ψ/[t0])) (insert (∃⁰ (∼step)) Γ) with hΔ
+  have hNF : ∀ m : ℕ, (ONote.ofNat m).NF := fun m => ONote.nf_ofNat m
+  have chain : ∀ n k, k ≤ n →
+      Zef2TC (ONote.ofNat (a * (k + 1))) e (adjoin H n) (rel1 f n) c
+        (insert (ψ/[nm k]) Δ) := by
+    intro n
+    have hFmono : Monotone (rel1 f n) := rel1_monotone hmono n
+    have hFinfl : ∀ m, m ≤ rel1 f n m := rel1_infl hinfl n
+    have hf0n : f 0 ≤ rel1 f n 0 := by simpa [rel1] using hmono (Nat.zero_le (max n 0))
+    have hnF : n ≤ rel1 f n 0 := by
+      have := hinfl (max n 0)
+      simp only [rel1]
+      omega
+    have hconst : ∀ m, m ≤ 2 * a → clog m ≤ rel1 f n 0 := by
+      intro m hm
+      have h1 := clog_mono hm
+      have h2 := clog_mul_le 2 a
+      have h3 : clog 2 ≤ 2 := by decide
+      omega
+    have htower : ∀ k, k ≤ n → clog (a * (k + 1)) ≤ rel1 f n 0 := by
+      intro k hk
+      have h1 := clog_tower_gate a (n := n) hk
+      have h2 : 2 * clog a + 12 ≤ rel1 f n 0 := le_trans hg1 hf0n
+      omega
+    have hcxk : ∀ (t : SyntacticTerm ℒₒᵣ), (ψ/[t]).complexity = ψ.complexity := by
+      intro t; simp
+    intro k
+    induction k with
+    | zero =>
+        intro _
+        have hgEM : clog (2 * ψ.complexity + 1) ≤ rel1 f n 0 :=
+          hconst _ (by omega)
+        have hem : Zef2TC (ONote.ofNat (2 * ψ.complexity + 1)) e (adjoin H n) (rel1 f n) c
+            (insert (ψ/[nm 0]) Δ) :=
+          (em_cong1_Zef2TC (nm 0) t0 (by simp [hval0]) ψ
+            hFmono hFinfl hgEM
+            (Finset.mem_insert_self _ _)
+            (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))).mono_c
+            (c' := c) (Nat.zero_le c)
+        refine Zef2TC.weak ?_ (ofNat_lt_ofNat (by omega)) (hNF _) (hNF _)
+          (Cl.ofNat _) (Finset.Subset.refl _) hem
+        exact le_trans (Nlog_ofNat_le _) (htower 0 (Nat.zero_le n))
+    | succ k ih =>
+        intro hk1
+        have hkn : k ≤ n := Nat.le_of_succ_le hk1
+        have Dk := ih hkn
+        set X : Seq := insert (∼(ψ/[nm k])) (insert (ψ/[nm (k + 1)]) Δ) with hX
+        have hgEM : clog (2 * ψ.complexity + 1) ≤ rel1 f n 0 := hconst _ (by omega)
+        -- left EM leaf: ψ(nm k) vs ∼ψ(nm k)
+        have hL : Zef2TC (ONote.ofNat (2 * ψ.complexity + 1)) e (adjoin H n) (rel1 f n) c
+            (insert (ψ/[nm k]) X) := by
+          have h : Zef2TC (ONote.ofNat (2 * (ψ/[nm k]).complexity + 1)) e (adjoin H n)
+              (rel1 f n) c (insert (ψ/[nm k]) X) :=
+            (em_Zef2TC' (ψ/[nm k]) hFmono hFinfl
+              (by rw [hcxk]; exact hgEM)
+              (Finset.mem_insert_self _ _)
+              (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))).mono_c
+              (c' := c) (Nat.zero_le c)
+          rwa [hcxk] at h
+        -- right EM leaf: value-congruent pair (nm (k+1), succT k)
+        have hR : Zef2TC (ONote.ofNat (2 * ψ.complexity + 1)) e (adjoin H n) (rel1 f n) c
+            (insert (∼(ψ/[succT k])) X) :=
+          (em_cong1_Zef2TC (nm (k + 1)) (succT k) (by simp [hsval]) ψ
+            hFmono hFinfl hgEM
+            (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+              (Finset.mem_insert_self _ _)))
+            (Finset.mem_insert_self _ _)).mono_c (c' := c) (Nat.zero_le c)
+        -- andI + exI: fire the step disjunct at witness k
+        have hand := Zef2TC.andI (α := ONote.ofNat (2 * ψ.complexity + 2))
+          (le_trans (Nlog_ofNat_le _) (hconst _ (by omega)))
+          _ _ (ofNat_lt_ofNat (by omega)) (ofNat_lt_ofNat (by omega))
+          (hNF _) (hNF _) (hNF _) (Cl.ofNat _) (Cl.ofNat _) hL hR
+        rw [← hstep k] at hand
+        have hex := Zef2TC.exI (α := ONote.ofNat (2 * ψ.complexity + 3))
+          (le_trans (Nlog_ofNat_le _) (hconst _ (by omega)))
+          (∼step) k (ofNat_lt_ofNat (by omega)) (hNF _) (hNF _) (Cl.ofNat _)
+          (le_trans (le_trans hkn hnF) (le_refl _)) hand
+        rw [Finset.insert_eq_self.mpr
+          (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+            (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))))] at hex
+        -- the cut on ψ(nm k), root a·(k+2)
+        have hmul1 : a * (k + 1 + 1) = a * (k + 1) + a := by ring
+        have hmul2 : a ≤ a * (k + 1) := Nat.le_mul_of_pos_right a (by omega)
+        have d₁ : Zef2TC (ONote.ofNat (a * (k + 1))) e (adjoin H n) (rel1 f n) c
+            (insert (ψ/[nm k]) (insert (ψ/[nm (k + 1)]) Δ)) :=
+          Dk.wk Dk.gate (Finset.insert_subset_insert _ (Finset.subset_insert _ _))
+        exact Zef2TC.cut
+          (le_trans (Nlog_ofNat_le _) (htower (k + 1) hk1))
+          (ψ/[nm k]) (by rw [hcxk]; omega) (by rw [hcxk]; exact le_trans hg2 hf0n)
+          (ofNat_lt_ofNat (by omega)) (ofNat_lt_ofNat (by omega))
+          (hNF _) (hNF _) (hNF _) (Cl.ofNat _) (Cl.ofNat _) d₁ hex
+  have hroot : Nlog ONote.omega ≤ f 0 := by rw [Nlog_omega]; omega
+  exact Zef2TC.allω hroot ψ (fun n => ONote.ofNat (a * (n + 1)))
+    (fun n => ofNat_lt_omega _) (fun n => hNF _) omega_NF
+    (fun n => Cl.ofNat _) (fun n => chain n n le_rfl)
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -2276,3 +2511,7 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.truth_exFree_Zef2TC
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_addEqOfLt
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_axm_PAminus
+#print axioms GoodsteinPA.E1EmbeddingGrind.allClosure_peel
+#print axioms GoodsteinPA.E1EmbeddingGrind.clog_tower_gate
+#print axioms GoodsteinPA.E1EmbeddingGrind.rew_succInd'
+#print axioms GoodsteinPA.E1EmbeddingGrind.metaInduction_Zef2TC
