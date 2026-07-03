@@ -38,11 +38,16 @@ the banked pieces into `wainer_splice_Zef2`'s shape — with exactly ONE genuine
 > **(1) `S*`-domination FIRST — THE decisive open obligation.** The m-uniformized read-off bound is
 >   `n ≤ ewIter S* γ (S* (max m C))` with FIXED `S* = max(tower, P*)`, `γ` (K_m pre-max commuted out via
 >   `ewIterTower_rel1_le`; `P_m ≤ P*` via `gvb_substs_q_le`). To fire `ewIter_hardy_le_of_dom` you need
->   `∀z, S* z ≤ H_{ω^{e₀}}(z)` at ONE fixed NF `e₀ ≠ 0`. Probe the TOWER half FIRST — apply
->   `ewIter_hardy_le` to the d-fold `ewIterTower` of `ewRootSlot` (a fixed concrete slot at fixed B,d,α',
->   so its Hardy bound sits at a FIXED ordinal level); then the `P*` half (`gvb goodsteinBodyE` = a fixed
->   formula → elementary). If the tower is NOT pointwise-dominable at a fixed Hardy level, the growth
->   conversion's shape must be rethought before assembling — so probe it EARLY, don't leave it last.
+>   `S*` dominated by a fixed Hardy level. **⚠️ lap-209 probe: the BARE form fails at `z=0`** — `hEng_of_dom`
+>   demands `∀z, f z ≤ H_{ω^{e₀}}(z)` with no pad, but `S*` has a large constant floor at 0
+>   (`ewRootSlot e B x = 2(x + hardy e (max B x)) + 3 ≥ 3`, preserved by the tower's `ewIter` floor +
+>   `Sslot`'s max) while `H_{ω^{e₀}}(0)` is O(1) (`hardy ω 0 = 1`). **So step (1) starts by adding a PADDED
+>   engine variant** `hEng_of_dom_pad` / `ewIter_hardy_le_of_dom_pad` (hypothesis `∀z, f z ≤ H_{ω^{e₀}}(z+c)`;
+>   the pad absorbs the floor) — a small generalization of the existing pad-in-output proof. Then prove
+>   `∀z, S* z ≤ H_{ω^{e₀}}(z+c)`: TOWER half via `ewIter_hardy_le` on the d-fold `ewIterTower` (fixed
+>   B,d,α' ⇒ fixed padded Hardy level); `P*` half (`gvb goodsteinBodyE`) elementary. Full analysis in
+>   `PENDING_WORK.md` lap-209 top. If even the PADDED form resists (unexpected), rethink the growth-conversion
+>   shape before assembling — so probe it EARLY, don't leave it last.
 > **(2) 2b(c) Sslot assembly** — `Sslot_mono_slot` + `ewIter_mono_slot` (banked) collapse the pipeline
 >   slot to fixed `S*` with a max-shifted argument; `ewIter_hardy_le_of_dom` then yields
 >   `goodsteinLength m ≤ n ≤ H_{ω^{e₀+3+γ}}(H_{ω^{e₀+2}}(Nlog γ + g m))` — ONE fixed ordinal, `m` only

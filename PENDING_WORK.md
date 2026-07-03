@@ -1,5 +1,42 @@
 # PENDING WORK
 
+## Lap 209 (2026-07-03, FRESH-MIND REVIEW) — direction retargeted to the 2b COMPOSITION; decisive-case probe of `S*`-domination
+
+**Direction verdict: SOUND — CONTINUE.** Route (c) read-off CLOSED (lap 207), 2b growth-conversion
+crux CLOSED (lap 208), both kernel-clean and independently re-verified this lap (real `#print axioms`).
+No drift/repetition: laps 206→207→208 each closed a distinct whole-lemma crux target hardest-first.
+DIRECTION lap-209 block set; STATUS refreshed. Remaining = the 2b composition; MANDATE = `S*`-domination
+FIRST.
+
+**⚠️ DECISIVE-CASE FINDING (probe this lap — hands the next grind lap a running start, avoids a wall):**
+The directive's step-(1) `S*`-domination as literally stated — feed `S*` to `ewIter_hardy_le_of_dom` via
+`hEng_of_dom` — hits a **z=0 constant-floor wall**, kernel-checked this lap:
+- `hEng_of_dom` (`wip/HardyMajorization.lean:454`) requires the BARE pointwise hypothesis
+  `hdom : ∀z, f z ≤ hardy (Wpow e₀) z` (no pad on the RHS argument).
+- But the pipeline slot `S* = Sslot (ewIterTower (rel1 (ewRootSlot e B) K) d α) P` has a LARGE constant
+  floor at `z=0`: `ewRootSlot e B x = 2*(x + hardy e (max B x)) + 3` (`OperatorZef2.lean:1113`), so
+  `rel1 (ewRootSlot e B) K 0 = ewRootSlot e B K = 2*(K + hardy e (max B K)) + 3 ≥ 3`, and the tower's
+  `ewIter` floor (`f0_le_ewIter`) plus `Sslot`'s `max` preserve that floor.
+- Meanwhile `hardy (Wpow e₀) 0` is **O(1)** — kernel-confirmed `hardy ω 0 = hardy 1 0 = 1` (fund. seq.
+  `ω[i] = ofNat (i+1)`, `Hardy.lean:329`; for higher `e₀` it stays small). So `hdom` at `z=0` demands
+  `(large floor) ≤ (O(1))` — **FALSE**. Bare pointwise domination of a constant-floor slot by a fixed
+  Hardy level cannot hold at small `z`.
+
+**FIX (mechanical, do this FIRST):** add a PADDED engine variant `hEng_of_dom_pad` with hypothesis
+`hdom_pad : ∀z, f z ≤ hardy (Wpow e₀) (z + c)` for a constant `c` — the pad absorbs the floor since
+`hardy (Wpow e₀) (z + c)` at `z=0` is `hardy (Wpow e₀) c` (LARGE for `c` large). Thread `c` through the
+same closed-form chain the current `hEng_of_dom` uses (it already pads the OUTPUT argument `x + p`, so
+the pad machinery is present — this generalizes the INPUT side symmetrically). Then the actual
+`S*`-domination obligation becomes the provable `∀z, S* z ≤ hardy (Wpow e₀) (z + c)`:
+tower half via `ewIter_hardy_le` on the d-fold `ewIterTower` (α' fixed ⇒ fixed Hardy level, padded);
+`P*` half elementary (`gvb goodsteinBodyE` linear-ish). If even the PADDED form resists (it shouldn't),
+that is the signal to rethink the growth-conversion shape before assembling (c′-adjacent) — but the
+padded form is the expected route and is a small generalization, not a new crux.
+
+**Next grind lap order:** (1) `hEng_of_dom_pad` + a padded `ewIter_hardy_le_of_dom_pad`; (2) the
+concrete `ewRootSlot`/tower/`P*` padded-domination bounds → `S*`-domination; (3) 2b(c) Sslot assembly;
+(4) 2b(e) EventuallyLE + contradiction. Then the ONE judge package. Do NOT self-ratify into `src`.
+
 ## Lap 208 (2026-07-03, grind) — 2b MASTER MAJORIZATION CLOSED sorry-free
 
 - **`ewIter_hardy_le`** (`wip/HardyMajorization.lean`): `ewIter f α m ≤ H_{ω^{e'+1+α}}(H_{ω^{e'}}(Nlog α + m + p))`
