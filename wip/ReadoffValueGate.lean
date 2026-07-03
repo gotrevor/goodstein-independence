@@ -96,4 +96,195 @@ termination_by φ _ _ _ _ => φ.complexity
 decreasing_by
   all_goals simp [Semiformula.complexity_rew]
 
+/-! ## The term-value frame `tvB` — standard-model values with all variables at `B`
+
+The root discharge's `P_φ` is built from `tvB` over φ's guard terms.  `tvB t B` dominates the
+value of every numeral instance of `t` whose numerals are `≤ B` (monotonicity + `val_rew`). -/
+
+/-- Standard-model `ℒₒᵣ` term values are monotone in both environments (0/1/+/· are monotone). -/
+theorem valm_mono : ∀ {m : ℕ} (t : Semiterm ℒₒᵣ ℕ m) {e e' : Fin m → ℕ} {ε ε' : ℕ → ℕ},
+    (∀ i, e i ≤ e' i) → (∀ x, ε x ≤ ε' x) →
+    Semiterm.valm ℕ e ε t ≤ Semiterm.valm ℕ e' ε' t := by
+  intro m t
+  induction t with
+  | bvar x => intro e e' ε ε' he _; simpa using he x
+  | fvar x => intro e e' ε ε' _ hε; simpa using hε x
+  | func f v ih =>
+      intro e e' ε ε' he hε
+      cases f with
+      | zero =>
+          show Semiterm.valm ℕ e ε (Semiterm.func Language.Zero.zero v)
+            ≤ Semiterm.valm ℕ e' ε' (Semiterm.func Language.Zero.zero v)
+          simp
+      | one =>
+          show Semiterm.valm ℕ e ε (Semiterm.func Language.One.one v)
+            ≤ Semiterm.valm ℕ e' ε' (Semiterm.func Language.One.one v)
+          simp
+      | add =>
+          show Semiterm.valm ℕ e ε (Semiterm.func Language.Add.add v)
+            ≤ Semiterm.valm ℕ e' ε' (Semiterm.func Language.Add.add v)
+          simp only [Semiterm.val_func, Structure.add_eq_of_lang]
+          have h0 := ih 0 he hε
+          have h1 := ih 1 he hε
+          exact Nat.add_le_add h0 h1
+      | mul =>
+          show Semiterm.valm ℕ e ε (Semiterm.func Language.Mul.mul v)
+            ≤ Semiterm.valm ℕ e' ε' (Semiterm.func Language.Mul.mul v)
+          simp only [Semiterm.val_func, Structure.mul_eq_of_lang]
+          have h0 := ih 0 he hε
+          have h1 := ih 1 he hε
+          exact Nat.mul_le_mul h0 h1
+
+/-- `tvB t B` — the value of `t` with every bounded variable at `B` and every free name at `0`. -/
+noncomputable def tvB {m : ℕ} (t : Semiterm ℒₒᵣ ℕ m) (B : ℕ) : ℕ :=
+  Semiterm.valm ℕ (fun _ => B) (fun _ => 0) t
+
+theorem tvB_mono {m : ℕ} (t : Semiterm ℒₒᵣ ℕ m) : Monotone (tvB t) :=
+  fun _ _ h => valm_mono t (fun _ => h) (fun _ => le_rfl)
+
+/-- `bShift` does not change `tvB` (the constant environment absorbs the shift). -/
+theorem tvB_bShift {m : ℕ} (t : Semiterm ℒₒᵣ ℕ m) (B : ℕ) :
+    tvB (Rew.bShift t) B = tvB t B := by
+  simp [tvB, Semiterm.val_bShift']
+
+/-! ## The guard-value bound `gvb` — the root discharge's `P_φ` shape
+
+`gvb ψ B` = the max standard-model value of any argument term of any atomic subformula of `ψ`,
+with every bounded variable at `B` (names at `0`).  Ball guards `x < t` are atoms, so `gvb`
+dominates every guard value; it is monotone in `B` and contracts under numeral substitution
+(`gvb (χ/[nm k]) B ≤ gvb χ (max B k)`), which is exactly what the master induction threads. -/
+
+noncomputable def gvb : ∀ {m : ℕ}, SyntacticSemiformula ℒₒᵣ m → ℕ → ℕ
+  | _, Semiformula.rel _ v, B => Finset.univ.sup fun i => tvB (v i) B
+  | _, Semiformula.nrel _ v, B => Finset.univ.sup fun i => tvB (v i) B
+  | _, Semiformula.verum, _ => 0
+  | _, Semiformula.falsum, _ => 0
+  | _, Semiformula.and χ₁ χ₂, B => max (gvb χ₁ B) (gvb χ₂ B)
+  | _, Semiformula.or χ₁ χ₂, B => max (gvb χ₁ B) (gvb χ₂ B)
+  | _, Semiformula.all χ, B => gvb χ B
+  | _, Semiformula.exs χ, B => gvb χ B
+
+theorem gvb_mono : ∀ {m : ℕ} (ψ : SyntacticSemiformula ℒₒᵣ m), Monotone (gvb ψ) := by
+  intro m ψ
+  induction ψ with
+  | rel r v => exact fun B B' h => Finset.sup_mono_fun fun i _ => tvB_mono (v i) h
+  | nrel r v => exact fun B B' h => Finset.sup_mono_fun fun i _ => tvB_mono (v i) h
+  | verum => exact fun _ _ _ => le_rfl
+  | falsum => exact fun _ _ _ => le_rfl
+  | and χ₁ χ₂ ih₁ ih₂ => exact fun B B' h => max_le_max (ih₁ h) (ih₂ h)
+  | or χ₁ χ₂ ih₁ ih₂ => exact fun B B' h => max_le_max (ih₁ h) (ih₂ h)
+  | all χ ih => exact ih
+  | exs χ ih => exact ih
+
+/-- Terms contract under a numeral-or-variable rewrite: if `ω` maps every bounded variable to a
+term of frame value `≤ max B K` and fixes names, then `tvB (ω t) B ≤ tvB t (max B K)`. -/
+theorem tvB_rew_le {K : ℕ} {n₁ n₂ : ℕ} (t : Semiterm ℒₒᵣ ℕ n₁) (ω : Rew ℒₒᵣ ℕ n₁ ℕ n₂)
+    (hb : ∀ i B, tvB (ω #i) B ≤ max B K) (hf : ∀ x, ω &x = &x) (B : ℕ) :
+    tvB (ω t) B ≤ tvB t (max B K) := by
+  have h1 : tvB (ω t) B
+      = Semiterm.valm ℕ (fun i => tvB (ω #i) B) (fun x => tvB (ω &x) B) t :=
+    Semiterm.val_rew ω t
+  rw [h1]
+  apply valm_mono t
+  · intro i
+    exact hb i B
+  · intro x
+    rw [hf x]
+    simp [tvB]
+
+/-- The rewrite class is stable under the binder lift `ω.q`. -/
+theorem q_class {K : ℕ} {n₁ n₂ : ℕ} (ω : Rew ℒₒᵣ ℕ n₁ ℕ n₂)
+    (hb : ∀ i B, tvB (ω #i) B ≤ max B K) (hf : ∀ x, ω &x = &x) :
+    (∀ i B, tvB (ω.q #i) B ≤ max B K) ∧ (∀ x, ω.q &x = &x) := by
+  constructor
+  · intro i B
+    cases i using Fin.cases with
+    | zero => simp [tvB]
+    | succ j => rw [Rew.q_bvar_succ, tvB_bShift]; exact hb j B
+  · intro x
+    rw [Rew.q_fvar, hf x]
+    rfl
+
+/-- **The substitution law**: `gvb` contracts under a numeral-or-variable rewrite. -/
+theorem gvb_rew_le {K : ℕ} :
+    ∀ {n₁ : ℕ} (χ : SyntacticSemiformula ℒₒᵣ n₁) {n₂ : ℕ} (ω : Rew ℒₒᵣ ℕ n₁ ℕ n₂),
+      (∀ i B, tvB (ω #i) B ≤ max B K) → (∀ x, ω &x = &x) →
+      ∀ B, gvb (ω ▹ χ) B ≤ gvb χ (max B K) := by
+  intro n₁ χ
+  induction χ with
+  | rel r v =>
+      intro n₂ ω hb hf B
+      rw [Semiformula.rew_rel]
+      simp only [gvb]
+      exact Finset.sup_le fun i _ =>
+        le_trans (tvB_rew_le (v i) ω hb hf B)
+          (Finset.le_sup (f := fun i => tvB (v i) (max B K)) (Finset.mem_univ i))
+  | nrel r v =>
+      intro n₂ ω hb hf B
+      rw [Semiformula.rew_nrel]
+      simp only [gvb]
+      exact Finset.sup_le fun i _ =>
+        le_trans (tvB_rew_le (v i) ω hb hf B)
+          (Finset.le_sup (f := fun i => tvB (v i) (max B K)) (Finset.mem_univ i))
+  | verum =>
+      intro n₂ ω _ _ B
+      rw [show (ω ▹ (Semiformula.verum : SyntacticSemiformula ℒₒᵣ _))
+        = Semiformula.verum from rfl]
+      simp [gvb]
+  | falsum =>
+      intro n₂ ω _ _ B
+      rw [show (ω ▹ (Semiformula.falsum : SyntacticSemiformula ℒₒᵣ _))
+        = Semiformula.falsum from rfl]
+      simp [gvb]
+  | and χ₁ χ₂ ih₁ ih₂ =>
+      intro n₂ ω hb hf B
+      rw [show (ω ▹ Semiformula.and χ₁ χ₂)
+        = Semiformula.and (ω ▹ χ₁) (ω ▹ χ₂) from rfl]
+      simp only [gvb]
+      exact max_le_max (ih₁ ω hb hf B) (ih₂ ω hb hf B)
+  | or χ₁ χ₂ ih₁ ih₂ =>
+      intro n₂ ω hb hf B
+      rw [show (ω ▹ Semiformula.or χ₁ χ₂)
+        = Semiformula.or (ω ▹ χ₁) (ω ▹ χ₂) from rfl]
+      simp only [gvb]
+      exact max_le_max (ih₁ ω hb hf B) (ih₂ ω hb hf B)
+  | all χ ih =>
+      intro n₂ ω hb hf B
+      rw [show (ω ▹ Semiformula.all χ) = Semiformula.all (ω.q ▹ χ) from rfl]
+      simp only [gvb]
+      obtain ⟨hb', hf'⟩ := q_class ω hb hf
+      exact ih ω.q hb' hf' B
+  | exs χ ih =>
+      intro n₂ ω hb hf B
+      rw [show (ω ▹ Semiformula.exs χ) = Semiformula.exs (ω.q ▹ χ) from rfl]
+      simp only [gvb]
+      obtain ⟨hb', hf'⟩ := q_class ω hb hf
+      exact ih ω.q hb' hf' B
+
+/-- Numerals sit inside the frame: `tvB (nm k) B = k`. -/
+theorem tvB_nm (k B : ℕ) : tvB (nm k) B = k := by
+  have he : (fun _ => B : Fin 0 → ℕ) = ![] := by funext i; exact i.elim0
+  simp only [tvB, he]
+  exact valm_nm k (fun _ => 0)
+
+/-- **The numeral-instance law** — the exact shape the master induction threads at `allω`/`exs`
+descents: instantiating the head variable by `nm k` contracts `gvb` into the `max B k` frame. -/
+theorem gvb_substs_le {χ : SyntacticSemiformula ℒₒᵣ 1} (k B : ℕ) :
+    gvb (χ/[nm k]) B ≤ gvb χ (max B k) := by
+  have hb : ∀ (i : Fin 1) B', tvB ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm k]) #i) B' ≤ max B' k := by
+    intro i B'
+    have h0 : (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm k]) #i = nm k := by
+      simp
+    rw [h0, tvB_nm]
+    exact le_max_right _ _
+  have hf : ∀ x, (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm k]) &x = &x := by
+    intro x; simp
+  exact gvb_rew_le (K := k) χ (Rew.subst ![nm k]) hb hf B
+
+#print axioms GoodsteinPA.ReadoffValueGate.Gated_mono
+#print axioms GoodsteinPA.ReadoffValueGate.Gated_all_iff
+#print axioms GoodsteinPA.ReadoffValueGate.gvb_mono
+#print axioms GoodsteinPA.ReadoffValueGate.gvb_rew_le
+#print axioms GoodsteinPA.ReadoffValueGate.gvb_substs_le
+
 end GoodsteinPA.ReadoffValueGate
