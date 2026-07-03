@@ -1623,6 +1623,130 @@ theorem budgetedEmbedsV3_cut {Γ : Finset (SyntacticFormula ℒₒᵣ)}
       (lt_of_le_of_lt (Zekd.le_add_left_NF hα₁NF hα₂NF) (Zekd.lt_osucc haddNF))
       hα₁NF hα₂NF (osucc_NF haddNF) (clT α₁) (clT α₂) D₁' D₂'
 
+/-- **V3 `exs`** — the closed-term collapse with a STRUCTURAL witness budget.  The witness
+`m = stdClosedVal (asg env t)` is env-dependent, but `stdClosedVal_asg_le_Gexp_iter` bounds it
+by `Gexp^[c] (envSup env Nt)` with STRUCTURAL `(c, Nt)`; raising the control tower to
+`e := osucc (e₁ + ω²·(c+1))` absorbs the iterate into a single Hardy value
+(`Gexp_iter_eq_hardy`) dominated by the root slot (`hardy_le_of_lt`, `norm` gate paid by `B`).
+The value-congruent EM + cut + `exI` assembly ports from block-8; the ordinal-join gates are
+free from the structural `Nlog ≤ B` invariant. -/
+theorem budgetedEmbedsV3_exs {Γ : Finset (SyntacticFormula ℒₒᵣ)}
+    {φ : SyntacticSemiformula ℒₒᵣ 1} (h : ∃⁰ φ ∈ Γ) (t : SyntacticTerm ℒₒᵣ)
+    (ih : BudgetedEmbedsV3 (insert (φ/[t]) Γ)) :
+    BudgetedEmbedsV3 Γ := by
+  obtain ⟨B₁, d₁, N₁, e₁, α₁, he₁, hα₁NF, hN₁, ih₁⟩ := ih
+  obtain ⟨c, Nt, hdom⟩ := stdClosedVal_asg_le_Gexp_iter t
+  -- the Gexp control tower `ω²·(c+1)` and the joined control `e`
+  set c' : ℕ+ := ⟨c + 1, Nat.succ_pos c⟩ with hc'
+  set eG : ONote := ONote.oadd (ONote.ofNat 2) c' 0 with heG
+  have heGNF : eG.NF := (ONote.nf_ofNat 2).oadd c' ONote.NFBelow.zero
+  have headdNF : (e₁ + eG).NF := by haveI := he₁; haveI := heGNF; exact ONote.add_nf e₁ eG
+  have heNF : (osucc (e₁ + eG)).NF := osucc_NF headdNF
+  set e : ONote := osucc (e₁ + eG) with he
+  have hlt₁ : e₁ < e :=
+    lt_of_le_of_lt (Zekd.le_add_right_NF he₁ heGNF) (Zekd.lt_osucc headdNF)
+  have hltG : eG < e :=
+    lt_of_le_of_lt (Zekd.le_add_left_NF he₁ heGNF) (Zekd.lt_osucc headdNF)
+  set B : ℕ := B₁ + φ.complexity + clog (2 * φ.complexity + 1)
+    + norm e₁ + norm eG + 3 with hB
+  set d : ℕ := max d₁ (φ.complexity + 1) with hd
+  set N : ℕ := max N₁ Nt with hN
+  have hofNF : (ONote.ofNat (2 * φ.complexity + 1)).NF := ONote.nf_ofNat _
+  have haddNF : (α₁ + ONote.ofNat (2 * φ.complexity + 1)).NF := by
+    haveI := hα₁NF; haveI := hofNF; exact ONote.add_nf _ _
+  refine ⟨B, d, N, e, osucc (osucc (α₁ + ONote.ofNat (2 * φ.complexity + 1))),
+    heNF, osucc_NF (osucc_NF haddNF), ?_, fun env => ?_⟩
+  · -- the structural `Nlog` invariant at the doubled-osucc root
+    have h1 := Nlog_osucc_le (osucc_NF haddNF)
+    have h2 := Nlog_osucc_le haddNF
+    have h3 := Nlog_add_le_max_succ α₁ hα₁NF _ hofNF
+    have h4 := Nlog_ofNat_le (2 * φ.complexity + 1)
+    omega
+  · set M : ℕ := envSup env N with hM
+    set F : ℕ → ℕ := rel1 (ewRootSlot e B) M with hF
+    set ψ' : SyntacticSemiformula ℒₒᵣ 1 := (Embedding.asg env).q ▹ φ with hψ'
+    set s : SyntacticTerm ℒₒᵣ := Embedding.asg env t with hs
+    set m : ℕ := stdClosedVal s with hm
+    have hψc : ψ'.complexity = φ.complexity := by simp [hψ']
+    have hf1 := ewRootSlot_f1 e B
+    have hFmono : Monotone F := rel1_monotone hf1.1.monotone M
+    have hFinfl : ∀ x, x ≤ F x := rel1_infl (fun x => by have := hf1.2 x; omega) M
+    have hBF : B ≤ F 0 := le_relSlot_zero e B M
+    -- the IH derivation, re-based to the joined control/budgets
+    have D₁ := ih₁ env
+    rw [Finset.image_insert, Embedding.rew_subst_term (Embedding.asg env) φ t] at D₁
+    have hff : ∀ x, rel1 (ewRootSlot e₁ B₁) (envSup env N₁) x ≤ F x :=
+      relSlot_le he₁ heNF hlt₁ (by omega)
+        (envSup_mono_N env (le_max_left N₁ Nt)) (by omega)
+    have D₁' := ((D₁.change_e e).mono_f hff).mono_c (c' := d) (le_max_left _ _)
+    -- left cut premise: add ψ'/[nm m] to the context
+    have Dsrc : Zef2TC α₁ e (fun _ => True) F d
+        (insert (ψ'/[s]) (insert (ψ'/[nm m])
+          (Γ.image (fun χ => Embedding.asg env ▹ χ)))) :=
+      D₁'.wk D₁'.gate (Finset.insert_subset_insert _ (Finset.subset_insert _ _))
+    -- right cut premise: value-congruent EM at the pair (nm m, s)
+    have hgateEM : clog (2 * ψ'.complexity + 1) ≤ F 0 := by rw [hψc]; omega
+    have Dcong : Zef2TC (ONote.ofNat (2 * ψ'.complexity + 1)) e (fun _ => True) F 0
+        (insert (∼(ψ'/[s])) (insert (ψ'/[nm m])
+          (Γ.image (fun χ => Embedding.asg env ▹ χ)))) := by
+      refine em_cong1_Zef2TC (nm m) s (by simp [hm]) ψ' hFmono hFinfl hgateEM ?_ ?_
+      · exact Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)
+      · exact Finset.mem_insert_self _ _
+    have Dcong' := Dcong.mono_c (c' := d) (Nat.zero_le d)
+    -- the cut, at root `osucc (α₁ + ofNat (2·complexity+1))`; gate free from `B`
+    have hgcut : Nlog (osucc (α₁ + ONote.ofNat (2 * φ.complexity + 1))) ≤ F 0 := by
+      have h2 := Nlog_osucc_le haddNF
+      have h3 := Nlog_add_le_max_succ α₁ hα₁NF _ hofNF
+      have h4 := Nlog_ofNat_le (2 * φ.complexity + 1)
+      omega
+    have hcompl : (ψ'/[s]).complexity < d := by
+      have : (ψ'/[s]).complexity = φ.complexity := by simp [hψ']
+      omega
+    have hread : (ψ'/[s]).complexity ≤ F 0 := by
+      have hc : (ψ'/[s]).complexity = φ.complexity := by simp [hψ']
+      omega
+    have hψof : ONote.ofNat (2 * ψ'.complexity + 1)
+        = ONote.ofNat (2 * φ.complexity + 1) := by rw [hψc]
+    rw [hψof] at Dcong'
+    have Dnum : Zef2TC (osucc (α₁ + ONote.ofNat (2 * φ.complexity + 1))) e
+        (fun _ => True) F d
+        (insert (ψ'/[nm m]) (Γ.image (fun χ => Embedding.asg env ▹ χ))) :=
+      Zef2TC.cut hgcut (ψ'/[s]) hcompl hread
+        (lt_of_le_of_lt (Zekd.le_add_right_NF hα₁NF hofNF) (Zekd.lt_osucc haddNF))
+        (lt_of_le_of_lt (Zekd.le_add_left_NF hα₁NF hofNF) (Zekd.lt_osucc haddNF))
+        hα₁NF hofNF (osucc_NF haddNF) (clT _) (clT _) Dsrc Dcong'
+    -- THE structural witness bound: `m ≤ Gexp^[c] ≤ hardy eG ≤ hardy e ≤ F 0`
+    have hwit : m ≤ F 0 := by
+      have s1 : m ≤ Gexp^[c] (envSup env Nt) := hdom env
+      have s2 : Gexp^[c] (envSup env Nt) ≤ Gexp^[c] M :=
+        Gexp_iter_monotone c (envSup_mono_N env (le_max_right N₁ Nt))
+      have s3 : Gexp^[c] M ≤ Gexp^[c + 1] M := Gexp_iter_le_iter (Nat.le_succ c) M
+      have s4 : Gexp^[c + 1] M = hardy eG M := Gexp_iter_eq_hardy c' M
+      have s5 : hardy eG M ≤ hardy eG (max B (max M 0)) :=
+        hardy_monotone eG (le_trans (le_max_left M 0) (le_max_right B _))
+      have s6 : hardy eG (max B (max M 0)) ≤ hardy e (max B (max M 0)) :=
+        hardy_le_of_lt heGNF heNF hltG (le_trans (by omega) (le_max_left B _))
+      have s7 : hardy e (max B (max M 0)) ≤ F 0 := by
+        simp only [hF, rel1, ewRootSlot]
+        omega
+      omega
+    -- the ∃-introduction at the numeral witness `m`
+    have hgout : Nlog (osucc (osucc (α₁ + ONote.ofNat (2 * φ.complexity + 1)))) ≤ F 0 := by
+      have h1 := Nlog_osucc_le (osucc_NF haddNF)
+      have h2 := Nlog_osucc_le haddNF
+      have h3 := Nlog_add_le_max_succ α₁ hα₁NF _ hofNF
+      have h4 := Nlog_ofNat_le (2 * φ.complexity + 1)
+      omega
+    have hexI := Zef2TC.exI
+      (α := osucc (osucc (α₁ + ONote.ofNat (2 * φ.complexity + 1))))
+      hgout ψ' m
+      (Zekd.lt_osucc (osucc_NF haddNF)) (osucc_NF haddNF)
+      (osucc_NF (osucc_NF haddNF)) (clT _) hwit Dnum
+    have hmem : (∃⁰ ψ') ∈ Γ.image (fun χ => Embedding.asg env ▹ χ) := by
+      have := Finset.mem_image_of_mem (fun χ => Embedding.asg env ▹ χ) h
+      simpa [hψ'] using this
+    rwa [Finset.insert_eq_self.mpr hmem] at hexI
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -1633,3 +1757,4 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_all
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_and
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_cut
+#print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_exs
