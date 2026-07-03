@@ -149,16 +149,14 @@ FADED = BANKED | SUPERSEDED | NOT_REQUIRED
 #   * a prose/aspirational node has no Lean decl at all to attach an attribute to.
 # Colors stay whatever content.tex declares; this only adds one label line.
 NODE_NOTE = {
-    # Live Route-B remaining work — real lap costs (rebased 2026-07-02, trap-8
-    # judge pass + WAINER-LADDER-2026-07-02.md rung P: lap-7 E–W statement lap +
-    # lap-8 judged port + the pass grind on Zef2).
-    "thm:zeh_pass":                "~4-7 laps | 70%",    # rung P (E–W rebuild; sorry: pin-3 gate)
-    "thm:zeh_readoff_delta0":      "~2-3 laps | 80%",    # rung D (Towsner-5.4 pattern; re-based per the ladder)
-    # The rest of the wainer ladder (decl-less until the lap-8 port erects the
-    # named pins + ledger rows; estimates = WAINER-LADDER-2026-07-02.md).
-    "thm:zeh_rank_zero":           "~1 lap | 90%",       # rung R (plain induction over the pass)
-    "thm:zeh_embedding":           "~8-20 laps | 65%",   # rung E (the long pole after P)
-    "thm:wainer_splice":           "~2-4 laps | 75%",    # rung W (Hardy brackets banked lap 179)
+    # Live Route-B remaining work — rebased 2026-07-03 at the SERIES-3 judge pass
+    # (E-2026-07-03-JUDGE-series3-validation.md): rungs P/R/D kernel-verified in
+    # src, rung E realized in wip (statement judge-ratified), rung W half-built.
+    "thm:zeh_pass":                "✅ src, kernel-clean (S3 lap 198)",  # rung P (cutElimPass_Zef2; TC port in wip, lap 204)
+    "thm:zeh_readoff_delta0":      "✅ src, kernel-clean (S3 lap 199)",  # rung D (R-4′ verbatim, by vacuity; live TC value read-off in wip, lap 207)
+    "thm:zeh_rank_zero":           "✅ src, kernel-clean (S3 lap 198)",  # rung R (rankToZero_Zef2; TC port in wip, lap 204)
+    "thm:zeh_embedding":           "✅ wip, ratified (S3 lap 203)",      # rung E (embedding_Zef2TC_V3; src promotion at the S4 judge package)
+    "thm:wainer_splice":           "~2-5 laps | 85%",    # rung W (composition only: S*-domination half-built, lap 209)
     # thm:pa_not_proves_goodstein (the summit) now carries LEDGER row 16 — the
     # rung-C re-point (1 lap @ 95% once routeB_headline is clean, + W7 burndown).
     # It is NAME-matched above (decl-less tex node), so no hand note here.
@@ -259,43 +257,62 @@ def main() -> int:
         suffix = node.split(":", 1)[-1]
         est = estimate_text(info)
         # DOT label (inside a JS template literal: file needs \\n so the JS
-        # string carries \n, which Graphviz renders as a centered line break)
+        # string carries \n, which Graphviz renders as a centered line break).
+        # Idempotent by OVERWRITE: a stale second line is refreshed, not skipped.
         old = f"label={suffix},"
         new = f'label="{suffix}\\\\n{est}",'
+        # \\{1,2}n tolerates a single-backslash variant so a damaged label heals
+        stale_re = re.compile(r'label="' + re.escape(suffix) + r'\\{1,2}n[^"]*",')
         if old in html:
             html = html.replace(old, new, 1)
             changed += 1
-        elif f'label="{suffix}\\\\n' not in html:
+        elif stale_re.search(html):
+            prev = html
+            # lambda replacement: no backslash-escape processing of `new`
+            html = stale_re.sub(lambda _m: new, html, count=1)
+            if html != prev:
+                changed += 1
+        else:
             print(f"warn: no DOT label found for {node}", file=sys.stderr)
-        # modal: prepend the estimate line to the node's LaTeX link
+        # modal: prepend the estimate line to the node's LaTeX link (overwrite if stale)
         anchor_re = re.compile(r'(<a class="latex_link" href="[^"]*#' + re.escape(node) + '">)')
-        if f'data-estimate="{node}"' not in html:
-            html = anchor_re.sub(
-                f'<p class="node-estimate" data-estimate="{node}">Ledger estimate: {est} confidence</p>\n    \\1',
-                html,
-                count=1,
-            )
+        est_p = f'<p class="node-estimate" data-estimate="{node}">Ledger estimate: {est} confidence</p>'
+        est_p_re = re.compile(
+            r'<p class="node-estimate" data-estimate="' + re.escape(node) + r'">[^<]*</p>')
+        if est_p_re.search(html):
+            html = est_p_re.sub(est_p, html, count=1)
+        else:
+            html = anchor_re.sub(f'{est_p}\n    \\1', html, count=1)
 
     # Node-level planning notes (see NODE_NOTE above): estimates for nodes the
-    # ledger can't reach (sorry-bearing or prose). Idempotent — skips a node whose
-    # label already carries a second line.
+    # ledger can't reach (sorry-bearing or prose). Idempotent by OVERWRITE — a
+    # node whose label already carries a (possibly stale) second line is refreshed.
     node_notes = 0
     for node, note in sorted(NODE_NOTE.items()):
         suffix = node.split(":", 1)[-1]
         old = f"label={suffix},"
         new = f'label="{suffix}\\\\n{note}",'
+        # \\{1,2}n tolerates a single-backslash variant so a damaged label heals
+        stale_re = re.compile(r'label="' + re.escape(suffix) + r'\\{1,2}n[^"]*",')
         if old in html:
             html = html.replace(old, new, 1)
             node_notes += 1
-        elif f'label="{suffix}\\\\n' not in html:
+        elif stale_re.search(html):
+            prev = html
+            # lambda replacement: no backslash-escape processing of `note`
+            html = stale_re.sub(lambda _m: new, html, count=1)
+            if html != prev:
+                node_notes += 1
+        else:
             print(f"warn: no DOT label found for node-note {node}", file=sys.stderr)
         anchor_re = re.compile(r'(<a class="latex_link" href="[^"]*#' + re.escape(node) + '">)')
-        if f'data-note="{node}"' not in html:
-            html = anchor_re.sub(
-                f'<p class="node-estimate" data-note="{node}">Plan note (not audit-backed): {note}</p>\n    \\1',
-                html,
-                count=1,
-            )
+        note_p = f'<p class="node-estimate" data-note="{node}">Plan note (not audit-backed): {note}</p>'
+        note_p_re = re.compile(
+            r'<p class="node-estimate" data-note="' + re.escape(node) + r'">[^<]*</p>')
+        if note_p_re.search(html):
+            html = note_p_re.sub(note_p, html, count=1)
+        else:
+            html = anchor_re.sub(f'{note_p}\n    \\1', html, count=1)
     print(f"node-level planning notes: {node_notes} label(s)")
 
     # Summit at the TOP: rank flow bottom-to-top, so dependencies climb

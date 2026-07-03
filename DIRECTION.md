@@ -14,10 +14,27 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
+**2026-07-03 (SERIES-3 JUDGE PASS, host judge session — VERDICT: PASS. THIS IS THE CURRENT BINDING
+BLOCK; it supersedes the lap-209 block below for the mandate/next-move pointer; the lap-209/206
+FORBIDDENs and gotchas stay in force.)**
+SERIES-3 judged (`E-2026-07-03-JUDGE-series3-validation.md`): rungs P/R/D kernel-verified in src,
+rung E realized in wip with the ∃K/V3 statement **RATIFIED** (Ruling 2), R-4′ **CONFORMANT**
+(Ruling 1), Ax2-deferred **RESOLVED** (Ruling 3). Ledger row 14 rebased 3-8@85; depgraph regenerated.
+🚦 **MANDATE = the SERIES-4 FINAL-DISCHARGE order, §4 of the judge doc.** Lane S (serial):
+S-1 `ewIterTower_dom_pad` (statement + plan verbatim in `HANDOFF-2026-07-03-lap209.md` §NEXT) →
+S-2 `P*`-domination + `Sslot_dom_pad` → S-3 Sslot assembly → S-4 EventuallyLE package → S-5 the
+wip-side splice at the axiom's **VERBATIM type** (copy from `WainerRoute.lean:119-121`, do not
+compose; end with its `#print axioms` witness). Lane B (interleave when S blocks): B-1 W7
+native_decide burndown (statements FROZEN, proof swaps only; kernel-infeasible ⇒ ledger, don't
+restate) · B-2 the 15 src sorries (re-point to landed theorems, or retirement PROPOSALS — the judge
+executes deletions). **JUDGE-GATED — grind laps MUST NOT: the src axiom→theorem swap
+(`WainerRoute.lean`), the rung-C crown re-point, any `Statement.lean` edit, src decl deletion.**
+STOP when S-5 + B-1 + B-2 are ledgered (or hard-blocked with kernel evidence) → stamp the ONE judge
+package for the SERIES-4 pass.
+
 **2026-07-03 (FRESH-MIND REVIEW, global lap 209 — route (c) read-off CLOSED + the 2b growth-conversion
-crux CLOSED; the E-seam is now COMPOSITION, not open proof-uncertainty. THIS IS THE CURRENT BINDING
-BLOCK; it supersedes the lap-206 block below for the piece-1 route choice (route (c) is DONE) and the
-"next move" pointer; the lap-206 FORBIDDENs and everything else stay in force.)**
+crux CLOSED; the E-seam is now COMPOSITION, not open proof-uncertainty. SUPERSEDED by the judge block
+above for the mandate pointer; the lap-206 FORBIDDENs and everything else stay in force.)**
 Independently re-verified this lap (real `#print axioms`, bare `lake build` 🟢 **1342**, `lake env lean`
 on the two crux wip files): headline `[propext, Classical.choice, goodstein_implies_consistency,
 Quot.sound]` sorryAx OFF; growth headline = trust base + `wainer_bound_of_pa_proves_goodstein` + 12

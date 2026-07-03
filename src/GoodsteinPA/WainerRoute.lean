@@ -150,17 +150,17 @@ theorem peano_not_proves_goodstein_growth : 𝗣𝗔 ⊬ ↑goodsteinSentence :=
   exact cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing o ho hbound
 
 /- Blueprint ledger: THE remaining route-B debt — the specialized Wainer
-classification, held as the sole axiom. The whole Zᵉ operator-calculus substrate
-(the rebuild) exists to discharge this. Estimate re-based 2026-07-02 from the
-WAINER-LADDER decomposition (rungs P/R/D/E/W, sum ≈ 20–40 laps; a planning
-claim, not a kernel fact; category `debt` is machine-audited by
-`lake exe blueprint_audit`). The rungs get their own ledger rows at the lap-8
-port; until then this row carries the sum. -/
-attribute [goodstein_blueprint 14 debt "wainer_axiom" "20-40" 65 wainer_bound_of_pa_proves_goodstein
+classification, held as the sole axiom. Estimate re-based 2026-07-03 at the
+SERIES-3 judge pass (E-2026-07-03-JUDGE-series3-validation.md): rungs P/R/D
+kernel-verified in src, rung E realized in wip (statement judge-ratified),
+rung W half-built (Hardy majorization + padded engine green) — the residual is
+the 2b COMPOSITION + judge-gated src promotion (a planning claim, not a kernel
+fact; category `debt` is machine-audited by `lake exe blueprint_audit`). -/
+attribute [goodstein_blueprint 14 debt "wainer_axiom" "3-8" 85 wainer_bound_of_pa_proves_goodstein
   []
-  ["WAINER-LADDER-2026-07-02.md: rungs P 4-7@70 + R 1@90 + D 2-3@80 + E 8-20@65 + W 2-4@75; supersedes the MASTERPLAN 30-60@60 monolith estimate",
-   "Lap-8 (OperatorZef2.lean): rungs erected as named Zef2 pins — P cutElimPass_Zef2, R rankToZero_Zef2, D readoff_delta0_Zef2, E embedding_Zef2 (trap-9 escalation-flagged), W wainer_splice_Zef2; on the tex dep-graph (sorry pins cannot be @[goodstein_blueprint]-tagged: BlueprintAudit computes broken)",
-   "Buchholz-Wainer 1987: the classification is proved by omega-logic + cut-elimination — the someK/Zeh substrate"]
+  ["SERIES-3 (laps 198-209): P cutElimPass_Zef2 + R rankToZero_Zef2 + D readoff_delta0_Zef2 (R-4' verbatim, by vacuity) all src kernel-clean; E embedding_Zef2TC_V3 realized wip (V3/existsK statement RATIFIED at the S3 judge pass); TC pass port (passAuxTC/rankToZero_TC/sound0_TC) + value read-off (readoff_value_goodstein) + Hardy majorization (ewIter_hardy_le, padded engine) all wip kernel-clean",
+   "Residual = rung W composition ONLY: ewIterTower_dom_pad -> S*-domination -> Sslot assembly -> EventuallyLE package -> splice at the axiom's verbatim type; then judge-gated promotion (grind laps MUST NOT self-ratify into src)",
+   "Buchholz-Wainer 1987: the classification is proved by omega-logic + cut-elimination — the someK/Zeh substrate; superseded estimates: MASTERPLAN 30-60@60, WAINER-LADDER 20-40@65"]
   "The specialized Wainer classification axiom; discharged by the wainer ladder over the Z^e operator calculus (embed -> pass -> rank-0 -> Delta_0 read-off -> splice)."]
   wainer_bound_of_pa_proves_goodstein
 
