@@ -1,6 +1,7 @@
 import GoodsteinPA.OperatorZef2
 import GoodsteinPA.WainerRoute
 import GoodsteinPA.Embedding
+import GoodsteinPA.InternalBridge
 
 /-!
 # E-1 grind (Series-3) — `Zef2TC` (full E–W Def-23 rule set) + the budgeted EM lemma
@@ -4837,8 +4838,51 @@ theorem ewIterTower_rel1_le {f : ℕ → ℕ} (hmono : Monotone f) (hinfl : ∀ 
         _ ≤ ewIter (ewIterTower f d α) (collapseIter d α) (max K x) :=
             ewIter_rel1_le hTmono hTinfl (collapseIter d α) K x
 
+/-! ### 2b item (d) — the semantic link (igoodstein faithfulness)
+
+A true numeral instance of the pipeline matrix at witness `n` bounds the REAL Goodstein
+length: `atomTrue (χ/[nm n]) → goodsteinLength m ≤ n`.  The matrix is extracted from the
+`∃⁰`-shape equality by constructor injectivity (whnf), then the Bridge-style eval recipe
+(`igoodstein_defined.iff` + `igoodstein_nat`) lands on `goodsteinSeq m n = 0`. -/
+
+theorem goodsteinBodyE_semantic_link {m n : ℕ} {χ : SyntacticSemiformula ℒₒᵣ 1}
+    (hχ : goodsteinBodyE/[nm m] = (∃⁰ χ)) (h : atomTrue (χ/[nm n])) :
+    GoodsteinPA.Dom.goodsteinLength m ≤ n := by
+  have hbody := Semiformula.exs.inj hχ
+  rw [← hbody] at h
+  have h' : atomTrue ((((Rew.subst (L := ℒₒᵣ) ![nm m]).q ▹
+      ((Rew.emb : Rew ℒₒᵣ Empty 1 ℕ 1).q ▹
+        (((↑(LO.FirstOrder.Arithmetic.igoodsteinDef))/[(‘0’ : Semiterm ℒₒᵣ Empty 2), #1, #0])
+          : Semisentence ℒₒᵣ 2))) : SyntacticSemiformula ℒₒᵣ 1)/[nm n]) := h
+  apply GoodsteinPA.Dom.goodsteinLength_le (m := m) (N := n)
+  rw [← GoodsteinPA.InternalPow.igoodstein_nat]
+  simp only [atomTrue, Semiformula.eval_substs, Semiformula.eval_rew, Semiformula.eval_emb,
+    Function.comp_def] at h'
+  have hcast : ∀ (E : Fin 3 → ℕ) (ε₁ ε₂ : Empty → ℕ),
+      Semiformula.Eval (Arithmetic.standardModel ℕ) E ε₁
+        (↑(LO.FirstOrder.Arithmetic.igoodsteinDef)) →
+      Semiformula.Eval (Arithmetic.standardModel ℕ) E ε₂
+        (↑(LO.FirstOrder.Arithmetic.igoodsteinDef)) := by
+    intro E ε₁ ε₂ hh
+    rwa [show ε₂ = ε₁ from funext fun a => a.elim]
+  have h'' := hcast _ _ Empty.elim h'
+  have hkey := GoodsteinPA.InternalPow.igoodstein_defined.iff.mp h''
+  have hq1 : ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #1 : SyntacticSemiterm ℒₒᵣ 1)
+      = Rew.bShift (nm m) := by
+    show (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #(Fin.succ 0) = _
+    rw [Rew.q_bvar_succ]
+    simp
+  have hval : Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => n) (fun _ => 0)
+      ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #1) = m := by
+    rw [hq1]
+    simp [Semiterm.val_bShift', Matrix.empty_eq, valm_nm]
+  simp at hkey
+  rw [hval] at hkey
+  simpa using hkey.symm 
+
 end GoodsteinPA.E1EmbeddingGrind
 
+#print axioms GoodsteinPA.E1EmbeddingGrind.goodsteinBodyE_semantic_link
 #print axioms GoodsteinPA.E1EmbeddingGrind.ewIter_mono_slot
 #print axioms GoodsteinPA.E1EmbeddingGrind.ewIterTower_rel1_le
 #print axioms GoodsteinPA.E1EmbeddingGrind.goodsteinBodyE_inst_shape

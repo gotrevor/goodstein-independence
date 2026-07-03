@@ -26,6 +26,13 @@
   `y := H_{ω^{e₀}}(x+p)` → raise ω²→ω^{e₀+1} (eq-split at e₀=1 via `repr_inj`) → exact comp
   (`hardy_add_comp`) → final raise under ω^{e₀+2}.  End-to-end:
   `ewIter f α m ≤ H_{ω^{e₀+3+α}}(H_{ω^{e₀+2}}(Nlog α + m + p))`.
+- **(b)+(d) CLOSED same lap**: `gvb_substs_q_le` (ReadoffValueGate — one-binder numeral
+  contraction, P_m ≤ P*(max m ·) with FIXED P*) and `goodsteinBodyE_semantic_link`
+  (E1EmbeddingGrind — `atomTrue (χ/[nm n]) → goodsteinLength m ≤ n`; matrix extracted by
+  `Semiformula.exs.inj` whnf, eval via `eval_rew` peel + Empty-ε transport +
+  `igoodstein_defined.iff` + `embedding_subst_q_cons_app`-free q#1 val patch +
+  `igoodstein_nat`).  Gotcha: `⊧/`(Evalbm) is an abbrev — simp can't re-fold raw `Eval`;
+  apply `.iff.mp` to a term whose ε was transported to `Empty.elim` by funext.
 - **NEXT (2b remaining)**: (b) gvb
   numeral contraction (P_m ≤ P* fixed, ReadoffValueGate); (c) Sslot-level assembly of the
   m-uniformized pipeline bound feeding ewIter_hardy_le; (d) semantic link atomTrue→goodsteinLength;
