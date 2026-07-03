@@ -78,6 +78,21 @@ gadget + prove its TWO threading inequalities FIRST (ordinal-descent absorption 
 induction. If the gadget's ordinal-monotonicity is kernel-refuted in a way `ewIter`'s norm-gating
 can't fix, THAT is the escalation point for (c′).
 
+**⭐ PROBE EXECUTED (lap 206, same lap): `wip/ReadoffValueGadgetProbe.lean` — the algebra CLOSES,
+kernel-verified** (`T1_extract`/`T3_descent`/`T4_slot_read`/`S_max_mono_infl`, all
+`[propext, Classical.choice, Quot.sound]` or less, sorry-free). Master bound
+`BND V α := ewIter S α (S V)` (seed ONE `S` ahead) with `S x := max (f₀ x) (P_φ x)`:
+- **T3 (decisive)**: `β < α` NF + gate `Nlog β ≤ S (S V)` + any budget bump `V' ≤ S V` ⟹
+  `ewIter S β (S V') ≤ ewIter S α (S V)` — proven from `ewIter_monotone` + `ewIter_lower` alone.
+  Covers the trap descent (`V' = max V k₀`, `k₀ ≤ P_φ V`), the vacuous-`exI` bump
+  (`V' = max V (f₀ j)`), and same-budget `andI`/`orI`/branch-0 descents (`V' = V`).
+- **T4**: slot along the descent stays `rel1 f₀ j`, `j ≤ V` (`rel1_rel1` collapses towers), so
+  every calculus gate `Nlog β ≤ (slot) 0 = f₀ j ≤ S V ≤ S (S V)` is T3-shaped, and `exI` reads
+  `n ≤ (slot) 0 ≤ S V ≤ BND V α` (T1).
+- ⟹ **(c′) is OFF the table**; remaining work is (ii) `P_φ` + the ball value gate (Foundation
+  `Hierarchy` structural work) and (iii) the V-threaded re-grind of `readoffTC_core` against
+  `BND` (the `InstOf φ V` closure predicate + the 9 cases, 8 of which survive with V-edits).
+
 **(c′) fallback — ESCALATION-ONLY, do NOT start it**: amend `Zef2TC.allω` with an E–W-style
 branch/norm gate. Statement-cleanest but re-opens the ENTIRE banked V3 ladder + TC pass
 (~10+ laps re-grind). Only on a kernel-refuted (c).
