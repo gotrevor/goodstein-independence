@@ -15,7 +15,25 @@
     `Nlog α' ≤ ewIterTower (rel1 (ewRootSlot e B) K) d α 0` (bounded by T°(max K₀ m) — Hardy in m).
   - `ewIter_dom_pad_levelcap` then converts per-α' double-Hardy bounds to the FIXED level
     `ω^{e₀+2+1+γ+1}` (γ = collapseIter d α), with `Nlog α'` left in the ARGUMENT.
-- ⏭️ **NEXT (S-3/S-4 continue):**
+- ✅ Also landed: `dom_pad_comp` (`4511346`), S-4 `hardy_pad_lt_fastGrowing_osucc`+`dom_pad_eventuallyLE`
+  (`19065e7`), RVG `gated_certificate_uniform` (`5370cf0`) — ONE k for the whole numeral family.
+- ⏭️ **NEXT = `master_conversion` in HardyMajorization** (the S-3 capstone; full design in this
+  lap's analysis): statement quantifies e,Bb,K₀,d,k,α,γ; concludes ∃o NF ∃N ∀m≥N ∀α'≤γ NF,
+  Nlog α' ≤ S°(max K₀ m) → n ≤ ewIter S° α' (S°(max K₀ m)) → n ≤ fastGrowing o m, where
+  S° := fun x => max (ewIterTower (ewRootSlot e Bb) d α x) ((hardy (oadd (ofNat 2) 1 0))^[k] x)
+  (NO Sslot/Gexp constants — shared verbatim shape with E1's hypothesis). Proof chain:
+  ewRootSlot_dom_pad → ewIterTower_dom_pad (no rel1!) + hardy_Wpow_iter_dom_pad → dom_pad_max
+  → S°-bound; ewIter_dom_pad_levelcap (f := S°, γ) → per-α' bound; then m-side: Nlog α' ≤ x_m :=
+  S°(max K₀ m) hyp, inner ≤ 2·x_m + q ≤ Gexp(x_m) for x_m ≥ max(q,1) (x_m ≥ Q°-infl ≥ max K₀ m ≥ m
+  eventually; helper `2y+q ≤ H_{ω²}(y)` for y≥q via hardy_omega_pow_ofNat: H ≥ 4y+3); then
+  dom_pad_comp twice (inner-level hardy ∘ H_{E₃}, then outer L-level ∘ result; note f ≤ H(z+0)
+  self-bound rfl trick) → n ≤ H_{E₅}(m + c₅) → hardy_pad_lt_fastGrowing_osucc (m ≥ max(q, c₅+3)).
+  THEN E1 final assembly: hypotheses Hcert (= gated_certificate_uniform stmt @ G:=Gexp closure
+  facts, body := goodsteinBodyE's matrix; χ-equation from exs-injectivity of inst_shape) +
+  Hconv (= master_conversion stmt); local m-uniformization (ewIterTower_rel1_le + ewIter_mono_slot
+  + ewIter_rel1_le, V := 0, M := max K₀ m, P_m ≤ Gexp^[k](max m ·) ≤ Q°(max M ·)); semantic link;
+  conclude ∃o NF, EventuallyLE goodsteinLength (fastGrowing o) — the axiom's VERBATIM type.
+- **(previous next-list, items now absorbed above):**
   1. (E1EmbeddingGrind) primed `readoff_value_pipeline'`/`readoff_value_goodstein'` keeping the
      Nlog certificate. Mechanical (re-thread the discarded conjunct).
   2. (HardyMajorization) `dom_pad_comp` — composition of two padded-dominated functions
