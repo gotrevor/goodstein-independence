@@ -1,5 +1,34 @@
 # PENDING WORK
 
+## Lap 210 (2026-07-03, grind) — S-1 + S-2 CLOSED; S-3 bricks (all `[propext, choice, Quot.sound]`)
+
+- ✅ S-1 `ewIterTower_dom_pad` (`564b51f`), S-2 `gvb_le_iter`+`hardy_Wpow_iter_dom_pad` (`15f6617`),
+  `dom_pad_max`+`Sstar_dom_pad` (`b22dbc3`), S-3 brick `ewIter_dom_pad_levelcap`+`two_pow_le_hardy_Wpow2`
+  (`b22d33f`). Details inline in lap-209 section below.
+- **KEY design findings this lap:**
+  - The m-uniformization route: K_m = max(K₀, m) is LINEAR in m (`embedding_Zef2TC_V3` proof:
+    `K = max (envSup 0 N) m`); P_m := `fun B => gvb ψ_m (max V B)` contracts to the FIXED matrix by
+    `gvb_substs_q_le`; `ewIterTower_rel1_le` + `ewIter_rel1_le` + `ewIter_mono_slot` (all banked in
+    E1EmbeddingGrind) push ALL m-dependence into the ARGUMENT of ONE fixed slot S°.
+  - `Zef2TCProv` CARRIES `Nlog α' ≤ f 0` (E1EmbeddingGrind:3424) — `readoff_value_pipeline` currently
+    DISCARDS it (`_hα'N`). The α'-uniform conversion NEEDS it: make a primed pipeline variant keeping
+    `Nlog α' ≤ ewIterTower (rel1 (ewRootSlot e B) K) d α 0` (bounded by T°(max K₀ m) — Hardy in m).
+  - `ewIter_dom_pad_levelcap` then converts per-α' double-Hardy bounds to the FIXED level
+    `ω^{e₀+2+1+γ+1}` (γ = collapseIter d α), with `Nlog α'` left in the ARGUMENT.
+- ⏭️ **NEXT (S-3/S-4 continue):**
+  1. (E1EmbeddingGrind) primed `readoff_value_pipeline'`/`readoff_value_goodstein'` keeping the
+     Nlog certificate. Mechanical (re-thread the discarded conjunct).
+  2. (HardyMajorization) `dom_pad_comp` — composition of two padded-dominated functions
+     (raise outer to E₁+E₂+1 first, gate from inner value ≥ arg; then collapse+raise = E₁+E₂+2).
+     Needed to collapse `H_L(H_{e₀+2}(Nlog α'_m + X_m))` where X_m/Nlog α'_m ≤ H-fixed(m+C) chains.
+  3. (Hardy/WainerLadder grep first) fastGrowing shift absorption: `H_{ω^L}(m+C) ≤ f_o(m)`
+     eventually, one fixed o (e.g. via `hardy_omega_pow_lt_fastGrowing` + `fastGrowing` argument
+     bump o→o+1). Check `src/GoodsteinPA/WainerLadder.lean` + Hardy for banked pieces.
+  4. Assembly: EventuallyLE package at the axiom's VERBATIM type (`WainerRoute.lean:119-121`),
+     hypothesis-passing across the three wip files (each hypothesis = verbatim statement of a
+     theorem proven in a sibling wip file; document the pairing for the judge splice).
+
+
 ## Lap 209 (2026-07-03, FRESH-MIND REVIEW) — direction retargeted to the 2b COMPOSITION; decisive-case probe of `S*`-domination
 
 **Direction verdict: SOUND — CONTINUE.** Route (c) read-off CLOSED (lap 207), 2b growth-conversion
