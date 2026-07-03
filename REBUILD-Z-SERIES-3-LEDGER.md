@@ -452,3 +452,66 @@ banked `envSup_shift_le`), `all` (re-proved field-free).  Remaining V3 cases: `a
 `exs` (local `Gexp`-domination via `e > ω²·c`), `axm` (W1/W2 bounded-truth engine).  Gotcha:
 `em_Zef2TC'` needs its `{e}{H}` implicits pinned by an explicit `have` type before `rwa`
 converts `(asg env ▹ φ).complexity → φ.complexity`.
+
+---
+
+## Lap 203 (2026-07-03) — E-1 blocks 9b–11: RUNG E REALIZED (V3 ladder 10/10 + inversion + statement)
+
+**Four green commits**: `190c5c7` (9b: succInd cut-tower), `8eadab5` (9c: V3 induction axm),
+`bc92545` (10: V3 master ladder), `76e0525` (11: allω inversion + rung-E statement).  All new
+theorems `[propext, Classical.choice, Quot.sound]`, no sorryAx; everything in
+`wip/E1EmbeddingGrind.lean` (judge input — NOT promoted to src, per directive).
+
+**Block 9b — `metaInduction_Zef2TC`** (the succInd cut-tower at root `ω`, the last hard rung-E
+leaf).  Per ω-branch `n`: a length-`n` cut chain `D_k ⊢ ψ(nm k), Δ` on the linear ordinal ladder
+`ofNat(a·(k+1))`, `a = 2·complexity+4`.  `D_0` = value-congruent EM at `(nm 0, t0)`;
+`D_{k+1}` = cut of `ψ(nm k)` against the fired step disjunct (`exI` witness `k` ≤ branch slot,
+`andI`, plain EM + `em_cong1` at `(nm (k+1), succTerm k)`, values equal).  KEY INSIGHT: branch
+ordinals are unbounded but their gates are `Nlog(ofNat(a·(k+1))) ≈ clog` = LOGARITHMIC, so the
+arbitrary monotone+inflationary slot floor `max n C` pays them — `clog_tower_gate`
+(`clog(a·(k+1)) ≤ max n (2·clog a + 12)`, on new `clog_mul_le`/`two_mul_clog_le`).  ω-root kit:
+`Cl_omega` (every `Cl S ω` via `expTower (ofNat 1)`), `ofNat_lt_omega`, `Nlog_omega = 2`.
+ℒₒᵣ ports of `rew_succInd`/`succInd_nnf` (from `EmbeddingX`'s LX versions, verbatim modulo lang).
+
+**Block 9c — `budgetedEmbedsV3_succInd`**: `univCl (succInd φ)` is V3-embeddable.
+`asg_emb_fix` + `coe_univCl_eq_univCl'` expose `∀⁰* (fixitr ▹ succInd φ)`; `allClosure_peel`
+(base `osucc² ω`, arity `0 + fvSup` — NOTE the `fixitr` arity is `0+ℓ`, pass it verbatim) peels
+to numeral instances; each instance = `succInd_shape_Zef2TC` (NNF `orI` peels over the tower).
+Budgets structural: `B = 2·clog(2c+4) + c + ℓ + 20`, `d = c+1`, `N = 0`.
+
+**Block 10 — `budgetedEmbedsV3_axm` + `budgetedEmbeddingV3`**: 𝗣𝗔 splits
+(`simpa [Arithmetic.Peano, Theory.add_def]`) into 𝗣𝗔⁻ + induction scheme; the master ladder
+closes ALL TEN `Derivation2` cases sorry-free.  **The V3 predicate is validated end-to-end.**
+
+**Block 11 — `allω_inversion` + `embedding_Zef2TC_V3` (the rung-E statement, REALIZED).**
+Inversion: replay a `Zef2TC` derivation at branch slot `rel1 f m`, replacing `∀⁰ φ` by its
+`m`-th instance throughout (`Γ.erase (∀⁰ φ)` formulation; side-formula inserts handled by
+erase/insert commutation + wk-reshape; principal case recurses into branch `m` and drops the
+duplicate via `rel1_rel1`+`max_self`; nested ω-branches commute via `rel1_rel1`+`max_comm`).
+Operators are TOTAL PHANTOMS in `Zef2TC` (`change_H` needs no hypotheses — `Cl_of_NF` pays all
+obligations), which kills every adjoin-commutation concern.  Statement:
+`embedding_Zef2TC_V3 : (𝗣𝗔 ⊢ ↑goodsteinSentence) → ∃ B d, ∃ e α, e.NF ∧ α.NF ∧ ∀ m, ∃ K, ∃ H,
+Cl H α ∧ Zef2TC α e H (rel1 (ewRootSlot e B) K) d {goodsteinBodyE/[nm m]}` — the DRAFT2 `∃ K`
+shape STRENGTHENED (`α` is `m`-uniform), proof = `toDerivation2 ∘ budgetedEmbeddingV3 ∘
+allω_inversion`.  Exactly the per-instance singleton shape rungs R/D consume.
+
+**⚠️ THE E-SEAM, precisely characterized (judge-input, ratification-relevant).**  Rungs P/R/D
+are proven over `Zef2`; rung E produces `Zef2TC` (connective rules FORCED by
+`zef2T_not_derives_verum`).  The seam is NOT a translation (`Zef2` cannot derive `⊤` — no
+TC→Zef2 map exists); it is a PASS PORT:
+- `passAux`'s top-rank inert-shape discharge (`erase_inert` for ⊤/⊥/⋏/⋎ — "never principal")
+  BREAKS in TC: `andI`/`orI`/`verumR`/`trueRel`/`trueNrel` make them principal.
+- Port scope: (i) ⋏/⋎ principal cuts = finite Buchholz reduction (and/or-INVERSION — mirrors
+  `allω_inversion`, simpler: no slot change — then two lower-rank cuts); (ii) atomic cuts vs
+  truth leaves (`trueRel`+`trueNrel` on the same atom contradict via `atomTrue`, so the
+  `atomCutRun` surgery extends); (iii) ⊥ stays never-principal → ⊥-erase survives.
+- **D-for-TC is nearly FREE**: a rank-0 `Zef2TC` derivation of the singleton `{∃⁰ φ}` can only
+  end in `exI` (bound `n ≤ f 0` BUILT IN), `wk`/`weak` — the read-off is a trivial induction
+  (contrast `Zef2`, where D landed by vacuity).
+- R-for-TC = iterate the ported pass (same `rankToZeroAux` skeleton).
+
+**Next (blocks 12+, Lane E/W per order W-1)**: `wip/SpliceAssembly.lean` composition attempt;
+in support, the TC pass port in order (1) and/or-inversions + ⊥-erase + rank-0 TC readoff
+(easy, independently judge-useful), (2) atomic truth-leaf cut surgery, (3) the ⋏/⋎ reduction
+step, (4) `passAux`-for-TC assembly + `rankToZero`-for-TC.  Judge pass can ratify the rung-E
+statement in parallel — the seam work is statement-independent.
