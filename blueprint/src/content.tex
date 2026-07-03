@@ -321,18 +321,20 @@ per-instance, no evaluator, consuming \emph{no} \(H\)-data (which dissolved the
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_reduction}
-  \lean{GoodsteinPA.OperatorZeh.cutReduceAllAuxRunning_Zf}
+  \lean{GoodsteinPA.OperatorZeh.cutReduceAllAuxRunning_Zf2}
   \leanok
   \uses{thm:zeh_inversion}
-\textbf{Running-family reduction (pin; laps 2--4).}  The \S19.6 \(\forall/\exists\) reduction at
-\emph{fixed} control (E--W Lemma~25, judge-amended 2026-07-02: the drafted raised-control conjunct
-was refutable two independent ways), output slot the \emph{composition} \(f\circ g\)
-(\(\texttt{NormControlled}\) conjunct dischargeable via the banked \(\texttt{NormControlled.comp}\)).
-Both W4B seams are already re-composed against this statement (kernel-real seam probes).
+\textbf{Running-family reduction (pin; laps 2--4; re-proved over \(\mathtt{Zef2}\) SERIES-1
+Stage~2).}  The \S19.6 \(\forall/\exists\) reduction at \emph{fixed} control (E--W Lemma~25,
+judge-amended 2026-07-02: the drafted raised-control conjunct was refutable two independent ways),
+output ordinal \(\alpha+\gamma\) per ruling \#1 (no successor bump), output slot the
+\emph{composition} \(g\circ f\) with the \(\mathrm{ewN}\) gate re-threaded at every rebuilt node.
+The \(\mathtt{Zf}\)-era proof survives in \texttt{OperatorZeh.lean}; the bound decl is the
+\(\mathtt{Zef2}\) mainline.
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_step}
-  \lean{GoodsteinPA.OperatorZeh.stepAllω_Zf}
+  \lean{GoodsteinPA.OperatorZeh.stepAllω_Zf2}
   \leanok
   \uses{thm:zeh_reduction}
 \textbf{Principal \(\forall/\exists\) step (pin; laps 2--4).}  One \(\vee\)-principal
@@ -341,32 +343,39 @@ it enters via inversion), IHs at one control, fixed-control output, composed slo
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_pass}
-  \lean{GoodsteinPA.OperatorZeh.cutElimPass_Zf}
+  \lean{GoodsteinPA.OperatorZeh.cutElimPass_Zef2}
   \uses{thm:zeh_step}
   \notready
-\textbf{Elimination pass (pin; lap-5 entrance gate).}  Rank \(c+1 \to c\) at the towered control
---- the ONE place the control raises and the numeric slot \emph{iterates} (E--W Lemma~30).  The
-drafted \(\exists f'\) is kernel-checked vacuous, so the signature is DRAFT-INVALID: its
-restatement with the explicit iterate \(f \mapsto f^{(\cdot)}\) is the lap-5 entrance statement
-mini-lock, and discharging it as written is forbidden.
+\textbf{Elimination pass (statement ratified lap 7; a real derivation since SERIES-1 Stage~3).}
+Rank \(c+1 \to c\): the ordinal collapses (\(\mathrm{collapse}\,\alpha = \omega^\alpha\)) and the
+slot iterates (the Def-16 norm-gated \(\mathrm{ewIter}\,f\,\alpha\)) --- E--W Lemma~26/27.  Now
+\(\texttt{passAux}\), a generalized-rank induction with 5 of 6 cases discharged axiom-clean; the
+sole open case, the TOP-RANK cut, is judge-escalated as a trilemma among ratified pillars
+(\texttt{E-2026-07-03-JUDGE-series1-validation.md} \S4.1; amendment ruling reserved for the
+SERIES-2 probes).
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_readoff_delta0}
+  \lean{GoodsteinPA.OperatorZeh.readoff_delta0_Zef2}
   \uses{thm:zeh_readoff}
   \notready
 \textbf{\(\Delta_0\)-matrix read-off extension (ladder rung D).}  The proven read-off covers atomic
 matrices; the Goodstein sentence's matrix is \(\Delta_0\) (bounded quantifiers introduce
-\(\omega\)-nodes the \(\forall\)-free lemma excludes).  Towsner-\S5.4-style extension --- scheduled
-work, an explicit node so the exit genuinely connects to Thm~\ref{thm:wainer_axiom}.
+\(\omega\)-nodes the \(\forall\)-free lemma excludes).  R-4-restated + decomposed SERIES-1
+(\(\texttt{sound0}\) + falsity invariant \(\texttt{readoffD\_aux}\) proven; the downward-closed-guard
+fragment closes sorry-free via \(\texttt{readoffD\_trapped\_of\_mono}\)); the generic residue is
+gated on the shared (Ax2)/restatement decision (ruling \S4.2).
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_rank_zero}
+  \lean{GoodsteinPA.OperatorZeh.rankToZero_Zef2}
   \uses{thm:zeh_pass}
   \notready
 \textbf{Rank-to-zero (ladder rung R).}  Iterate the elimination pass down the cut rank
 \(d \to 0\): ordinal tower \(\mathrm{expTower}^{[d]}\), slot tower the composed E--W iterate.
-A plain induction over Thm~\ref{thm:zeh_pass} once it lands --- no new mathematics.
-(\texttt{WAINER-LADDER-2026-07-02.md} rung R; erected as a named pin at the lap-8 port.)
+DISCHARGED SERIES-1 Stage~4 as a real \(\texttt{rankToZeroAux}\) induction --- proven
+\emph{modulo the pass} (its sorryAx footprint flows only through the open top-rank cut, so this
+node goes \(\leanok\) automatically when Thm~\ref{thm:zeh_pass} lands).
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_embedding}
