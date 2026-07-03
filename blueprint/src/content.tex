@@ -345,14 +345,16 @@ it enters via inversion), IHs at one control, fixed-control output, composed slo
 \begin{theorem}\label{thm:zeh_pass}
   \lean{GoodsteinPA.OperatorZeh.cutElimPass_Zef2}
   \uses{thm:zeh_step}
-  \notready
-\textbf{Elimination pass (statement ratified lap 7; a real derivation since SERIES-1 Stage~3).}
+  \leanok
+\textbf{Elimination pass (statement ratified lap 7; PROVEN SERIES-3 N-2).}
 Rank \(c+1 \to c\): the ordinal collapses (\(\mathrm{collapse}\,\alpha = \omega^\alpha\)) and the
-slot iterates (the Def-16 norm-gated \(\mathrm{ewIter}\,f\,\alpha\)) --- E--W Lemma~26/27.  Now
-\(\texttt{passAux}\), a generalized-rank induction with 5 of 6 cases discharged axiom-clean; the
-sole open case, the TOP-RANK cut, is judge-escalated as a trilemma among ratified pillars
-(\texttt{E-2026-07-03-JUDGE-series1-validation.md} \S4.1; amendment ruling reserved for the
-SERIES-2 probes).
+slot iterates (the Def-16 norm-gated \(\mathrm{ewIter}\,f\,\alpha\)) --- E--W Lemma~26/27.
+\(\texttt{passAux}\) is a generalized-rank induction, all 6 cases kernel-clean.  The former
+top-rank-cut trilemma was dissolved by the judged \(\mathrm{ewN}\to N_{\log}\) absorbing-norm
+amendment (Series-2 ruling (1)): quantifier cut shapes reduce via
+\(\texttt{stepAllz\_bnd}\)-style merge under \(\mathrm{collapse}\), the slack discharged by the
+\(\texttt{ewIter}\) swap lemma; atomic shapes by the axL-pair splice
+(\(\texttt{atomCutRun\_Zf2}\)); \(\top/\bot/\wedge/\vee\) shapes are never principal and erase.
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_readoff_delta0}
@@ -370,12 +372,12 @@ gated on the shared (Ax2)/restatement decision (ruling \S4.2).
 \begin{theorem}\label{thm:zeh_rank_zero}
   \lean{GoodsteinPA.OperatorZeh.rankToZero_Zef2}
   \uses{thm:zeh_pass}
-  \notready
+  \leanok
 \textbf{Rank-to-zero (ladder rung R).}  Iterate the elimination pass down the cut rank
 \(d \to 0\): ordinal tower \(\mathrm{expTower}^{[d]}\), slot tower the composed E--W iterate.
-DISCHARGED SERIES-1 Stage~4 as a real \(\texttt{rankToZeroAux}\) induction --- proven
-\emph{modulo the pass} (its sorryAx footprint flows only through the open top-rank cut, so this
-node goes \(\leanok\) automatically when Thm~\ref{thm:zeh_pass} lands).
+DISCHARGED SERIES-1 Stage~4 as a real \(\texttt{rankToZeroAux}\) induction; kernel-clean
+(\([\texttt{propext},\texttt{choice},\texttt{Quot.sound}]\)) since the pass landed (SERIES-3
+N-2), exactly as anticipated.
 \end{theorem}
 
 \begin{theorem}\label{thm:zeh_embedding}

@@ -117,3 +117,44 @@ slot hypothesis — `hg_slack` is a THEOREM of the kit (`hslack_kit_ge` at `g = 
 `f = ewIter s βψ`).  The trilemma's escalated horn is dead in src, not just in probes.
 **N-2 (the top-rank cut) is now purely assembly**: IH both premises, `stepAllω_Zf2_bnd`,
 `collapse_add_lt`, `ewIter_comp_le`, + the `c = 0` atom-cut lemma.
+
+---
+
+## Block 3 — (N-2) **THE TOP-RANK CUT IS CLOSED — THE PASS LANDS** (+ N-3 rung R flips)
+
+**Lap**: 198 · **Files**: `src/GoodsteinPA/OperatorZef2.lean`, `blueprint/src/content.tex` ·
+**Build**: 🟢 bare `lake build` (1342 jobs) · **`blueprint_audit`**: ✓ PASSED · **Headline**:
+quadruple UNDRIFTED · **`lean-sorry src/` delta: −1** (`passAux`'s top-rank `sorry` GONE;
+`OperatorZef2` survivor = `readoffD_trapped` only, reserved for D-3).
+
+**The reserved crux — open since the lap-188 `osucc`-gate refutation, escalated lap-191,
+trilemma'd lap-192, ruled lap-197 — is now a kernel theorem.**  Sweep:
+- `passAux` = `[propext, Classical.choice, Quot.sound]` — **all 6 cases closed**;
+- `cutElimPass_Zef2` (rung P / `thm:zeh_pass`) = standard triple — **REAL**;
+- `rankToZero_Zef2` (rung R / `thm:zeh_rank_zero`) = standard triple — **REAL** (flipped
+  automatically, exactly as the Series-1 ledger predicted);
+- `cutElimPass_exit_root_Zef2` (the anti-vacuity composed exit) = standard triple;
+- new helpers `atomCutRun_Zf2`, `Zef2.erase_inert` = standard triple.
+
+**The proof (E–W Lemma 26 principal step, by cut-formula shape).**  The IH reduces both
+premises to rank `c` at `(collapse βφ, ewIter f βφ)` / `(collapse βψ, ewIter f βψ)`; then:
+1. **`∀`-shape** (`χ = ∀⁰ψ`): `stepAllω_Zf2_bnd` merges the premises (its `hg_slack` is
+   DISCHARGED by `hslack_kit_ge` — the N-0 swap-lemma arithmetic, exactly as designed); the
+   output ordinal `collapse βφ + collapse βψ` lands under `collapse α` by `collapse_add_lt`;
+   the output slot composite lands under `ewIter f α` by `ewIter_comp_le`.
+2. **`∃`-shape**: same with roles swapped (`∼(∃⁰ψ) = ∀⁰∼ψ` is `rfl`; `∼∼ψ = ψ` by simp).
+3. **Atomic shapes** (`rel`/`nrel`) — the flagged sub-crux: **`atomCutRun_Zf2`**, the axL-pair
+   surgery, built as a fixed-premise mirror of the running reduction: every axL leaf whose
+   pair IS the cut atom is replaced by the (weakened) other premise; all other nodes rebuild
+   at the fresh root `βψ + γ` with the absorbing gate `Nlog_add_le_comp` + the slot-threaded
+   slack — the SAME `Nlog` machinery, no new hypotheses.
+4. **Inert shapes** (`⊤/⊥/⋏/⋎` — cut formulas the order's shape list didn't enumerate, but
+   which the full `Semiformula` type admits): NEW helper `Zef2.erase_inert` — these shapes are
+   never principal in any `Zef2` rule (the calculus has no `⊤/⊥/⋏/⋎` rules), so they erase
+   from any context with all gates riding; the cut premise then IS a derivation of `Γ`.
+
+**(N-3)** `thm:zeh_pass` + `thm:zeh_rank_zero` flipped `\notready → \leanok` with honest prose
+(status annotations, not ratified statement text); `blueprint_audit` ✓ 16 nodes consistent.
+
+**Ladder state**: rungs P + R **GREEN**.  Remaining: D-3 (lane D, R-4′ restatement — retires
+`readoffD_trapped`), E-0/E-1 (rung E statement + wip grind), W-1 (splice composition).

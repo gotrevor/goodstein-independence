@@ -667,6 +667,221 @@ theorem stepAllω_Zf2_bnd {E : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq}
   exact ((hred.weakening
     (Finset.union_subset (Finset.erase_insert_subset _ _) (Finset.Subset.refl Γ))).mono hbnd)
 
+/-! ## N-2 helpers: inert-shape erasure + the atomic-cut splice
+
+`Zef2` has NO `⊤/⊥/⋏/⋎` rules, so formulas of those shapes are never principal — they can be
+erased from any context (`Zef2.erase_inert`).  This closes the top-rank cut for the four inert
+cut-formula shapes.  The two atomic shapes (`rel`/`nrel`) are closed by the flagged atom-cut
+lemma (`atomCutRun_Zf2`, the axL-pair surgery — a fixed-premise mirror of the running
+reduction).  The two quantifier shapes are `stepAllω_Zf2_bnd`. -/
+
+/-- A formula shape never principal in any `Zef2` rule. -/
+def InertForm (A : Form) : Prop :=
+  (∀ (ar : ℕ) (r : (ℒₒᵣ).Rel ar) (v : Fin ar → Semiterm ℒₒᵣ ℕ 0),
+      A ≠ Semiformula.rel r v ∧ A ≠ Semiformula.nrel r v) ∧
+  ∀ (χ : SyntacticSemiformula ℒₒᵣ 1), A ≠ (∀⁰ χ) ∧ A ≠ (∃⁰ χ)
+
+theorem inertForm_verum : InertForm ⊤ :=
+  ⟨fun _ _ _ => ⟨nofun, nofun⟩, fun _ => ⟨nofun, nofun⟩⟩
+
+theorem inertForm_falsum : InertForm ⊥ :=
+  ⟨fun _ _ _ => ⟨nofun, nofun⟩, fun _ => ⟨nofun, nofun⟩⟩
+
+theorem inertForm_and (φ₁ φ₂ : Form) : InertForm (φ₁ ⋏ φ₂) :=
+  ⟨fun _ _ _ => ⟨nofun, nofun⟩, fun _ => ⟨nofun, nofun⟩⟩
+
+theorem inertForm_or (φ₁ φ₂ : Form) : InertForm (φ₁ ⋎ φ₂) :=
+  ⟨fun _ _ _ => ⟨nofun, nofun⟩, fun _ => ⟨nofun, nofun⟩⟩
+
+/-- **Inert erasure**: a formula of inert shape can be erased from any `Zef2` context (it is
+never principal, so every rule commutes; instance formulas `χ/[nm n]` that happen to EQUAL the
+inert formula are restored by plain `wk`).  All gates ride unchanged (same `α`, same `f`). -/
+theorem Zef2.erase_inert {A : Form} (hA : InertForm A) :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2 α e H f c Γ → Zef2 α e H f c (Γ.erase A) := by
+  intro α e H f c Γ dd
+  induction dd with
+  | @axL α e H f c Γ ar hαN r v hp hn =>
+      exact Zef2.axL hαN r v
+        (Finset.mem_erase.mpr ⟨Ne.symm (hA.1 _ r v).1, hp⟩)
+        (Finset.mem_erase.mpr ⟨Ne.symm (hA.1 _ r v).2, hn⟩)
+  | @wk α e H f c Δ Γ hαN hsub _ ih =>
+      exact Zef2.wk hαN (Finset.erase_subset_erase A hsub) ih
+  | @weak α β e H f c Δ Γ hαN hβ hβNF hαNF hβH hsub _ ih =>
+      exact Zef2.weak hαN hβ hβNF hαNF hβH (Finset.erase_subset_erase A hsub) ih
+  | @allω α e H f c Γ₀ hαN χ β hβ hβNF hαNF hβH dd ih =>
+      have hne : (∀⁰ χ) ≠ A := Ne.symm (hA.2 χ).1
+      have hgoal : (insert (∀⁰ χ) Γ₀).erase A = insert (∀⁰ χ) (Γ₀.erase A) := by
+        ext x
+        simp only [Finset.mem_erase, Finset.mem_insert]
+        constructor
+        · rintro ⟨hxA, rfl | hx⟩
+          · exact Or.inl rfl
+          · exact Or.inr ⟨hxA, hx⟩
+        · rintro (rfl | ⟨hxA, hx⟩)
+          · exact ⟨hne, Or.inl rfl⟩
+          · exact ⟨hxA, Or.inr hx⟩
+      rw [hgoal]
+      refine Zef2.allω hαN χ β hβ hβNF hαNF hβH (fun n => ?_)
+      exact (ih n).wk (Zef2.gate (ih n)) (by
+        intro x hx
+        simp only [Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+  | @exI α β e H f c Γ₀ hαN χ n hβ hβNF hαNF hβH hbound _ ih =>
+      have hne : (∃⁰ χ) ≠ A := Ne.symm (hA.2 χ).2
+      have hgoal : (insert (∃⁰ χ) Γ₀).erase A = insert (∃⁰ χ) (Γ₀.erase A) := by
+        ext x
+        simp only [Finset.mem_erase, Finset.mem_insert]
+        constructor
+        · rintro ⟨hxA, rfl | hx⟩
+          · exact Or.inl rfl
+          · exact Or.inr ⟨hxA, hx⟩
+        · rintro (rfl | ⟨hxA, hx⟩)
+          · exact ⟨hne, Or.inl rfl⟩
+          · exact ⟨hxA, Or.inr hx⟩
+      rw [hgoal]
+      refine Zef2.exI hαN χ n hβ hβNF hαNF hβH hbound ?_
+      exact ih.wk (Zef2.gate ih) (by
+        intro x hx
+        simp only [Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+  | @cut α βφ βψ e H f c Γ₀ hαN χ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      refine Zef2.cut hαN χ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH
+        (ih₁.wk (Zef2.gate ih₁) ?_) (ih₂.wk (Zef2.gate ih₂) ?_) <;>
+        · intro x hx
+          simp only [Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto
+
+set_option maxHeartbeats 1000000 in
+/-- **The atom-cut lemma (axL-pair surgery)** — the `c = 0`-shape sub-crux of the top-rank
+cut, at general rank.  A fixed premise `D₂` deriving `insert (nrel rr vv) Γ` is spliced into a
+derivation of a context containing `rel rr vv`: every axL leaf whose pair IS `(rr, vv)` is
+replaced by `D₂` (weakened); all other nodes rebuild at the fresh root `βψ + γ` with the
+absorbing gate (`Nlog_add_le_comp` + the slot-threaded slack, exactly as in the running
+reduction).  Output slot `g ∘ f`. -/
+theorem atomCutRun_Zf2 {ar : ℕ} {rr : (ℒₒᵣ).Rel ar} {vv : Fin ar → Semiterm ℒₒᵣ ℕ 0}
+    {c : ℕ} {βψ e : ONote} {Γ : Seq} {g : ℕ → ℕ} {H₂ : ONote → Prop}
+    (hβψNF : βψ.NF) (heNF : e.NF)
+    (hg_mono : Monotone g) (hg_infl : ∀ x, x ≤ g x)
+    (D₂ : Zef2 βψ e H₂ g c (insert (Semiformula.nrel rr vv) Γ)) :
+    ∀ {γ : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Δ : Seq}, Zef2 γ e H f c Δ → γ.NF →
+      Monotone f → (∀ x, x ≤ f x) → (∀ k, f 0 ≤ k → max (g 0) k + 1 ≤ g k) →
+      Zef2Prov (βψ + γ) e H (g ∘ f) c (Δ.erase (Semiformula.rel rr vv) ∪ Γ) := by
+  have hg0 : Nlog βψ ≤ g 0 := Zef2.gate D₂
+  intro γ H f Δ D
+  induction D with
+  | @axL γ e H f c Δ ar' hαN r v hp hn =>
+      intro hγNF hmono hinfl hsl
+      by_cases hsplice : Semiformula.rel r v = Semiformula.rel rr vv
+      · -- the pair IS the cut atom: splice `D₂` (its `nrel` support is in `Δ`, hence survives)
+        have hnrel : Semiformula.nrel r v = Semiformula.nrel rr vv := by
+          have := congrArg (∼·) hsplice
+          simpa using this
+        have hnmem : Semiformula.nrel rr vv ∈ Δ.erase (Semiformula.rel rr vv) ∪ Γ :=
+          Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨by simp, hnrel ▸ hn⟩)
+        have hgate : Nlog βψ ≤ (g ∘ f) 0 := le_trans hg0 (hg_mono (Nat.zero_le _))
+        refine ⟨βψ, Zekd.le_add_right_NF hβψNF hγNF, hβψNF, Cl_of_NF hβψNF, hgate, ?_⟩
+        exact ((D₂.change_H (H' := H)).mono_f (fun x => hg_mono (hinfl x))).wk hgate (by
+          intro x hx
+          rcases Finset.mem_insert.mp hx with rfl | hxΓ
+          · exact hnmem
+          · exact Finset.mem_union_right _ hxΓ)
+      · -- ordinary axL: the pair survives the erasure; keep the ordinal `γ` (no fresh root)
+        have hgate : Nlog γ ≤ (g ∘ f) 0 := le_trans hαN (hg_infl (f 0))
+        refine ⟨γ, Zekd.le_add_left_NF hβψNF hγNF, hγNF, Cl_of_NF hγNF, hgate, ?_⟩
+        exact Zef2.axL hgate r v
+          (Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨hsplice, hp⟩))
+          (Finset.mem_union_left _ (Finset.mem_erase.mpr ⟨by simp, hn⟩))
+  | @wk γ e H f c Δsub Δsup hαN hsub D' ih =>
+      intro hγNF hmono hinfl hsl
+      exact (ih heNF D₂ hγNF hmono hinfl hsl).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase] at hx ⊢
+        rcases hx with ⟨hne, hxs⟩ | hxΓ
+        · exact Or.inl ⟨hne, hsub hxs⟩
+        · exact Or.inr hxΓ)
+  | @weak γ β e H f c Δsub Δsup hαN hβ hβNF hγNF' hβH hsub D' ih =>
+      intro hγNF hmono hinfl hsl
+      exact ((ih heNF D₂ hβNF hmono hinfl hsl).weakening (by
+        intro x hx; simp only [Finset.mem_union, Finset.mem_erase] at hx ⊢
+        rcases hx with ⟨hne, hxs⟩ | hxΓ
+        · exact Or.inl ⟨hne, hsub hxs⟩
+        · exact Or.inr hxΓ)).mono
+        (le_of_lt (Zekd.add_lt_add_left_NF hβψNF hβNF hγNF hβ))
+  | @allω γ e H f c Γ₀ hαN χ β hβ hβNF hγNF' hβH dd ih =>
+      intro hγNF hmono hinfl hsl
+      have hhead : (∀⁰ χ) ≠ Semiformula.rel rr vv := (fun h => by cases h)
+      have haddNF : (βψ + γ).NF := ONote.add_nf βψ γ
+      have ihn : ∀ n, Zef2Prov (βψ + β n) e (adjoin H n) (g ∘ rel1 f n) c
+          (insert (χ/[nm n]) (Γ₀.erase (Semiformula.rel rr vv) ∪ Γ)) := by
+        intro n
+        refine (ih n heNF D₂ (hβNF n) (rel1_monotone hmono n)
+          (rel1_infl hinfl n)
+          (fun k hk => hsl k (le_trans (by
+            simp only [rel1]; exact hmono (Nat.zero_le _)) hk))).weakening (by
+            intro x hx
+            simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+      refine Zef2Prov.of haddNF (Cl_of_NF haddNF)
+        (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) ?_
+      have hAll : Zef2 (βψ + γ) e H (g ∘ f) c
+          (insert (∀⁰ χ) (Γ₀.erase (Semiformula.rel rr vv) ∪ Γ)) := by
+        exact Zef2.allω (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) χ
+          (fun n => (ihn n).choose)
+          (fun n => lt_of_le_of_lt (ihn n).choose_spec.1
+            (Zekd.add_lt_add_left_NF hβψNF (hβNF n) hγNF (hβ n)))
+          (fun n => (ihn n).choose_spec.2.1) haddNF
+          (fun n => Cl_of_NF (ihn n).choose_spec.2.1)
+          (fun n => (ihn n).choose_spec.2.2.2.2)
+      exact hAll.wk (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) (by
+        intro x hx
+        simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+        rcases hx with rfl | hx
+        · exact Or.inl ⟨hhead, Or.inl rfl⟩
+        · tauto)
+  | @exI γ β e H f c Γ₀ hαN χ n hβ hβNF hγNF' hβH hbound dχ ih =>
+      intro hγNF hmono hinfl hsl
+      have hhead : (∃⁰ χ) ≠ Semiformula.rel rr vv := (fun h => by cases h)
+      have haddNF : (βψ + γ).NF := ONote.add_nf βψ γ
+      obtain ⟨a, hale, haNF, haH, hag, Da⟩ :=
+        ih heNF D₂ hβNF hmono hinfl hsl
+      have Da' : Zef2 a e H (g ∘ f) c
+          (insert (χ/[nm n]) (Γ₀.erase (Semiformula.rel rr vv) ∪ Γ)) :=
+        Da.wk hag (by
+          intro x hx
+          simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+      refine Zef2Prov.of haddNF (Cl_of_NF haddNF)
+        (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) ?_
+      have hbound' : n ≤ (g ∘ f) 0 := le_trans hbound (hg_infl (f 0))
+      exact Zef2.exI (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) χ n
+        (lt_of_le_of_lt hale (Zekd.add_lt_add_left_NF hβψNF hβNF hγNF hβ))
+        haNF haddNF haH hbound' Da'
+      |>.wk (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) (by
+        intro x hx
+        simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
+        rcases hx with rfl | hx
+        · exact Or.inl ⟨hhead, Or.inl rfl⟩
+        · tauto)
+  | @cut γ βφ' βψ' e H f c Γ₀ hαN χ hχc hcutRead' hβφ hβψ' hβφNF hβψNF' hγNF' hβφH hβψH d₁ d₂ ih₁ ih₂ =>
+      intro hγNF hmono hinfl hsl
+      obtain ⟨a₁, ha₁le, ha₁NF, ha₁H, ha₁g, Dc₁⟩ :=
+        ih₁ heNF D₂ hβφNF hmono hinfl hsl
+      obtain ⟨a₂, ha₂le, ha₂NF, ha₂H, ha₂g, Dc₂⟩ :=
+        ih₂ heNF D₂ hβψNF' hmono hinfl hsl
+      have haddNF : (βψ + γ).NF := ONote.add_nf βψ γ
+      have Dc₁' : Zef2 a₁ e H (g ∘ f) c
+          (insert χ (Γ₀.erase (Semiformula.rel rr vv) ∪ Γ)) :=
+        Dc₁.wk ha₁g (by
+          intro x hx
+          simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+      have Dc₂' : Zef2 a₂ e H (g ∘ f) c
+          (insert (∼χ) (Γ₀.erase (Semiformula.rel rr vv) ∪ Γ)) :=
+        Dc₂.wk ha₂g (by
+          intro x hx
+          simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢; tauto)
+      refine Zef2Prov.of haddNF (Cl_of_NF haddNF)
+        (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) ?_
+      exact Zef2.cut (Nlog_add_le_comp hβψNF hγNF hg0 hαN (hsl _ le_rfl)) χ hχc
+        (le_trans hcutRead' (hg_infl (f 0)))
+        (lt_of_le_of_lt ha₁le (Zekd.add_lt_add_left_NF hβψNF hβφNF hγNF hβφ))
+        (lt_of_le_of_lt ha₂le (Zekd.add_lt_add_left_NF hβψNF hβψNF' hγNF hβψ'))
+        ha₁NF ha₂NF haddNF ha₁H ha₂H Dc₁' Dc₂'
+
 /-! ## The cut-elimination pass (P-e) — Stage-3 grind (UNLOCKED); `passAux` is the induction -/
 
 /-- **`passAux`** — the cut-elimination pass as a generalized induction, threading
@@ -774,10 +989,114 @@ theorem passAux (c : ℕ) {e : ONote} (heNF : e.NF) :
         refine Zef2Prov.of (collapse_NF hαNF) (Cl_of_NF (collapse_NF hαNF)) hg ?_
         exact Zef2.cut hg χ hc (le_trans hcutRead hf0) haφcol haψcol
           haφNF haψNF (collapse_NF hαNF) haφH haψH (Dφ.mono_f hsφ) (Dψ.mono_f hsψ)
-      · -- TOP-RANK cut: `χ.complexity = c`.  ELIMINATE the cut (E–W Lemma 26 principal step).
-        -- ∀/∃-shaped `χ` → `stepAllω`-style inversion + slot composition (`ewIter_comp_le`);
-        -- the `c = 0` atomic case needs an atom-cut lemma.  TODO(SERIES-1 Stage-3 cut top-rank).
-        sorry
+      · -- TOP-RANK cut: `χ.complexity = c`.  ELIMINATE the cut (E–W Lemma 26 principal step),
+        -- by the shape of `χ`: quantifier shapes → `stepAllω_Zf2_bnd` (slack = `hslack_kit_ge`)
+        -- + `collapse_add_lt` + `ewIter_comp_le`; atomic shapes → `atomCutRun_Zf2` (the axL-pair
+        -- surgery); inert shapes (`⊤/⊥/⋏/⋎`, never principal) → `Zef2.erase_inert`.
+        have hgφ : Nlog βφ ≤ f 0 := Zef2.gate d₁
+        have hgψ : Nlog βψ ≤ f 0 := Zef2.gate d₂
+        have hcomp : ∀ m, ewIter f βφ (ewIter f βψ m) ≤ ewIter f α m :=
+          ewIter_comp_le hmono hinfl hβφNF hβψNF hβφ hβψ hgφ hgψ
+        have hcomp' : ∀ m, ewIter f βψ (ewIter f βφ m) ≤ ewIter f α m :=
+          ewIter_comp_le hmono hinfl hβψNF hβφNF hβψ hβφ hgψ hgφ
+        have hcollt : collapse βφ + collapse βψ < collapse α :=
+          collapse_add_lt hβφNF hβψNF hαNF hβφ hβψ
+        have hcollt' : collapse βψ + collapse βφ < collapse α :=
+          collapse_add_lt hβψNF hβφNF hαNF hβψ hβφ
+        have P₁ := ih₁ heNF hr hmono hinfl hlow hβφNF (Cl_of_NF hβφNF)
+        have P₂ := ih₂ heNF hr hmono hinfl hlow hβψNF (Cl_of_NF hβψNF)
+        -- the inert-shape discharge, shared by ⊤/⊥/⋏/⋎
+        have inert_case : InertForm χ → Zef2Prov (collapse α) e H (ewIter f α) c Γ := by
+          intro hInert
+          obtain ⟨a, hale, haNF, haH, hag, Da⟩ := P₁
+          have hslot := ewIter_slot_le hmono hinfl hβφNF hβφ hgφ
+          have hDa2 : Zef2 a e H (ewIter f βφ) c ((insert χ Γ).erase χ) :=
+            Zef2.erase_inert hInert Da
+          rw [Finset.erase_insert_eq_erase] at hDa2
+          have hDa3 : Zef2 a e H (ewIter f βφ) c Γ :=
+            hDa2.wk hag (Finset.erase_subset _ _)
+          exact ⟨a, le_trans hale (le_of_lt (collapse_strictMono hβφNF hβφ)), haNF, haH,
+            le_trans hag (hslot 0), hDa3.mono_f hslot⟩
+        cases χ with
+        | verum => exact inert_case inertForm_verum
+        | falsum => exact inert_case inertForm_falsum
+        | and φ₁ φ₂ => exact inert_case (inertForm_and φ₁ φ₂)
+        | or φ₁ φ₂ => exact inert_case (inertForm_or φ₁ φ₂)
+        | rel r' v' =>
+            -- `∼(rel r' v') = nrel r' v'`: fixed side = the ψ-premise
+            obtain ⟨a₂, ha₂le, ha₂NF, ha₂H, ha₂g, D₂w⟩ := P₂
+            obtain ⟨a₁, ha₁le, ha₁NF, ha₁H, ha₁g, D₁w⟩ := P₁
+            have hrun := atomCutRun_Zf2 ha₂NF heNF (ewIter_monotone hmono hinfl βψ)
+              (ewIter_infl hinfl βψ) D₂w D₁w ha₁NF (ewIter_monotone hmono hinfl βφ)
+              (ewIter_infl hinfl βφ) (hslack_kit_ge hmono hinfl hlow βψ βφ)
+            have hrun' := hrun.weakening (Δ := Γ) (by
+              intro x hx
+              simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx
+              tauto)
+            obtain ⟨w, hwle, hwNF, hwH, hwg, Dw⟩ := hrun'
+            have hsum : a₂ + a₁ ≤ collapse βψ + collapse βφ := by
+              haveI := ha₂NF; haveI := ha₁NF
+              haveI := collapse_NF hβψNF; haveI := collapse_NF hβφNF
+              haveI := ONote.add_nf a₂ a₁
+              haveI := ONote.add_nf (collapse βψ) (collapse βφ)
+              rw [le_def, repr_add, repr_add]
+              exact add_le_add (le_def.mp ha₂le) (le_def.mp ha₁le)
+            exact ⟨w, le_trans hwle (le_trans hsum (le_of_lt hcollt')), hwNF, hwH,
+              le_trans hwg (hcomp' 0), Dw.mono_f hcomp'⟩
+        | nrel r' v' =>
+            -- `∼(nrel r' v') = rel r' v'`: fixed side = the φ-premise
+            obtain ⟨a₁, ha₁le, ha₁NF, ha₁H, ha₁g, D₁w⟩ := P₁
+            obtain ⟨a₂, ha₂le, ha₂NF, ha₂H, ha₂g, D₂w⟩ := P₂
+            have hrun := atomCutRun_Zf2 ha₁NF heNF (ewIter_monotone hmono hinfl βφ)
+              (ewIter_infl hinfl βφ) D₁w D₂w ha₂NF (ewIter_monotone hmono hinfl βψ)
+              (ewIter_infl hinfl βψ) (hslack_kit_ge hmono hinfl hlow βφ βψ)
+            have hrun' := hrun.weakening (Δ := Γ) (by
+              intro x hx
+              simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx
+              tauto)
+            obtain ⟨w, hwle, hwNF, hwH, hwg, Dw⟩ := hrun'
+            have hsum : a₁ + a₂ ≤ collapse βφ + collapse βψ := by
+              haveI := ha₁NF; haveI := ha₂NF
+              haveI := collapse_NF hβφNF; haveI := collapse_NF hβψNF
+              haveI := ONote.add_nf a₁ a₂
+              haveI := ONote.add_nf (collapse βφ) (collapse βψ)
+              rw [le_def, repr_add, repr_add]
+              exact add_le_add (le_def.mp ha₁le) (le_def.mp ha₂le)
+            exact ⟨w, le_trans hwle (le_trans hsum (le_of_lt hcollt)), hwNF, hwH,
+              le_trans hwg (hcomp 0), Dw.mono_f hcomp⟩
+        | all ψ =>
+            have h : (Semiformula.all ψ : Form).complexity = ψ.complexity + 1 := rfl
+            have hψc : ψ.complexity < c := by omega
+            have hread : ψ.complexity ≤ ewIter f βψ 0 := by
+              have h2 : ψ.complexity ≤ f 0 := by omega
+              exact le_trans h2 (ewIter_base_le hinfl βψ)
+            have hstep := stepAllω_Zf2_bnd (collapse_NF hβφNF) (collapse_NF hβψNF) heNF hψc
+              (ewIter_monotone hmono hinfl βφ) (ewIter_infl hinfl βφ)
+              (hslack_kit_ge hmono hinfl hlow βφ βψ)
+              (ewIter_monotone hmono hinfl βψ) (ewIter_infl hinfl βψ) hread P₁ P₂
+            obtain ⟨w, hwle, hwNF, hwH, hwg, Dw⟩ := hstep
+            exact ⟨w, le_trans hwle (le_of_lt hcollt), hwNF, hwH,
+              le_trans hwg (hcomp 0), Dw.mono_f hcomp⟩
+        | exs ψ =>
+            have h : (Semiformula.exs ψ : Form).complexity = ψ.complexity + 1 := rfl
+            have h2 : (∼ψ).complexity = ψ.complexity := Semiformula.complexity_neg ψ
+            have hψc : (∼ψ).complexity < c := by omega
+            have hread : (∼ψ).complexity ≤ ewIter f βφ 0 := by
+              have h3 : (∼ψ).complexity ≤ f 0 := by omega
+              exact le_trans h3 (ewIter_base_le hinfl βφ)
+            -- roles swap: the ψ-premise carries `∀⁰ ∼ψ` (= `∼(∃⁰ ψ)`, rfl); the φ-premise
+            -- carries `∃⁰ ψ = ∃⁰ ∼∼ψ`
+            have P₁' : Zef2Prov (collapse βφ) e H (ewIter f βφ) c (insert (∃⁰ ∼(∼ψ)) Γ) := by
+              have hnn : (∼(∼ψ)) = ψ := by simp
+              rw [hnn]
+              exact P₁
+            have hstep := stepAllω_Zf2_bnd (collapse_NF hβψNF) (collapse_NF hβφNF) heNF hψc
+              (ewIter_monotone hmono hinfl βψ) (ewIter_infl hinfl βψ)
+              (hslack_kit_ge hmono hinfl hlow βψ βφ)
+              (ewIter_monotone hmono hinfl βφ) (ewIter_infl hinfl βφ) hread P₂ P₁'
+            obtain ⟨w, hwle, hwNF, hwH, hwg, Dw⟩ := hstep
+            exact ⟨w, le_trans hwle (le_of_lt hcollt'), hwNF, hwH,
+              le_trans hwg (hcomp' 0), Dw.mono_f hcomp'⟩
 
 /-- **PIN → THEOREM (Stage-3, in grind): one cut-ELIMINATION pass over `Zef2`.**  E–W Lemma 26/27's
 single predicative rank step: the ordinal COLLAPSES (`collapse α`) and the numeric slot ITERATES
