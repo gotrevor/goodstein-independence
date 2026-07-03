@@ -1,11 +1,12 @@
 /-
 # The headline: PA does not prove Goodstein's theorem (Kirby–Paris)
 
-**Designated audit surface.** This is the open target of the expedition. As of lap 166 it is a
-**real proof** resting on the named-axiom blueprint (see the methodology note below), NOT a bare
-`sorry`. Its only non-canonical dependency is the single, faithfully-stated Phase 2–3 girder
-`goodstein_implies_consistency` (`Reduction.lean`); everything else — the Gödel-II contraposition
-`not_proves_of_implies_consistency`, `peano_not_proves_consistency` — is axiom-clean.
+**Designated audit surface.** The summit of the expedition. It is now a **kernel-clean proof**:
+the crown re-points to the route-B growth headline `peano_not_proves_goodstein_growth` (the Wainer
+bound vs Cichon/Caicedo), whose footprint is exactly `[propext, Classical.choice, Quot.sound]` (no
+`sorry`, no blueprint axiom, no `native_decide`/`ofReduceBool`). The earlier Route-A proof (via the
+Phase 2-3 girder `goodstein_implies_consistency` + Gödel II) is banked under
+`peano_not_proves_goodstein_routeA`. Confirm with `#print axioms peano_not_proves_goodstein`.
 
 **Named-axiom blueprint (the in-progress ledger discipline).** A `sorry`'d headline collapses all
 outstanding debt to one opaque `sorryAx`. Instead, each not-yet-proven *milestone* is a NAMED
@@ -50,18 +51,21 @@ consistency-girder body is banked above. Ledger: `#print axioms` ⇒
 theorem peano_not_proves_goodstein : 𝗣𝗔 ⊬ ↑goodsteinSentence :=
   GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth
 
-/- Blueprint ledger: the CROWN is a RE-POINT node — zero intrinsic laps by design. The summit
-is currently proven through the banked Route-A wiring, so its machine-audited footprint carries
-`goodstein_implies_consistency` (⇒ `debt`). All of its real work lives in its dependency chain
-(the wainer ladder + the W7 native_decide burndown); when `routeB_headline` goes clean, the
-summit flips green in ONE lap by re-pointing its body to `peano_not_proves_goodstein_growth`
-(the literally identical proposition `𝗣𝗔 ⊬ ↑goodsteinSentence`). The Route-A body stays banked
-under its own name. See `WAINER-LADDER-2026-07-02.md` rung C. -/
+/- Blueprint ledger: the CROWN is a RE-POINT node with zero intrinsic laps by design. The re-point
+has LANDED (SERIES-5 Lane B): the summit body is `peano_not_proves_goodstein_growth`, whose route-B
+chain (the wainer ladder + the W7 native_decide burndown, since discharged kernel-only) is
+axiom-clean, so the summit's machine-audited footprint is `[propext, Classical.choice, Quot.sound]`
+(⇒ `clean`). The Route-A consistency-girder body stays banked under `peano_not_proves_goodstein_routeA`.
+See `WAINER-LADDER-2026-07-02.md` rung C. -/
 attribute [goodstein_blueprint 16 clean "pa_not_proves_goodstein" "0" 100 peano_not_proves_goodstein
   []
   ["WAINER-LADDER-2026-07-02.md rung C: crown re-point, unlocked by routeB_headline clean (ladder P/R/D/E/W + W7)",
    "Both headlines state the identical proposition; the rewire is `:= peano_not_proves_goodstein_growth`"]
-  "Crown: the PA ⊬ Goodstein summit. Zero intrinsic work — re-points to the route-B headline when it goes clean; debt inherited from the banked Route-A axiom until then."]
+  "Crown: the PA ⊬ Goodstein summit. Zero intrinsic work: re-points to the route-B growth headline, now discharged kernel-clean; footprint [propext, Classical.choice, Quot.sound]. The Route-A consistency-girder body is banked under peano_not_proves_goodstein_routeA."]
   peano_not_proves_goodstein
 
 end GoodsteinPA
+
+/- Ledger check: every build of this module prints the summit's axiom footprint.
+Expected (done): `[propext, Classical.choice, Quot.sound]` and nothing else. -/
+#print axioms GoodsteinPA.peano_not_proves_goodstein

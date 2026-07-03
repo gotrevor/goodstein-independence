@@ -25,20 +25,20 @@ jobs:
       # keyed on the Foundation rev in lakefile.toml.
       - uses: leanprover/lean-action@v1
 
-      # ── Axiom-clean gate (named-axiom blueprint, ALLOWLIST mode) ───────────────────────────────
+      # ── Axiom-clean gate (EXACT-MATCH) ─────────────────────────────────────────────────────────
       # Prove the published claim's ledger: the headline `peano_not_proves_goodstein` is a REAL
-      # proof that NEVER depends on `sorryAx`, and rests only on the 3 canonical axioms plus the
-      # DECLARED, faithful, allowlisted blueprint axiom `goodstein_implies_consistency` (the open
-      # Phase 2–3 girder). The allowlist SHRINKS toward the 3 canonical as milestones discharge;
-      # the day the girder is built, drop it from ALLOW below and the gate becomes exact-match.
-      # See DIRECTION.md "ANTI-FRAUD guard" + the KB note `named-axiom-blueprint`. (Host-local,
-      # the equivalent one-liner is `lean-axiom-gate . -t GoodsteinPA.peano_not_proves_goodstein
-      # -a goodstein_implies_consistency`.)
-      - name: Axiom-clean gate (allowlist)
+      # proof that NEVER depends on `sorryAx`, and rests on NOTHING but the 3 canonical axioms
+      # `[propext, Classical.choice, Quot.sound]`. The summit re-points (SERIES-5 Lane B) to the
+      # route-B growth headline `peano_not_proves_goodstein_growth`, which never routes through the
+      # `goodstein_implies_consistency` girder — so the allowlist has collapsed to exact-match.
+      # (The girder remains a declared axiom used only by the banked `peano_not_proves_goodstein_routeA`,
+      # which is NOT gated here.) See DIRECTION.md "ANTI-FRAUD guard" + the KB note `named-axiom-blueprint`.
+      # Host-local equivalent: `lean-axiom-gate . -t GoodsteinPA.peano_not_proves_goodstein`.
+      - name: Axiom-clean gate (exact-match)
         run: |
           set -euo pipefail
-          # Declared blueprint-axiom allowlist (extended-regex alternation; qualified or short name).
-          ALLOW='propext|Classical\.choice|Quot\.sound|(GoodsteinPA\.)?goodstein_implies_consistency'
+          # Exact-match: the summit may rest on NOTHING but the 3 canonical axioms.
+          ALLOW='propext|Classical\.choice|Quot\.sound'
           printf 'import GoodsteinPA.Statement\n#print axioms GoodsteinPA.peano_not_proves_goodstein\n' > axcheck.lean
           lake env lean axcheck.lean 2>&1 | tee ax.out
           # (1) Hard fail on any sorry on the headline.
@@ -57,7 +57,7 @@ jobs:
           if [ -n "$leftover" ]; then
             echo "::error::headline has non-allowlisted axiom(s):"; echo "$leftover"; cat ax.out; exit 1
           fi
-          echo "✓ headline axiom-clean modulo allowlist {propext, Classical.choice, Quot.sound, goodstein_implies_consistency}"
+          echo "✓ headline axiom-clean: exactly {propext, Classical.choice, Quot.sound}"
           rm -f axcheck.lean ax.out ax.norm
 
       # ── Blueprint status gate (machine-verified, ANTI-DRIFT) ───────────────────────────────────
