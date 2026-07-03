@@ -4196,148 +4196,11 @@ theorem f0_le_ewIter {f : ℕ → ℕ} (hinfl : ∀ m, m ≤ f m) (α : ONote) :
     have hff : f (f 0) ≤ ewIter f α 0 := by simpa [ewIter_zero] using hlow
     exact le_trans (hinfl (f 0)) hff
 
-/-- **`readoffTC_core`** — the bounded read-off, invariant form (bound `f 0`).  See the section
-docstring.  One disclosed `sorry`: the `allω` non-monotone-matrix trap. -/
-theorem readoffTC_core {φ : SyntacticSemiformula ℒₒᵣ 1} :
-    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
-      Zef2TC α e H f c Γ → c = 0 →
-      (∃⁰ φ) ∈ Γ → (∀ ψ ∈ Γ, ψ = (∃⁰ φ) ∨ ¬ atomTrue ψ) →
-      ∃ n ≤ f 0, atomTrue (φ/[nm n]) := by
-  intro α e H f c Γ dd
-  induction dd with
-  | @axL α e H f c Γ ar hαN r v hp hn =>
-      intro _ _ hinv
-      have h1 : ¬ atomTrue (Semiformula.rel r v) :=
-        (hinv _ hp).resolve_left (Semiformula.ne_of_ne_complexity (by simp))
-      have h2 : ¬ atomTrue (Semiformula.nrel r v) :=
-        (hinv _ hn).resolve_left (Semiformula.ne_of_ne_complexity (by simp))
-      exact absurd ((atomTrue_nrel_iff_not_rel r v).mpr h1) h2
-  | trueRel hαN r v htrue hmem =>
-      intro _ _ hinv
-      exact absurd htrue ((hinv _ hmem).resolve_left (Semiformula.ne_of_ne_complexity (by simp)))
-  | trueNrel hαN r v htrue hmem =>
-      intro _ _ hinv
-      exact absurd htrue ((hinv _ hmem).resolve_left (Semiformula.ne_of_ne_complexity (by simp)))
-  | verumR hαN h =>
-      intro _ _ hinv
-      have hf := (hinv _ h).resolve_left (Semiformula.ne_of_ne_complexity (by simp))
-      exact absurd (show atomTrue (⊤ : Form) by simp [atomTrue]) hf
-  | @wk α e H f c Δ Γ hαN hsub dpr ih =>
-      intro hc _ hinv
-      obtain ⟨ψ, hψΔ, htψ⟩ := sound0_TC dpr hc
-      have hφΔ : (∃⁰ φ) ∈ Δ := by
-        rcases hinv ψ (hsub hψΔ) with rfl | hfalse
-        · exact hψΔ
-        · exact absurd htψ hfalse
-      exact ih hc hφΔ (fun ψ' hψ' => hinv ψ' (hsub hψ'))
-  | @weak α β e H f c Δ Γ hαN hβ hβNF hαNF hβH hsub dpr ih =>
-      intro hc _ hinv
-      obtain ⟨ψ, hψΔ, htψ⟩ := sound0_TC dpr hc
-      have hφΔ : (∃⁰ φ) ∈ Δ := by
-        rcases hinv ψ (hsub hψΔ) with rfl | hfalse
-        · exact hψΔ
-        · exact absurd htψ hfalse
-      exact ih hc hφΔ (fun ψ' hψ' => hinv ψ' (hsub hψ'))
-  | @andI α βφ βψ e H f c Γ hαN χ₁ χ₂ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH dφ dψ ih₁ ih₂ =>
-      intro hc hmem hinv
-      have hφΓ : (∃⁰ φ) ∈ Γ :=
-        (Finset.mem_insert.mp hmem).resolve_left
-          (fun h => (by simp : (χ₁ ⋏ χ₂) ≠ (∃⁰ φ)) h.symm)
-      have hfalse : ¬ (atomTrue χ₁ ∧ atomTrue χ₂) := by
-        have hnand : ¬ atomTrue (χ₁ ⋏ χ₂) :=
-          (hinv _ (Finset.mem_insert_self _ _)).resolve_left (by simp)
-        simpa [atomTrue] using hnand
-      rcases not_and_or.mp hfalse with h1 | h2
-      · exact ih₁ hc (Finset.mem_insert_of_mem hφΓ) (fun ψ hψ => by
-          rcases Finset.mem_insert.mp hψ with rfl | hψΓ
-          · exact Or.inr h1
-          · exact hinv ψ (Finset.mem_insert_of_mem hψΓ))
-      · exact ih₂ hc (Finset.mem_insert_of_mem hφΓ) (fun ψ hψ => by
-          rcases Finset.mem_insert.mp hψ with rfl | hψΓ
-          · exact Or.inr h2
-          · exact hinv ψ (Finset.mem_insert_of_mem hψΓ))
-  | @orI α β e H f c Γ hαN χ₁ χ₂ hβ hβNF hαNF hβH dpr ih =>
-      intro hc hmem hinv
-      have hφΓ : (∃⁰ φ) ∈ Γ :=
-        (Finset.mem_insert.mp hmem).resolve_left
-          (fun h => (by simp : (χ₁ ⋎ χ₂) ≠ (∃⁰ φ)) h.symm)
-      have hfalse : ¬ (atomTrue χ₁ ∨ atomTrue χ₂) := by
-        have hnor : ¬ atomTrue (χ₁ ⋎ χ₂) :=
-          (hinv _ (Finset.mem_insert_self _ _)).resolve_left (by simp)
-        simpa [atomTrue] using hnor
-      obtain ⟨hf1, hf2⟩ := not_or.mp hfalse
-      refine ih hc (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hφΓ)) (fun ψ hψ => ?_)
-      rcases Finset.mem_insert.mp hψ with rfl | hψ'
-      · exact Or.inr hf1
-      · rcases Finset.mem_insert.mp hψ' with rfl | hψΓ
-        · exact Or.inr hf2
-        · exact hinv ψ (Finset.mem_insert_of_mem hψΓ)
-  | @allω α e H f c Γ hαN χ β hβ hβNF hαNF hβH dpr ih =>
-      intro hc hmem hinv
-      have hφΓ : (∃⁰ φ) ∈ Γ :=
-        (Finset.mem_insert.mp hmem).resolve_left (by simp)
-      by_cases h0 : atomTrue (χ/[nm 0])
-      · -- RESIDUAL: `∀⁰ χ` false (invariant) but `χ/[nm 0]` true — the non-monotone-matrix trap.
-        -- Closed by `readoffD_trapped_of_mono`'s downward-closed guard (judge-gated rung-D/E text).
-        have _hnall : ¬ atomTrue (∀⁰ χ) :=
-          (hinv _ (Finset.mem_insert_self _ _)).resolve_left (by simp)
-        sorry
-      · -- `χ/[nm 0]` false ⇒ recurse branch 0 at the sharp slot `rel1 f 0 = f`.
-        have hib := ih 0 hc
-          (show (∃⁰ φ) ∈ insert (χ/[nm 0]) Γ from Finset.mem_insert_of_mem hφΓ)
-          (fun ψ hψ => by
-            rcases Finset.mem_insert.mp hψ with rfl | hψΓ
-            · exact Or.inr h0
-            · exact hinv ψ (Finset.mem_insert_of_mem hψΓ))
-        obtain ⟨n, hn, htn⟩ := hib
-        refine ⟨n, ?_, htn⟩
-        have hr0 : (rel1 f 0) 0 = f 0 := by simp [rel1]
-        rw [hr0] at hn; exact hn
-  | @exI α β e H f c Γ hαN χ n hβ hβNF hαNF hβH hbound dpr ih =>
-      intro hc hmem hinv
-      by_cases hχφ : (∃⁰ χ) = (∃⁰ φ)
-      · have hχeq : χ = φ := by simpa using hχφ
-        subst hχeq
-        by_cases htn : atomTrue (χ/[nm n])
-        · exact ⟨n, hbound, htn⟩
-        · have hInvP : ∀ ψ ∈ insert (χ/[nm n]) Γ, ψ = (∃⁰ χ) ∨ ¬ atomTrue ψ := by
-            intro ψ hψ
-            rcases Finset.mem_insert.mp hψ with rfl | hψΓ
-            · exact Or.inr htn
-            · exact hinv ψ (Finset.mem_insert_of_mem hψΓ)
-          by_cases hin : (∃⁰ χ) ∈ insert (χ/[nm n]) Γ
-          · exact ih hc hin hInvP
-          · obtain ⟨ψ, hψ, htψ⟩ := sound0_TC dpr hc
-            rcases hInvP ψ hψ with rfl | hfψ
-            · exact absurd hψ hin
-            · exact absurd htψ hfψ
-      · have hφΓ : (∃⁰ φ) ∈ Γ :=
-          (Finset.mem_insert.mp hmem).resolve_left (fun h => hχφ h.symm)
-        have hexχ : ¬ atomTrue (∃⁰ χ) :=
-          (hinv _ (Finset.mem_insert_self _ _)).resolve_left hχφ
-        have hχn : ¬ atomTrue (χ/[nm n]) :=
-          fun ht => hexχ ((atomTrue_ex_iff χ).mpr ⟨n, ht⟩)
-        exact ih hc (Finset.mem_insert_of_mem hφΓ) (fun ψ hψ => by
-          rcases Finset.mem_insert.mp hψ with rfl | hψΓ
-          · exact Or.inr hχn
-          · exact hinv ψ (Finset.mem_insert_of_mem hψΓ))
-  | @cut α βφ βψ e H f c Γ hαN χ hcompl hcutRead _ _ _ _ _ _ _ _ _ _ _ =>
-      intro hc _ _; subst hc
-      exact absurd hcompl (by omega)
-
-/-- **`readoff_delta0_Zef2TC` (E-seam piece 1)** — the bounded rank-0 read-off for the SINGLETON
-`{∃⁰ φ}` (the embedding's output shape, cf. `embedding_Zef2TC_V3`).  From a rank-0 `Zef2TC`
-derivation of `{∃⁰ φ}`, extract `∃ n ≤ ewIter f α 0, atomTrue (φ/[nm n])` — the R-4′-ratified bound.
-The singleton's invariant is trivial (its sole member is `∃⁰ φ`); the `f 0 → ewIter f α 0` weakening
-is `f0_le_ewIter`.  Carries `readoffTC_core`'s single disclosed `allω`-trap `sorry`. -/
-theorem readoff_delta0_Zef2TC {φ : SyntacticSemiformula ℒₒᵣ 1}
-    {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} (hinfl : ∀ m, m ≤ f m)
-    (dd : Zef2TC α e H f 0 {(∃⁰ φ)}) :
-    ∃ n ≤ ewIter f α 0, atomTrue (φ/[nm n]) := by
-  obtain ⟨n, hn, htn⟩ :=
-    readoffTC_core dd rfl (Finset.mem_singleton_self _)
-      (fun ψ hψ => Or.inl (Finset.mem_singleton.mp hψ))
-  exact ⟨n, le_trans hn (f0_le_ewIter hinfl α), htn⟩
+/- **`readoffTC_core` / `readoff_delta0_Zef2TC` (TC bounded rank-0 read-off) — RETIRED
+(SERIES-5 Lane C).**  The invariant-form TC read-off and its singleton wrapper carried the single
+`allω` non-monotone-matrix `sorry`; both are superseded by the V-threaded VALUE-BUDGET read-off
+below (`readoffVTC_core` / `readoff_value_pipeline` / `readoff_value_goodstein'`), which carries the
+clean route-B chain. Neither had a code consumer outside this dead pair. `f0_le_ewIter` is retained. -/
 
 /-! ### Route-(c): the V-threaded VALUE-BUDGET read-off (DIRECTION lap-206 step (3))
 
@@ -5042,7 +4905,5 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.sound0_TC
 #print axioms GoodsteinPA.E1EmbeddingGrind.falsum_erase
 #print axioms GoodsteinPA.E1EmbeddingGrind.f0_le_ewIter
-#print axioms GoodsteinPA.E1EmbeddingGrind.readoffTC_core
-#print axioms GoodsteinPA.E1EmbeddingGrind.readoff_delta0_Zef2TC
 #print axioms GoodsteinPA.E1EmbeddingGrind.three_le_rel1_rootSlot
 #print axioms GoodsteinPA.E1EmbeddingGrind.ewIterTower_infl
