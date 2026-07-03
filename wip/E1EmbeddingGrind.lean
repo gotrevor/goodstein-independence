@@ -2177,6 +2177,91 @@ theorem budgetedEmbedsV3_axm_PAminus {Γ : Finset (SyntacticFormula ℒₒᵣ)}
         Semiformula.Operator.lt_def, Semiformula.Operator.LE.def_of_Eq_of_LT,
         Semiformula.imp_eq]) hmod hΓ
 
+/-! ### The induction-schema kit, part 1 — `osuccs` + the ∀-closure peel -/
+
+/-- Iterated successor (the closure-peel ordinal ladder). -/
+def osuccs (α : ONote) : ℕ → ONote
+  | 0 => α
+  | n + 1 => osucc (osuccs α n)
+
+theorem osuccs_NF {α : ONote} (h : α.NF) : ∀ n, (osuccs α n).NF
+  | 0 => h
+  | n + 1 => osucc_NF (osuccs_NF h n)
+
+theorem osuccs_succ_shift (α : ONote) : ∀ n, osuccs (osucc α) n = osucc (osuccs α n)
+  | 0 => rfl
+  | n + 1 => by simp only [osuccs, osuccs_succ_shift α n]
+
+theorem Cl_osuccs {S : ONote → Prop} {α : ONote} (h : Cl S α) : ∀ n, Cl S (osuccs α n)
+  | 0 => h
+  | n + 1 => Cl.osucc (Cl_osuccs h n)
+
+theorem Nlog_osuccs_le {α : ONote} (h : α.NF) : ∀ n, Nlog (osuccs α n) ≤ Nlog α + n
+  | 0 => le_refl _
+  | n + 1 => by
+      have h1 := Nlog_osucc_le (osuccs_NF h n)
+      have h2 := Nlog_osuccs_le h n
+      simp only [osuccs]
+      omega
+
+/-- **∀-closure peel**: if every numeral instance of the `ℓ`-ary matrix is derivable at `α`
+(uniformly in the operator/slot, `em_cong`-style stability), the universal closure is
+derivable at `osuccs α ℓ`.  Instances feed through `embedding_subst_q_cons_app`; the
+`Cl`-in-every-operator hypothesis pays every `relOp` side condition. -/
+theorem allClosure_peel {e : ONote} {d : ℕ} {f₀ : ℕ → ℕ} :
+    ∀ (ℓ : ℕ) (α : ONote), α.NF → (∀ S : ONote → Prop, Cl S α) →
+      ∀ (χ : SyntacticSemiformula ℒₒᵣ ℓ) (Γ : Seq),
+      (∀ (w : Fin ℓ → ℕ) (H : ONote → Prop) (f : ℕ → ℕ), Monotone f → (∀ m, m ≤ f m) →
+          f₀ 0 ≤ f 0 →
+          Zef2TC α e H f d (insert (Rew.subst (fun i => nm (w i)) ▹ χ) Γ)) →
+      (∀ k, k ≤ ℓ → Nlog (osuccs α k) ≤ f₀ 0) →
+      ∀ (H : ONote → Prop) (f : ℕ → ℕ), Monotone f → (∀ m, m ≤ f m) → f₀ 0 ≤ f 0 →
+      Zef2TC (osuccs α ℓ) e H f d (insert (∀⁰* χ) Γ) := by
+  intro ℓ
+  induction ℓ with
+  | zero =>
+      intro α hNF hCl χ Γ hinst hg H f hmono hinfl hf0
+      have h := hinst ![] H f hmono hinfl hf0
+      have hs : Rew.subst (fun i => nm ((![] : Fin 0 → ℕ) i)) ▹ χ = χ := by
+        have : (Rew.subst (fun i => nm ((![] : Fin 0 → ℕ) i)) : Rew ℒₒᵣ ℕ 0 ℕ 0)
+            = Rew.subst ![] := by congr; funext i; exact i.elim0
+        rw [this]
+        simp
+      rwa [hs] at h
+  | succ n ih =>
+      intro α hNF hCl χ Γ hinst hg H f hmono hinfl hf0
+      have step : ∀ (w : Fin n → ℕ) (H' : ONote → Prop) (f' : ℕ → ℕ), Monotone f' →
+          (∀ m, m ≤ f' m) → f₀ 0 ≤ f' 0 →
+          Zef2TC (osucc α) e H' f' d
+            (insert (Rew.subst (fun i => nm (w i)) ▹ (∀⁰ χ)) Γ) := by
+        intro w H' f' hmono' hinfl' hf0'
+        have hsub : Rew.subst (fun i => nm (w i)) ▹ (∀⁰ χ)
+            = ∀⁰ ((Rew.subst (fun i => nm (w i))).q ▹ χ) := by simp
+        rw [hsub]
+        have fam : ∀ m, Zef2TC α e (adjoin H' m) (rel1 f' m) d
+            (insert ((((Rew.subst (fun i => nm (w i))).q ▹ χ))/[nm m]) Γ) := by
+          intro m
+          have hf'm : f' 0 ≤ rel1 f' m 0 := by
+            simpa [rel1] using hmono' (Nat.zero_le (max m 0))
+          rw [embedding_subst_q_cons_app]
+          have hv : (nm m :> fun i => nm (w i)) = (fun i => nm ((m :> w) i)) := by
+            funext i
+            refine Fin.cases ?_ (fun j => ?_) i <;> simp
+          rw [hv]
+          exact hinst (m :> w) (adjoin H' m) (rel1 f' m) (rel1_monotone hmono' m)
+            (rel1_infl hinfl' m) (le_trans hf0' hf'm)
+        have hgd : Nlog (osucc α) ≤ f' 0 := le_trans (hg 1 (by omega)) hf0'
+        exact Zef2TC.allω hgd _ (fun _ => α) (fun _ => Zekd.lt_osucc hNF) (fun _ => hNF)
+          (osucc_NF hNF) (fun m => hCl (adjoin H' m)) fam
+      have h := ih (osucc α) (osucc_NF hNF) (fun S => Cl.osucc (hCl S)) (∀⁰ χ) Γ step
+        (fun k hk => by
+          rw [osuccs_succ_shift]
+          exact hg (k + 1) (by omega))
+        H f hmono hinfl hf0
+      rw [osuccs_succ_shift] at h
+      exact h
+
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
