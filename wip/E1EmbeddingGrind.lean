@@ -2497,6 +2497,124 @@ theorem metaInduction_Zef2TC (ψ step : SyntacticSemiformula ℒₒᵣ 1)
     (fun n => ofNat_lt_omega _) (fun n => hNF _) omega_NF
     (fun n => Cl.ofNat _) (fun n => chain n n le_rfl)
 
+/-! ### The induction-schema kit, part 5 — the per-instance succInd shape, and the V3 case -/
+
+/-- The successor term of the induction step, at numeral `n`. -/
+noncomputable def succTerm (n : ℕ) : SyntacticTerm ℒₒᵣ :=
+  Rew.subst ![nm n] (‘(#0 + 1)’ : Semiterm ℒₒᵣ ℕ 1)
+
+theorem stdClosedVal_succTerm (n : ℕ) : stdClosedVal (succTerm n) = n + 1 := by
+  simp [succTerm, stdClosedVal, Semiterm.val_operator₂, Semiterm.val_operator₀,
+    Matrix.empty_eq, nm]
+
+/-- **The succInd instance shape**: any (rewritten) induction-axiom instance
+`succInd ψw` is `Zef2TC`-derivable at the FIXED structural root `osucc² ω` — the ω-root
+cut-tower `metaInduction_Zef2TC` plus the two `orI` peels of the NNF. -/
+theorem succInd_shape_Zef2TC (ψw : SyntacticSemiformula ℒₒᵣ 1)
+    {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ : Seq}
+    (hmono : Monotone f) (hinfl : ∀ m, m ≤ f m)
+    (hg1 : 2 * clog (2 * ψw.complexity + 4) + 12 ≤ f 0)
+    (hg2 : ψw.complexity ≤ f 0) :
+    Zef2TC (osucc (osucc ONote.omega)) e H f (ψw.complexity + 1)
+      (insert (Arithmetic.succInd ψw) Γ) := by
+  rw [succInd_nnf' ψw]
+  set t0 : SyntacticTerm ℒₒᵣ := (↑(0 : ℕ) : Semiterm ℒₒᵣ ℕ 0) with ht0
+  set stepw : SyntacticSemiformula ℒₒᵣ 1 :=
+    (∼ψw/[(#0 : Semiterm ℒₒᵣ ℕ 1)]) ⋎ ψw/[(‘(#0 + 1)’ : Semiterm ℒₒᵣ ℕ 1)] with hstepw
+  have hval0 : stdClosedVal t0 = 0 := by simp [ht0, stdClosedVal]
+  have hstep : ∀ n, (∼stepw)/[nm n] = (ψw/[nm n]) ⋏ ∼(ψw/[succTerm n]) := by
+    intro n
+    simp only [hstepw, succTerm]
+    simp [← TransitiveRewriting.comp_app, Rew.subst_comp_subst]
+  have ht := metaInduction_Zef2TC ψw stepw t0 succTerm hval0 stdClosedVal_succTerm hstep
+    (e := e) (H := H) (Γ := Γ) hmono hinfl hg1 hg2
+  have hb : ψw/[(#0 : Semiterm ℒₒᵣ ℕ 1)] = ψw := by simp
+  -- gates for the two orI peels
+  have hNs : Nlog (osucc ONote.omega) ≤ 3 := by
+    have := Nlog_osucc_le omega_NF; rw [Nlog_omega] at this; omega
+  have hNss : Nlog (osucc (osucc ONote.omega)) ≤ 4 := by
+    have := Nlog_osucc_le (osucc_NF omega_NF); omega
+  -- reorder for the inner orI
+  have hre : Zef2TC ONote.omega e H f (ψw.complexity + 1)
+      (insert (∃⁰ (∼stepw)) (insert (∀⁰ ψw)
+        (insert (∼(ψw/[t0])) Γ))) :=
+    ht.wk ht.gate (by intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto)
+  have horI₂ := Zef2TC.orI (α := osucc ONote.omega)
+    (le_trans hNs (le_trans (by omega : (3:ℕ) ≤ 12) (le_trans (by omega) hg1)))
+    (∃⁰ (∼stepw)) (∀⁰ ψw) (Zekd.lt_osucc omega_NF) omega_NF (osucc_NF omega_NF)
+    (Cl_omega H) hre
+  have hre₂ : Zef2TC (osucc ONote.omega) e H f (ψw.complexity + 1)
+      (insert (∼(ψw/[t0])) (insert ((∃⁰ (∼stepw)) ⋎ (∀⁰ ψw)) Γ)) :=
+    horI₂.wk horI₂.gate (by intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto)
+  have horI₁ := Zef2TC.orI (α := osucc (osucc ONote.omega))
+    (le_trans hNss (le_trans (by omega : (4:ℕ) ≤ 12) (le_trans (by omega) hg1)))
+    (∼(ψw/[t0])) ((∃⁰ (∼stepw)) ⋎ (∀⁰ ψw)) (Zekd.lt_osucc (osucc_NF omega_NF))
+    (osucc_NF omega_NF) (osucc_NF (osucc_NF omega_NF)) (Cl.osucc (Cl_omega H)) hre₂
+  rw [hb]
+  exact horI₁
+
+/-- **V3 `axm`, the induction schema** — the LAST V3 ladder rung.  The `univCl (succInd φ)`
+sentence is env-fixed (`asg_emb_fix`), coerces to `∀⁰* (fixitr ▹ succInd φ)`, and peels by
+`allClosure_peel` into numeral instances `succInd ψw` handled by `succInd_shape_Zef2TC` at the
+uniform root `osucc² ω` — total root `osuccs (osucc² ω) fvSup`, all budgets structural. -/
+theorem budgetedEmbedsV3_succInd {Γ : Finset (SyntacticFormula ℒₒᵣ)}
+    (φ : Semiformula ℒₒᵣ ℕ 1)
+    (hΓ : (↑(Semiformula.univCl (Arithmetic.succInd φ)) : SyntacticFormula ℒₒᵣ) ∈ Γ) :
+    BudgetedEmbedsV3 Γ := by
+  set ℓ : ℕ := (Arithmetic.succInd φ).fvSup with hℓ
+  set B : ℕ := 2 * clog (2 * φ.complexity + 4) + φ.complexity + ℓ + 20 with hB
+  set α₀ : ONote := osucc (osucc ONote.omega) with hα₀
+  have hα₀NF : α₀.NF := osucc_NF (osucc_NF omega_NF)
+  have hα₀Cl : ∀ S : ONote → Prop, Cl S α₀ := fun S => Cl.osucc (Cl.osucc (Cl_omega S))
+  have hNlogα₀ : Nlog α₀ ≤ 4 := by
+    rw [hα₀]
+    have h1 := Nlog_osucc_le omega_NF
+    have h2 := Nlog_osucc_le (osucc_NF omega_NF)
+    rw [Nlog_omega] at h1
+    omega
+  refine ⟨B, φ.complexity + 1, 0, 0, osuccs α₀ (0 + ℓ), ONote.NF.zero,
+    osuccs_NF hα₀NF (0 + ℓ), ?_, fun env => ?_⟩
+  · exact le_trans (Nlog_osuccs_le hα₀NF (0 + ℓ)) (by omega)
+  · have hmem := Finset.mem_image_of_mem (fun χ => Embedding.asg env ▹ χ) hΓ
+    rw [asg_emb_fix] at hmem
+    have hcoe : (↑(Semiformula.univCl (Arithmetic.succInd φ)) : SyntacticFormula ℒₒᵣ)
+        = ∀⁰* (Rew.fixitr 0 ℓ ▹ (Arithmetic.succInd φ)) := by
+      rw [Semiformula.coe_univCl_eq_univCl']; rfl
+    rw [hcoe] at hmem
+    have hf1 := ewRootSlot_f1 (0 : ONote) B
+    have hmono : Monotone (rel1 (ewRootSlot 0 B) (envSup env 0)) :=
+      rel1_monotone hf1.1.monotone _
+    have hinfl : ∀ m, m ≤ rel1 (ewRootSlot 0 B) (envSup env 0) m :=
+      rel1_infl (fun m => by have := hf1.2 m; omega) _
+    have hf0 : B ≤ rel1 (ewRootSlot 0 B) (envSup env 0) 0 := le_relSlot_zero 0 B _
+    have hinst : ∀ (w : Fin (0 + ℓ) → ℕ) (H : ONote → Prop) (f : ℕ → ℕ), Monotone f →
+        (∀ m, m ≤ f m) → (fun _ : ℕ => B) 0 ≤ f 0 →
+        Zef2TC α₀ 0 H f (φ.complexity + 1)
+          (insert (Rew.subst (fun i => nm (w i)) ▹ (Rew.fixitr 0 ℓ ▹ (Arithmetic.succInd φ)))
+            (Γ.image (fun χ => Embedding.asg env ▹ χ))) := by
+      intro w H f hmono' hinfl' hf0'
+      rw [← TransitiveRewriting.comp_app, rew_succInd']
+      set ψw : SyntacticSemiformula ℒₒᵣ 1 :=
+        ((Rew.subst fun i => nm (w i)).comp (Rew.fixitr 0 ℓ)).q ▹ φ with hψw
+      have hcx : ψw.complexity = φ.complexity := by simp [hψw]
+      have hBle : B ≤ f 0 := hf0'
+      have h := succInd_shape_Zef2TC ψw (e := 0) (H := H)
+        (Γ := Γ.image (fun χ => Embedding.asg env ▹ χ)) hmono' hinfl'
+        (by rw [hcx]; exact le_trans (by rw [hB]; omega) hBle)
+        (by rw [hcx]; exact le_trans (by rw [hB]; omega) hBle)
+      rwa [hcx] at h
+    have hpeel := allClosure_peel (f₀ := fun _ => B) (0 + ℓ) α₀ hα₀NF hα₀Cl
+      (Rew.fixitr 0 ℓ ▹ (Arithmetic.succInd φ))
+      (Γ.image (fun χ => Embedding.asg env ▹ χ)) hinst
+      (fun k hk => by
+        have h1 := Nlog_osuccs_le hα₀NF k
+        have h2 := hNlogα₀
+        show Nlog (osuccs α₀ k) ≤ B
+        rw [hB]
+        omega)
+      (fun _ => True) (rel1 (ewRootSlot 0 B) (envSup env 0)) hmono hinfl hf0
+    rwa [Finset.insert_eq_self.mpr hmem] at hpeel
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -2515,3 +2633,5 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.clog_tower_gate
 #print axioms GoodsteinPA.E1EmbeddingGrind.rew_succInd'
 #print axioms GoodsteinPA.E1EmbeddingGrind.metaInduction_Zef2TC
+#print axioms GoodsteinPA.E1EmbeddingGrind.succInd_shape_Zef2TC
+#print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_succInd
