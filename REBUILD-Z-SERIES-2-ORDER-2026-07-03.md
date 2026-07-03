@@ -93,13 +93,46 @@ its order.
 
 ## FORBIDDEN
 
-Grinding `passAux` top-rank cut or `readoffD_trapped` (reserved). Adding (Ax2) to the src `Zef2`
-(probe clones only). Any `rel1` change in src. Statement text beyond the blocks above (rung-E
-draft stays in wip until ratified). Self-ratification (VOID). Un-diff-verified ledger claims.
+Grinding `passAux` top-rank cut or `readoffD_trapped` **in src** (reserved for the post-ruling
+grind series — but wip-probe advances on both are SANCTIONED, ladder P4 below). Adding (Ax2) to
+the src `Zef2` (probe clones only). Any `rel1` change in src. Statement text beyond the blocks
+above (rung-E draft stays in wip until ratified). Self-ratification (VOID). Un-diff-verified
+ledger claims. Route-A / `Zf`-era sorries (`Crux2Blueprint` ×12, `DescentSemantic`,
+`OperatorZeh:1925` old pin 3) stay FROZEN per the operator route decision — they are superseded
+surfaces, not open theorems; laps spent there are not productive work.
+
+## PRODUCTIVITY LADDER (operator directive 2026-07-03: 10 productive hours; walk DOWN on blocks)
+
+Work the highest rung that offers in-scope work; a wall (recorded escalation/probe) on one rung
+is the license to move down, not to idle. Every lap must bank something kernel-checked.
+
+- **P1** — Stage A (mechanical debt). Always available; do it first.
+- **P2** — Stages B, C, D (the probe evidence — the high-value core). Lanes are independent:
+  blocked in B ⇒ move to C or D, and vice versa.
+- **P3** — Probe DEEPENING (after B–D's first passes): (i) B-1(iii) at increasing fidelity —
+  grow the Lemma-31-style read-off miniature over `Zef2T` toward the full `readoffD_trapped`
+  shape; (ii) D-2 extended — actually RE-PROVE pins 1–2 over `rel1'` in the wip clone (measure
+  the amendment cost by construction, not estimation); (iii) D-1 candidate-family sweeps;
+  (iv) C-1 → a full feasibility proof draft of the splice against the `ewIter f α 0` bound.
+- **P4** — every-open-theorem fallback (wip-only where gated): advance the TOP-RANK CUT inside
+  the wip amendment clones (does the cut case close over `rel1'`? over an absorbing-norm
+  candidate? — each answer directly feeds the reserved ruling) and `readoffD_trapped` via the
+  `Zef2T` (Ax2) mechanism. Never src, never self-ratified — these are ruling inputs, and they ARE
+  productive work.
+- **P5** — lap-TAIL only (never a whole lap): ledger/docstring/blueprint hygiene.
+
+## STOP RULE (do not burn tokens idling)
+
+"Productive" = a rung of the ladder offers work whose result the series-end judge will consume
+(a statement executed, a probe answered, a cost measured, an escalation sharpened). When NO rung
+does — every stage landed-or-escalated, probes answered to ruling grade, fallbacks exhausted —
+**self-stop green** (`done --green`; the host verifies the full gate) with the ledger's final
+block naming what was exhausted. Do NOT pad laps with hygiene, re-verification theater, or
+Route-A archaeology. An early honest stop is a good outcome; an idle lap is not.
 
 ## Fire shape (operator)
 
-One fire, `--max-laps 5 --max-duration 12h` (statement/probe laps are cheap; the Series-1
-estimate history says statement laps run true while grind laps run 2–4× optimistic — this series
-is all statement/probe). Even the all-refutation branch hands the judge everything needed to
-rule both amendments.
+One fire, `--max-laps 8 --max-duration 10h --review-every 3 --allow-stop` (statement/probe laps
+are cheap and historically run true to estimate; the ladder fills 10h only if the evidence is
+flowing). Even the all-refutation branch hands the judge everything needed to rule both
+amendments.
