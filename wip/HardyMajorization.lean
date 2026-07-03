@@ -720,9 +720,76 @@ theorem ewIter_hardy_le_of_dom_pad {f : ℕ → ℕ} {e₀ : ONote} {c : ℕ}
   exact ewIter_hardy_le hNFe2 (by omega)
     (hEng_of_dom_pad he₀ he₀0 hdom le_rfl) α hα m
 
+/-! ## `S*`-domination bricks (lap 209) — the concrete pipeline slot is padded-Hardy-dominable
+
+The read-off hands `n ≤ ewIter (Sslot (ewIterTower (rel1 (ewRootSlot e B) K) d α) P) α' (…)`.  To
+feed `ewIter_hardy_le_of_dom_pad`, the slot must be padded-dominated by a FIXED Hardy level.  These
+bricks build that from the base up: `ewRootSlot` → the tower `ewIterTower` (d-fold, via the
+majorization ITSELF) → `Sslot` (max with `P`).  The pad absorbs the constant floor. -/
+
+/-- Any NF `e` sits strictly below `ω^{e+1}` — the level needed to Hardy-dominate `hardy e`. -/
+theorem e_lt_Wpow_succ (e : ONote) (he : e.NF) : e < Wpow (e + 1) := by
+  rw [lt_def]
+  show e.repr < (Wpow (e + 1)).repr
+  have hr : (Wpow (e + 1)).repr = ω ^ (e + 1).repr := by
+    show ω ^ (e + 1).repr * (1 : ℕ) + 0 = ω ^ (e + 1).repr
+    simp
+  rw [hr]
+  have hrepr1 : (e + 1).repr = e.repr + 1 := by rw [ONote.repr_add, ONote.repr_one]; norm_num
+  rw [hrepr1]
+  calc e.repr ≤ ω ^ e.repr := Ordinal.right_le_opow _ (by exact_mod_cast Ordinal.one_lt_omega0)
+    _ < ω ^ (e.repr + 1) :=
+        (Ordinal.opow_lt_opow_iff_right (by norm_num : (1 : Ordinal) < ω)).mpr (lt_add_one _)
+
+/-- **`hardy e` at a `max`-shifted argument is padded-dominated by `H_{ω^{e+1}}`.**  Uniform in `z`
+(no `norm e ≤ z` gate leaks): the pad `m + norm e` both shifts past the `max m` and pays the
+`hardy_le_of_lt` norm gate at `z = 0`. -/
+theorem hardy_maxpad (e : ONote) (he : e.NF) (m : ℕ) :
+    ∀ z, hardy e (max m z) ≤ hardy (Wpow (e + 1)) (z + (m + norm e)) := by
+  intro z
+  have he1 : (e + 1).NF := ONote.add_nf e 1
+  have hlt : e < Wpow (e + 1) := e_lt_Wpow_succ e he
+  have hmono : hardy e (max m z) ≤ hardy e (z + (m + norm e)) :=
+    hardy_monotone e (by omega)
+  have hgate : hardy e (z + (m + norm e)) ≤ hardy (Wpow (e + 1)) (z + (m + norm e)) :=
+    hardy_le_of_lt he (Wpow_NF he1) hlt (by omega)
+  exact le_trans hmono hgate
+
+/-- **The base root slot is padded-Hardy-dominated.**  `ewRootSlot e m x = 2(x + hardy e (max m x))
++ 3` fits under `H_{ω^{(e+1)+2}}` at a padded argument: take `f z := hardy e (max m z)` (padded-dom
+by `hardy_maxpad`), feed `hEng_of_dom_pad`, and note `2x + 2 f x + 3 ≤` the engine LHS since
+`x ≤ f x ≤ 2^{f x + 1}`. -/
+theorem ewRootSlot_dom_pad (e : ONote) (he : e.NF) (m : ℕ) :
+    ∀ x, ewRootSlot e m x
+        ≤ hardy (Wpow ((e + 1) + 2))
+            (x + (norm ((e + 1) + 1) + norm (e + 1) + normSum ((e + 1) + 2 + 1)
+                    + norm ((e + 1) + 2) + 8 + (m + norm e))) := by
+  intro x
+  have he₀ : (e + 1).NF := ONote.add_nf e 1
+  have he₀0 : e + 1 ≠ 0 := by
+    intro h
+    have hh := congrArg ONote.repr h
+    rw [ONote.repr_add, ONote.repr_one, repr_zero] at hh
+    push_cast at hh
+    exact (lt_of_lt_of_le zero_lt_one le_add_self).ne' hh
+  have hfdom : ∀ z, hardy e (max m z) ≤ hardy (Wpow (e + 1)) (z + (m + norm e)) :=
+    hardy_maxpad e he m
+  have hEng := hEng_of_dom_pad (f := fun z => hardy e (max m z)) (c := m + norm e)
+    he₀ he₀0 hfdom le_rfl
+  have hEngx := hEng x
+  have hfge : x ≤ hardy e (max m x) := le_trans (le_max_right m x) (le_hardy e (max m x))
+  have hpowge : hardy e (max m x) + 1 ≤ 2 ^ (hardy e (max m x) + 1) :=
+    Nat.le_of_lt Nat.lt_two_pow_self
+  have hunfold : ewRootSlot e m x = 2 * (x + hardy e (max m x)) + 3 := by
+    simp only [ewRootSlot, rel1]
+  rw [hunfold]
+  refine le_trans ?_ hEngx
+  omega
+
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.ewRootSlot_dom_pad
 
 end GoodsteinPA.HardyMajorization
