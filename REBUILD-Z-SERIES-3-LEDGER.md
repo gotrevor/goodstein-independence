@@ -352,3 +352,37 @@ headline undrifted. New content, all SORRY-FREE (standard triple, `#print axioms
 
 **Next**: `all` (uniformize per-branch `(K_n, α_n)` — the genuinely new ordinal content;
 `EmbeddingBound.embedC_LX_bdd` discipline), then `axm`.
+
+---
+
+## Block 10 — E-1 block 5: the GROWTH KIT — `Gexp = H_{ω²}` term domination (lap 200c)
+
+**File**: `wip/E1EmbeddingGrind.lean`. Build green (1342 jobs), `blueprint_audit` ✓ 16,
+headline undrifted. All SORRY-FREE (standard triple).
+
+**Why**: the `all` case CANNOT close under the block-8 predicate as-is — the per-branch
+witness indices `K_n` (from the IH at `n :>ₙ env`) carry NO growth bound, while `allω`'s
+branch slot `rel1 f n` grows only linearly in the branch numeral; an unbounded `∃ K` kills
+the ω-rule uniformization.  The fix (V3, next block) bounds the witness budget by a
+STRUCTURAL function of the assignment; the mechanism that pays it is the control tower.
+Banked the whole prerequisite kit:
+
+1. `Gexp := hardy (ω²)` with closed form `Gexp_eq : Gexp x = 2^(x+1)·(x+1) − 1` (B4 bridge
+   `hardy_omega_pow_ofNat` + mathlib `fastGrowing_two`); order facts `succ_le_Gexp`,
+   `add_le_Gexp_max`, `mul_le_Gexp_max` (the two term-closure absorptions), iterate kit
+   (`Gexp_iter_monotone/le_Gexp_iter/Gexp_iter_le_iter/iter_le_Gexp_iter`).
+2. `Gexp_iter_eq_hardy : Gexp^[c] = H_{ω²·c}` (`hardy_single_coeff`) — the iterate budget is
+   ONE Hardy value, i.e. absorbable into the slot's control ordinal `e`.
+3. `envSup` (canonical assignment sup over a structural fv bound) + `envSup_cons_le` (the
+   ω-rule cons law: branch sup ≤ `max n` root sup).
+4. **`term_val_le_Gexp_iter`**: every ℒₒᵣ term value under every assignment is
+   ≤ `Gexp^[c] (envSup env N)` with STRUCTURAL `c, N` (term induction; standard-model func
+   evaluation by `rfl` after `Semiterm.val_func`).  `stdClosedVal_asg` bridges the
+   `atomTrue` evaluator to direct env-valuation; `stdClosedVal_asg_le_Gexp_iter` is the form
+   the V3 `exs` gate consumes.
+
+**Next (block 6 = V3)**: restate `BudgetedEmbedsTC` with the witness budget bounded
+structurally (slot `rel1 (ewRootSlot e B) (Gexp^[c] (envSup env N))`-shaped or the
+`K ≤ hardy e (…)` side condition), re-close the 8 landed cases (mechanical — joins as
+before), re-prove `exs` against `stdClosedVal_asg_le_Gexp_iter`, then `all` via
+`envSup_cons_le` + `rel1_rel1`.  `axm` stays after.
