@@ -1747,6 +1747,147 @@ theorem budgetedEmbedsV3_exs {Γ : Finset (SyntacticFormula ℒₒᵣ)}
       simpa [hψ'] using this
     rwa [Finset.insert_eq_self.mpr hmem] at hexI
 
+/-! ### The W1 kit — bounded truth for ∃-free formulas (the `axm` engine)
+
+All PA⁻/EQ axioms except `addEqOfLt` are (∀-closures of) ∃-free matrices; a TRUE closed
+∃-free formula is cut-free `Zef2TC`-derivable at the deterministic rung `ofNat (2k+1)` —
+no witness budget at all (`exI` never fires).  `addEqOfLt` (witness `z = y - x ≤ y`, paid by
+the branch slot) and the induction schema (cut-tower over `em_Zef2TC`) are the two bespoke
+residues. -/
+
+/-- No `∃⁰` anywhere (the Π-fragment over NNF).  Truth of such closed formulas needs no
+witness data, so the bounded-truth derivation avoids `exI`'s slot gate entirely. -/
+def ExFree : ∀ {n : ℕ}, SyntacticSemiformula ℒₒᵣ n → Prop
+  | _, Semiformula.verum => True
+  | _, Semiformula.falsum => True
+  | _, Semiformula.rel _ _ => True
+  | _, Semiformula.nrel _ _ => True
+  | _, Semiformula.and φ ψ => ExFree φ ∧ ExFree ψ
+  | _, Semiformula.or φ ψ => ExFree φ ∧ ExFree ψ
+  | _, Semiformula.all φ => ExFree φ
+  | _, Semiformula.exs _ => False
+
+@[simp] theorem exFree_verum {n : ℕ} : ExFree (⊤ : SyntacticSemiformula ℒₒᵣ n) := trivial
+@[simp] theorem exFree_falsum {n : ℕ} : ExFree (⊥ : SyntacticSemiformula ℒₒᵣ n) := trivial
+@[simp] theorem exFree_rel {n k : ℕ} (r : (ℒₒᵣ).Rel k) (v) :
+    ExFree (Semiformula.rel (n := n) r v) := trivial
+@[simp] theorem exFree_nrel {n k : ℕ} (r : (ℒₒᵣ).Rel k) (v) :
+    ExFree (Semiformula.nrel (n := n) r v) := trivial
+@[simp] theorem exFree_and {n : ℕ} {φ ψ : SyntacticSemiformula ℒₒᵣ n} :
+    ExFree (φ ⋏ ψ) ↔ ExFree φ ∧ ExFree ψ := Iff.rfl
+@[simp] theorem exFree_or {n : ℕ} {φ ψ : SyntacticSemiformula ℒₒᵣ n} :
+    ExFree (φ ⋎ ψ) ↔ ExFree φ ∧ ExFree ψ := Iff.rfl
+@[simp] theorem exFree_all {n : ℕ} {φ : SyntacticSemiformula ℒₒᵣ (n + 1)} :
+    ExFree (∀⁰ φ) ↔ ExFree φ := Iff.rfl
+@[simp] theorem exFree_exs {n : ℕ} {φ : SyntacticSemiformula ℒₒᵣ (n + 1)} :
+    ExFree (∃⁰ φ) ↔ False := Iff.rfl
+
+/-- `ExFree` is stable under every rewriting (rewriting preserves the connective tree). -/
+theorem ExFree.rew : ∀ {n₁ : ℕ} (ψ : SyntacticSemiformula ℒₒᵣ n₁), ExFree ψ →
+    ∀ {n₂ : ℕ} (ω : Rew ℒₒᵣ ℕ n₁ ℕ n₂), ExFree (ω ▹ ψ) := by
+  intro n₁ ψ
+  induction ψ using Semiformula.rec' with
+  | hverum => intro _ n₂ ω; simp
+  | hfalsum => intro _ n₂ ω; simp
+  | hrel r v => intro _ n₂ ω; simp [Semiformula.rew_rel]
+  | hnrel r v => intro _ n₂ ω; simp [Semiformula.rew_nrel]
+  | hand φ ψ ihφ ihψ =>
+      intro h n₂ ω
+      simp only [LogicalConnective.HomClass.map_and, exFree_and]
+      exact ⟨ihφ h.1 ω, ihψ h.2 ω⟩
+  | hor φ ψ ihφ ihψ =>
+      intro h n₂ ω
+      simp only [LogicalConnective.HomClass.map_or, exFree_or]
+      exact ⟨ihφ h.1 ω, ihψ h.2 ω⟩
+  | hall φ ih =>
+      intro h n₂ ω
+      rw [Rewriting.app_all]
+      exact ih h ω.q
+  | hexs φ ih => intro h; exact absurd h (by simp)
+
+/-- **Bounded ω-truth for the ∃-free fragment** (the W1 engine): a TRUE (zero-assignment)
+∃-free formula in `Γ` is cut-free `Zef2TC`-derivable at the deterministic-complexity rung.
+Same budget discipline as `em_Zef2TC` — all hypotheses `rel1`-stable, the `all` branches
+relativize the slot, and no `exI` ever fires. -/
+theorem truth_exFree_Zef2TC (k : ℕ) :
+    ∀ (ψ : SyntacticFormula ℒₒᵣ), ψ.complexity ≤ k → ExFree ψ → atomTrue ψ →
+    ∀ {e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {Γ : Seq},
+      Monotone f → (∀ m, m ≤ f m) → clog (2 * k + 1) ≤ f 0 → ψ ∈ Γ →
+      Zef2TC (ONote.ofNat (2 * k + 1)) e H f 0 Γ := by
+  induction k with
+  | zero =>
+    intro ψ hk hex htrue e H f Γ hmono hinfl hgate hmem
+    have hgate' : Nlog (ONote.ofNat 1) ≤ f 0 := le_trans (Nlog_ofNat_le 1) hgate
+    cases ψ using Semiformula.cases' with
+    | hverum => exact Zef2TC.verumR hgate' hmem
+    | hfalsum => exact htrue.elim
+    | hrel r v => exact Zef2TC.trueRel hgate' r v htrue hmem
+    | hnrel r v => exact Zef2TC.trueNrel hgate' r v htrue hmem
+    | hand φ ψ => simp at hk
+    | hor φ ψ => simp at hk
+    | hall φ => simp at hk
+    | hexs φ => simp at hk
+  | succ k ih =>
+    intro ψ hk hex htrue e H f Γ hmono hinfl hgate hmem
+    rw [show 2 * (k + 1) + 1 = 2 * k + 3 by ring] at hgate ⊢
+    have hNF : ∀ m : ℕ, (ONote.ofNat m).NF := fun m => ONote.nf_ofNat m
+    have hlt13 : ONote.ofNat (2 * k + 1) < ONote.ofNat (2 * k + 3) := ofNat_lt_ofNat (by omega)
+    have hroot : Nlog (ONote.ofNat (2 * k + 3)) ≤ f 0 := le_trans (Nlog_ofNat_le _) hgate
+    have hg1 : clog (2 * k + 1) ≤ f 0 := le_trans (clog_mono (by omega)) hgate
+    cases ψ using Semiformula.cases' with
+    | hverum => exact Zef2TC.verumR hroot hmem
+    | hfalsum => exact htrue.elim
+    | hrel r v => exact Zef2TC.trueRel hroot r v htrue hmem
+    | hnrel r v => exact Zef2TC.trueNrel hroot r v htrue hmem
+    | hand a b =>
+        have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+        have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_and] at hk; omega
+        have hta : atomTrue a := htrue.1
+        have htb : atomTrue b := htrue.2
+        have h1 := ih a hak hex.1 hta (e := e) (H := H) (f := f)
+          (Γ := insert a Γ) hmono hinfl hg1 (Finset.mem_insert_self _ _)
+        have h2 := ih b hbk hex.2 htb (e := e) (H := H) (f := f)
+          (Γ := insert b Γ) hmono hinfl hg1 (Finset.mem_insert_self _ _)
+        have hand := Zef2TC.andI (α := ONote.ofNat (2 * k + 3)) hroot
+          a b hlt13 hlt13 (hNF _) (hNF _) (hNF _) (Cl.ofNat _) (Cl.ofNat _) h1 h2
+        rwa [Finset.insert_eq_self.mpr hmem] at hand
+    | hor a b =>
+        have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+        have hbk : b.complexity ≤ k := by simp only [Semiformula.complexity_or] at hk; omega
+        have htab : atomTrue a ∨ atomTrue b := htrue
+        have h1 : Zef2TC (ONote.ofNat (2 * k + 1)) e H f 0 (insert a (insert b Γ)) := by
+          rcases htab with hta | htb
+          · exact ih a hak hex.1 hta hmono hinfl hg1 (Finset.mem_insert_self _ _)
+          · exact ih b hbk hex.2 htb hmono hinfl hg1
+              (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+        have hor := Zef2TC.orI (α := ONote.ofNat (2 * k + 3)) hroot
+          a b hlt13 (hNF _) (hNF _) (Cl.ofNat _) h1
+        rwa [Finset.insert_eq_self.mpr hmem] at hor
+    | hall a =>
+        have hak : a.complexity ≤ k := by simp only [Semiformula.complexity_all] at hk; omega
+        have fam : ∀ m, Zef2TC (ONote.ofNat (2 * k + 1)) e (adjoin H m) (rel1 f m) 0
+            (insert (a/[nm m]) Γ) := by
+          intro m
+          have hf0m : f 0 ≤ rel1 f m 0 := by
+            simpa [rel1] using hmono (Nat.zero_le (max m 0))
+          have hsk : (a/[nm m]).complexity ≤ k := by
+            have : (a/[nm m]).complexity = a.complexity := by simp
+            omega
+          have hsex : ExFree (a/[nm m]) := hex.rew a (Rew.subst ![nm m])
+          have hstrue : atomTrue (a/[nm m]) := by
+            have hall : ∀ x : ℕ, Semiformula.Evalm ℕ ![x] (fun _ => 0) a := by
+              simpa [atomTrue, Matrix.constant_eq_singleton, Matrix.empty_eq] using htrue
+            simpa [atomTrue, Semiformula.eval_substs, Embedding.valm_nm,
+              Matrix.constant_eq_singleton, Matrix.empty_eq] using hall m
+          exact ih (a/[nm m]) hsk hsex hstrue
+            (rel1_monotone hmono m) (rel1_infl hinfl m) (le_trans hg1 hf0m)
+            (Finset.mem_insert_self _ _)
+        have hall := Zef2TC.allω (α := ONote.ofNat (2 * k + 3)) hroot
+          a (fun _ => ONote.ofNat (2 * k + 1)) (fun _ => hlt13)
+          (fun _ => hNF _) (hNF _) (fun _ => Cl.ofNat _) fam
+        rwa [Finset.insert_eq_self.mpr hmem] at hall
+    | hexs a => exact absurd hex (by simp)
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -1758,3 +1899,4 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_and
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_cut
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbedsV3_exs
+#print axioms GoodsteinPA.E1EmbeddingGrind.truth_exFree_Zef2TC
