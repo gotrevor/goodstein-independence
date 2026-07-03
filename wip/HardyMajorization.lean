@@ -960,10 +960,96 @@ theorem hardy_Wpow_iter_dom_pad (E₀ : ONote) (hE₀ : E₀.NF) :
             hardy_le_of_lt hsum (Wpow_NF (hsucc_nf Ek hEk))
               (Wpow_add_lt_Wpow_succ hEk hE₀ hE₀Ek) hgate
 
+/-- **Padded-domination max-combiner** — two padded Hardy bounds at (possibly different) levels
+combine at the joint level `E₁+E₂+1`, both gates paid from the joint pad.  This is `Sslot`'s
+`max (tower z) (P* z)` step. -/
+theorem dom_pad_max {f g : ℕ → ℕ} {E₁ E₂ : ONote} {c₁ c₂ : ℕ}
+    (hE₁ : E₁.NF) (hE₂ : E₂.NF)
+    (hf : ∀ z, f z ≤ hardy (Wpow E₁) (z + c₁))
+    (hg : ∀ z, g z ≤ hardy (Wpow E₂) (z + c₂)) :
+    ∃ (E : ONote) (c : ℕ), E.NF ∧ E ≠ 0 ∧ E₁ < E ∧ E₂ < E ∧
+      ∀ z, max (f z) (g z) ≤ hardy (Wpow E) (z + c) := by
+  haveI := hE₁
+  haveI := hE₂
+  haveI h12 : (E₁ + E₂).NF := ONote.add_nf E₁ E₂
+  haveI hE : (E₁ + E₂ + 1).NF := ONote.add_nf (E₁ + E₂) 1
+  have hrepr : (E₁ + E₂ + 1).repr = E₁.repr + E₂.repr + 1 := by
+    rw [ONote.repr_add (E₁ + E₂) 1, ONote.repr_add E₁ E₂, ONote.repr_one]
+    push_cast
+    rfl
+  have hlt₁ : E₁ < E₁ + E₂ + 1 := by
+    rw [lt_def, hrepr]
+    calc E₁.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_right _ _
+      _ < E₁.repr + E₂.repr + 1 := lt_add_one _
+  have hlt₂ : E₂ < E₁ + E₂ + 1 := by
+    rw [lt_def, hrepr]
+    calc E₂.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_left _ _
+      _ < E₁.repr + E₂.repr + 1 := lt_add_one _
+  have hne : E₁ + E₂ + 1 ≠ 0 := by
+    intro h
+    have hh := congrArg ONote.repr h
+    rw [hrepr, repr_zero] at hh
+    exact (lt_of_lt_of_le zero_lt_one le_add_self).ne'
+      (by exact_mod_cast hh)
+  refine ⟨E₁ + E₂ + 1, max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂), hE, hne, hlt₁, hlt₂,
+    fun z => ?_⟩
+  have harg₁ : z + c₁ ≤ z + (max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂)) := by omega
+  have harg₂ : z + c₂ ≤ z + (max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂)) := by omega
+  have hgate₁ : norm (Wpow E₁)
+      ≤ z + (max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂)) := by omega
+  have hgate₂ : norm (Wpow E₂)
+      ≤ z + (max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂)) := by omega
+  have hb₁ : f z ≤ hardy (Wpow (E₁ + E₂ + 1))
+      (z + (max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂))) :=
+    le_trans (hf z) (le_trans (hardy_monotone _ harg₁)
+      (hardy_le_of_lt (Wpow_NF hE₁) (Wpow_NF hE) (Wpow_lt hlt₁) hgate₁))
+  have hb₂ : g z ≤ hardy (Wpow (E₁ + E₂ + 1))
+      (z + (max c₁ c₂ + norm (Wpow E₁) + norm (Wpow E₂))) :=
+    le_trans (hg z) (le_trans (hardy_monotone _ harg₂)
+      (hardy_le_of_lt (Wpow_NF hE₂) (Wpow_NF hE) (Wpow_lt hlt₂) hgate₂))
+  exact max_le hb₁ hb₂
+
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom
 #print axioms GoodsteinPA.HardyMajorization.ewIterTower_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.hardy_Wpow_iter_dom_pad
+/-- **THE `S*`-domination** (SERIES-4 S-2 capstone) — the concrete pipeline slot
+`S* z = max (ewIterTower (rel1 (ewRootSlot e m) K) d α z) (P z)` (`Sslot` unfolded; tower over
+the embedding's base root slot, `P` any `Gexp`-iterate-bounded value function — the
+`gvb_le_iter` shape, taken as a hypothesis because `gvb` lives in `wip/ReadoffValueGate.lean`)
+is padded-Hardy-dominated at ONE fixed level: `ewRootSlot_dom_pad → rel1_dom_pad →
+ewIterTower_dom_pad` on the tower half, `hardy_Wpow_iter_dom_pad` on the `P` half,
+`dom_pad_max` to join. -/
+theorem Sstar_dom_pad (e : ONote) (he : e.NF) (m K d : ℕ) (α : ONote) (hα : α.NF)
+    {P : ℕ → ℕ} {E₀ : ONote} (hE₀ : E₀.NF) {k V : ℕ}
+    (hP : ∀ z, P z ≤ (hardy (Wpow E₀))^[k] (max V z)) :
+    ∃ (E : ONote) (c : ℕ), E.NF ∧ E ≠ 0 ∧
+      ∀ z, max (ewIterTower (rel1 (ewRootSlot e m) K) d α z) (P z)
+        ≤ hardy (Wpow E) (z + c) := by
+  haveI := he
+  haveI h1 : (e + 1).NF := ONote.add_nf e 1
+  haveI : (2 : ONote).NF := nf_ofNat 2
+  haveI hL : ((e + 1) + 2).NF := ONote.add_nf (e + 1) 2
+  have hL0 : (e + 1) + 2 ≠ 0 := by
+    intro h
+    have hh := congrArg ONote.repr h
+    rw [ONote.repr_add (e + 1) 2,
+      show ((2 : ONote)).repr = ((2 : ℕ) : Ordinal) from repr_ofNat 2, repr_zero] at hh
+    push_cast at hh
+    exact (lt_of_lt_of_le zero_lt_two le_add_self).ne' hh
+  have hrel1 := rel1_dom_pad (ewRootSlot_dom_pad e he m) K
+  obtain ⟨E₁, c₁, hE₁, hE₁0, htower⟩ := ewIterTower_dom_pad hL hL0 hrel1 α hα d
+  obtain ⟨E₂, c₂, hE₂, hE₂0, _hlt, hiter⟩ := hardy_Wpow_iter_dom_pad E₀ hE₀ k
+  have hPdom : ∀ z, P z ≤ hardy (Wpow E₂) (z + (V + c₂)) := by
+    intro z
+    have hz : P z ≤ (hardy (Wpow E₀))^[k] (z + V) :=
+      le_trans (hP z) ((hardy_monotone (Wpow E₀)).iterate k (by omega))
+    exact le_trans hz (le_trans (hiter (z + V)) (hardy_monotone _ (by omega)))
+  obtain ⟨E, c, hE, hE0, _, _, hmax⟩ := dom_pad_max hE₁ hE₂ htower hPdom
+  exact ⟨E, c, hE, hE0, hmax⟩
+
+#print axioms GoodsteinPA.HardyMajorization.dom_pad_max
+#print axioms GoodsteinPA.HardyMajorization.Sstar_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewRootSlot_dom_pad
