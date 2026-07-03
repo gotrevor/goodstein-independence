@@ -1895,55 +1895,6 @@ theorem headline_readoff_Zef {φ : SyntacticSemiformula ℒₒᵣ 1}
     subst hψ
     rcases hlit with h | h <;> exact absurd h (by simp [ExsQuantifier.exs])
 
-/-- **PIN (disclosed sorry): one cut-ELIMINATION pass, slot-judgment form** (`cutElimPass_Zf` —
-E–W Lemma 27/30's single predicative rank step: the ONE place the ordinal COLLAPSES and the numeric
-slot ITERATES).  The lap-5 RESTATEMENT of the retired draft, per the entrance mini-lock C1–C2:
-- **C1** — the control `e` is untouched (no `raise e α`); the ordinal collapses, the slot iterates.
-- **C2** — the output slot is the PINNED ordinal-indexed iterate `iterSlot f α` (no `∃`, no fixed
-  `f^[k]`); the height drops to `collapse α`, the rank to `c`.  Slots stay `Monotone` + inflationary
-  (`iterSlot_monotone`/`iterSlot_infl`).
-
-Discharge is FORBIDDEN until the lap-5 verdict is ratified (grind laps 6–7).  The `∃`-cut lane
-threads via `iter_comp` (counts add); the `allω` lane is the E–W Lemma 19/20 arithmetic (the hard
-`allω`-lane pole, T-Z5(iii)).  Composed anti-vacuity check: `cutElimPass_exit_root` (§7b).
-
-**LAP 6 (global 186) FINDING — candidate EIGHTH statement trap; discharge now ARCHITECT-gated, not
-grind-open** (`REBUILD-Z-TRAP8-2026-07-02.md`; kernel evidence `wip/Trap8Probe.lean`).  The bare
-diagonalizing `iterSlot f α` is NOT ordinal-monotone (`iterSlot f 2 0 = 3 > 2 = iterSlot f ω 0` —
-it dips at a limit base, riding `ω[0] = 1`).  Every induction case with a `β < α` sub-derivation
-(`weak`/`exI`/`allω`/`cut`) must lift its slot `iterSlot f β` up to `iterSlot f α` via `Zef.mono_f`
-(slots only RAISE), needing `iterSlot f β ≤ iterSlot f α` — kernel-false.  Statement-intrinsic (the
-output slot is rigidly `iterSlot f α`; `ZefProv` slackens only the height).  trap-7's diagonalization
-fix (large-argument for `allω`) reintroduced base-argument smallness that bites at `weak`/`exI`/`cut`
-(slot read near argument 0).  Fix = C2 output-slot amendment (positive-budget / relativized read so
-reaches-monotonicity applies) — architect-owned, do NOT self-ratify.  Banked toward any fix:
-`iterSlot_monotone` (C5, discharged) + `iterSlot_le_of_reaches` (the reaches lever). -/
-theorem cutElimPass_Zf {α e : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq} (f : ℕ → ℕ)
-    (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
-    (D : Zef α e H f (c + 1) Γ) (hf_mono : Monotone f) (hf_infl : ∀ x, x ≤ f x) :
-    ZefProv (collapse α) e H (iterSlot f α) c Γ := by
-  sorry
-
-/-! ## §7b The C3 composed exit — the anti-vacuity test at statement level (LOCK Addendum 2, C3)
-
-The pin-3 restatement is only faithful if its output iterate is CONSUMED by the read-off.  This
-corollary composes ONE elimination pass (rank `1 → 0`) with `headline_readoff_Zef`, at the canonical
-root slot `f = rel1 (hardy e) m` (the `Zeh → Zef` embedding image, `f 0 = hardy e m`).  The resulting
-witness bound is `iterSlot (rel1 (hardy e) m) α 0` — the ordinal-indexed (diagonalizing) iterate
-is VISIBLE in the statement and is what the read-off reads.  This is the C3 test that
-distinguishes the pinned iterate from severed-slot (Q2) vacuity: a statement whose count the read-off
-never reads would not typecheck with the count in the bound.  Kernel-checked at statement level
-(pin body `sorry`, this corollary is a real derivation from the pin + the read-off). -/
-theorem cutElimPass_exit_root {α e : ONote} {H : ONote → Prop} {m : ℕ}
-    {φ : SyntacticSemiformula ℒₒᵣ 1}
-    (hφinst : ∀ n, ∃ ar, ∃ r : (ℒₒᵣ).Rel ar, ∃ v, φ/[nm n] = Semiformula.rel r v)
-    (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
-    (D : Zef α e H (rel1 (hardy e) m) (0 + 1) {(∃⁰ φ)}) :
-    ∃ n ≤ iterSlot (rel1 (hardy e) m) α 0, atomTrue (φ/[nm n]) := by
-  obtain ⟨α', _, _, _, D'⟩ :=
-    cutElimPass_Zf (rel1 (hardy e) m) heNF hαNF hαH D
-      (rel1_monotone (hardy_monotone e) m) (rel1_infl (le_hardy e) m)
-  exact headline_readoff_Zef hφinst D'
 
 /-! ## §8 The stage→slot embedding `Zeh → Zef` (P4 consolidation; the LOCK §1-A1/§3 amendment
 made faithful — `Zef` conservatively generalizes `Zeh`)

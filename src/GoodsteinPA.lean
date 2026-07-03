@@ -85,19 +85,12 @@ import GoodsteinPA.StdCor34F
 import GoodsteinPA.InternalBridge
 import GoodsteinPA.DescentInternal
 
--- E via first-order completeness (lap-30 redirect): `DescentE` reduced to ONE semantic obligation
--- (`paLX_models_TI_of_PA_provable`). Modulo that disclosed `sorry`, the headline chains; NOT wired
--- into `Statement.lean` (anti-fraud). See `DescentSemantic.lean` docstring + `DESCENT-PLAN.md §5`.
-import GoodsteinPA.DescentSemantic
-import GoodsteinPA.DescentConstruction
+-- (SERIES-5 cleanup) The Route-A consistency-route apparatus — `DescentSemantic`,
+-- `DescentConstruction`, `Crux2Blueprint` — moved to `wip/` after route B carried the headline
+-- kernel-clean; they were the abandoned Goodstein⟹Con(PA) route, off the clean summit.
 import GoodsteinPA.ReductModel
 import GoodsteinPA.XCongruence
 
--- Crux-2 blueprint (judge seed, lap 84): the genuine reduct `red` + `RedSound` ⟹ Gentzen
--- contradiction, decomposed into named sorried leaves M1a–M3 so the assembly is wired BY
--- CONSTRUCTION. Green-gated (imported here, not an island). Leaves discharged via the InternalZ
--- validity infrastructure (`iCritReductG`/`zKValidF_iCritReductGen`/`ZDerivation_iCritReductG_of`).
-import GoodsteinPA.Crux2Blueprint
 
 -- Front 2 (Foundation's `PA_delta1Definable` axiom) is RESOLVED UPSTREAM: Foundation@e6e1ad1 proves
 -- both `PA_delta1Definable` / `ISigma1_delta1Definable` as instances (were bare axioms), so
