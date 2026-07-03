@@ -500,7 +500,8 @@ ordinal-monotonicity gives it pointwise from the base gate `ewN β ≤ f 0`. -/
 theorem ewIter_slot_le {f : ℕ → ℕ} (hf_mono : Monotone f) (hf_infl : ∀ m, m ≤ f m)
     {β α : ONote} (hβNF : β.NF) (hβα : β < α) (g : Nlog β ≤ f 0) :
     ∀ x, ewIter f β x ≤ ewIter f α x :=
-  fun x => ewIter_le_of_lt hf_infl hβNF hβα (le_trans g (hf_mono (Nat.zero_le _)))
+  fun x => ewIter_le_of_lt (m := x) hf_infl hβNF hβα
+    (le_trans g (hf_mono (Nat.zero_le _)))
 
 /-- **Slot-composition containment** (lap-10 SERIES-3 pass prep) — the cut-elimination step merges
 two IH-reduced premises' slots `ewIter f α₀ ∘ ewIter f α₁` (`α₀,α₁ < α`) and must fit under the

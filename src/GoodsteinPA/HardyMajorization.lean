@@ -866,7 +866,7 @@ theorem ewIterTower_dom_pad {g : ℕ → ℕ} {E : ONote} {c : ℕ} (hE : E.NF) 
         rfl
       rw [lt_def, h1]
       calc (Ed + 2).repr < (Ed + 2).repr + 1 := lt_add_one _
-        _ ≤ (Ed + 2).repr + 1 + (collapseIter d α).repr := Ordinal.le_add_right _ _
+        _ ≤ (Ed + 2).repr + 1 + (collapseIter d α).repr := le_self_add
     haveI hWA : (Wpow (Ed + 2 + 1 + collapseIter d α)).NF := Wpow_NF hA
     haveI hWB : (Wpow (Ed + 2)).NF := Wpow_NF hB
     haveI hA1 : (Ed + 2 + 1 + collapseIter d α + 1).NF :=
@@ -979,11 +979,11 @@ theorem dom_pad_max {f g : ℕ → ℕ} {E₁ E₂ : ONote} {c₁ c₂ : ℕ}
     rfl
   have hlt₁ : E₁ < E₁ + E₂ + 1 := by
     rw [lt_def, hrepr]
-    calc E₁.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_right _ _
+    calc E₁.repr ≤ E₁.repr + E₂.repr := le_self_add
       _ < E₁.repr + E₂.repr + 1 := lt_add_one _
   have hlt₂ : E₂ < E₁ + E₂ + 1 := by
     rw [lt_def, hrepr]
-    calc E₂.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_left _ _
+    calc E₂.repr ≤ E₁.repr + E₂.repr := le_add_self
       _ < E₁.repr + E₂.repr + 1 := lt_add_one _
   have hne : E₁ + E₂ + 1 ≠ 0 := by
     intro h
@@ -1071,11 +1071,11 @@ theorem dom_pad_comp {f g : ℕ → ℕ} {E₁ E₂ : ONote} {c₁ c₂ : ℕ}
     rfl
   have hlt₁ : E₁ < E₁ + E₂ + 1 := by
     rw [lt_def, hrepr]
-    calc E₁.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_right _ _
+    calc E₁.repr ≤ E₁.repr + E₂.repr := le_self_add
       _ < E₁.repr + E₂.repr + 1 := lt_add_one _
   have hlt₂ : E₂ < E₁ + E₂ + 1 := by
     rw [lt_def, hrepr]
-    calc E₂.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_left _ _
+    calc E₂.repr ≤ E₁.repr + E₂.repr := le_add_self
       _ < E₁.repr + E₂.repr + 1 := lt_add_one _
   have hne : E₁ + E₂ + 1 + 1 ≠ 0 := by
     intro h
@@ -1182,7 +1182,7 @@ theorem ewIter_dom_pad_levelcap {f : ℕ → ℕ} {e₀ γ : ONote} {c : ℕ}
         show ((2 : ONote)).repr = ((2 : ℕ) : Ordinal) from repr_ofNat 2]
       have h1lt : (1 : Ordinal) < e₀.repr + 1 := lt_of_le_of_lt he₀pos (lt_add_one _)
       have hsucc : (1 : Ordinal) + 1 < (e₀.repr + 1) + 1 := by
-        rw [Ordinal.add_one_eq_succ, Ordinal.add_one_eq_succ]
+        rw [← Order.succ_eq_add_one, ← Order.succ_eq_add_one]
         exact Order.succ_lt_succ h1lt
       calc ((2 : ℕ) : Ordinal) = 1 + 1 := by push_cast; exact one_add_one_eq_two.symm
         _ < (e₀.repr + 1) + 1 := hsucc

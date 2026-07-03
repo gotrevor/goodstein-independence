@@ -269,10 +269,10 @@ IH-reduced premises (at `collapse βφ`, `collapse βψ`, `βφ,βψ < α`) into
 additive output `collapse βφ + collapse βψ` must fit strictly under the single collapse
 `collapse α = ω^α`.  This is the additive principality of `ω^α`.  Kernel-checked in
 `wip/Lap10PassProbe.lean`. -/
-theorem collapse_add_lt {βφ βψ α : ONote} (hβφ : βφ.NF) (hβψ : βψ.NF) (hα : α.NF)
+theorem collapse_add_lt {βφ βψ α : ONote} (hβφ : βφ.NF) (hβψ : βψ.NF) (_hα : α.NF)
     (hφ : βφ < α) (hψ : βψ < α) : collapse βφ + collapse βψ < collapse α := by
-  haveI := hβφ; haveI := hβψ; haveI := hα
-  haveI := collapse_NF hβφ; haveI := collapse_NF hβψ; haveI := collapse_NF hα
+  haveI := hβφ; haveI := hβψ; haveI := _hα
+  haveI := collapse_NF hβφ; haveI := collapse_NF hβψ; haveI := collapse_NF _hα
   haveI := ONote.add_nf (collapse βφ) (collapse βψ)
   refine lt_def.mpr ?_
   rw [repr_add, repr_collapse, repr_collapse, repr_collapse]
@@ -1104,7 +1104,7 @@ single predicative rank step: the ordinal COLLAPSES (`collapse α`) and the nume
 disclosed crux decomposition). -/
 theorem cutElimPass_Zef2 {α e : ONote} {H : ONote → Prop} {c : ℕ} {Γ : Seq} (f : ℕ → ℕ)
     (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
-    (D : Zef2 α e H f (c + 1) Γ) (hf1 : EwF1 f) (hf2 : EwF2 f) :
+    (D : Zef2 α e H f (c + 1) Γ) (hf1 : EwF1 f) (_hf2 : EwF2 f) :
     Zef2Prov (collapse α) e H (ewIter f α) c Γ :=
   passAux c heNF D rfl hf1.monotone hf1.infl hf1.2 hαNF hαH
 
@@ -1230,7 +1230,7 @@ A plain induction over the pass (`rankToZeroAux`): `d` applications collapse the
 derivation (reuses the pass; `EwF1 → EwLow` at the top).  **Ledger: debt, "1", 90** (rung R). -/
 theorem rankToZero_Zef2 {α e : ONote} {H : ONote → Prop} {d : ℕ} {Γ : Seq} (f : ℕ → ℕ)
     (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
-    (D : Zef2 α e H f d Γ) (hf1 : EwF1 f) (hf2 : EwF2 f) :
+    (D : Zef2 α e H f d Γ) (hf1 : EwF1 f) (_hf2 : EwF2 f) :
     Zef2Prov (collapseIter d α) e H (ewIterTower f d α) 0 Γ :=
   rankToZeroAux e heNF d D hf1.monotone hf1.infl hf1.2 hαNF hαH
 
@@ -1378,7 +1378,7 @@ theorem zef2_rank0_uniform_spine_underivable {t : Option (Bool × ((k : ℕ) × 
       rw [show spineHead (Semiformula.rel r v) = some (true, ⟨ar, r⟩) from rfl] at h1
       rw [show spineHead (Semiformula.nrel r v) = some (false, ⟨ar, r⟩) from rfl] at h2
       rw [← h2] at h1
-      simpa using h1
+      simp at h1
   | wk hαN hsub _ ih =>
       intro hc hyp
       exact ih hc (fun ψ hψ => hyp ψ (hsub hψ))
@@ -1455,7 +1455,7 @@ not `axL`-closable and has no ∧-rule ⇒ underivable).  The genuine grind is t
 `atomTrue (∀⁰ χ) = ∀ k, Evalm (χ/[nm k])` needs every branch's matrix as its true disjunct + the Δ₀
 bound to bound the load-bearing branches (Towsner §5.4).  **Ledger: debt, "2-3", 80** (rung D). -/
 theorem readoff_delta0_Zef2 {φ : SyntacticSemiformula ℒₒᵣ 1}
-    (hφbdd : ∀ n, LO.FirstOrder.Arithmetic.DeltaZero (φ/[nm n]))
+    (_hφbdd : ∀ n, LO.FirstOrder.Arithmetic.DeltaZero (φ/[nm n]))
     {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ}
     (dd : Zef2 α e H f 0 {(∃⁰ φ)}) :
     ∃ n ≤ ewIter f α 0, atomTrue (φ/[nm n]) :=

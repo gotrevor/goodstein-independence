@@ -489,7 +489,7 @@ theorem tvB_le_iter (hG_mono : Monotone G) (hG_succ : ∀ x, x + 1 ≤ G x)
     {m : ℕ} (t : Semiterm ℒₒᵣ ℕ m) : ∃ c, ∀ B, tvB t B ≤ G^[c] B := by
   induction t with
   | bvar x => exact ⟨0, fun B => le_of_eq (by simp [tvB])⟩
-  | fvar x => exact ⟨0, fun B => by simpa [tvB] using Nat.zero_le B⟩
+  | fvar x => exact ⟨0, fun B => by simp [tvB]⟩
   | func f v ih =>
       match f, v with
       | LO.FirstOrder.Language.ORing.Func.zero, v =>

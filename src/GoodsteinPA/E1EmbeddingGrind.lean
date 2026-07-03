@@ -3697,9 +3697,9 @@ root slot: `ewRootSlot … 0 ≥ 3`). -/
 
 /-- Successor headroom under the collapse: `collapse α = ω^α` is a limit for `α > 0`, so
 `σ < collapse α → osucc σ < collapse α` (additive principality with `1 < ω^α`). -/
-theorem osucc_lt_collapse {σ α : ONote} (hσNF : σ.NF) (hαNF : α.NF)
+theorem osucc_lt_collapse {σ α : ONote} (hσNF : σ.NF) (_hαNF : α.NF)
     (hαpos : (0 : ONote) < α) (h : σ < collapse α) : osucc σ < collapse α := by
-  haveI := hσNF; haveI := hαNF
+  haveI := hσNF; haveI := _hαNF
   refine ONote.lt_def.mpr ?_
   rw [repr_osucc hσNF, repr_collapse]
   have h1 : σ.repr < Ordinal.omega0 ^ α.repr := by
@@ -3815,7 +3815,7 @@ theorem passAuxTC (c : ℕ) {e : ONote} (heNF : e.NF) :
       have hf0 : f 0 ≤ ewIter f α 0 := ewIter_base_le hinfl α
       have hαpos : (0 : ONote) < α := by
         cases α with
-        | zero => exact absurd (ONote.lt_def.mp hβφ) (Ordinal.not_lt_zero _)
+        | zero => exact absurd (ONote.lt_def.mp hβφ) not_lt_zero
         | oadd e' n' a' => exact oadd_pos e' n' a'
       by_cases hc : χ.complexity < c
       · -- SUB-RANK cut: keep it, rebuild at rank `c`
@@ -4067,7 +4067,7 @@ theorem rankToZeroAuxTC (e : ONote) (heNF : e.NF) :
 `3 ≤ f 0` is satisfied by every real root slot, e.g. `ewRootSlot e m 0 ≥ 3`). -/
 theorem rankToZero_TC {α e : ONote} {H : ONote → Prop} {d : ℕ} {Γ : Seq} (f : ℕ → ℕ)
     (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α) (hf0 : 3 ≤ f 0)
-    (D : Zef2TC α e H f d Γ) (hf1 : EwF1 f) (hf2 : EwF2 f) :
+    (D : Zef2TC α e H f d Γ) (hf1 : EwF1 f) (_hf2 : EwF2 f) :
     Zef2TCProv (collapseIter d α) e H (ewIterTower f d α) 0 Γ :=
   rankToZeroAuxTC e heNF d D hf1.monotone hf1.infl hf1.2 hf0 hαNF hαH
 

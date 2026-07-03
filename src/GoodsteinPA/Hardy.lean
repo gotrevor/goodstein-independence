@@ -1781,13 +1781,13 @@ theorem hardy_add_le_comp : ∀ (e : ONote), e.NF → ∀ (β : ONote), β.NF �
             | zero => rfl
             | oadd e'' n'' a'' =>
                 have hlt := NFBelow.lt hba₁; rw [repr_zero] at hlt
-                exact absurd hlt (Ordinal.not_lt_zero _)
+                exact absurd hlt not_lt_zero
           have ha'z : a' = 0 := by
             cases a' with
             | zero => rfl
             | oadd e'' n'' a'' =>
                 have hlt := NFBelow.lt (hh ▸ hsNF).snd'; rw [repr_zero] at hlt
-                exact absurd hlt (Ordinal.not_lt_zero _)
+                exact absurd hlt not_lt_zero
           subst ha1z; subst ha'z
           have hβeq : β = oadd 0 n' 0 := by rw [← ONote.zero_add β]; exact hh
           rw [hβeq]

@@ -49,6 +49,7 @@ strong induction; `bump` gets the parallel pair over `ℕ`.
 noncomputable def toOrdinal (b : ℕ) (n : ℕ) : Ordinal.{0} :=
   if h : n = 0 then 0
   else
+    have _hn : n ≠ 0 := h
     ω ^ toOrdinal b (Nat.log b n) * (n / b ^ Nat.log b n : ℕ)
       + toOrdinal b (n % b ^ Nat.log b n)
 termination_by n
@@ -208,7 +209,7 @@ theorem bump_mono_and_bound (b : ℕ) (hb : 2 ≤ b) (n : ℕ) :
         bump b r < (b + 1) ^ bump b e' := by
       intro r e' he'n hre' hrn
       rcases eq_or_ne r 0 with rfl | hr0
-      · simpa using Nat.pow_pos (show 0 < b + 1 by omega)
+      · simp
       · have hlogr : Nat.log b r < e' := (Nat.log_lt_iff_lt_pow hb1 hr0).2 hre'
         have h1 : bump b (Nat.log b r) < bump b e' := (ih e' he'n).1 _ hlogr
         have h2 : bump b r < (b + 1) ^ (bump b (Nat.log b r) + 1) := (ih r hrn).2 hr0
@@ -298,7 +299,7 @@ The base-`(b+1)` analog of the leading bound. -/
 lemma bump_lt_pow (b : ℕ) (hb : 2 ≤ b) {r e : ℕ} (h : r < b ^ e) :
     bump b r < (b + 1) ^ bump b e := by
   rcases eq_or_ne r 0 with rfl | hr0
-  · simpa using Nat.pow_pos (show 0 < b + 1 by omega)
+  · simp
   · have hb1 : 1 < b := by omega
     have hlogr : Nat.log b r < e := (Nat.log_lt_iff_lt_pow hb1 hr0).2 h
     have hmono := (bump_mono_and_bound b hb e).1 (Nat.log b r) hlogr
@@ -509,7 +510,9 @@ of `n` written in base `b` with the base read as `ω`. Mirrors `toOrdinal`'s rec
 (peel the top power `b^(log b n)`), keeping everything computable. -/
 def toONote (b : ℕ) (n : ℕ) : ONote :=
   if h : n = 0 then 0
-  else oadd (toONote b (Nat.log b n)) (n / b ^ Nat.log b n).toPNat'
+  else
+    have _hn : n ≠ 0 := h
+    oadd (toONote b (Nat.log b n)) (n / b ^ Nat.log b n).toPNat'
         (toONote b (n % b ^ Nat.log b n))
 termination_by n
 decreasing_by
@@ -857,7 +860,7 @@ theorem evalNat_fundSeq (b : ℕ) : ∀ {E : ONote} {f : ℕ → ONote},
           rw [hm] at h
           obtain rfl : (fun i => oadd a' i.succPNat 0) = f := by simpa using h
           have hm1 : (m : ℕ) = 1 := by have := PNat.natPred_add_one m; omega
-          simp only [evalNat_oadd, evalNat_zero, hbsucc, Nat.add_zero, hm1, Nat.cast_one,
+          simp only [evalNat_oadd, evalNat_zero, hbsucc, Nat.add_zero, hm1,
             one_mul, hsa, pow_succ]
           ring
         · -- m = k+2
@@ -866,7 +869,6 @@ theorem evalNat_fundSeq (b : ℕ) : ∀ {E : ONote} {f : ℕ → ONote},
           have hmk : (m : ℕ) = k + 2 := by have := PNat.natPred_add_one m; omega
           simp only [evalNat_oadd, evalNat_zero, hbsucc, Nat.add_zero, Nat.succPNat_coe, hmk,
             hsa, pow_succ, Nat.succ_eq_add_one]
-          push_cast
           ring
       · -- a limit (fund seq p): uses evalNat_fundSeq on a
         rw [ha] at h
@@ -879,7 +881,7 @@ theorem evalNat_fundSeq (b : ℕ) : ∀ {E : ONote} {f : ℕ → ONote},
           rw [hm] at h
           obtain rfl : (fun i => oadd (p i) 1 0) = f := by simpa using h
           have hm1 : (m : ℕ) = 1 := by have := PNat.natPred_add_one m; omega
-          simp only [evalNat_oadd, evalNat_zero, Nat.add_zero, hm1, Nat.cast_one, one_mul, hpa,
+          simp only [evalNat_oadd, evalNat_zero, Nat.add_zero, hm1, one_mul, hpa,
             PNat.one_coe]
         · -- m = k+2
           rw [hm] at h
