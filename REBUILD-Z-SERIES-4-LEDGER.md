@@ -80,3 +80,28 @@ are sorryAx-free in full.
 executes the src splice and axiom→theorem swap.
 
 ---
+
+## Block 2 — LANE B-1 CRACKED: the 12 native_decide base cases proven KERNEL-ONLY
+
+**Lap**: 211 · **File**: `wip/KernelBaseCases.lean` (NEW; src untouched this lap) ·
+**Build**: 🟢 `lake env lean wip/KernelBaseCases.lean` clean.
+
+**Result**: `base_cases_kernel` — the VERBATIM statement of `goodsteinLength_base_cases`
+(`4 ≤ M < 16 → 2^{M+1} + M ≤ goodsteinLength M`) — on exactly
+`[propext, Classical.choice, Quot.sound]`. **No `Lean.ofReduceBool`.** Compiles in seconds
+(vs. minutes of native computation before).
+
+**The insight (checkpoint survival)**: `le_bump` ⇒ the Goodstein value drops by at most 1 per
+step ⇒ `goodsteinSeq M k = v ≥ 1` certifies `goodsteinLength M ≥ k + v`
+(`glen_ge_of_seq_value`, with `goodsteinSeq_zero_absorb` covering steps before `k`). Every seed
+`4 ≤ M < 16` reaches `v ≥ 2^{M+1}+M − k` by step `k ≤ 4` (max value 326593 at M=15) — the
+65551-step forward pass was never needed. Kernel evaluation via `gvalF`/`bumpF` (fuel-based
+structural clone of `bump`, fuel = n; `bumpF_eq` bridges; mathlib's `Nat.log` is already
+structural hence kernel-reducible — the old "WF-recursion forces native_decide" note is now
+HALF-stale: it still holds for `bump`, no longer for `Nat.log`).
+
+**NEXT (mechanical, grind-legal)**: move the 5 helpers + swap the proof body of
+`goodsteinLength_base_cases` in `Domination.lean` (statement FROZEN, satisfied verbatim), full
+`lake build`, re-`#print axioms` the growth headline — `Lean.ofReduceBool` should drop from
+`goodsteinLength_exp_lower_uncond` and everything downstream. The 12 anti-vacuity `example`s
+elsewhere may keep native_decide (they sit on no theorem's axiom path).
