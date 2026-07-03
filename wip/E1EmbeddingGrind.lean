@@ -2827,6 +2827,341 @@ theorem embedding_Zef2TC_V3 :
   rw [hctx] at hinv
   exact hinv.change_H
 
+/-! ### The TC pass-port kit, part 1 — finite inversions + ⊥-erase
+
+`passAux`'s inert-shape discharge (`Zef2.erase_inert`) breaks over `Zef2TC` (⋏/⋎/⊤ ARE
+principal here).  The port needs: and/or-INVERSION (the finite mirrors of `allω_inversion` —
+no slot change, no operator change), and ⊥-erase (⊥ is still never principal in TC). -/
+
+/-- Left ⋏-inversion: replace `χ₁ ⋏ χ₂` by `χ₁` throughout.  Same ordinal, slot, rank. -/
+theorem and_inversion_left {χ₁ χ₂ : Form} :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2TC α e H f c Γ →
+      Zef2TC α e H f c (insert χ₁ (Γ.erase (χ₁ ⋏ χ₂))) := by
+  have hreshape : ∀ (χ : Form) (Γ : Seq),
+      insert χ₁ ((insert χ Γ).erase (χ₁ ⋏ χ₂))
+        ⊆ insert χ (insert χ₁ (Γ.erase (χ₁ ⋏ χ₂))) := by
+    intro χ Γ x hx
+    simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+    tauto
+  intro α e H f c Γ dd
+  induction dd with
+  | axL hαN r v hp hn =>
+      exact Zef2TC.axL hαN r v
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hp⟩))
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hn⟩))
+  | trueRel hαN r v htrue hmem =>
+      exact Zef2TC.trueRel hαN r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩))
+  | trueNrel hαN r v htrue hmem =>
+      exact Zef2TC.trueNrel hαN r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩))
+  | verumR hαN h =>
+      exact Zef2TC.verumR hαN
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, h⟩))
+  | wk hαN hsub _ ih =>
+      exact Zef2TC.wk hαN
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) ih
+  | weak hαN hβ hβNF hαNF hβH hsub _ ih =>
+      exact Zef2TC.weak hαN hβ hβNF hαNF hβH
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) ih
+  | @andI α' βφ' βψ' e' H' F' c' Γ' hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH d₁ _ ih₁ ih₂ =>
+      by_cases hchi : (φ ⋏ ψ : Form) = χ₁ ⋏ χ₂
+      · -- PRINCIPAL: use the LEFT premise, re-invert, drop the duplicate
+        have hφ₁ : φ = χ₁ ∧ ψ = χ₂ := by simpa using hchi
+        obtain ⟨rfl, rfl⟩ := hφ₁
+        have hctx : insert (φ : Form) ((insert φ Γ').erase (φ ⋏ ψ))
+            = insert φ (Γ'.erase (φ ⋏ ψ)) := by
+          rw [Finset.erase_insert_of_ne (by
+            intro h
+            have := congrArg Semiformula.complexity h
+            simp at this)]
+          exact Finset.insert_idem _ _
+        rw [hctx] at ih₁
+        refine Zef2TC.weak hαN hβφ hβφNF hαNF hβφH ?_ ih₁
+        rw [hchi]
+        intro x hx
+        simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        tauto
+      · rw [Finset.erase_insert_of_ne hchi, Finset.insert_comm]
+        refine Zef2TC.andI hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+        · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+        · exact Zef2TC.wk ih₂.gate (hreshape ψ Γ') ih₂
+  | @orI α' β' e' H' F' c' Γ' hαN φ ψ hβ hβNF hαNF hβH _ ih =>
+      have hne : (φ ⋎ ψ : Form) ≠ χ₁ ⋏ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.orI hαN φ ψ hβ hβNF hαNF hβH ?_
+      refine Zef2TC.wk ih.gate ?_ ih
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @allω α' e' H' F' c' Γ' hαN φ β hβ hβNF hαNF hβH _ ih =>
+      have hne : (∀⁰ φ : Form) ≠ χ₁ ⋏ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.allω hαN φ β hβ hβNF hαNF hβH ?_
+      intro n
+      refine Zef2TC.wk (ih n).gate ?_ (ih n)
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @exI α' β' e' H' F' c' Γ' hαN φ n hβ hβNF hαNF hβH hbound _ ih =>
+      have hne : (∃⁰ φ : Form) ≠ χ₁ ⋏ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.exI hαN φ n hβ hβNF hαNF hβH hbound ?_
+      refine Zef2TC.wk ih.gate ?_ ih
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @cut α' βφ' βψ' e' H' F' c' Γ' hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      refine Zef2TC.cut hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+      · exact Zef2TC.wk ih₂.gate (hreshape (∼φ) Γ') ih₂
+
+/-- Right ⋏-inversion. -/
+theorem and_inversion_right {χ₁ χ₂ : Form} :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2TC α e H f c Γ →
+      Zef2TC α e H f c (insert χ₂ (Γ.erase (χ₁ ⋏ χ₂))) := by
+  have hreshape : ∀ (χ : Form) (Γ : Seq),
+      insert χ₂ ((insert χ Γ).erase (χ₁ ⋏ χ₂))
+        ⊆ insert χ (insert χ₂ (Γ.erase (χ₁ ⋏ χ₂))) := by
+    intro χ Γ x hx
+    simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+    tauto
+  intro α e H f c Γ dd
+  induction dd with
+  | axL hαN r v hp hn =>
+      exact Zef2TC.axL hαN r v
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hp⟩))
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hn⟩))
+  | trueRel hαN r v htrue hmem =>
+      exact Zef2TC.trueRel hαN r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩))
+  | trueNrel hαN r v htrue hmem =>
+      exact Zef2TC.trueNrel hαN r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, hmem⟩))
+  | verumR hαN h =>
+      exact Zef2TC.verumR hαN
+        (Finset.mem_insert_of_mem (Finset.mem_erase.mpr ⟨by simp, h⟩))
+  | wk hαN hsub _ ih =>
+      exact Zef2TC.wk hαN
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) ih
+  | weak hαN hβ hβNF hαNF hβH hsub _ ih =>
+      exact Zef2TC.weak hαN hβ hβNF hαNF hβH
+        (Finset.insert_subset_insert _ (Finset.erase_subset_erase _ hsub)) ih
+  | @andI α' βφ' βψ' e' H' F' c' Γ' hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ d₂ ih₁ ih₂ =>
+      by_cases hchi : (φ ⋏ ψ : Form) = χ₁ ⋏ χ₂
+      · have hφ₁ : φ = χ₁ ∧ ψ = χ₂ := by simpa using hchi
+        obtain ⟨rfl, rfl⟩ := hφ₁
+        have hctx : insert (ψ : Form) ((insert ψ Γ').erase (φ ⋏ ψ))
+            = insert ψ (Γ'.erase (φ ⋏ ψ)) := by
+          rw [Finset.erase_insert_of_ne (by
+            intro h
+            have := congrArg Semiformula.complexity h
+            simp at this)]
+          exact Finset.insert_idem _ _
+        rw [hctx] at ih₂
+        refine Zef2TC.weak hαN hβψ hβψNF hαNF hβψH ?_ ih₂
+        rw [hchi]
+        intro x hx
+        simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        tauto
+      · rw [Finset.erase_insert_of_ne hchi, Finset.insert_comm]
+        refine Zef2TC.andI hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+        · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+        · exact Zef2TC.wk ih₂.gate (hreshape ψ Γ') ih₂
+  | @orI α' β' e' H' F' c' Γ' hαN φ ψ hβ hβNF hαNF hβH _ ih =>
+      have hne : (φ ⋎ ψ : Form) ≠ χ₁ ⋏ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.orI hαN φ ψ hβ hβNF hαNF hβH ?_
+      refine Zef2TC.wk ih.gate ?_ ih
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @allω α' e' H' F' c' Γ' hαN φ β hβ hβNF hαNF hβH _ ih =>
+      have hne : (∀⁰ φ : Form) ≠ χ₁ ⋏ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.allω hαN φ β hβ hβNF hαNF hβH ?_
+      intro n
+      refine Zef2TC.wk (ih n).gate ?_ (ih n)
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @exI α' β' e' H' F' c' Γ' hαN φ n hβ hβNF hαNF hβH hbound _ ih =>
+      have hne : (∃⁰ φ : Form) ≠ χ₁ ⋏ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne, Finset.insert_comm]
+      refine Zef2TC.exI hαN φ n hβ hβNF hαNF hβH hbound ?_
+      refine Zef2TC.wk ih.gate ?_ ih
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @cut α' βφ' βψ' e' H' F' c' Γ' hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      refine Zef2TC.cut hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+      · exact Zef2TC.wk ih₂.gate (hreshape (∼φ) Γ') ih₂
+
+/-- ⋎-inversion: replace `χ₁ ⋎ χ₂` by BOTH disjuncts. -/
+theorem or_inversion {χ₁ χ₂ : Form} :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2TC α e H f c Γ →
+      Zef2TC α e H f c (insert χ₁ (insert χ₂ (Γ.erase (χ₁ ⋎ χ₂)))) := by
+  have hreshape : ∀ (χ : Form) (Γ : Seq),
+      insert χ₁ (insert χ₂ ((insert χ Γ).erase (χ₁ ⋎ χ₂)))
+        ⊆ insert χ (insert χ₁ (insert χ₂ (Γ.erase (χ₁ ⋎ χ₂)))) := by
+    intro χ Γ x hx
+    simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+    tauto
+  intro α e H f c Γ dd
+  induction dd with
+  | axL hαN r v hp hn =>
+      exact Zef2TC.axL hαN r v
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨by simp, hp⟩)))
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨by simp, hn⟩)))
+  | trueRel hαN r v htrue hmem =>
+      exact Zef2TC.trueRel hαN r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨by simp, hmem⟩)))
+  | trueNrel hαN r v htrue hmem =>
+      exact Zef2TC.trueNrel hαN r v htrue
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨by simp, hmem⟩)))
+  | verumR hαN h =>
+      exact Zef2TC.verumR hαN
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+          (Finset.mem_erase.mpr ⟨by simp, h⟩)))
+  | wk hαN hsub _ ih =>
+      exact Zef2TC.wk hαN
+        (Finset.insert_subset_insert _ (Finset.insert_subset_insert _
+          (Finset.erase_subset_erase _ hsub))) ih
+  | weak hαN hβ hβNF hαNF hβH hsub _ ih =>
+      exact Zef2TC.weak hαN hβ hβNF hαNF hβH
+        (Finset.insert_subset_insert _ (Finset.insert_subset_insert _
+          (Finset.erase_subset_erase _ hsub))) ih
+  | @andI α' βφ' βψ' e' H' F' c' Γ' hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      have hne : (φ ⋏ ψ : Form) ≠ χ₁ ⋎ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne]
+      rw [show insert (χ₁ : Form) (insert χ₂ (insert (φ ⋏ ψ) (Γ'.erase (χ₁ ⋎ χ₂))))
+          = insert (φ ⋏ ψ) (insert χ₁ (insert χ₂ (Γ'.erase (χ₁ ⋎ χ₂)))) from by
+        rw [Finset.insert_comm χ₂, Finset.insert_comm χ₁]]
+      refine Zef2TC.andI hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+      · exact Zef2TC.wk ih₂.gate (hreshape ψ Γ') ih₂
+  | @orI α' β' e' H' F' c' Γ' hαN φ ψ hβ hβNF hαNF hβH d₁ ih =>
+      by_cases hchi : (φ ⋎ ψ : Form) = χ₁ ⋎ χ₂
+      · -- PRINCIPAL: the premise carries BOTH disjuncts; re-invert and clean up
+        have hφ₁ : φ = χ₁ ∧ ψ = χ₂ := by simpa using hchi
+        obtain ⟨rfl, rfl⟩ := hφ₁
+        have hctx : insert (φ : Form) (insert ψ
+              ((insert φ (insert ψ Γ')).erase (φ ⋎ ψ)))
+            = insert φ (insert ψ (Γ'.erase (φ ⋎ ψ))) := by
+          rw [Finset.erase_insert_of_ne (by
+              intro h
+              have := congrArg Semiformula.complexity h
+              simp at this),
+            Finset.erase_insert_of_ne (by
+              intro h
+              have := congrArg Semiformula.complexity h
+              simp at this)]
+          ext x
+          simp only [Finset.mem_insert]
+          tauto
+        rw [hctx] at ih
+        refine Zef2TC.weak hαN hβ hβNF hαNF hβH ?_ ih
+        rw [hchi]
+        intro x hx
+        simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        tauto
+      · rw [Finset.erase_insert_of_ne hchi]
+        rw [show insert (χ₁ : Form) (insert χ₂ (insert (φ ⋎ ψ) (Γ'.erase (χ₁ ⋎ χ₂))))
+            = insert (φ ⋎ ψ) (insert χ₁ (insert χ₂ (Γ'.erase (χ₁ ⋎ χ₂)))) from by
+          rw [Finset.insert_comm χ₂, Finset.insert_comm χ₁]]
+        refine Zef2TC.orI hαN φ ψ hβ hβNF hαNF hβH ?_
+        refine Zef2TC.wk ih.gate ?_ ih
+        intro x hx
+        simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+        tauto
+  | @allω α' e' H' F' c' Γ' hαN φ β hβ hβNF hαNF hβH _ ih =>
+      have hne : (∀⁰ φ : Form) ≠ χ₁ ⋎ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne]
+      rw [show insert (χ₁ : Form) (insert χ₂ (insert (∀⁰ φ) (Γ'.erase (χ₁ ⋎ χ₂))))
+          = insert (∀⁰ φ) (insert χ₁ (insert χ₂ (Γ'.erase (χ₁ ⋎ χ₂)))) from by
+        rw [Finset.insert_comm χ₂, Finset.insert_comm χ₁]]
+      refine Zef2TC.allω hαN φ β hβ hβNF hαNF hβH ?_
+      intro n
+      refine Zef2TC.wk (ih n).gate ?_ (ih n)
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @exI α' β' e' H' F' c' Γ' hαN φ n hβ hβNF hαNF hβH hbound _ ih =>
+      have hne : (∃⁰ φ : Form) ≠ χ₁ ⋎ χ₂ := by simp
+      rw [Finset.erase_insert_of_ne hne]
+      rw [show insert (χ₁ : Form) (insert χ₂ (insert (∃⁰ φ) (Γ'.erase (χ₁ ⋎ χ₂))))
+          = insert (∃⁰ φ) (insert χ₁ (insert χ₂ (Γ'.erase (χ₁ ⋎ χ₂)))) from by
+        rw [Finset.insert_comm χ₂, Finset.insert_comm χ₁]]
+      refine Zef2TC.exI hαN φ n hβ hβNF hαNF hβH hbound ?_
+      refine Zef2TC.wk ih.gate ?_ ih
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @cut α' βφ' βψ' e' H' F' c' Γ' hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      refine Zef2TC.cut hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+      · exact Zef2TC.wk ih₂.gate (hreshape (∼φ) Γ') ih₂
+
+/-- ⊥-erase: `⊥` is never principal in `Zef2TC` (no rule introduces `falsum`), so it can be
+erased from any context. -/
+theorem falsum_erase :
+    ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : ℕ} {Γ : Seq},
+      Zef2TC α e H f c Γ →
+      Zef2TC α e H f c (Γ.erase (⊥ : Form)) := by
+  have hreshape : ∀ (χ : Form) (Γ : Seq),
+      (insert χ Γ).erase (⊥ : Form) ⊆ insert χ (Γ.erase (⊥ : Form)) := by
+    intro χ Γ x hx
+    simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+    tauto
+  intro α e H f c Γ dd
+  induction dd with
+  | axL hαN r v hp hn =>
+      exact Zef2TC.axL hαN r v
+        (Finset.mem_erase.mpr ⟨by simp, hp⟩) (Finset.mem_erase.mpr ⟨by simp, hn⟩)
+  | trueRel hαN r v htrue hmem =>
+      exact Zef2TC.trueRel hαN r v htrue (Finset.mem_erase.mpr ⟨by simp, hmem⟩)
+  | trueNrel hαN r v htrue hmem =>
+      exact Zef2TC.trueNrel hαN r v htrue (Finset.mem_erase.mpr ⟨by simp, hmem⟩)
+  | verumR hαN h =>
+      exact Zef2TC.verumR hαN (Finset.mem_erase.mpr ⟨by simp, h⟩)
+  | wk hαN hsub _ ih =>
+      exact Zef2TC.wk hαN (Finset.erase_subset_erase _ hsub) ih
+  | weak hαN hβ hβNF hαNF hβH hsub _ ih =>
+      exact Zef2TC.weak hαN hβ hβNF hαNF hβH (Finset.erase_subset_erase _ hsub) ih
+  | @andI α' βφ' βψ' e' H' F' c' Γ' hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      rw [Finset.erase_insert_of_ne (by simp : (φ ⋏ ψ : Form) ≠ ⊥)]
+      refine Zef2TC.andI hαN φ ψ hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+      · exact Zef2TC.wk ih₂.gate (hreshape ψ Γ') ih₂
+  | @orI α' β' e' H' F' c' Γ' hαN φ ψ hβ hβNF hαNF hβH _ ih =>
+      rw [Finset.erase_insert_of_ne (by simp : (φ ⋎ ψ : Form) ≠ ⊥)]
+      refine Zef2TC.orI hαN φ ψ hβ hβNF hαNF hβH ?_
+      refine Zef2TC.wk ih.gate ?_ ih
+      intro x hx
+      simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
+      tauto
+  | @allω α' e' H' F' c' Γ' hαN φ β hβ hβNF hαNF hβH _ ih =>
+      rw [Finset.erase_insert_of_ne (by simp : (∀⁰ φ : Form) ≠ ⊥)]
+      refine Zef2TC.allω hαN φ β hβ hβNF hαNF hβH ?_
+      intro n
+      exact Zef2TC.wk (ih n).gate (hreshape _ Γ') (ih n)
+  | @exI α' β' e' H' F' c' Γ' hαN φ n hβ hβNF hαNF hβH hbound _ ih =>
+      rw [Finset.erase_insert_of_ne (by simp : (∃⁰ φ : Form) ≠ ⊥)]
+      refine Zef2TC.exI hαN φ n hβ hβNF hαNF hβH hbound ?_
+      exact Zef2TC.wk ih.gate (hreshape _ Γ') ih
+  | @cut α' βφ' βψ' e' H' F' c' Γ' hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH _ _ ih₁ ih₂ =>
+      refine Zef2TC.cut hαN φ hcompl hcutRead hβφ hβψ hβφNF hβψNF hαNF hβφH hβψH ?_ ?_
+      · exact Zef2TC.wk ih₁.gate (hreshape φ Γ') ih₁
+      · exact Zef2TC.wk ih₂.gate (hreshape (∼φ) Γ') ih₂
+
 end GoodsteinPA.E1EmbeddingGrind
 
 #print axioms GoodsteinPA.E1EmbeddingGrind.term_val_le_Gexp_iter
@@ -2851,3 +3186,7 @@ end GoodsteinPA.E1EmbeddingGrind
 #print axioms GoodsteinPA.E1EmbeddingGrind.budgetedEmbeddingV3
 #print axioms GoodsteinPA.E1EmbeddingGrind.allω_inversion
 #print axioms GoodsteinPA.E1EmbeddingGrind.embedding_Zef2TC_V3
+#print axioms GoodsteinPA.E1EmbeddingGrind.and_inversion_left
+#print axioms GoodsteinPA.E1EmbeddingGrind.and_inversion_right
+#print axioms GoodsteinPA.E1EmbeddingGrind.or_inversion
+#print axioms GoodsteinPA.E1EmbeddingGrind.falsum_erase
