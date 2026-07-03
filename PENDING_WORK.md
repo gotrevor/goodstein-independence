@@ -10,9 +10,15 @@
   headline `goodsteinLength_eventually_dominates_fixed_fastGrowing` = **`[propext,choice,Quot.sound]`**
   (sorryAx OFF). Blueprint nodes 14/15 flipped `debt`→`clean`; `blueprint_audit` PASSED (16 nodes,
   0 warnings). Full build GREEN 1346 jobs.
-- ⏭️ **NEXT = SERIES-5 Lane B + Lane C** (DIRECTION SERIES-4 judge block §3):
-  - Lane B: crown re-point — break `WainerRoute → Statement` import cycle, re-point body only
-    (TYPE FROZEN) → node 16 `clean`. (Re-check whether still needed now Lane A is in.)
+- ✅ **Lane B LANDED (commit f9a6436).** Broke `WainerRoute → Statement` cycle (WainerRoute now
+  imports `Reduction`, not `Statement`); `Statement` imports `WainerBound`; crown
+  `peano_not_proves_goodstein` re-pointed to `WainerRoute.peano_not_proves_goodstein_growth`
+  (Route-A body banked as `peano_not_proves_goodstein_routeA`). **`#print axioms
+  peano_not_proves_goodstein = [propext, Classical.choice, Quot.sound]`** — `goodstein_implies_consistency`
+  DROPPED off the headline. Node 16 `clean`; `blueprint_audit` PASSED (16/16, full footprint clean).
+  ⇒ **2 of 3 STOP conditions MET** (headline clean + audit green); remaining = `lean-sorry src/ = 0`.
+- ⏭️ **NEXT = SERIES-5 Lane C** (DIRECTION SERIES-4 judge block §3): prune `src` sorries → 0.
+  All remaining sorries are now OFF the clean headline (route-A/crux-2 girder + E1 read-off trap).
   - Lane C: prune `src` sorries toward 0 (`lean-sorry src/`). Live: Crux2Blueprint (10),
     E1EmbeddingGrind (5: readoffTC_core `allω`-trap + W1/W2 `axm`), WainerLadder, Reduction,
     OperatorZeh (pin-3), DescentSemantic:550 (Rathjen §3 in M). ⚠️ Block-4 retirement proposals
