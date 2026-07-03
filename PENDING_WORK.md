@@ -21,12 +21,20 @@ Quot.sound]`:
 `readoffD_trapped_of_mono`, (Ax2) is needed by NEITHER read-off NOR splice on the headline
 path. Ledger Stage C-1 block written. Producer-side caveat recorded (Series-3).
 
-**NEXT (ladder P2, remaining stages):**
-1. **Stage C-2** — confirm the goodstein matrix's bounded-∀ step clauses satisfy the
-   `readoffD_trapped_of_mono` guard (`atomTrue (χ/[nm 0]) → atomTrue (∀⁰ χ)`) on the CONCRETE
-   translation (kernel example, no native_decide, wip).
-2. **Stage B — rung-E Ax2-adequacy probe** (`wip/Ax2AdequacyProbe.lean`, full `Zef2T` clone).
-3. **Stage D-2 — shift-relativization `rel1'` cost probe.**
+**Stage C-2 DONE (same lap): mono guard REFUTED — Option B is LOAD-BEARING.**
+`wip/GuardMonoProbe.lean` (kernel-clean): `guardShape_not_mono` — the bounded-∀
+guarded-implication step-clause shape (`x < 2 → x = 0` as the minimal representative of the
+`igoodsteinDef` run-coding clauses) has TRUE 0-instance and FALSE ω-universal, so
+`readoffD_trapped_of_mono` does NOT cover the concrete goodstein translation. Stage C combined
+verdict for ruling (2): recommend the R-4′ restatement (bound `f 0 → ewIter f α 0`; splice cost
+one definitional tower level per C-1); (Ax2) stays solely a rung-E question. Ledger updated.
+
+**NEXT (ladder, remaining stages):**
+1. **Stage B — rung-E Ax2-adequacy probe** (`wip/Ax2AdequacyProbe.lean`): clone `Zef2` as
+   `Zef2T` = `Zef2` + (Ax2) true-literal rule; kernel-answer (i) `toZef` extension, (ii) pins
+   1–2 re-prove, (iii) Lemma-31-style read-off miniature. Heavier (full inductive clone).
+2. **Stage D-2 — shift-relativization `rel1'` cost probe** (`rel1' f n = fun m => f (n+m)`;
+   preserves `hg_base`/`2m+1`/Monotone? blast radius on Series-1-ratified statements?).
 
 ## LAP 196 (SERIES-2 Stage A + D-1) — rung-W homed at concrete translation; absorbing-norm EXISTS (top-rank-cut ruling input)
 
