@@ -190,3 +190,41 @@ blob; but the run-miscoding adversary is a semantic counterexample family for th
 coding too.
 
 ---
+
+## Stage B — rung-E (Ax2)-adequacy probe (`Zef2T` clone) — ✅ ANSWERED (lap 197)
+
+**File**: `wip/Ax2AdequacyProbe.lean` (standalone; `src` untouched). All headline probe
+theorems kernel-clean `[propext, Classical.choice, Quot.sound]`, no `native_decide`.
+
+**The clone**: `Zef2T` = `Zef2`'s six constructors VERBATIM (gates included) + E–W (Ax2) as
+`trueRel`/`trueNrel` (the `Zekd` shape with the `ewN` gate threaded). `Zef2T.gate` and the
+inclusion `Zef2T.ofZef2 : Zef2 → Zef2T` proven.
+
+**(i) `toZef` does NOT extend — (Ax2) is a STRICT extension at rank 0 (kernel-proven).**
+`zef2T_derives_true_literal`: `Zef2T 0 e H id 0 {0=0}` (one trueRel leaf).
+`zef_rank0_literal_pair`: every rank-0 `Zef` derivation of an all-literal sequent carries a
+complementary PAIR (allω/exI conclusions are non-literals; cut impossible at rank 0) ⇒
+`zef_not_derives_true_literal_singleton`. CONSEQUENCE: the lap-8 "discharge read-offs via
+`toZef`" route is unavailable for `Zef2T`; read-offs must be re-proven natively.
+
+**(ii) Pins 1–2 extend MECHANICALLY on the new leaves (kernel-proven case).**
+`reduction_trueLit_case` = the exact new constructor case `cutReduceAllAuxRunning_Zf2` would
+acquire: the true literal survives `Δ.erase (∃⁰ ∼φ)` (`ne_of_ne_complexity`) and one `trueRel`
+leaf at `α + γ` closes with the SAME `ewN_add_le_comp` gate arithmetic as `axL`. No new
+mathematics; (f.1)-class hypotheses untouched.
+
+**(iii) Falsity-invariant read-offs treat (Ax2) leaves VACUOUSLY (kernel-proven case).**
+`readoffD_trueLit_vacuous`/`readoffD_trueNlit_vacuous`: under the lane-D invariant, a true
+literal in Γ is contradictory — the `readoffD_aux` induction extends with two vacuous cases.
+⚠️ HONEST LIMIT (lap-195's caution, kernel-grounded): (Ax2) does NOT dissolve the `allω`
+trapped-contraction residue PER-DERIVATION (that case is unchanged in `Zef2T`); its value is
+derivation EXISTENCE — an embedding can close true Δ₀ leaves without forcing the goal
+existential into the shared `allω` context (E–W Lemma 31's separation). That is a
+rung-E/embedding property.
+
+**Combined Stage B+C ruling input**: (Ax2) is cheap on the calculus side ((ii),(iii)) but
+BREAKS the toZef read-off route ((i)) and is NOT needed by lane D (Stage C: R-4′ restatement +
+guard-refutation). Recommendation shape: adopt (Ax2) if-and-only-if rung E's embedding needs
+it (its Lemma-31 separation suggests it does); lane D takes R-4′ regardless.
+
+---
