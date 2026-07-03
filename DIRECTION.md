@@ -14,10 +14,60 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
+**2026-07-03 (FRESH-MIND REVIEW, global lap 209 — route (c) read-off CLOSED + the 2b growth-conversion
+crux CLOSED; the E-seam is now COMPOSITION, not open proof-uncertainty. THIS IS THE CURRENT BINDING
+BLOCK; it supersedes the lap-206 block below for the piece-1 route choice (route (c) is DONE) and the
+"next move" pointer; the lap-206 FORBIDDENs and everything else stay in force.)**
+Independently re-verified this lap (real `#print axioms`, bare `lake build` 🟢 **1342**, `lake env lean`
+on the two crux wip files): headline `[propext, Classical.choice, goodstein_implies_consistency,
+Quot.sound]` sorryAx OFF; growth headline = trust base + `wainer_bound_of_pa_proves_goodstein` + 12
+native_decide; no drift; rungs P/R/D clean in src. **Route (c) is CLOSED** —
+`readoffVTC_core`/`readoff_value_Zef2TC`/`readoff_value_pipeline`/`readoff_value_goodstein`/
+`goodsteinBodyE_semantic_link` ALL `[propext, choice, Quot.sound]` (the `allω` trap DISSOLVED lap 207
+via the `Gated` value gate — no branch-0 split). **The 2b growth-conversion crux is CLOSED** —
+`ewIter_hardy_le` (master majorization) + `ewIter_hardy_le_of_dom` (concrete engine `e'=e₀+2` from bare
+pointwise `f ≤ H_{ω^{e₀}}`) both `[propext, choice, Quot.sound]` (lap 208), plus 2b(b) `gvb_substs_q_le`
++ 2b(d) `goodsteinBodyE_semantic_link`. FIXATION CHECK: laps 206→207→208 each closed a distinct
+whole-lemma crux target hardest-first — no spin, no false summit; direction SOUND.
+
+⭐ **STATE CHANGE:** the last real PROOF uncertainty on the Route-B girder (the value-budget read-off)
+is discharged, and so is the ewIter→hardy majorization. What remains is **COMPOSITION** — assembling
+the banked pieces into `wainer_splice_Zef2`'s shape — with exactly ONE genuinely new obligation.
+
+🚦 **MANDATED next move — the 2b COMPOSITION, in this order, in `wip/`:**
+> **(1) `S*`-domination FIRST — THE decisive open obligation.** The m-uniformized read-off bound is
+>   `n ≤ ewIter S* γ (S* (max m C))` with FIXED `S* = max(tower, P*)`, `γ` (K_m pre-max commuted out via
+>   `ewIterTower_rel1_le`; `P_m ≤ P*` via `gvb_substs_q_le`). To fire `ewIter_hardy_le_of_dom` you need
+>   `∀z, S* z ≤ H_{ω^{e₀}}(z)` at ONE fixed NF `e₀ ≠ 0`. Probe the TOWER half FIRST — apply
+>   `ewIter_hardy_le` to the d-fold `ewIterTower` of `ewRootSlot` (a fixed concrete slot at fixed B,d,α',
+>   so its Hardy bound sits at a FIXED ordinal level); then the `P*` half (`gvb goodsteinBodyE` = a fixed
+>   formula → elementary). If the tower is NOT pointwise-dominable at a fixed Hardy level, the growth
+>   conversion's shape must be rethought before assembling — so probe it EARLY, don't leave it last.
+> **(2) 2b(c) Sslot assembly** — `Sslot_mono_slot` + `ewIter_mono_slot` (banked) collapse the pipeline
+>   slot to fixed `S*` with a max-shifted argument; `ewIter_hardy_le_of_dom` then yields
+>   `goodsteinLength m ≤ n ≤ H_{ω^{e₀+3+γ}}(H_{ω^{e₀+2}}(Nlog γ + g m))` — ONE fixed ordinal, `m` only
+>   in the argument.
+> **(3) 2b(e) EventuallyLE + contradiction** — one fixed `fastGrowing o` (NF) dominates
+>   `m ↦ H_{fixed}(H_{fixed}(linear m))` via the banked `hardy_le_fastGrowing` /
+>   `hardy_omega_pow_lt_fastGrowing` brackets; compose with
+>   `WainerRoute.goodsteinLength_eventually_dominates_fixed_fastGrowing` → contradiction ⟹ `𝗣𝗔 ⊬ goodstein`.
+> Then the ONE judge package = rung-E statement + `Zef2TC` + (Ax2) + route-(c) read-off + the certificate
+> seam + the 2b majorization, ratified together. **Do NOT self-ratify into `src`.**
+
+**Why:** with the read-off and the majorization both kernel-clean, `S*`-domination is the only piece
+whose feasibility is still in real (if modest) doubt — it decides whether the loosened read-off bound
+actually converts to a fixed-`o` fastGrowing bound. Everything after it is banked-bracket composition.
+Attacking it hardest-first outranks any glue/hygiene work.
+
+**FORBIDDEN (this block):** re-grinding route (c) / the 2b majorization / a landed rung (P/R/D, V3
+ladder, TC pass) — all banked sorry-free; grinding trap routes (a)/(b) or starting (c′); self-ratifying
+rung-E artifacts / `Zef2TC` / (Ax2) into `src`; touching Route-A surfaces; hygiene/leaf-retreat while
+the E-seam composition is open; idle laps. All lap-206 + SERIES-3-order FORBIDDENs remain in force.
+
 **2026-07-03 (DEEP REFLECTION, global lap 206 — the lap-205 soft trigger FIRED and the rethink is
 DONE: read-off trap-fix routes (a)/(b) are DEAD on the real matrix; route (c) = the E–W-faithful
-VALUE-BUDGET read-off is MANDATED. THIS IS THE CURRENT BINDING BLOCK; it supersedes the lap-205
-block below for piece-1 route choice; everything else in that block stays in force.)**
+VALUE-BUDGET read-off is MANDATED. ⛔ SUPERSEDED by the lap-209 block above for the piece-1 route
+choice (route (c) is now CLOSED) and the "next move" pointer; its FORBIDDENs remain in force.)**
 Independently re-verified this lap (real `#print axioms`, bare `lake build` 🟢 1342, full wip re-run):
 headline undrifted sorryAx-OFF; rungs P/R/D clean in src; the whole wip bank kernel-clean except
 exactly `readoffTC_core`/`readoff_delta0_Zef2TC` (the ONE `allω`-trap sorry). ROUTE VERDICT:
@@ -589,6 +639,7 @@ Re-verified (lap 161, real `#print axioms`, build 🟢 1326): headline `peano_no
   RE-PLAN toward the M2 bridge — that becomes the dominant feasibility unknown.
 
 ### Directive history (newest first; append one line per altitude lap — never delete)
+- **lap-209** (FRESH-MIND REVIEW): directive CHANGED — piece-1 route (c) is CLOSED, retargeted to the **2b COMPOSITION**. Re-verified this lap (real `#print axioms`, bare `lake build` 🟢 **1342**, `lake env lean` on `wip/HardyMajorization.lean` + `wip/E1EmbeddingGrind.lean`): headline `[propext, Classical.choice, goodstein_implies_consistency, Quot.sound]` sorryAx OFF, growth headline = trust base + girder + 12 native_decide, no drift; rungs P/R/D clean in src. STATE CHANGE since lap 206: (i) **route (c) read-off CLOSED** (lap 207) — `readoffVTC_core`/`readoff_value_Zef2TC`/`readoff_value_pipeline`/`readoff_value_goodstein`/`goodsteinBodyE_semantic_link` all `[propext, choice, Quot.sound]`; the `allω` trap DISSOLVED by the `Gated` value gate (no branch-0 split); (ii) **2b growth-conversion crux CLOSED** (lap 208) — `ewIter_hardy_le` (master majorization) + `ewIter_hardy_le_of_dom` (concrete engine) both kernel-clean, + 2b(b) `gvb_substs_q_le` + 2b(d) `goodsteinBodyE_semantic_link`. CRUX/FIXATION CHECK: laps 206→207→208 each closed a distinct whole-lemma crux target hardest-first — no spin, no false summit; the mandated decisive uncertainty (the read-off) and the ewIter→hardy majorization are BOTH discharged, so the E-seam is now COMPOSITION not open proof-uncertainty. MANDATE = the 2b composition: **(1) `S*`-domination FIRST** (the ONE genuinely new obligation — `∀z, S* z ≤ H_{ω^{e₀}}(z)` at a fixed NF `e₀`, tower half via `ewIter_hardy_le` applied to the d-fold `ewIterTower`, `P*` half elementary; probe EARLY), (2) 2b(c) Sslot assembly, (3) 2b(e) EventuallyLE + contradiction against `goodsteinLength_eventually_dominates_fixed_fastGrowing`; then the ONE judge package. FORBIDDEN = re-grinding route (c) / the 2b majorization / a landed rung / trap routes (a)/(b) / (c′) / self-ratifying rung-E artifacts into src / Route-A / hygiene-retreat while the composition is open / idle laps; all lap-206 + SERIES-3 FORBIDDENs remain. Do NOT self-ratify into src.
 - **lap-206** (DEEP REFLECTION, every-9th): directive CHANGED — piece-1 route retargeted. The lap-205 soft trigger ("bound can't thread through nested `allω` → rethink the statement shape before splicing") FIRED (trap kernel-real, general statement refuted); rethink executed THIS lap: routes (a) mono-guard and (b) φ-shape vacuity are both DEAD on the actual pipeline matrix (`igoodsteinDef` = machine-generated `PR.Blueprint.resultDef` history formula; its bounded-∀ coherence clauses falsify the mono-guard and sit on the instantiation spine). Source diagnosis (E–W §4–5): their controls carry numeral VALUES (`f[m+k]`, `f[N(ι)]` relativization) and rule side conditions gate every branch index; `Zef2TC.allω` has no gate ⇒ the trap is a calculus/invariant mismatch artifact; their Thm-37 exit bound is an α-indexed iterate, not constant `f(0)`. MANDATE = route (c), the value-budget read-off: S-iterate gadget probe FIRST, then `P_φ` + value gate, then the V-threaded re-grind of `readoffTC_core`; exposed bound may loosen (splice target has total ordinal freedom); (c′) `allω`-gate calculus amendment = escalation-only. ROUTE VERDICT: CONTINUE (no unhandled trigger; laps 202–205 closed whole-lemma targets each lap). Independently re-verified: build 🟢 1342, headline undrifted sorryAx-OFF, rungs P/R/D clean, full wip bank kernel-clean except the ONE trap sorry. Ledger re-grade: Route-B girder 🟠→🟡 (P/R/D real + E realized dissolves the "generational" reason; remaining = one lemma + composition + ratification).
 - **lap-205** (FRESH-MIND REVIEW): directive CHANGED — retargeted from the (now-DONE) "V3 predicate" move to **the two remaining E-seam wip pieces**: (1) the BOUNDED rank-0 `Zef2TC` read-off (the flagged hard piece — `sound0_TC` gives the unbounded true member, the bound needs its own induction threading through nested `allω`; probe that threading EARLY), then (2) `wip/SpliceAssembly.lean` composing `embedding_Zef2TC_V3`→`rankToZero_TC`→bounded read-off into the `wainer_splice_Zef2` shape. Re-verified this lap (real `#print axioms`, bare `lake build` 🟢 **1342** + `lake env lean wip/E1EmbeddingGrind.lean`): headline `[propext, Classical.choice, goodstein_implies_consistency, Quot.sound]` sorryAx OFF no drift; rungs P/R/D real in src; and in wip **`embedding_Zef2TC_V3`** (rung E), **`budgetedEmbeddingV3`** (V3 ladder 10/10), **`passAuxTC`**, **`rankToZero_TC`**, **`sound0_TC`** ALL kernel-clean `[propext, choice, Quot.sound]`. STATE CHANGE since lap 201: laps 202–204 CLOSED the lap-201 mandate (V3 structural-budget predicate → `all`/`axm`/`exs` leaves → ladder 10/10 → rung E realized) AND ported the whole cut-elim pass to `Zef2TC` (`passAuxTC`/`rankToZero_TC`/`sound0_TC`). CRUX CHECK: laps 200→204 walked the crux hardest-first with real verified progress (V3 ladder → rung E → TC pass port), no fixation/dead-end — direction SOUND; only the stale lap-201 "next move" (V3 predicate, now done) needed retargeting. The E-seam is no longer a "hard rung" — it is TWO concrete wip proofs + a judge pass. MANDATE = close those two wip pieces; rung-E statement + `Zef2TC` amendment → next judge pass; do NOT self-ratify rung-E statement / `Zef2TC` / (Ax2) into src. FORBIDDEN = hygiene/leaf-retreat while E-seam open / Route-A / self-ratifying rung-E artifacts into src / re-grinding a landed rung (P/R/D, V3 ladder, TC pass) / idle laps; all SERIES-3-order FORBIDDENs remain. SERIES-3 order stays binding for operational detail.
 - **lap-201** (FRESH-MIND REVIEW): directive CHANGED — retargeted from the (now-resolved) top-rank-cut escalation + Lane D to **Lane E / rung E (the embedding)**, the sole remaining hard rung. Re-verified terminal state (real `#print axioms`, bare `lake build` 🟢 **1342**): headline `[propext, Classical.choice, goodstein_implies_consistency, Quot.sound]`, sorryAx OFF, no drift. STATE CHANGE since lap 192: the SERIES-2 judge pass RESOLVED the trilemma (ruling (1) = absorbing norm `ewN→Nlog`) and SERIES-3 EXECUTED it — **the top-rank cut LANDED (lap 198)**; rungs P (`cutElimPass_Zef2`), R (`rankToZero_Zef2`), D (`readoff_delta0_Zef2`, R-4′) are all REAL axiom-clean theorems (verified this lap `[propext, choice, Quot.sound]`); the splice `wainer_splice_Zef2` (rung W, src) carries the sole live `sorryAx` at the rung-E consumption point. CRUX CHECK: laps 198→200 correctly walked N→D→E (crux-first, no fixation, no dead-end) — direction SOUND, only the stale lap-192 directive needed retargeting to match SERIES-3 reality. MANDATE = continue the E-1 wip grind (`wip/E1EmbeddingGrind.lean`), **E-1 block 6 = the V3 predicate** (structural witness budget `Gexp^[c](envSup env N)`; growth kit banked lap 200), re-close the 8 landed cases + `exs`, then close `all` (ω-rule uniformization — the decisive case; probe early) and `axm` (W1/W2). When V3 closes the ladder, rung-E statement + Ax2 probe → next judge pass; do NOT self-ratify into src. FORBIDDEN = hygiene/leaf-retreat while E open / Route-A / self-ratifying rung-E statement (or Zef2T/(Ax2)) into src / re-grinding a landed rung / idle laps; all SERIES-3-order FORBIDDENs remain. SERIES-3 order stays binding for operational detail.
