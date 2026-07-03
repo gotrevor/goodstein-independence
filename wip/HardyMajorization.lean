@@ -786,10 +786,62 @@ theorem ewRootSlot_dom_pad (e : ONote) (he : e.NF) (m : ℕ) :
   refine le_trans ?_ hEngx
   omega
 
+/-- `rel1` shift preserves padded domination — the `max K` folds into the pad. -/
+theorem rel1_dom_pad {g : ℕ → ℕ} {E : ONote} {c : ℕ}
+    (hg : ∀ x, g x ≤ hardy (Wpow E) (x + c)) (K : ℕ) :
+    ∀ z, rel1 g K z ≤ hardy (Wpow E) (z + (K + c)) := by
+  intro z
+  show g (max K z) ≤ hardy (Wpow E) (z + (K + c))
+  exact le_trans (hg (max K z)) (hardy_monotone _ (by omega))
+
+/-- General `ω^A + ω^B < ω^{A+1}` for `B < A` (the tower-collapse raise; generalizes the
+`hEng_of_dom` `hDlt` step to arbitrary ordered exponents). -/
+theorem Wpow_add_lt_Wpow_succ {A B : ONote} (hA : A.NF) (hB : B.NF) (hBA : B < A) :
+    Wpow A + Wpow B < Wpow (A + 1) := by
+  haveI : (Wpow A).NF := Wpow_NF hA
+  haveI : (Wpow B).NF := Wpow_NF hB
+  rw [lt_def, ONote.repr_add]
+  show (Wpow A).repr + (Wpow B).repr < ω ^ (A + 1).repr * (1 : ℕ) + 0
+  have hrA : (Wpow A).repr = ω ^ A.repr := by
+    show ω ^ A.repr * (1 : ℕ) + 0 = ω ^ A.repr; simp
+  have hrB : (Wpow B).repr = ω ^ B.repr := by
+    show ω ^ B.repr * (1 : ℕ) + 0 = ω ^ B.repr; simp
+  have hrA1 : (A + 1).repr = A.repr + 1 := by rw [ONote.repr_add, ONote.repr_one]; norm_num
+  rw [hrA, hrB, hrA1]
+  have hBltA : B.repr < A.repr := by rw [lt_def] at hBA; exact hBA
+  have hstep : ω ^ B.repr < ω ^ A.repr :=
+    (Ordinal.opow_lt_opow_iff_right (by norm_num : (1 : Ordinal) < ω)).mpr hBltA
+  calc ω ^ A.repr + ω ^ B.repr
+      < ω ^ A.repr + ω ^ A.repr := (add_lt_add_iff_left _).2 hstep
+    _ = ω ^ A.repr * 2 := by rw [show (2 : Ordinal) = 1 + 1 by norm_num, mul_add, mul_one]
+    _ < ω ^ A.repr * ω := mul_lt_mul_of_pos_left (by simpa using Ordinal.natCast_lt_omega0 2)
+        (Ordinal.opow_pos _ omega0_pos)
+    _ = ω ^ (A.repr + 1) := by
+        have h := (Ordinal.opow_add ω A.repr 1).symm
+        rw [Ordinal.opow_one] at h; exact h
+    _ ≤ ω ^ (A.repr + 1) * (1 : ℕ) + 0 := by simp
+
+/-- **Double-Hardy collapse** for ordered `ω`-power levels — `H_{ω^A}(H_{ω^B}(y)) = H_{ω^A+ω^B}(y)`
+when `B < A` (generalizes `hEng_of_dom`'s `hC` step). -/
+theorem hardy_double_collapse {A B : ONote} (hA : A.NF) (hB : B.NF) (hBA : B < A) (y : ℕ) :
+    hardy (Wpow A) (hardy (Wpow B) y) = hardy (Wpow A + Wpow B) y := by
+  refine (hardy_add_comp _ (Wpow_NF hA) _ (Wpow_NF hB) (Or.inr ?_) y).symm
+  show (Wpow B).repr < ω ^ (lastExp (Wpow A)).repr
+  have hlast : lastExp (Wpow A) = A := rfl
+  rw [hlast]
+  have hrB : (Wpow B).repr = ω ^ B.repr := by
+    show ω ^ B.repr * (1 : ℕ) + 0 = ω ^ B.repr; simp
+  rw [hrB]
+  have hBltA : B.repr < A.repr := by rw [lt_def] at hBA; exact hBA
+  exact (Ordinal.opow_lt_opow_iff_right (by norm_num : (1 : Ordinal) < ω)).mpr hBltA
+
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewRootSlot_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.rel1_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.Wpow_add_lt_Wpow_succ
+#print axioms GoodsteinPA.HardyMajorization.hardy_double_collapse
 
 end GoodsteinPA.HardyMajorization
