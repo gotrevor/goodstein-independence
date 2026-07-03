@@ -136,4 +136,132 @@ theorem hardy_step {β' e' α' : ONote} (hβ' : β'.NF) (he' : e'.NF) (hα' : α
 #print axioms GoodsteinPA.HardyMajorization.hardy_chain_eq
 #print axioms GoodsteinPA.HardyMajorization.hardy_step
 
+/-! ## Argument super-additivity of `hardy` (lap 208)
+
+`H_o(n) + c ≤ H_o(n + c)` — the commuting engine that pushes the branch's additive
+`Nlog β + ·` costs INSIDE the composed Hardy stack (so all principal applications
+compose exactly, engines innermost).  Successor form mirrors `hardy_monotone`'s
+WF recursion; limit case pays one `hardy_fundSeq_step`. -/
+
+theorem hardy_succ_ge (o : ONote) (n : ℕ) : hardy o n + 1 ≤ hardy o (n + 1) := by
+  rcases e : fundamentalSequence o with (_ | a) | f
+  · rw [hardy_zero' o e]; simp
+  · have hlt : a < o := by
+      have hp := fundamentalSequence_has_prop o; rw [e] at hp
+      rw [lt_def, hp.1]; exact Order.lt_succ _
+    rw [hardy_succ o e]
+    exact hardy_succ_ge a (n + 1)
+  · have hlt : f n < o := by
+      have hp := fundamentalSequence_has_prop o; rw [e] at hp
+      exact (hp.2.1 n).2.1
+    rw [hardy_limit o e]
+    exact le_trans (hardy_succ_ge (f n) n) (hardy_fundSeq_step e n)
+termination_by o
+decreasing_by
+  · exact hlt
+  · exact hlt
+
+theorem hardy_arg_add (o : ONote) (n c : ℕ) : hardy o n + c ≤ hardy o (n + c) := by
+  induction c with
+  | zero => simp
+  | succ c ih =>
+      calc hardy o n + (c + 1) = (hardy o n + c) + 1 := by ring
+        _ ≤ hardy o (n + c) + 1 := by omega
+        _ ≤ hardy o (n + c + 1) := hardy_succ_ge o (n + c)
+        _ = hardy o (n + (c + 1)) := by ring_nf
+
+/-- Exponent-strict-monotonicity of `Wpow` (repr-level). -/
+theorem Wpow_lt {x y : ONote} (h : x < y) : Wpow x < Wpow y := by
+  rw [lt_def]
+  show ω ^ x.repr * (1 : ℕ) + 0 < ω ^ y.repr * (1 : ℕ) + 0
+  simpa using (Ordinal.opow_lt_opow_iff_right (by norm_num : (1 : Ordinal) < ω)).mpr
+    (lt_def.mp h)
+
+/-! ## Linear-norm control of ONote addition
+
+`norm (x + y) ≤ normSum x + norm y` where `normSum` charges the SUM of per-term maxima
+of `x` (a fixed constant when `x` is fixed, e.g. the assignment prefix `e' + 1`).  This is
+what bounds `norm (e' + 1 + β)` by `C(e') + norm β`, feeding the raise's norm gate through
+the `Nlog → norm` bridge. -/
+
+/-- Summed per-term charge of a notation (an upper-bound companion to `norm`). -/
+def normSum : ONote → ℕ
+  | 0 => 0
+  | oadd e n a => max (norm e) (n : ℕ) + normSum a
+
+theorem norm_addAux_le (e : ONote) (n : ℕ+) (o : ONote) :
+    norm (addAux e n o) ≤ max (norm e) (n : ℕ) + norm o := by
+  cases o with
+  | zero =>
+      show norm (oadd e n 0) ≤ _
+      simp only [norm_oadd, norm_zero]
+      omega
+  | oadd e' n' a' =>
+      show norm (match ONote.cmp e e' with
+        | Ordering.lt => oadd e' n' a'
+        | Ordering.eq => oadd e (n + n') a'
+        | Ordering.gt => oadd e n (oadd e' n' a')) ≤ _
+      cases ONote.cmp e e' with
+      | lt => simp only [norm_oadd]; omega
+      | eq =>
+          simp only [norm_oadd, PNat.add_coe]
+          have h1 := le_max_left (norm e) (n : ℕ)
+          have h2 := le_max_right (norm e) (n : ℕ)
+          have h3 := le_max_left (norm e') ((n' : ℕ) ⊔ norm a')
+          have h4 := le_max_left (n' : ℕ) (norm a')
+          have h5 := le_max_right (n' : ℕ) (norm a')
+          have h6 := le_max_right (norm e') ((n' : ℕ) ⊔ norm a')
+          omega
+      | gt => simp only [norm_oadd]; omega
+
+theorem norm_add_le : ∀ (x y : ONote), norm (x + y) ≤ normSum x + norm y
+  | 0, y => by simp [normSum]
+  | oadd e n a, y => by
+      rw [oadd_add]
+      have h1 := norm_addAux_le e n (a + y)
+      have h2 := norm_add_le a y
+      simp only [normSum]
+      omega
+
+#print axioms GoodsteinPA.HardyMajorization.hardy_arg_add
+#print axioms GoodsteinPA.HardyMajorization.norm_add_le
+
+/-! ## The coefficient-3 chain (the master induction's actual branch shape)
+
+The branch pays THREE same-level principal applications (outer IH + inner IH + the raised
+middle engine) over one innermost engine: `H_{ω^β'}³(H_{ω^e'}(z)) = H_{ω^β'·3 + ω^e'}(z)`,
+then the composed ordinal raises under `ω^α'` exactly as in `hardy_step_raise`. -/
+
+/-- `ω^β'·3 + ω^e'` in normal form. -/
+noncomputable def stepOrd3 (β' e' : ONote) : ONote := oadd β' 3 (Wpow e')
+
+theorem stepOrd3_NF {β' e' : ONote} (hβ' : β'.NF) (he' : e'.NF) (hlt : e' < β') :
+    (stepOrd3 β' e').NF :=
+  NF.oadd hβ' 3 (NFBelow.oadd he' NFBelow.zero (lt_def.mp hlt))
+
+/-- Three same-level principals over one engine compose exactly (tail-peel + coefficient
+additivity — no repr arithmetic needed). -/
+theorem hardy_chain3_eq {β' e' : ONote} (hβ0 : β' ≠ 0) (z : ℕ) :
+    hardy (Wpow β') (hardy (Wpow β') (hardy (Wpow β') (hardy (Wpow e') z)))
+      = hardy (stepOrd3 β' e') z := by
+  rw [show stepOrd3 β' e' = oadd β' 3 (Wpow e') from rfl,
+    hardy_oadd_tail β' 3 (Wpow e') z,
+    show (3 : ℕ+) = 1 + 2 from rfl, hardy_coeff_add β' hβ0 1 2,
+    show (2 : ℕ+) = 1 + 1 from rfl, hardy_coeff_add β' hβ0 1 1]
+  rfl
+
+/-- The composed branch ordinal sits strictly below the next `ω`-power. -/
+theorem stepOrd3_lt_Wpow {β' e' α' : ONote} (hβ' : β'.NF) (he' : e'.NF)
+    (hlt : e' < β') (hβα : β' < α') : stepOrd3 β' e' < Wpow α' := by
+  rw [lt_def]
+  calc (stepOrd3 β' e').repr
+      < ω ^ α'.repr :=
+        (NF.below_of_lt (lt_def.mp hβα) (stepOrd3_NF hβ' he' hlt)).repr_lt
+    _ ≤ (Wpow α').repr := by
+        show ω ^ α'.repr ≤ ω ^ α'.repr * (1 : ℕ) + 0
+        simp
+
+#print axioms GoodsteinPA.HardyMajorization.hardy_chain3_eq
+#print axioms GoodsteinPA.HardyMajorization.stepOrd3_lt_Wpow
+
 end GoodsteinPA.HardyMajorization
