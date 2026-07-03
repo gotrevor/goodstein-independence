@@ -48,6 +48,29 @@ in-kernel**, isolating the obstruction to a strictly smaller case.
   original monolith.  Start there next lap.
 - The (Ax2) architect gate (shared with rung E) is UNCHANGED; this lap did not touch the calculus.
 
+### DECISIVE grounding (read Towsner §Thm 17.1 + E–W Lemma 31 this lap) — the residue is NOT a slick structural fix
+Cross-checked the two source read-offs:
+- **Towsner Thm 17.1** (the cut-free lower bound) proves its invariant with an explicit **growth
+  coupling**: every `φ ∈ Γ` is (i) `∀x∃y g_y(x)=0`, (ii) `∃y g_y(n)=0` for `n ≤ k` **with
+  `𝒢(n) > h_α(k)`**, or (iii) `g_t(n)=0`, `t < 𝒢(n)`.  The `∃I`/`∀I` cases turn on the numeric bound
+  `k` and the ordinal `α` being TOO SMALL (`witness ≤ h_α(k) < 𝒢(n)`).  The coupling between the
+  witness budget and the fast-growing `h_α` is CARRIED IN THE INVARIANT.
+- **`readoffD_aux`'s invariant carries NO such coupling** — only "`= ∃⁰φ` or `¬atomTrue`".  That is
+  exactly why the non-monotone `allω` residue (slot grows to `rel1 f k₀ 0 = f k₀`) cannot be closed:
+  nothing ties the grown budget back to `f 0`.
+- **E–W's Lemma 31** dodges it only via **(Ax2)** (verify a true Δ₀ matrix leaf SEMANTICALLY, never
+  descend it) — the rule `Zef2` lacks.
+
+**Conclusion (escalation-grade):** the generic `readoff_delta0_Zef2` residue is closable by exactly
+two routes, both substantial: **(A)** add (Ax2) to `Zef2` [architect-gated, shared with rung E]; or
+**(B)** re-cast `readoffD_aux`'s *internal* invariant as a growth-coupled one (Towsner (ii)-style,
+tying the witness bound to `ewN α` / the `ewIter` tower and the banked Part-2 fast-growing lower
+bound) — this reformulates MY OWN helper (not the ratified `readoff_delta0_Zef2` statement), so it is
+IN-SCOPE proof-only work, but it is a multi-lap effort coupling to the Hardy/Wainer bank.  **Route B
+is the mandated proof-only continuation** (the top-level statement is untouched); begin by stating the
+growth-coupled `readoffD_aux'` invariant and proving `axL`/`exI`/`wk`/`weak`, isolating the coupling
+lemma at the `allω` node.
+
 ## LAP 194c (grind, lane D) — `readoffD_trapped` ROOT-CAUSED via the E–W Lemma 31 PROOF: it needs the (Ax2) amendment (architect-gated, SHARED with rung E)
 
 Read the actual E–W Lemma 31 proof from the PDF (`papers/eguchi-weiermann-2012-…`, extracted). It
