@@ -1048,6 +1048,78 @@ theorem Sstar_dom_pad (e : ONote) (he : e.NF) (m K d : ℕ) (α : ONote) (hα : 
   obtain ⟨E, c, hE, hE0, _, _, hmax⟩ := dom_pad_max hE₁ hE₂ htower hPdom
   exact ⟨E, c, hE, hE0, hmax⟩
 
+/-- **Padded-domination composition** — padded-Hardy-dominated functions compose: raise the
+outer level to `E₁+E₂+1` (gate = `norm(ω^{E₁})`, paid by the inner VALUE `≥ z + pad`), collapse
+the ordered double Hardy, raise once more.  Result level `E₁+E₂+1+1`. -/
+theorem dom_pad_comp {f g : ℕ → ℕ} {E₁ E₂ : ONote} {c₁ c₂ : ℕ}
+    (hE₁ : E₁.NF) (hE₂ : E₂.NF)
+    (hf : ∀ z, f z ≤ hardy (Wpow E₁) (z + c₁))
+    (hg : ∀ z, g z ≤ hardy (Wpow E₂) (z + c₂)) :
+    ∃ (E : ONote) (c : ℕ), E.NF ∧ E ≠ 0 ∧
+      ∀ z, f (g z) ≤ hardy (Wpow E) (z + c) := by
+  haveI := hE₁
+  haveI := hE₂
+  haveI h12 : (E₁ + E₂).NF := ONote.add_nf E₁ E₂
+  haveI hA : (E₁ + E₂ + 1).NF := ONote.add_nf (E₁ + E₂) 1
+  haveI hE : (E₁ + E₂ + 1 + 1).NF := ONote.add_nf (E₁ + E₂ + 1) 1
+  haveI hWA : (Wpow (E₁ + E₂ + 1)).NF := Wpow_NF hA
+  haveI hWE₂ : (Wpow E₂).NF := Wpow_NF hE₂
+  haveI hsum : (Wpow (E₁ + E₂ + 1) + Wpow E₂).NF := ONote.add_nf _ _
+  have hrepr : (E₁ + E₂ + 1).repr = E₁.repr + E₂.repr + 1 := by
+    rw [ONote.repr_add (E₁ + E₂) 1, ONote.repr_add E₁ E₂, ONote.repr_one]
+    push_cast
+    rfl
+  have hlt₁ : E₁ < E₁ + E₂ + 1 := by
+    rw [lt_def, hrepr]
+    calc E₁.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_right _ _
+      _ < E₁.repr + E₂.repr + 1 := lt_add_one _
+  have hlt₂ : E₂ < E₁ + E₂ + 1 := by
+    rw [lt_def, hrepr]
+    calc E₂.repr ≤ E₁.repr + E₂.repr := Ordinal.le_add_left _ _
+      _ < E₁.repr + E₂.repr + 1 := lt_add_one _
+  have hne : E₁ + E₂ + 1 + 1 ≠ 0 := by
+    intro h
+    have hh := congrArg ONote.repr h
+    rw [ONote.repr_add (E₁ + E₂ + 1) 1, ONote.repr_one, repr_zero] at hh
+    push_cast at hh
+    exact (lt_of_lt_of_le zero_lt_one le_add_self).ne' hh
+  refine ⟨E₁ + E₂ + 1 + 1,
+    c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂),
+    hE, hne, fun z => ?_⟩
+  have h1 : f (g z) ≤ hardy (Wpow E₁) (g z + c₁) := hf (g z)
+  have h2 : g z + c₁ ≤ hardy (Wpow E₂) (z + c₂) + c₁ := by
+    have := hg z
+    omega
+  have h3 : hardy (Wpow E₂) (z + c₂) + c₁ ≤ hardy (Wpow E₂) (z + c₂ + c₁) :=
+    hardy_arg_add _ _ _
+  have h4 : hardy (Wpow E₂) (z + c₂ + c₁) ≤ hardy (Wpow E₂)
+      (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂))) :=
+    hardy_monotone _ (by omega)
+  have hY : f (g z) ≤ hardy (Wpow E₁) (hardy (Wpow E₂)
+      (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂)))) :=
+    le_trans h1 (hardy_monotone _ (le_trans h2 (le_trans h3 h4)))
+  have hgate₁ : norm (Wpow E₁) ≤ hardy (Wpow E₂)
+      (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂))) := by
+    have := le_hardy (Wpow E₂)
+      (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂)))
+    omega
+  have hraise : hardy (Wpow E₁) (hardy (Wpow E₂)
+        (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂))))
+      ≤ hardy (Wpow (E₁ + E₂ + 1)) (hardy (Wpow E₂)
+        (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂)))) :=
+    hardy_le_of_lt (Wpow_NF hE₁) (Wpow_NF hA) (Wpow_lt hlt₁) hgate₁
+  have hcol := hardy_double_collapse hA hE₂ hlt₂
+      (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂)))
+  have hfin : hardy (Wpow (E₁ + E₂ + 1) + Wpow E₂)
+        (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂)))
+      ≤ hardy (Wpow (E₁ + E₂ + 1 + 1))
+        (z + (c₁ + c₂ + norm (Wpow E₁) + norm (Wpow (E₁ + E₂ + 1) + Wpow E₂))) :=
+    hardy_le_of_lt hsum (Wpow_NF hE) (Wpow_add_lt_Wpow_succ hA hE₂ hlt₂) (by omega)
+  calc f (g z) ≤ _ := hY
+    _ ≤ _ := hraise
+    _ = _ := hcol
+    _ ≤ _ := hfin
+
 /-- `2^x` sits under `H_{ω²}` — the floor fact that lets an `Nlog` certificate pay a linear
 `norm` gate (via `norm < 2^{Nlog+1}`). -/
 theorem two_pow_le_hardy_Wpow2 (x : ℕ) : 2 ^ x ≤ hardy (Wpow (ofNat 2)) x := by
@@ -1189,6 +1261,7 @@ theorem ewIter_dom_pad_levelcap {f : ℕ → ℕ} {e₀ γ : ONote} {c : ℕ}
 
 #print axioms GoodsteinPA.HardyMajorization.dom_pad_max
 #print axioms GoodsteinPA.HardyMajorization.Sstar_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.dom_pad_comp
 #print axioms GoodsteinPA.HardyMajorization.two_pow_le_hardy_Wpow2
 #print axioms GoodsteinPA.HardyMajorization.ewIter_dom_pad_levelcap
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
