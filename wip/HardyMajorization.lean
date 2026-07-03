@@ -903,9 +903,67 @@ theorem ewIterTower_dom_pad {g : ℕ → ℕ} {E : ONote} {c : ℕ} (hE : E.NF) 
           + norm (Wpow (Ed + 2 + 1 + collapseIter d α) + Wpow (Ed + 2))) := by omega
     exact hardy_le_of_lt hsum (Wpow_NF hA1) (Wpow_add_lt_Wpow_succ hA hB hBA) hgate
 
+/-- **Iterates of a fixed `ω`-power Hardy level are padded-Hardy-dominated** (existential
+level/pad, carrying `E₀ < E` so the collapse stays ordered).  Mirror of `ewIterTower_dom_pad`:
+`G^[k+1] z = G^[k] (G z)`, the IH + `hardy_arg_add` absorb the pad, `hardy_double_collapse` +
+`Wpow_add_lt_Wpow_succ` fold the double Hardy back to a single level.  Instantiated at
+`G = Gexp = hardy (Wpow 2)` for the `P*` (`gvb`) half of the `S*`-domination (SERIES-4 S-2). -/
+theorem hardy_Wpow_iter_dom_pad (E₀ : ONote) (hE₀ : E₀.NF) :
+    ∀ k, ∃ (E : ONote) (c : ℕ), E.NF ∧ E ≠ 0 ∧ E₀ < E ∧
+      ∀ z, (hardy (Wpow E₀))^[k] z ≤ hardy (Wpow E) (z + c) := by
+  haveI := hE₀
+  have hsucc_lt : ∀ (β : ONote), β.NF → β < β + 1 := by
+    intro β hβ
+    haveI := hβ
+    rw [lt_def, ONote.repr_add, ONote.repr_one]
+    push_cast
+    exact lt_add_one _
+  have hsucc_nf : ∀ (β : ONote), β.NF → (β + 1).NF := by
+    intro β hβ; haveI := hβ; exact ONote.add_nf β 1
+  have hsucc_ne : ∀ (β : ONote), β.NF → β + 1 ≠ 0 := by
+    intro β hβ h
+    haveI := hβ
+    have hh := congrArg ONote.repr h
+    rw [ONote.repr_add, ONote.repr_one, repr_zero] at hh
+    push_cast at hh
+    exact (lt_of_lt_of_le zero_lt_one le_add_self).ne' hh
+  intro k
+  induction k with
+  | zero =>
+      refine ⟨E₀ + 1, 0, hsucc_nf E₀ hE₀, hsucc_ne E₀ hE₀, hsucc_lt E₀ hE₀, fun z => ?_⟩
+      simpa using le_hardy (Wpow (E₀ + 1)) z
+  | succ k ih =>
+      obtain ⟨Ek, ck, hEk, hEk0, hE₀Ek, hdom⟩ := ih
+      haveI := hEk
+      haveI hWEk : (Wpow Ek).NF := Wpow_NF hEk
+      haveI hWE₀ : (Wpow E₀).NF := Wpow_NF hE₀
+      haveI hsum : (Wpow Ek + Wpow E₀).NF := ONote.add_nf _ _
+      refine ⟨Ek + 1, ck + norm (Wpow Ek + Wpow E₀), hsucc_nf Ek hEk, hsucc_ne Ek hEk,
+        lt_trans hE₀Ek (hsucc_lt Ek hEk), fun z => ?_⟩
+      have h1 : (hardy (Wpow E₀))^[k + 1] z = (hardy (Wpow E₀))^[k] (hardy (Wpow E₀) z) :=
+        Function.iterate_succ_apply _ _ _
+      rw [h1]
+      have h2 : (hardy (Wpow E₀))^[k] (hardy (Wpow E₀) z)
+          ≤ hardy (Wpow Ek) (hardy (Wpow E₀) z + ck) := hdom _
+      have h3 : hardy (Wpow E₀) z + ck ≤ hardy (Wpow E₀) (z + ck) := hardy_arg_add _ _ _
+      have h4 : hardy (Wpow Ek) (hardy (Wpow E₀) (z + ck))
+          = hardy (Wpow Ek + Wpow E₀) (z + ck) := hardy_double_collapse hEk hE₀ hE₀Ek _
+      have harg : z + ck ≤ z + (ck + norm (Wpow Ek + Wpow E₀)) := by omega
+      have hgate : norm (Wpow Ek + Wpow E₀) ≤ z + (ck + norm (Wpow Ek + Wpow E₀)) := by omega
+      calc (hardy (Wpow E₀))^[k] (hardy (Wpow E₀) z)
+          ≤ hardy (Wpow Ek) (hardy (Wpow E₀) z + ck) := h2
+        _ ≤ hardy (Wpow Ek) (hardy (Wpow E₀) (z + ck)) := hardy_monotone _ h3
+        _ = hardy (Wpow Ek + Wpow E₀) (z + ck) := h4
+        _ ≤ hardy (Wpow Ek + Wpow E₀) (z + (ck + norm (Wpow Ek + Wpow E₀))) :=
+            hardy_monotone _ harg
+        _ ≤ hardy (Wpow (Ek + 1)) (z + (ck + norm (Wpow Ek + Wpow E₀))) :=
+            hardy_le_of_lt hsum (Wpow_NF (hsucc_nf Ek hEk))
+              (Wpow_add_lt_Wpow_succ hEk hE₀ hE₀Ek) hgate
+
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom
 #print axioms GoodsteinPA.HardyMajorization.ewIterTower_dom_pad
+#print axioms GoodsteinPA.HardyMajorization.hardy_Wpow_iter_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.hEng_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewIter_hardy_le_of_dom_pad
 #print axioms GoodsteinPA.HardyMajorization.ewRootSlot_dom_pad

@@ -455,6 +455,136 @@ theorem gated_root_of_sigma1 (ψ : Form) (h : Arithmetic.Hierarchy 𝚺 1 ψ) (V
   refine gated_of_sigma1 (fun _ _ hb => gvb_mono ψ (max_le_max le_rfl hb)) ψ h V (fun B => ?_)
   exact gvb_mono ψ (le_trans (le_max_right V B) (le_max_right V (max V B)))
 
+/-! ## `P*`-domination brick (lap 210, SERIES-4 S-2) — `gvb` of a FIXED formula is dominated by
+finitely many iterates of ANY engine closed under successor/add/mul.  Abstract in the engine `G`
+because the wip modules cannot import each other: instantiate at assembly with `Gexp = hardy ω²`
+(closure facts `succ_le_Gexp`/`add_le_Gexp_max`/`mul_le_Gexp_max`, `wip/E1EmbeddingGrind.lean`),
+whose iterates are padded-Hardy-dominated by `hardy_Wpow_iter_dom_pad`
+(`wip/HardyMajorization.lean`). -/
+
+section IterDom
+
+variable {G : ℕ → ℕ}
+
+/-- Iterates inflate, from the successor closure. -/
+theorem le_iter_of_succ (hG_succ : ∀ x, x + 1 ≤ G x) : ∀ (c x : ℕ), x ≤ G^[c] x
+  | 0, _ => le_rfl
+  | (c + 1), x => by
+      rw [Function.iterate_succ_apply']
+      have h1 := le_iter_of_succ hG_succ c x
+      have h2 := hG_succ (G^[c] x)
+      omega
+
+/-- Iterate-count monotonicity, from successor closure + monotonicity. -/
+theorem iter_le_iter_of_succ (hG_mono : Monotone G) (hG_succ : ∀ x, x + 1 ≤ G x)
+    {c c' : ℕ} (h : c ≤ c') (x : ℕ) : G^[c] x ≤ G^[c'] x := by
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le h
+  rw [Function.iterate_add_apply]
+  exact hG_mono.iterate c (le_iter_of_succ hG_succ k x)
+
+/-- Every ℒₒᵣ term value `tvB t` is bounded by finitely many `G`-iterates of the frame `B`
+(names sit at `0`; `add`/`mul` each cost one iterate). -/
+theorem tvB_le_iter (hG_mono : Monotone G) (hG_succ : ∀ x, x + 1 ≤ G x)
+    (hG_add : ∀ a b, a + b ≤ G (max a b)) (hG_mul : ∀ a b, a * b ≤ G (max a b))
+    {m : ℕ} (t : Semiterm ℒₒᵣ ℕ m) : ∃ c, ∀ B, tvB t B ≤ G^[c] B := by
+  induction t with
+  | bvar x => exact ⟨0, fun B => le_of_eq (by simp [tvB])⟩
+  | fvar x => exact ⟨0, fun B => by simpa [tvB] using Nat.zero_le B⟩
+  | func f v ih =>
+      match f, v with
+      | LO.FirstOrder.Language.ORing.Func.zero, v =>
+          refine ⟨0, fun B => ?_⟩
+          have hv : tvB (Semiterm.func LO.FirstOrder.Language.ORing.Func.zero v) B = 0 := by
+            simp only [tvB, Semiterm.valm, Semiterm.val_func]; rfl
+          simp [hv]
+      | LO.FirstOrder.Language.ORing.Func.one, v =>
+          refine ⟨1, fun B => ?_⟩
+          have hv : tvB (Semiterm.func LO.FirstOrder.Language.ORing.Func.one v) B = 1 := by
+            simp only [tvB, Semiterm.valm, Semiterm.val_func]; rfl
+          have h := hG_succ B
+          simp only [Function.iterate_one]
+          omega
+      | LO.FirstOrder.Language.ORing.Func.add, v =>
+          obtain ⟨c₀, h₀⟩ := ih 0
+          obtain ⟨c₁, h₁⟩ := ih 1
+          refine ⟨max c₀ c₁ + 1, fun B => ?_⟩
+          have hb₀ : tvB (v 0) B ≤ G^[max c₀ c₁] B :=
+            le_trans (h₀ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_left c₀ c₁) B)
+          have hb₁ : tvB (v 1) B ≤ G^[max c₀ c₁] B :=
+            le_trans (h₁ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_right c₀ c₁) B)
+          have hadd : tvB (Semiterm.func LO.FirstOrder.Language.ORing.Func.add v) B
+              = tvB (v 0) B + tvB (v 1) B := by
+            simp only [tvB, Semiterm.valm, Semiterm.val_func]; rfl
+          rw [hadd, Function.iterate_succ_apply']
+          exact le_trans (hG_add _ _) (hG_mono (max_le hb₀ hb₁))
+      | LO.FirstOrder.Language.ORing.Func.mul, v =>
+          obtain ⟨c₀, h₀⟩ := ih 0
+          obtain ⟨c₁, h₁⟩ := ih 1
+          refine ⟨max c₀ c₁ + 1, fun B => ?_⟩
+          have hb₀ : tvB (v 0) B ≤ G^[max c₀ c₁] B :=
+            le_trans (h₀ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_left c₀ c₁) B)
+          have hb₁ : tvB (v 1) B ≤ G^[max c₀ c₁] B :=
+            le_trans (h₁ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_right c₀ c₁) B)
+          have hmul : tvB (Semiterm.func LO.FirstOrder.Language.ORing.Func.mul v) B
+              = tvB (v 0) B * tvB (v 1) B := by
+            simp only [tvB, Semiterm.valm, Semiterm.val_func]; rfl
+          rw [hmul, Function.iterate_succ_apply']
+          exact le_trans (hG_mul _ _) (hG_mono (max_le hb₀ hb₁))
+
+/-- **`gvb` of a fixed formula is `G`-iterate-bounded** — the `P*`-domination shape:
+`∃ c, ∀ B, gvb ψ B ≤ G^[c] B`. -/
+theorem gvb_le_iter (hG_mono : Monotone G) (hG_succ : ∀ x, x + 1 ≤ G x)
+    (hG_add : ∀ a b, a + b ≤ G (max a b)) (hG_mul : ∀ a b, a * b ≤ G (max a b))
+    {m : ℕ} (ψ : SyntacticSemiformula ℒₒᵣ m) : ∃ c, ∀ B, gvb ψ B ≤ G^[c] B := by
+  induction ψ with
+  | rel r v =>
+      choose c hc using fun i => tvB_le_iter hG_mono hG_succ hG_add hG_mul (v i)
+      refine ⟨Finset.univ.sup c, fun B => ?_⟩
+      rw [show gvb (Semiformula.rel r v) B = Finset.univ.sup (fun i => tvB (v i) B) from rfl]
+      exact Finset.sup_le fun i _ => le_trans (hc i B)
+        (iter_le_iter_of_succ hG_mono hG_succ (Finset.le_sup (Finset.mem_univ i)) B)
+  | nrel r v =>
+      choose c hc using fun i => tvB_le_iter hG_mono hG_succ hG_add hG_mul (v i)
+      refine ⟨Finset.univ.sup c, fun B => ?_⟩
+      rw [show gvb (Semiformula.nrel r v) B = Finset.univ.sup (fun i => tvB (v i) B) from rfl]
+      exact Finset.sup_le fun i _ => le_trans (hc i B)
+        (iter_le_iter_of_succ hG_mono hG_succ (Finset.le_sup (Finset.mem_univ i)) B)
+  | verum =>
+      exact ⟨0, fun B => by
+        rw [show gvb (Semiformula.verum : SyntacticSemiformula ℒₒᵣ _) B = 0 from rfl]
+        exact Nat.zero_le B⟩
+  | falsum =>
+      exact ⟨0, fun B => by
+        rw [show gvb (Semiformula.falsum : SyntacticSemiformula ℒₒᵣ _) B = 0 from rfl]
+        exact Nat.zero_le B⟩
+  | and χ₁ χ₂ ih₁ ih₂ =>
+      obtain ⟨c₁, h₁⟩ := ih₁
+      obtain ⟨c₂, h₂⟩ := ih₂
+      refine ⟨max c₁ c₂, fun B => ?_⟩
+      rw [show gvb (Semiformula.and χ₁ χ₂) B = max (gvb χ₁ B) (gvb χ₂ B) from rfl]
+      exact max_le
+        (le_trans (h₁ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_left c₁ c₂) B))
+        (le_trans (h₂ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_right c₁ c₂) B))
+  | or χ₁ χ₂ ih₁ ih₂ =>
+      obtain ⟨c₁, h₁⟩ := ih₁
+      obtain ⟨c₂, h₂⟩ := ih₂
+      refine ⟨max c₁ c₂, fun B => ?_⟩
+      rw [show gvb (Semiformula.or χ₁ χ₂) B = max (gvb χ₁ B) (gvb χ₂ B) from rfl]
+      exact max_le
+        (le_trans (h₁ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_left c₁ c₂) B))
+        (le_trans (h₂ B) (iter_le_iter_of_succ hG_mono hG_succ (le_max_right c₁ c₂) B))
+  | all χ ih =>
+      obtain ⟨c, h⟩ := ih
+      exact ⟨c, fun B => by
+        rw [show gvb (Semiformula.all χ) B = gvb χ B from rfl]; exact h B⟩
+  | exs χ ih =>
+      obtain ⟨c, h⟩ := ih
+      exact ⟨c, fun B => by
+        rw [show gvb (Semiformula.exs χ) B = gvb χ B from rfl]; exact h B⟩
+
+end IterDom
+
+#print axioms GoodsteinPA.ReadoffValueGate.gvb_le_iter
 #print axioms GoodsteinPA.ReadoffValueGate.gated_root_of_sigma1
 #print axioms GoodsteinPA.ReadoffValueGate.gated_of_sigma1
 #print axioms GoodsteinPA.ReadoffValueGate.Gated_mono
