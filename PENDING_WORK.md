@@ -1,5 +1,48 @@
 # PENDING WORK
 
+## lap 205 (FRESH-MIND REVIEW + E-seam piece 1) — bounded rank-0 `Zef2TC` read-off REALIZED (E–W Lemma 31), modulo ONE trap ✅
+
+**Review**: direction SOUND (laps 202–204 CLOSED the lap-201 V3 mandate — V3 ladder 10/10, rung E
+realized `embedding_Zef2TC_V3`, TC pass ported `passAuxTC`/`rankToZero_TC`/`sound0_TC`, all verified
+kernel-clean this lap). Retargeted `DIRECTION.md` CURRENT DIRECTIVE (lap-205 block) + STATUS to the
+two remaining E-seam wip pieces. See `HANDOFF-2026-07-03-lap205.md`.
+
+**Advance (E-seam piece 1)**: `readoff_delta0_Zef2TC` + helper `readoffTC_core`
+(`wip/E1EmbeddingGrind.lean`, file compiles, main `lake build` 🟢 1342 unaffected). From a rank-0
+`Zef2TC` derivation of the SINGLETON `{∃⁰ φ}`, extract `∃ n ≤ ewIter f α 0, atomTrue (φ/[nm n])`.
+Follows **E–W Witnessing Lemma 31** (the retirement-note-mandated route): extract the top `∃⁰ φ`
+witness via `exI` at slot `f` (`n ≤ f 0`), verify the Δ₀ instance SEMANTICALLY via `sound0_TC`, NO
+structural descent into `allω` matrix branches. Invariant = `∃⁰ φ ∈ Γ ∧ every other member
+standard-false`, maintained by every rule at the CONSTANT bound `f 0`; `f 0 → ewIter f α 0` weakened
+once at the root by `f0_le_ewIter` (fully clean `[propext, choice, Quot.sound]`). **8 of 9 rule-cases
+close** (axL/trueRel/trueNrel/verumR vacuous under the invariant; weak/wk/andI/orI/exI recurse at
+slot `f`, using `sound0_TC` to kill empty contexts and the vacuous-`exI` re-witness; cut rank-0).
+
+**THE ONE residual (disclosed `sorry` in `readoffTC_core`'s `allω` case)**: `∀⁰ χ` standard-false
+(forced by the invariant) yet its `0`-instance `χ/[nm 0]` TRUE — the non-monotone-matrix trap. Then
+`rel1 f 0 = f`'s sharp branch-0 recursion is unavailable and the semantic false-branch index
+overflows the budget (kernel-refuted in general; trap-derivations EXIST in `Zef2TC` since (Ax2)
+doesn't help when `∃⁰ φ` is the only true context member). This is EXACTLY the fragment
+`readoffD_trapped_of_mono` (`OperatorZef2.lean`) closes under goodstein's downward-closed guard
+`atomTrue (χ/[nm 0]) → atomTrue (∀⁰ χ)`.
+
+**NEXT attack (close the residual, two candidate routes — the decisive statement-shape choice for the
+judge)**:
+- (a) **Downward-closed guard** — thread a hypothesis that every `allω`-principal `χ` on the spine
+  satisfies `atomTrue (χ/[nm 0]) → atomTrue (∀⁰ χ)` (goodstein's bounded-`∀` guards `y < t → ψ`,
+  `ψ` downward-closed, satisfy it). Under it the `χ/[nm 0]`-true branch contradicts `∀⁰ χ` false.
+  Awkward to state (global over dynamic subformulas); may need a `Δ₀`-structural formulation.
+- (b) **φ-shape argument** — show the embedding's `goodsteinBodyE = ∃⁰(matrix)` has no leading
+  substituted bounded-`∀`, so the vacuous-`exI`→`allω` path that buries `∃⁰ φ` never arises ⇒ the
+  trap is vacuous for the pipeline's derivations (cleaner if it holds; inspect `goodsteinBody`).
+- Then **E-seam piece 2** = `wip/SpliceAssembly.lean`: compose `embedding_Zef2TC_V3` →
+  `rankToZero_TC` → `readoff_delta0_Zef2TC` into `wainer_splice_Zef2`'s shape. Slot plumbing: the
+  embedding outputs `rel1 (ewRootSlot e B) K` (EwF1 ⇒ inflationary ⇒ feeds `f0_le_ewIter`).
+- rung-E statement + `Zef2TC` amendment + read-off statement shape (guard vs φ-shape) → next judge
+  pass. Do NOT self-ratify into src.
+
+---
+
 ## lap 201b (E-1 block 6) — V3 predicate + THE `all` CASE DISCHARGED ✅
 
 `budgetedEmbedsV3_all` SORRY-FREE, `[propext, Classical.choice, Quot.sound]`
