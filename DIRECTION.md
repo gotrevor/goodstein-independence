@@ -14,9 +14,27 @@ autonomous treadmill campaign. Read both.
 > over every few review laps. Keep it SHORT; detail lives in `PENDING_WORK.md` / `REFLECTION-*.md`.
 > (Live milestone map = `E-CRUX2-ROADMAP-2026-06-24.md`; the phase list below is the standing charter.)
 
-**2026-07-03 (SERIES-3 JUDGE PASS, host judge session — VERDICT: PASS. THIS IS THE CURRENT BINDING
-BLOCK; it supersedes the lap-209 block below for the mandate/next-move pointer; the lap-209/206
-FORBIDDENs and gotchas stay in force.)**
+**2026-07-03 (SERIES-4 JUDGE PASS, host judge session — VERDICT: PASS (validity). THIS IS THE CURRENT
+BINDING BLOCK; supersedes the SERIES-3 block below for the mandate/next-move pointer. The SERIES-3/209/206
+FORBIDDENs + gotchas stay in force.)**
+SERIES-4 judged (`E-2026-07-03-JUDGE-series4-validation.md`): the route-B axiom discharge is AUTHORIZED
+(witness `wainer_bound_witness` kernel-clean at the axiom's verbatim type, judge-verified). Architecture
+scaffolded on branch **`wip/series4-discharge`**: the 3 wip modules (E1EmbeddingGrind / ReadoffValueGate /
+HardyMajorization) promoted to `src/`; new `WainerBound.lean` holds the discharged
+`wainer_bound_of_pa_proves_goodstein` (currently `sorry`, blocked ONLY on a fully-diagnosed
+`Gated`-duplication snag) + the route-B headline; build GREEN (1346 jobs).
+🚦 **MANDATE = the SERIES-5 COMPLETION order, §3 of the SERIES-4 judge doc.** Lane A: land the splice
+(dedupe `E1EmbeddingGrind.Gated` vs `ReadoffValueGate.Gated`; `#print axioms` must be
+`[propext,choice,Quot.sound]`) → flip nodes 14/15 to `clean`. Lane B: crown re-point (break the
+`WainerRoute → Statement` import cycle; re-point body only, TYPE FROZEN) → node 16 `clean`. Lane C: prune
+`src` sorries **20 → 0** (`lean-sorry src/` is the gate). ⚠️ **The old `REBUILD-Z-SERIES-4-LEDGER.md`
+Block-4 deletion proposals are UNRELIABLE — 2 verified WRONG (§4 of the judge doc); re-derive every
+retirement against the compiler, never delete on say-so.** STOP when
+`#print axioms peano_not_proves_goodstein` = `[propext, Classical.choice, Quot.sound]` + `blueprint_audit`
+green + `lean-sorry src/` = 0.
+
+**2026-07-03 (SERIES-3 JUDGE PASS, host judge session — VERDICT: PASS. SUPERSEDED by the SERIES-4 block
+above for the mandate/next-move pointer; the lap-209/206 FORBIDDENs and gotchas stay in force.)**
 SERIES-3 judged (`E-2026-07-03-JUDGE-series3-validation.md`): rungs P/R/D kernel-verified in src,
 rung E realized in wip with the ∃K/V3 statement **RATIFIED** (Ruling 2), R-4′ **CONFORMANT**
 (Ruling 1), Ax2-deferred **RESOLVED** (Ruling 3). Ledger row 14 rebased 3-8@85; depgraph regenerated.

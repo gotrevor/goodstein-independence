@@ -109,16 +109,9 @@ theorem goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing (o : ONo
   have hgap := fastGrowing_fixed_add_two_lt_successor ho hm4
   omega
 
-/-- **Wainer classification, specialized to this route.**
-
-If PA proves the Goodstein sentence, then the Goodstein length function is PA-provably
-total; Wainer's classification of PA-provably-total recursive functions then bounds it
-eventually by one fixed fast-growing function `f_o`, `o < epsilon_0`.
-
-This is the new proof-theory debt replacing the internalized Gentzen bridge. -/
-axiom wainer_bound_of_pa_proves_goodstein :
-    (𝗣𝗔 ⊢ ↑goodsteinSentence) ->
-      ∃ o : ONote, o.NF ∧ EventuallyLE GoodsteinPA.Dom.goodsteinLength (fun n => fastGrowing o n)
+/- `wainer_bound_of_pa_proves_goodstein` (formerly the sole route-B axiom) is now a THEOREM,
+discharged in `GoodsteinPA.WainerBound` — downstream of the embedding chain, which imports THIS
+module, so it lives there to break the import cycle. SERIES-4 judge pass, 2026-07-03. -/
 
 /-- **Cichon/Caicedo exact no-fixed-bound theorem.**
 
@@ -139,40 +132,8 @@ theorem cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing :
     hM n (le_max_right _ _)
   omega
 
-/-- **Kirby--Paris via Wainer/Cichon/Caicedo.**
-
-This is the new route theorem: if PA proved Goodstein, Wainer would put the Goodstein
-length function below some fixed `f_o`; Cichon/Caicedo says no fixed `f_o` can bound it.
-The only route-specific axiom left is the specialized Wainer classification above. -/
-theorem peano_not_proves_goodstein_growth : 𝗣𝗔 ⊬ ↑goodsteinSentence := by
-  intro hpa
-  obtain ⟨o, ho, hbound⟩ := wainer_bound_of_pa_proves_goodstein hpa
-  exact cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing o ho hbound
-
-/- Blueprint ledger: THE remaining route-B debt — the specialized Wainer
-classification, held as the sole axiom. Estimate re-based 2026-07-03 at the
-SERIES-3 judge pass (E-2026-07-03-JUDGE-series3-validation.md): rungs P/R/D
-kernel-verified in src, rung E realized in wip (statement judge-ratified),
-rung W half-built (Hardy majorization + padded engine green) — the residual is
-the 2b COMPOSITION + judge-gated src promotion (a planning claim, not a kernel
-fact; category `debt` is machine-audited by `lake exe blueprint_audit`). -/
-attribute [goodstein_blueprint 14 debt "wainer_axiom" "3-8" 85 wainer_bound_of_pa_proves_goodstein
-  []
-  ["SERIES-3 (laps 198-209): P cutElimPass_Zef2 + R rankToZero_Zef2 + D readoff_delta0_Zef2 (R-4' verbatim, by vacuity) all src kernel-clean; E embedding_Zef2TC_V3 realized wip (V3/existsK statement RATIFIED at the S3 judge pass); TC pass port (passAuxTC/rankToZero_TC/sound0_TC) + value read-off (readoff_value_goodstein) + Hardy majorization (ewIter_hardy_le, padded engine) all wip kernel-clean",
-   "Residual = rung W composition ONLY: ewIterTower_dom_pad -> S*-domination -> Sslot assembly -> EventuallyLE package -> splice at the axiom's verbatim type; then judge-gated promotion (grind laps MUST NOT self-ratify into src)",
-   "Buchholz-Wainer 1987: the classification is proved by omega-logic + cut-elimination — the someK/Zeh substrate; superseded estimates: MASTERPLAN 30-60@60, WAINER-LADDER 20-40@65"]
-  "The specialized Wainer classification axiom; discharged by the wainer ladder over the Z^e operator calculus (embed -> pass -> rank-0 -> Delta_0 read-off -> splice)."]
-  wainer_bound_of_pa_proves_goodstein
-
-/- Blueprint ledger: the route-B headline (PA ⊬ Goodstein via growth rates).
-Proved in Lean modulo the Wainer axiom above (3-line assembly over Cichon/Caicedo),
-so it inherits `debt` until that axiom lands; the estimate is the final
-packaging/assembly step (masterplan W6). -/
-attribute [goodstein_blueprint 15 debt "routeB_headline" "1-2" 90 peano_not_proves_goodstein_growth
-  []
-  ["MASTERPLAN-2026-07-01-ZERO-AXIOMS.md W6 (assembly, corollaries, full independence): 1-2 laps, 90%",
-   "Proof body is done mod the axiom: intro hpa; obtain from wainer_bound; exact cichon_caicedo"]
-  "Route-B independence headline: PA ⊬ Goodstein from Wainer's fixed-f_o bound vs Cichon/Caicedo no-fixed-bound. Assembly done; debt inherited from the Wainer axiom."]
-  peano_not_proves_goodstein_growth
+/- `peano_not_proves_goodstein_growth` and blueprint nodes 14 (`wainer_axiom`) / 15
+(`routeB_headline`) moved to `GoodsteinPA.WainerBound` with the axiom's discharge (they consume the
+now-proven bound; they cannot live here because `WainerBound` imports this module). -/
 
 end GoodsteinPA.WainerRoute

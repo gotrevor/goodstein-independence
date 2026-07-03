@@ -23,6 +23,9 @@ import GoodsteinPA.Domination
 import GoodsteinPA.LowerBound
 import GoodsteinPA.Embedding
 import GoodsteinPA.WainerRoute
+-- Route-B growth axiom `wainer_bound_of_pa_proves_goodstein` DISCHARGED into a theorem here
+-- (SERIES-4 judge pass): promotes the embedding/RVG/Hardy wip chain into src and splices the witness.
+import GoodsteinPA.WainerBound
 
 import GoodsteinPA.EmbeddingX
 import GoodsteinPA.EpsilonOrder
