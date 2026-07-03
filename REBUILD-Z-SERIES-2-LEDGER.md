@@ -228,3 +228,45 @@ guard-refutation). Recommendation shape: adopt (Ax2) if-and-only-if rung E's emb
 it (its Lemma-31 separation suggests it does); lane D takes R-4′ regardless.
 
 ---
+
+## Stage D-2 — shift-relativization `rel1'` cost assessment (wip probe) — ✅ ANSWERED (lap 197)
+
+**File**: `wip/Rel1ShiftProbe.lean` (standalone; `src` untouched). Kernel-clean, no
+`native_decide`. `rel1' f n = f (n + ·)` (E–W Def 23 literal) vs ratified `rel1 f n = f (max n ·)`.
+
+**Kernel findings:**
+- `rel1'` preserves the EwLow triple (`rel1'_monotone/_infl/_low`) — pass-threading unaffected.
+- **`rel1'` does NOT preserve `hg_base`** (`rel1'_not_base`, concrete `fBad` satisfying ALL FOUR
+  ratified hypotheses whose shift-by-1 violates base-additivity at `k=2`). So the naive
+  "max→+ and keep `hg_base`" amendment is POINTLESS — kernel-sharpens the lap-192 parenthetical
+  (insufficient even before the `ewIter` plateau enters).
+- The property that survives is **uniform step-additivity** `StepAdd f = ∀ m k, f m + k ≤ f (m+k)`:
+  implies `hg_base` (`stepAdd_base`); **closed under `rel1'`** (`stepAdd_rel1'`, axiom-FREE —
+  self-reproducing through nested ω-contexts); **NOT closed under `rel1`** (`stepAdd_not_rel1`,
+  `f = id`, `rel1 f 5` at `m=0,k=1`) — consistent with the banked refutation; and the CONCRETE
+  root slot has it (`ewRootSlot_stepAdd`), so the pins' upgrade `hg_base → StepAdd` is free at
+  the root.
+- **Blast radius (measured)**: `rel1` occurs 88×/68×/13× in OperatorZeh/OperatorZef2/EwIter;
+  the `allω` constructors BIND `rel1` structurally → swap = NEW INDUCTIVE + full lemma-suite
+  re-proof. Branch-0 mechanism carries over (`rel1' f 0 = f` by `zero_add`, propositional like
+  `max 0 x = x`).
+
+**Amendment cost verdict**: the viable shift package is {`rel1 → rel1'`, `hg_base → StepAdd`}
+at new-inductive + full-suite cost; the D-1 absorbing norm (`ewN → Nlog`) dissolves the SAME
+node gate with NO constructor change and NO slot property. **Stage D ranks: absorbing norm ≫
+shift+StepAdd.**
+
+---
+
+# SERIES-2 END — all stages closed (A, B, C-1, C-2, D-1, D-2). STOP for the judge per the order.
+
+**The two amendment rulings' evidence packages:**
+- **Ruling (1) [top-rank cut trilemma]**: D-1 (absorbing `Nlog`: BOTH properties proven, NF
+  finite fibers + absorption theorems; unrestricted statement kernel-refuted) vs D-2 (shift
+  package viable but strictly dominated on cost). → prime candidate: `ewN → Nlog`.
+- **Ruling (2) [lane-D residue: Ax2 vs restatement]**: C-1 (Option-B/R-4′ restatement is
+  structurally FREE for the splice — one definitional tower level) + C-2 (the mono-guard
+  fragment does NOT cover the concrete goodstein matrix — kernel-refuted) + B ((Ax2) strict at
+  rank 0, breaks the toZef route, mechanical elsewhere, does NOT dissolve the allω trap
+  per-derivation; its value is embedding-side existence). → lane D: R-4′ restatement; (Ax2):
+  iff rung E's embedding needs it (Lemma-31 separation suggests yes).
