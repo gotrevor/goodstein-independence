@@ -4880,8 +4880,102 @@ theorem goodsteinBodyE_semantic_link {m n : ℕ} {χ : SyntacticSemiformula ℒ�
   rw [hval] at hkey
   simpa using hkey.symm 
 
+/-! ### Lap 210 (SERIES-4 S-3) — the Nlog-PRIMED pipeline
+
+`Zef2TCProv` carries `Nlog α' ≤ f 0`; `readoff_value_pipeline` discarded it, but the α'-uniform
+Hardy conversion (`ewIter_dom_pad_levelcap`, `wip/HardyMajorization.lean`) needs it — `Nlog α'`
+appears in the converted bound's ARGUMENT and must itself be bounded (it is: by the tower slot
+at `0`, which the `S°`-uniformization makes Hardy-in-`m`).  Same proofs, keeping the conjunct. -/
+
+/-- `readoff_value_pipeline` + the `Nlog α'` certificate. -/
+theorem readoff_value_pipeline' {φ : SyntacticSemiformula ℒₒᵣ 1} {P : ℕ → ℕ}
+    (hP_mono : Monotone P)
+    {α e : ONote} {H : ONote → Prop} {B K d : ℕ}
+    (heNF : e.NF) (hαNF : α.NF) (hαH : Cl H α)
+    (D : Zef2TC α e H (rel1 (ewRootSlot e B) K) d {(∃⁰ φ)})
+    (V : ℕ) (hroot : Gated P V (∃⁰ φ)) :
+    ∃ α', α' ≤ collapseIter d α ∧ α'.NF ∧
+      Nlog α' ≤ ewIterTower (rel1 (ewRootSlot e B) K) d α 0 ∧
+      ∃ n, n ≤ ewIter (Sslot (ewIterTower (rel1 (ewRootSlot e B) K) d α) P) α'
+              (Sslot (ewIterTower (rel1 (ewRootSlot e B) K) d α) P V) ∧
+        atomTrue (φ/[nm n]) := by
+  have hf1 := ewRootSlot_f1 e B
+  have hmono : Monotone (rel1 (ewRootSlot e B) K) := rel1_monotone hf1.monotone K
+  have hinfl : ∀ x, x ≤ rel1 (ewRootSlot e B) K x := rel1_infl hf1.infl K
+  have hlow : ∀ m, 2 * m + 1 ≤ rel1 (ewRootSlot e B) K m := rel1_low hf1.monotone hf1.2 K
+  obtain ⟨α', hα'le, hα'NF, _hα'H, hα'N, D0⟩ :=
+    rankToZeroAuxTC e heNF d D hmono hinfl hlow (three_le_rel1_rootSlot e B K) hαNF hαH
+  obtain ⟨n, hn, htn⟩ := readoff_value_Zef2TC
+    (ewIterTower_monotone hmono hinfl α d) (ewIterTower_infl hinfl α d)
+    hP_mono D0 V hroot
+  exact ⟨α', hα'le, hα'NF, hα'N, n, hn, htn⟩
+
+/-- The per-`m` stage `K_m` of `embedding_Zef2TC_V3` is `max K₀ m` for a UNIFORM `K₀` — the
+m-uniformization's linear-stage certificate, extracted by re-running the embedding's own proof
+(the stage is `max (envSup (fun _ => 0) N) m`). -/
+theorem embedding_Zef2TC_V3_linearK :
+    (𝗣𝗔 ⊢ ↑GoodsteinPA.goodsteinSentence) →
+      ∃ B d K₀ : ℕ, ∃ e α : ONote, e.NF ∧ α.NF ∧ ∀ m : ℕ,
+        ∃ H : ONote → Prop, Cl H α ∧
+          Zef2TC α e H (rel1 (ewRootSlot e B) (max K₀ m)) d {(goodsteinBodyE/[nm m])} := by
+  intro h
+  obtain ⟨b⟩ := h
+  have d2 := Derivation.toDerivation2 _ b
+  have hV3 : BudgetedEmbedsV3 {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by
+    have : ([(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)]).toFinset
+        = {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by simp
+    rw [← this]
+    exact budgetedEmbeddingV3 d2
+  obtain ⟨B, d, N, e, α, he, hαNF, hNlogB, hD⟩ := hV3
+  refine ⟨B, d, envSup (fun _ => 0) N, e, α, he, hαNF, fun m => ?_⟩
+  have hD0 := hD (fun _ => 0)
+  have himg : ({(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} :
+        Finset (SyntacticFormula ℒₒᵣ)).image
+        (fun φ => Embedding.asg (fun _ => 0) ▹ φ)
+      = {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by
+    rw [Finset.image_singleton, asg_emb_fix]
+  rw [himg, coe_goodsteinSentence_eq] at hD0
+  have hf1 := ewRootSlot_f1 e B
+  have hmono : Monotone (rel1 (ewRootSlot e B) (envSup (fun _ => 0) N)) :=
+    rel1_monotone hf1.1.monotone _
+  have hinv := allω_inversion (φ := goodsteinBodyE) m hD0 hmono
+  rw [rel1_rel1] at hinv
+  refine ⟨fun _ => True, Cl_of_NF hαNF, ?_⟩
+  have hctx : insert (goodsteinBodyE/[nm m])
+        (({(∀⁰ goodsteinBodyE : SyntacticFormula ℒₒᵣ)} :
+          Finset (SyntacticFormula ℒₒᵣ)).erase (∀⁰ goodsteinBodyE))
+      = {(goodsteinBodyE/[nm m])} := by
+    rw [Finset.erase_singleton]
+    rfl
+  rw [hctx] at hinv
+  exact hinv.change_H
+
+/-- `readoff_value_goodstein` + the `Nlog α'` certificate + the LINEAR stage `max K₀ m` —
+the m-uniformization-ready read-off. -/
+theorem readoff_value_goodstein'
+    (h : 𝗣𝗔 ⊢ ↑GoodsteinPA.goodsteinSentence) :
+    ∃ B d K₀ : ℕ, ∃ e α : ONote, e.NF ∧ α.NF ∧ ∀ m : ℕ,
+      ∃ χ : SyntacticSemiformula ℒₒᵣ 1,
+        goodsteinBodyE/[nm m] = (∃⁰ χ) ∧ Arithmetic.Hierarchy 𝚺 1 (∃⁰ χ) ∧
+        ∀ (P : ℕ → ℕ) (V : ℕ), Monotone P → Gated P V (∃⁰ χ) →
+          ∃ α', α' ≤ collapseIter d α ∧ α'.NF ∧
+            Nlog α' ≤ ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α 0 ∧
+            ∃ n, n ≤ ewIter (Sslot (ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α) P)
+                    α' (Sslot (ewIterTower (rel1 (ewRootSlot e B) (max K₀ m)) d α) P V) ∧
+              atomTrue (χ/[nm n]) := by
+  obtain ⟨B, d, K₀, e, α, heNF, hαNF, hall⟩ := embedding_Zef2TC_V3_linearK h
+  refine ⟨B, d, K₀, e, α, heNF, hαNF, fun m => ?_⟩
+  obtain ⟨H, hαH, D⟩ := hall m
+  obtain ⟨χ, hχeq, hchiS⟩ := goodsteinBodyE_inst_shape m
+  rw [hχeq] at D
+  refine ⟨χ, hχeq, hchiS, fun P V hP_mono hroot => ?_⟩
+  exact readoff_value_pipeline' hP_mono heNF hαNF hαH D V hroot
+
 end GoodsteinPA.E1EmbeddingGrind
 
+#print axioms GoodsteinPA.E1EmbeddingGrind.readoff_value_pipeline'
+#print axioms GoodsteinPA.E1EmbeddingGrind.readoff_value_goodstein'
+#print axioms GoodsteinPA.E1EmbeddingGrind.embedding_Zef2TC_V3_linearK
 #print axioms GoodsteinPA.E1EmbeddingGrind.goodsteinBodyE_semantic_link
 #print axioms GoodsteinPA.E1EmbeddingGrind.ewIter_mono_slot
 #print axioms GoodsteinPA.E1EmbeddingGrind.ewIterTower_rel1_le
