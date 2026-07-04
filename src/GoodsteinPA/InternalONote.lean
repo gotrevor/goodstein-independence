@@ -17,6 +17,7 @@ Coding: `0 ↦ (0 : V)`, and `oadd e n r ↦ ⟪⟪ec, n⟫, rc⟫ + 1` (the `+1
 a positive code, so `0` is the *unique* code of the ordinal `0`).
 -/
 import GoodsteinPA.InternalBump
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalONote
 

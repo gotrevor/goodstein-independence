@@ -18,6 +18,7 @@ internal induction (`DescentArith.ineq6_internal`) consumes. This is brick 1 of 
 brick 2 will be base-`b` digit extraction, brick 3 the hereditary base-change `bump`.
 -/
 import Foundation.FirstOrder.Arithmetic.HFS
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalPow
 

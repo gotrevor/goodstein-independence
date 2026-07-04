@@ -21,6 +21,7 @@ NEXT (next bricks): `Phi`/`blueprint`/`construction` (Fixpoint) → `ZDerivation
 import GoodsteinPA.InternalTower
 import GoodsteinPA.FvSubst
 import Foundation.FirstOrder.Incompleteness.Second
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalZ
 

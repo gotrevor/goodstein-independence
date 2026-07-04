@@ -22,6 +22,7 @@ in Phases 3–4 when `γ ⟹ Con(𝗣𝗔)` is proved.
 import GoodsteinPA.Encoding
 import GoodsteinPA.Defs
 import GoodsteinPA.InternalBridge
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA
 
@@ -42,7 +43,8 @@ theorem goodsteinSentence_faithful :
     Semiformula.eval_ex, Semiformula.eval_substs, InternalPow.igoodstein_defined.iff,
     Matrix.cons_val_zero, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
     ORingStructure.zero_eq_zero, Fin.succ_zero_eq_one, Matrix.cons_val_one, Semiterm.val_bvar,
-    Fin.Fin1.eq_one, Matrix.cons_val_fin_one, Fin.succ_one_eq_two, Matrix.cons_app_two]
+    Fin.Fin1.eq_one, Matrix.cons_val_fin_one, Fin.succ_one_eq_two, Matrix.cons_app_two,
+    Function.comp_def]
   simp only [InternalPow.igoodstein_nat, eq_comm]
 
 end GoodsteinPA

@@ -16,6 +16,7 @@ preservation applies (`fvSubst_isSemiformula`).
 -/
 import GoodsteinPA.InternalZ
 import GoodsteinPA.FvSubst
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalZ
 

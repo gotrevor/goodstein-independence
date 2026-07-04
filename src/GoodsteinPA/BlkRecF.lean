@@ -14,6 +14,7 @@ are ported verbatim (the proofs only use the `boStep` if-then-else structure, no
 Next: re-thread `StdCor34`/`SeqDominated` onto `blkF`/`wsumcF` (width `W = fun t => iC (β (t+1))`).
 -/
 import GoodsteinPA.BlkRec
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.BlkRecF
 

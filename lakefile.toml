@@ -3,14 +3,13 @@
 # PA (`𝗣𝗔 = Peano : ArithmeticTheory`), Σ₁ arithmetization, and Gödel II. Track 1 (the
 # mathlib-only growth theory) lives in ~/src/lean-formalizations.
 #
-# Foundation comes from the lean-universe store (4.31.0). It was added as a universe package
-# 2026-06-21, so goodstein consumes it via a git require (gotrevor/Foundation, our v4.31 port;
-# exact rev pinned in the [[require]] block below, maintained by lake-base link) with the
-# store's pre-built oleans CoW-cloned into this repo's
-# own .lake/packages by `lake-base link goodstein-independence --require Foundation`. That makes
-# goodstein self-contained + offline-buildable (no dependency on the ~/src/Foundation sibling
-# clone) and still Replays Foundation's 1671 jobs instead of rebuilding. The [[require]] block
-# below is appended/maintained by lake-base link — re-run it after a store re-pin.
+# Foundation is the upstream FormalizedFormalLogic/Foundation monorepo, pinned by rev in the
+# [[require]] block below. This previously pointed at a personal v4.31 fork (gotrevor/Foundation)
+# that carried the forward-port plus the Δ₁-definability discharge; both have since landed upstream
+# (#830, #833), so the dependency is re-homed onto upstream master and there is no fork infra left
+# to track. The pin sits at the v4.31.0 mathlib commit (fabf563a), matching this repo's toolchain,
+# so a build only recompiles Foundation itself while mathlib oleans Replay from cache. Bump the
+# rev by hand as upstream advances.
 name = "GoodsteinPA"
 # Build BOTH libs by default: the public root AND the blueprint root. Without the latter in
 # defaultTargets, a bare `lake build` (the local .githooks gate + CI's lean-action) never compiles
@@ -35,8 +34,8 @@ supportInterpreter = true
 
 [[require]]
 name = "Foundation"
-git = "https://github.com/gotrevor/Foundation.git"
-rev = "e6e1ad149d3622b1e670c62092827f84fc276d1c"
+git = "https://github.com/FormalizedFormalLogic/Foundation.git"
+rev = "2040d2f33807c34636b8a9f20189d22b48d65040"
 
 [[require]]
 name = "checkdecls"

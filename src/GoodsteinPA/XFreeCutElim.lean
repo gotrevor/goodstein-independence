@@ -22,6 +22,7 @@ so it is **vacuous**. Hence `removeFalseLit` is only ever invoked on X-FREE cut 
 `axTrue`, fine for `XFreeAx`). The full chain therefore preserves `XFreeAx` at cut rank 0.
 -/
 import GoodsteinPA.Boundedness
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.XFreeCutElim
 
@@ -65,8 +66,8 @@ theorem PXFc.axL {Γ : Seq LX} {k} (r : LX.Rel k) (v) (hp : Semiformula.rel r v 
 
 /-- The value-congruent literal axiom, `XFreeAx`-safe (not an `axTrue`). -/
 theorem PXFc.axLv {Γ : Seq LX} {k} (r : LX.Rel k) (v v' : Fin k → Semiterm LX ℕ 0)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+               = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i))
     (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : PXFc 0 0 Γ :=
   ⟨Deriv.axLv r v v' hval hp hn, by simp [Deriv.o], by simp [Deriv.cr], by simp [XFreeAx]⟩
 
@@ -1044,8 +1045,8 @@ theorem PXFc.removeFalsum {B : Ordinal.{0}} {Γ : Seq LX}
 containing the negative literal `nrel r v`, replace it by a value-congruent `nrel r w`
 (`|v| = |w|`), preserving height and `XFreeAx`. -/
 theorem PXFc.nrel_value_subst {k} (r : (LX).Rel k) (v w : Fin k → Semiterm LX ℕ 0)
-    (hvw : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-              = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)) :
+    (hvw : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+              = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)) :
     ∀ {Δ : Seq LX} (d : Deriv Δ), XFreeAx d → d.cr ≤ (0 : ℕ∞) →
       (Semiformula.nrel r v) ∈ Δ →
       PXFc d.o 0 (insert (Semiformula.nrel r w) (Δ.erase (Semiformula.nrel r v))) := by

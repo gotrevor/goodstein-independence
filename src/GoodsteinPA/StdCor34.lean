@@ -35,6 +35,7 @@ import GoodsteinPA.InternalCor34
 import GoodsteinPA.InternalThm35
 import GoodsteinPA.InternalIg
 import GoodsteinPA.DescentSlowdown
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.StdCor34
 

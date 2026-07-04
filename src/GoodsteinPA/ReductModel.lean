@@ -22,6 +22,7 @@ The two deliverables here are pure model theory (zero Goodstein content), reusab
 - `reduct_models_PA` / `reduct_models_isigma1` : `M ⊧ paLX ⟹ M ⊧ 𝗣𝗔 ⟹ M ⊧ 𝗜𝚺₁` in the reduct.
 -/
 import GoodsteinPA.DescentLift
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.ReductModel
 
@@ -61,37 +62,39 @@ theorem reduct_eq_standardModel [Structure.Eq LX M] :
       Matrix.fun_eq_vec_two]; rfl⟩
   haveI : Structure.LT ℒₒᵣ M := ⟨fun a b => by
     simp [Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel,
-      Matrix.fun_eq_vec_two]; rfl⟩
+      Matrix.fun_eq_vec_two, Function.comp_def]; rfl⟩
   haveI : Structure.Eq ℒₒᵣ M := ⟨fun a b => by
     have h := Structure.Eq.eq (L := LX) (M := M) a b
     simp only [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
       Semiformula.eval_rel, Semiterm.val_bvar, Matrix.cons_val_zero,
-      Structure.lMap_rel] at h ⊢
+      Structure.lMap_rel, Function.comp_def] at h ⊢
     exact h⟩
   exact standardModel_unique (M := M) sM
 
 /-- **`M`'s reduct models `𝗣𝗔`.** From `M ⊧ paLX ⊇ lMap Φ 𝗣𝗔` (the lap-30 `lMap_PA_subset`), the
 reduct satisfies `𝗣𝗔` symbol-by-symbol (`modelsTheory_onTheory₁`), and the reduct IS the standard
 model (`reduct_eq_standardModel`). -/
-theorem reduct_models_PA [Structure.Eq LX M] (hM : M ⊧ₘ* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
+theorem reduct_models_PA [Structure.Eq LX M]
+    (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
     letI : ORingStructure M := reductORing
     M ⊧ₘ* (𝗣𝗔 : Theory ℒₒᵣ) := by
   letI : ORingStructure M := reductORing
   -- `M ⊧ lMap Φ 𝗣𝗔`
-  have hlift : M ⊧ₘ* (Theory.lMap Φ 𝗣𝗔 : Theory LX) :=
-    ModelsTheory.of_ss hM lMap_PA_subset
-  -- transfer to the reduct structure
-  have hred : ModelsTheory (s := inst.lMap Φ) M (𝗣𝗔 : Theory ℒₒᵣ) :=
-    Theory.modelsTheory_onTheory₁.mp hlift
-  rw [reduct_eq_standardModel] at hred
-  exact hred
+  have hlift : M↓[LX] ⊧* (Theory.lMap Φ 𝗣𝗔 : Theory LX) := models_of_ss hM lMap_PA_subset
+  -- each `σ ∈ 𝗣𝗔` holds in the reduct: `M↓[LX] ⊧ lMap Φ σ` transfers to `(inst.lMap Φ) ⊧ σ`
+  -- (`models_lMap`), and the reduct IS the standard model of `reductORing` (`reduct_eq_standardModel`)
+  refine ⟨fun σ hσ => ?_⟩
+  have h2 : (inst.lMap Φ).toStruc ⊧ σ :=
+    Semiformula.models_lMap.mp (hlift.models _ (Set.mem_image_of_mem _ hσ))
+  exact (reduct_eq_standardModel (M := M)) ▸ h2
 
 /-- **`M`'s reduct models `𝗜𝚺₁`.** Immediate from `reduct_models_PA` via `𝗜𝚺₁ ⪯ 𝗣𝗔`
 (`models_of_subtheory`). This is the `[V ⊧ₘ* 𝗜𝚺₁]` instance the internal Goodstein substrate runs over. -/
-theorem reduct_models_isigma1 [Structure.Eq LX M] (hM : M ⊧ₘ* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
+theorem reduct_models_isigma1 [Structure.Eq LX M]
+    (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
     letI : ORingStructure M := reductORing
     M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := by
   letI : ORingStructure M := reductORing
-  exact models_of_subtheory (reduct_models_PA hM)
+  exact models_of_subtheory (reduct_models_PA (M := M) hM)
 
 end GoodsteinPA.ReductModel

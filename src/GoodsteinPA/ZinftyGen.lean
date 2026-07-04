@@ -50,6 +50,7 @@ import Mathlib.SetTheory.Ordinal.Principal
 import Mathlib.SetTheory.Ordinal.Veblen
 import Mathlib.SetTheory.Ordinal.Family
 import Mathlib.Data.ENat.Lattice
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.ZinftyGen
 
@@ -85,7 +86,7 @@ def signedLit : Bool → {k : ℕ} → (L).Rel k → (Fin k → Semiterm L ℕ 0
 /-- **ℕ-truth of a closed formula** (the side condition `axTrue` carries on its literal): the
 standard L-model evaluation with no bound variables. For a closed literal the free-variable
 assignment is immaterial (fixed to `id`). -/
-def LitTrue (φ : Form L) : Prop := Semiformula.Evalm ℕ ![] (id : ℕ → ℕ) φ
+def LitTrue (φ : Form L) : Prop := GoodsteinPA.Compat.gEvalm ℕ ![] (id : ℕ → ℕ) φ
 
 /-- `∼`-duality: a closed formula is true iff its negation is false. -/
 @[simp] theorem litTrue_neg (φ : Form L) : LitTrue (∼φ) ↔ ¬ LitTrue φ := by
@@ -99,13 +100,13 @@ theorem litTrue_or_neg (φ : Form L) : LitTrue φ ∨ LitTrue (∼φ) := by
 standard values of its argument terms, so equal-valued argument vectors give equal literal truth.
 The semantic content behind `Provable.axLv` (and the embedding's value-congruent witness collapse). -/
 theorem litTrue_rel_congr {k} (r : (L).Rel k) (v v' : Fin k → Semiterm L ℕ 0)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i)) :
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+               = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i)) :
     LitTrue (Semiformula.rel r v) ↔ LitTrue (Semiformula.rel r v') := by
   unfold LitTrue
-  simp only [Semiformula.eval_rel]
-  have : (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i))
-       = (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i)) := funext hval
+  simp only [Semiformula.eval_rel, Function.comp_def]
+  have : (fun i => GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i))
+       = (fun i => GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i)) := funext hval
   rw [this]
 
 /-- The negation of a signed literal flips its sign. -/
@@ -133,8 +134,8 @@ inductive Deriv : Seq L → Type
   | axL {Γ : Seq L} {k} (r : (L).Rel k) (v) (hp : Semiformula.rel r v ∈ Γ)
       (hn : Semiformula.nrel r v ∈ Γ) : Deriv Γ
   | axLv {Γ : Seq L} {k} (r : (L).Rel k) (v v' : Fin k → Semiterm L ℕ 0)
-      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-                 = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+      (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+                 = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i))
       (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : Deriv Γ
   | axTrue {Γ : Seq L} {k} (b : Bool) (r : (L).Rel k) (v) (htrue : LitTrue (signedLit b r v))
       (hmem : signedLit b r v ∈ Γ) : Deriv Γ
@@ -220,8 +221,8 @@ pair `{rel r v, nrel r v'}` whose argument vectors have equal standard values cl
 containing it, at bound `0`, cut rank `0`. Sound: in the ℕ-model `rel r v ↔ rel r v'` when the values
 agree. Generalises the same-atom `axL` (`v' = v`); needed for the embedding's value-congruent X-pair. -/
 theorem Provable.axLv {Γ : Seq L} {k} (r : (L).Rel k) (v v' : Fin k → Semiterm L ℕ 0)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+               = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i))
     (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : Provable 0 0 Γ :=
   ⟨Deriv.axLv r v v' hval hp hn, by simp [Deriv.o], by simp [Deriv.cr]⟩
 

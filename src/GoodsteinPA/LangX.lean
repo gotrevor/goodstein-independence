@@ -8,6 +8,7 @@ buchholz-pivot.md`): the whole chain (PA, embedding M4, cut-elim M5, Boundedness
 -/
 import Foundation.FirstOrder.Arithmetic.Basic.Model
 import Foundation.FirstOrder.Basic.Operator
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.LangX
 
@@ -100,9 +101,9 @@ noncomputable def structLX (S : ℕ → Prop) : Structure LX ℕ where
 `S` of the value of `t` — i.e. `X` reads as the set `S`. This is the defining property that makes
 `structLX S` the `⊨^α` carrier (take `S := {n | |n|_≺ < α}`). -/
 theorem eval_Xatom (S : ℕ → Prop) {ξ} (e : Fin 0 → ℕ) (ε : ξ → ℕ) (t : Semiterm LX ξ 0) :
-    Semiformula.Eval (structLX S) e ε (Xatom t)
-      ↔ S (Semiterm.val (structLX S) e ε t) := by
-  simp only [Xatom, Semiformula.eval_rel₁]
+    GoodsteinPA.Compat.gEval (structLX S) e ε (Xatom t)
+      ↔ S (GoodsteinPA.Compat.gVal (structLX S) e ε t) := by
+  simp only [Xatom, GoodsteinPA.Compat.eval_rel₁]
   rfl
 
 end GoodsteinPA.LangX

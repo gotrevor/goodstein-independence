@@ -25,6 +25,7 @@ codes — is the one remaining piece toward a single sequence indexed from `0`. 
 `route-resolved-prwo-gentzen` (memory) and `PENDING_WORK.md`.
 -/
 import GoodsteinPA.InternalCor34
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalONote
 

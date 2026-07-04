@@ -26,6 +26,7 @@ The four arithmetic facts proved here are *exactly* the bookkeeping hypotheses o
 (`hblk_dich`, the within-block off-advance behind `higt_within`, and `hnm : blk j + off j ≤ j`).
 -/
 import GoodsteinPA.InternalCor34
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.BlkRec
 

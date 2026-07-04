@@ -21,6 +21,7 @@ gives the non-terminating run that contradicts the lifted `goodsteinSentence`.
 import GoodsteinPA.InternalGoodstein
 import GoodsteinPA.InternalONote
 import GoodsteinPA.DescentArith
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.DescentSlowdown
 

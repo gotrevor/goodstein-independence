@@ -13,6 +13,7 @@ Built by the least-number principle exactly as Foundation builds base-2 `log` (l
 hereditary base-change `bump` itself (brick 4).
 -/
 import GoodsteinPA.InternalDigits
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalPow
 

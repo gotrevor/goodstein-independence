@@ -12,6 +12,7 @@ predecessor), so it goes straight through `PR.Construction`:
 `T̂^{k+2}∘β` and the internal `ineq6_step`.
 -/
 import GoodsteinPA.InternalBump
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalPow
 

@@ -1,4 +1,5 @@
 import GoodsteinPA.EwIter
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.OperatorZeh
 
@@ -1238,7 +1239,7 @@ theorem rankToZero_Zef2 {α e : ONote} {H : ONote → Prop} {d : ℕ} {Γ : Seq}
 assignment — the value of a closed numeral const is assignment-independent.  Local companion of
 `stdClosedVal_nm`, phrased with `valm ℕ` so it `rw`s inside `eval_substs` read-offs. -/
 @[simp] lemma valm_nm (n : ℕ) (f : ℕ → ℕ) :
-    Semiterm.valm ℕ ![] f (nm n) = n := by simp [nm]
+    GoodsteinPA.Compat.gValm ℕ ![] f (nm n) = n := by simp [nm]
 
 /-- **Rank-0 `Zef2` soundness** (the reusable truth core of the Δ₀ read-off).  A cut-free
 derivation of `Γ` has a standard-model-true member.  The `allω` (Π) case combines: either some
@@ -1254,7 +1255,7 @@ theorem sound0 : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c : 
       by_cases htrue : atomTrue (Semiformula.rel r v)
       · exact ⟨_, hp, htrue⟩
       · refine ⟨_, hn, ?_⟩
-        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel] using htrue
+        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel, Function.comp_def] using htrue
   | @wk α e H f c Δ Γ hαN hsub _ ih =>
       intro hc
       obtain ⟨ψ, hψ, htrue⟩ := ih hc
@@ -1331,8 +1332,8 @@ def spineHead : ∀ {n}, SyntacticSemiformula ℒₒᵣ n → Option (Bool × ((
 /-- Rewriting (in particular substitution `φ/[nm n]`) preserves the spine head. -/
 theorem spineHead_rew : ∀ {n₁ n₂} (om : Rew ℒₒᵣ ℕ n₁ ℕ n₂) (φ : SyntacticSemiformula ℒₒᵣ n₁),
     spineHead (om ▹ φ) = spineHead φ
-  | _, _, om, Semiformula.rel r v => by simp [Semiformula.rew_rel, spineHead]
-  | _, _, om, Semiformula.nrel r v => by simp [Semiformula.rew_nrel, spineHead]
+  | _, _, om, Semiformula.rel r v => by simp [Semiformula.rew_rel, spineHead, Function.comp_def]
+  | _, _, om, Semiformula.nrel r v => by simp [Semiformula.rew_nrel, spineHead, Function.comp_def]
   | _, _, om, Semiformula.all φ => by
       rw [show (Semiformula.all φ) = ∀⁰ φ from rfl, Rewriting.app_all]
       simpa [spineHead] using spineHead_rew om.q φ

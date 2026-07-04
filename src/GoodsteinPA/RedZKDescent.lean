@@ -18,6 +18,7 @@ K-case: that needs (a) the non-critical splice/replace branch descents, and (b) 
 green-gated until then. See `PENDING_WORK.md` lap-108.
 -/
 import GoodsteinPA.Zsubst
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalZ
 

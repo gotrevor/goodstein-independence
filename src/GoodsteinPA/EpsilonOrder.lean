@@ -17,6 +17,7 @@ defining `φ` (via Foundation's `codeOfREPred₂`). Those instantiate the `Seam`
 -/
 import GoodsteinPA.Boundedness
 import Mathlib.SetTheory.Ordinal.Veblen
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.EpsilonOrder
 
@@ -34,8 +35,8 @@ closed `e = ![], ε = id` case). The `X`-set `S` is irrelevant because the `ℒ�
 is the standard model (`lMap_structLX`). -/
 theorem eval_lMap_structLX (S : ℕ → Prop) {n} (e : Fin n → ℕ) (ε : ℕ → ℕ)
     (ψ : Semiformula ℒₒᵣ ℕ n) :
-    Semiformula.Eval (structLX S) e ε (Semiformula.lMap (Language.ORing.embedding LX) ψ)
-      ↔ Semiformula.Evalm ℕ e ε ψ := by
+    GoodsteinPA.Compat.gEval (structLX S) e ε (Semiformula.lMap (Language.ORing.embedding LX) ψ)
+      ↔ GoodsteinPA.Compat.gEvalm ℕ e ε ψ := by
   rw [Semiformula.eval_lMap, lMap_structLX]
 
 /-! ## `hprecXPos` is automatic for an `lMap`'d `ℒₒᵣ` formula -/
@@ -75,7 +76,7 @@ variable (prec : Semiformula LX ℕ 2)
 `hprec` holds. Pure unfolding of `⊨^γ` through `∀`, `→`, and the `X`-atom on the bound variable. -/
 theorem hprec_of_eval
     (hdef : ∀ (S : ℕ → Prop) (a b : ℕ),
-      Semiformula.Eval (structLX S) ![a, b] id prec ↔ lt a b)
+      GoodsteinPA.Compat.gEval (structLX S) ![a, b] id prec ↔ lt a b)
     (γ : Ordinal.{0}) (n : ℕ) :
     models lt γ ((hyp prec)/[nm n]) ↔ ∀ m : ℕ, lt m n → rk lt m < γ := by
   unfold models hyp
@@ -84,22 +85,25 @@ theorem hprec_of_eval
   intro m
   -- The assignment `m :> (the substituted vector)` equals `![m, n]`.
   have hvec : (m :> fun i : Fin 1 =>
-      Semiterm.val (structLX (levelSet lt γ)) ![] id (![nm n] i)) = ![m, n] := by
+      GoodsteinPA.Compat.gVal (structLX (levelSet lt γ)) ![] id (![nm n] i)) = ![m, n] := by
     funext i
     refine Fin.cases ?_ (fun j => ?_) i
     · rfl
     · refine Fin.cases ?_ (fun k => k.elim0) j
       simp [val_nm_structLX]
+  -- upstream's `eval_substs` now emits the assignment in `∘`-composition normal form
+  -- (`Semiterm.val ![] id ∘ ![nm n]`); expand it back to the `fun i => …` shape `hvec` matches.
+  simp only [Function.comp_def]
   rw [hvec]
   simp only [LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq,
-    Xat, Semiformula.eval_rel₁, Semiterm.val_bvar, Matrix.cons_val_zero, structLX_rel_Xsym]
+    Xat, GoodsteinPA.Compat.eval_rel₁, Semiterm.val_bvar, Matrix.cons_val_zero, structLX_rel_Xsym]
   rw [hdef (levelSet lt γ) m n]
   rfl
 
 /-- **`hprec` from an `lMap`-definable order.** If the `ℒₒᵣ`-formula `φ` defines `lt` in the standard
 model, then `prec := φ.lMap` discharges the Boundedness seam hypothesis `hprec`. -/
 theorem hprec_of_lMap_defined (φ : Semiformula ℒₒᵣ ℕ 2)
-    (hφ : ∀ a b : ℕ, Semiformula.Evalm ℕ ![a, b] id φ ↔ lt a b)
+    (hφ : ∀ a b : ℕ, GoodsteinPA.Compat.gEvalm ℕ ![a, b] id φ ↔ lt a b)
     (γ : Ordinal.{0}) (n : ℕ) :
     models lt γ ((hyp (Semiformula.lMap (Language.ORing.embedding LX) φ))/[nm n])
       ↔ ∀ m : ℕ, lt m n → rk lt m < γ :=
@@ -122,7 +126,7 @@ structure Seam where
   /-- an `X`-free `ℒₒᵣ`-formula defining `lt` in the standard ℕ-model -/
   φ : Semiformula ℒₒᵣ ℕ 2
   /-- `φ` defines `lt` -/
-  hφ : ∀ a b : ℕ, Semiformula.Evalm ℕ ![a, b] id φ ↔ lt a b
+  hφ : ∀ a b : ℕ, GoodsteinPA.Compat.gEvalm ℕ ![a, b] id φ ↔ lt a b
   /-- the order type is at least ε₀ (the only obligation not yet discharged by this file) -/
   ge : ε₀ ≤ orderType lt
 

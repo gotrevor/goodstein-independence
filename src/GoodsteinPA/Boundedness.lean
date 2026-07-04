@@ -16,6 +16,7 @@ import GoodsteinPA.ZinftyGen
 import GoodsteinPA.LangX
 import GoodsteinPA.TruthSem
 import GoodsteinPA.XPositive
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.Boundedness
 
@@ -54,7 +55,7 @@ variable (lt : ℕ → ℕ → Prop) [IsWellFounded ℕ lt]
 /-- The numeral `nm n` denotes `n` in the `structLX` carrier (its `ℒₒᵣ`-fragment is the standard
 model). -/
 theorem val_nm_structLX (S : ℕ → Prop) (n : ℕ) :
-    Semiterm.val (structLX S) ![] (id : ℕ → ℕ) (nm n) = n := by
+    GoodsteinPA.Compat.gVal (structLX S) ![] (id : ℕ → ℕ) (nm n) = n := by
   letI inst : Structure LX ℕ := structLX S
   haveI : Structure.Zero LX ℕ := ⟨rfl⟩
   haveI : Structure.One LX ℕ := ⟨rfl⟩
@@ -66,7 +67,7 @@ membership, i.e. as the ≺-rank bound. -/
 theorem models_Xat_nm (γ : Ordinal.{0}) (n : ℕ) :
     models lt γ (Xat (nm n)) ↔ rk lt n < γ := by
   unfold models Xat
-  rw [Semiformula.eval_rel₁, structLX_rel_Xsym]
+  rw [GoodsteinPA.Compat.eval_rel₁, structLX_rel_Xsym]
   simp only [Matrix.cons_val_zero, val_nm_structLX]
   rfl
 
@@ -108,13 +109,13 @@ variable (lt : ℕ → ℕ → Prop) [IsWellFounded ℕ lt]
 /-- `tval lt t = |tᴺ|_≺` — the ≺-rank of the ℕ-value of a closed `LX`-term (X-free, so the carrier
 is immaterial). -/
 noncomputable def tval (t : Semiterm LX ℕ 0) : Ordinal.{0} :=
-  rk lt (Semiterm.val (structLX (fun _ => False)) ![] id t)
+  rk lt (GoodsteinPA.Compat.gVal (structLX (fun _ => False)) ![] id t)
 
 /-- **The X-atom on a closed term reads the ≺-rank bound.** -/
 theorem models_Xat' (γ : Ordinal.{0}) (t : Semiterm LX ℕ 0) :
     models lt γ (Xat t) ↔ tval lt t < γ := by
   unfold models Xat tval
-  rw [Semiformula.eval_rel₁, structLX_rel_Xsym]
+  rw [GoodsteinPA.Compat.eval_rel₁, structLX_rel_Xsym]
   simp only [Matrix.cons_val_zero, levelSet]
   rw [val_structLX_eq (levelSet lt γ) (fun _ => False)]
 
@@ -124,7 +125,7 @@ theorem models_negXat (γ : Ordinal.{0}) (t : Semiterm LX ℕ 0) :
   have : ∼(Xat t) = Semiformula.nrel Xsym ![t] := rfl
   rw [this]
   unfold models tval
-  rw [Semiformula.eval_nrel₁, structLX_rel_Xsym]
+  rw [GoodsteinPA.Compat.eval_nrel₁, structLX_rel_Xsym]
   simp only [Matrix.cons_val_zero, levelSet]
   rw [val_structLX_eq (levelSet lt γ) (fun _ => False)]
   exact not_lt
@@ -133,12 +134,12 @@ theorem models_negXat (γ : Ordinal.{0}) (t : Semiterm LX ℕ 0) :
 theorem models_inl_lit (γ : Ordinal.{0}) (b : Bool) {k} (r₀ : (ℒₒᵣ).Rel k)
     (v : Fin k → Semiterm LX ℕ 0) (htrue : LitTrue (signedLit b (Sum.inl r₀) v)) :
     models lt γ (signedLit b (Sum.inl r₀) v) := by
-  have hv : (fun i => Semiterm.val (structLX (levelSet lt γ)) ![] id (v i))
-      = (fun i => Semiterm.val (structLX (fun _ => False)) ![] id (v i)) :=
+  have hv : (fun i => GoodsteinPA.Compat.gVal (structLX (levelSet lt γ)) ![] id (v i))
+      = (fun i => GoodsteinPA.Compat.gVal (structLX (fun _ => False)) ![] id (v i)) :=
     funext fun i => val_structLX_eq _ _ _ _ (v i)
   cases b <;>
     · simp only [signedLit, models, LitTrue, Semiformula.eval_rel, Semiformula.eval_nrel,
-        Semiformula.Evalm] at htrue ⊢
+        GoodsteinPA.Compat.gEvalm, Function.comp_def] at htrue ⊢
       rw [hv]; exact htrue
 
 /-- **X-free axTrue leaves only** (Buchholz-faithfulness; see the section header). -/
@@ -207,7 +208,7 @@ theorem satpos_subset {γ : Ordinal.{0}} {Δ Δ' : Seq LX} (h : Δ ⊆ Δ') :
 
 /-- `(X #0)/[nm n] = X (nm n)`. -/
 theorem xat_subst (n : ℕ) : (Xat (#0 : Semiterm LX ℕ 1))/[nm n] = Xat (nm n) := by
-  simp [Xat, Semiformula.rew_rel, Matrix.constant_eq_singleton]
+  simp [Xat, Semiformula.rew_rel, Matrix.constant_eq_singleton, Function.comp_def]
 
 /-- The `¬Prog` body `∼(hyp 🡒 X #0)` substitutes to `hyp/[nm n] ⋏ ¬X(nm n)` — the two Buchholz
 case-2 conjuncts (the X-positive `∀y≺n Xy` and the bounded negative atom `¬Xn`). -/
@@ -246,8 +247,8 @@ theorem PXF.axL {Γ : Seq LX} {k} (r : LX.Rel k) (v) (hp : Semiformula.rel r v �
 
 /-- The value-congruent literal axiom is `XFreeAx`-safe (it is not an `axTrue`). -/
 theorem PXF.axLv {Γ : Seq LX} {k} (r : LX.Rel k) (v v' : Fin k → Semiterm LX ℕ 0)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-               = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+               = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i))
     (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : PXF 0 Γ :=
   ⟨Deriv.axLv r v v' hval hp hn, by simp [Deriv.o], by simp [Deriv.cr], by simp [XFreeAx]⟩
 
