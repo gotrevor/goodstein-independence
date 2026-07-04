@@ -76,12 +76,15 @@ upstream `𝗣𝗔` / provability / satisfaction directly. The shim only touches
 check: `#print axioms` = `[propext, Classical.choice, Quot.sound]`.
 
 ## Fire (Trevor)
-This is a `mode=build-green` job. Because `lean-treadmill` runs network-isolated c-yolo boxes and a
-git *worktree*'s `.git` is a pointer into the parent (unreachable from the box), grind on a
-standalone clone, not this worktree — e.g. `cp -cR` the branch state into a fresh `~/src` dir (APFS
-clonefile, keeps the CoW `.lake`), then:
+This is a `mode=build-green` job. `lean-treadmill` runs network-isolated c-yolo boxes, and a git
+*worktree*'s `.git` is a pointer into the parent (unreachable from the box) — so grind a
+**standalone clone**, not this worktree. Make one by APFS-cloning the MAIN repo (self-contained
+`.git` + already-built CoW `.lake`), then checking out this branch (it lives in the shared repo):
 
-    lean-treadmill <clone-dir-name> --prompt "Finish the upstream-Foundation rehome: get bare \`lake build\` green and axiom-clean per HANDOFF-REHOME.md. Fix the Derivation2 Schema→Theory embedding-layer errors; keep the trusted surface (Statement/Encoding/Bridge) on upstream; re-run scripts/rehome_foundation_api.py after edits." --max-duration 4h --review-every 3
+    cp -cR ~/src/goodstein-independence ~/src/goodstein-rehome-grind
+    cd ~/src/goodstein-rehome-grind && git-safe checkout rehome-foundation-upstream
+    # first `lake build` re-resolves to upstream Foundation (mathlib Replays; Foundation recompiles)
+    lean-treadmill goodstein-rehome-grind --prompt "Finish the upstream-Foundation rehome: get bare \`lake build\` green and axiom-clean per HANDOFF-REHOME.md. Fix the Derivation2 Schema→Theory embedding-layer errors; keep the trusted surface (Statement/Encoding/Bridge) on upstream; re-run scripts/rehome_foundation_api.py after edits." --max-duration 4h --review-every 3
 
 Endgame (host, after green): `lean-axiom-gate --exact`, commit, push, open the PR. The PR is the
 `retire-foundation-fork` todo; retiring `gotrevor/Foundation` also waits on the other fork consumers.
