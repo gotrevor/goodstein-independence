@@ -29,12 +29,13 @@ namespace GoodsteinPA.ReductModel
 open LO LO.FirstOrder LO.FirstOrder.Arithmetic
 open GoodsteinPA GoodsteinPA.LangX GoodsteinPA.DescentLift
 
-variable {M : Type} [Nonempty M] [inst : Structure LX M]
+variable {M : Type} [inst : Structure LX M]
 
 /-- **The `ORingStructure` on `M` read off its `LX`-reduct.** Each ring/order symbol of `ℒₒᵣ` is sent
 by `Φ = ORing.embedding LX` to the corresponding `LX`-symbol, and we take its `M`-interpretation. By
 construction this makes `inst.lMap Φ` agree with the canonical `standardModel` of `reductORing`
 (`reduct_eq_standardModel`). -/
+@[reducible]
 noncomputable def reductORing : ORingStructure M where
   zero := (inst.lMap Φ).func Language.Zero.zero ![]
   one := (inst.lMap Φ).func Language.One.one ![]
@@ -46,7 +47,7 @@ noncomputable def reductORing : ORingStructure M where
 interprets `=` as real equality (`[Structure.Eq LX M]`), the reduct `inst.lMap Φ` coincides with the
 canonical `standardModel M` of the read-off `ORingStructure` — by `standardModel_unique`, since each
 symbol's interpretation matches by construction. -/
-theorem reduct_eq_standardModel [Structure.Eq LX M] :
+theorem reduct_eq_standardModel [Nonempty M] [Structure.Eq LX M] :
     inst.lMap Φ = @standardModel M reductORing := by
   letI : ORingStructure M := reductORing
   letI sM : Structure ℒₒᵣ M := inst.lMap Φ
@@ -62,11 +63,11 @@ theorem reduct_eq_standardModel [Structure.Eq LX M] :
       Matrix.fun_eq_vec_two]; rfl⟩
   haveI : Structure.LT ℒₒᵣ M := ⟨fun a b => by
     simp [Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel,
-      Matrix.fun_eq_vec_two, Function.comp_def]; rfl⟩
+      Matrix.fun_eq_vec_two]; rfl⟩
   haveI : Structure.Eq ℒₒᵣ M := ⟨fun a b => by
     have h := Structure.Eq.eq (L := LX) (M := M) a b
     simp only [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
-      Semiformula.eval_rel, Semiterm.val_bvar, Matrix.cons_val_zero,
+      Semiformula.eval_rel, Semiterm.val_bvar,
       Structure.lMap_rel, Function.comp_def] at h ⊢
     exact h⟩
   exact standardModel_unique (M := M) sM
@@ -74,8 +75,8 @@ theorem reduct_eq_standardModel [Structure.Eq LX M] :
 /-- **`M`'s reduct models `𝗣𝗔`.** From `M ⊧ paLX ⊇ lMap Φ 𝗣𝗔` (the lap-30 `lMap_PA_subset`), the
 reduct satisfies `𝗣𝗔` symbol-by-symbol (`modelsTheory_onTheory₁`), and the reduct IS the standard
 model (`reduct_eq_standardModel`). -/
-theorem reduct_models_PA [Structure.Eq LX M]
-    (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
+theorem reduct_models_PA [Nonempty M] [Structure.Eq LX M]
+  (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
     letI : ORingStructure M := reductORing
     M ⊧ₘ* (𝗣𝗔 : Theory ℒₒᵣ) := by
   letI : ORingStructure M := reductORing
@@ -90,8 +91,8 @@ theorem reduct_models_PA [Structure.Eq LX M]
 
 /-- **`M`'s reduct models `𝗜𝚺₁`.** Immediate from `reduct_models_PA` via `𝗜𝚺₁ ⪯ 𝗣𝗔`
 (`models_of_subtheory`). This is the `[V ⊧ₘ* 𝗜𝚺₁]` instance the internal Goodstein substrate runs over. -/
-theorem reduct_models_isigma1 [Structure.Eq LX M]
-    (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
+theorem reduct_models_isigma1 [Nonempty M] [Structure.Eq LX M]
+  (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
     letI : ORingStructure M := reductORing
     M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := by
   letI : ORingStructure M := reductORing
