@@ -460,7 +460,7 @@ invariant for ANY closed term). -/
 theorem iord_descent_iRcritG_critReductCorr {s r ds sᵢ sⱼ a p pj k' d0 : V}
     (hds : Seq ds) (hmem : ∀ i < lh ds, ZDerivation (znth ds i))
     (hvalid : zKValid s r ds)
-    (hIlt : redexI (zK s r ds) < lh ds) (hJlt : redexJ (zK s r ds) < lh ds)
+    (hIlt : redexI (zK s r ds) < lh ds) (_ : redexJ (zK s r ds) < lh ds)
     (hIJ : redexI (zK s r ds) < redexJ (zK s r ds))
     (hdi : znth ds (redexI (zK s r ds)) = zIall sᵢ a p d0)
     (hdj : znth ds (redexJ (zK s r ds)) = zAxAll sⱼ pj k')

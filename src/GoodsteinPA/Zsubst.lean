@@ -646,7 +646,7 @@ lemma inAnt_fvSubstSeq_reflect {a t A Γ : V} (hΓ : Γ ≤ a)
 
 /-- **`tp` is invariant under eigenvariable substitution on an `a`-free derivation** (`d ≤ a`): the
 principal formula is `≤ a` hence `^&a`-free, so `fvSubst` fixes it and the inference symbol is unchanged. -/
-lemma tp_zsubst_eq {a t : V} (ht : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDerivation d) (hda : d ≤ a) :
+lemma tp_zsubst_eq {a t : V} (_ : IsSemiterm ℒₒᵣ 0 t) {d : V} (hd : ZDerivation d) (hda : d ≤ a) :
     tp (zsubst d a t) = tp d := by
   rcases zDerivation_iff.mp hd with ⟨s, rfl, _⟩ | ⟨s, e, p, d0, rfl, _, _, hwff⟩ |
     ⟨s, p, d0, rfl, _, _, hwff⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ |
@@ -788,11 +788,11 @@ instance maxEigenNext_defined : 𝚺₁-Function₂ (maxEigenNext : V → V → 
     by_cases h1 : zTag (v 1) = 1
     · simp [h1]
     · by_cases h2 : zTag (v 1) = 2
-      · simp [h1, h2]
+      · simp [h2]
       · by_cases h3 : zTag (v 1) = 3
-        · simp [h1, h2, h3]
+        · simp [h3]
         · by_cases h4 : zTag (v 1) = 4
-          · simp [h1, h2, h3, h4]
+          · simp [h4]
           · simp [h1, h2, h3, h4]
 
 instance maxEigenNext_definable : 𝚺₁-Function₂ (maxEigenNext : V → V → V) :=
@@ -1247,8 +1247,7 @@ def _root_.LO.FirstOrder.Arithmetic.ltFlagDef : 𝚺₀.Semisentence 3 := .mkSig
   “z x y. (x < y ∧ z = 0) ∨ (y ≤ x ∧ z = 1)”
 
 instance ltFlag_defined : 𝚺₀-Function₂ (ltFlag : V → V → V) via ltFlagDef := .mk fun v ↦ by
-  by_cases h : v 1 < v 2 <;> simp [ltFlagDef, ltFlag, h, not_lt.mp, le_of_lt, not_le.mpr] <;>
-    simp [not_lt] at h ⊢ <;> omega
+  by_cases h : v 1 < v 2 <;> simp [ltFlagDef, ltFlag, h, not_lt.mp, not_le.mpr]
 instance ltFlag_definable : 𝚺₀-Function₂ (ltFlag : V → V → V) := ltFlag_defined.to_definable
 
 @[simp] lemma ltFlag_eq_zero_iff {x y : V} : ltFlag x y = 0 ↔ x < y := by
@@ -1274,7 +1273,7 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zRegNextDef : 𝚺₁.Semisent
     ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqMaxTabDef y s ds)
     ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ y = 0) )”
 
-set_option maxHeartbeats 1000000 in
+-- set_option maxHeartbeats 1000000 in
 instance zRegNext_defined : 𝚺₁-Function₂ (zRegNext : V → V → V) via zRegNextDef :=
   .mk fun v ↦ by
     simp [zRegNextDef, zRegNext, zTag_defined.iff, zIallPrem_defined.iff, maxEigen_defined.iff,
@@ -1284,11 +1283,11 @@ instance zRegNext_defined : 𝚺₁-Function₂ (zRegNext : V → V → V) via z
     by_cases h1 : zTag (v 1) = 1
     · simp [h1]
     · by_cases h2 : zTag (v 1) = 2
-      · simp [h1, h2]
+      · simp [h2]
       · by_cases h3 : zTag (v 1) = 3
-        · simp [h1, h2, h3]
+        · simp [h3]
         · by_cases h4 : zTag (v 1) = 4
-          · simp [h1, h2, h3, h4]
+          · simp [h4]
           · simp [h1, h2, h3, h4]
 
 instance zRegNext_definable : 𝚺₁-Function₂ (zRegNext : V → V → V) := zRegNext_defined.to_definable
@@ -1739,11 +1738,11 @@ instance zFreshNext_defined : 𝚺₁-Function₂ (zFreshNext : V → V → V) v
     by_cases h1 : zTag (v 1) = 1
     · simp [h1]
     · by_cases h2 : zTag (v 1) = 2
-      · simp [h1, h2]
+      · simp [h2]
       · by_cases h3 : zTag (v 1) = 3
-        · simp [h1, h2, h3]
+        · simp [h3]
         · by_cases h4 : zTag (v 1) = 4
-          · simp [h1, h2, h3, h4]
+          · simp [h4]
           · simp [h1, h2, h3, h4]
 
 instance zFreshNext_definable : 𝚺₁-Function₂ (zFreshNext : V → V → V) := zFreshNext_defined.to_definable
@@ -2063,7 +2062,7 @@ noncomputable def _root_.LO.FirstOrder.Arithmetic.zSeqAntNextDef : 𝚺₁.Semis
     ∨ (t = 4 ∧ ∃ ds, !zKseqDef ds d ∧ !iseqMaxTabDef w s ds)
     ∨ (t ≠ 1 ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ w = 0) ) ∧ !max.dfn y fl w”
 
-set_option maxHeartbeats 1000000 in
+-- set_option maxHeartbeats 1000000 in
 instance zSeqAntNext_defined : 𝚺₁-Function₂ (zSeqAntNext : V → V → V) via zSeqAntNextDef :=
   .mk fun v ↦ by
     simp [zSeqAntNextDef, zSeqAntNext, zTag_defined.iff, fstIdx_defined.iff, seqAntSeqFlag_defined.iff,
@@ -2072,11 +2071,11 @@ instance zSeqAntNext_defined : 𝚺₁-Function₂ (zSeqAntNext : V → V → V)
     by_cases h1 : zTag (v 1) = 1
     · simp [h1]
     · by_cases h2 : zTag (v 1) = 2
-      · simp [h1, h2]
+      · simp [h2]
       · by_cases h3 : zTag (v 1) = 3
-        · simp [h1, h2, h3]
+        · simp [h3]
         · by_cases h4 : zTag (v 1) = 4
-          · simp [h1, h2, h3, h4]
+          · simp [h4]
           · simp [h1, h2, h3, h4]
 
 instance zSeqAntNext_definable : 𝚺₁-Function₂ (zSeqAntNext : V → V → V) := zSeqAntNext_defined.to_definable
@@ -2494,7 +2493,7 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _⟩ | ⟨s, p, d0, rfl, _, _⟩ |
     ⟨s, at', p, d0, d1, rfl, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
     ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
-  · rw [red_zAtom]; simpa using hreg
+  · rw [red_zAtom]; simp
   · rw [red_zIall, zReg_zsubst _ _ _ hd0]; rw [zReg_zIall] at hreg
     exact nonpos_iff_eq_zero.mp (hreg ▸ le_max_right _ _)
   · rw [red_zIneg]; rwa [zReg_zIneg] at hreg
@@ -2505,10 +2504,10 @@ lemma ZRegular_red_of_not_zK {d : V} (hZ : ZDerivation d) (hreg : ZRegular d)
     have h1 : zReg d1 = 0 := nonpos_iff_eq_zero.mp (hreg ▸ le_trans (le_max_right _ _) (le_max_right _ _))
     rw [h0, h1]; simp
   · exact absurd (zTag_zK s r ds) hnK
-  · rw [red_zAxAll]; simpa using hreg
-  · rw [red_zAxNeg]; simpa using hreg
-  · rw [red_zAx1]; simpa using hreg
-  · rw [red_zAxBot]; simpa using hreg
+  · rw [red_zAxAll]; simp
+  · rw [red_zAxNeg]; simp
+  · rw [red_zAx1]; simp
+  · rw [red_zAxBot]; simp
 
 /-! ### Reusable building blocks for the `zK` chain case (5.1/5.2.1/5.2.2)
 
@@ -2995,7 +2994,7 @@ lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
   rcases zDerivation_iff.mp hZ with ⟨s, rfl, _⟩ | ⟨s, a, p, d0, rfl, hd0, _, _⟩ |
     ⟨s, p, d0, rfl, _, _, _⟩ | ⟨s, at', p, d0, d1, rfl, _, _, _⟩ | ⟨s, r, ds, rfl, _, _, _⟩ |
     ⟨s, p, k, rfl, _, _⟩ | ⟨s, p, rfl, _, _⟩ | ⟨s, C, rfl, _⟩ | ⟨s, rfl, _⟩
-  · rw [red_zAtom]; simpa using hfresh
+  · rw [red_zAtom]; simp
   · rw [zFresh_zIall] at hfresh
     rw [red_zIall]
     exact zFresh_zsubst a 0 d0 hd0 (nonpos_iff_eq_zero.mp (hfresh ▸ le_max_right _ _))
@@ -3007,10 +3006,10 @@ lemma ZFresh_red_of_not_zK {d : V} (hZ : ZDerivation d) (hfresh : ZFresh d)
         (nonpos_iff_eq_zero.mp (hfresh ▸ le_trans (le_max_left _ _) (le_max_right _ _)))
         (nonpos_iff_eq_zero.mp (hfresh ▸ le_trans (le_max_right _ _) (le_max_right _ _))))
   · exact absurd (zTag_zK s r ds) hnK
-  · rw [red_zAxAll]; simpa using hfresh
-  · rw [red_zAxNeg]; simpa using hfresh
-  · rw [red_zAx1]; simpa using hfresh
-  · rw [red_zAxBot]; simpa using hfresh
+  · rw [red_zAxAll]; simp
+  · rw [red_zAxNeg]; simp
+  · rw [red_zAx1]; simp
+  · rw [red_zAxBot]; simp
 
 /-! ## `red` preserves `ZFresh` — the `zK` chain dispatch (freshness analogue of `ZRegular_red_zK`)
 
