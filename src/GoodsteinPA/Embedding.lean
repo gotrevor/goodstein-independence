@@ -531,13 +531,14 @@ theorem embedC {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     exact ⟨0, fun e => provable_em (asg e ▹ φ) (Finset.mem_image_of_mem _ hp)
       (by have := Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hn; simpa using this)⟩
   | axm φ hφ hΓ =>
-    -- closed PA axiom `φ = ↑σ`, `σ ∈ 𝗣𝗔`. Since `ℕ ⊧ₘ* 𝗣𝗔`, `↑σ` is a TRUE closed formula, so
-    -- (even after the closing substitution `asg e`, which fixes it) `provable_true` (ω-completeness)
-    -- derives it directly — no Buchholz meta-induction needed; the ω-rule subsumes it.
-    obtain ⟨σ, hσ, rfl⟩ := hφ
+    -- closed PA axiom: `φ : Sentence ℒₒᵣ`, `φ ∈ 𝗣𝗔`, and `↑φ ∈ Γ` (upstream's `Derivation2` is
+    -- `Theory`-indexed, so `axm` hands back the sentence `φ` and its coercion `↑φ : Proposition`
+    -- directly — no `Rewriting.emb ''` unwrap). Since `ℕ ⊧ₘ* 𝗣𝗔`, `↑φ` is a TRUE closed formula,
+    -- so (even after the closing substitution `asg e`, which fixes it) `provable_true`
+    -- (ω-completeness) derives it directly — no Buchholz meta-induction needed; ω-rule subsumes it.
     refine ⟨0, fun e => ?_⟩
-    have htrue : LitTrue (asg e ▹ (↑σ : SyntacticFormula ℒₒᵣ)) := by
-      have hmod : ℕ ⊧ₘ σ := ModelsTheory.models ℕ hσ
+    have htrue : LitTrue (asg e ▹ (↑φ : SyntacticFormula ℒₒᵣ)) := by
+      have hmod : ℕ ⊧ₘ φ := Semantics.modelsSet_iff.mp inferInstance hφ
       simp only [LitTrue, asg, Semiformula.eval_rewrite, Semiformula.eval_emb]
       rw [models_iff] at hmod
       simpa using hmod

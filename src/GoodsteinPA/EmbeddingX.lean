@@ -410,7 +410,7 @@ automatic). All structural builders are `XFreeAx`-safe. The two non-structural c
   the faithful fix is to generalise `axL` to value-congruent literal pairs (Boundedness case 1.2,
   p.29, already handles them). Held as a disclosed `sorry` pending that retrofit. -/
 theorem embedC_LX_gen {𝓢 : Theory LX}
-    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ 𝓢 → φ ∈ Γ →
+    (hax : ∀ {Γ : Seq LX} (φ : Sentence LX), φ ∈ 𝓢 → (↑φ : Form LX) ∈ Γ →
       ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)))
     {Γ : Seq LX} (d : Derivation2 𝓢 Γ) :
     ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun φ => asgX e ▹ φ)) := by
@@ -536,8 +536,8 @@ Buchholz's `Z = PA(X)`: Peano arithmetic in the language `ℒₒᵣ ∪ {X}` wit
 of the finite `𝗣𝗔⁻` axioms (X-free) together with the full `LX` induction scheme `InductionScheme LX
 Set.univ`. A hypothetical proof `Z ⊢ TI_≺(X)` is then a `Derivation2 (↑paLX) {TI prec}`. -/
 noncomputable def paLX : Theory LX :=
-  Theory.lMap (Language.ORing.embedding LX) 𝗣𝗔⁻ + LO.FirstOrder.Arithmetic.InductionScheme LX Set.univ
-    + {Theory.Eq.relExt Xsym}
+  Theory.lMap (Language.ORing.embedding LX) 𝗣𝗔⁻ ∪ LO.FirstOrder.Arithmetic.InductionScheme LX Set.univ
+    ∪ {Theory.Eq.relExt Xsym}
 
 /-! ### Discharging `hax` for `paLX` (C₂-axm): X-free base axioms + X-induction instances -/
 
@@ -850,13 +850,13 @@ go through `metaInduction_cong`: the `asgX e`-image of `↑(univCl (succInd ψ))
 (`PXFc_allClosure`) to per-`v` numeral instantiations, each repackaged via `rew_succInd` as an
 induction axiom `succInd ψ_v`, NNF-expanded (`succInd_nnf`) and broken by `PXFc.orI` into the
 `{∼ψ_v(0), ∃(∼step_v), ∀ψ_v}` shape `metaInduction_cong` discharges. -/
-theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Theory LX)) (hΓ : φ ∈ Γ) :
+theorem hax_paLX {Γ : Seq LX} (φ : Sentence LX) (hφ : φ ∈ (paLX : Theory LX))
+    (hΓ : (↑φ : Form LX) ∈ Γ) :
     ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)) := by
-  obtain ⟨σ, hσ, rfl⟩ := hφ
-  rcases hσ with (hbase | hind) | heq
+  rcases hφ with (hbase | hind) | heq
   · obtain ⟨τ, hτ, rfl⟩ := hbase
     refine ⟨0, fun e => ?_⟩
-    have hmod : ℕ ⊧ₘ τ := ModelsTheory.models ℕ hτ
+    have hmod : ℕ ⊧ₘ τ := Semantics.modelsSet_iff.mp inferInstance hτ
     have htrue := litTrue_lMap_axiom τ hmod e
     have hxf : XFreeForm (asgX e ▹ (Rew.emb ▹ Semiformula.lMap (Language.ORing.embedding LX) τ)) := by
       rw [xfreeForm_rew, xfreeForm_rew]; exact xfreeForm_lMap τ
@@ -888,8 +888,10 @@ theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Theory LX)) 
       intro n
       haveI hO : Structure.One LX ℕ := ⟨rfl⟩
       haveI hA : Structure.Add LX ℕ := ⟨fun _ _ => rfl⟩
+      -- upstream's `val_substs` now emits the substitution assignment in `∘`-composition normal
+      -- form; expand it so `Matrix.cons_val_zero` + `valm_nm` reduce `(val ∘ ![nm n]) 0` to `n`.
       simp only [hsuccT, Semiterm.val_substs, Semiterm.val_operator₂, Semiterm.val_operator₀,
-        hA.add, valm_nm, Semiterm.val_bvar, Matrix.cons_val_zero]
+        hA.add, Function.comp_def, Matrix.cons_val_zero, Semiterm.val_bvar, valm_nm]
       congr 1
     have hstep : ∀ n, (∼step)/[nm n] = (ψv/[nm n]) ⋏ ∼(ψv/[succT n]) := by
       intro n
@@ -924,7 +926,7 @@ X-induction instances via `metaInduction`). The structural engine (`embedC_LX_ge
 sorry-free + axiom-clean; only `hax` and the cut-elimination end (`atomCut_x` → `nrel_value_subst`)
 remain to make the full `Z ⊢ TI ⟹ ‖≺‖ < ε₀` chain clean. -/
 theorem embedC_LX
-    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ (paLX : Theory LX) → φ ∈ Γ →
+    (hax : ∀ {Γ : Seq LX} (φ : Sentence LX), φ ∈ (paLX : Theory LX) → (↑φ : Form LX) ∈ Γ →
       ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)))
     {Γ : Seq LX} (d : Derivation2 (paLX : Theory LX) Γ) :
     ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun φ => asgX e ▹ φ)) :=

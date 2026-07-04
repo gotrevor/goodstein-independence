@@ -1270,7 +1270,11 @@ theorem term_val_le_Gexp_iter (t : SyntacticTerm ℒₒᵣ) :
 theorem stdClosedVal_asg (env : ℕ → ℕ) (t : SyntacticTerm ℒₒᵣ) :
     stdClosedVal (Embedding.asg env t) = GoodsteinPA.Compat.gValm ℕ ![] env t := by
   show GoodsteinPA.Compat.gVal _ (fun _ => 0) (fun _ => 0) (Rew.rewrite (fun x => nm (env x)) t) = _
+  -- unfold the `gVal`/`gValm` shims so `rw` sees `Semiterm.val`; upstream's `val_rewrite` now emits
+  -- the free-var assignment in `∘`-composition form, so normalize it back with `Function.comp_def`
+  unfold GoodsteinPA.Compat.gVal GoodsteinPA.Compat.gValm
   rw [Semiterm.val_rewrite]
+  simp only [Function.comp_def]
   have he : (fun _ => 0 : Fin 0 → ℕ) = ![] := funext (fun x => x.elim0)
   rw [he]
   congr 1
@@ -1962,7 +1966,7 @@ theorem budgetedEmbedsV3_addEqOfLt {Γ : Finset (SyntacticFormula ℒₒᵣ)}
                 ▹ (Semiformula.rel Language.Eq.eq ![‘(#2 + #0)’, #1]))) := by
         rw [embedding_subst_q_cons_app]
         simp [hM, Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.comp_vecCons,
-          Matrix.empty_eq, Function.comp_def]
+          Matrix.empty_eq, Function.comp_def, Matrix.constant_eq_singleton]
       rw [hsubB]
       set A : SyntacticFormula ℒₒᵣ := ∼(Semiformula.rel Language.LT.lt ![nm a, nm b]) with hA
       set Eb : SyntacticSemiformula ℒₒᵣ 1 := (Rew.subst (nm b :> ![nm a])).q
@@ -1977,7 +1981,8 @@ theorem budgetedEmbedsV3_addEqOfLt {Γ : Finset (SyntacticFormula ℒₒᵣ)}
                   ![Semiterm.func Language.Add.add ![nm a, nm (b - a)], nm b] := by
             rw [hE, embedding_subst_q_cons_app]
             simp [Semiformula.rew_rel, Rew.func, Matrix.comp_vecCons, Matrix.empty_eq,
-              Semiterm.Operator.operator, Semiterm.Operator.Add.term_eq, Function.comp_def]
+              Semiterm.Operator.operator, Semiterm.Operator.Add.term_eq, Function.comp_def,
+              Matrix.constant_eq_singleton]
           have htrue : atomTrue (Semiformula.rel Language.Eq.eq
               ![Semiterm.func Language.Add.add ![nm a, nm (b - a)], nm b]) := by
             simp [atomTrue, Semiformula.eval_rel, Semiterm.val_func, Matrix.empty_eq,
@@ -2026,7 +2031,7 @@ except `addEqOfLt` are TRUE ∃-free sentences — `budgetedEmbedsV3_of_exFree_t
 theorem budgetedEmbedsV3_axm_PAminus {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     (σ : Sentence ℒₒᵣ) (hσ : σ ∈ 𝗣𝗔⁻) (hΓ : (↑σ : SyntacticFormula ℒₒᵣ) ∈ Γ) :
     BudgetedEmbedsV3 Γ := by
-  have hmod : ℕ ⊧ₘ σ := ModelsTheory.models ℕ hσ
+  have hmod : ℕ ⊧ₘ σ := Semantics.modelsSet_iff.mp inferInstance hσ
   cases hσ with
   | equal φ hφ =>
       cases hφ with
@@ -2586,7 +2591,7 @@ theorem budgetedEmbedsV3_axm {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     (σ : Sentence ℒₒᵣ) (hσ : σ ∈ (𝗣𝗔 : Theory ℒₒᵣ))
     (hΓ : (↑σ : SyntacticFormula ℒₒᵣ) ∈ Γ) : BudgetedEmbedsV3 Γ := by
   have hsplit : σ ∈ (𝗣𝗔⁻ : Theory ℒₒᵣ) ∨ σ ∈ Arithmetic.InductionScheme ℒₒᵣ Set.univ := by
-    simpa [Arithmetic.Peano, Theory.add_def] using hσ
+    simpa [Arithmetic.Peano, Set.mem_union] using hσ
   rcases hsplit with h | h
   · exact budgetedEmbedsV3_axm_PAminus σ h hΓ
   · obtain ⟨φ, -, rfl⟩ := h
@@ -2601,9 +2606,7 @@ theorem budgetedEmbeddingV3 {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     BudgetedEmbedsV3 Γ := by
   induction d with
   | closed Γ φ hp hn => exact budgetedEmbedsV3_closed φ hp hn
-  | axm φ hφ hΓ =>
-      obtain ⟨σ, hσ, rfl⟩ := hφ
-      exact budgetedEmbedsV3_axm σ hσ hΓ
+  | axm φ hφ hΓ => exact budgetedEmbedsV3_axm φ hφ hΓ
   | verum h => exact budgetedEmbedsV3_verum h
   | @and Γ φ ψ h _dp _dq ihp ihq => exact budgetedEmbedsV3_and h ihp ihq
   | @or Γ φ ψ h _d ih => exact budgetedEmbedsV3_or h ih
@@ -2758,12 +2761,9 @@ theorem embedding_Zef2TC_V3 :
         ∃ H : ONote → Prop, Cl H α ∧
           Zef2TC α e H (rel1 (ewRootSlot e B) K) d {(goodsteinBodyE/[nm m])} := by
   intro h
-  obtain ⟨b⟩ := h
-  have d2 := Derivation.toDerivation2 _ b
+  -- upstream `𝗣𝗔 ⊢ σ` repackages as a `Derivation2 𝗣𝗔 {↑σ}` via `provable_iff_derivable2`
   have hV3 : BudgetedEmbedsV3 {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by
-    have : ([(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)]).toFinset
-        = {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by simp
-    rw [← this]
+    obtain ⟨d2⟩ := (provable_iff_derivable2 (L := ℒₒᵣ)).mp h
     exact budgetedEmbeddingV3 d2
   obtain ⟨B, d, N, e, α, he, hαNF, hNlogB, hD⟩ := hV3
   refine ⟨B, d, e, α, he, hαNF, fun m => ?_⟩
@@ -4640,7 +4640,9 @@ theorem goodsteinBodyE_semantic_link {m n : ℕ} {χ : SyntacticSemiformula ℒ�
     show (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #(Fin.succ 0) = _
     rw [Rew.q_bvar_succ]
     simp
-  have hval : GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => n) (fun _ => 0)
+  -- `hkey` (post-`simp`) carries a bare `Semiterm.val`; state `hval` in the same form (the ℕ-model's
+  -- `Structure ℒₒᵣ ℕ` instance IS `standardModel ℕ`) so the `rw` matches, not via the `gVal` shim.
+  have hval : Semiterm.val (L := ℒₒᵣ) (ξ := ℕ) (fun _ => n) (fun _ => 0)
       ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #1) = m := by
     rw [hq1]
     simp [Semiterm.val_bShift', Matrix.empty_eq, valm_nm]
@@ -4687,12 +4689,9 @@ theorem embedding_Zef2TC_V3_linearK :
         ∃ H : ONote → Prop, Cl H α ∧
           Zef2TC α e H (rel1 (ewRootSlot e B) (max K₀ m)) d {(goodsteinBodyE/[nm m])} := by
   intro h
-  obtain ⟨b⟩ := h
-  have d2 := Derivation.toDerivation2 _ b
+  -- upstream `𝗣𝗔 ⊢ σ` repackages as a `Derivation2 𝗣𝗔 {↑σ}` via `provable_iff_derivable2`
   have hV3 : BudgetedEmbedsV3 {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by
-    have : ([(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)]).toFinset
-        = {(↑GoodsteinPA.goodsteinSentence : SyntacticFormula ℒₒᵣ)} := by simp
-    rw [← this]
+    obtain ⟨d2⟩ := (provable_iff_derivable2 (L := ℒₒᵣ)).mp h
     exact budgetedEmbeddingV3 d2
   obtain ⟨B, d, N, e, α, he, hαNF, hNlogB, hD⟩ := hV3
   refine ⟨B, d, envSup (fun _ => 0) N, e, α, he, hαNF, fun m => ?_⟩

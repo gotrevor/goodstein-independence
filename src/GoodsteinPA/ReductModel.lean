@@ -74,25 +74,27 @@ theorem reduct_eq_standardModel [Structure.Eq LX M] :
 /-- **`M`'s reduct models `𝗣𝗔`.** From `M ⊧ paLX ⊇ lMap Φ 𝗣𝗔` (the lap-30 `lMap_PA_subset`), the
 reduct satisfies `𝗣𝗔` symbol-by-symbol (`modelsTheory_onTheory₁`), and the reduct IS the standard
 model (`reduct_eq_standardModel`). -/
-theorem reduct_models_PA [Structure.Eq LX M] (hM : M ⊧ₘ* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
+theorem reduct_models_PA [Structure.Eq LX M]
+    (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
     letI : ORingStructure M := reductORing
     M ⊧ₘ* (𝗣𝗔 : Theory ℒₒᵣ) := by
   letI : ORingStructure M := reductORing
   -- `M ⊧ lMap Φ 𝗣𝗔`
-  have hlift : M ⊧ₘ* (Theory.lMap Φ 𝗣𝗔 : Theory LX) :=
-    ModelsTheory.of_ss hM lMap_PA_subset
-  -- transfer to the reduct structure
-  have hred : ModelsTheory (s := inst.lMap Φ) M (𝗣𝗔 : Theory ℒₒᵣ) :=
-    Theory.modelsTheory_onTheory₁.mp hlift
-  rw [reduct_eq_standardModel] at hred
-  exact hred
+  have hlift : M↓[LX] ⊧* (Theory.lMap Φ 𝗣𝗔 : Theory LX) := models_of_ss hM lMap_PA_subset
+  -- each `σ ∈ 𝗣𝗔` holds in the reduct: `M↓[LX] ⊧ lMap Φ σ` transfers to `(inst.lMap Φ) ⊧ σ`
+  -- (`models_lMap`), and the reduct IS the standard model of `reductORing` (`reduct_eq_standardModel`)
+  refine ⟨fun σ hσ => ?_⟩
+  have h2 : (inst.lMap Φ).toStruc ⊧ σ :=
+    Semiformula.models_lMap.mp (hlift.models _ (Set.mem_image_of_mem _ hσ))
+  exact (reduct_eq_standardModel (M := M)) ▸ h2
 
 /-- **`M`'s reduct models `𝗜𝚺₁`.** Immediate from `reduct_models_PA` via `𝗜𝚺₁ ⪯ 𝗣𝗔`
 (`models_of_subtheory`). This is the `[V ⊧ₘ* 𝗜𝚺₁]` instance the internal Goodstein substrate runs over. -/
-theorem reduct_models_isigma1 [Structure.Eq LX M] (hM : M ⊧ₘ* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
+theorem reduct_models_isigma1 [Structure.Eq LX M]
+    (hM : M↓[LX] ⊧* (GoodsteinPA.EmbeddingX.paLX : Theory LX)) :
     letI : ORingStructure M := reductORing
     M ⊧ₘ* (𝗜𝚺₁ : Theory ℒₒᵣ) := by
   letI : ORingStructure M := reductORing
-  exact models_of_subtheory (reduct_models_PA hM)
+  exact models_of_subtheory (reduct_models_PA (M := M) hM)
 
 end GoodsteinPA.ReductModel

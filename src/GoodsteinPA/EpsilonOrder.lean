@@ -91,6 +91,9 @@ theorem hprec_of_eval
     · rfl
     · refine Fin.cases ?_ (fun k => k.elim0) j
       simp [val_nm_structLX]
+  -- upstream's `eval_substs` now emits the assignment in `∘`-composition normal form
+  -- (`Semiterm.val ![] id ∘ ![nm n]`); expand it back to the `fun i => …` shape `hvec` matches.
+  simp only [Function.comp_def]
   rw [hvec]
   simp only [LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq,
     Xat, GoodsteinPA.Compat.eval_rel₁, Semiterm.val_bvar, Matrix.cons_val_zero, structLX_rel_Xsym]

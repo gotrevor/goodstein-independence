@@ -130,8 +130,8 @@ theorem lMap_inductionScheme_subset :
 first summand verbatim, and its induction-scheme image lands in `InductionScheme LX univ` (`paLX`'s
 second summand) by `lMap_inductionScheme_subset`. -/
 theorem lMap_PA_subset : Theory.lMap Φ 𝗣𝗔 ⊆ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
-  show Theory.lMap Φ (𝗣𝗔⁻ + InductionScheme ℒₒᵣ Set.univ) ⊆ _
-  rw [Theory.add_def, Theory.lMap, Set.image_union]
+  show Semiformula.lMap Φ '' (𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ Set.univ) ⊆ _
+  rw [Set.image_union]
   exact Set.union_subset (fun _ hx => Or.inl (Or.inl hx))
     (fun _ hx => Or.inl (Or.inr (lMap_inductionScheme_subset hx)))
 
@@ -179,14 +179,14 @@ lemma lMap_funcExt {k} (f : (ℒₒᵣ : Language).Func k) :
     Semiformula.lMap Φ (Theory.Eq.funcExt f) = Theory.Eq.funcExt (Φ.func f) := by
   cases f <;>
     simp [Theory.Eq.funcExt, Semiformula.Operator.eq_def, Semiformula.lMap_rel, Semiterm.lMap_func,
-      Semiterm.lMap_bvar, Matrix.conj, Matrix.vecTail, Function.comp, lx_eq, phi_rel, phi_func,
+      Semiterm.lMap_bvar, Matrix.conj, Matrix.vecTail, Function.comp_def, lx_eq, phi_rel, phi_func,
       Matrix.fun_eq_vec_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
 
 /-- **`𝗘𝗤(LX) ⊆ paLX`.** Each `𝗘𝗤(LX)` axiom is either the `lMap Φ`-image of an `𝗘𝗤(ℒₒᵣ) ⊆ 𝗣𝗔⁻`
 axiom (refl/symm/trans/funcExt/relExt over ℒₒᵣ symbols — `paLX`'s first summand) or `relExt Xsym`
 (`paLX`'s third summand). -/
-theorem eqLX_subset_paLX : (𝗘𝗤 : Theory LX) ⊆ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
-  have hbase : ∀ σ : Sentence ℒₒᵣ, σ ∈ (𝗘𝗤 : Theory ℒₒᵣ) →
+theorem eqLX_subset_paLX : (𝗘𝗤 LX : Theory LX) ⊆ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
+  have hbase : ∀ σ : Sentence ℒₒᵣ, σ ∈ (𝗘𝗤 ℒₒᵣ : Theory ℒₒᵣ) →
       Semiformula.lMap Φ σ ∈ (GoodsteinPA.EmbeddingX.paLX : Theory LX) := by
     intro σ hσ
     exact Or.inl (Or.inl ⟨σ, PeanoMinus.equal σ hσ, rfl⟩)
@@ -211,38 +211,35 @@ theorem eqLX_subset_paLX : (𝗘𝗤 : Theory LX) ⊆ (GoodsteinPA.EmbeddingX.pa
       exact Or.inr rfl
 
 /-- **`𝗘𝗤 ⪯ paLX`** — the instance the completeness route's `consequence_iff_eq`/`EQ.provOf` needs. -/
-instance eqAxiom_weakerThan_paLX : (𝗘𝗤 : Theory LX) ⪯ (GoodsteinPA.EmbeddingX.paLX : Theory LX) :=
+instance eqAxiom_weakerThan_paLX : (𝗘𝗤 LX : Theory LX) ⪯ (GoodsteinPA.EmbeddingX.paLX : Theory LX) :=
   Entailment.WeakerThan.ofSubset eqLX_subset_paLX
 
-/-- The schema coercion commutes with `lMap`: `(T : Schema).lMap Φ = (Theory.lMap Φ T : Schema)`
-(both are `lMap`/`emb` images; they agree by `lMap_emb`). -/
-theorem coe_schema_lMap (T : Theory ℒₒᵣ) :
-    Schema.lMap Φ (T : Theory ℒₒᵣ) = ((Theory.lMap Φ T : Theory LX) : Theory LX) := by
-  unfold Schema.lMap Theory.toSchema Theory.lMap
-  rw [Set.image_image, Set.image_image]
-  exact Set.image_congr (fun σ _ => Semiformula.lMap_emb σ)
-
-/-- The schema-level form of `lMap_PA_subset`. -/
-theorem schema_lMap_PA_subset :
-    Schema.lMap Φ (𝗣𝗔 : Theory ℒₒᵣ) ⊆ ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Theory LX) := by
-  rw [coe_schema_lMap]; exact (Theory.coe_subset_coe).mpr lMap_PA_subset
-
 /-- **The X-free E-lift.** A `𝗣𝗔`-proof of any `ℒₒᵣ`-sentence `σ` translates into a `Derivation2`
-of its `LX`-image in the `paLX` calculus: take the Tait derivation (`provable_def`), `lMap` it
-(`Derivation.lMap`), weaken the schema along `schema_lMap_PA_subset`, and repackage as a `Derivation2`
-(`provable_iff_derivable2`). This is the proof-translation half of E-lift; the descent wall **E**
-remains because `TI prec` mentions the set variable `X` and is *not* such an `lMap`-image (see
-`DESCENT-PLAN.md §1`) — the X-induction instance is the missing E-core content. -/
+of its `LX`-image in the `paLX` calculus: take the theory-level proof witness
+(`Theory.Proof.provable_iff`), `lMap` its underlying Tait derivation across `ℒₒᵣ ↪ LX`
+(`Derivation.lMap`), observe the mapped axioms land in `paLX` (`lMap_PA_subset`), and repackage as a
+`Derivation2` (`provable_iff_derivable2`). This is the proof-translation half of E-lift; the descent
+wall **E** remains because `TI prec` mentions the set variable `X` and is *not* such an `lMap`-image
+(see `DESCENT-PLAN.md §1`) — the X-induction instance is the missing E-core content. -/
 theorem paLX_derivable2_lMap_of_PA_provable (σ : Sentence ℒₒᵣ) (h : 𝗣𝗔 ⊢ σ) :
-    Nonempty (Derivation2 ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Theory LX)
+    Nonempty (Derivation2 (GoodsteinPA.EmbeddingX.paLX : Theory LX)
       {Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ)}) := by
-  have h1 : (𝗣𝗔 : Theory ℒₒᵣ) ⊢ (↑σ : SyntacticFormula ℒₒᵣ) := provable_def.mp h
-  have d := h1.get
-  have h3 : Schema.lMap Φ (𝗣𝗔 : Theory ℒₒᵣ) ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
-    ⟨Derivation.cast (Derivation.lMap Φ d) (by simp)⟩
-  have h4 : ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Theory LX)
-      ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
-    (Entailment.Axiomatized.weakerThanOfSubset schema_lMap_PA_subset).pbl h3
-  exact provable_iff_derivable2.mp h4
+  -- Land the `lMap Φ`-image of the PA-proof inside `paLX` (as sentences), then repackage.
+  have hp : (GoodsteinPA.EmbeddingX.paLX : Theory LX) ⊢ (Semiformula.lMap Φ σ : Sentence LX) := by
+    rw [Theory.Proof.provable_iff] at h ⊢
+    obtain ⟨Γ, hΓ, ⟨d⟩⟩ := h
+    refine ⟨Γ.map (Semiformula.lMap Φ), ?_, ⟨Derivation.cast (Derivation.lMap Φ d) ?_⟩⟩
+    · -- each mapped axiom is in `Theory.lMap Φ 𝗣𝗔 ⊆ paLX`
+      intro ψ hψ
+      simp only [List.mem_map] at hψ
+      obtain ⟨τ, hτ, rfl⟩ := hψ
+      exact lMap_PA_subset ⟨τ, hΓ τ hτ, rfl⟩
+    · -- the mapped Tait sequent is `lMap σ :: ∼embed (lMap Γ)`; push `lMap` through the coercion
+      -- (`lMap_emb`) and the per-element negation (`map_neg`, cross-language so `lcHom_comm` misses)
+      simp [Sequent.embed, Semiformula.lMap_emb, List.map_map, Function.comp_def, List.tilde_def,
+        LogicalConnective.HomClass.map_neg]
+  have h2 := provable_iff_derivable2.mp hp
+  rwa [show ((Semiformula.lMap Φ σ : Sentence LX) : Proposition LX)
+        = Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) from (Semiformula.lMap_emb σ).symm] at h2
 
 end GoodsteinPA.DescentLift

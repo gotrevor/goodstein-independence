@@ -1,5 +1,23 @@
 # HANDOFF — re-home goodstein onto upstream Foundation (retire the fork)
 
+> **STATUS 2026-07-04: COMPLETE (in-box).** Bare `lake build` is GREEN (1345 jobs) and
+> `#print axioms GoodsteinPA.peano_not_proves_goodstein` reports EXACTLY
+> `[propext, Classical.choice, Quot.sound]` — no new axioms/sorries above baseline (verified via
+> `lake env lean` since the box has no `lean-axiom-gate`). The 15 pre-existing governance-gated
+> sorries (Embedding ×2, EmbeddingX ×2, E1EmbeddingGrind ×10, plus 1 elsewhere) are unchanged and
+> off the headline. Trusted surface (Statement/Encoding/Bridge/Compat) untouched.
+>
+> The Derivation2 Schema→Theory port touched 8 files beyond the handoff's "15 errors" estimate
+> (the estimate was measured before the build reached the downstream files): Embedding, EmbeddingX,
+> EpsilonOrder, FvSubst, DescentLift (axm/Theory port), plus ReductModel, EmbeddingBound,
+> E1EmbeddingGrind (ModelsTheory→ModelsSet/`models_lMap`, `+`→`∪`, `𝗘𝗤`→`𝗘𝗤 L`, `provable_def`/
+> `Derivation.toDerivation2`→`provable_iff_derivable2`, and the upstream `∘`-composition simp-normal-form
+> churn via `Function.comp_def`). Committed on `rehome-foundation-upstream`.
+>
+> **HOST ENDGAME (Trevor):** the box cannot push / run `cc`-native `blueprint_audit`. On the host:
+> re-confirm `lean-axiom-gate --exact`, run `lake exe blueprint_audit`, push, open the
+> `retire-foundation-fork` PR.
+
 **Goal.** Repoint the `Foundation` dependency from the personal fork `gotrevor/Foundation @ e6e1ad14`
 to **upstream `FormalizedFormalLogic/Foundation` (master `2040d2f3`)** and get `lake build` green +
 axiom-clean, so `gotrevor/Foundation` can be retired. Branch: `rehome-foundation-upstream`

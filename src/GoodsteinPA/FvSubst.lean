@@ -99,8 +99,9 @@ instance termFvSubst.definable' : Γ-[i + 1]-Function₃ termFvSubst (V := V) L 
   termFvSubst.definable.of_sigmaOne
 
 instance termFvSubstVec.defined : 𝚺₁-Function₄ termFvSubstVec (V := V) L via termFvSubstVecGraph L := .mk fun v ↦ by
-  simpa [termFvSubstVecGraph, termFvSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
-    using construction.resultVec_defined.defined ![v 0, v 3, v 4, v 1, v 2]
+  simpa [termFvSubstVecGraph, termFvSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
+    Function.comp_def]
+    using (construction.resultVec_defined (L := L)).defined ![v 0, v 3, v 4, v 1, v 2]
 
 instance termFvSubstVec.definable : 𝚺₁-Function₄ termFvSubstVec (V := V) L := termFvSubstVec.defined.to_definable
 

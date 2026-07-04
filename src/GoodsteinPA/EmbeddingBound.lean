@@ -695,17 +695,17 @@ set_option maxHeartbeats 1000000 in
 **uniformly** (over the closing assignment `e`) bounded by some `B < ε₀`. X-free axioms land at the
 finite height `↑complexity`; X-induction instances land at `(ω + 1 + 1 + 1) + ↑fvSup` (one ω-jump from
 the cut-tower, three `⋎`-bumps for the NNF, finite closure bumps). -/
-theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Theory LX)) (hΓ : φ ∈ Γ) :
+theorem hax_paLX_bdd {Γ : Seq LX} (φ : Sentence LX) (hφ : φ ∈ (paLX : Theory LX))
+    (hΓ : (↑φ : Form LX) ∈ Γ) :
     ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
       ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun ψ => asgX e ▹ ψ)) := by
-  obtain ⟨σ, hσ, rfl⟩ := hφ
-  rcases hσ with (hbase | hind) | heq
+  rcases hφ with (hbase | hind) | heq
   · -- X-free base axiom: true closed X-free formula, height `↑complexity` (e-independent)
     obtain ⟨τ, hτ, rfl⟩ := hbase
     set χτ : SyntacticFormula LX :=
       Rew.emb ▹ Semiformula.lMap (Language.ORing.embedding LX) τ with hχτ
     refine ⟨0, (χτ.complexity : Ordinal), natCast_lt_epsilon0 _, fun e => ?_⟩
-    have hmod : ℕ ⊧ₘ τ := ModelsTheory.models ℕ hτ
+    have hmod : ℕ ⊧ₘ τ := Semantics.modelsSet_iff.mp inferInstance hτ
     have htrue := litTrue_lMap_axiom τ hmod e
     have hxf : XFreeForm (asgX e ▹ χτ) := by
       rw [hχτ, xfreeForm_rew, xfreeForm_rew]; exact xfreeForm_lMap τ
@@ -746,8 +746,9 @@ theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Theory L
         intro n
         haveI hO : Structure.One LX ℕ := ⟨rfl⟩
         haveI hA : Structure.Add LX ℕ := ⟨fun _ _ => rfl⟩
+        -- upstream's `val_substs` now emits the assignment in `∘`-composition normal form
         simp only [hsuccT, Semiterm.val_substs, Semiterm.val_operator₂, Semiterm.val_operator₀,
-          hA.add, valm_nm, Semiterm.val_bvar, Matrix.cons_val_zero]
+          hA.add, Function.comp_def, Matrix.cons_val_zero, Semiterm.val_bvar, valm_nm]
         congr 1
       have hstep : ∀ n, (∼step)/[nm n] = (ψv/[nm n]) ⋏ ∼(ψv/[succT n]) := by
         intro n
@@ -784,7 +785,7 @@ which preserve `< ε₀`. The only transfinite contribution comes through the ax
 discharged by the cut-tower `metaInduction_cong_bdd`). -/
 set_option maxHeartbeats 1600000 in
 theorem embedC_LX_gen_bdd {𝓢 : Theory LX}
-    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ 𝓢 → φ ∈ Γ →
+    (hax : ∀ {Γ : Seq LX} (φ : Sentence LX), φ ∈ 𝓢 → (↑φ : Form LX) ∈ Γ →
       ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
         ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun ψ => asgX e ▹ ψ)))
     {Γ : Seq LX} (d : Derivation2 𝓢 Γ) :
