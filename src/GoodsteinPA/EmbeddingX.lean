@@ -18,6 +18,7 @@ discharge for the concrete `paLX` schema (`embedC_LX`) chains on top.
 -/
 import GoodsteinPA.XFreeCutElim
 import Foundation.FirstOrder.Arithmetic.Schemata
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.EmbeddingX
 
@@ -65,8 +66,8 @@ def XFreeForm {ξ n} : Semiformula LX ξ n → Prop :=
   induction φ using Semiformula.rec' generalizing ζ m with
   | hverum => simp
   | hfalsum => simp
-  | hrel r v => simp [Semiformula.rew_rel]
-  | hnrel r v => simp [Semiformula.rew_nrel]
+  | hrel r v => simp [Semiformula.rew_rel, Function.comp_def]
+  | hnrel r v => simp [Semiformula.rew_nrel, Function.comp_def]
   | hand φ ψ ihφ ihψ => simp [ihφ, ihψ]
   | hor φ ψ ihφ ihψ => simp [ihφ, ihψ]
   | hall φ ih => simpa using ih _
@@ -75,13 +76,13 @@ def XFreeForm {ξ n} : Semiformula LX ξ n → Prop :=
 /-- The numeral `nm n` evaluates to `n` under the ambient `Boundedness.ambient` instance (which is
 `structLX ∅`, defeq), so `LitTrue` substitution instances simplify. -/
 @[simp] lemma val_nm_ambient (n : ℕ) :
-    Semiterm.val Boundedness.ambient ![] (id : ℕ → ℕ) (nm n) = n :=
+    GoodsteinPA.Compat.gVal Boundedness.ambient ![] (id : ℕ → ℕ) (nm n) = n :=
   Boundedness.val_nm_structLX (fun _ => False) n
 
-/-- The same fact phrased with `Semiterm.valm ℕ` (the ambient instance), so it `rw`s in `LitTrue`/EM
+/-- The same fact phrased with `GoodsteinPA.Compat.gValm ℕ` (the ambient instance), so it `rw`s in `LitTrue`/EM
 goals stated with `valm`. -/
 @[simp] lemma valm_nm (n : ℕ) :
-    Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm n : Semiterm LX ℕ 0) = n :=
+    GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (nm n : Semiterm LX ℕ 0) = n :=
   Boundedness.val_nm_structLX (fun _ => False) n
 
 /-! ## ω-completeness for TRUE closed X-free formulas, `XFreeAx`-preserving. -/
@@ -201,12 +202,12 @@ literal axiom `PXFc.axLv`, every atomic case closes **uniformly via `axLv`** (no
 
 /-- Value of a renamed term depends only on the values of the substituted terms. -/
 lemma valm_subst_congr {n} (w w' : Fin n → SyntacticTerm LX)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
     (t : SyntacticSemiterm LX n) :
-    Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w t)
-      = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' t) := by
-  simp only [Semiterm.valm, Semiterm.val_substs]
+    GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (Rew.subst w t)
+      = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' t) := by
+  simp only [GoodsteinPA.Compat.gValm, Semiterm.val_substs]
   congr 1; funext x; exact hval x
 
 /-- Substitution-composition (LX port). -/
@@ -227,8 +228,8 @@ lemma subst_q_cons_app (w : Fin n → SyntacticTerm LX) (m : ℕ)
 /-- **Value-congruent excluded middle (arity-general), `XFreeAx` form.** -/
 theorem provable_em_cong_gen_x : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → SyntacticTerm LX)
     (ψ : SyntacticSemiformula LX n), ψ.complexity ≤ k →
-    (∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-        = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i)) →
+    (∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+        = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i)) →
     ∀ {Γ : Seq LX}, (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ → ∃ a, PXFc a 0 Γ := by
   intro k
   induction k with
@@ -295,8 +296,8 @@ theorem provable_em_cong_gen_x : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → Synta
       have hn' : (∃⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
       have fam : ∀ m, ∃ x, PXFc x 0 (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
         intro m
-        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
-            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+        have hvalm : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
           intro i; cases i using Fin.cases with
           | zero => rfl
           | succ j => simpa using hval j
@@ -323,8 +324,8 @@ theorem provable_em_cong_gen_x : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → Synta
       have hn' : (∀⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
       have fam : ∀ m, ∃ x, PXFc x 0 (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
         intro m
-        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
-            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+        have hvalm : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
           intro i; cases i using Fin.cases with
           | zero => rfl
           | succ j => simpa using hval j
@@ -344,26 +345,26 @@ theorem provable_em_cong_gen_x : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → Synta
       exact ⟨_, hallω⟩
 where
   atomic_close_x {n} (w w' : Fin n → SyntacticTerm LX)
-      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
       {k} (r : (LX).Rel k) (v : Fin k → SyntacticSemiterm LX n)
       {Γ : Seq LX} (hp : (Rew.subst w ▹ Semiformula.rel r v) ∈ Γ)
       (hn : (∼(Rew.subst w' ▹ Semiformula.rel r v)) ∈ Γ) : ∃ a, PXFc a 0 Γ := by
     have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-      simpa [Semiformula.rew_rel] using hp
+      simpa [Semiformula.rew_rel, Function.comp_def] using hp
     have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-      simpa [Semiformula.rew_rel] using hn
+      simpa [Semiformula.rew_rel, Function.comp_def] using hn
     exact ⟨0, PXFc.axLv r _ _ (fun i => valm_subst_congr w w' hval (v i)) hp' hn'⟩
   atomic_close_neg_x {n} (w w' : Fin n → SyntacticTerm LX)
-      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
       {k} (r : (LX).Rel k) (v : Fin k → SyntacticSemiterm LX n)
       {Γ : Seq LX} (hp : (Rew.subst w ▹ Semiformula.nrel r v) ∈ Γ)
       (hn : (∼(Rew.subst w' ▹ Semiformula.nrel r v)) ∈ Γ) : ∃ a, PXFc a 0 Γ := by
     have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-      simpa [Semiformula.rew_nrel] using hp
+      simpa [Semiformula.rew_nrel, Function.comp_def] using hp
     have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-      simpa [Semiformula.rew_nrel] using hn
+      simpa [Semiformula.rew_nrel, Function.comp_def] using hn
     exact ⟨0, PXFc.axLv r _ _ (fun i => (valm_subst_congr w w' hval (v i)).symm) hn' hp'⟩
 
 /-- **Closed-term ∃-introduction, `XFreeAx` form.** From `⊢ ψ/[s], Γ` (any closed `s`) conclude
@@ -373,10 +374,10 @@ theorem PXFc.exI_closed {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
     (ψ : SyntacticSemiformula LX 1) (s : SyntacticTerm LX)
     (h : PXFc α c (insert (ψ/[s]) Γ)) :
     ∃ β, PXFc β (max c (ψ.complexity + 1)) (insert (∃⁰ ψ) Γ) := by
-  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set m : ℕ := GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s with hm
   set c' : ℕ := max c (ψ.complexity + 1) with hc'
-  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
-             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by
+  have hsval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
+             = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s := by
     rw [valm_nm]
   have h₁ : PXFc α c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
     (h.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
@@ -408,7 +409,7 @@ automatic). All structural builders are `XFreeAx`-safe. The two non-structural c
   which our calculus's same-atom `axL` does NOT provide. See `ANALYSIS-2026-06-22-lap16-exs-axLv.md`:
   the faithful fix is to generalise `axL` to value-congruent literal pairs (Boundedness case 1.2,
   p.29, already handles them). Held as a disclosed `sorry` pending that retrofit. -/
-theorem embedC_LX_gen {𝓢 : Schema LX}
+theorem embedC_LX_gen {𝓢 : Theory LX}
     (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ 𝓢 → φ ∈ Γ →
       ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)))
     {Γ : Seq LX} (d : Derivation2 𝓢 Γ) :
@@ -576,7 +577,7 @@ with `ψ/[t]` for any value-equal `t` (`|s| = |t|`), at the same cut rank, `XFre
 `nrel_value_subst`; the bridge from `succInd`'s `nm n + 1` to `metaInduction`'s `nm (n+1)`. -/
 theorem PXFc.subst_value_subst {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
     (ψ : SyntacticSemiformula LX 1) (s t : SyntacticTerm LX)
-    (hval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) s = Semiterm.valm ℕ ![] (id : ℕ → ℕ) t)
+    (hval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) t)
     (hc : (ψ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞))
     (h : PXFc α c (insert (ψ/[s]) Γ)) :
     ∃ β, PXFc β c (insert (ψ/[t]) Γ) := by
@@ -602,7 +603,7 @@ the numeral `nm (n+1)`. The chain's `ψ(succT n)` is bridged back to `ψ(nm (n+1
 syntax (where the successor is `#0 + 1`, value- but not syntactically-equal to the next numeral). -/
 theorem metaInduction_cong (ψ step : SyntacticSemiformula LX 1) {Γ : Seq LX}
     (succT : ℕ → SyntacticTerm LX)
-    (hsval : ∀ n, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1)
+    (hsval : ∀ n, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1)
     (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[succT n])) :
     ∃ a, PXFc a (ψ.complexity + 1)
       (insert (∼(ψ/[nm 0])) (insert (∃⁰ (∼step)) (insert (∀⁰ ψ) Γ))) := by
@@ -747,14 +748,14 @@ theorem litTrue_eq_iff (m n : ℕ) :
     LitTrue (Semiformula.rel (Language.Eq.eq : LX.Rel 2) ![nm m, nm n]) ↔ m = n := by
   unfold LitTrue
   rw [Semiformula.eval_rel]
-  have hfun : (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ)
+  have hfun : (fun i => GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ)
         ((![nm m, nm n] : Fin 2 → Semiterm LX ℕ 0) i)) = ![m, n] := by
     funext i
     refine i.cases ?_ (fun j => j.cases ?_ (fun k => k.elim0))
     · simp
     · simp
   show Structure.rel (Language.Eq.eq : LX.Rel 2)
-      (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((![nm m, nm n] : Fin 2 → Semiterm LX ℕ 0) i)) ↔ m = n
+      (fun i => GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((![nm m, nm n] : Fin 2 → Semiterm LX ℕ 0) i)) ↔ m = n
   rw [hfun]
   exact Iff.rfl
 
@@ -777,7 +778,7 @@ lemma relExtBody_subst_eq (v : Fin (1 + 1) → ℕ) :
   simp only [Matrix.conj, Matrix.vecTail, Function.comp, Semiformula.Operator.operator,
     Semiformula.Operator.Eq.sentence_eq]
   simp [Semiformula.imp_eq, Semiformula.rew_rel, Semiformula.rew_nrel, Fin.addCast, Fin.addNat,
-    ← TransitiveRewriting.comp_app, Rew.comp_app]
+    ← TransitiveRewriting.comp_app, Rew.comp_app, Function.comp_def]
   refine ⟨?_, ?_, ?_⟩
   · funext i
     refine i.cases ?_ (fun j => j.cases ?_ (fun k => k.elim0)) <;>
@@ -849,7 +850,7 @@ go through `metaInduction_cong`: the `asgX e`-image of `↑(univCl (succInd ψ))
 (`PXFc_allClosure`) to per-`v` numeral instantiations, each repackaged via `rew_succInd` as an
 induction axiom `succInd ψ_v`, NNF-expanded (`succInd_nnf`) and broken by `PXFc.orI` into the
 `{∼ψ_v(0), ∃(∼step_v), ∀ψ_v}` shape `metaInduction_cong` discharges. -/
-theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema LX)) (hΓ : φ ∈ Γ) :
+theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Theory LX)) (hΓ : φ ∈ Γ) :
     ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)) := by
   obtain ⟨σ, hσ, rfl⟩ := hφ
   rcases hσ with (hbase | hind) | heq
@@ -883,7 +884,7 @@ theorem hax_paLX {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema LX)) 
       (∼ψv/[(#0 : Semiterm LX ℕ 1)]) ⋎ ψv/[(‘(#0 + 1)’ : Semiterm LX ℕ 1)] with hstepdef
     set succT : ℕ → SyntacticTerm LX :=
       fun n => Rew.subst ![nm n] (‘(#0 + 1)’ : Semiterm LX ℕ 1) with hsuccT
-    have hsval : ∀ n, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1 := by
+    have hsval : ∀ n, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1 := by
       intro n
       haveI hO : Structure.One LX ℕ := ⟨rfl⟩
       haveI hA : Structure.Add LX ℕ := ⟨fun _ _ => rfl⟩
@@ -923,9 +924,9 @@ X-induction instances via `metaInduction`). The structural engine (`embedC_LX_ge
 sorry-free + axiom-clean; only `hax` and the cut-elimination end (`atomCut_x` → `nrel_value_subst`)
 remain to make the full `Z ⊢ TI ⟹ ‖≺‖ < ε₀` chain clean. -/
 theorem embedC_LX
-    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ (paLX : Schema LX) → φ ∈ Γ →
+    (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ (paLX : Theory LX) → φ ∈ Γ →
       ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun ψ => asgX e ▹ ψ)))
-    {Γ : Seq LX} (d : Derivation2 (paLX : Schema LX) Γ) :
+    {Γ : Seq LX} (d : Derivation2 (paLX : Theory LX) Γ) :
     ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, PXFc α c (Γ.image (fun φ => asgX e ▹ φ)) :=
   embedC_LX_gen hax d
 

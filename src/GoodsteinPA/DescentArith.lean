@@ -24,6 +24,7 @@ and proving the internalized `ineq6_step` (the numeral-`Δ₀` form of `DescentC
 makes the *assembly* of those pieces axiom-clean and unambiguous.
 -/
 import Foundation.FirstOrder.Arithmetic.Induction
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.DescentArith
 

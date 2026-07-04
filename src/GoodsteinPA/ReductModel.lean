@@ -22,6 +22,7 @@ The two deliverables here are pure model theory (zero Goodstein content), reusab
 - `reduct_models_PA` / `reduct_models_isigma1` : `M ⊧ paLX ⟹ M ⊧ 𝗣𝗔 ⟹ M ⊧ 𝗜𝚺₁` in the reduct.
 -/
 import GoodsteinPA.DescentLift
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.ReductModel
 
@@ -61,12 +62,12 @@ theorem reduct_eq_standardModel [Structure.Eq LX M] :
       Matrix.fun_eq_vec_two]; rfl⟩
   haveI : Structure.LT ℒₒᵣ M := ⟨fun a b => by
     simp [Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel,
-      Matrix.fun_eq_vec_two]; rfl⟩
+      Matrix.fun_eq_vec_two, Function.comp_def]; rfl⟩
   haveI : Structure.Eq ℒₒᵣ M := ⟨fun a b => by
     have h := Structure.Eq.eq (L := LX) (M := M) a b
     simp only [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
       Semiformula.eval_rel, Semiterm.val_bvar, Matrix.cons_val_zero,
-      Structure.lMap_rel] at h ⊢
+      Structure.lMap_rel, Function.comp_def] at h ⊢
     exact h⟩
   exact standardModel_unique (M := M) sM
 

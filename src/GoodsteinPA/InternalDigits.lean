@@ -12,6 +12,7 @@ with `idigit b n i < b` (for `0 < b`) and the `𝚺₁`-definability needed for 
 will assemble these into the base-`b` hereditary base-change.
 -/
 import GoodsteinPA.InternalPow
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalPow
 

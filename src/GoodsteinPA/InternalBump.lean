@@ -13,6 +13,7 @@ references). Brick 4b will assemble the table itself via `PR.Construction`, bric
 `ibump b n := (table b n).[n]` and prove it satisfies `Defs.bump`'s recursion.
 -/
 import GoodsteinPA.InternalLog
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalPow
 

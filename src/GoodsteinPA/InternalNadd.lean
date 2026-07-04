@@ -17,6 +17,7 @@ preservation, `iC (a # b) ≤ iC a + iC b`, descent monotonicity) are the next b
 promote to `src/`. `icmp` convention: `0`=lt, `1`=eq, `2`=gt (`cmpV`).
 -/
 import GoodsteinPA.InternalONote
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalONote
 

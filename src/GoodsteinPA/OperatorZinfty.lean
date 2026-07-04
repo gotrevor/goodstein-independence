@@ -28,6 +28,7 @@ import Foundation.FirstOrder.Arithmetic.Basic.Model
 import Mathlib.SetTheory.Ordinal.Notation
 import Mathlib.Order.Lattice.Nat
 import GoodsteinPA.Hardy
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.OperatorZinfty
 
@@ -37,7 +38,7 @@ open GoodsteinPA.FastGrowing
 abbrev Form := SyntacticFormula ℒₒᵣ
 noncomputable def nm (n : ℕ) : Semiterm ℒₒᵣ ℕ 0 := (Semiterm.Operator.numeral ℒₒᵣ n).const
 abbrev Seq := Finset Form
-noncomputable def atomTrue (φ : Form) : Prop := Semiformula.Evalm ℕ (fun _ => 0) (fun _ => 0) φ
+noncomputable def atomTrue (φ : Form) : Prop := GoodsteinPA.Compat.gEvalm ℕ (fun _ => 0) (fun _ => 0) φ
 
 /-- **The control-ordinal operator witness-bounded `Z_∞` calculus** `Zᵉᵏᵈ ⊢^{α,e}_{k,d,c} Γ`.
 Derivation ordinal `α`; **control ordinal `e`** (governs the witness bound, raised by cut-elim);
@@ -1047,7 +1048,7 @@ theorem inductionLeaf_exI_runningIndex_probe {α β e : ONote} {k d c n : ℕ} {
 
 /-- The standard value of a closed arithmetic term, in the evaluator used by `atomTrue`. -/
 noncomputable abbrev stdClosedVal (t : SyntacticTerm ℒₒᵣ) : ℕ :=
-  Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) t
+  GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) t
 
 /-- The standard value of the numeral term `nm m` is `m`. -/
 @[simp] lemma stdClosedVal_nm (m : ℕ) : stdClosedVal (nm m) = m := by
@@ -1092,30 +1093,30 @@ lemma atomTrue_rel_congr {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
     (v v' : Fin ar → SyntacticTerm ℒₒᵣ)
     (hval : ∀ i, stdClosedVal (v i) = stdClosedVal (v' i)) :
     atomTrue (Semiformula.rel r v) ↔ atomTrue (Semiformula.rel r v') := by
-  have hv : (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v i))
-      = (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v' i)) := by
+  have hv : (fun i => GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v i))
+      = (fun i => GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v' i)) := by
     funext i; exact hval i
-  simp only [atomTrue, Semiformula.eval_rel, hv]
+  simp only [atomTrue, Semiformula.eval_rel, hv, Function.comp_def]
 
 /-- Truth of a closed negated atomic relation only depends on the standard values of its terms. -/
 lemma atomTrue_nrel_congr {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
     (v v' : Fin ar → SyntacticTerm ℒₒᵣ)
     (hval : ∀ i, stdClosedVal (v i) = stdClosedVal (v' i)) :
     atomTrue (Semiformula.nrel r v) ↔ atomTrue (Semiformula.nrel r v') := by
-  have hv : (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v i))
-      = (fun i => Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v' i)) := by
+  have hv : (fun i => GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v i))
+      = (fun i => GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => 0) (fun _ => 0) (v' i)) := by
     funext i; exact hval i
-  simp only [atomTrue, Semiformula.eval_nrel, hv]
+  simp only [atomTrue, Semiformula.eval_nrel, hv, Function.comp_def]
 
 lemma atomTrue_nrel_iff_not_rel {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
     (v : Fin ar → SyntacticTerm ℒₒᵣ) :
     atomTrue (Semiformula.nrel r v) ↔ ¬ atomTrue (Semiformula.rel r v) := by
-  simp [atomTrue, Semiformula.eval_rel, Semiformula.eval_nrel]
+  simp [atomTrue, Semiformula.eval_rel, Semiformula.eval_nrel, Function.comp_def]
 
 lemma atomTrue_rel_iff_not_nrel {ar : ℕ} (r : (ℒₒᵣ).Rel ar)
     (v : Fin ar → SyntacticTerm ℒₒᵣ) :
     atomTrue (Semiformula.rel r v) ↔ ¬ atomTrue (Semiformula.nrel r v) := by
-  simp [atomTrue, Semiformula.eval_rel, Semiformula.eval_nrel]
+  simp [atomTrue, Semiformula.eval_rel, Semiformula.eval_nrel, Function.comp_def]
 
 /--
 Bounded value-congruent atomic closure, relation-positive side.
@@ -1196,8 +1197,8 @@ theorem embedding_valueCongruentRelClosedTermAtom_probe
     cases i using Fin.cases with
     | zero => simpa using hval
     | succ j => exact Fin.elim0 j
-  · simpa [Semiformula.rew_rel] using hp
-  · simpa [Semiformula.rew_nrel] using hn
+  · simpa [Semiformula.rew_rel, Function.comp_def] using hp
+  · simpa [Semiformula.rew_nrel, Function.comp_def] using hn
 
 /-- Closed-term specialization of the value-congruent negated-relation atom leaf. -/
 theorem embedding_valueCongruentNrelClosedTermAtom_probe
@@ -1214,8 +1215,8 @@ theorem embedding_valueCongruentNrelClosedTermAtom_probe
     cases i using Fin.cases with
     | zero => simpa using hval
     | succ j => exact Fin.elim0 j
-  · simpa [Semiformula.rew_nrel] using hp
-  · simpa [Semiformula.rew_rel] using hn
+  · simpa [Semiformula.rew_nrel, Function.comp_def] using hp
+  · simpa [Semiformula.rew_rel, Function.comp_def] using hn
 
 /-- Constant-true base case for the bounded value-congruent EM engine. -/
 theorem embedding_valueCongruentVerum_probe {α e : ONote} {k d c n : ℕ} {Γ : Seq}
@@ -1444,11 +1445,11 @@ theorem embedding_valueCongruentQFreeClosedTerm_probe :
       | hrel r v =>
           exact embedding_valueCongruentRelClosedTermAtom_probe r s s' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega) hp
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hnrel r v =>
           exact embedding_valueCongruentNrelClosedTermAtom_probe r s s' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega) hp
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hand a b =>
           simp only [Semiformula.complexity_and] at hψq
           omega
@@ -1469,11 +1470,11 @@ theorem embedding_valueCongruentQFreeClosedTerm_probe :
       | hrel r v =>
           exact embedding_valueCongruentRelClosedTermAtom_probe r s s' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega) hp
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hnrel r v =>
           exact embedding_valueCongruentNrelClosedTermAtom_probe r s s' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega) hp
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hand a b =>
           have haq : a.complexity ≤ q := by
             simp only [Semiformula.complexity_and] at hψq
@@ -1562,13 +1563,13 @@ theorem embedding_valueCongruentEM_probe :
       | hrel r v =>
           exact embedding_valueCongruentRelSubstAtom_probe r w w' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega)
-            (by simpa [Semiformula.rew_rel] using hp)
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_rel, Function.comp_def] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hnrel r v =>
           exact embedding_valueCongruentNrelSubstAtom_probe r w w' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega)
-            (by simpa [Semiformula.rew_nrel] using hp)
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_nrel, Function.comp_def] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hand a b =>
           simp only [Semiformula.complexity_and] at hψq
           omega
@@ -1591,13 +1592,13 @@ theorem embedding_valueCongruentEM_probe :
       | hrel r v =>
           exact embedding_valueCongruentRelSubstAtom_probe r w w' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega)
-            (by simpa [Semiformula.rew_rel] using hp)
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_rel, Function.comp_def] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hnrel r v =>
           exact embedding_valueCongruentNrelSubstAtom_probe r w w' v hval inferInstance
             (by rw [embedding_norm_ofNat]; omega)
-            (by simpa [Semiformula.rew_nrel] using hp)
-            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel] using hn)
+            (by simpa [Semiformula.rew_nrel, Function.comp_def] using hp)
+            (by simpa [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def] using hn)
       | hand a b =>
           have haq : a.complexity ≤ q := by
             simp only [Semiformula.complexity_and] at hψq
@@ -1783,11 +1784,11 @@ theorem zekdOfBoundedTruth_probe :
       | hrel r v =>
           exact Zekd.trueRel r (fun i => Rew.subst w (v i)) hBT
             (by rw [embedding_norm_ofNat]; omega) inferInstance
-            (by simpa [Semiformula.rew_rel] using hmem)
+            (by simpa [Semiformula.rew_rel, Function.comp_def] using hmem)
       | hnrel r v =>
           exact Zekd.trueNrel r (fun i => Rew.subst w (v i)) hBT
             (by rw [embedding_norm_ofNat]; omega) inferInstance
-            (by simpa [Semiformula.rew_nrel] using hmem)
+            (by simpa [Semiformula.rew_nrel, Function.comp_def] using hmem)
       | hand a b =>
           simp only [Semiformula.complexity_and] at hψq
           omega
@@ -1810,11 +1811,11 @@ theorem zekdOfBoundedTruth_probe :
       | hrel r v =>
           exact Zekd.trueRel r (fun i => Rew.subst w (v i)) hBT
             (by rw [embedding_norm_ofNat]; omega) inferInstance
-            (by simpa [Semiformula.rew_rel] using hmem)
+            (by simpa [Semiformula.rew_rel, Function.comp_def] using hmem)
       | hnrel r v =>
           exact Zekd.trueNrel r (fun i => Rew.subst w (v i)) hBT
             (by rw [embedding_norm_ofNat]; omega) inferInstance
-            (by simpa [Semiformula.rew_nrel] using hmem)
+            (by simpa [Semiformula.rew_nrel, Function.comp_def] using hmem)
       | hand a b =>
           have haq : a.complexity ≤ q := by
             simp only [Semiformula.complexity_and] at hψq

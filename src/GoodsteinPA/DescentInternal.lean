@@ -14,6 +14,7 @@ extracted from `¬TI prec` (see `DESCENT-PLAN.md §3` + `ON-LINE-REQUEST.md`).
 -/
 import GoodsteinPA.DescentArith
 import GoodsteinPA.InternalBridge
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.DescentArith
 

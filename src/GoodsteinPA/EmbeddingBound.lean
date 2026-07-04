@@ -24,6 +24,7 @@ Downstream chips (next laps): `provable_true_x_bdd`, `exI_closed_bdd`, `metaIndu
 import GoodsteinPA.XFreeCutElim
 import GoodsteinPA.EmbeddingX
 import GoodsteinPA.Epsilon0Complete
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.EmbeddingBound
 
@@ -88,8 +89,8 @@ theorem PXFcFin.verumR {c Γ} (h : (⊤ : Form LX) ∈ Γ) : PXFcFin c Γ :=
   ⟨0, (PXFc.verumR h).mono (by simp) (Nat.zero_le c)⟩
 
 theorem PXFcFin.axLv {c Γ k} (r : LX.Rel k) (v v' : Fin k → Semiterm LX ℕ 0)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v i)
-              = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (v' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v i)
+              = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (v' i))
     (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v' ∈ Γ) : PXFcFin c Γ :=
   ⟨0, (PXFc.axLv r v v' hval hp hn).mono (by simp) (Nat.zero_le c)⟩
 
@@ -248,8 +249,8 @@ set_option maxHeartbeats 1000000 in
 `EmbeddingX.provable_em_cong_gen_x`. -/
 theorem provable_em_cong_gen_x_bdd : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → SyntacticTerm LX)
     (ψ : SyntacticSemiformula LX n), ψ.complexity ≤ k →
-    (∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-        = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i)) →
+    (∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+        = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i)) →
     ∀ {Γ : Seq LX}, (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ →
       PXFc ((2 * k : ℕ) : Ordinal) 0 Γ := by
   intro k
@@ -263,15 +264,15 @@ theorem provable_em_cong_gen_x_bdd : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → S
     | hfalsum => exact PXFc.verumR (by simpa using hn)
     | hrel r v =>
       have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_rel] using hp
+        simpa [Semiformula.rew_rel, Function.comp_def] using hp
       have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_rel] using hn
+        simpa [Semiformula.rew_rel, Function.comp_def] using hn
       exact PXFc.axLv r _ _ (fun i => valm_subst_congr w w' hval (v i)) hp' hn'
     | hnrel r v =>
       have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_nrel] using hp
+        simpa [Semiformula.rew_nrel, Function.comp_def] using hp
       have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_nrel] using hn
+        simpa [Semiformula.rew_nrel, Function.comp_def] using hn
       exact PXFc.axLv r _ _ (fun i => (valm_subst_congr w w' hval (v i)).symm) hn' hp'
     | hand φ ψ => simp at hk
     | hor φ ψ => simp at hk
@@ -287,16 +288,16 @@ theorem provable_em_cong_gen_x_bdd : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → S
     | hfalsum => exact (PXFc.verumR (by simpa using hn)).mono (by simp) (le_refl 0)
     | hrel r v =>
       have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_rel] using hp
+        simpa [Semiformula.rew_rel, Function.comp_def] using hp
       have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_rel] using hn
+        simpa [Semiformula.rew_rel, Function.comp_def] using hn
       exact (PXFc.axLv r _ _ (fun i => valm_subst_congr w w' hval (v i)) hp' hn').mono
         (by simp) (le_refl 0)
     | hnrel r v =>
       have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_nrel] using hp
+        simpa [Semiformula.rew_nrel, Function.comp_def] using hp
       have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-        simpa [Semiformula.rew_nrel] using hn
+        simpa [Semiformula.rew_nrel, Function.comp_def] using hn
       exact (PXFc.axLv r _ _ (fun i => (valm_subst_congr w w' hval (v i)).symm) hn' hp').mono
         (by simp) (le_refl 0)
     | hand a b =>
@@ -345,8 +346,8 @@ theorem provable_em_cong_gen_x_bdd : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → S
       have fam : ∀ m, PXFc (((2 * k : ℕ) : Ordinal) + 1) 0
           (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
         intro m
-        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
-            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+        have hvalm : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
           intro i; cases i using Fin.cases with
           | zero => rfl
           | succ j => simpa using hval j
@@ -374,8 +375,8 @@ theorem provable_em_cong_gen_x_bdd : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → S
       have fam : ∀ m, PXFc (((2 * k : ℕ) : Ordinal) + 1) 0
           (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
         intro m
-        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
-            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+        have hvalm : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
           intro i; cases i using Fin.cases with
           | zero => rfl
           | succ j => simpa using hval j
@@ -493,7 +494,7 @@ theorem provable_em_x_fin {c : ℕ} {Γ : Seq LX} (φ : Form LX) (hp : φ ∈ Γ
 /-- Bounded `PXFc.subst_value_subst`: value-congruent substitution preserves finite height. -/
 theorem subst_value_subst_bdd {c : ℕ} {Γ : Seq LX}
     (ψ : SyntacticSemiformula LX 1) (s t : SyntacticTerm LX)
-    (hval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) s = Semiterm.valm ℕ ![] (id : ℕ → ℕ) t)
+    (hval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) t)
     (hc : (ψ.complexity + 1 : ℕ∞) ≤ (c : ℕ∞))
     (h : PXFcFin c (insert (ψ/[s]) Γ)) :
     PXFcFin c (insert (ψ/[t]) Γ) := by
@@ -519,10 +520,10 @@ theorem exI_closed_bdd {c : ℕ} {Γ : Seq LX}
     (h : PXFcFin c (insert (ψ/[s]) Γ)) :
     PXFcFin (max c (ψ.complexity + 1)) (insert (∃⁰ ψ) Γ) := by
   obtain ⟨N, hN⟩ := h
-  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set m : ℕ := GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s with hm
   set c' : ℕ := max c (ψ.complexity + 1) with hc'
-  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
-             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
+  have hsval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
+             = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
   have h₁ : PXFc (N : Ordinal) c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
     (hN.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
       (le_max_left _ _)
@@ -548,10 +549,10 @@ theorem exI_closed_lt {α : Ordinal.{0}} {c : ℕ} {Γ : Seq LX}
     (h : PXFc α c (insert (ψ/[s]) Γ)) :
     PXFc (max α ((2 * ψ.complexity : ℕ) : Ordinal) + 1 + 1) (max c (ψ.complexity + 1))
       (insert (∃⁰ ψ) Γ) := by
-  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set m : ℕ := GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s with hm
   set c' : ℕ := max c (ψ.complexity + 1) with hc'
-  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
-             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
+  have hsval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (nm m : Semiterm LX ℕ 0)
+             = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
   have h₁ : PXFc α c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
     (h.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
       (le_max_left _ _)
@@ -577,7 +578,7 @@ sole place the embedded ordinal goes transfinite — exactly Gentzen's content. 
 set_option maxHeartbeats 1000000 in
 theorem metaInduction_cong_bdd (ψ step : SyntacticSemiformula LX 1) {Γ : Seq LX}
     (succT : ℕ → SyntacticTerm LX)
-    (hsval : ∀ n, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1)
+    (hsval : ∀ n, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1)
     (hstep : ∀ n, (∼step)/[nm n] = (ψ/[nm n]) ⋏ ∼(ψ/[succT n])) :
     PXFc (Ordinal.omega0 + 1) (ψ.complexity + 1)
       (insert (∼(ψ/[nm 0])) (insert (∃⁰ (∼step)) (insert (∀⁰ ψ) Γ))) := by
@@ -694,7 +695,7 @@ set_option maxHeartbeats 1000000 in
 **uniformly** (over the closing assignment `e`) bounded by some `B < ε₀`. X-free axioms land at the
 finite height `↑complexity`; X-induction instances land at `(ω + 1 + 1 + 1) + ↑fvSup` (one ω-jump from
 the cut-tower, three `⋎`-bumps for the NNF, finite closure bumps). -/
-theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema LX)) (hΓ : φ ∈ Γ) :
+theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Theory LX)) (hΓ : φ ∈ Γ) :
     ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
       ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun ψ => asgX e ▹ ψ)) := by
   obtain ⟨σ, hσ, rfl⟩ := hφ
@@ -741,7 +742,7 @@ theorem hax_paLX_bdd {Γ : Seq LX} (φ : Form LX) (hφ : φ ∈ (paLX : Schema L
         (∼ψv/[(#0 : Semiterm LX ℕ 1)]) ⋎ ψv/[(‘(#0 + 1)’ : Semiterm LX ℕ 1)] with hstepdef
       set succT : ℕ → SyntacticTerm LX :=
         fun n => Rew.subst ![nm n] (‘(#0 + 1)’ : Semiterm LX ℕ 1) with hsuccT
-      have hsval : ∀ n, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1 := by
+      have hsval : ∀ n, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (succT n) = n + 1 := by
         intro n
         haveI hO : Structure.One LX ℕ := ⟨rfl⟩
         haveI hA : Structure.Add LX ℕ := ⟨fun _ _ => rfl⟩
@@ -782,7 +783,7 @@ it via `mono`. Each structural rule bumps `B` by `+1`/`max+1`/`(⨆ const)+1`/`e
 which preserve `< ε₀`. The only transfinite contribution comes through the axiom case (`hax_bdd`,
 discharged by the cut-tower `metaInduction_cong_bdd`). -/
 set_option maxHeartbeats 1600000 in
-theorem embedC_LX_gen_bdd {𝓢 : Schema LX}
+theorem embedC_LX_gen_bdd {𝓢 : Theory LX}
     (hax : ∀ {Γ : Seq LX} (φ : Form LX), φ ∈ 𝓢 → φ ∈ Γ →
       ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
         ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun ψ => asgX e ▹ ψ)))
@@ -910,7 +911,7 @@ theorem embedC_LX_gen_bdd {𝓢 : Schema LX}
 /-- **D' fully assembled: `embedC_LX_bdd`.** The embedding of `paLX`-derivations into `PXFc`, with the
 embedded ordinal **uniformly `< ε₀`** (Gentzen's content). Specialises `embedC_LX_gen_bdd` to the
 concrete `paLX` axiom discharge `hax_paLX_bdd`. -/
-theorem embedC_LX_bdd {Γ : Seq LX} (d : Derivation2 (paLX : Schema LX) Γ) :
+theorem embedC_LX_bdd {Γ : Seq LX} (d : Derivation2 (paLX : Theory LX) Γ) :
     ∃ c : ℕ, ∃ B : Ordinal.{0}, B < ε₀ ∧
       ∀ e : ℕ → ℕ, PXFc B c (Γ.image (fun φ => asgX e ▹ φ)) :=
   embedC_LX_gen_bdd hax_paLX_bdd d

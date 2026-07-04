@@ -37,6 +37,7 @@ image are CLOSED — which is what lets M5's numeral-only `exI`/ω-rule `allω` 
 import GoodsteinPA.Zinfty
 import Foundation.FirstOrder.Basic.Calculus2
 import Foundation.FirstOrder.Arithmetic.Schemata
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.Embedding
 
@@ -199,37 +200,37 @@ lemma subst_q_cons_app (w : Fin n → SyntacticTerm ℒₒᵣ) (m : ℕ)
 
 /-- Value of a renamed term depends only on the values of the substituted terms. -/
 lemma valm_subst_congr {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
     (t : SyntacticSemiterm ℒₒᵣ n) :
-    Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w t)
-      = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' t) := by
-  simp only [Semiterm.valm, Semiterm.val_substs]
+    GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (Rew.subst w t)
+      = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' t) := by
+  simp only [GoodsteinPA.Compat.gValm, Semiterm.val_substs]
   congr 1
   funext x; exact hval x
 
 /-- Literal-truth congruence under value-equal substitutions. -/
 lemma litTrue_subst_congr {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
-    (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+    (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
     (b : Bool) {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → SyntacticSemiterm ℒₒᵣ n) :
     LitTrue (signedLit b r (fun i => Rew.subst w (v i)))
       ↔ LitTrue (signedLit b r (fun i => Rew.subst w' (v i))) := by
-  have hv : (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w (v i)))
-          = (fun i => Semiterm.valm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' (v i))) := by
+  have hv : (fun i => GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (Rew.subst w (v i)))
+          = (fun i => GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (Rew.subst w' (v i))) := by
     funext i; exact valm_subst_congr w w' hval (v i)
   cases b <;>
-    simp only [signedLit, LitTrue, Semiformula.eval_rel, Semiformula.eval_nrel, hv]
+    simp only [signedLit, LitTrue, Semiformula.eval_rel, Semiformula.eval_nrel, hv, Function.comp_def]
 
 /-- The numeral `nm m` evaluates to `m` in the standard ℕ-model (any free assignment). -/
-lemma valm_nm (m : ℕ) (f : ℕ → ℕ) : Semiterm.valm ℕ ![] f (nm m) = m := by
+lemma valm_nm (m : ℕ) (f : ℕ → ℕ) : GoodsteinPA.Compat.gValm ℕ ![] f (nm m) = m := by
   simp [nm]
 
 /-- **Value-congruent excluded middle (arity-general).** -/
 theorem provable_em_cong_gen : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
     (ψ : SyntacticSemiformula ℒₒᵣ n), ψ.complexity ≤ k →
-    (∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-        = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i)) →
+    (∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+        = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i)) →
     ∀ {Γ : Seq}, (Rew.subst w ▹ ψ) ∈ Γ → (∼(Rew.subst w' ▹ ψ)) ∈ Γ → ∃ a, Provable a 0 Γ := by
   intro k
   induction k with
@@ -297,8 +298,8 @@ theorem provable_em_cong_gen : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → Syntact
       have hn' : (∃⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
       have fam : ∀ m, ∃ x, Provable x 0 (insert (((Rew.subst w).q ▹ a)/[nm m]) Γ) := by
         intro m
-        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
-            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+        have hvalm : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
           intro i; cases i using Fin.cases with
           | zero => rfl
           | succ j => simpa using hval j
@@ -327,8 +328,8 @@ theorem provable_em_cong_gen : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → Syntact
       have hn' : (∀⁰ ((Rew.subst w').q ▹ ∼a)) ∈ Γ := by simpa using hn
       have fam : ∀ m, ∃ x, Provable x 0 (insert (((Rew.subst w').q ▹ ∼a)/[nm m]) Γ) := by
         intro m
-        have hvalm : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
-            = Semiterm.valm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
+        have hvalm : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w) i)
+            = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) ((nm m :> w') i) := by
           intro i; cases i using Fin.cases with
           | zero => rfl
           | succ j => simpa using hval j
@@ -349,15 +350,15 @@ theorem provable_em_cong_gen : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → Syntact
       exact ⟨_, hallω⟩
 where
   atomic_close {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
-      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
       {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → SyntacticSemiterm ℒₒᵣ n)
       {Γ : Seq} (hp : (Rew.subst w ▹ Semiformula.rel r v) ∈ Γ)
       (hn : (∼(Rew.subst w' ▹ Semiformula.rel r v)) ∈ Γ) : ∃ a, Provable a 0 Γ := by
     have hp' : signedLit true r (fun i => Rew.subst w (v i)) ∈ Γ := by
-      simpa [signedLit, Semiformula.rew_rel] using hp
+      simpa [signedLit, Semiformula.rew_rel, Function.comp_def] using hp
     have hn' : signedLit false r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-      simpa [signedLit, Semiformula.rew_rel] using hn
+      simpa [signedLit, Semiformula.rew_rel, Function.comp_def] using hn
     rcases litTrue_or_neg (signedLit true r (fun i => Rew.subst w (v i))) with htt | htf
     · exact ⟨0, Provable.axTrue true r _ htt hp'⟩
     · rw [neg_lit] at htf
@@ -365,15 +366,15 @@ where
         (litTrue_subst_congr w w' hval false r v).mp htf
       exact ⟨0, Provable.axTrue false r _ htf' hn'⟩
   atomic_close_neg {n} (w w' : Fin n → SyntacticTerm ℒₒᵣ)
-      (hval : ∀ i, Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w i)
-                = Semiterm.valm ℕ ![] (id : ℕ → ℕ) (w' i))
+      (hval : ∀ i, GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w i)
+                = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (w' i))
       {k} (r : (ℒₒᵣ).Rel k) (v : Fin k → SyntacticSemiterm ℒₒᵣ n)
       {Γ : Seq} (hp : (Rew.subst w ▹ Semiformula.nrel r v) ∈ Γ)
       (hn : (∼(Rew.subst w' ▹ Semiformula.nrel r v)) ∈ Γ) : ∃ a, Provable a 0 Γ := by
     have hp' : signedLit false r (fun i => Rew.subst w (v i)) ∈ Γ := by
-      simpa [signedLit, Semiformula.rew_nrel] using hp
+      simpa [signedLit, Semiformula.rew_nrel, Function.comp_def] using hp
     have hn' : signedLit true r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-      simpa [signedLit, Semiformula.rew_nrel] using hn
+      simpa [signedLit, Semiformula.rew_nrel, Function.comp_def] using hn
     rcases litTrue_or_neg (signedLit false r (fun i => Rew.subst w (v i))) with htt | htf
     · exact ⟨0, Provable.axTrue false r _ htt hp'⟩
     · rw [neg_lit] at htf
@@ -384,7 +385,7 @@ where
 /-- **Value-congruent excluded middle (single-term form).** For closed terms `s, s'` of equal
 standard value, a sequent containing `ψ/[s]` and `∼(ψ/[s'])` is `Z∞`-derivable cut-free. -/
 theorem provable_em_cong (s s' : SyntacticTerm ℒₒᵣ)
-    (hval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) s = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s')
+    (hval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s')
     (ψ : SyntacticSemiformula ℒₒᵣ 1) {Γ : Seq}
     (hp : (ψ/[s]) ∈ Γ) (hn : (∼(ψ/[s'])) ∈ Γ) : ∃ a, Provable a 0 Γ := by
   refine provable_em_cong_gen ψ.complexity ![s] ![s'] ψ le_rfl ?_ ?_ ?_
@@ -402,10 +403,10 @@ theorem Provable.exI_closed {α : Ordinal.{0}} {c : ℕ} {Γ : Seq}
     (ψ : SyntacticSemiformula ℒₒᵣ 1) (s : SyntacticTerm ℒₒᵣ)
     (h : Provable α c (insert (ψ/[s]) Γ)) :
     ∃ β, Provable β (max c (ψ.complexity + 1)) (insert (∃⁰ ψ) Γ) := by
-  set m : ℕ := Semiterm.valm ℕ ![] (id : ℕ → ℕ) s with hm
+  set m : ℕ := GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s with hm
   set c' : ℕ := max c (ψ.complexity + 1) with hc'
-  have hsval : Semiterm.valm ℕ ![] (id : ℕ → ℕ) (nm m)
-             = Semiterm.valm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
+  have hsval : GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) (nm m)
+             = GoodsteinPA.Compat.gValm ℕ ![] (id : ℕ → ℕ) s := by rw [valm_nm]
   -- left cut premise: ψ/[s] available (from h, weakened to add ψ/[nm m])
   have h₁ : Provable α c' (insert (ψ/[s]) (insert (ψ/[nm m]) Γ)) :=
     (h.weakening (Finset.insert_subset_insert _ (Finset.subset_insert _ _))).mono le_rfl
@@ -523,7 +524,7 @@ noncomputable def asg (e : ℕ → ℕ) : Rew ℒₒᵣ ℕ 0 ℕ 0 := Rew.rewri
 *at every numeral assignment of its free variables* (all sequents closed). Structural cases done;
 `all`/`exs`/`axm` are the disclosed deep obligations (the latter two now unblocked by `axTrue`). -/
 theorem embedC {Γ : Finset (SyntacticFormula ℒₒᵣ)}
-    (d : Derivation2 (𝗣𝗔 : Schema ℒₒᵣ) Γ) :
+    (d : Derivation2 (𝗣𝗔 : Theory ℒₒᵣ) Γ) :
     ∃ c : ℕ, ∀ e : ℕ → ℕ, ∃ α, Provable α c (Γ.image (fun φ => asg e ▹ φ)) := by
   induction d with
   | closed Γ φ hp hn =>

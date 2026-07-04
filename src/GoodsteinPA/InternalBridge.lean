@@ -16,6 +16,7 @@ import GoodsteinPA.InternalGoodstein
 import GoodsteinPA.Defs
 import GoodsteinPA.Domination
 import Mathlib.Data.Nat.Log
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalPow
 

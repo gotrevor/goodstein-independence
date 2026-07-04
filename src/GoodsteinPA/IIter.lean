@@ -20,6 +20,7 @@ Mirrors `InternalCor34.iVbigMul.construction` but with the iterated operation pa
 -/
 import GoodsteinPA.InternalCor34
 import GoodsteinPA.Grzegorczyk
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.IIter
 

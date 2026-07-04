@@ -16,6 +16,7 @@ classical `m = psum (blockIdx) + blockOff` decomposition law (`Grz.psum_add_bloc
 -/
 import GoodsteinPA.IIter
 import GoodsteinPA.BlkRec
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalGrz
 

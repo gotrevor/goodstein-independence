@@ -16,6 +16,7 @@ Result `crux1_internal_run_F`: from a `𝚺₁`-definable `≺`-descending NF-no
 -/
 import GoodsteinPA.StdCor34
 import GoodsteinPA.BlkRecF
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.StdCor34F
 

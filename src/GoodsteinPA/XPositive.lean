@@ -7,6 +7,7 @@ formulas where `X` occurs only positively, together with `U^γ ⊆ U^δ` for `γ
 that monotonicity.
 -/
 import GoodsteinPA.TruthSem
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.XPositive
 
@@ -28,7 +29,7 @@ def XPos : {n : ℕ} → Semiformula LX ℕ n → Prop
 /-- Term values are independent of the `X`-interpretation (terms never mention `X`; `structLX`'s
 function interpretation does not depend on `S`). -/
 theorem val_structLX_eq (S S' : ℕ → Prop) {n} (e : Fin n → ℕ) (ε : ℕ → ℕ) (t : Semiterm LX ℕ n) :
-    Semiterm.val (structLX S) e ε t = Semiterm.val (structLX S') e ε t := by
+    GoodsteinPA.Compat.gVal (structLX S) e ε t = GoodsteinPA.Compat.gVal (structLX S') e ε t := by
   induction t with
   | bvar x => rfl
   | fvar x => rfl
@@ -38,17 +39,17 @@ theorem val_structLX_eq (S S' : ℕ → Prop) {n} (e : Fin n → ℕ) (ε : ℕ 
 `S ⊆ S'` (pointwise), then `A` is true with `X := S'`. -/
 theorem eval_mono {S S' : ℕ → Prop} (hSS : ∀ n, S n → S' n) :
     ∀ {n} (A : Semiformula LX ℕ n), XPos A → ∀ (e : Fin n → ℕ) (ε : ℕ → ℕ),
-      Semiformula.Eval (structLX S) e ε A → Semiformula.Eval (structLX S') e ε A := by
+      GoodsteinPA.Compat.gEval (structLX S) e ε A → GoodsteinPA.Compat.gEval (structLX S') e ε A := by
   intro n A
   induction A using Semiformula.rec' with
   | hverum => intro _ e ε h; exact h
   | hfalsum => intro _ e ε h; exact h
   | hrel r v =>
     intro _ e ε h
-    simp only [Semiformula.eval_rel] at h ⊢
+    simp only [Semiformula.eval_rel, Function.comp_def] at h ⊢
     -- align the (S'-)term-values in the goal with the (S-)term-values in `h`
-    have hv : (fun i => Semiterm.val (structLX S') e ε (v i))
-        = (fun i => Semiterm.val (structLX S) e ε (v i)) :=
+    have hv : (fun i => GoodsteinPA.Compat.gVal (structLX S') e ε (v i))
+        = (fun i => GoodsteinPA.Compat.gVal (structLX S) e ε (v i)) :=
       funext fun i => val_structLX_eq S' S e ε (v i)
     rw [hv]
     rcases r with r₀ | rx
@@ -60,9 +61,9 @@ theorem eval_mono {S S' : ℕ → Prop} (hSS : ∀ n, S n → S' n) :
       exact hSS _ h
   | hnrel r v =>
     intro hpos e ε h
-    simp only [Semiformula.eval_nrel] at h ⊢
-    have hv : (fun i => Semiterm.val (structLX S') e ε (v i))
-        = (fun i => Semiterm.val (structLX S) e ε (v i)) :=
+    simp only [Semiformula.eval_nrel, Function.comp_def] at h ⊢
+    have hv : (fun i => GoodsteinPA.Compat.gVal (structLX S') e ε (v i))
+        = (fun i => GoodsteinPA.Compat.gVal (structLX S) e ε (v i)) :=
       funext fun i => val_structLX_eq S' S e ε (v i)
     rw [hv]
     rcases r with r₀ | rx

@@ -22,7 +22,9 @@ public import Foundation.FirstOrder.Incompleteness.Second
 
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
+-- NB: this is a Lean `module` file and cannot import the non-module `GoodsteinPA.Compat` shim,
+-- so it uses upstream's current spelling directly (`↓[ℒₒᵣ] ⊧*` for the old `⊧ₘ*`).
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section
 

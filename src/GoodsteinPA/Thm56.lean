@@ -76,7 +76,7 @@ instance : IsWellFounded ℕ SeamDefinability.seam.lt := SeamDefinability.seam.w
 /-- **C₂ collapsed to `{TI prec}`.** A `Z ⊢ TI_≺(X)` proof embeds (via `embedC_LX`/`hax_paLX`) to a
 `PXFc`-derivation of the singleton `{TI prec}` itself (the assignment image collapses by
 `asgX_TI_fix`). Existential in the ordinal — the `< ε₀` bound is the separate `embed_TI_bounded`. -/
-theorem embed_TI (d : Derivation2 (paLX : Schema LX) {TI prec}) :
+theorem embed_TI (d : Derivation2 (paLX : Theory LX) {TI prec}) :
     ∃ (c : ℕ) (α : Ordinal.{0}), PXFc α c ({TI prec} : Seq LX) := by
   obtain ⟨c, hc⟩ := embedC_LX hax_paLX d
   obtain ⟨α, hα⟩ := hc id
@@ -92,7 +92,7 @@ discharge `hax_paLX` ⟵ `provable_em_x`, `metaInduction`) to the *uniform* conc
 of which keep `B < ε₀` (ε₀ a limit); the ω-rule (`allω`) case closes precisely because the IH's `B`
 sits *outside* `∀ e`, so the family `{α(n)}ₙ` is uniformly `≤ B`, hence `⨆ₙ α(n) + 1 ≤ B + 1 < ε₀`.
 Pure ordinal bookkeeping, Foundation-light, no literature. -/
-theorem embed_TI_bounded (d : Derivation2 (paLX : Schema LX) {TI prec}) :
+theorem embed_TI_bounded (d : Derivation2 (paLX : Theory LX) {TI prec}) :
     ∃ (c : ℕ) (α : Ordinal.{0}), α < ε₀ ∧ PXFc α c ({TI prec} : Seq LX) := by
   obtain ⟨c, B, hB, hpxfc⟩ := GoodsteinPA.EmbeddingBound.embedC_LX_bdd d
   refine ⟨c, B, hB, ?_⟩
@@ -110,7 +110,7 @@ theorem two_opow_lt_epsilon0 {β : Ordinal.{0}} (h : β < ε₀) : (2 : Ordinal)
 **not** prove transfinite induction `TI_≺(X)` along the CNF-ε₀ order. Modulo the two disclosed walls
 (F-φ `rePred_ltPull_natCode`, Aristotle; D' `embed_TI_bounded`), this is axiom-clean and chains the
 entire §5 girder: embedding (C₂) + cut-elimination (C₁) + Boundedness (D) + order-type ≥ ε₀ (F). -/
-theorem peano_not_proves_TI : IsEmpty (Derivation2 (paLX : Schema LX) {TI prec}) := by
+theorem peano_not_proves_TI : IsEmpty (Derivation2 (paLX : Theory LX) {TI prec}) := by
   refine ⟨fun d => ?_⟩
   obtain ⟨c, α, hα, hpxfc⟩ := embed_TI_bounded d
   have hbound : orderType SeamDefinability.seam.lt ≤ 2 ^ (Deriv.omegaTower c α) :=
@@ -131,7 +131,7 @@ the headline by contradiction. The headline `sorry` in `Statement.lean` stays pu
 /-- **The descent wall E (interface).** From a PA proof of the Goodstein sentence, a `Z`-derivation of
 `TI_≺(X)` along the seam's CNF-ε₀ order. This is the sole remaining unstarted girder. -/
 def DescentE : Prop :=
-  𝗣𝗔 ⊢ ↑goodsteinSentence → Nonempty (Derivation2 (paLX : Schema LX) {TI prec})
+  𝗣𝗔 ⊢ ↑goodsteinSentence → Nonempty (Derivation2 (paLX : Theory LX) {TI prec})
 
 /-- **G — the headline, reduced to E.** If the descent `E` holds, then `𝗣𝗔 ⊬ ↑goodsteinSentence`:
 a proof of `γ` would yield (by `E`) a `Z`-proof of `TI_≺(X)`, contradicting Thm 5.6. This does NOT

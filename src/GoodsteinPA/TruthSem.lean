@@ -15,6 +15,7 @@ The light self-contained layer the Boundedness theorem (Buchholz Thm 5.4) sits o
 import GoodsteinPA.ZinftyGen
 import GoodsteinPA.LangX
 import Mathlib.SetTheory.Ordinal.Rank
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.TruthSem
 
@@ -52,7 +53,7 @@ def levelSet (γ : Ordinal.{0}) : ℕ → Prop := fun n => rk lt n < γ
 
 /-- `⊨^γ A :⟺ (ℕ, U^γ) ⊨ A` — truth in the `structLX (U^γ)` carrier (explicit structure). -/
 noncomputable def models (γ : Ordinal.{0}) (A : Form LX) : Prop :=
-  Semiformula.Eval (structLX (levelSet lt γ)) ![] id A
+  GoodsteinPA.Compat.gEval (structLX (levelSet lt γ)) ![] id A
 
 /-- `⊨^γ {A₁,…,A_k} :⟺ ⊨^γ A₁ ∨ … ∨ ⊨^γ A_k` (the Tait sequent reads as a disjunction). -/
 noncomputable def Sat (γ : Ordinal.{0}) (Γ : Seq LX) : Prop := ∃ A ∈ Γ, models lt γ A
@@ -67,7 +68,7 @@ quantifiers turn into the numeral family (matching the ω-rule premise shape `φ
 
 /-- The numeral `nm n` denotes `n` in `structLX S` (its `ℒₒᵣ`-fragment is the standard model). -/
 theorem val_nm (S : ℕ → Prop) (n : ℕ) :
-    Semiterm.val (structLX S) ![] (id : ℕ → ℕ) (nm n) = n := by
+    GoodsteinPA.Compat.gVal (structLX S) ![] (id : ℕ → ℕ) (nm n) = n := by
   letI inst : Structure LX ℕ := structLX S
   haveI : Structure.Zero LX ℕ := ⟨rfl⟩
   haveI : Structure.One LX ℕ := ⟨rfl⟩
@@ -76,7 +77,7 @@ theorem val_nm (S : ℕ → Prop) (n : ℕ) :
 
 /-- The 1-ary substitution vector `![nm n]` evaluates to `![n]` in `structLX S`. -/
 theorem subst_vec (S : ℕ → Prop) (n : ℕ) :
-    (fun i => Semiterm.val (structLX S) ![] id (![nm n] i)) = ![n] := by
+    (fun i => GoodsteinPA.Compat.gVal (structLX S) ![] id (![nm n] i)) = ![n] := by
   funext i; refine Fin.cases ?_ (fun j => j.elim0) i; simp [val_nm]
 
 @[simp] theorem models_and (γ : Ordinal.{0}) (φ ψ : Form LX) :
@@ -87,11 +88,11 @@ theorem subst_vec (S : ℕ → Prop) (n : ℕ) :
 
 theorem models_all (γ : Ordinal.{0}) (φ : SyntacticSemiformula LX 1) :
     models lt γ (∀⁰ φ) ↔ ∀ n : ℕ, models lt γ (φ/[nm n]) := by
-  unfold models; simp only [Semiformula.eval_all, Semiformula.eval_substs, subst_vec]
+  unfold models; simp only [Semiformula.eval_all, Semiformula.eval_substs, subst_vec, Function.comp_def]
 
 theorem models_ex (γ : Ordinal.{0}) (φ : SyntacticSemiformula LX 1) :
     models lt γ (∃⁰ φ) ↔ ∃ n : ℕ, models lt γ (φ/[nm n]) := by
-  unfold models; simp only [Semiformula.eval_ex, Semiformula.eval_substs, subst_vec]
+  unfold models; simp only [Semiformula.eval_ex, Semiformula.eval_substs, subst_vec, Function.comp_def]
 
 /-! ## X-free invariance
 
@@ -119,7 +120,7 @@ theorem lMap_structLX (S : ℕ → Prop) :
 ℕ-model — independent of `γ`. -/
 theorem models_lMap (γ : Ordinal.{0}) (φ₀ : SyntacticFormula ℒₒᵣ) :
     models lt γ (Semiformula.lMap (Language.ORing.embedding LX) φ₀)
-      ↔ Semiformula.Evalm ℕ ![] (id : ℕ → ℕ) φ₀ := by
+      ↔ GoodsteinPA.Compat.gEvalm ℕ ![] (id : ℕ → ℕ) φ₀ := by
   unfold models
   rw [Semiformula.eval_lMap, lMap_structLX]
 

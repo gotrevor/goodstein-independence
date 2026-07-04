@@ -12,6 +12,7 @@ new `𝚺₁`-recursion table is needed; its `isNF`/`icmp`/`iC` laws come straig
 (`isNF_iomul`, `icmp_iomul`, `iC_iomul`). This mirrors `Grz.bigMul`/`NF_bigMul`/`C_bigMul_le`.
 -/
 import GoodsteinPA.InternalONote
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalONote
 

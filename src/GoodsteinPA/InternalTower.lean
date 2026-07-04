@@ -15,6 +15,7 @@ immediately previous value). Key facts: `iotower_zero`/`iotower_succ` (the recur
 (`ω_m(α) ≺ ω_{m+1}(β)`, for the `dg`-drop cases) are pinned in `PENDING_WORK.md`.
 -/
 import GoodsteinPA.InternalNadd
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalONote
 

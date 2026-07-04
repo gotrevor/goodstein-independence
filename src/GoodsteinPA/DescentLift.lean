@@ -9,7 +9,7 @@ Foundation's `succInd`** (the induction-axiom builder), so that
 
     `Theory.lMap (ORing.embedding LX) (InductionScheme ℒₒᵣ univ) ⊆ InductionScheme LX univ`,
 
-and hence `(𝗣𝗔 : Schema ℒₒᵣ).lMap (ORing.embedding LX) ⊆ (paLX : Schema LX)` — the schema inclusion
+and hence `(𝗣𝗔 : Theory ℒₒᵣ).lMap (ORing.embedding LX) ⊆ (paLX : Theory LX)` — the schema inclusion
 that lets `Derivation.lMap` carry a PA-derivation into the `paLX` calculus.
 
 The genuine friction here is that the `“…”` arithmetic DSL desugars `0` / `#0 + 1` into
@@ -22,6 +22,7 @@ These are pure Foundation-syntax facts (ZERO Goodstein content), reusable for th
 `#print axioms`-clean. See `DESCENT-PLAN.md §2` for how they slot into the X-free lift lemma.
 -/
 import GoodsteinPA.EmbeddingX
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.DescentLift
 
@@ -216,14 +217,14 @@ instance eqAxiom_weakerThan_paLX : (𝗘𝗤 : Theory LX) ⪯ (GoodsteinPA.Embed
 /-- The schema coercion commutes with `lMap`: `(T : Schema).lMap Φ = (Theory.lMap Φ T : Schema)`
 (both are `lMap`/`emb` images; they agree by `lMap_emb`). -/
 theorem coe_schema_lMap (T : Theory ℒₒᵣ) :
-    Schema.lMap Φ (T : Schema ℒₒᵣ) = ((Theory.lMap Φ T : Theory LX) : Schema LX) := by
+    Schema.lMap Φ (T : Theory ℒₒᵣ) = ((Theory.lMap Φ T : Theory LX) : Theory LX) := by
   unfold Schema.lMap Theory.toSchema Theory.lMap
   rw [Set.image_image, Set.image_image]
   exact Set.image_congr (fun σ _ => Semiformula.lMap_emb σ)
 
 /-- The schema-level form of `lMap_PA_subset`. -/
 theorem schema_lMap_PA_subset :
-    Schema.lMap Φ (𝗣𝗔 : Schema ℒₒᵣ) ⊆ ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Schema LX) := by
+    Schema.lMap Φ (𝗣𝗔 : Theory ℒₒᵣ) ⊆ ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Theory LX) := by
   rw [coe_schema_lMap]; exact (Theory.coe_subset_coe).mpr lMap_PA_subset
 
 /-- **The X-free E-lift.** A `𝗣𝗔`-proof of any `ℒₒᵣ`-sentence `σ` translates into a `Derivation2`
@@ -233,13 +234,13 @@ of its `LX`-image in the `paLX` calculus: take the Tait derivation (`provable_de
 remains because `TI prec` mentions the set variable `X` and is *not* such an `lMap`-image (see
 `DESCENT-PLAN.md §1`) — the X-induction instance is the missing E-core content. -/
 theorem paLX_derivable2_lMap_of_PA_provable (σ : Sentence ℒₒᵣ) (h : 𝗣𝗔 ⊢ σ) :
-    Nonempty (Derivation2 ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Schema LX)
+    Nonempty (Derivation2 ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Theory LX)
       {Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ)}) := by
-  have h1 : (𝗣𝗔 : Schema ℒₒᵣ) ⊢ (↑σ : SyntacticFormula ℒₒᵣ) := provable_def.mp h
+  have h1 : (𝗣𝗔 : Theory ℒₒᵣ) ⊢ (↑σ : SyntacticFormula ℒₒᵣ) := provable_def.mp h
   have d := h1.get
-  have h3 : Schema.lMap Φ (𝗣𝗔 : Schema ℒₒᵣ) ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
+  have h3 : Schema.lMap Φ (𝗣𝗔 : Theory ℒₒᵣ) ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
     ⟨Derivation.cast (Derivation.lMap Φ d) (by simp)⟩
-  have h4 : ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Schema LX)
+  have h4 : ((GoodsteinPA.EmbeddingX.paLX : Theory LX) : Theory LX)
       ⊢ Semiformula.lMap Φ (↑σ : SyntacticFormula ℒₒᵣ) :=
     (Entailment.Axiomatized.weakerThanOfSubset schema_lMap_PA_subset).pbl h3
   exact provable_iff_derivable2.mp h4

@@ -50,6 +50,7 @@ import Mathlib.SetTheory.Ordinal.Principal
 import Mathlib.SetTheory.Ordinal.Veblen
 import Mathlib.SetTheory.Ordinal.Family
 import Mathlib.Data.ENat.Lattice
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.ZinftyF
 
@@ -77,7 +78,7 @@ def signedLit : Bool → {k : ℕ} → (ℒₒᵣ).Rel k → (Fin k → Semiterm
 /-- **ℕ-truth of a closed formula** (the side condition `axTrue` carries on its literal): the
 standard ℒₒᵣ-model evaluation with no bound variables. For a closed literal the free-variable
 assignment is immaterial (fixed to `id`). -/
-def LitTrue (φ : Form) : Prop := Semiformula.Evalm ℕ ![] (id : ℕ → ℕ) φ
+def LitTrue (φ : Form) : Prop := GoodsteinPA.Compat.gEvalm ℕ ![] (id : ℕ → ℕ) φ
 
 /-- `∼`-duality: a closed formula is true iff its negation is false. -/
 @[simp] theorem litTrue_neg (φ : Form) : LitTrue (∼φ) ↔ ¬ LitTrue φ := by

@@ -3,6 +3,7 @@ import GoodsteinPA.WainerRoute
 import GoodsteinPA.Embedding
 import GoodsteinPA.InternalBridge
 import GoodsteinPA.ReadoffValueGate
+import GoodsteinPA.Compat
 
 /-!
 # E-1 grind (Series-3) — `Zef2TC` (full E–W Def-23 rule set) + the budgeted EM lemma
@@ -738,9 +739,9 @@ private theorem em_cong_atomic_rel {n : ℕ} (w w' : Fin n → SyntacticTerm ℒ
     (hn : (∼(Rew.subst w' ▹ Semiformula.rel r v)) ∈ Γ) :
     Zef2TC α e H f c Γ := by
   have hp' : Semiformula.rel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-    simpa [Semiformula.rew_rel] using hp
+    simpa [Semiformula.rew_rel, Function.comp_def] using hp
   have hn' : Semiformula.nrel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-    simpa [Semiformula.rew_rel] using hn
+    simpa [Semiformula.rew_rel, Function.comp_def] using hn
   by_cases ht : atomTrue (Semiformula.rel r (fun i => Rew.subst w (v i)))
   · exact Zef2TC.trueRel hαN r _ ht hp'
   · have htn : atomTrue (Semiformula.nrel r (fun i => Rew.subst w (v i))) :=
@@ -759,9 +760,9 @@ private theorem em_cong_atomic_nrel {n : ℕ} (w w' : Fin n → SyntacticTerm �
     (hn : (∼(Rew.subst w' ▹ Semiformula.nrel r v)) ∈ Γ) :
     Zef2TC α e H f c Γ := by
   have hp' : Semiformula.nrel r (fun i => Rew.subst w (v i)) ∈ Γ := by
-    simpa [Semiformula.rew_nrel] using hp
+    simpa [Semiformula.rew_nrel, Function.comp_def] using hp
   have hn' : Semiformula.rel r (fun i => Rew.subst w' (v i)) ∈ Γ := by
-    simpa [Semiformula.rew_nrel] using hn
+    simpa [Semiformula.rew_nrel, Function.comp_def] using hn
   by_cases ht : atomTrue (Semiformula.nrel r (fun i => Rew.subst w (v i)))
   · exact Zef2TC.trueNrel hαN r _ ht hp'
   · have htn : atomTrue (Semiformula.rel r (fun i => Rew.subst w (v i))) := by
@@ -1200,7 +1201,7 @@ many `Gexp`-iterates of the env-sup over a structural fv bound.  Induction on th
 witness budgets reduce to (E–W: the control tower pays for term growth). -/
 theorem term_val_le_Gexp_iter (t : SyntacticTerm ℒₒᵣ) :
     ∃ c N : ℕ, ∀ env : ℕ → ℕ,
-      Semiterm.valm ℕ ![] env t ≤ Gexp^[c] (envSup env N) := by
+      GoodsteinPA.Compat.gValm ℕ ![] env t ≤ Gexp^[c] (envSup env N) := by
   induction t with
   | bvar x => exact x.elim0
   | fvar x =>
@@ -1210,35 +1211,35 @@ theorem term_val_le_Gexp_iter (t : SyntacticTerm ℒₒᵣ) :
       match f, v with
       | LO.FirstOrder.Language.ORing.Func.zero, v =>
           refine ⟨0, 0, fun env => ?_⟩
-          have hv : Semiterm.valm ℕ ![] env (Semiterm.func
+          have hv : GoodsteinPA.Compat.gValm ℕ ![] env (Semiterm.func
               LO.FirstOrder.Language.ORing.Func.zero v) = 0 := by
-            simp only [Semiterm.valm, Semiterm.val_func]; rfl
+            simp only [GoodsteinPA.Compat.gValm, Semiterm.val_func]; rfl
           simp [hv]
       | LO.FirstOrder.Language.ORing.Func.one, v =>
           refine ⟨1, 0, fun env => ?_⟩
           have h1 := iter_le_Gexp_iter 1 (envSup env 0)
-          have hv : Semiterm.valm ℕ ![] env (Semiterm.func
+          have hv : GoodsteinPA.Compat.gValm ℕ ![] env (Semiterm.func
               LO.FirstOrder.Language.ORing.Func.one v) = 1 := by
-            simp only [Semiterm.valm, Semiterm.val_func]; rfl
+            simp only [GoodsteinPA.Compat.gValm, Semiterm.val_func]; rfl
           omega
       | LO.FirstOrder.Language.ORing.Func.add, v =>
           obtain ⟨c₀, N₀, h₀⟩ := ih 0
           obtain ⟨c₁, N₁, h₁⟩ := ih 1
           refine ⟨max c₀ c₁ + 1, max N₀ N₁, fun env => ?_⟩
-          have hb₀ : Semiterm.valm ℕ ![] env (v 0)
+          have hb₀ : GoodsteinPA.Compat.gValm ℕ ![] env (v 0)
               ≤ Gexp^[max c₀ c₁] (envSup env (max N₀ N₁)) :=
             le_trans (h₀ env) (le_trans
               (Gexp_iter_le_iter (le_max_left c₀ c₁) _)
               (Gexp_iter_monotone _ (envSup_mono_N env (le_max_left N₀ N₁))))
-          have hb₁ : Semiterm.valm ℕ ![] env (v 1)
+          have hb₁ : GoodsteinPA.Compat.gValm ℕ ![] env (v 1)
               ≤ Gexp^[max c₀ c₁] (envSup env (max N₀ N₁)) :=
             le_trans (h₁ env) (le_trans
               (Gexp_iter_le_iter (le_max_right c₀ c₁) _)
               (Gexp_iter_monotone _ (envSup_mono_N env (le_max_right N₀ N₁))))
-          have hadd : Semiterm.valm ℕ ![] env (Semiterm.func
+          have hadd : GoodsteinPA.Compat.gValm ℕ ![] env (Semiterm.func
               LO.FirstOrder.Language.ORing.Func.add v)
-              = Semiterm.valm ℕ ![] env (v 0) + Semiterm.valm ℕ ![] env (v 1) := by
-            simp only [Semiterm.valm, Semiterm.val_func]; rfl
+              = GoodsteinPA.Compat.gValm ℕ ![] env (v 0) + GoodsteinPA.Compat.gValm ℕ ![] env (v 1) := by
+            simp only [GoodsteinPA.Compat.gValm, Semiterm.val_func]; rfl
           rw [hadd, Function.iterate_succ_apply']
           refine le_trans (add_le_Gexp_max _ _) (Gexp_monotone ?_)
           exact max_le hb₀ hb₁
@@ -1246,20 +1247,20 @@ theorem term_val_le_Gexp_iter (t : SyntacticTerm ℒₒᵣ) :
           obtain ⟨c₀, N₀, h₀⟩ := ih 0
           obtain ⟨c₁, N₁, h₁⟩ := ih 1
           refine ⟨max c₀ c₁ + 1, max N₀ N₁, fun env => ?_⟩
-          have hb₀ : Semiterm.valm ℕ ![] env (v 0)
+          have hb₀ : GoodsteinPA.Compat.gValm ℕ ![] env (v 0)
               ≤ Gexp^[max c₀ c₁] (envSup env (max N₀ N₁)) :=
             le_trans (h₀ env) (le_trans
               (Gexp_iter_le_iter (le_max_left c₀ c₁) _)
               (Gexp_iter_monotone _ (envSup_mono_N env (le_max_left N₀ N₁))))
-          have hb₁ : Semiterm.valm ℕ ![] env (v 1)
+          have hb₁ : GoodsteinPA.Compat.gValm ℕ ![] env (v 1)
               ≤ Gexp^[max c₀ c₁] (envSup env (max N₀ N₁)) :=
             le_trans (h₁ env) (le_trans
               (Gexp_iter_le_iter (le_max_right c₀ c₁) _)
               (Gexp_iter_monotone _ (envSup_mono_N env (le_max_right N₀ N₁))))
-          have hmul : Semiterm.valm ℕ ![] env (Semiterm.func
+          have hmul : GoodsteinPA.Compat.gValm ℕ ![] env (Semiterm.func
               LO.FirstOrder.Language.ORing.Func.mul v)
-              = Semiterm.valm ℕ ![] env (v 0) * Semiterm.valm ℕ ![] env (v 1) := by
-            simp only [Semiterm.valm, Semiterm.val_func]; rfl
+              = GoodsteinPA.Compat.gValm ℕ ![] env (v 0) * GoodsteinPA.Compat.gValm ℕ ![] env (v 1) := by
+            simp only [GoodsteinPA.Compat.gValm, Semiterm.val_func]; rfl
           rw [hmul, Function.iterate_succ_apply']
           refine le_trans (mul_le_Gexp_max _ _) (Gexp_monotone ?_)
           exact max_le hb₀ hb₁
@@ -1267,8 +1268,8 @@ theorem term_val_le_Gexp_iter (t : SyntacticTerm ℒₒᵣ) :
 /-- Bridge: the `atomTrue`-evaluator value of the `asg`-closed term is the direct
 `env`-valuation. -/
 theorem stdClosedVal_asg (env : ℕ → ℕ) (t : SyntacticTerm ℒₒᵣ) :
-    stdClosedVal (Embedding.asg env t) = Semiterm.valm ℕ ![] env t := by
-  show Semiterm.val _ (fun _ => 0) (fun _ => 0) (Rew.rewrite (fun x => nm (env x)) t) = _
+    stdClosedVal (Embedding.asg env t) = GoodsteinPA.Compat.gValm ℕ ![] env t := by
+  show GoodsteinPA.Compat.gVal _ (fun _ => 0) (fun _ => 0) (Rew.rewrite (fun x => nm (env x)) t) = _
   rw [Semiterm.val_rewrite]
   have he : (fun _ => 0 : Fin 0 → ℕ) = ![] := funext (fun x => x.elim0)
   rw [he]
@@ -1750,8 +1751,8 @@ theorem ExFree.rew : ∀ {n₁ : ℕ} (ψ : SyntacticSemiformula ℒₒᵣ n₁)
   induction ψ using Semiformula.rec' with
   | hverum => intro _ n₂ ω; simp
   | hfalsum => intro _ n₂ ω; simp
-  | hrel r v => intro _ n₂ ω; simp [Semiformula.rew_rel]
-  | hnrel r v => intro _ n₂ ω; simp [Semiformula.rew_nrel]
+  | hrel r v => intro _ n₂ ω; simp [Semiformula.rew_rel, Function.comp_def]
+  | hnrel r v => intro _ n₂ ω; simp [Semiformula.rew_nrel, Function.comp_def]
   | hand φ ψ ihφ ihψ =>
       intro h n₂ ω
       simp only [LogicalConnective.HomClass.map_and, exFree_and]
@@ -1836,7 +1837,7 @@ theorem truth_exFree_Zef2TC (k : ℕ) :
             omega
           have hsex : ExFree (a/[nm m]) := hex.rew a (Rew.subst ![nm m])
           have hstrue : atomTrue (a/[nm m]) := by
-            have hall : ∀ x : ℕ, Semiformula.Evalm ℕ ![x] (fun _ => 0) a := by
+            have hall : ∀ x : ℕ, GoodsteinPA.Compat.gEvalm ℕ ![x] (fun _ => 0) a := by
               simpa [atomTrue, Matrix.constant_eq_singleton, Matrix.empty_eq] using htrue
             simpa [atomTrue, Semiformula.eval_substs, Embedding.valm_nm,
               Matrix.constant_eq_singleton, Matrix.empty_eq] using hall m
@@ -1922,7 +1923,7 @@ theorem budgetedEmbedsV3_addEqOfLt {Γ : Finset (SyntacticFormula ℒₒᵣ)}
     rw [asg_emb_fix]
     simp only [Arithmetic.PeanoMinus.Axiom.addEqOfLt, Semiformula.Operator.eq_def,
       Semiformula.Operator.lt_def, Semiformula.imp_eq]
-    simp [Semiformula.rew_rel, Semiformula.rew_nrel]
+    simp [Semiformula.rew_rel, Semiformula.rew_nrel, Function.comp_def]
     constructor <;> simp [Matrix.comp_vecCons, Rew.func, Matrix.empty_eq]
   have hmem := Finset.mem_image_of_mem (fun χ => Embedding.asg env ▹ χ) hΓ
   rw [himg] at hmem
@@ -1961,7 +1962,7 @@ theorem budgetedEmbedsV3_addEqOfLt {Γ : Finset (SyntacticFormula ℒₒᵣ)}
                 ▹ (Semiformula.rel Language.Eq.eq ![‘(#2 + #0)’, #1]))) := by
         rw [embedding_subst_q_cons_app]
         simp [hM, Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.comp_vecCons,
-          Matrix.empty_eq]
+          Matrix.empty_eq, Function.comp_def]
       rw [hsubB]
       set A : SyntacticFormula ℒₒᵣ := ∼(Semiformula.rel Language.LT.lt ![nm a, nm b]) with hA
       set Eb : SyntacticSemiformula ℒₒᵣ 1 := (Rew.subst (nm b :> ![nm a])).q
@@ -1976,11 +1977,11 @@ theorem budgetedEmbedsV3_addEqOfLt {Γ : Finset (SyntacticFormula ℒₒᵣ)}
                   ![Semiterm.func Language.Add.add ![nm a, nm (b - a)], nm b] := by
             rw [hE, embedding_subst_q_cons_app]
             simp [Semiformula.rew_rel, Rew.func, Matrix.comp_vecCons, Matrix.empty_eq,
-              Semiterm.Operator.operator, Semiterm.Operator.Add.term_eq]
+              Semiterm.Operator.operator, Semiterm.Operator.Add.term_eq, Function.comp_def]
           have htrue : atomTrue (Semiformula.rel Language.Eq.eq
               ![Semiterm.func Language.Add.add ![nm a, nm (b - a)], nm b]) := by
             simp [atomTrue, Semiformula.eval_rel, Semiterm.val_func, Matrix.empty_eq,
-              Embedding.valm_nm]
+              Embedding.valm_nm, Function.comp_def]
             omega
           have hleaf : Zef2TC (ONote.ofNat 1) 0 (adjoin (adjoin (fun _ : ONote => True) a) b)
               (rel1 (rel1 f a) b) 0 (insert (Eb/[nm (b - a)]) Δ) := by
@@ -1996,7 +1997,7 @@ theorem budgetedEmbedsV3_addEqOfLt {Γ : Finset (SyntacticFormula ℒₒᵣ)}
             (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))] at hexI
         · -- trueNrel leaf on ¬(a < b)
           have htrue : atomTrue (Semiformula.nrel Language.LT.lt ![nm a, nm b]) := by
-            simp [atomTrue, Semiformula.eval_nrel, Matrix.empty_eq, Embedding.valm_nm]
+            simp [atomTrue, Semiformula.eval_nrel, Matrix.empty_eq, Embedding.valm_nm, Function.comp_def]
             omega
           exact Zef2TC.trueNrel (hgb 2 (by omega)) _ _ htrue
             (by
@@ -2044,34 +2045,34 @@ theorem budgetedEmbedsV3_axm_PAminus {Γ : Finset (SyntacticFormula ℒₒᵣ)}
               simp [Theory.Eq.funcExt, Semiformula.Operator.eq_def, Semiformula.Operator.lt_def,
                 Semiformula.Operator.LE.def_of_Eq_of_LT, Semiformula.imp_eq, Matrix.conj,
                 Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.vecTail, Matrix.vecHead,
-                Matrix.comp_vecCons]) hmod hΓ
+                Matrix.comp_vecCons, Function.comp_def]) hmod hΓ
           | one => exact budgetedEmbedsV3_of_exFree_true _ (by
               simp [Theory.Eq.funcExt, Semiformula.Operator.eq_def, Semiformula.Operator.lt_def,
                 Semiformula.Operator.LE.def_of_Eq_of_LT, Semiformula.imp_eq, Matrix.conj,
                 Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.vecTail, Matrix.vecHead,
-                Matrix.comp_vecCons]) hmod hΓ
+                Matrix.comp_vecCons, Function.comp_def]) hmod hΓ
           | add => exact budgetedEmbedsV3_of_exFree_true _ (by
               simp [Theory.Eq.funcExt, Semiformula.Operator.eq_def, Semiformula.Operator.lt_def,
                 Semiformula.Operator.LE.def_of_Eq_of_LT, Semiformula.imp_eq, Matrix.conj,
                 Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.vecTail, Matrix.vecHead,
-                Matrix.comp_vecCons]) hmod hΓ
+                Matrix.comp_vecCons, Function.comp_def]) hmod hΓ
           | mul => exact budgetedEmbedsV3_of_exFree_true _ (by
               simp [Theory.Eq.funcExt, Semiformula.Operator.eq_def, Semiformula.Operator.lt_def,
                 Semiformula.Operator.LE.def_of_Eq_of_LT, Semiformula.imp_eq, Matrix.conj,
                 Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.vecTail, Matrix.vecHead,
-                Matrix.comp_vecCons]) hmod hΓ
+                Matrix.comp_vecCons, Function.comp_def]) hmod hΓ
       | relExt r =>
           cases r with
           | eq => exact budgetedEmbedsV3_of_exFree_true _ (by
               simp [Theory.Eq.relExt, Semiformula.Operator.eq_def, Semiformula.Operator.lt_def,
                 Semiformula.Operator.LE.def_of_Eq_of_LT, Semiformula.imp_eq, Matrix.conj,
                 Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.vecTail, Matrix.vecHead,
-                Matrix.comp_vecCons]) hmod hΓ
+                Matrix.comp_vecCons, Function.comp_def]) hmod hΓ
           | lt => exact budgetedEmbedsV3_of_exFree_true _ (by
               simp [Theory.Eq.relExt, Semiformula.Operator.eq_def, Semiformula.Operator.lt_def,
                 Semiformula.Operator.LE.def_of_Eq_of_LT, Semiformula.imp_eq, Matrix.conj,
                 Semiformula.rew_rel, Semiformula.rew_nrel, Matrix.vecTail, Matrix.vecHead,
-                Matrix.comp_vecCons]) hmod hΓ
+                Matrix.comp_vecCons, Function.comp_def]) hmod hΓ
   | addZero => exact budgetedEmbedsV3_of_exFree_true _ (by
       simp [Arithmetic.PeanoMinus.Axiom.addZero, Semiformula.Operator.eq_def,
         Semiformula.Operator.lt_def, Semiformula.Operator.LE.def_of_Eq_of_LT,
@@ -2596,7 +2597,7 @@ from 𝗣𝗔 is budgeted-embeddable into `Zef2TC` under the structural-budget p
 `BudgetedEmbedsV3`.  This is the rung-E embedding content, complete (judge input;
 NOT self-ratified into src per the directive). -/
 theorem budgetedEmbeddingV3 {Γ : Finset (SyntacticFormula ℒₒᵣ)}
-    (d : Derivation2 (𝗣𝗔 : Schema ℒₒᵣ) Γ) :
+    (d : Derivation2 (𝗣𝗔 : Theory ℒₒᵣ) Γ) :
     BudgetedEmbedsV3 Γ := by
   induction d with
   | closed Γ φ hp hn => exact budgetedEmbedsV3_closed φ hp hn
@@ -4083,7 +4084,7 @@ theorem sound0_TC : ∀ {α e : ONote} {H : ONote → Prop} {f : ℕ → ℕ} {c
       by_cases htrue : atomTrue (Semiformula.rel r v)
       · exact ⟨_, hp, htrue⟩
       · refine ⟨_, hn, ?_⟩
-        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel] using htrue
+        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel, Function.comp_def] using htrue
   | trueRel hαN r v htrue hmem =>
       intro _
       exact ⟨_, hmem, htrue⟩
@@ -4626,9 +4627,9 @@ theorem goodsteinBodyE_semantic_link {m n : ℕ} {χ : SyntacticSemiformula ℒ�
   simp only [atomTrue, Semiformula.eval_substs, Semiformula.eval_rew, Semiformula.eval_emb,
     Function.comp_def] at h'
   have hcast : ∀ (E : Fin 3 → ℕ) (ε₁ ε₂ : Empty → ℕ),
-      Semiformula.Eval (Arithmetic.standardModel ℕ) E ε₁
+      GoodsteinPA.Compat.gEval (Arithmetic.standardModel ℕ) E ε₁
         (↑(LO.FirstOrder.Arithmetic.igoodsteinDef)) →
-      Semiformula.Eval (Arithmetic.standardModel ℕ) E ε₂
+      GoodsteinPA.Compat.gEval (Arithmetic.standardModel ℕ) E ε₂
         (↑(LO.FirstOrder.Arithmetic.igoodsteinDef)) := by
     intro E ε₁ ε₂ hh
     rwa [show ε₂ = ε₁ from funext fun a => a.elim]
@@ -4639,7 +4640,7 @@ theorem goodsteinBodyE_semantic_link {m n : ℕ} {χ : SyntacticSemiformula ℒ�
     show (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #(Fin.succ 0) = _
     rw [Rew.q_bvar_succ]
     simp
-  have hval : Semiterm.val (Arithmetic.standardModel ℕ) (fun _ => n) (fun _ => 0)
+  have hval : GoodsteinPA.Compat.gVal (Arithmetic.standardModel ℕ) (fun _ => n) (fun _ => 0)
       ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #1) = m := by
     rw [hq1]
     simp [Semiterm.val_bShift', Matrix.empty_eq, valm_nm]

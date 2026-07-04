@@ -42,6 +42,7 @@ declarations (R5).
 -/
 import GoodsteinPA.OperatorZinfty
 import GoodsteinPA.BlueprintAttr
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.OperatorZeh
 
@@ -398,7 +399,7 @@ theorem readoff_sigma1 {φ : SyntacticSemiformula ℒₒᵣ 1}
       by_cases htrue : atomTrue (Semiformula.rel r v)
       · exact Or.inr ⟨_, hp, htrue, ar, r, v, Or.inl rfl⟩
       · refine Or.inr ⟨_, hn, ?_, ar, r, v, Or.inr rfl⟩
-        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel] using htrue
+        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel, Function.comp_def] using htrue
   | @wk α e H m c Δ Γ hsub _ ih =>
       intro hc hshape
       rcases ih hc (fun ψ hψ => hshape ψ (hsub hψ)) with h | ⟨ψ, hψ, hrest⟩
@@ -1831,7 +1832,7 @@ theorem readoff_sigma1_Zef {φ : SyntacticSemiformula ℒₒᵣ 1}
       by_cases htrue : atomTrue (Semiformula.rel r v)
       · exact Or.inr ⟨_, hp, htrue, ar, r, v, Or.inl rfl⟩
       · refine Or.inr ⟨_, hn, ?_, ar, r, v, Or.inr rfl⟩
-        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel] using htrue
+        simpa [atomTrue, Semiformula.eval_nrel, Semiformula.eval_rel, Function.comp_def] using htrue
   | @wk α e H f c Δ Γ hsub _ ih =>
       intro hc hshape
       rcases ih hc (fun ψ hψ => hshape ψ (hsub hψ)) with h | ⟨ψ, hψ, hrest⟩

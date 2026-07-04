@@ -25,6 +25,7 @@ The remaining `StdCor34.igt`-interface obligations — the `iC ≤ Kg·(n+m+1)` 
 within-block descent (`g_desc`), nonzero-in-range (`higt0`) — are the next bricks.
 -/
 import GoodsteinPA.InternalGrz
+import GoodsteinPA.Compat
 
 namespace GoodsteinPA.InternalIg
 
