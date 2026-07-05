@@ -56,6 +56,8 @@
       <dt>Dark green background</dt><dd>the <em>proof</em> of this result and all its ancestors are formalized</dd>
       
       <dt>Dark green border</dt><dd>this is in Mathlib</dd>
+      <dt>Teal border</dt><dd>not required for the summit — a conceptual gap or aspirational monument the live proof routes around (real math, but nothing blocks on it)</dd>
+      <dt>Grey border, dashed</dt><dd>abandoned / parked — a path that hit a wall (e.g. Route A), kept for provenance</dd>
       
     </dl>
   </div>
@@ -81,7 +83,7 @@
     <a class="latex_link" href="chp-foothills.html#def:encoding">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodsteinSentence">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.goodsteinSentence">Lean</a>
     
     
   
@@ -115,9 +117,9 @@
       <span class="lean_link">Lean</span>
       <ul class="tooltip_list">
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/ONote.fastGrowing" class="lean_decl">ONote.fastGrowing</a></li>
+           <li><a href="../docs/find/#doc/ONote.fastGrowing" class="lean_decl">ONote.fastGrowing</a></li>
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/ONote.fundamentalSequence" class="lean_decl">ONote.fundamentalSequence</a></li>
+           <li><a href="../docs/find/#doc/ONote.fundamentalSequence" class="lean_decl">ONote.fundamentalSequence</a></li>
         
       </ul>
   </div>
@@ -150,7 +152,7 @@
     <a class="latex_link" href="chp-routeB.html#def:goodstein_length">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.Dom.goodsteinLength">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.Dom.goodsteinLength">Lean</a>
     
     
   
@@ -177,6 +179,7 @@
     <div class="thm_thmcontent"><p> <b class="bfseries">Hardy hierarchy &amp; its growth theory (gap).</b> The Hardy functions \(H_\alpha \) on ordinal notations and the ordinal-indexed growth/monotonicity theory relating \(H_\alpha \) to \(f_\alpha \). A partial function <span class="ttfamily">GoodsteinPA.FastGrowing.hardy</span> (with <span class="ttfamily">hardy_monotone</span>) is ported into the repo from Track&#160;1, but the <em>classification-strength</em> content — the piece feeding the Wainer bounding theorem — is absent. Portable in spirit from Castéran’s Coq <span class="ttfamily">hydra-battles</span> (\(F_\alpha \)/\(H_\alpha \), axiom-free). </p>
 </div>
 
+    <p class="node-estimate" data-note="def:hardy">Plan note (not audit-backed): (gap: fn ported, growth theory absent)</p>
     <a class="latex_link" href="chp-foothills.html#def:hardy">LaTeX</a>
     
     
@@ -210,7 +213,7 @@
     <a class="latex_link" href="chp-shores.html#def:onote">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/ONote">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/ONote">Lean</a>
     
     
   
@@ -237,6 +240,7 @@
     <div class="thm_thmcontent"><p>  <b class="bfseries">Arithmetic transfinite induction \(\mathrm{TI}({{\lt}}\varepsilon _0)\) (gap).</b> The schema of transfinite induction up to each ordinal below \(\varepsilon _0\), expressed over <span class="ttfamily">ONote</span> codes as a family of PA-formulas. This is the object whose provability separates \(\mathsf{PA}\) from \(\mathrm{Con}(\mathsf{PA})\) (Gentzen): PA proves each instance below \(\varepsilon _0\) but not the schema at \(\varepsilon _0\). Net-new nowhere in Lean. </p>
 </div>
 
+    <p class="node-estimate" data-note="def:ti_schema">Plan note (not audit-backed): (gap: net-new in Lean)</p>
     <a class="latex_link" href="chp-foothills.html#def:ti_schema">LaTeX</a>
     
     
@@ -270,7 +274,7 @@
     <a class="latex_link" href="chp-shores.html#def:veblen">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/Ordinal.veblen">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/Ordinal.veblen">Lean</a>
     
     
   
@@ -297,10 +301,41 @@
     <div class="thm_thmcontent"><p>  <b class="bfseries">Wainer/Buchholz classification (the deep gap = ordinal analysis of PA).</b> A recursive function is \(\mathsf{PA}\)-provably total iff it is eventually dominated by some \(f_o\) with \(o{\lt}\varepsilon _0\). Its <em>converse</em> half (provably-total \(\Rightarrow \) \({\lt}\varepsilon _0\)-bounded) is proved in the literature by embedding PA into \(\omega \)-logic, applying cut-elimination, and reading off an ordinal assignment \({\lt}\varepsilon _0\) (Buchholz–Wainer 1987). Formalized in no proof assistant; this is the Route-B face of the one intrinsic monument. </p>
 </div>
 
+    <p class="node-estimate" data-note="def:wainer_class">Plan note (not audit-backed): (deep gap: ordinal analysis of PA)</p>
     <a class="latex_link" href="chp-foothills.html#def:wainer_class">LaTeX</a>
     
     
   
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:zeh_calculus_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:zeh_calculus" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">4.7</span></div>
+    <div class="thm_thmcontent"><p>  <b class="bfseries">The \(Z^{e}\) judgment.</b> \(\texttt{Zeh}\; \alpha \; e\; H\; m\; c\; \Gamma \): derivation ordinal \(\alpha \), control \(e\) (constant through a derivation; \(\texttt{exI}\) witnesses bounded by \(H_e(m)\)), operator <em>generator</em> slot \(H\) (side conditions are closure membership \(\texttt{Cl}\, H\)), stage \(m\) (threaded \(\max (m,n)\) at \(\omega \)-premises), cut rank \(c\). Kernel findings K1–K3: membership at \(\varepsilon _0\) is <em>information-free</em> (every NF notation lies in every closure), so no numeric fact may route through \(H\) — the numeric carrier is the \((e,m)\) axis plus the function slots below. </p>
+</div>
+
+    <a class="latex_link" href="chp-routeB.html#def:zeh_calculus">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.Zeh">Lean</a>
     
     
   
@@ -334,9 +369,9 @@
       <span class="lean_link">Lean</span>
       <ul class="tooltip_list">
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor" class="lean_decl">GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor</a></li>
+           <li><a href="../docs/find/#doc/GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor" class="lean_decl">GoodsteinPA.WainerRoute.fastGrowing_fixed_add_two_lt_successor</a></li>
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.add_le_iterate_of_lt" class="lean_decl">GoodsteinPA.WainerRoute.add_le_iterate_of_lt</a></li>
+           <li><a href="../docs/find/#doc/GoodsteinPA.WainerRoute.add_le_iterate_of_lt" class="lean_decl">GoodsteinPA.WainerRoute.add_le_iterate_of_lt</a></li>
         
       </ul>
   </div>
@@ -369,7 +404,7 @@
     <a class="latex_link" href="chp-foothills.html#thm:bridge">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodsteinSentence_faithful">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.goodsteinSentence_faithful">Lean</a>
     
     
   
@@ -399,7 +434,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:crux2_axiom">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodstein_implies_consistency">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.goodstein_implies_consistency">Lean</a>
     
     
   
@@ -429,7 +464,7 @@
     <a class="latex_link" href="chp-shores.html#thm:delta1">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/LO.FirstOrder.Arithmetic.PA_delta1Definable">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/LO.FirstOrder.Arithmetic.PA_delta1Definable">Lean</a>
     
     
   
@@ -459,7 +494,7 @@
     <a class="latex_link" href="chp-routeB.html#thm:dom_lower">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.Dom.goodsteinLength_dominates_fastGrowing">Lean</a>
     
     
   
@@ -486,6 +521,7 @@
     <div class="thm_thmcontent"><p>  <b class="bfseries">\(\mathrm{TI}(\varepsilon _0)\vdash \mathrm{Con}(\mathsf{PA})\) (Gentzen’s consistency proof).</b> From the ordinal-assigned cut-elimination, an empty-sequent PA-derivation would yield an infinite primitive-recursive \(\varepsilon _0\)-descent, forbidden by transfinite induction up to \(\varepsilon _0\); hence \(\mathrm{Con}(\mathsf{PA})\). This is the shared engine: its <em>internalized-in-\(\mathsf{PA}\)</em> shadow is the Route-A girder (Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a>); its <em>growth-rate contrapositive</em> is the Route-B Wainer bound (Thm&#160;<a href="chp-routeB.html#thm:wainer_axiom">4.5</a>). </p>
 </div>
 
+    <p class="node-estimate" data-note="thm:gentzen_conpa">Plan note (not audit-backed): (shared monument engine)</p>
     <a class="latex_link" href="chp-crown.html#thm:gentzen_conpa">LaTeX</a>
     
     
@@ -519,7 +555,7 @@
     <a class="latex_link" href="chp-shores.html#thm:godel1">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/LO.FirstOrder.Arithmetic.incomplete">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/LO.FirstOrder.Arithmetic.incomplete">Lean</a>
     
     
   
@@ -549,7 +585,7 @@
     <a class="latex_link" href="chp-shores.html#thm:godel2">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/LO.FirstOrder.Arithmetic.consistent_unprovable">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/LO.FirstOrder.Arithmetic.consistent_unprovable">Lean</a>
     
     
   
@@ -583,9 +619,9 @@
       <span class="lean_link">Lean</span>
       <ul class="tooltip_list">
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.not_proves_of_implies_consistency" class="lean_decl">GoodsteinPA.not_proves_of_implies_consistency</a></li>
+           <li><a href="../docs/find/#doc/GoodsteinPA.not_proves_of_implies_consistency" class="lean_decl">GoodsteinPA.not_proves_of_implies_consistency</a></li>
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.peano_not_proves_consistency" class="lean_decl">GoodsteinPA.peano_not_proves_consistency</a></li>
+           <li><a href="../docs/find/#doc/GoodsteinPA.peano_not_proves_consistency" class="lean_decl">GoodsteinPA.peano_not_proves_consistency</a></li>
         
       </ul>
   </div>
@@ -618,7 +654,7 @@
     <a class="latex_link" href="chp-foothills.html#thm:goodstein_termination">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.Dom.goodstein_terminates">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.Dom.goodstein_terminates">Lean</a>
     
     
   
@@ -642,13 +678,14 @@
       Theorem
       </span>
       <span class="theorem_thmlabel">2.4</span></div>
-    <div class="thm_thmcontent"><p> Foundation’s finitary first-order Gentzen <b class="bfseries">Hauptsatz</b> (cut-elimination), <span class="ttfamily">LO.FirstOrder.hauptsatz</span> (\(=\texttt{Hauptsatz.main}\)). It is proved and kernel-clean <em>in Foundation</em>, but is not imported into this build’s environment, so it carries no in-repo <span class="ttfamily">\lean</span> binding here. It is listed as a shore because the <em>infinitary</em>, \(\varepsilon _0\)-ordinal-assigned analogue of exactly this theorem is the crown gap (Thm&#160;<a href="chp-crown.html#thm:infinitary_tower">6.1</a>); the finitary Hauptsatz is the template, not the summit. </p>
+    <div class="thm_thmcontent"><p>  Foundation’s finitary first-order Gentzen <b class="bfseries">Hauptsatz</b> (cut-elimination), <span class="ttfamily">LO.FirstOrder.hauptsatz</span> (\(=\texttt{Hauptsatz.main}\)). It is proved and kernel-clean <em>in Foundation</em>, and is now imported into this build (via the blueprint root), so this node is a real green shore. It is listed as a shore because the <em>infinitary</em>, \(\varepsilon _0\)-ordinal-assigned analogue of exactly this theorem is the crown gap (Thm&#160;<a href="chp-crown.html#thm:infinitary_tower">6.1</a>); the finitary Hauptsatz is the template, not the summit. </p>
 </div>
 
+    <p class="node-estimate" data-note="thm:hauptsatz">Plan note (not audit-backed): (finitary template)</p>
     <a class="latex_link" href="chp-shores.html#thm:hauptsatz">LaTeX</a>
     
     
-  
+  <a class="lean_link lean_decl" href="../docs/find/#doc/LO.FirstOrder.hauptsatz">Lean</a>
     
     
   
@@ -705,6 +742,7 @@
     <div class="thm_thmcontent"><p>  <b class="bfseries">Infinitary \(\mathsf{PA}_\omega \) cut-elimination (the monument).</b> The \(\omega \)-logic proof system for PA with the \(\omega \)-rule, an ordinal assignment \(o(d){\lt}\varepsilon _0\) to derivations, and cut-elimination that lowers the assigned ordinal — the \(\varepsilon _0\)-graded, infinitary analogue of the finitary Hauptsatz (Thm&#160;<a href="chp-shores.html#thm:hauptsatz">2.4</a>). Formalized only in Coq (Sinclaire; Bryce &amp; Goré, <span class="ttfamily">arXiv:2603.00487</span>, \(\sim \)18k lines, <span class="ttfamily">PA_omega.v</span>); absent from mathlib and every other prover. \(\sim \)6–7k Lean lines, human-architected, multi-month. </p>
 </div>
 
+    <p class="node-estimate" data-note="thm:infinitary_tower">Plan note (not audit-backed): (crown monument: ~6-7k lines, multi-month)</p>
     <a class="latex_link" href="chp-crown.html#thm:infinitary_tower">LaTeX</a>
     
     
@@ -742,12 +780,43 @@
       <span class="lean_link">Lean</span>
       <ul class="tooltip_list">
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing" class="lean_decl">GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing</a></li>
+           <li><a href="../docs/find/#doc/GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing" class="lean_decl">GoodsteinPA.WainerRoute.cichon_caicedo_not_eventually_bounded_by_fixed_fastGrowing</a></li>
         
-           <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing" class="lean_decl">GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing</a></li>
+           <li><a href="../docs/find/#doc/GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing" class="lean_decl">GoodsteinPA.WainerRoute.goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing</a></li>
         
       </ul>
   </div>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:pa_not_proves_goodstein_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:pa_not_proves_goodstein" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">6.4</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Summit: \(\mathsf{PA}\nvdash \gamma \), axiom-free — REACHED.</b> The Kirby–Paris independence with a clean \(\texttt{\# print axioms}\) (\(\{ \texttt{propext},\texttt{Classical.choice}, \texttt{Quot.sound}\} \) only), machine-verified by the CI axiom gate. Discharged via Route&#160;B’s Wainer bound (SERIES-5); the crown re-points its body onto <span class="ttfamily">peano_not_proves_goodstein_growth</span>, the identical proposition. <em>Reached without the \(\varepsilon _0\) monument</em> (Thm&#160;<a href="chp-crown.html#thm:gentzen_conpa">6.2</a>): Route&#160;B trades the ordinal analysis for a growth-rate contradiction. A first in any proof assistant. <em>Graph-reading note:</em> \(\backslash \texttt{uses}\) is conjunctive-only, so both route in-edges are drawn; the summit needs exactly ONE. Route&#160;B is the live path (mainline); the banked Route&#160;A edge is rendered faded/deprioritized, kept for provenance. Ledger row&#160;16 (rung&#160;C of <span class="ttfamily">WAINER-LADDER-2026-07-02.md</span>) tracks the flip: the summit has <em>zero intrinsic work</em> — one lap re-points its body onto the route-B headline (the identical proposition) once that is clean, plus the W7 <span class="ttfamily">native_decide</span> burndown. </p>
+</div>
+
+    <p class="node-estimate" data-estimate="thm:pa_not_proves_goodstein">Ledger estimate: 0 laps | 100% confidence</p>
+    <a class="latex_link" href="chp-crown.html#thm:pa_not_proves_goodstein">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein">Lean</a>
     
     
   
@@ -778,7 +847,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBClosedWitnessBudgets">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage">Lean</a>
     
     
   
@@ -809,7 +878,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBGoodsteinFragmentExtraction">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage">Lean</a>
     
     
   
@@ -840,7 +909,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBGoodsteinSentenceShape">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage">Lean</a>
     
     
   
@@ -871,7 +940,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBInductionAxiomShell">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage">Lean</a>
     
     
   
@@ -902,7 +971,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBOperatorCutElimination">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage">Lean</a>
     
     
   
@@ -933,7 +1002,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBPeanoMinusAxiomLeaves">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage">Lean</a>
     
     
   
@@ -964,7 +1033,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBSomeKStructuralEmbedding">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage">Lean</a>
     
     
   
@@ -995,7 +1064,7 @@
     <a class="latex_link" href="chp-routeA.html#thm:pathBSubformulaProjection">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage">Lean</a>
     
     
   
@@ -1019,14 +1088,14 @@
       Theorem
       </span>
       <span class="theorem_thmlabel">5.10</span></div>
-    <div class="thm_thmcontent"><p>   The full crux-2 capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out by the promoted lower-bound theorem. The bridge <em>step</em> itself is discharged (ledger: <span class="ttfamily">clean</span>, <span class="ttfamily">0 laps</span>), but this stage theorem composes capstones 2–8, so its kernel footprint carries their open axioms until the chain discharges. </p>
+    <div class="thm_thmcontent"><p>   The terminal bridge step: unpack the \(\mathrm{RouteBCapstone}\) carried by the fragment-extraction marker, which is ruled out by the promoted lower-bound theorem. Discharged (ledger: <span class="ttfamily">clean</span>, audited via <span class="ttfamily">collectAxioms</span>) — this node’s own job is done; what remains open lives entirely upstream in capstones 2–8 (the <span class="ttfamily">\uses</span> chain). The <em>cumulative</em> composition is <span class="ttfamily">pathB_terminalRouteBridge_stage</span>, whose kernel footprint clears exactly when the whole chain does. </p>
 </div>
 
     <p class="node-estimate" data-estimate="thm:pathBTerminalRouteBridge">Ledger estimate: 0 laps | 100% confidence</p>
     <a class="latex_link" href="chp-routeA.html#thm:pathBTerminalRouteBridge">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_capstone">Lean</a>
     
     
   
@@ -1050,13 +1119,13 @@
       Theorem
       </span>
       <span class="theorem_thmlabel">5.12</span></div>
-    <div class="thm_thmcontent"><p>   <b class="bfseries">Kirby–Paris via internalization + Gödel&#160;II.</b> \(\mathsf{PA}\nvdash \gamma \), proved as \(\texttt{not\_ proves\_ of\_ implies\_ consistency}\  \texttt{goodstein\_ implies\_ consistency}\). A real proof whose only non-canonical dependency is the single girder axiom Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a> — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{goodstein\_ implies\_ consistency}\} \). Banked at the identical type to the mainline summit; converges with Route&#160;B at Thm&#160;<a href="chp-crown.html#thm:summit">6.4</a>. </p>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Kirby–Paris via internalization + Gödel&#160;II.</b> \(\mathsf{PA}\nvdash \gamma \), proved as \(\texttt{not\_ proves\_ of\_ implies\_ consistency}\  \texttt{goodstein\_ implies\_ consistency}\). A real proof whose only non-canonical dependency is the single girder axiom Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a> — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{goodstein\_ implies\_ consistency}\} \). Banked at the identical type to the mainline summit; converges with Route&#160;B at Thm&#160;<a href="chp-crown.html#thm:pa_not_proves_goodstein">6.4</a>. </p>
 </div>
 
     <a class="latex_link" href="chp-routeA.html#thm:routeA_headline">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein_routeA">Lean</a>
     
     
   
@@ -1083,10 +1152,11 @@
     <div class="thm_thmcontent"><p>   <b class="bfseries">Kirby–Paris via Wainer/Cichoń/Caicedo.</b> \(\mathsf{PA}\nvdash \gamma \): if PA proved \(\gamma \), the Wainer bound (Thm&#160;<a href="chp-routeB.html#thm:wainer_axiom">4.5</a>) would put \(\texttt{goodsteinLength}\) below a fixed \(f_o\), contradicting Thm&#160;<a href="chp-routeB.html#thm:no_fixed_bound">4.4</a>. A <em>real proof</em> whose only open dependency is the single Wainer axiom — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{wainer\_ bound\_ of\_ pa\_ proves\_ goodstein}, \text{finite native\_ decide}\} \). </p>
 </div>
 
+    <p class="node-estimate" data-estimate="thm:routeB_headline">Ledger estimate: 0 laps | 100% confidence</p>
     <a class="latex_link" href="chp-routeB.html#thm:routeB_headline">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.WainerRoute.peano_not_proves_goodstein_growth">Lean</a>
     
     
   
@@ -1128,36 +1198,6 @@
 
 
     
-    <div class="dep-modal-container" id="thm:summit_modal">
-      <div class="dep-modal-content">
-          <button class="dep-closebtn">
-<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        
-  <div class="thm" id="thm:summit" style="display: none">
-    <div class="thm_thmheading">
-      <span class="theorem_thmcaption">
-      Theorem
-      </span>
-      <span class="theorem_thmlabel">6.4</span></div>
-    <div class="thm_thmcontent"><p>  <b class="bfseries">Summit: \(\mathsf{PA}\nvdash \gamma \), axiom-free.</b> The Kirby–Paris independence with a clean \(\texttt{\# print axioms}\) (\(\{ \texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\} \) only). Reached the instant either route’s debt axiom is discharged against the crown — Route&#160;B’s Wainer bound or Route&#160;A’s internalized girder, both grounded in Thm&#160;<a href="chp-crown.html#thm:gentzen_conpa">6.2</a>. A first in any proof assistant. </p>
-</div>
-
-    <a class="latex_link" href="chp-crown.html#thm:summit">LaTeX</a>
-    
-    
-  
-    
-    
-  
-    
-  </div>
-    
-      </div>
-    </div>
-
-
-    
     <div class="dep-modal-container" id="thm:two_sided_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
@@ -1173,6 +1213,7 @@
     <div class="thm_thmcontent"><p>  <b class="bfseries">The proof-theoretic ordinal of PA is \(\varepsilon _0\).</b> Both directions: \(\mathsf{PA}\) proves \(\mathrm{TI}(\alpha )\) for each \(\alpha {\lt}\varepsilon _0\), and \(\mathrm{TI}(\varepsilon _0)\) proves \(\mathrm{Con}(\mathsf{PA})\) (so PA cannot prove it). The complete ordinal analysis, of which either Goodstein route is one corollary. </p>
 </div>
 
+    <p class="node-estimate" data-note="thm:two_sided">Plan note (not audit-backed): (crown: full ordinal analysis)</p>
     <a class="latex_link" href="chp-crown.html#thm:two_sided">LaTeX</a>
     
     
@@ -1200,13 +1241,293 @@
       Theorem
       </span>
       <span class="theorem_thmlabel">4.5</span></div>
-    <div class="thm_thmcontent"><p>   <b class="bfseries">Wainer bound (the one Route-B debt axiom).</b> If \(\mathsf{PA}\vdash \gamma \), then \(\texttt{goodsteinLength}\) is eventually bounded by some fixed \(f_o\), \(o{\lt}\varepsilon _0\). This is the Wainer classification (Def&#160;<a href="chp-foothills.html#def:wainer_class">3.4</a>) specialized to this route — currently a named <span class="ttfamily">axiom</span> standing in for the un-built ordinal analysis of PA. It is the <em>entire</em> remaining mathematical debt of Route&#160;B. </p>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Wainer bound (the one Route-B debt axiom).</b> If \(\mathsf{PA}\vdash \gamma \), then \(\texttt{goodsteinLength}\) is eventually bounded by some fixed \(f_o\), \(o{\lt}\varepsilon _0\). This is the Wainer classification (Def&#160;<a href="chp-foothills.html#def:wainer_class">3.4</a>) specialized to this route — a named <span class="ttfamily">axiom</span> standing in for the ordinal analysis of PA, <em>now under construction</em> as the \(Z^{e}\) operator calculus (Section&#160;<a href="chp-routeB.html#sec:zeh">4.1</a>). Its discharge is DECOMPOSED as the <b class="bfseries">wainer ladder</b> (<span class="ttfamily">WAINER-LADDER-2026-07-02.md</span>): embedding (rung&#160;E, Thm&#160;<a href="chp-routeB.html#thm:zeh_embedding">4.15</a>) \(\to \) elimination pass (rung&#160;P, Thm&#160;<a href="chp-routeB.html#thm:zeh_pass">4.12</a>) \(\to \) rank-to-zero (rung&#160;R, Thm&#160;<a href="chp-routeB.html#thm:zeh_rank_zero">4.14</a>) \(\to \) \(\Delta _0\) read-off (rung&#160;D, Thm&#160;<a href="chp-routeB.html#thm:zeh_readoff_delta0">4.13</a>) \(\to \) the splice (rung&#160;W, Thm&#160;<a href="chp-routeB.html#thm:wainer_splice">4.16</a>), which flips this node \(\texttt{axiom}\to \texttt{theorem}\). Rung estimates are hand-claims until the lap-8 port erects them as named pins with ledger rows. </p>
 </div>
 
+    <p class="node-estimate" data-estimate="thm:wainer_axiom">Ledger estimate: 0 laps | 100% confidence</p>
     <a class="latex_link" href="chp-routeB.html#thm:wainer_axiom">LaTeX</a>
     
     
-  <a class="lean_link lean_decl" href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein">Lean</a>
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.WainerRoute.wainer_bound_of_pa_proves_goodstein">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:wainer_splice_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:wainer_splice" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.16</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">The splice (ladder rung W): \(\texttt{wainer\_ bound}\) as a theorem.</b> Compose embedding \(\to \) rank-to-zero \(\to \) \(\Delta _0\) read-off, convert the exit bound into the axiom’s hardy/fast-growing vocabulary via the banked Lemma-19 brackets (<span class="ttfamily">Hardy.lean</span>, lap 179 — banked <em>for</em> this rung), and contradict the banked lower bound (Thm&#160;<a href="chp-routeB.html#thm:dom_lower">4.2</a>). Discharges Thm&#160;<a href="chp-routeB.html#thm:wainer_axiom">4.5</a> (\(\texttt{axiom}\to \texttt{theorem}\)). (<span class="ttfamily">WAINER-LADDER-2026-07-02.md</span> rung W.) </p>
+</div>
+
+    <p class="node-estimate" data-estimate="thm:wainer_splice">Ledger estimate: 0 laps | 100% confidence</p>
+    <p class="node-estimate" data-note="thm:wainer_splice">Plan note (not audit-backed): ~2-5 laps | 85%</p>
+    <a class="latex_link" href="chp-routeB.html#thm:wainer_splice">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.WainerLadder.wainer_splice_Zef2">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_embedding_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_embedding" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.15</span></div>
+    <div class="thm_thmcontent"><p>  <b class="bfseries">The controlled embedding (ladder rung E).</b> From \(\mathsf{PA}\vdash \gamma \), a controlled derivation of the translated sequent in the slot calculus — tower \(e\), root slot, cut rank \(d\), and (post-trap-8) the per-node norm side conditions, sourced at the leaves via the f-relativization (E–W Lemmas&#160;32–36). The W3 spike ratified the statement shape (Towsner-§16 K-hypothesis form); it re-bases onto the E–W-amended judgment at the lap-8 port. (<span class="ttfamily">WAINER-LADDER-2026-07-02.md</span> rung E.) </p>
+<p><em>SERIES-5 status:</em> the embedding’s work is complete and kernel-clean — it is realized <em>inside</em> the discharged girder (<span class="ttfamily">E1EmbeddingGrind.wainer_bound_witness</span>), not exposed as a standalone faithful theorem. So this node stays uncertified <em>by design</em>: it is exposition debt (home an <span class="ttfamily">embedding_Zef2</span> of its own faithful type), NOT remaining proof debt — the summit above is axiom-clean without it. </p>
+</div>
+
+    <p class="node-estimate" data-note="thm:zeh_embedding">Plan note (not audit-backed): ✅ wip, ratified (S3 lap 203)</p>
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_embedding">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_inversion_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_inversion" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.8</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Inversion suite (done, axiom-clean).</b> \(\forall \)-inversion at the relativization and running stage (\(\texttt{allInv\_ Zeh}\), mirroring the banked \(\texttt{Zekd.allInv}\)) plus the complete propositional companions (\(\texttt{orInv\_ Zeh}\), \(\texttt{andInvL\_ Zeh}\), \(\texttt{andInvR\_ Zeh}\)). Suite completeness is checked, not asserted: the minimal core admits no fifth inversion. </p>
+</div>
+
+    <p class="node-estimate" data-estimate="thm:zeh_inversion">Ledger estimate: 0 laps | 100% confidence</p>
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_inversion">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.allInv_Zeh">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_pass_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_pass" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.12</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Elimination pass (statement ratified lap 7; PROVEN SERIES-3 N-2).</b> Rank \(c+1 \to c\): the ordinal collapses (\(\mathrm{collapse}\, \alpha = \omega ^\alpha \)) and the slot iterates (the Def-16 norm-gated \(\mathrm{ewIter}\, f\, \alpha \)) — E–W Lemma&#160;26/27. \(\texttt{passAux}\) is a generalized-rank induction, all 6 cases kernel-clean. The former top-rank-cut trilemma was dissolved by the judged \(\mathrm{ewN}\to N_{\log }\) absorbing-norm amendment (Series-2 ruling (1)): quantifier cut shapes reduce via \(\texttt{stepAllz\_ bnd}\)-style merge under \(\mathrm{collapse}\), the slack discharged by the \(\texttt{ewIter}\) swap lemma; atomic shapes by the axL-pair splice (\(\texttt{atomCutRun\_ Zf2}\)); \(\top /\bot /\wedge /\vee \) shapes are never principal and erase. </p>
+</div>
+
+    <p class="node-estimate" data-note="thm:zeh_pass">Plan note (not audit-backed): ✅ src, kernel-clean (S3 lap 198)</p>
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_pass">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.cutElimPass_Zef2">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_rank_zero_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_rank_zero" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.14</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Rank-to-zero (ladder rung R).</b> Iterate the elimination pass down the cut rank \(d \to 0\): ordinal tower \(\mathrm{expTower}^{[d]}\), slot tower the composed E–W iterate. DISCHARGED SERIES-1 Stage&#160;4 as a real \(\texttt{rankToZeroAux}\) induction; kernel-clean (\([\texttt{propext},\texttt{choice},\texttt{Quot.sound}]\)) since the pass landed (SERIES-3 N-2), exactly as anticipated. </p>
+</div>
+
+    <p class="node-estimate" data-note="thm:zeh_rank_zero">Plan note (not audit-backed): ✅ src, kernel-clean (S3 lap 198)</p>
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_rank_zero">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.rankToZero_Zef2">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_readoff_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_readoff" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.9</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Bounding read-off (done, proven — the fixed exit).</b> A rank-0 \(Z^{e}\) derivation of the \(\Sigma _1\) headline shape \(\{ \exists ^0\varphi \} \) (atomic matrix) yields a witness \(n \le H_e(m)\) with \(\varphi (n)\) true — the Buchholz–Wainer Bounding-Lemma analog, per-instance, no evaluator, consuming <em>no</em> \(H\)-data (which dissolved the “\(\Sigma _1\)-definability of \(H\)” risk). </p>
+</div>
+
+    <p class="node-estimate" data-estimate="thm:zeh_readoff">Ledger estimate: 0 laps | 100% confidence</p>
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_readoff">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.headline_readoff">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_readoff_delta0_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_readoff_delta0" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.13</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">\(\Delta _0\)-matrix read-off extension (ladder rung D).</b> The proven read-off covers atomic matrices; the Goodstein sentence’s matrix is \(\Delta _0\). R-4\('\)-restated per Series-2 ruling (2) (conclusion bound \(\mathrm{ewIter}\, f\, \alpha \, 0\)) and DISCHARGED Series-3 D-3 by VACUITY: the spine-head invariant (\(\texttt{zef2\_ rank0\_ singleton\_ ex\_ underivable}\)) shows \(Z^{ef}_2\) without E–W’s (Ax2) cannot derive any singleton \(\{ \exists ^0\varphi \} \) at rank 0 (no complementary \(\mathrm{axL}\) pair can form from a single quantifier spine), so the ratified statement holds at every bound. The abandoned falsity-invariant route is parked in \(\texttt{wip/ReadoffDAuxRetired.lean}\); the downward-closed-guard fragment remains banked (\(\texttt{readoffD\_ trapped\_ of\_ mono}\)). Decisive rung-E input: the embedding must target the (Ax2)-extended calculus. </p>
+</div>
+
+    <p class="node-estimate" data-note="thm:zeh_readoff_delta0">Plan note (not audit-backed): ✅ src, kernel-clean (S3 lap 199)</p>
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_readoff_delta0">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.readoff_delta0_Zef2">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_reduction_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_reduction" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.10</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Running-family reduction (pin; laps 2–4; re-proved over \(\mathtt{Zef2}\) SERIES-1 Stage&#160;2).</b> The §19.6 \(\forall /\exists \) reduction at <em>fixed</em> control (E–W Lemma&#160;25, judge-amended 2026-07-02: the drafted raised-control conjunct was refutable two independent ways), output ordinal \(\alpha +\gamma \) per ruling #1 (no successor bump), output slot the <em>composition</em> \(g\circ f\) with the \(\mathrm{ewN}\) gate re-threaded at every rebuilt node. The \(\mathtt{Zf}\)-era proof survives in <span class="ttfamily">OperatorZeh.lean</span>; the bound decl is the \(\mathtt{Zef2}\) mainline. </p>
+</div>
+
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_reduction">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.cutReduceAllAuxRunning_Zf2">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:zeh_step_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:zeh_step" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">4.11</span></div>
+    <div class="thm_thmcontent"><p>   <b class="bfseries">Principal \(\forall /\exists \) step (pin; laps 2–4).</b> One \(\vee \)-principal cut-reduction (kept unified per the Q3 ruling: the \(\forall \)-side has no separate reduction — it enters via inversion), IHs at one control, fixed-control output, composed slot. </p>
+</div>
+
+    <a class="latex_link" href="chp-routeB.html#thm:zeh_step">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="../docs/find/#doc/GoodsteinPA.OperatorZeh.stepAllω_Zf2">Lean</a>
     
     
   
@@ -1234,7 +1555,13 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"thm:hauptsatz"	[color="#FFAA33",		label=hauptsatz,		shape=ellipse];	"def:wainer_class"	[color="#FFAA33",		label=wainer_class,		shape=box];	"thm:hauptsatz" -> "def:wainer_class"	[style=dashed];	"thm:infinitary_tower"	[color="#FFAA33",		label=infinitary_tower,		shape=ellipse];	"def:wainer_class" -> "thm:infinitary_tower"	[style=dashed];	"thm:wainer_axiom"	[color="#FFAA33",		label=wainer_axiom,		shape=ellipse];	"def:wainer_class" -> "thm:wainer_axiom"	[style=dashed];	"thm:gentzen_conpa"	[color="#FFAA33",		label=gentzen_conpa,		shape=ellipse];	"thm:infinitary_tower" -> "thm:gentzen_conpa"	[style=dashed];	"thm:two_sided"	[color="#FFAA33",		label=two_sided,		shape=ellipse];	"thm:gentzen_conpa" -> "thm:two_sided"	[style=dashed];	"thm:routeB_headline"	[color="#FFAA33",		label=routeB_headline,		shape=ellipse];	"thm:wainer_axiom" -> "thm:routeB_headline"	[style=dashed];	"thm:no_fixed_bound"	[color=green,		label=no_fixed_bound,		shape=ellipse];	"thm:no_fixed_bound" -> "thm:routeB_headline"	[style=dashed];	"thm:summit"	[color="#FFAA33",		label=summit,		shape=ellipse];	"thm:routeB_headline" -> "thm:summit"	[style=dashed];	"thm:pathBGoodsteinSentenceShape"	[color=green,		label="pathBGoodsteinSentenceShape\\n0 laps | 100%",		shape=ellipse];	"thm:pathBPeanoMinusAxiomLeaves"	[color="#FFAA33",		label="pathBPeanoMinusAxiomLeaves\\n~1-2 laps | 80%",		shape=ellipse];	"thm:pathBGoodsteinSentenceShape" -> "thm:pathBPeanoMinusAxiomLeaves"	[style=dashed];	"thm:pathBInductionAxiomShell"	[color="#FFAA33",		label="pathBInductionAxiomShell\\n~4-8 laps | 65%",		shape=ellipse];	"thm:pathBPeanoMinusAxiomLeaves" -> "thm:pathBInductionAxiomShell"	[style=dashed];	"thm:pathBClosedWitnessBudgets"	[color="#FFAA33",		label="pathBClosedWitnessBudgets\\n~2-5 laps | 75%",		shape=ellipse];	"thm:pathBInductionAxiomShell" -> "thm:pathBClosedWitnessBudgets"	[style=dashed];	"thm:pathBSomeKStructuralEmbedding"	[color="#FFAA33",		label="pathBSomeKStructuralEmbedding\\n~4-8 laps | 65%",		shape=ellipse];	"thm:pathBClosedWitnessBudgets" -> "thm:pathBSomeKStructuralEmbedding"	[style=dashed];	"thm:pathBOperatorCutElimination"	[color="#FFAA33",		label="pathBOperatorCutElimination\\n~5-10 laps | 65%",		shape=ellipse];	"thm:pathBSomeKStructuralEmbedding" -> "thm:pathBOperatorCutElimination"	[style=dashed];	"thm:pathBSubformulaProjection"	[color="#FFAA33",		label="pathBSubformulaProjection\\n~3-6 laps | 65%",		shape=ellipse];	"thm:pathBOperatorCutElimination" -> "thm:pathBSubformulaProjection"	[style=dashed];	"def:fastgrowing"	[color=green,		fillcolor="#B0ECA3",		label=fastgrowing,		shape=box,		style=filled];	"def:fastgrowing" -> "def:wainer_class"	[style=dashed];	"thm:dom_lower"	[color=green,		label=dom_lower,		shape=ellipse];	"def:fastgrowing" -> "thm:dom_lower"	[style=dashed];	"lem:succ_gap"	[color=green,		label=succ_gap,		shape=ellipse];	"def:fastgrowing" -> "lem:succ_gap"	[style=dashed];	"thm:dom_lower" -> "thm:no_fixed_bound"	[style=dashed];	"lem:succ_gap" -> "thm:no_fixed_bound"	[style=dashed];	"thm:godel1"	[color="#FFAA33",		label=godel1,		shape=ellipse];	"thm:horizon"	[color="#FFAA33",		label=horizon,		shape=ellipse];	"def:encoding"	[color=green,		fillcolor="#B0ECA3",		label=encoding,		shape=box,		style=filled];	"def:encoding" -> "thm:pathBGoodsteinSentenceShape"	[style=dashed];	"thm:bridge"	[color=green,		label=bridge,		shape=ellipse];	"def:encoding" -> "thm:bridge"	[style=dashed];	"thm:godel2_reduction"	[color=green,		label=godel2_reduction,		shape=ellipse];	"def:encoding" -> "thm:godel2_reduction"	[style=dashed];	"thm:bridge" -> "thm:routeB_headline"	[style=dashed];	"thm:routeA_headline"	[color="#FFAA33",		label=routeA_headline,		shape=ellipse];	"thm:bridge" -> "thm:routeA_headline"	[style=dashed];	"thm:godel2_reduction" -> "thm:routeA_headline"	[style=dashed];	"thm:routeA_headline" -> "thm:summit"	[style=dashed];	"thm:delta1"	[color=green,		label=delta1,		shape=ellipse];	"thm:delta1" -> "thm:godel1"	[style=dashed];	"thm:godel2"	[color=green,		label=godel2,		shape=ellipse];	"thm:delta1" -> "thm:godel2"	[style=dashed];	"thm:godel2" -> "thm:godel2_reduction"	[style=dashed];	"thm:pathBGoodsteinFragmentExtraction"	[color="#FFAA33",		label="pathBGoodsteinFragmentExtraction\\n~2-5 laps | 65%",		shape=ellipse];	"thm:pathBSubformulaProjection" -> "thm:pathBGoodsteinFragmentExtraction"	[style=dashed];	"thm:pathBTerminalRouteBridge"	[color="#FFAA33",		label="pathBTerminalRouteBridge\\n0 laps | 100%",		shape=ellipse];	"thm:pathBGoodsteinFragmentExtraction" -> "thm:pathBTerminalRouteBridge"	[style=dashed];	"thm:crux2_axiom"	[color="#FFAA33",		label=crux2_axiom,		shape=ellipse];	"thm:pathBTerminalRouteBridge" -> "thm:crux2_axiom"	[style=dashed];	"thm:siblings"	[color="#FFAA33",		label=siblings,		shape=ellipse];	"thm:two_sided" -> "thm:siblings"	[style=dashed];	"def:ti_schema"	[color="#FFAA33",		label=ti_schema,		shape=box];	"def:ti_schema" -> "thm:gentzen_conpa"	[style=dashed];	"def:ti_schema" -> "thm:crux2_axiom"	[style=dashed];	"thm:crux2_axiom" -> "thm:routeA_headline"	[style=dashed];	"thm:goodstein_termination"	[color=green,		label=goodstein_termination,		shape=ellipse];	"thm:goodstein_termination" -> "def:encoding"	[style=dashed];	"def:goodstein_length"	[color=green,		fillcolor="#B0ECA3",		label=goodstein_length,		shape=box,		style=filled];	"thm:goodstein_termination" -> "def:goodstein_length"	[style=dashed];	"def:goodstein_length" -> "thm:wainer_axiom"	[style=dashed];	"def:goodstein_length" -> "thm:dom_lower"	[style=dashed];	"def:veblen"	[color=green,		fillcolor="#B0ECA3",		label=veblen,		shape=box,		style=filled];	"def:veblen" -> "def:wainer_class"	[style=dashed];	"def:veblen" -> "thm:horizon"	[style=dashed];	"def:veblen" -> "def:ti_schema"	[style=dashed];	"def:onote"	[color=green,		fillcolor="#B0ECA3",		label=onote,		shape=box,		style=filled];	"def:onote" -> "def:fastgrowing"	[style=dashed];	"def:hardy"	[color="#FFAA33",		label=hardy,		shape=box];	"def:hardy" -> "def:wainer_class"	[style=dashed];}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent,	rankdir=BT];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"thm:bridge"	[color=green,		label=bridge,		shape=ellipse];	"thm:routeB_headline"	[color=green,		label="routeB_headline\\n0 laps | 100%",		shape=ellipse];	"thm:bridge" -> "thm:routeB_headline"	[style=dashed];	"thm:routeA_headline"	[color="#8a9096",		label="routeA_headline\\n(banked)",		style=dashed,		shape=ellipse];	"thm:bridge" -> "thm:routeA_headline"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pa_not_proves_goodstein"	[color=green,		label="pa_not_proves_goodstein\\n0 laps | 100%",		shape=ellipse];	"thm:routeB_headline" -> "thm:pa_not_proves_goodstein"	[style=dashed];	"thm:routeA_headline" -> "thm:pa_not_proves_goodstein"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:zeh_pass"	[color=green,		label="zeh_pass\\n✅ src, kernel-clean (S3 lap 198)",		shape=ellipse];	"thm:zeh_rank_zero"	[color=green,		label="zeh_rank_zero\\n✅ src, kernel-clean (S3 lap 198)",		shape=ellipse];	"thm:zeh_pass" -> "thm:zeh_rank_zero"	[style=dashed];	"thm:wainer_splice"	[color=green,		label="wainer_splice\\n~2-5 laps | 85%",		shape=ellipse];	"thm:zeh_rank_zero" -> "thm:wainer_splice"	[style=dashed];	"thm:wainer_axiom"	[color=green,		label="wainer_axiom\\n0 laps | 100%",		shape=ellipse];	"thm:wainer_splice" -> "thm:wainer_axiom"	[style=dashed];	"thm:zeh_embedding"	[color="#FFAA33",		label="zeh_embedding\\n✅ wip, ratified (S3 lap 203)",		shape=ellipse];	"thm:zeh_embedding" -> "thm:wainer_splice"	[style=dashed];	"thm:wainer_axiom" -> "thm:routeB_headline"	[style=dashed];	"thm:pathBInductionAxiomShell"	[color="#FFAA33",		label="pathBInductionAxiomShell\\n~4-8 laps | 65%",		shape=ellipse];	"thm:pathBClosedWitnessBudgets"	[color="#FFAA33",		label="pathBClosedWitnessBudgets\\n~2-5 laps | 75%",		shape=ellipse];	"thm:pathBInductionAxiomShell" -> "thm:pathBClosedWitnessBudgets"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBSomeKStructuralEmbedding"	[color="#FFAA33",		label="pathBSomeKStructuralEmbedding\\n~4-8 laps | 65%",		shape=ellipse];	"thm:pathBClosedWitnessBudgets" -> "thm:pathBSomeKStructuralEmbedding"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBOperatorCutElimination"	[color="#FFAA33",		label="pathBOperatorCutElimination\\n~5-10 laps | 65%",		shape=ellipse];	"thm:pathBSomeKStructuralEmbedding" -> "thm:pathBOperatorCutElimination"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBSubformulaProjection"	[color="#FFAA33",		label="pathBSubformulaProjection\\n~3-6 laps | 65%",		shape=ellipse];	"thm:pathBOperatorCutElimination" -> "thm:pathBSubformulaProjection"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBGoodsteinFragmentExtraction"	[color="#FFAA33",		label="pathBGoodsteinFragmentExtraction\\n~2-5 laps | 65%",		shape=ellipse];	"thm:pathBSubformulaProjection" -> "thm:pathBGoodsteinFragmentExtraction"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:hardy"	[color="#17A2B8",
+	style=dashed,		label="hardy\\n(gap: fn ported, growth theory absent)",		shape=box];	"def:wainer_class"	[color="#17A2B8",
+	style=dashed,		label="wainer_class\\n(deep gap: ordinal analysis of PA)",		shape=box];	"def:hardy" -> "def:wainer_class"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:wainer_class" -> "thm:wainer_axiom"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:infinitary_tower"	[color="#17A2B8",
+	style=dashed,		label="infinitary_tower\\n(crown monument: ~6-7k lines, multi-month)",		shape=ellipse];	"def:wainer_class" -> "thm:infinitary_tower"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:gentzen_conpa"	[color="#17A2B8",
+	style=dashed,		label="gentzen_conpa\\n(shared monument engine)",		shape=ellipse];	"thm:infinitary_tower" -> "thm:gentzen_conpa"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"lem:succ_gap"	[color=green,		label=succ_gap,		shape=ellipse];	"thm:no_fixed_bound"	[color=green,		label=no_fixed_bound,		shape=ellipse];	"lem:succ_gap" -> "thm:no_fixed_bound"	[style=dashed];	"thm:no_fixed_bound" -> "thm:routeB_headline"	[style=dashed];	"thm:delta1"	[color=green,		label=delta1,		shape=ellipse];	"thm:godel2"	[color=green,		label=godel2,		shape=ellipse];	"thm:delta1" -> "thm:godel2"	[style=dashed];	"thm:godel1"	[color="#FFAA33",		label=godel1,		shape=ellipse];	"thm:delta1" -> "thm:godel1"	[style=dashed];	"thm:godel2_reduction"	[color=green,		label=godel2_reduction,		shape=ellipse];	"thm:godel2" -> "thm:godel2_reduction"	[style=dashed];	"thm:godel2_reduction" -> "thm:routeA_headline"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:dom_lower"	[color=green,		label=dom_lower,		shape=ellipse];	"thm:dom_lower" -> "thm:no_fixed_bound"	[style=dashed];	"thm:two_sided"	[color="#17A2B8",
+	style=dashed,		label="two_sided\\n(crown: full ordinal analysis)",		shape=ellipse];	"thm:gentzen_conpa" -> "thm:two_sided"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:siblings"	[color="#FFAA33",		label=siblings,		shape=ellipse];	"thm:two_sided" -> "thm:siblings"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:veblen"	[color=green,		fillcolor="#B0ECA3",		label=veblen,		shape=box,		style=filled];	"def:veblen" -> "def:wainer_class"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:horizon"	[color="#FFAA33",		label=horizon,		shape=ellipse];	"def:veblen" -> "thm:horizon"	[style=dashed];	"def:ti_schema"	[color="#17A2B8",
+	style=dashed,		label="ti_schema\\n(gap: net-new in Lean)",		shape=box];	"def:veblen" -> "def:ti_schema"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:ti_schema" -> "thm:gentzen_conpa"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:crux2_axiom"	[color="#8a9096",		label="crux2_axiom\\n(banked)",		style=dashed,		shape=ellipse];	"def:ti_schema" -> "thm:crux2_axiom"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:crux2_axiom" -> "thm:routeA_headline"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:fastgrowing"	[color=green,		fillcolor="#B0ECA3",		label=fastgrowing,		shape=box,		style=filled];	"def:fastgrowing" -> "def:wainer_class"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:fastgrowing" -> "lem:succ_gap"	[style=dashed];	"def:fastgrowing" -> "thm:dom_lower"	[style=dashed];	"def:encoding"	[color=green,		fillcolor="#B0ECA3",		label=encoding,		shape=box,		style=filled];	"def:encoding" -> "thm:bridge"	[style=dashed];	"def:encoding" -> "thm:zeh_embedding"	[style=dashed];	"def:encoding" -> "thm:godel2_reduction"	[style=dashed];	"thm:pathBGoodsteinSentenceShape"	[color=green,		label="pathBGoodsteinSentenceShape\\n0 laps | 100%",		shape=ellipse];	"def:encoding" -> "thm:pathBGoodsteinSentenceShape"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBPeanoMinusAxiomLeaves"	[color="#FFAA33",		label="pathBPeanoMinusAxiomLeaves\\n~1-2 laps | 80%",		shape=ellipse];	"thm:pathBGoodsteinSentenceShape" -> "thm:pathBPeanoMinusAxiomLeaves"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBPeanoMinusAxiomLeaves" -> "thm:pathBInductionAxiomShell"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"def:zeh_calculus"	[color=green,		fillcolor="#B0ECA3",		label=zeh_calculus,		shape=box,		style=filled];	"def:zeh_calculus" -> "thm:zeh_embedding"	[style=dashed];	"thm:zeh_readoff"	[color=green,		label="zeh_readoff\\n0 laps | 100%",		shape=ellipse];	"def:zeh_calculus" -> "thm:zeh_readoff"	[style=dashed];	"thm:zeh_inversion"	[color=green,		label="zeh_inversion\\n0 laps | 100%",		shape=ellipse];	"def:zeh_calculus" -> "thm:zeh_inversion"	[style=dashed];	"thm:zeh_readoff_delta0"	[color=green,		label="zeh_readoff_delta0\\n✅ src, kernel-clean (S3 lap 199)",		shape=ellipse];	"thm:zeh_readoff" -> "thm:zeh_readoff_delta0"	[style=dashed];	"thm:zeh_reduction"	[color=green,		label=zeh_reduction,		shape=ellipse];	"thm:zeh_inversion" -> "thm:zeh_reduction"	[style=dashed];	"thm:zeh_readoff_delta0" -> "thm:wainer_splice"	[style=dashed];	"thm:zeh_step"	[color=green,		label=zeh_step,		shape=ellipse];	"thm:zeh_reduction" -> "thm:zeh_step"	[style=dashed];	"thm:hauptsatz"	[color=green,		label="hauptsatz\\n(finitary template)",		shape=ellipse];	"thm:hauptsatz" -> "def:wainer_class"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBTerminalRouteBridge"	[color=green,		label="pathBTerminalRouteBridge\\n0 laps | 100%",		shape=ellipse];	"thm:pathBGoodsteinFragmentExtraction" -> "thm:pathBTerminalRouteBridge"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:pathBTerminalRouteBridge" -> "thm:crux2_axiom"	[style=dotted, color="#4a5056", penwidth=0.7, arrowsize=0.6];	"thm:zeh_step" -> "thm:zeh_pass"	[style=dashed];	"def:onote"	[color=green,		fillcolor="#B0ECA3",		label=onote,		shape=box,		style=filled];	"def:onote" -> "def:fastgrowing"	[style=dashed];	"thm:goodstein_termination"	[color=green,		label=goodstein_termination,		shape=ellipse];	"thm:goodstein_termination" -> "def:encoding"	[style=dashed];	"def:goodstein_length"	[color=green,		fillcolor="#B0ECA3",		label=goodstein_length,		shape=box,		style=filled];	"thm:goodstein_termination" -> "def:goodstein_length"	[style=dashed];	"def:goodstein_length" -> "thm:wainer_splice"	[style=dashed];	"def:goodstein_length" -> "thm:dom_lower"	[style=dashed];}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

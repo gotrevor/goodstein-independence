@@ -60,6 +60,13 @@
  </li>
 <li class="">
   <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-routeB.html#sec:zeh"><span class="toc_ref">4.1</span> <span class="toc_entry">The \(Z^{e}\) operator calculus (the Wainer-axiom discharge substrate)</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class=" active current">
   <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
@@ -69,7 +76,7 @@
   <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
  </li>
 <li class="">
-  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (superseded substrate — re-keys onto \(Z^{e}\))</span></a>
  </li>
 <li class="">
   <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
@@ -143,9 +150,9 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.not_proves_of_implies_consistency" class="lean_decl">GoodsteinPA.not_proves_of_implies_consistency</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.not_proves_of_implies_consistency" class="lean_decl">GoodsteinPA.not_proves_of_implies_consistency</a></li>
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.peano_not_proves_consistency" class="lean_decl">GoodsteinPA.peano_not_proves_consistency</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.peano_not_proves_consistency" class="lean_decl">GoodsteinPA.peano_not_proves_consistency</a></li>
           
         </ul>
     
@@ -160,8 +167,9 @@
 
   </div>
 </div>
-<h1 id="a0000000007">5.2 The crux-2 milestone chain (witness-bounded operator calculus, preserved)</h1>
-<p>The following nine nodes are the internalized-cut-elimination decomposition of the Phase 2–3 girder, imported through <span class="ttfamily">GoodsteinPABlueprint</span>. Status semantics here need care: each node’s <em>ledger</em> entry rates that node’s own <em>step</em> (its capstone), while the bound <em>stage</em> theorem is the <em>cumulative</em> chain up to that point. Stage&#160;1’s step is discharged and audited clean, and stage&#160;1 has no upstream, so that node is genuinely done. Stage&#160;9’s <em>step</em> is likewise discharged (<span class="ttfamily">0 laps</span>), but its stage theorem composes capstones 2–8 — all still named <span class="ttfamily">axiom</span>s classified <span class="ttfamily">debt</span> by <span class="ttfamily">blueprint_audit</span> — so nodes 2–9 remain <span class="ttfamily">\notready</span>. They are the “how would the internalization actually be built” skeleton, retained as a banked asset. </p>
+<h1 id="a0000000007">5.2 The crux-2 milestone chain (superseded substrate — re-keys onto \(Z^{e}\))</h1>
+<p>The following nine nodes are the internalized-cut-elimination decomposition of the Phase 2–3 girder, imported through <span class="ttfamily">GoodsteinPABlueprint</span>. Status semantics: a node’s color rates that node’s <em>own</em> step — green means “this node has done its job; if everything upstream held, so would this” — while chain-completeness is a property of the <em>ancestry</em> (the legend’s dark green). Steps 1 and 9 are discharged and audited clean (green); capstones 2–8 are still named <span class="ttfamily">axiom</span>s classified <span class="ttfamily">debt</span> by <span class="ttfamily">blueprint_audit</span> (<span class="ttfamily">\notready</span>, with per-step lap/confidence estimates on the nodes). </p>
+<p><em>Post-fork status (2026-07-02):</em> capstones 2–8 are stated over the \((k,d)\)/someK calculus that SPIKE-W4B <em>kernel-killed</em>, and the chain’s only consumer is the banked Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a> — so as stated, nothing required flows through it and it will never be discharged in this form (the fork directive freezes all \((k,d)\)-motive work; its edges render faded). What survives is the <em>decomposition shape</em> — sentence shape \(\to \) PA\(^-\) leaves \(\to \) induction shell \(\to \) witness budgets \(\to \) embedding \(\to \) cut-elimination \(\to \) extraction — which is exactly the embedding-phase map for the \(Z^{e}\) rebuild (Section&#160;<a href="chp-routeB.html#sec:zeh">4.1</a>); when that phase opens, these nodes are restated over <span class="ttfamily">Zeh</span> and the restated chain feeds Thm&#160;<a href="chp-routeB.html#thm:wainer_axiom">4.5</a> (the live target), not the banked girder. The per-step estimates below are old-substrate numbers; re-estimate at the embedding-phase statement lock. </p>
 <div class="theorem_thmwrapper theorem-style-definition" id="thm:pathBGoodsteinSentenceShape">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
@@ -210,7 +218,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_goodsteinSentenceShape_stage</a></li>
           
         </ul>
     
@@ -271,7 +279,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_peanoMinusAxiomLeaves_stage</a></li>
           
         </ul>
     
@@ -332,7 +340,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_inductionAxiomShell_stage</a></li>
           
         </ul>
     
@@ -393,7 +401,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_closedWitnessBudgets_stage</a></li>
           
         </ul>
     
@@ -454,7 +462,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_someKStructuralEmbedding_stage</a></li>
           
         </ul>
     
@@ -515,7 +523,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_operatorCutElimination_stage</a></li>
           
         </ul>
     
@@ -576,7 +584,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_subformulaProjection_stage</a></li>
           
         </ul>
     
@@ -637,7 +645,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_goodsteinFragmentExtraction_stage</a></li>
           
         </ul>
     
@@ -660,6 +668,8 @@
     <span class="theorem_thmlabel">5.10</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
@@ -698,7 +708,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage" class="lean_decl">GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_stage</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_capstone" class="lean_decl">GoodsteinPA.PathBProbe.pathB_terminalRouteBridge_capstone</a></li>
           
         </ul>
     
@@ -709,7 +719,7 @@
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>   The full crux-2 capstone chain yields the terminal \(\mathrm{RouteBCapstone}\), which is ruled out by the promoted lower-bound theorem. The bridge <em>step</em> itself is discharged (ledger: <span class="ttfamily">clean</span>, <span class="ttfamily">0 laps</span>), but this stage theorem composes capstones 2–8, so its kernel footprint carries their open axioms until the chain discharges. </p>
+  <p>   The terminal bridge step: unpack the \(\mathrm{RouteBCapstone}\) carried by the fragment-extraction marker, which is ruled out by the promoted lower-bound theorem. Discharged (ledger: <span class="ttfamily">clean</span>, audited via <span class="ttfamily">collectAxioms</span>) — this node’s own job is done; what remains open lives entirely upstream in capstones 2–8 (the <span class="ttfamily">\uses</span> chain). The <em>cumulative</em> composition is <span class="ttfamily">pathB_terminalRouteBridge_stage</span>, whose kernel footprint clears exactly when the whole chain does. </p>
 
   </div>
 </div>
@@ -762,7 +772,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.goodstein_implies_consistency" class="lean_decl">GoodsteinPA.goodstein_implies_consistency</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.goodstein_implies_consistency" class="lean_decl">GoodsteinPA.goodstein_implies_consistency</a></li>
           
         </ul>
     
@@ -829,7 +839,7 @@
         
         <ul class="uses">
           
-          <li><a href="https://gotrevor.github.io/goodstein-independence/docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein" class="lean_decl">GoodsteinPA.peano_not_proves_goodstein</a></li>
+          <li><a href="../docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein_routeA" class="lean_decl">GoodsteinPA.peano_not_proves_goodstein_routeA</a></li>
           
         </ul>
     
@@ -840,7 +850,7 @@
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>   <b class="bfseries">Kirby–Paris via internalization + Gödel&#160;II.</b> \(\mathsf{PA}\nvdash \gamma \), proved as \(\texttt{not\_ proves\_ of\_ implies\_ consistency}\  \texttt{goodstein\_ implies\_ consistency}\). A real proof whose only non-canonical dependency is the single girder axiom Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a> — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{goodstein\_ implies\_ consistency}\} \). Banked at the identical type to the mainline summit; converges with Route&#160;B at Thm&#160;<a href="chp-crown.html#thm:summit">6.4</a>. </p>
+  <p>   <b class="bfseries">Kirby–Paris via internalization + Gödel&#160;II.</b> \(\mathsf{PA}\nvdash \gamma \), proved as \(\texttt{not\_ proves\_ of\_ implies\_ consistency}\  \texttt{goodstein\_ implies\_ consistency}\). A real proof whose only non-canonical dependency is the single girder axiom Thm&#160;<a href="chp-routeA.html#thm:crux2_axiom">5.11</a> — \(\texttt{\# print axioms}\) shows exactly \(\{ \text{3 kernel}, \texttt{goodstein\_ implies\_ consistency}\} \). Banked at the identical type to the mainline summit; converges with Route&#160;B at Thm&#160;<a href="chp-crown.html#thm:pa_not_proves_goodstein">6.4</a>. </p>
 
   </div>
 </div>

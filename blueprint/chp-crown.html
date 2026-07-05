@@ -59,6 +59,13 @@
  </li>
 <li class="">
   <a href="chp-routeB.html"><span class="toc_ref">4</span> <span class="toc_entry">Route B — Wainer growth rates (mainline)</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="chp-routeB.html#sec:zeh"><span class="toc_ref">4.1</span> <span class="toc_entry">The \(Z^{e}\) operator calculus (the Wainer-axiom discharge substrate)</span></a>
+ </li>
+
+  </ul>
  </li>
 <li class="">
   <a href="chp-routeA.html"><span class="toc_ref">5</span> <span class="toc_entry">Route A — internalized Gentzen cut-elimination (banked)</span></a>
@@ -68,7 +75,7 @@
   <a href="chp-routeA.html#a0000000006"><span class="toc_ref">5.1</span> <span class="toc_entry">The clean Gödel-II reduction (reused)</span></a>
  </li>
 <li class="">
-  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (witness-bounded operator calculus, preserved)</span></a>
+  <a href="chp-routeA.html#a0000000007"><span class="toc_ref">5.2</span> <span class="toc_entry">The crux-2 milestone chain (superseded substrate — re-keys onto \(Z^{e}\))</span></a>
  </li>
 <li class="">
   <a href="chp-routeA.html#a0000000008"><span class="toc_ref">5.3</span> <span class="toc_entry">The Route-A girder and headline</span></a>
@@ -90,7 +97,7 @@
 <div class="main-text">
 <h1 id="chp:crown">6 Crown &amp; horizon</h1>
 
-<p>The summit both routes require, and the ranges it opens. Every node here is aspirational: no Lean declaration exists yet, so none carries a <span class="ttfamily">\lean</span> binding. They are the honest map of what remains — “the entire remaining deliverable” after the 2026-07-01 “axiom-free or abandon” decision. </p>
+<p>The summit, and the ranges beyond it. <b class="bfseries">The summit (Thm&#160;<a href="chp-crown.html#thm:pa_not_proves_goodstein">6.4</a>) is reached</b> — \(\mathsf{PA}\nvdash \gamma \), axiom-clean, via the Route-B growth path (SERIES-5). Crucially it was reached <em>without</em> formalizing the \(\varepsilon _0\) ordinal analysis of PA: the monument nodes below (\(\mathsf{PA}_\omega \) cut-elimination, Gentzen’s \(\mathrm{Con}(\mathsf{PA})\), the two-sided ordinal characterization) are the <em>horizon</em>, not summit prerequisites — Route&#160;B’s growth-rate contradiction sidesteps them. Those nodes carry no <span class="ttfamily">\lean</span> binding because no declaration exists yet; they are the honest map of what a full ordinal analysis would add. </p>
 <div class="theorem_thmwrapper theorem-style-definition" id="thm:infinitary_tower">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
@@ -225,7 +232,7 @@
 
   </div>
 </div>
-<div class="theorem_thmwrapper theorem-style-definition" id="thm:summit">
+<div class="theorem_thmwrapper theorem-style-definition" id="thm:pa_not_proves_goodstein">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
     Theorem
@@ -233,10 +240,12 @@
     <span class="theorem_thmlabel">6.4</span>
     <div class="thm_header_extras">
 
+    
+    ✓
         </div>
     <div class="thm_header_hidden_extras">
 
-    <a class="icon proof" href="chp-crown.html#thm:summit">#</a>
+    <a class="icon proof" href="chp-crown.html#thm:pa_not_proves_goodstein">#</a>
     
     
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
@@ -262,10 +271,29 @@
 
     
     
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="../docs/find/#doc/GoodsteinPA.peano_not_proves_goodstein" class="lean_decl">GoodsteinPA.peano_not_proves_goodstein</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>  <b class="bfseries">Summit: \(\mathsf{PA}\nvdash \gamma \), axiom-free.</b> The Kirby–Paris independence with a clean \(\texttt{\# print axioms}\) (\(\{ \texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\} \) only). Reached the instant either route’s debt axiom is discharged against the crown — Route&#160;B’s Wainer bound or Route&#160;A’s internalized girder, both grounded in Thm&#160;<a href="chp-crown.html#thm:gentzen_conpa">6.2</a>. A first in any proof assistant. </p>
+  <p>   <b class="bfseries">Summit: \(\mathsf{PA}\nvdash \gamma \), axiom-free — REACHED.</b> The Kirby–Paris independence with a clean \(\texttt{\# print axioms}\) (\(\{ \texttt{propext},\texttt{Classical.choice}, \texttt{Quot.sound}\} \) only), machine-verified by the CI axiom gate. Discharged via Route&#160;B’s Wainer bound (SERIES-5); the crown re-points its body onto <span class="ttfamily">peano_not_proves_goodstein_growth</span>, the identical proposition. <em>Reached without the \(\varepsilon _0\) monument</em> (Thm&#160;<a href="chp-crown.html#thm:gentzen_conpa">6.2</a>): Route&#160;B trades the ordinal analysis for a growth-rate contradiction. A first in any proof assistant. <em>Graph-reading note:</em> \(\backslash \texttt{uses}\) is conjunctive-only, so both route in-edges are drawn; the summit needs exactly ONE. Route&#160;B is the live path (mainline); the banked Route&#160;A edge is rendered faded/deprioritized, kept for provenance. Ledger row&#160;16 (rung&#160;C of <span class="ttfamily">WAINER-LADDER-2026-07-02.md</span>) tracks the flip: the summit has <em>zero intrinsic work</em> — one lap re-points its body onto the route-B headline (the identical proposition) once that is clean, plus the W7 <span class="ttfamily">native_decide</span> burndown. </p>
 
   </div>
 </div>
