@@ -4,17 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
 import GoodsteinPA.PH.Independence
+import GoodsteinPA.PH.LowerBound
 import GoodsteinPA.PH.Computable
 
 /-!
 # PA does not prove the Paris–Harrington principle (stage 3 headline)
 
-The two statements below are RATIFIED (Astra, 2026-09-26, in Trevor's place).  Their statements
-are frozen: do not weaken, generalise, or re-state them.  The treadmill's job is to discharge the
-`sorry`s; see `PH-TREADMILL.md`.
-
-This file is deliberately not imported by `GoodsteinPA.lean` until it is sorry-free (the main lib
-builds warnings-as-errors).  Check it with `lake env lean src/GoodsteinPA/PH/Main.lean`.
+The two statements below were RATIFIED (Astra, 2026-09-26, in Trevor's place) and are frozen.
+`pa_not_proves_ph` is stage 1's Wainer bound composed with `LB.escapes`, the Buchholz/Loebl–Nešetřil
+lower bound (`PH/LB/`); `exists_sigma1_ph_def` is the primitive-recursive encoding (`PH/Computable.lean`).
 -/
 
 namespace GoodsteinPA.PH
@@ -26,7 +24,8 @@ not prove `∀ x, ∃ N, φ(x, N)`. -/
 theorem pa_not_proves_ph
     (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
     (hdef : ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N) :
-    𝗣𝗔 ⊬ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) := sorry
+    𝗣𝗔 ⊬ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) :=
+  pa_not_proves_ph_of_escape LB.escapes φ hφ hdef
 
 /-- **Anti-vacuity**: some Σ₁ formula defines `PHx` pointwise in ℕ. -/
 theorem exists_sigma1_ph_def :

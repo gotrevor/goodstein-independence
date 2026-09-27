@@ -6,6 +6,10 @@
 true iff the domain is nonempty; `PH 1 0 0 0` is false — anchor it).
 
 ## Done
+- **2026-09-26: stage 3 COMPLETE.**  `PH/Main.lean`: `pa_not_proves_ph` (= `pa_not_proves_ph_of_escape LB.escapes`)
+  and `exists_sigma1_ph_def` (`PH/Computable.lean`), both pinned in `scripts/AxiomCheck.lean`.  Lower bound in
+  `PH/LB/{Cnf,Colour,Descent,Bad,Escape}.lean` per `PH-BUCHHOLZ-SPEC.md`: statements designed in the attended
+  session, proved by five parallel subagents; Part A by one treadmill lap.
 - `infinite_ramsey` (all exponents), `ph_true` (Rado selection + Ramsey) — axiom-clean.
 - `pa_not_proves_ph_of_escape` — headline from stage 1 + `Escapes`.
 

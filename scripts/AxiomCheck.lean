@@ -9,6 +9,8 @@ import GoodsteinPA.Bridge
 import GoodsteinPA.Domination
 import GoodsteinPA.WainerGeneral
 import GoodsteinPA.HydraComputable
+import GoodsteinPA.PH.Main
+import GoodsteinPA.PH.Truth
 
 /-!
 # Axiom audit — the reference point of truth
@@ -73,3 +75,18 @@ reconciles each `@[goodstein_blueprint]` node's `collectAxioms` footprint agains
 /-- info: 'GoodsteinPA.Hydra.exists_sigma1_battle_def' depends on axioms: [propext, Classical.choice, Quot.sound, GoodsteinPA.ONoteComp.cmpStep_spec._native.native_decide.ax_1_5] -/
 #guard_msgs (whitespace := lax) in
 #print axioms GoodsteinPA.Hydra.exists_sigma1_battle_def
+
+-- Stage 3: PA does not prove the Paris–Harrington principle (every faithful Σ₁ encoding).
+/-- info: 'GoodsteinPA.PH.pa_not_proves_ph' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.PH.pa_not_proves_ph
+
+-- Stage 3 anti-vacuity: a Σ₁ definition of PH exists.
+/-- info: 'GoodsteinPA.PH.exists_sigma1_ph_def' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.PH.exists_sigma1_ph_def
+
+-- Stage 3: Paris–Harrington is true (infinite Ramsey + Rado selection).
+/-- info: 'GoodsteinPA.PH.ph_true' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.PH.ph_true

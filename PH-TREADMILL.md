@@ -108,3 +108,5 @@ in the Log, commit, and stop the treadmill with `box done` / self-stop.**
   (**no** `Nat` namespace, and `Nat.equivBitIndices` does not exist); `Finset.range_succ` is
   `Finset.range_add_one`; `Colex`/`Primrec` do not transitively import `norm_num`/`ring`.
   **Next: Part B (`Escapes`).**
+- 2026-09-26 (Ren): Part B landed from `eps0/ph-lb` (skeleton + parallel provers); `PH/Main.lean`
+  sorry-free and imported; AxiomCheck pins added.  Objective met; this file is now historical.
