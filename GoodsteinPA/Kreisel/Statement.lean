@@ -42,7 +42,9 @@ Kreisel's point.
    over `𝗣𝗔` (`ProvablyProperOn`, Foundation's notion of `Δ₁`-ness), the two halves being in
    `Hierarchy 𝚺 1` / `Hierarchy 𝚷 1` by construction.
 
-Phase 1 (this file) states these and leaves the proofs `sorry`; see `KREISEL.md`.
+All of them are proved here, `sorry`-free and on the bare mathlib axiom triple; the two
+faithfulness pins `good_iff` and `nat_models_TI_kreisel` (the sentence `𝗣𝗔` cannot prove is *true*)
+come with them.  `scripts/AxiomCheck.lean` asserts the axiom sets; `KREISEL.md` records the route.
 -/
 
 namespace GoodsteinPA.Kreisel
