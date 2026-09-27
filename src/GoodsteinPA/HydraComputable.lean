@@ -542,4 +542,31 @@ theorem primrec_battleC : Primrec₂ battleC :=
 theorem computable_battle : Computable₂ fun m N => toCode (battle (ofCode m) N) :=
   (primrec_battleC.to_comp).of_eq fun p => battleC_spec p.1 p.2
 
+/-! ### (h) A Σ₁ definition of the battle exists -/
+
+section Existence
+open LO LO.FirstOrder
+
+/-- The battle's final-code function on argument vectors `![N, m]`. -/
+def battleVec (v : List.Vector ℕ 2) : Part ℕ := Part.some (battleC (v.get 1) (v.get 0))
+
+theorem partrec_battleVec : Nat.Partrec' battleVec := by
+  apply Nat.Partrec'.of_part
+  exact (primrec_battleC.to_comp.comp
+    (Primrec.vector_get.to_comp.comp Computable.id (Computable.const 1))
+    (Primrec.vector_get.to_comp.comp Computable.id (Computable.const 0))).partrec
+
+/-- **Anti-vacuity for the ratified headline**: some Σ₁ formula defines the canonical battle
+pointwise in ℕ, so `pa_not_proves_hydra`'s hypothesis class is inhabited. -/
+theorem exists_sigma1_battle_def :
+    ∃ φ : Semisentence ℒₒᵣ 2, Arithmetic.Hierarchy 𝚺 1 φ ∧
+      ∀ m N : ℕ, (ℕ ⊧/![N, m] φ) ↔ battle (ofCode m) N = Hydra.leaf := by
+  refine ⟨(Arithmetic.codeOfPartrec' battleVec)/[‘0’, #0, #1], ?_, fun m N => ?_⟩
+  · exact Arithmetic.Hierarchy.rew _ (by simp [Arithmetic.codeOfPartrec'])
+  · have hspec := Arithmetic.codeOfPartrec'_spec partrec_battleVec (y := 0) (v := ![N, m])
+    rw [← toCode_eq_zero, ← battleC_spec]
+    simpa [Semiformula.eval_substs, Matrix.comp_vecCons', battleVec, eq_comm] using hspec
+
+end Existence
+
 end GoodsteinPA.Hydra

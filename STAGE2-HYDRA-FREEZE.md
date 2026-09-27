@@ -130,4 +130,13 @@ inductive through `ONote`, so not auto-derived — the Goodstein analogue was `p
   bounded by one squaring per head (`toCode_padded`: `code + 2 ≤ (C + 2)^(2^k)`, `code ≥ k`) and
   `(C + 2)^(2^k) ≤ 2^(2^k·k) ≤ f_3(k)`.  The padded-Goodstein family (Astra's correction) stays
   valid but unused.
-- ⏳ **(B)** `exists_sigma1_battle_def` — the headline does not ship without it.
+- ✅ **(B)** `exists_sigma1_battle_def` (`src/GoodsteinPA/HydraComputable.lean`): the battle is
+  primitive recursive on codes (`primrec_battleC`; `computable_battle` is Astra's sufficient
+  target), via `insC` / `ordC` / `pickIdxC` / `chopCC` / `canonC`, each a strong recursion on codes
+  with a spec against the gallery definition; then Foundation's `codeOfPartrec'` (arity 2) +
+  `code_sigma_one`.  Axioms: the three standard ones plus the inherited `native_decide` of
+  `ONoteComp.cmpStep_spec` (exposed as `primrec_Cnat`); the headline itself stays standard.
+  Both pinned in `scripts/AxiomCheck.lean`.
+- ⏭️ Still open for the stage's discipline: a comparator entry for `pa_not_proves_hydra` (its
+  closure is lean-gallery's hydra definitions, which a Challenge would re-declare verbatim under
+  their own names, as the gallery's own `Comparator/Hydra` does); merge gallery PR #18, then re-pin.
