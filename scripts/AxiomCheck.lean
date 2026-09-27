@@ -87,3 +87,38 @@ info: 'GoodsteinPA.Hydra.exists_sigma1_battle_def' depends on axioms: [propext,
 /-- info: 'GoodsteinPA.PH.ph_true' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms GoodsteinPA.PH.ph_true
+
+/-! ## Kreisel's unnatural well-ordering (`GoodsteinPA/Kreisel/Statement.lean`) -/
+
+-- Headline 1: in the standard model Kreisel's relation IS the usual `<` (order type ω).
+/-- info: 'GoodsteinPA.Kreisel.kreiselLT_iff_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.kreiselLT_iff_lt
+
+-- Headline 2: PA does not prove transfinite induction along it, already for φ := `good`.
+/-- info: 'GoodsteinPA.Kreisel.pa_not_proves_TI_kreisel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.pa_not_proves_TI_kreisel
+
+-- Headline 3: PA DOES prove transfinite induction along the syntactic `<`, for every formula.
+/-- info: 'GoodsteinPA.Kreisel.pa_proves_TI_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.pa_proves_TI_lt
+
+-- Headline 4: the relation is Δ₁ (Σ₁/Π₁ halves, provably equivalent over PA).
+/-- info: 'GoodsteinPA.Kreisel.kreiselLT_hierarchy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.kreiselLT_hierarchy
+
+/-- info: 'GoodsteinPA.Kreisel.kreiselLT_delta1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.kreiselLT_delta1
+
+-- Faithfulness pin for `good`, and the anti-vacuity amendment (the unprovable sentence is TRUE).
+/-- info: 'GoodsteinPA.Kreisel.good_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.good_iff
+
+/-- info: 'GoodsteinPA.Kreisel.nat_models_TI_kreisel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.nat_models_TI_kreisel

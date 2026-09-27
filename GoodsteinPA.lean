@@ -5,6 +5,7 @@ public import GoodsteinPA.HydraComputable
 public import GoodsteinPA.HydraEscape
 public import GoodsteinPA.HydraIndependence
 public import GoodsteinPA.HydraLowerBound
+public import GoodsteinPA.Kreisel.Statement
 public import GoodsteinPA.Internal
 public import GoodsteinPA.OperatorZef2.Basic
 public import GoodsteinPA.OperatorZef2.CutStep

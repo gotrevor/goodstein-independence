@@ -115,3 +115,55 @@ pinned binder orientation; headline 1 quantifies all x y with real semantics; `p
 `⊧` spelling is): the sentence PA fails to prove is TRUE.  Without it, a mis-encoding that made the
 sentence false would satisfy headline 2 for free.  Prove it from headline 1 plus ordinary strong
 induction in ℕ.  Phase 2 may start; statements are frozen except for this addition.
+
+### 2026-09-27 — Phase 2 DONE: all headlines proved sorry-free and axiom-clean
+
+`GoodsteinPA/Kreisel/Statement.lean` compiles with **no warnings, no errors, no `sorry`**; it is now
+imported from `GoodsteinPA.lean` and `lake build` is green (**1492 jobs**).  Seven `#print axioms`
+pins were added to `scripts/AxiomCheck.lean` (headlines 1, 2, 3, 4a, 4b, plus the faithfulness pin
+`good_iff` and the anti-vacuity amendment `nat_models_TI_kreisel`); each is exactly
+`[propext, Classical.choice, Quot.sound]` and `lake env lean scripts/AxiomCheck.lean` is silent.
+
+**The one idea that made phase 2 easy.**  Do not reason *syntactically* inside `𝗣𝗔`.  Foundation has
+`Arithmetic.complete : (∀ M [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T], M↓[ℒₒᵣ] ⊧ φ) → T ⊢ φ`
+(`Arithmetic/Basic/Model.lean:78`), so every `𝗣𝗔 ⊢ …` obligation becomes an ordinary semantic
+argument in an arbitrary (possibly nonstandard) model.  All the `Δ₁` bookkeeping then collapses into
+three `Defined` instances, from which Foundation's `@[simp] Defined.iff` does the evaluation:
+
+* `prfBot.defined : 𝚫₁-Predicate[V] PrfBot via prfBotΔ` (`PrfBot z := Proof 𝗣𝗔 z ⌜⊥⌝` in `V`),
+* `good.defined : 𝚫₁-Predicate[V] Good via goodΔ` (`Good x := ∀ z ≤ x, ¬ PrfBot z`),
+* `kreiselLT.defined : 𝚫₁-Relation[V] KreiselLT via kreiselLTΔ`.
+
+Properness of the compound is assembled from `ProperOn.{and,or,neg,ball,rew}`; after that a bare
+`simp` reduces `V↓[ℒₒᵣ] ⊧ TI kreiselLT good` to the *set-theoretic* statement
+`(∀ x, (∀ y, KreiselLT y x → Good y) → Good x) → ∀ x, Good x`.
+
+**How each headline went.**
+
+1. `kreiselLT_iff_lt` — `nat_good` (from `standard_consistent 𝗣𝗔` + the `Consistent 𝗣𝗔` instance)
+   makes every `x : ℕ` good, so only the first disjunct can fire: `KreiselLT x y ↔ x < y`.
+2. `pa_not_proves_TI_kreisel` — the real content is `models_TI_imp_consistent`, proved in **every**
+   model of `𝗜𝚺₁` from two one-line model lemmas: `progressive_good` (if `x` is bad then `x + 1` is
+   bad and `x + 1 ≺ x` by the *reversed* third disjunct, so progressivity at `x` is contradicted)
+   and `consistent_of_all_good` (a proof `d` of `⊥` witnesses `¬ Good d`).  `Arithmetic.complete`
+   turns it into `𝗣𝗔 ⊢ ↑(TI kreiselLT good) 🡒 ↑𝗣𝗔.consistent`; then `⨀` and Gödel II
+   (`consistent_unprovable 𝗣𝗔`).
+3. `pa_proves_TI_lt` — needed a new reusable lemma `model_order_induction`: order induction in a
+   model of `𝗣𝗔` for a predicate given by an **arbitrary** formula.  Foundation's
+   `InductionOnHierarchy.order_induction` is hierarchy-bounded and therefore unusable here; the fix
+   is to drive `InductionScheme.succ_induction` at `C := Set.univ` (which is exactly what `𝗣𝗔`'s
+   induction scheme gives) on the auxiliary predicate `fun x ↦ ∀ y < x, φ(y)`, witnessed by the
+   formula `“x. ∀ y < x, !(Rew.emb ▹ φ) y”`.
+4. `kreiselLT_hierarchy` was already `by simp`; `kreiselLT_delta1` is
+   `ProvablyProperOn.ofProperOn.{0}` applied to `Defined.proper` of the instance above.
+   Amendment: `nat_models_TI_kreisel` is free — in `ℕ` the *conclusion* `∀ x, good x` is outright
+   true, so the implication holds.
+
+**Gotchas worth keeping.** `Arithmetic.complete` and `ProvablyProperOn.ofProperOn` need an explicit
+universe (`.{0}`) or elaboration fails with "failed to infer universe levels".
+`models_of_subtheory` needs `(U := 𝗣𝗔)` supplied or the instance search is stuck.  `ℕ` carries
+**two** `≤` instances (`instLENat` and Foundation's scoped `x = y ∨ x < y`), so `good_iff` has to
+bridge them via `le_def` + `omega`.  In `goodΔ = ball ‘x. x + 1’ (∼ …)` the inner formula lives at
+`Semisentence 2`, not `1`.
+
+Phase 2 objective met; nothing in this run remains open.
