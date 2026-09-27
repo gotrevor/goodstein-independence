@@ -96,6 +96,7 @@ import GoodsteinPA.HydraLowerBound
 import GoodsteinPA.HydraEscape
 import GoodsteinPA.HydraComputable
 import GoodsteinPA.PH.Truth
+import GoodsteinPA.PH.Norm
 import GoodsteinPA.PH.Independence
 import GoodsteinPA.PH.Computable
 

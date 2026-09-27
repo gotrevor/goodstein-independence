@@ -69,6 +69,11 @@ Rewrite freely.  The design:
   - `PHx` unpacks `x = ⟪e, ⟪r, k⟫⟫` with `Nat.unpair`.
 
 ## Part B: `pa_not_proves_ph` (the hard part)
+
+**UPDATE 2026-09-26 (Ren): Part B is being done separately on branch `eps0/ph-lb`
+(skeleton `src/GoodsteinPA/PH/LB/*.lean`, parallel provers).  Do NOT start Part B here.  When Part A is
+complete (Computable.lean green, `exists_sigma1_ph_def` proved in Main.lean, anchors added), record it
+in the Log, commit, and stop the treadmill with `box done` / self-stop.**
 - `PH/Independence.lean` already proves `pa_not_proves_ph_of_escape`.  What remains is proving
   `Escapes`.
 - Follow `STAGE3-PH-PLAN.md`, steps 1–7.
