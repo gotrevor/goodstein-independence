@@ -1,15 +1,9 @@
-module
-
-public import GoodsteinPA.Zef2TC.Wainer
-public import GoodsteinPA.ToMathlib.Hardy.Majorization
-
-@[expose] public section
-
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
+import GoodsteinPA.WainerBound
 
 /-!
 # Wainer's bound, general form (stage 1 of `ROADMAP-EPSILON0.md`)
@@ -30,17 +24,18 @@ reads the true atom back as `ℕ ⊧/![n, m] φ` instead of through `igoodstein`
 
 namespace GoodsteinPA.Wainer
 
-open LO LO.FirstOrder LO.FirstOrder.ArithmeticTerm ONote Ordinal
+open LO LO.FirstOrder ONote Ordinal
+open GoodsteinPA.FastGrowing
 open GoodsteinPA.OperatorZeh GoodsteinPA.OperatorZinfty
-open GoodsteinPA.E1EmbeddingGrind GoodsteinPA.ReadoffValueGate
+open GoodsteinPA.E1EmbeddingGrind GoodsteinPA.ReadoffValueGate GoodsteinPA.HardyMajorization
 
 /-- The embedded `∃⁰ φ` body (general form of `goodsteinBodyE`). -/
-noncomputable def bodyE (φ : Semisentence ℒₒᵣ 2) : Semiformula ℒₒᵣ ℕ 1 :=
+noncomputable def bodyE (φ : Semisentence ℒₒᵣ 2) : SyntacticSemiformula ℒₒᵣ 1 :=
   Rewriting.emb (∃⁰ φ : Semisentence ℒₒᵣ 1)
 
 /-- The embedded sentence is the ∀-closure of the embedded body (general `coe_goodsteinSentence_eq`). -/
 theorem coe_pi2_eq (φ : Semisentence ℒₒᵣ 2) :
-    (↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : Semiformula ℒₒᵣ ℕ 0) = ∀⁰ bodyE φ := by
+    (↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : SyntacticFormula ℒₒᵣ) = ∀⁰ bodyE φ := by
   simp [bodyE, Rewriting.emb]
 
 /-- General `embedding_Zef2TC_V3_linearK`: the per-`m` stage is `max K₀ m` for a uniform `K₀`. -/
@@ -50,16 +45,16 @@ theorem embedding_linearK (φ : Semisentence ℒₒᵣ 2) :
         ∃ H : ONote → Prop, Cl H α ∧
           Zef2TC α e H (rel1 (ewRootSlot e B) (max K₀ m)) d {((bodyE φ)/[nm m])} := by
   intro h
-  have hV3 : BudgetedEmbedsV3 {(↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : Semiformula ℒₒᵣ ℕ 0)} := by
+  have hV3 : BudgetedEmbedsV3 {(↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : SyntacticFormula ℒₒᵣ)} := by
     obtain ⟨d2⟩ := (provable_iff_derivable2 (L := ℒₒᵣ)).mp h
     exact budgetedEmbeddingV3 d2
   obtain ⟨B, d, N, e, α, he, hαNF, hNlogB, hD⟩ := hV3
   refine ⟨B, d, envSup (fun _ => 0) N, e, α, he, hαNF, fun m => ?_⟩
   have hD0 := hD (fun _ => 0)
-  have himg : ({(↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : Semiformula ℒₒᵣ ℕ 0)} :
-        Finset (Semiformula ℒₒᵣ ℕ 0)).image
-        (fun ψ => asg (fun _ => 0) ▹ ψ)
-      = {(↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : Semiformula ℒₒᵣ ℕ 0)} := by
+  have himg : ({(↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : SyntacticFormula ℒₒᵣ)} :
+        Finset (SyntacticFormula ℒₒᵣ)).image
+        (fun ψ => Embedding.asg (fun _ => 0) ▹ ψ)
+      = {(↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) : SyntacticFormula ℒₒᵣ)} := by
     rw [Finset.image_singleton, asg_emb_fix]
   rw [himg, coe_pi2_eq] at hD0
   have hf1 := ewRootSlot_f1 e B
@@ -69,8 +64,8 @@ theorem embedding_linearK (φ : Semisentence ℒₒᵣ 2) :
   rw [rel1_rel1] at hinv
   refine ⟨fun _ => True, Cl_of_NF hαNF, ?_⟩
   have hctx : insert ((bodyE φ)/[nm m])
-        (({(∀⁰ bodyE φ : Semiformula ℒₒᵣ ℕ 0)} :
-          Finset (Semiformula ℒₒᵣ ℕ 0)).erase (∀⁰ bodyE φ))
+        (({(∀⁰ bodyE φ : SyntacticFormula ℒₒᵣ)} :
+          Finset (SyntacticFormula ℒₒᵣ)).erase (∀⁰ bodyE φ))
       = {((bodyE φ)/[nm m])} := by
     rw [Finset.erase_singleton]
     rfl
@@ -91,7 +86,7 @@ theorem bodyE_inst_shape (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hiera
 theorem readoff_value (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
     (h : 𝗣𝗔 ⊢ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ)) :
     ∃ B d K₀ : ℕ, ∃ e α : ONote, e.NF ∧ α.NF ∧ ∀ m : ℕ,
-      ∃ χ : Semiformula ℒₒᵣ ℕ 1,
+      ∃ χ : SyntacticSemiformula ℒₒᵣ 1,
         (bodyE φ)/[nm m] = (∃⁰ χ) ∧ Arithmetic.Hierarchy 𝚺 1 (∃⁰ χ) ∧
         ∀ (P : ℕ → ℕ) (V : ℕ), Monotone P → Gated P V (∃⁰ χ) →
           ∃ α', α' ≤ collapseIter d α ∧ α'.NF ∧
@@ -112,7 +107,7 @@ theorem readoff_value (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarch
 `goodsteinLength m ≤ n` through `igoodstein`.) -/
 theorem bodyE_semantic_link (φ : Semisentence ℒₒᵣ 2) {m n : ℕ}
     (h : atomTrue ((((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q ▹
-        ((Rew.emb : Rew ℒₒᵣ Empty 1 ℕ 1).q ▹ φ)) : Semiformula ℒₒᵣ ℕ 1)/[nm n])) :
+        ((Rew.emb : Rew ℒₒᵣ Empty 1 ℕ 1).q ▹ φ)) : SyntacticSemiformula ℒₒᵣ 1)/[nm n])) :
     ℕ ⊧/![n, m] φ := by
   simp only [atomTrue, Semiformula.eval_rew, Function.comp_def] at h
   unfold Semiformula.Evalb
@@ -121,21 +116,21 @@ theorem bodyE_semantic_link (φ : Semisentence ℒₒᵣ 2) {m n : ℕ}
     refine Fin.cases ?_ (fun i => ?_) x
     · simp [Rew.q_bvar_zero]
     · rw [Fin.fin_one_eq_zero i]
-      have hq1 : ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #1 : Semiterm ℒₒᵣ ℕ 1)
+      have hq1 : ((Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #1 : SyntacticSemiterm ℒₒᵣ 1)
           = Rew.bShift (nm m) := by
         show (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q #(Fin.succ 0) = _
         rw [Rew.q_bvar_succ]
         simp
-      simp [hq1, Matrix.empty_eq]
+      simp [hq1, Semiterm.val_bShift', Matrix.empty_eq, valm_nm]
 
 /-- General `wainer_bound_witness`: the three hypotheses are, verbatim, the statements of
-`ReadoffValueGate.gated_certificate_uniform`, `Scirc_dom_pad` and
-`master_conversion` (discharged in `pa_provable_pi2_eventually_witnessed_below_fastGrowing`). -/
+`ReadoffValueGate.gated_certificate_uniform`, `HardyMajorization.Scirc_dom_pad` and
+`HardyMajorization.master_conversion` (discharged in `pa_provable_pi2_eventually_witnessed_below_fastGrowing`). -/
 theorem wainer_bound_witness_general (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
     (Hcert : ∀ {G : ℕ → ℕ}, Monotone G → (∀ x, x + 1 ≤ G x) →
       (∀ a b, a + b ≤ G (max a b)) → (∀ a b, a * b ≤ G (max a b)) →
-      ∀ (body : Semiformula ℒₒᵣ ℕ 2), ∃ k : ℕ, ∀ (m V : ℕ)
-        (χ : Semiformula ℒₒᵣ ℕ 1),
+      ∀ (body : SyntacticSemiformula ℒₒᵣ 2), ∃ k : ℕ, ∀ (m V : ℕ)
+        (χ : SyntacticSemiformula ℒₒᵣ 1),
         χ = (Rew.subst (L := ℒₒᵣ) (ξ := ℕ) ![nm m]).q ▹ body →
         Arithmetic.Hierarchy 𝚺 1 (∃⁰ χ) →
         ∃ P : ℕ → ℕ, Monotone P ∧ Gated P V (∃⁰ χ) ∧
@@ -239,7 +234,7 @@ theorem pa_provable_pi2_eventually_witnessed_below_fastGrowing
     ∃ o : ONote, o.NF ∧ ∃ M : ℕ, ∀ m, M ≤ m →
       ∃ N ≤ fastGrowing o m, ℕ ⊧/![N, m] φ :=
   wainer_bound_witness_general φ hφ ReadoffValueGate.gated_certificate_uniform
-    Scirc_dom_pad master_conversion h
+    HardyMajorization.Scirc_dom_pad HardyMajorization.master_conversion h
 
 /-! ## The Goodstein instance: the original bound as a corollary -/
 
@@ -253,7 +248,7 @@ theorem goodsteinMatrix_sigma1 : Arithmetic.Hierarchy 𝚺 1 goodsteinMatrix := 
   simp [goodsteinMatrix]
 
 theorem goodsteinMatrix_eval {m N : ℕ} (h : ℕ ⊧/![N, m] goodsteinMatrix) :
-    Goodstein.goodsteinSeq m N = 0 := by
+    goodsteinSeq m N = 0 := by
   rw [← GoodsteinPA.InternalPow.igoodstein_nat]
   simp [goodsteinMatrix, Semiformula.eval_substs] at h
   exact h.symm
@@ -262,7 +257,7 @@ theorem goodsteinMatrix_eval {m N : ℕ} (h : ℕ ⊧/![N, m] goodsteinMatrix) :
 `WainerRoute.wainer_bound_of_pa_proves_goodstein`). -/
 theorem wainer_bound_of_pa_proves_goodstein_via_general :
     (𝗣𝗔 ⊢ ↑GoodsteinPA.goodsteinSentence) →
-      ∃ o : ONote, o.NF ∧ Goodstein.EventuallyLE Goodstein.Dom.goodsteinLength
+      ∃ o : ONote, o.NF ∧ GoodsteinPA.WainerRoute.EventuallyLE GoodsteinPA.Dom.goodsteinLength
         (fun n => fastGrowing o n) := by
   intro h
   rw [goodsteinSentence_eq_pi2] at h
@@ -270,9 +265,6 @@ theorem wainer_bound_of_pa_proves_goodstein_via_general :
     pa_provable_pi2_eventually_witnessed_below_fastGrowing goodsteinMatrix goodsteinMatrix_sigma1 h
   refine ⟨o, ho, M, fun m hm => ?_⟩
   obtain ⟨N, hN, hsem⟩ := hM m hm
-  exact le_trans (Goodstein.Dom.goodsteinLength_le (goodsteinMatrix_eval hsem)) hN
+  exact le_trans (GoodsteinPA.Dom.goodsteinLength_le (goodsteinMatrix_eval hsem)) hN
 
 end GoodsteinPA.Wainer
-
-
-end

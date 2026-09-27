@@ -71,3 +71,18 @@ note it in the log.
 Then log it and stop.
 
 ## Log
+
+### 2026-09-27 — stage 1 (Wainer general) ported green
+
+- `ToMathlib/ONote/Computability.lean`: additive `primrec_cmpStep` / `primrec_Cnat`
+  (`computable_cmpStep` kept as a corollary).
+- `GoodsteinPA/WainerGeneral.lean` ported to the module system (`public import
+  GoodsteinPA.Zef2TC.Wainer` + `GoodsteinPA.ToMathlib.Hardy.Majorization`) and imported from
+  `GoodsteinPA.lean`.  Statement-level renames only, all forced by Foundation `b47cf44`:
+  `SyntacticSemiformula ℒₒᵣ n` → `Semiformula ℒₒᵣ ℕ n`, `SyntacticFormula ℒₒᵣ` →
+  `Semiformula ℒₒᵣ ℕ 0`, `SyntacticSemiterm` → `Semiterm ℒₒᵣ ℕ`, `Embedding.asg` → `asg`,
+  `HardyMajorization.{Scirc_dom_pad,master_conversion}` → `ONote.…` (bare, via `open ONote`),
+  `WainerRoute.EventuallyLE`/`GoodsteinPA.Dom` → `Goodstein.EventuallyLE`/`Goodstein.Dom`.
+  The frozen headline `pa_provable_pi2_eventually_witnessed_below_fastGrowing` is unchanged
+  modulo those; `#print axioms` = `[propext, Classical.choice, Quot.sound]`.
+- Next: stage 2 (Hydra) — needs the LeanGallery `[[require]]` + manifest entry by hand.

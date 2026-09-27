@@ -25,6 +25,7 @@ public import GoodsteinPA.OperatorZinfty.SomeK
 public import GoodsteinPA.ReadoffValueGate
 public import GoodsteinPA.Result.ConsistencyPA
 public import GoodsteinPA.Statement
+public import GoodsteinPA.WainerGeneral
 public import GoodsteinPA.ToFoundation.Compat
 public import GoodsteinPA.ToFoundation.FvSubst
 public import GoodsteinPA.ToFoundation.Numeral
