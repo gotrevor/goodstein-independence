@@ -52,3 +52,11 @@ rev = "2040d2f33807c34636b8a9f20189d22b48d65040"
 name = "checkdecls"
 git = "https://github.com/PatrickMassot/checkdecls.git"
 rev = "3d425859e73fcfbef85b9638c2a91708ef4a22d4"
+
+# The Kirby–Paris hydra (gallery `Hydra` / `Chop` / `Step` + the canonical battle), for the
+# stage-2 independence result.  Only `LeanGallery.Logic.Hydra.*` is imported; the gallery's own
+# mathlib pin is overridden by this repo's (Foundation's), and the hydra files compile on both.
+[[require]]
+name = "LeanGallery"
+git = "https://github.com/gotrevor/lean-gallery.git"
+rev = "4422092b7b50182b77c317462d58714035a5bd74"

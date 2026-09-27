@@ -91,6 +91,7 @@ import GoodsteinPA.DescentInternal
 import GoodsteinPA.ReductModel
 import GoodsteinPA.XCongruence
 import GoodsteinPA.WainerGeneral
+import GoodsteinPA.HydraIndependence
 
 
 -- Front 2 (Foundation's `PA_delta1Definable` axiom) is RESOLVED UPSTREAM: Foundation@e6e1ad1 proves
