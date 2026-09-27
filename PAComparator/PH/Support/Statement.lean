@@ -9,6 +9,10 @@ import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Fintype.Powerset
 import Mathlib.Data.Nat.Pairing
 
+/-! Comparator challenge support: `RelLarge`, `Homog`, `PH`, `PHx`, verbatim from
+`src/GoodsteinPA/PH/Statement.lean` (same imports, same names, same namespace; the whole module is
+reproduced, including its decidability instance and known-answer anchors). -/
+
 /-!
 # The Paris–Harrington principle (stage 3 of `ROADMAP-EPSILON0.md`)
 
