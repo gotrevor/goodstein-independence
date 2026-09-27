@@ -95,6 +95,11 @@ import GoodsteinPA.HydraIndependence
 import GoodsteinPA.HydraLowerBound
 import GoodsteinPA.HydraEscape
 import GoodsteinPA.HydraComputable
+import GoodsteinPA.PH.Truth
+import GoodsteinPA.PH.Norm
+import GoodsteinPA.PH.Independence
+import GoodsteinPA.PH.Computable
+import GoodsteinPA.PH.Main
 
 
 -- Front 2 (Foundation's `PA_delta1Definable` axiom) is RESOLVED UPSTREAM: Foundation@e6e1ad1 proves
