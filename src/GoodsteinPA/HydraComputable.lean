@@ -233,4 +233,78 @@ theorem primrec_ordC : Primrec ordC := by
     (primrec_ordStep.comp Primrec.snd).to₂ (fun _ c => ordStep_spec c)
   exact this.comp (Primrec.const ()) Primrec.id
 
-end GoodsteinPA.Hydra
+/-! ### (d) The canonical child, on codes -/
+
+theorem ordC_toCode (h : Hydra) : ordC (toCode h) = encodeONote (ord h) := by
+  rw [ordC, ofCode_toCode]
+
+/-- `ord x < ord c`, decided on codes. -/
+theorem cmp_lt_iff_Cnat (e c : Hydra) :
+    (ONote.cmp (ord e) (ord c) == .lt) = decide (Cnat (Nat.pair (ordC (toCode e)) (ordC (toCode c))) = 0) := by
+  rw [ordC_toCode, ordC_toCode, Cnat_pair, decodeONote_encodeONote, decodeONote_encodeONote]
+  cases ONote.cmp (ord e) (ord c) <;> rfl
+
+/-- The fold step: extend the (index, tail) state by a new head `c`. -/
+def pickStep (c : ℕ) (st : ℕ × List ℕ) : ℕ × List ℕ :=
+  (if st.2.length = 0 then 0 else
+    Option.casesOn (st.2[st.1]?) 0 fun e =>
+      if Cnat (Nat.pair (ordC e) (ordC c)) = 0 then st.1 + 1 else 0,
+   c :: st.2)
+
+/-- Index of the canonical child, on a list of child codes. -/
+def pickIdxC (l : List ℕ) : ℕ := (l.foldr pickStep (0, [])).1
+
+theorem pick_branch (L : List Hydra) (j : ℕ) (c : Hydra) :
+    (Option.casesOn (Option.map toCode L[j]?) 0
+        (fun e => if Cnat (Nat.pair (ordC e) (ordC (toCode c))) = 0 then j + 1 else 0) : ℕ) =
+      (match L[j]? with
+        | some e => if (ONote.cmp (ord e) (ord c) == Ordering.lt) = true then j + 1 else 0
+        | none => 0 : ℕ) := by
+  cases h : L[j]? with
+  | none => rfl
+  | some e =>
+    simp only [Option.map_some]
+    rw [cmp_lt_iff_Cnat]
+    by_cases hlt : Cnat (Nat.pair (ordC (toCode e)) (ordC (toCode c))) = 0 <;> simp [hlt]
+
+theorem foldr_pickStep (cs : List Hydra) :
+    (cs.map toCode).foldr pickStep (0, []) = (pickIdx cs, cs.map toCode) := by
+  induction cs with
+  | nil => rfl
+  | cons c cs ih =>
+    rw [List.map_cons, List.foldr_cons, ih]
+    simp only [pickStep, Prod.mk.injEq, and_true]
+    rcases cs with _ | ⟨d, cs⟩
+    · simp [pickIdx]
+    · simp only [List.map_cons, List.length_cons, Nat.add_one_ne_zero, if_false]
+      rw [pickIdx, ← List.map_cons, List.getElem?_map]
+      exact pick_branch _ _ c
+
+theorem pickIdxC_map (cs : List Hydra) : pickIdxC (cs.map toCode) = pickIdx cs := by
+  rw [pickIdxC, foldr_pickStep]
+
+theorem primrec_pickIdxC : Primrec pickIdxC := by
+  have hC : Primrec₂ fun (e c : ℕ) => decide (Cnat (Nat.pair (ordC e) (ordC c)) = 0) :=
+    (Primrec.eq.decide.comp (primrec_Cnat.comp (Primrec₂.natPair.comp
+      (primrec_ordC.comp Primrec.fst) (primrec_ordC.comp Primrec.snd))) (Primrec.const 0)).to₂
+  have hstep : Primrec₂ pickStep := by
+    have h1 : Primrec fun q : ℕ × (ℕ × List ℕ) => q.2.2.length := Primrec.list_length.comp
+      (Primrec.snd.comp Primrec.snd)
+    have hget : Primrec fun q : ℕ × (ℕ × List ℕ) => q.2.2[q.2.1]? :=
+      Primrec.list_getElem?.comp (Primrec.snd.comp Primrec.snd) (Primrec.fst.comp Primrec.snd)
+    have hbranch : Primrec₂ fun (q : ℕ × (ℕ × List ℕ)) (e : ℕ) =>
+        if Cnat (Nat.pair (ordC e) (ordC q.1)) = 0 then q.2.1 + 1 else 0 :=
+      (Primrec.ite (PrimrecPred.of_eq (Primrec.eq.comp (primrec_Cnat.comp (Primrec₂.natPair.comp
+          (primrec_ordC.comp Primrec.snd) (primrec_ordC.comp (Primrec.fst.comp Primrec.fst))))
+          (Primrec.const 0)) fun _ => Iff.rfl)
+        (Primrec.succ.comp (Primrec.fst.comp (Primrec.snd.comp Primrec.fst)))
+        (Primrec.const 0)).to₂
+    have hidx : Primrec fun q : ℕ × (ℕ × List ℕ) => (if q.2.2.length = 0 then 0 else
+        Option.casesOn (q.2.2[q.2.1]?) 0 fun e =>
+          if Cnat (Nat.pair (ordC e) (ordC q.1)) = 0 then q.2.1 + 1 else 0) :=
+      Primrec.ite (Primrec.eq.comp h1 (Primrec.const 0)) (Primrec.const 0)
+        (Primrec.option_casesOn hget (Primrec.const 0) hbranch)
+    exact (hidx.pair (Primrec.list_cons.comp Primrec.fst (Primrec.snd.comp Primrec.snd))).to₂
+  exact Primrec.fst.comp (Primrec.list_foldr Primrec.id (Primrec.const (0, []))
+    (hstep.comp (Primrec.fst.comp Primrec.snd) (Primrec.snd.comp Primrec.snd)).to₂)
+
