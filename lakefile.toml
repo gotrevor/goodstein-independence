@@ -23,16 +23,18 @@ name = "GoodsteinPA"
 [[lean_lib]]
 name = "GoodsteinPABlueprint"
 
-# The leanprover/comparator harness (Comparator/Goodstein/{Challenge,Solution}.lean). Deliberately
+# The leanprover/comparator harness (PAComparator/<Result>/{Challenge,Solution}.lean). Named
+# `PAComparator`, not `Comparator`: the required LeanGallery package has its own `Comparator` lib
+# (`Comparator.Goodstein.*`, `Comparator.Hydra.*`) and Lake would resolve our imports into it. Deliberately
 # NOT in defaultTargets and NOT reachable from the main roots: the Challenge carries `sorry` by
 # design and the main libs build warnings-as-errors, so this must stay out of the default build.
-# The package sets `srcDir = "src"`, but the harness lives at repo root under `Comparator/` (matching
+# The package sets `srcDir = "src"`, but the harness lives at repo root under `PAComparator/` (matching
 # tao-collatz / lean-gallery layout), so this lib overrides `srcDir = "."`. Build explicitly with
-# `lake build Comparator`; the real gate is `.github/workflows/comparator.yml`.
+# `lake build PAComparator`; the real gate is `.github/workflows/comparator.yml`.
 [[lean_lib]]
-name = "Comparator"
+name = "PAComparator"
 srcDir = ".."
-globs = ["Comparator.+"]
+globs = ["PAComparator.+"]
 
 # Machine-verified blueprint status gate. Computes each `@[goodstein_blueprint]` node's real
 # `collectAxioms` footprint and reconciles it against the category claim. `supportInterpreter`

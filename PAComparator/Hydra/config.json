@@ -1,0 +1,9 @@
+{
+  "challenge_module": "PAComparator.Hydra.Challenge",
+  "solution_module": "PAComparator.Hydra.Solution",
+  "theorem_names": [
+    "GoodsteinPA.Hydra.pa_not_proves_hydra"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}
