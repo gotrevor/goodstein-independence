@@ -1,0 +1,55 @@
+diff --git a/scripts/AxiomCheck.lean b/scripts/AxiomCheck.lean
+index 85739d5..e5b9b57 100644
+--- a/scripts/AxiomCheck.lean
++++ b/scripts/AxiomCheck.lean
+@@ -7,6 +7,10 @@ import GoodsteinPA.Statement
+ import GoodsteinPA.Reduction
+ import GoodsteinPA.Bridge
+ import GoodsteinPA.Domination
++import GoodsteinPA.WainerGeneral
++import GoodsteinPA.HydraComputable
++import GoodsteinPA.PH.Main
++import GoodsteinPA.PH.Truth
+ 
+ /-!
+ # Axiom audit — the reference point of truth
+@@ -50,3 +54,39 @@ reconciles each `@[goodstein_blueprint]` node's `collectAxioms` footprint agains
+ /-- info: 'GoodsteinPA.goodsteinSentence_faithful' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+ #guard_msgs (whitespace := lax) in
+ #print axioms GoodsteinPA.goodsteinSentence_faithful
++
++-- Wainer's bound, general (ROADMAP-EPSILON0 stage 1): PA-provable Π₂ ⇒ witness below some `f_o`, `o < ε₀`.
++/-- info: 'GoodsteinPA.Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing
++
++-- The Goodstein bound re-derived as a corollary of the general theorem.
++/-- info: 'GoodsteinPA.Wainer.wainer_bound_of_pa_proves_goodstein_via_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.Wainer.wainer_bound_of_pa_proves_goodstein_via_general
++
++-- Stage 2: PA does not prove that the canonical hydra battle terminates (every faithful Σ₁ encoding).
++/-- info: 'GoodsteinPA.Hydra.pa_not_proves_hydra' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.Hydra.pa_not_proves_hydra
++
++-- Stage 2 anti-vacuity: a Σ₁ definition of the battle exists.  Inherits the one `native_decide`
++-- of `ONoteComp.cmpStep_spec` (computability of `ONote.cmp`, via `primrec_Cnat`).
++/-- info: 'GoodsteinPA.Hydra.exists_sigma1_battle_def' depends on axioms: [propext, Classical.choice, Quot.sound, GoodsteinPA.ONoteComp.cmpStep_spec._native.native_decide.ax_1_5] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.Hydra.exists_sigma1_battle_def
++
++-- Stage 3: PA does not prove the Paris–Harrington principle (every faithful Σ₁ encoding).
++/-- info: 'GoodsteinPA.PH.pa_not_proves_ph' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.PH.pa_not_proves_ph
++
++-- Stage 3 anti-vacuity: a Σ₁ definition of PH exists.
++/-- info: 'GoodsteinPA.PH.exists_sigma1_ph_def' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.PH.exists_sigma1_ph_def
++
++-- Stage 3: Paris–Harrington is true (infinite Ramsey + Rado selection).
++/-- info: 'GoodsteinPA.PH.ph_true' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms GoodsteinPA.PH.ph_true

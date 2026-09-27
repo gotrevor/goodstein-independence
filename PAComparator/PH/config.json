@@ -1,0 +1,11 @@
+{
+  "challenge_module": "PAComparator.PH.Challenge",
+  "solution_module": "PAComparator.PH.Solution",
+  "theorem_names": [
+    "GoodsteinPA.PH.pa_not_proves_ph",
+    "GoodsteinPA.PH.exists_sigma1_ph_def",
+    "GoodsteinPA.PH.ph_true"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

@@ -1,0 +1,3028 @@
+                                         Beweistheorie
+                                           Wilfried Bu hholz
+                      Skriptum einer 4-std. Vorlesung im Wintersemester 1997/98
+                           Mathematis hes Institut der Universitat Mun hen
+
+
+
+
+Literatur
+GENTZEN, G.: Die Widerspru hsfreiheit der reinen Zahlentheorie. Math. Ann. 112 (1936), pp. 493-565
+GENTZEN, G.: Neue Fassung des Widerspru hsfreiheitsbeweises fur die reine Zahlentheorie. Fors hungen
+zur Logik und zur Grundlegung der exakten Wissens haften, New Series 4, Leipzig (1938), pp. 19-44
+GENTZEN, G.: Beweisbarkeit und Unbeweisbarkeit von Anfangsfallen der trans niten Induktion in der
+reinen Zahlentheorie. Math. Ann. 119 (1943), pp. 149-161
+GIRARD, J.Y.: Proof Theory and Logi al Complexity. Studies in Proof Theory, Monographs 1. Napoli:
+Bibliopolis 1987
+POHLERS, W.: Proof Theory. Springer LNM 1407
+SCHWICHTENBERG, H.: Proof Theory: some appli ations of ut-elimination. In: Barwise, J.(ed.) Hand-
+book of Mathemati al Logi . Amsterdam: North-Holland 1977
+    
+SCHUTTE,   K.: Proof Theory.
+TAIT, W.W.: Normal Derivability in Classi al Logi . In: Springer LNM 72 (1986)
+TAKEUTI, G.: Proof Theory.
+WAINER and WALLEN: Basi Proof Theory. In: A zel, Simmons, Wainer (eds.) Proof Theory. Cambridge
+University Press 1993.
+
+
+
+
+                                                  i
+x1 The Tait al ulus for lassi al 1st -order predi ate logi without equality
+Formal language
+Basi symbols:
+1. Variables v0 ; v1 ; v2 ::: (denoted by x; y; z; x1 ; :::)
+2. :, ^, _, 8, 9
+Let L be some xed ( ountable) language, i.e. set of fun tion and predi ate symbols where ea h symbol
+p 2 L has a ertain arity #(p) 2 IN.
+From now on all synta ti notions su h as terms, formulas, sequents,.... are de ned with respe t to L.
+Terms are de ned as usual:
+1. Every variable is a term.
+2. If f is an n-ary fun tion symbol (n  0) and t1 ; :::; tn are terms then the string ft1:::tn is a term.
+We use s; t; s1 ; ::: as synta ti variables for terms.
+An atomi formula is an expression pt1 :::tn where p is an n-ary predi ate symbol and t1 ; :::; tn are terms.
+An expression of the form A or :A, where A is an atomi formula, is alled a (positive or negative) literal.
+Indu tive de nition of formulas
+1. Every literal is a formula.
+2. If A; B are formulas then also ^AB and _AB are formulas.
+3. If A is a formula then 8xA and 9xA are formulas.
+As usual we write A ^ B; A _ B for ^AB; _AB .
+We use A; B; C; D; F; G as synta ti variables for formulas.
+De nition of the negation neg(A) of a formula A
+1. If A is atomi then neg(A) := :A and neg(:A) := A.
+2. neg(A ^ B ) := neg(A) _ neg(B ), neg(A _ B ) := neg(A) ^ neg(B ).
+3. neg(8xA) := 9x neg(A), neg(9xA) := 8x neg(A).
+Corollary: neg(A) is a formula, and neg(neg(A)) = A.
+Notation:
+(i) From now on we write :A for neg(A).
+(ii) A1 ! ::: ! An ! B := :A1 _ (:A2 _ (::: _ (:An _ B ):::)).
+For ea h term or formula E we de ne the set FV(E ) [ BV(E ) ℄ of its free [ bound ℄ variables in the usual
+way. Further let Var(E ) := FV(E ) [ BV(E ) (the set of all variables o uring in E ). If X is a set of terms
+                               S
+and/or formulas then FV(X ) := fFV(E ) : E 2 Xg; analogously BV(X ) and Var(X ) are de ned.
+Substitution
+De nition of Ex (t)
+1. If E is a term or a literal then Ex (t) is obtained from E by repla ing every o urren e of x in E by t.
+2. (A  B )x (t) := Ax (t)  Bx (t)   ( 2 f^; _g)
+
+                                                               1
+3.1. (QxA)x (t) := QxA       (Q 2 f8; 9g)
+3.2. (QyA)x (t) := Qy Ax (t), if x 6= y   (Q 2 f8; 9g)
+Abbreviation: subst(E; x; t) :, t is free for x in E .
+
+De nition of rk(A)
+1. rk(A) := 0, if A is a literal.
+2. rk(A  B ) := maxfrk(A); rk(B )g + 1.
+3. rk(QxA) := rk(A) + 1.
+Corollary: rk(:A) = rk(A) = rk(Ax (t)).
+
+De nition
+FV := fv2i : i 2 INg , BV := fv2i+1 : i 2 INg.
+A formula A is alled de ent if FV(A)  FV and BV(A)  BV.
+Ter := set of all terms t with FV(t)  FV.
+Finite sets of de ent formulas are alled sequents.
+Synta ti variables for sequents are ; .
+
+Proof systems
+In the following we mostly write A1 ; :::; An for fA1 ; :::; An g, and A; ;  for fAg [   [ , et .
+A proof system S is given by
+{ a set of formal expressions alled inferen e symbols (synta ti variable I )
+{ for ea h inferen e symbol I a set jIj (the arity of I ), a sequent (I ) and a family of sequents ( (I ))2jIj.
+                          S
+  The elements of (I ) [ 2jIj  (I ) ℄ are alled the prin ipal formulas [ minor formulas ℄ of I .
+{ for ea h inferen e symbol I a set Eig(I ) whi h is either empty or a singleton fyg with y 2 FV n FV((I ));
+  in the latter ase y is alled the eigenvariable of I .
+{ for ea h inferen e symbol I an ordinal deg(I ).
+NOTATION
+By writing
+        : : :  : : : (2I )
+(I )                          [ !y ! ℄
+               
+we express that I is an inferen e symbol with jIj = I , (I ) = ,  (I ) =  , and Eig(I ) = ; [ Eig(I ) = fyg,
+resp.℄.
+                                        : : : n              : : :  : : : (2I )
+If jIj = f0; :::; ng we write 0 1                  , instead of                       .
+                                                                      
+Inferen e symbols I with jIj = ; will be alled axioms.
+By writing \ (I )  " we de lare I as an axiom with (I ) := .
+For almost all inferen e symbols (ex ept axioms) the sequents (I );  (I ) are singletons or empty.
+
+
+                                                         2
+Example:
+By (CutC )
+             C     :C we express that for ea h de ent formula C , the expression I := Cut is an inferen e
+                                                                                         C
+                 ;
+symbol with jIj = f0; 1g, (I ) = ;, 0 (I ) = fC g, 1 (I ) = f:C g.
+Indu tive de nition of S-derivations
+If I is an inferen e symbol of S, and (d )2jIj is a family of S-derivations su h that Eig(I ) \ FV( ) = ; where
+              S
+   := (I ) [ 2jIj( (d ) n  (I )), then d := I (d )2jIj (or I d0 :::dn 1 if jIj = f0; :::; n 1g) is an S-derivation
+with (d) := , last(d) := I , deg(d) := sup(fdeg(I )g[fdeg(d ) :  2 jIjg) , lg(d) := supflg(d)+1 :  2 jIjg.
+  (d) is alled the endsequent of d, and last(d) is alled the last inferen e (symbol) of d.
+A proof system S also omprises the assignment of an ordinal o(d) to ea h S-derivation d.
+If nothing else is said we de ne o(d) := lg(d).
+Abbreviations
+S 3 d ` : () d is an S-derivation with o(d)  , deg(d)  , (d)  ,
+S ` : () S 3 d ` for some d,
+S ` : () S ` for some .
+If S is known from the ontext, we write d ` instead of S 3 d ` , et .
+Remark (for proof systems with o(d) = lg(d))
+Assume that I 2 S & deg(I )   & Eig(I ) \ FV( ) = ; & 8 2 jIj(  < ):
+(8 2 jIj) S 3 d `  ;  (I ) =) S 3 I (d )2jIj ` ; (I ) .
+
+The proof system PL1 (Tait's version of Gentzen's al ulus of sequents)
+(LogAxA ) A; :A if rk(A) = 0
+ V         A      A1          W             Ak
+( A0 ^A1 ) 0                 ( kA0 _A1 )         (k 2 f0; 1g)
+            A0 ^A1                       A0 _A1
+ V       A (y)                W          Ax (t)
+( y8xA ) x
+          8xA   !y !         ( t9xA)
+                                         9xA (t 2 Ter)
+(CutC )
+          C       :C
+              ;
+deg(CutC ) := rk(C )+1 and deg(I ) := 0 for all other inferen e symbols.
+o(d) := lg(d).
+
+Displaying derivations:
+                                                                                         d0 : : : d n
+To in rease the readability we often write derivations in tree form, i.e. we write                      instead of I d0 :::dn .
+                                                                                              I
+Another way of representing derivations ( lose to the traditional one) is to write them as trees of sequents
+and to display the respe tive inferen e symbols at the right or left end of ea h inferen e line. Mostly we will
+not show the full inferen e symbol I but only some kind of abbreviation (e.g. the outermost logi al symbol
+of the prin ipal formula of I ) or nothing. The sequents and inferen e symbols will be arranged in su h a
+                                             : : :  h1i I
+way that at ea h node  the relation  h0i                 is satis ed (where  [ I , resp. ℄ is the sequent
+                                                
+[inferen e symbol℄ at node  ). Consequently we have (dj )   , if dj is the subderivation with root  .
+
+                                                           3
+Two examples: Abbreviation: AxF := LogAxF
+      W            W            W0      W1
+I. d = t9x(:Rfx_Rx) ft
+                     9x(:Rfx_Rx) :Rft_Rt :Rfft_Rft AxRft =
+                 AxRft                        Rft; :Rft
+            W1
+             W0
+               :Rfft_Rft                 :Rfft _ Rft; :Rft (_)(_)
+       =
+           Wft
+                :Rft_Rt        =      :Rfft _ Rft; :Rft _ Rt (9)
+             9x(:Rfx_Rx)             9x(:Rfx _ Rx); :Rft _ Rt (9)
+           Wt
+            9x(:Rfx_Rx)                   9x(:Rfx _ Rx)
+II. Let G := 9x(F (x) ^ :F (Sx)),
+      W V                W V
+d = SG0 F (S0)^:F (SS0) 0G F (0)^:F (S0) AxF (0) AxF (S0) AxF (SS0) =
+           AxVF (0) AxF (S0)                         :F (0); G; F (0) :F (S 0); F (S 0)
+              F (0)^:F (S 0)
+                  W0
+                                                     :F (0); G; F (0) ^ :F (S 0); F (S 0) ((9^))
+   =                GV              AxF (SS0)   =            :F (0); G; F (S 0)                  :F (SS 0); F (SS 0)
+                        F (S 0)^:F (SS 0)                          :F (0); G; F (S 0) ^ :F (SS 0); F (SS 0) (9) (^)
+                             WS 0
+                               G
+                                                                            :F (0); G; F (SS 0)
+De nition
+ j= C () C is a logi al onsequen e from  ( a set of formulas)
+ j= fA1 ; :::; An g ()  j= A1 _ ::: _ An
+j= () ; j= .
+An axiom system is a set of losed formulas.
+Theorem 1.1
+j= =) PL1 `0 .
+Corollary
+If  is an axiom system and C a de ent formula then the following holds:
+ j= C =) There are A1 ; :::; An 2  su h that PL1 `0 :A1 ; :::; :An ; C .
+
+
+Proof of Theorem 1.2:
+AX := set of nite sequen es (A0 ; :::; Al ) su h that there is a prime formula A with fA; :Ag  fA1 ; :::; Al g.
+Let  be a nite sequen e of de ent formulas .
+t0 ; t1 ; :::: enumeration of Ter.
+;  are ranging over nite 0-1-sequen es (elements of f0; 1g<! ).
+ v  :,  is an initial segment of  (i.e.  =    for some  2 f0; 1g<!)
+For ea h  2 f0; 1g<! we de ne a nite sequen e of de ent formulas  .
+The de nition pro eeds by re ursion on lh( ).
+1. h i := ,
+Let n = lh( ), and assume that  is already de ned for ea h  v  .
+
+                                                         4
+2.  2 AX or all formulas in  are literals:  hii :=  ,
+3.  = 0 ; A; 00 62 AX, and rk(A) > 0 while all formulas in 0 are literals:
+3.1. A = A0 ^ A1 :  hii := 0 ; Ai ; 00 ,
+3.2. A = A0 _ A1 :  hii := 0 ; A0 ; A1 ; 00 ,
+3.3. A = 8xB :  hii := 0 ; Bx(u); 00 , where u is the rst variable in FV n FV( ),
+3.4. A = 9xB :  hii := 0 ; Bx(tk ); 00 ; A, where k is minimal s.t. ( x 2 FV(B ) ) 8 v  Bx(tk ) 62  ).
+
+Assumption:
+(in )n2IN is a 0-1-sequen e su h that 8n 2 IN( hi0 ;:::;in 1i 62 AX ).
+                                                  S
+Abbreviation:  (n) := hi0 ; :::; in 1 i,  := n2IN  (n)
+
+De nition: If not all formulas in  are literals let dp( ) be the rst formula in  whi h is not a literal.
+
+Proposition 1
+A 2  (n) & rk(A) > 0 =) 9k  n( dp( (k) ) = A )
+Proposition 2
+a) rk(A) = 0 =) A 62  _ :A 62 ,
+b) A0 ^A1 2  =) A0 2  or A1 2 ,
+ ) A0 _A1 2  =) A0 2  and A1 2 ,
+d) 8xB 2  =) 9u 2 FV( Bx (u) 2  ),
+e) 9xB 2  =) 8t 2 Ter( Bx (t) 2  ).
+Proof:
+a) rk(A) = 0 & A 2  (n) & :A 2  (m) ) 8k  maxfm; ng(A; :A 2  (k) ).
+Assume that A 2  with rk(A) > 0. Then A = dp( (k) ) for some k.
+b) A = A0 ^A1 : Then Ai 2  (k)hii for i = 0; 1, and therefore A0 2  (k+1) or A1 2  (k+1) .
+ ) A = A0 _A1 : Then A0 ; A1 2  (k)hii for i = 0; 1, and therefore A0 2  (k+1) and A1 2  (k+1) .
+d) A = 8xB : Then Bx (u) 2  (k)hii for some u 2 Var0 .
+e) A = 9xB : Then 8n  k0 ( 9xB 2  (n) ) () .
+By indu tion on m we prove Bx (tm ) 2 :
+Assume that B (ti ) 2  for all i < m. By Proposition 1 and () there is an n  k su h that dp( (n) ) = 9xB
+and 8i < m9j  n( B (ti ) 2  (j) ) ().
+                                                                                 
+By de nition of  (n+1) we get 8j  n( B (tm ) 62  (j) ) ) B (tm ) 2  (n+1) and thus B (tm ) 2 .
+jMj := Ter, f M (s1 ; :::; sn ) := fs1 :::sn , pM (s1 ; :::; sn ) :, ps1 ; :::; sn 62 
+Let  : Var ! Ter su h that  (x) = x for x 2 FV.
+Proposition
+a) tM [ ℄ = t for ea h t 2 Ter,
+b) A 2  ) M 6j= A[ ℄.
+
+
+                                                                5
+Proof of b) by indu tion on rk(A):
+                                      IH
+8xB 2  ) Bx (u) 62  for some u 2 FV )  M 6j= Bx (u)[ ℄ ) M 6j= (8xB )[ ℄.
+                                     IH                                 a)
+9xB 2  ) Bx (t) 2  for all t 2 Ter )  M 6j= Bx(t)[ ℄ for all t 2 Ter )  M 6j= B [xt ℄ for all
+t 2 Ter ) M 6j= (9xB )[ ℄.
+
+   & M 6j= A[ ℄ for ea h A 2  =) 6j= .
+Hen e the assumption was false.
+By Konigs Lemma (and sin e  2 AX implies  hii 2 AX) the set f :  62 AXg is nite.
+Let m := maxflh( ) :  62 AXg + 1.
+By re ursion on m  lh( ) we de ne a PL1-derivation d with d `0  :
+1.  2 AX: Then d := LogAxA with suitable A.
+2.  62 AX: Then lh( ) < m and thus m  lh( hii) < m  lh( ).
+Hen e by IH (*) d hii `0  hii for i = 0; 1.
+Now not all formulas A 2  are literals, sin e otherwise   =  62 AX for all .
+Hen e one of the following ases holds:
+                                                                 V
+2.1.  = 0 ; A0 ^A1 ; 00 and  hii = 0 ; Ai ; 00 : d := A0 ^A1 d h0i d h1i .
+                                                                    W       W
+2.2.  = 0 ; A0 _A1 ; 00 and  h0i = 0 ; A0 ; A1 ; 00 : d := 1A0 _A1 0A0 _A1 d h0i .
+                                                                                          V
+2.3.  = 0 ; 8xB; 00 and  h0i = 0 ; Bx(u); 00 with u 2 FV n FV( ): d := u8xB d h0i .
+                                                                               W
+2.4.  = 0 ; 9xB; 00 and  h0i = 0 ; Bx(t); 00 with t 2 Ter: d := t9xB d h0i .
+
+
+
+
+                                                       6
+x2 Cut-Elimination
+Substitution
+De nition
+A proof system S is losed under substitution i it satis es the following onditions:
+(I) For ea h x 2 FV, t 2 Ter and I 2 S with Eig(I ) \ (FV(t) [ fxg) = ; an inferen e symbol I (x=t) 2 S
+    is de ned su h that
+    (a) jI (x=t)j = jIj and Eig(I (x=t)) = Eig(I ),
+    (b) (I (x=t)) = (I )x (t),
+    ( ) (8i 2 jIj) i (I (x=t)) = i (I )x (t),
+    (d) deg(I (x=t)) = deg(I ).
+(II) For I 2 S with Eig(I ) 6= ; and u 2 FV n FV((I )) an inferen e symbol I u 2 S is de ned su h that
+     (a) jI u j = jIj and Eig(I u ) = fug,
+     (b) (I u ) = (I ),
+     ( ) (8i 2 jIj) i (I u ) = i (I )y (u), where Eig(I ) = fyg,
+     (d) deg(I u ) = deg(I ).
+
+De nition
+                             V          V       W           W
+LogAxA (x=t) := LogAxAx (t) , A (x=t) := Ax(t) , kA (x=t) := kAx (t) , CutC (x=t) := CutCx (t) ,
+Ws              Wsx (t)          Vy             Vy                   V         V
+ 9zA (x=t) :=     (9zA)x (t) ,    8zA(x=t) :=    (8zA)x (t) .       ( y8zA)u := u8zA
+Lemma 2.1
+With the above de nitions PL1 is losed under substitution.
+Proof:
+                                    V                 V
+ad (II): If Eig(I ) = fyg, then I = y8zA and I u = u8zA . Hen e jI u j = jIj, Eig(I u ) = fug, (I u ) = (I ),
+                         ()
+and 0 (I u ) = fAz (u)g = fAz (y)y (u)g = 0 (I )y (u). (*) y 62 FV(8zA).
+ad (I):
+        V
+1. I = y8zA: Then y 62 FV(8zA) [ fxg.
+One easily veri es (*) (8zA)x(t) = 8zA0 with A0z (y) = Az (y)x (t).
+                             V
+By (*) we have I (x=t) = y8zA0 , and y 62 FV(8zA0), sin e 8zA0 = (8zA)x(t) and y 62 FV(8zA) [ FV(t).
+Hen e I (x=t) is an inferen e symbol of PL1.
+(a),(b),(d) are trivial.
+                             ()
+( ) 0 (I (x=t)) = fA0z (y)g = fAz (y)x (t)g = 0 (I )x (t)
+[Proof of (*): If x 62 FV(8zA) then (8zA)x(t) = 8zA and Az (y) = Az (y)x (t) (note that x 6= y).
+If x 2 FV(8zA) then (8zA)x(t) = 8zAx(t) and Ax (t)z (y) = Az (y)x (t), sin e z 62 FV(t) and x 6= y.℄
+        W
+2. I = s9zA: One easily veri es (*) (9zA)x (t) = 9zA0 with A0z (sx (t)) = Az (s)x (t).
+                  W (t)
+Hen e I (x=t) = s9xzA   0 is an inferen e symbol of PL1.
+(a),(b),(d) are trivial.
+                                  ()
+( ) 0 (I (x=t)) = fA0z (sx (t))g = fAz (s)x (t)g = 0 (I )x (t).
+                                                                7
+[Proof of (*): If x 62 FV(9zA) then (9zA)x (t) = 9zA and Az (sx (t)) = Az (s)x (t). If x 2 FV(9zA) then
+(9zA)x (t) = 9zAx (t) and Ax (t)z (sx (t)) = Az (s)x (t), sin e z 62 FV(t) [ fxg.℄
+3. Otherwise: trivial.
+
+Now let S be a nitary proof system whi h is losed under substitution and extends PL1.
+Let m0  ! su h that deg(I )  m0 and rk(A) < m0 for all I 2 S n PL1 and A 2 (I ).
+To simplify the writing we assume in addition that jIj = f0g whenever Eig(I ) 6= ;.
+For the rest of this se tion d; di denote S-derivations. o(d) := lg(d) .
+
+De nition of d(x=t) for x 2 FV, t 2 Ter
+                                     8
+                                     >
+                                     <
+                                       d                                if Eig(I ) = fxg
+For d = I d0 :::dn 1 we set d(x=t) := I (x=t) d0 (y=u)(x=t)
+                                         u                              if Eig(I ) = fyg with y 2 FV(t) n fxg
+                                     >
+                                     :
+                                       I (x=t)d0 (x=t) : : : dn 1 (x=t) otherwise
+where u is the rst variable in FV n (FV( (d)) [ FV(t) [ fxg),
+Lemma 2.2 d `km          ) d(x=t) `km x (t).
+Proof:
+Let x; t be xed, and d = I d0 :::dn 1 . W.l.o.g. (d) = . { We write U 0 for U (x=t).
+1. Eig(I ) = fxg: d0 = d and = x (t), sin e x 62 FV( ).
+2. Eig(I ) = fyg with y 2 FV(t) n fxg: Let e := I u d0 (y=u).
+We have d0 `m  k 1 ; 0 (I ), and therefore by IH d0 (y=u) `k 1 ; 0 (I )y (u).
+                                                             m
+Sin e 0 (I )y (u) = 0 (I ) and u 62 FV( ), we obtain e `m .
+                          u                                k
+
+Sin e Eig(I u ) = fug and u 62 FV(t) [ fxg, we have e0 = (I u )0 d0 (y=u)0 = d0 , and by ase 3. below e0 `km 0 .
+3. Otherwise:
+For ea h i < n we have di `mk 1 ; i (I ) and therefore by IH d0 `k 1 0 ; i (I )0 , i.e. d0 `k 1 0 ; i (I 0 ).
+                                                                   i m                     i m
+            0          0    0           0    0
+Further (I ) = (I )  and Eig(I ) \ = ; (the latter follows from Eig(I ) \ FV( ) = ; & Eig(I ) \
+FV(t) = ; & Eig(I 0 ) = Eig(I )). Now we get d0 = I 0 d00 :::d0n 1 `m
+                                                                    k 1 0.
+
+Remark
+Given a nite set of variables V and a derivation d = I d0 :::dn 1 with S 3 d `km we may from now on assume
+without loss of generality (w.l.o.g.) that Eig(I ) \ (FV( ) [ V ) = ;. Be ause if Eig(I ) = fyg  FV( ) [ V
+we may hoose some u 2 FV n (V [ FV( )) and onsider the modi ed derivation d0 := I u d0 (y=u). A ording
+to Lemma 2.2 S 3 d0 `km .
+
+Lemma 2.3
+Assume S 3 d `km ; C with rk(C )  m0 .
+a) If C = 8xA, then S `km ; Ax (t) for ea h t 2 Ter.
+b) If C = A0 ^ A1 , then S `km ; Aj for j 2 f0; 1g.
+ ) If C = A0 _ A1 , then S `km ; A0 ; A1 .
+                                                       8
+Proof of a): Let d = I d0 :::dn 1 , and (w.l.o.g.) (d) = ; C .
+                                                                             V
+1. 8xA 2 (I ): Sin e rk(8xA)  m0 , I has to be a PL1-inferen e. Hen e I = y8xA, y 62 FV( ; 8xA) and
+d0 `m
+    k 1 ; 8xA; Ax (y ). By Lemma 2.2 we get d0 (y=t) `k 1 ; 8xA; Ax (t). Now we apply the IH and obtain
+                                                         m
+S `mk 1 ; Ax(t).
+2. 8xA 62 (I ): Then (I )  and di `m      k 1 ; 8xA; i (I ) for i < n. By IH we get
+d0i `m
+     k 1 ; Ax (t); i (I ) for i < n. W.l.o.g. Eig(I ) \ FV( ; Ax (t)) = ;. Hen e I d0 :::d0
+                                                                                     0 n 1 `m ; Ax (t).
+                                                                                             k
+
+
+Cut-elimination
+Theorem 2.4
+S `km ; C & S `lm ; :C & m0  rk(C )  m =) S `km+l .
+Proof by indu tion on k + l:
+Assume d `km ; C and e `lm ; :C .
+1. C is not a main formula of I := last(d):
+Then (I )  and w.l.o.g. we may assume that Eig(I ) \ FV( ) = ;.
+For ea h i 2 jIj we have `kmi ; C; i (I ) with ki < k. By IH we get `m
+                                                                      ki +l ; i (I ) for ea h i 2 jIj.
+
+Hen e `km+l , sin e (I )  and Eig(I ) \ FV( ) = ;.
+1'. :C is not main formula of last(e): symmetri to 1.
+2. C is main formula of last(d), and :C is main formula of last(e):
+From m0  rk(C ) = rk(:C ) it follows that last(d) and last(e) are inferen e symbols of PL1.
+2.1. C is a literal: Then fC; :C g = (last(d))       [ fC g and fC; :C g = (last(e))  [ f:C g. Hen e
+fC; :C g  , and therefore `km+l .
+                                            W                   V
+2.2. C = 9xA: Then :C = 8xA, last(d) = tC , and last(e) = y:C .
+Hen e d0 `km0 ; C; Ax (t) , e0 `lm0 ; :C; :Ax (y) with k0 < k, l0 < l.
+W.l.o.g. y 62 FV( ; :C ). Therefore by Lemma 2.2 we get e0 (y=t) `lm0 ; :C; :Ax (t).
+Now the IH yields `m
+                   k0 +l ; Ax (t) and `k+l0 ; :Ax (t).
+                                       m
+Further we have rk(Ax (t)) < rk(C )  m, and therefore `km+l        by (CutAx (t) ).
+2.2'. C = 8xA or A0 ^ A1 or A0 _ A1 : analogous to 2.2.
+Theorem 2.5
+S `km+1 & m0  m =) S `2mk .
+Proof:
+1. d = CutC d0 d1 with m0  rk(C ):
+Then rk(C )  m and `km0+1 ; C , `km1+1 ; :C with k0 ; k1 < k.
+                 k              k                                      k
+By IH we get `2m 0 ; C and `2m 1 ; :C . Hen e by Theorem 2.4 `2m           , sin e 2k0 + 2k1  2k .
+2. otherwise: Then d = I d0 :::dn 1 with deg(I )  m0  m, Eig(I ) \ FV( ) = ;, and
+                                                                 k                                    k
+di `kmi+1 ; i (I ) with ki < k for all i 2 jIj. By IH we get `2m i ; i (I ) (8 2 jIj), and then `2m .
+
+                                                       9
+x3 Ordinalzahlen
+
+In diesem Abs hnitt bezei hnen wir mit A; B; C stets Klassen.
+
+Die Struktur (On; <) der Ordinalzahlen ist bis auf Isomorphie eindeutig bestimmt dur h folgende Eigen-
+s haften:
+(O1) < ist eine lineare Ordnung auf On.
+(O2) Jede ni htleere Klasse C  On besitzt ein kleinstes Element.
+(O3) Fur jedes 2 On ist f 2 On :  < g eine Menge.
+(O4) Zu jeder Menge A  On gibt es 2 On mit 8 2A( < ).
+      (On ist also keine Menge, sondern eine e hte Klasse).
+ herweise de niert man die Ordinalzahlen derart, da stets = f 2 On :  2
+Ubli                                                                                g. Davon wollen wir
+hier au h ausgehen, da es an man hen Stellen die Notation vereinfa ht.
+ ; ; ; Æ; ; ;  bezei hnen im folgenden stets Ordinalzahlen.
+Die kleinste Ordinalzahl wird mit 0 bezei hnet. Entspre hend obiger Annahme ist 0 = ;.
+V sei die Allklasse (Klasse aller Mengen).
+Satz 3.1(Trans nite Induktion)
+8 [ 8< ( ) ! ( ) ℄ ! 8 ( ).
+Beweis:
+Wir beweisen die Kontraposition der Behauptung. Gelte also :8 ( ). Dann ist die Klasse C := f :
+:( )g ni htleer und besitzt daher ein kleinstes Element 0 . Somit gilt 8< 0 ( ) ^ :( 0 ).
+Satz 3.2 (Trans nite Rekursion)
+Zu G : A  On  V ! B gibt es genau ein F : A  On ! B mit
+F (x; ) = G(x; ; Fx j ) fur alle (x; ) 2 A  On. (Dabei sei Fx := y:F (x; y). )
+De nition
+ +1 := minf : <  g.
+  heit Limeszahl, falls 6= 0 und :9 ( =  +1).
+Lim bezei hnet die Klasse aller Limeszahlen und ! die kleinste Limeszahl.
+(Die Existenz von Limeszahlen folgt aus dem sog. Unendli hkeitsaxiom der Mengenlehre.)
+Die Ordinalzahlen < ! nennt man endli he Ordinalzahlen oder naturli he Zahlen.
+Die Bu hstaben i; j; k; l; m; n bezei hnen im folgenden stets naturli he Zahlen.
+De nition
+Fur jede Menge A  On sei sup(A) := minf : 8 2 A(  )g und
+sup+ (A) := minf : 8 2 A( < )g (= supf +1 :  2 Ag).
+Lemma 3.3
+Fur jede ni htleere Menge A  On gilt: sup(A) 62 A ) sup(A) 2 Lim.
+
+
+                                                     10
+Beweis:
+Sei := sup(A) 62 A. O enbar ist dann 6= 0. Bleibt zu zeigen 8 < ( + 1 < ).
+Sei also < . Dann existiert ein  2 A mit <  , und wegen 62 A gilt + 1   < .
+De nition
+Eine binare Relation  heit fundiert, wenn jede ni htleere Menge ein bzgl.  minimales Element besitzt.
+Lemma 3.4
+a) Ist  fundiert, so gibt es keine unendli he Folge (an )n<! mit an+1  an fur alle n.
+   (Mit Hilfe des Auswahlaxioms lat si h au h die Gegenri htung beweisen.)
+b) Ist  A  A und F : A ! On mit 8x; y(y  x ) F (y) < F (x) ) so ist  fundiert.
+Beweis:
+a) Sei die Folge (an )n<! gegeben. Na h Voraussetzung besitzt die Menge A := fan : n < !g ein minimales
+Element am . Dann gilt 8x 2 A(x 6 am ), insbesondere am+1 6 am .
+b) Sei X eine ni htleere Menge. Ist X [ A = ;, so ist jedes Element von X minimal bzgl. . Ist X [ A 6= ;,
+so existiert := minfF (x) : x 2 X [ Ag. Sei x0 2 X \ A mit F (x0 ) = . Dann ist x0 minimales Element
+von X bzgl. .
+De nition
+Sei A eine Menge und  eine binare Relation auf A.
+Fur jede Menge X  A sei  (X ) := fx 2 A : 8y  x(y 2 X )g.
+(Im folgenden wird ledigli h die Monotonie von I bzgl.  ausgenutzt.)
+                                                       S
+Dur h trans nite Rekursion de nieren wir:  :=  ( <  ).
+                 S                              T
+Ferner sei 1
+             := 2On  und A (A; ) := fX  A :  (X )  X g.
+Lemma 3.5
+a) < )    .
+b) +1 =  ( ).
+ )  (1
+         ) = 1
+               .
+d) 1
+     = A (A; ).
+Beweis:
+a),b) klar.
+                                                                                       S
+ ) \": x 2  (1  ) ) 8y  x9 (y 2  ) ) 9 8y  x9 < (y 2  ) ) 9 (x 2  ( <  ) =  ).
+                                                                                            
+
+\":   +1 =  ( )   (1    ).
+d) Aus ) folgt A (A; )  1  . {
+Andererseits erhalt man dur h trans nite Induktion 8 (   X ) fur X  A mit  (X )  X .
+De nition
+Sei  eine binare Relation auf der Menge A.
+Fur x 2 A (A; ) de nieren wir jxj := minf : x 2 +1 g.
+O enbar gilt: () x 2 A (A; ) ) jxj = supfjyj + 1 : y  xg.
+
+
+                                                     11
+                                                               S                                   S
+[Beweis: Sei x 2 A und := jxj , also x 2 +1 =  ( <  )). Es folgt 8y  x(y 2 <  ),
+also 8y  x(jyj < ) und somit := supfjyj + 1 : y  xg  . Umgekehrt gilt 8y  x(jyj < ), also
+8y  x(y 2  ) und folgli h x 2 +1 , d.h.  .℄
+Satz 3.6
+Sei  eine binare Relation auf der Menge A.
+a)  einges hrankt auf A (A; ) ist fundiert.
+b) A (A; ) = A ()  fundiert.
+ ) Ist  fundiert, so ist jxj 2 On fur alle x 2 A de niert und es gilt 8x; y 2 A(y  x ) jyj < jxj ).
+Beweis:
+a) folgt aus () und Lemma 3.4b.
+b) \)" folgt aus a).
+\)": Sei A := A n A (A; ). Ware A 6= ;, so besae A ein minimales Element a; wir hatten also
+a 2 A ^ 8x  a(x 2 A (A; ) ^ a 62 A (A; ). Widerspru h.
+ ) folgt aus b) und ().
+
+De nition
+Eine Funktion F : On ! On heit ordnungstreu, wenn gilt 8 ; ( <           ) F ( ) < F ( ) ).
+Lemma 3.7
+Ist F : On ! On ordnungstreu, so       F ( ) fur alle .
+Beweis dur h trans nite Induktion:
+Na h I.V. haben wir 8< (  F ( ) < F ( )), also (F ( ) <     ) F ( ) < F ( )) und somit < F ( ).
+De nition
+F : On ! On heit Ordnungsfunktion der Klasse A  On, falls F ordnungstreu ist und ran(F ) = A gilt.
+Satz 3.8
+Jede unbes hrankten Klasse A  On besitzt genau eine Ordnungsfunktion F ,
+und zwar gilt F ( ) = minf 2 A : 8< (F ( ) < )g.
+Beweis:
+Existenz:
+Dur h trans nite Rekursion de nieren wir F : On ! On mit F ( ) := minf 2 A : 8< (F ( ) < )g.
+1. F ( ) ist fur jedes de niert, denn fF ( ) :  < g ist Menge und deshalb gibt es 2 A mit
+8< (F ( ) < ).
+2. F ist ordnungstreu und ran(F )  A: klar na h Def.
+3. A  ran(F ):
+Sei 2 A. Da F injektiv ist, ist f : F ( ) < g eine Menge und es existiert := minf :  F ( )g. Na h
+De nition von gilt nun  F ( ) ^ 8 < (F ( ) < ). Folgli h F ( ) = minf 2 A : 8 < (F ( ) < )g 
+   F ( ).
+Eindeutigkeit: Sei G : On ! A ordnungstreu mit ran(G) = A. Dur h trans nite Induktion na h zeigen
+
+                                                      12
+wir G( ) = F ( ). Gelte s hon G( ) = F ( ) fur alle  < . Wegen F ( ) 2 A = ran(G) gibt es ein mit
+G( ) = F ( ). Da F ordnungstreu ist, mu  sein. Da G ordnungstreu ist, folgt sogar = , denn
+andernfalls ware F ( ) ni ht in ran(G).
+
+Vereinbarung:  bezei hne im folgenden stets Limeszahlen.
+
+De nition
+1. Eine Funktion F : On ! On heit stetig, falls gilt 8( F () = sup< F ( ) ).
+2. F : On ! On heit Normalfunktion, falls F ordnungstreu und stetig ist.
+Lemma 3.9
+Ist F : On ! On stetig mit 8 ( F ( ) < F ( + 1) ), so ist F eine Normalfunktion.
+Beweis: Dur h trans nite Induktion na h      zeigt man 8 < (F ( ) < F ( )).
+Lemma 3.10
+Fur jede Normalfunktion F : On ! On gilt:
+a) F ( ) = supfF ( + 1) :  2 g, fur alle > 0.
+b)  2 Lim ) F () 2 Lim.
+ ) 8  F (0)9! ( F ( )  < F ( + 1)).
+d) G Normalfunktion ) F Æ G Normalfunktion.
+e) F (sup(A)) = sup(F [A℄) (= sup2A F ( ) ) fur jede ni htleere Menge A  On.
+Beweis:
+a) Wegen 8 < ( + 1  ) gilt := supfF ( + 1) :  < g  F ( ). Ist = + 1, so F ( ) 2 fF ( + 1) :
+ < g und deshalb F ( )  . Ist 2 Lim, so F ( ) = sup< F ( )  sup< F ( + 1) = .
+b) Es ist 0  F (0) < F (). Aus < F () folgt 9 < ( < F ( )) und weiter 9 ( + 1  F ( ) < F ()).
+ ) Sei  F (0). Wegen  F ( ) < F ( + 1) existiert := minf : < F ( + 1)g. Dann < F ( + 1). Ist
+  = 0, so F ( ) = F (0)  . Ist > 0, so F ( ) = sup< F ( + 1) und 8 < (F ( + 1)  ), also F ( )  .
+d) (F Æ G)() = F (G()) = F (sup(fG( ) :  < g)) = sup< F (G( )).
+e) Sei ; 6= A  On und := sup(A). Ist 2 A, so F ( ) = sup(F [A℄), da F ordnungstreu. Ist 62 A,
+so 2 Lim und deshalb F ( ) = sup< F ( ). Ferner gilt 8 2 A( < ) ^ 8 < 92A( < ), woraus
+sup< F ( ) = sup(F [A℄) folgt.
+De nition von + dur h trans nite Rekursion na h
+ + 0 := ;    + ( + 1) := ( + ) + 1;  +  := sup< ( + ).
+Abkurzung: 1 := 0 + 1.
+Bemerkung: + 1 hat nun zwei Bedeutungen, die aber ubereinstimmen, namli h
+1. + 1 = minf : <  g,
+2. + 1 = Summe von und 1 gema obiger De nition.
+
+
+
+
+                                                      13
+Lemma 3.11
+a) Fur jedes ist 7! + eine Normalfunktion.
+b) 0 < 1 ) + 0 < + 1
+ ) ;  +
+d) 8  9! ( + = )
+e) 0  1 ) 0 +  1 +
+f) ( + ) + = + ( + )
+g) ; < ! ) + = + < !
+h) 0 < k < ! ) k + ! = ! < ! + k
+Beweis:
+a) folgt aus 3.9. b),d) folgen aus a). ) folgt aus a) und 3.7. e) Induktion na h . f) Induktion na h .
+g) Induktion na h . h) !  k + ! = supn<! (k + n)  ! < ! + k.
+De nition von  dur h trans nite Rekursion na h
+  0 := 0;  ( + 1) := (  ) + ;   := supf   :  < g.
+Lemma 3.12
+a) Fur jedes  1 ist 7!  eine Normalfunktion.
+b) 0  1 ) 0   1 
+ ) (  ) = (  )
+d)  ( + ) =  + 
+e) 0  =  0 = 0 & 1  =  1 =
+f) ; < ! )  =  < !
+De nition von      dur h trans nite Rekursion na h
+ 0 := 1; +1 :=       ;  := supf  :  < g.
+Lemma 3.13
+Fur  2 gilt:
+a) 7! ist Normalfunktion.
+b)  )           
+ )  =         +
+
+d) ( ) = 
+e) > 0 > ::: > n & Æ0; :::; Æn <       )       >        0    Æ0 + ::: +   n    Æn .
+Beweis:
+e) Ind. na h n: I.V. )   0>        
+                                1 Æ1 + ::: +        
+                                                   n Æn       )a          0           
+                                                                                        0 Æ0 +   0>      
+                                                                                                        0 Æ0 + ::: +    
+                                                                                                                       n Æn .
+
+Satz 3.14
+a) Zu  2 und  1 existieren eindeutig ; Æ; 0 mit 0 < Æ < & 0 < & =                                    Æ + 0.
+b) Zu  2 und  1 existieren eindeutig 0 > ::: > n und 0 < Æ0 ; :::; Æn < mit
+     = 0  Æ0 + ::: + n  Æn . (Cantors he Normalform von zur Basis )
+
+                                                               14
+Beweis:
+a) Eindeutigkeit: Sei    =     Æ+ 0 =          1    Æ1 + 1 mit 0 < Æ; Æ1 <
+                                                                   & 0 < & 1 < 1 . Dann
+     < +1 & 1  < 1 +1 , also = 1 . Weiter folgt nun  Æ  <  (Æ + 1) und
+    Æ1  <  (Æ1 + 1), also au h Æ = Æ1 . Aus  Æ + 0 =  Æ + 1 folgt s hlieli h 0 = 1 .
+Existenz: Na h 3.10 existiert ein mit      < +1 , d.h.  1  <  . Wiederum mit 3.10 (im
+wesentli hen) folgt daraus  Æ  <  (Æ + 1) =  Æ + . Na h 3.11 existiert deshalb ein 0 <
+mit =  Æ + 0 .
+b) folgt aus a) und 3.13e mittels Induktion na h .
+Abkurzung
+ =CNF ! 0  k0 + : : : + ! k  kn : ()       = ! 0  k0 + : : : + ! k  kn & 0 > : : : > n
+De nition (Additive Hauptzahlen)
+ 2 On heit additive Hauptzahl, falls > 0 ^ 8;  < ( +  < ).
+H := Klasse aller additiven Hauptzahlen.
+Lemma 3.15
+a) 7! ! ist die Ordnungsfunktion der Klasse H aller additiven Hauptzahlen.
+b) 2 H , > 0 ^ 8 < ( + = ).
+Beweis:
+a) 1. Dur h Induktion na h zeigen wir ! 2 H :
+1.1. !0 2 H ist trivial.
+1.2. ;  < ! +1 ) ;  < !  n fur ein n < ! )  +  < !  n + !  n = !  (n + n) < ! +1 .
+                                           :V:
+1.3. ;  < ! ) ;  < ! fur ein <  I)       +  < ! < ! .
+2. 62 f! : 2 Ong ) 62 H .
+Beweis: Sei 1  62 f! : 2 Ong. Dann = !  n + 0 mit 0 < n < ! & 0 < ! und 1 < n _ 0 < 0 .
+Fur  := !  (n 1) + 0 gilt nun 0 <  < !  n  und ! < ! +  = , d.h. 62 H .
+b) 1. Sei 2 H und  < . Dann  + = supf +  + 1 :  < g  , da (;  < )  +  <                        )
+ +  + 1  ). 2. Gelte > 0 & 8 < ( + = ), und sei ;  < . Dann  +  <  + = .
+
+Abkurzung      =NF     0 + : : : + n : ()      =     0 + : : : + n & 0 ; :::; n 2 H & 0  : : :  n .
+
+Lemma 3.16
+a) Zu jedem > 0 existiert genau ein Tupel 0 ; :::; n 2 H mit =NF 0 + ::: + n .
+b) Ist = 0 + ::: + n mit additiven Hauptzahlen 0  : : :  n , so gilt fur jedes k < n:
+     0 + ::: + k < und k+1 + ::: + n < .
+Beweis:
+a) folgt aus dem Satz uber die Cantors he-Normalform (zur Basis !) unter Beru ksi htigung der Glei hung
+!  n = ! + ::: + ! .
+b) Die erste Unglei hung ist trivial. Nun zur zweiten Unglei hung.
+
+                                                         15
+Fall 1: k+1 < k . Dann k+1 + ::: + n < k < .
+Fall 2: k+1 = k . Dann k+1 + ::: + n  k + ::: + n 1 < k + ::: + n  .
+De nition (Naturli he Summe oder Hessenberg-Summe)
+ #0 := 0# := .
+Fur =NF 0 + ::: + n und =NF n+1 + ::: + n+m sei # := p(0) + ::: + p(m+n) ,
+wobei p eine Permutation von m + n + 1 mit p(0)  :::  p(m+n) .
+Bemerkung
+Ist =CNF ! 0  k0 + : : : + ! n  kn und =CNF ! 0  l0 + : : : + ! n  ln , so gilt
+  # = ! 0  (k0 +l0 ) + : : : + ! n  (kn +ln ):
+Lemma 3.17
+a) # = # ,
+b) ( # )# = #( # ),
+ ) 0  :::  n additive Hauptzahlen )         0 + ::: + n = 0 #:::# n ,
+d) < ) # < # ,
+e) ; < ! ) # < ! ,
+f) +  # .
+Beweis:
+a),b),e) klar.
+d) Wegen b) und ) rei ht es, die Behauptung fur 2 H zu beweisen. Sei = ! 0 , =CNF !Æ0  k0 + : : : +
+!Æn  kn und =CNF !Æ0  l0 + : : : + !Æn  ln mit 0 = Æm fur ein m  n. Dann # = !Æ0  k00 + : : : + ! n  kn0
+                                                           0 = lm +1 und ki0 = ki ; li0 = l i fur i 6= m.
+                                               0 = km +1; lm
+und # = !Æ0  l00 + : : : + ! n  ln0 , wobei km
+f) 1. Ist 2 H , so + =  # oder + = # .
+2. Fur beliebiges folgt die Behauptung aus 1. und der Assoziativitat von #.
+
+
+
+
+                                                       16
+x4 Proof theoreti analysis of Z via the in nitary system Z1
+The axiom system Z of pure number theory
+Indu tive De nition of sets PRn of n-ary fun tion symbols
+(PR 1) 0n 2 PRn (n  0), S 2 PR1 , Ini 2 PRn (1  i  n).
+(PR 2) h 2 PRm & g1 ; :::; gm 2 PRn & m; n  1 =) (Æhg1:::gm ) 2 PRn .
+(PR 3) g 2 PRn & h 2 PRn+2 =) (Rgh) 2 PRn+1 .
+                         S
+Abbreviation: PR := n2IN PRn , 0 := 00 .
+L0 := PR [ f g , where is a binary relation symbol (equality).            n
+                                                                        z}|{
+The L0 -terms 0; S0; SS0; :::: are alled numerals. For n 2 IN let n := S:::S 0.
+T := set of all losed L0 -terms.
+If t 2 T then val(t) denotes its anoni al value. Hen e val(n) = n.
+TRUE0 := set of all true losed literals of L0 [= fs t : s; t 2 T & val(s) = val(t)g[f:(s t) : val(s) 6= val(t)g℄
+The language of Z is L0 (X ) := L0 [ fX0 ; X1 ; :::g, where X0 ; X1 ; ::: are unary predi ate symbols; we all
+them set variables. But note that they are not onsidered as variables in the proper sense (e.g. FV(Xi 0) = ;).
+We use X as synta ti variable for X0 ; X1 ; :::.
+The axioms of Z are the universal losures of the following L0 (X )-formulas:
+x x
+x y ! Az (x) ! Az (y) , for ea h atomi L0 (X )-formula A
+:(Sx 0)
+Sx Sy ! x y
+0n x1 :::xn 0
+Ini x1 :::xn xi
+(Æhg1:::gm )x1 :::xn hg1x1 :::xn : : : gm x1 :::xn
+(Rgh)x1 :::xn 0 gx1 :::xn
+(Rgh)x1 :::xn Sy hx1 :::xn y(Rgh)x1 :::xn y
+Fx (0) ! 8x(F ! Fx (Sx)) ! Fx (z ), for ea h L0 (X )-formula F
+
+
+
+
+                                                      17
+De nition
+Let R be an L0 -formula with FV(R) = fx; yg su h that the relation
+:= f(m; n) 2 IN2 : IN j= Ry;x(m; n)g is wellfounded.
+By re ursion over  one de nes the -norm jnj of n 2 IN:
+jnj := supfjmj + 1 : m  ng.
+Abbreviations:
+s  t := Ry;x (s; t) , 8yt F (y) := 8y(yt ! F (y)),
+jtj := jval(t)j for t 2 T ,
+Prog (F ) := 8x(8yxF (y) ! F (x)),
+TI (F; t) := Prog (F ) ! 8xtF (x).
+In this se tion we will show that trans nite indu tion up to "0 is not provable in Z , more pre isely we will
+establish the following
+Theorem Z ` TI (X; n) =) jnj < "0 .
+Sket h of the proof:
+We de ne an in nitary proof system Z1 , whi h (essentially) results from PL1 by
+                                          V
+(i) repla ing ea h inferen e symbol y8xA by its in nitary version
+      V       : : : Ax (t) : : : (t2T )
+     ( 8xA )                            (!-rule)
+                        8xA
+(ii) adding the axioms A (for A 2 TRUE0 ) and Xs; :Xt (for s; t 2 T with val(s) = val(t))
+Then we prove:
+Lemma 4.5 PL1 `k0 & FV( ) = ; =) Z1 `k0 .
+Lemma 4.8 A 2 Z =) Z1 `0 A for some < ! + !.
+Theorem 4.2 Z1 `m+1 =) Z1 `3m .
+Lemma 4.4 Z1 `0 TI (X; n) =) jnj  2
+From this the announ ed Theorem is obtained as follows:
+Z ` TI (X; n) 1:1(Cor   :)                                                                      :5
+                    =) PL1 `k0 :A1 ; :::; :Al ; TI (X; n) for some k < ! and A1 ; :::; Al 2 Z =4)
+Z1 `k0 :A1 ; :::; :Al ; TI (X; n) =4)
+                                     :8 1                                                            :2
+                                          Z `m TI (X; n) with < ! + ! and m := max1il rk(Ai )+1 =4)
+Z1 `m TI (X; n) with < "0 =4)         :4
+                                           jnj  2 < "0 .
+
+
+
+
+                                                     18
+The in nitary proof system Z1
+The language of Z1 is L0 (X ).
+We introdu e the following relation ' between L0 (X )-formulas and (possibly in nitary) onjun tions or
+disjun tions of L0 (X )-formulas:
+           V
+A0 ^ A1 ' i2f0;1g Ai ,
+                                       V
+                          8xA ' t2T Ax (t),   A0 _ A1 ' i2f0;1g Ai ,
+                                                                    W
+                                                                                     9xA ' Wt2T Ax (t)
+Then we have
+{ A ' 2J A &  2 J =) rk(A ) < rk(A),
+                                          W  V V    W
+{ A ' 2J A =) :(A) ' 2J :(A ), where := , := ,
+De nition
+AX (Z1 ) := set of all sequents  su h that
+{ all elements of  are literals,
+{  \ TRUE0 6= ; or  ontains a subset fXs; :Xtg with val(s) = val(t).
+Remark: 0 ; 00 2 AX (Z1 ) =) (0 n fC g) [ (00 n f:C g) 2 AX (Z1 )
+
+Z1 -inferen es
+(Ax1
+   )                               if  2 AX (Z1 )
+ V             : : : A : : : (2J )        V
+( A)                                 if A ' 2J A
+                      A
+ W                     A                   W
+( A )                               if A ' 2J A and  2 J
+                        A
+                     C :C
+(CutC )
+                       ;
+(Rep)
+                       ;
+                       ;
+o(d) := lg(d), deg(CutC ) := rk(C ) + 1 and deg(I ) := 0 for all other inferen es.
+Remark: At moment we ould do without Rep inferen es. They will be ome important later.
+NOTATION
+We use d; d0 ; d1 ; e; ::: as synta ti variables for Z1 -derivations.
+   8
+   >
+   >        d
+   <
+                                                                                  ::: :::(2jIj) I
+d ' : : :  :  : : : :, d = I (d )2jIj & 8 2 jIj( (d )   & o(d )   < ) &                ,
+   >
+   >                    I
+   :
+              :
+       :::  :::(2jIj) I
+where                        :, (I )  & 8 2 jIj(   ;  (I )).
+                
+                    : : : : : :I
+Note that d '                    implies (d)  and o(d)  .
+                        :
+
+
+
+
+                                                        19
+Theorem and De nition 4.1
+For ea h formula C we de ne an operator RC su h that:
+d `m ; C & e `m ; :C & rk(C )  m =) RC (d; e) `m#                            .
+Proof: RC (d; e) is de ned by re ursion on # .
+                                                                     8
+                                                                     >
+                                                                     >
+                                                                     <
+                                                                                  d
+1. C is not a main formula of I := last(d0 ): Then d ' : : : ; C;  :  : : :(2I ) .
+                                                          >
+                                                          >                          I
+                                                          :
+                                                                    ;C :
+By IH we get RC (d ; e) `m #  for all  2 I . Further we have  # < # for all  2 I .
+                                       8
+                                       >
+                                       >
+                                       <
+                                              RC (d ; e)
+Hen e RC (d; e) := I (RC (d ; e))2I ' : : : ;  :  # : : :(2I ) is a derivation as required.
+                                       >
+                                       >                            I
+                                       :
+                                                 : #
+1'. :C is not main formula of last(e): symmetri to 1.
+2. C is main formula of last(d), and :C is main formula of last(e):
+2.1. C is a literal: Then last(d) = Ax1                  1          0      1          00
+                                      0 and last(e) = Ax00 with  2 AX (Z ) and  2 AX (Z ).
+                                                                                               1
+Hen e  := (0 n fC g) [ (00 n f:C g)  , and  2 AX (Z1 ) (by ....). We set RC (d; e) := Ax1
+                                                                                             .
+          W
+2.2. C ' 2J C :
+                                       8                                  8
+                                       >
+                                       >
+                                       <
+                                                  d0                      >
+                                                                          >
+                                                                          <
+                                                                                           e
+              V
+Then :C ' 2J :C and d ' ; C; C : 0                 , e ' : : : ; :C; :C :  : : :(2J )      .
+                              >
+                              >
+                              :
+                                   ;C :
+                                           _ 
+                                             C
+                                                           >
+                                                           >
+                                                           :
+                                                                     ; :C :
+                                                                                            ^ :C
+
+By IH we get RC (d0 ; e) `m0 # ; C and RC (d; e ) `m#  ; :C .
+Further rk(C ) < rk(C )  m.
+                                                            8
+                                                            >
+                                                            >
+                                                            <
+                                                                RC (d0 ; e)              RC (d; e )
+Hen e    RC (d; e) := CutC RC (d0 ; e)RC (d; e ) ' > ; C : 0 #                      ; :C : #               .
+                                                            >
+                                                            :                                        Cut   C
+                                                                                  : #
+             V
+2.2'. C ' 2J C : symmetri to (Case 2.2).
+
+Theorem and De nition 4.2
+We de ne an operator E su h that the following holds: d `m+1                       =) E (d) `3m .
+Proof:
+         8
+         >
+         >
+         <
+                 d0             d1
+1. d '     ;C :       0       ; :C :   1
+                                                  : Then rk(C )  m and, by IH, E (d0 ) `3m 0 ; C and E (d1 ) `3m 1 ; :C .
+         >
+         >                                 CutC
+         :
+                          :
+Hen e RC (E (d0 ); E (d1 )) `3m 0 #3 1 by Theorem 4.1. So we ould de ne E (d) to be RC (E (d0 ); E (d1 )). But
+for reasons whi h be ome lear later we set E (d) := Rep RC (E (d0 ); E (d1 )).
+                                       8                                   8
+                                       >
+                                       >
+                                       <
+                                                E (d  )                   >
+                                                                           >
+                                                                           <
+                                                                                     d
+2. otherwise: E (d) := I (E (d ))2I ' : : : ;  : 3  : : :(2I ) if d = : : : ;  :  : : :(2I )
+                                       >
+                                       >                            I      >
+                                                                           >                           I
+                                       :                                   :
+                                                  :3                                  :
+
+                                                                20
+Theorem 4.3 (Inversion)
+a) A ' 2J A & Z1 `m ; A =) Z1 `m ; A for ea h  2 J .
+       V
+
+b) Z1 `m ; A0 ; A1 =) Z1 `m ; A0 ; A1 .
+
+De nition
+L0 [X ℄ := L0 [ fX g,
+A losed L0 [X ℄-formula (sequent) is alled X -positive if it ontains no subformula :Xt.
+j= A :, (IN; fn : jnj < g) j= A,
+j= fA1 ; :::; Ak g :, j= A1 _ ::: _ Ak
+Lemma 4.4 (Boundedness)
+Let be X -positive.
+Z1 `0 :Prog (X ); :Xs1 ; :::; :Xsk ; & js1 j ; :::; jsk j    =) j= +2   .
+Corollary Z1 ` TI (X; n) =) jnj  2 .
+                   0
+Proof of Corollary:
+Z1 `0 TI (X; n) 4) :3a 1                          :4 2
+                       Z `0 :Prog (X ); 8y  nXy 4) j= 8y  nXy ) jnj  2 .
+Proof of Lemma by indu tion on :
+Abbreviations:  := f:Xs1 ; :::; :Xsk g.
+Let d `0 :Prog (X ); ; .
+1.1. last(d) = Ax1 and  \ TRUE0 6= ;: \ TRUE0 6= ; and the laim is trivial.
+                   
+1.2. last(d) = Ax1
+                  and Xt; :Xs   with val(t) = val(s):
+Then Xt 2 and :Xs 2 . Hen e jtj = jsj  < + 2 and thus j= +2                 .
+            Ws0
+2. last(d) = :Prog (X ) : Then `0 0 :Prog (X ); ; ; 8ys0 Xy ^ :Xs0 with 0 < .
+By 4.3a (Inversion) we get (1) `0 0 :Prog (X ); ; ; 8ys0 Xy, and (2) `0 0 :Prog (X ); :Xs0; ; .
+By IH from (1) we get j= +2 0 ; 8ys0 Xy.
+(Case 1) j= +2 0 : Then also j= +2 , sin e 0  and is X -positive.
+(Case 2) j= +2 0 8ys0 Xy: Then jmj < + 2 0 for all m  val(s0 ), i.e. js0 j  + 2 0 .
+From this together with js1 j ; :::; jsk j  and (2) by IH we obtain j= +2 0 +2 0 , and thus j= +2 .
+            V               V
+3. last(d) = C with C ' 2I C 2 : Then, for all  2 I , `0  :Prog (X ); ; ; C and  < . Hen e, by
+IH, j= +2  ; C for all . Sin e is X -positive, this implies j= +2 ; C for all , and thus j= +2 ; C .
+     W
+4.    C with C 2       : as 3.
+5. last(d) = Rep: immediate by IH.
+
+
+
+
+                                                       21
+Embedding of PL1 + Z into Z1 ; unprovability of TI("0 )
+Lemma 4.5
+PL1 `k0 & FV( ) = ; =) Z1 `k0
+Proof by indu tion on k:
+1. f:A; Ag  where A is atomi : Then either A 2 TRUE0 or :A 2 TRUE0 or A = Xs. Hen e Z1 `k0 .
+2. 8xA 2 und PL1 `0k 1 ; Ax (y): Then by 2.2 PL1 `0k 1 ; Ax (t) for all t 2 T .
+Hen e by IH Z1 `0k 1 ; Ax (t) for all t 2 T and thus Z1 `k0 , sin e 8xA ' t2T Ax (t).
+                                                                         V
+
+3. 9xA 2 and PL1 `0k 1 ; Ax (t): w.l.o.g. t 2 T ( f. Lemma 2.2). By IH Z1 `0k 1 ; Ax (t) and thus
+Z1 `k0 .
+4. (^),(_): as 2. and 3.
+Lemma 4.6
+s; t 2 T & val(s) = val(t) & FV(F )  fxg =) Z1 `02rk(F ) :Fx (s); Fx (t).
+Proof by indu tion on rk(F ).
+Lemma 4.7 (Derivability of Complete Indu tion)
+Let 8xF be losed and r := 2  rk(F ). Then for ea h t 2 T we have
+Z1 `r0+2n :Fx (0); :8x(F ! Fx (Sx)); Fx (t) where n := val(t).
+Proof by indu tion on n:
+Let := f:F (0); :8x(F ! Fx (Sx))g, i.e.           = f:F (0); 9x(F ^ :Fx (Sx))g.
+1. val(t) = 0: Then `r0 ; F (0) by Lemma 4.6.
+2. val(t) = n+1:
+(1) `r0+2n ; F (n)                                         [ IH ℄
+(2) `0 :F (Sn); F (t)
+      r                                                 [ L.4.6 ℄
+(3) `0r +2 n +1 ; F (n) ^ :F (Sn); F (t)          [(1),(2),(^) ℄
+                                               Wn
+(4) `0r +2 n+2  ; F (t)                  [ (3), 9x(F ^:Fx(Sx)) ℄
+
+Lemma 4.8
+For ea h C 2 Z there is an < ! + ! su h that Z1 `0 C .
+Proof:
+1. C = 8~y 8z [ F (0; ~y) ! 8x(F (x; ~y) ! F (Sx; ~y)) ! F (z; ~y))℄:
+By Lemma 4.7 we have `!0 :F (0; ~s); :8x(F (x; ~s) ! F (Sx; ~s)); F (t; ~s) for all ~s; t 2 T . This yields the laim.
+2. C = 8~y8x1 8x2 (x1 x2 ! A(x1 ; ~y) ! A(x2 ; ~y)) where A is atomi :
+Then for any losed L0 -terms ~s; t1 ; t2 we have `00 :(t1 t2 ); :A(t1 ; ~s); A(t2 ; ~s). [ If val(t1 ) = val(t2 ) then
+either :A(t1 ; ~s) 2 TRUE0 or A(t2 ; ~s) 2 TRUE0 or f:A(t1 ; ~s); A(t2 ; ~s)g = f:Xt; Xt0g with val(t) = val(t0 ).
+Otherwise :(t1 t2 ) 2 TRUE0 . ℄ Hen e `!0 C .
+3. C = 8x8y(Sx Sy ! x y): The laim holds, sin e `00 :Ss St; s t for all s; t 2 T .
+4. All other axioms are of the form 8~xA with A~x (~s) 2 TRUE0 for all ~s 2 T .
+
+                                                           22
+Theorem 4.9
+If Z ` C and FV(C ) = ; then Z1 `0 C for some < "0 .
+Proof:
+Assume Z ` C . Then there are axioms A1 ; :::; Al 2 Z su h that PL1 ` :A1 ; :::; :Al ; C . Now Lemma 4.5
+yields `!0 :A1 ; :::; :An ; C , and by Lemma 4.8 we have `0 Ai (i = 1; :::; l) for some < ! + !.
+Hen e `!m+! C , with m := max1il rk(Ai )+1. Now we apply the Cut-Elimination Theorem 4.2 and obtain
+                       ! +!
+                  3
+`0 C with := 3              < "0 .
+
+Theorem 4.10 Z ` TI (X; n) =) jnj < "0
+Proof:
+                 :9 1             4:4(Cor:)
+Z ` TI (X; n) =4) Z `0 TI (X; n) =) jnj  2 < "0 .
+Corollary. If "0  kk := supfjnj + 1 : n 2 INg then Z 6` Prog (X ) ! 8yXy.
+Proof:
+Z ` Prog (X ) ! 8yXy ) Z ` TI (X; n) (for all n 2 IN) 4:4(Cor
+                                                           ) :) jnj  2 for all n ) kk < "0 .
+
+
+
+
+                                                  23
+Provability of trans nite indu tion in Z
+We assume a bije tive oding of nite sequen es of natural numbers IN<! ! IN, (a0 ; :::; an 1 ) 7! ha0 ; :::; an 1 i
+su h that
+(i) h i = 0, and ai < ha0 ; :::; an 1 i for i < n,
+(ii) for ea h xed n the mapping (a0 ; :::; an ) 7! ha0 ; :::; an i is primitive re ursive,
+(iii) there is a primitive re ursive fun tion (a; i) 7! (a)i with (ha0 ; :::; an 1 i)i = ai for i < n.
+In the following a; b; ; x; y; z denote natural numbers.
+De nition of b 0 a
+b 0 a if, and only if, a = ha0 ; :::; an i and one of the following ases holds
+(i) b = ha0 ; :::; ak 1 i with k  n,
+(ii) b = ha0 ; :::; ak 1 ; bk ; :::; bm i with k  minfm; ng and bk 0 ak .
+Indu tive De nition of a set OT of ordinal notations
+1. 0 2 OT,
+2. a0 ; :::; an 2 OT & an 0 : : : 0 a0 =) ha0 ; :::; an i 2 OT.
+De nition b  a :, a; b 2 OT & b 0 a
+Abbreviation: a  b := a  b ( on atenation) ,             F (y) := 8x( 8z xF (z ) ! 8z xhyi F (z ))
+Lemma 4.11 Z ` Prog(F ) ! Prog(F )
+Proof (in Z ):
+Assume (1) Prog(F ), (2) 8ybF (y), (3) 8z aF (z ), (4)         a  hbi.
+We have to prove F ( ). From (4) it follows that either  a or = a  hb1 ; :::; bn i with bn  :::  b1  b.
+1.  a: F ( ) follows from (3).
+2. = a  hb1 ; :::; bni with bn  :::  b1  b:
+One easily shows that 0 is transitive, hen e b1 ; :::; bn  b.
+By (2) we get F (bi ) for i = 1; :::; n, i.e. 8x(8z xF (z ) ! 8z  x  hbi i F (z )) for i = 1; ::; n.
+Now by omplete indu tion (on i) we get 8z  a  hb1 ; :::; bi i F (z ) (=: A( ; i) ).
+Hen e 8z  F (z ) and thus by (1) F ( ).
+
+Lemma 4.12 Z ` TI (F ; y) ! TI (F; hyi) .
+Proof:
+Assume Prog(F ) ! 8z  yF (z ) and Prog(F ). By Lemma 4.11 we get Prog(F ) ^ 8z  yF (z ), hen e F (y),
+and from this 8z  hyiF (z ).
+
+Theorem 4.13 Z ` TI (F; a) , for ea h a 2 IN.
+Proof:
+If a = 0 or a 62 OT then 8z  a(0 = 1) and therefore TI (F; a).
+Now let 0 := 0, m+1 := h m i. Then for ea h a 2 OT there is an m with a  m , and by (meta-)indu tion
+                                                                         :12
+on m we obtain Z ` TI (F; m ). [ Indu tion step: IH ) Z ` TI (F ; m ) 4)   Z ` TI (F; m+1 ) ℄
+                                                            24
+De nition o(0) := 0, o(ha0 ; :::; an i) := !o(a0 ) + : : : + !o(ak )
+Lemma 4.14 o maps (OT; ) isomorphi onto ("0 ; <).
+Proof:
+1. From the de nition of 0 we get by indu tion on a: a 60 a and 8b(b 0 a _ a = b _ a 0 b).
+2. 8a(o(a) < "0 ): trivial.
+3. By indu tion on b we prove: b  a ) o(b) < o(a).
+3.1. If a = ha0 ; :::; an i and b = ha0 ; :::; ak 1 i with k  n then o(b) < o(b) + !o(ak ) + : : : + !o(an) = o(a).
+3.2. If a = ha0 ; :::; an i, b = ha0 ; :::; ak 1 ; bk ; :::; bmi with k  minfm; ng, bk  ak , then by IH o(bm )  ::: 
+o(bk ) < o(ak ) and thus o(b) = !o(a0 ) + : : : + !o(ak 1 ) + !o(bk ) + : : : + !o(bm ) < !o(a0 ) + : : : + !o(ak )  o(a).
+4. From 1. and 3. it follows that ojOT is inje tive, and that a; b 2 OT & o(b) < o(a) implies b  a.
+5. By indu tion on < "0 we prove 9a 2 OT(o(a) = ): Let 6= 0. By Lemma 3.16a there are 0  :::  n
+su h that = ! 0 + : : : + ! n and 0 < (the latter follows from 0  ! 0  < "0 ). Now by IH there
+are a0 ; :::; an 2 OT with i = o(ai ). From n  :::  0 we obtain an  :::  a0 by 4.
+Hen e a := ha0 ; :::; an i 2 OT and o(a) = .
+                                                    n
+Corollary  is wellfounded with jaj = o(a) if a 2 OT
+                                                        0       otherwise
+                                                                                      :14
+Proof: If a 2 OT then jaj = supfjbj+1 : b  ag = supfo(b)+1 : b  ag 4=
+                                                                IH
+                                                                                          o(a).
+
+The Hydra game
+A hydra is a nite unlabelled tree. By 0 we denote the hydra onsisting only of one node.
+Let  be the rightmost head of a the hydra h 6= 0. If Her ules hops o this head the hydra h hooses an
+arbitrary number n and transforms itself into a new hydra h[n℄ as follows (where  is the node immediately
+below , and h is h without ):
+Case 1: If  is the root of h, then h[n℄ := h .
+Case 2: Otherwise h[n℄ arises from h by sprouting n repli as of h j from the node immediately below  .
+A hydra game is a nite or in nite sequen e (hi )i< of hydras, su h that 8i+1 <                9ni (hi+1 = hi [ni ℄).
+Theorem 4.15 Ea h hydra game terminates, i.e., 8h8(ni)i<! 9k(h[n0 ℄[n1 ℄:::[nk ℄ = 0).
+Theorem 4.16 Z 6` 8h8(ni)i<! 9k(h[n0 ℄[n1 ℄:::[nk ℄ = 0).
+Proof of Theorem 4.15: To ea h hydra h we assign its Godel number dh e as follows: dh e := hdh0 e; :::; dhn 1 ei
+where h0 ; :::; hn 1 are the immediate subtrees of h. Obviously the mapping h 7! dh e is a bije tion from the
+set of all hydras onto IN. Therefore from now on we identify hydras and natural numbers.
+The above operation a 7! a[n℄ an be de ned by primitive re ursion as follows:
+1. tp(0) := 0, 0[n℄ := 0.
+2. If a = ha0 ; :::; am i with am = 0 then tp(a) := 1 and a[n℄ := ha0 ; :::; am 1 i.
+3. If a = ha0 ; :::; am i with tp(am ) = 1 then tp(a) := ! and a[n℄ := ha0 ; :::; am 1 ; am[0℄; :::; am [0℄i.
+                                                                                          |       {z      }
+                                                                                                 n+1
+4. If a = ha0 ; :::; am i with tp(am ) = ! then tp(a) := ! and a[n℄ := ha0 ; :::; am 1 ; am [n℄i.
+By indu tion on a we get o(a[n℄) < o(a) for ea h a 6= 0. This proves 4.15.
+                                                            25
+Proof of Theorem 4.16 (Unprovability of termination of the hydra game)
+Abbreviation: Let /  ININ be an arbitrary arithmeti al relation.
+WF/ (G) : 8x9!yG(x; y) ! 9x; z0 ; z1 (G(x; z0 ) ^ G(x+1; z1) ^ :z1 / z0 ),
+WF/ (X ) : WF/ (G) with G(x; y) : X hx; yi.
+TI/ (F ) : Prog/ (F ) ! 8xF .
+k / k := supfjaj/ + 1 : a 2 INg if / is wellfounded.
+Lemma 4.17 Z ` WF/ (X ) () Z ` TI/ (X )
+Proof:
+\=)": Assume Z ` WF/ (X ); then also Z ` WF/ (G) for ea h formula G(x; y).
+Now we work \in Z ": Assumption: Prog/ (X ) ^ a 62 X .
+For suitable G we prove :WF/ (G), i.e. 8i9!bG(i; b) ^ 8i; b0; b1 ( G(i; b0 ) ^ G(i+1; b1) ! b1 / b0 ).
+A(i; s) :, 8j < i((s)j+1 / (s)j ^ (s)j+1 62 X ^ 8x / (s)j [x < (s)j+1 ! x 2 X ℄),
+G(i; b) :, 9s((s)0 = a ^ (s)i = b ^ A(i; s)).
+(0) A(i; s) ^ A(i; s~) ^ (s)0 = (~s)0 ) 8j  i((s)j = (~s)j ),
+(1) G is fun tion: f. (0).
+(2) G total: By indu tion on i we prove 9b G(i; b).
+                                       Prog/ (X)
+    Indu tion step: G(i; b0 ) ) b0 62 X =)       9b / b0 (b 62 X ) ) 9b1 G(i+1; b1).
+                                                                                                             (0)
+(3) G(i; b0 ) ^ G(i+1; b1) ) 9s[ (s)0 = a ^ (s)i = b0 ^ A(i; s)℄ ^ 9s~[ (~s)0 = a ^ (~s)i+1 = b1 ^ A(i+1; s~)℄ )
+    b1 = (~s)i+1 / (~s)i = (s)i = b0 .
+\(=": left to the reader.
+
+De nition b 1 a :, a 6= 0 & 9i(b = a[i℄)
+Lemma 4.18 b  a ) 9i(b  a[i℄).
+
+Theorem 4.19
+a) 1 is wellfounded and k1k = "0 .
+b) Z 6` WF1 (X ).
+Proof:
+From 8a 6= 08n(o(a[n℄) < o(a)), it follows that 1 is wellfounded, and by indu tion on o(a) we get
+jaj1  o(a). Hen e k 1 k  "0 , sin e o(a) < "0 for all a.
+Using Lemma 4.18 we obtain 8a 2 OT(o(a)  jaj1 ) by indu tion on a:
+                                                   4:18                            IH
+0 6= a 2 OT ) o(a) = supfo(b)+1 : b  ag  supfo(a[i℄)+1 : i 2 INg  supfja[i℄j1 +1 : i 2 INg =
+supfjbj1 +1 : b 1 ag = jaj1 . Hen e "0 = supfo(a)+1 : a 2 OTg  supfjaj1 +1 : a 2 INg = k1 k.
+                 :4:10                 :17
+b) "0  k1k Cor=)     Z 6` TI1 (X ) 4)   Z 6` WF1 (X ).
+Remark: Theorem 4.16 follows from 4.19 b).
+
+                                                          26
+x5 Gentzen's onsisten y proof for pure number theory
+The proof-system Z
+The language of Z is L0 (X ) (language of arithmeti with set variables)
+Let AX (Z) be the set of all sequents having one of the following shapes:
+(G1)     t t
+(G2)     :s t; :Ax (s); Ax (t) if A is a literal
+(S0)     :St 0
+(S1)     :Ss St; s t
+(PR0) 0n t1 :::tn 0
+(PR1) Ini t1 :::tn ti
+(PR2) (Æhg1:::gm )t1 :::tn hg1t1 :::tn : : : gm t1 :::tn
+(PR3.0) (Rgh)t1 :::tn 0 gt1:::tn
+(PR3.1) (Rgh)t1 :::tn Ss ht1 :::tn s(Rgh)t1 :::tn s
+
+The inferen e symbols of Z are those of PL1 plus
+(Ax )  for  2 AX (Z) ,
+(Indy;t
+         :F; Fy (Sy)
+    F ) :Fy (0); Fy (t) !y ! .
+           
+deg(I ) := rk(C ) + 1 if I = CutC or IndC
+                                        y;t
+           0          otherwise
+In this se tion I is always an inferen e symbol of Z, and d; d0 ; ::: denote Z-derivations.
+
+De nition of I (x=t) and I u
+                 y;sx (t)
+   F (x=t) := IndFx (t) , (IndF ) := IndFy (u) ; otherwise I (x=t) and I are de ned as in PL1.
+Indy;s                        y;s u     u;s                             u
+
+Lemma 5.1 Z is losed under substitution.
+Proof: Let I = Indy;s              0                                      0                   0
+                        F and I := I (x=t) with x 6= y . Then jI j = f0g = jIj, Eig(I ) = fy g = Eig(I ),
+deg(I 0 ) = rk(Fx (t)) = rk(F ) = deg(I ), (I 0 ) = f:Fx (t)y (0); Fx (t)y (sx (t))g = f:Fy (0)x (t); Fy (s)x (t)g =
+(I )x (t), 0 (I 0 ) = f:Fx (t); Fx (t)y (Sy)g = f:Fx (t); Fy (Sy)x (t)g = 0 (I )x (t).
+(I u ) = f:Fy (u)u (0); Fy (u)u (s)g = f:Fy (0); Fy (s)g = (I ) , 0 (I u ) = f:Fy (u); Fy (u)u (Su)g =
+f:Fy (u); Fy (Sy)y (u)g = 0 (I )y (u) (note that u 62 FV(Fy (s))).
+De nition
+For m 2 IN, let Zm denote the subsystem arising from Z by deleting all indu tion axioms
+8~v8z (Fx(0) ! 8x(F ! Fx (Sx)) ! Fx (z )) with rk(F ) > m.
+Theorem 5.2
+If Zm ` A then Z `m+1 A, i.e., there is a Z-derivation d of A su h that rk(C )  m for ea h CutC or Indy;t
+                                                                                                       C
+o urring in d.
+
+
+                                                         27
+Proof:
+Let Zm be the subsystem of Z orresponding to Zm , i.e., Zm arises from Z by removing all inferen es Indy;t
+                                                                                                       F
+with rk(F ) > m. We rst show Zm `0 A , for ea h A 2 Zm :
+1. If A is not an indu tion axiom then Zm `0 A is easy to see.
+2. Now let A  8~v8z (Fx(0) ! 8x(F ! Fx (Sx)) ! Fx (z )) with rk(F )  m.
+Let G := 8x(F ! Fx (Sx)) and y 2 FV n FV(G):
+PL1 `0 Fx (y) ^ :Fx (Sy); :Fx (y); Fx (Sy) ) PL1 `0 :G; :Fx (y); Fx (Sy) Ind
+                                                                          ) Zm `0 :G; :Fx (0); Fx (u) )
+Zm `0 8z (Fx (0) ! G ! Fx (z )) ) Zm `0 A.
+Now assume Zm ` A. Then there are A1 ; :::; An 2 Zm su h that PL1 `0 :A1 ; :::; :An ; A and (as shown
+above) Zm `0 Ai for i = 1; :::; n. This yields Zm `r A with r := maxfm; rk(A1 ); :::; rk(An )g+1.
+Now we apply Theorem 2.5 (with S := Zm and m0 := m+1) and obtain Zm `m+1 A , i.e., Z `m+1 A.
+
+De nition of hgtd ( ) and Od ( ) (Gentzen)
+Let d be a Z-derivation and  a position in d.
+Id ( ) := the
+            
+               inferen e at position  in d
+rkd ( ) := rk(C ) if Id ( ) = CutC or IndC
+                                            y;t
+                 0       otherwise
+hgtd ( ) := supfrkd () :  is stri tly below  g
+             8
+             >
+             > !m (Od ( 0)#Od ( 1))   if Id ( ) = CutC
+             <
+Od ( ) :=       !m (Od ( 0)  !)      if Id ( ) = Indy;t
+                                                        C
+             >
+             >
+             :
+                 (supi<k Od (i)) + 1   otherwise
+where m := hgtd( 0) hgtd ( ) = rk(C )  hgtd( ).
+
+O(d) := Od (h i).
+
+De nition (End-pie es)
+1.  is an end-pie e.
+2. If a is an end-pie e, and d a Z-derivation then CutC ad and CutC da are end-pie es.
+                                                             q
+We use a; b; as synta ti variables for end-pie es. afqg :=    := the result of substituting q for  in a .
+                                                                   a
+De nition of  (d)
+                     8
+                     < (  (d0 ) n fC g) [ (  (d1 ) n f:C g) if I = CutC
+  (I d0 :::dn 1 ) := ;                                       if I = Indy;t
+                                                                        F
+                     :
+                       (I )                                  otherwise
+Lemma 5.3
+a)  (d)  (d).
+
+
+                                                              28
+b) If  (d) = ; then either d = afIndy;t
+                                     F d g or d = afCutC d d g with (d ) = fC g and (d ) = f:C g.
+                                         0                0 00       0              00
+ ) If A 2  (d) then d = afd~g with A 2 (last(d~)).
+Proof:
+a) trivial.
+b) Sin e  (d) = ;, one of the follwing two ases holds.
+1. d = Indy;t  0
+            F d : o.k.
+2. d = CutA d0 d1 with ; = (  (d0 ) n fAg) [ (  (d1 ) n f:Ag):
+2.1.  (d0 ) = fAg and  (d1 ) = f:Ag: o.k.
+2.2.  (d0 ) = ;: Then by IH either d0 = a0fIndy;t       F d g or d0 = a0 fCutC d d g with
+                                                            0                    0 00       (d0 ) = fC g and
+  (d00 ) = f:C g. Hen e the laim holds with a := CutA a0 d1 .
+2.3.  (d1 ) = ;: anlogous to 2.2.
+ ) 1. d = CutC d0 d1 and  (d) = (  (d0 ) n fC g) [ (  (d1 ) n f:C g): Then w.l.o.g. A 2  (d0 ) and by IH
+d0 = a0 fd~g with A 2 (last(d~)). Therefore the laim holds with a := CutC a0 d1 .
+2. Otherwise we have  (d) = (last(d)) and the laim holds with a := 
+
+\De nition"
+A (Z-)derivation d is alled losed if it ontains no super uous free variables, i.e., if every variable x 62
+FV( (d)) o urring free at some position  in d is the eigenvariable of some inferen e symbol below  .
+(A pre ise de nition of this notion will be given in x6.)
+
+Theorem 5.4 (Gentzen)
+For ea h Z-derivation d of the empty sequent ; one an onstru t another Z-derivation d of ; su h that
+O(d ) < O(d).
+Proof:
+W.l.o.g. we may assume that d is losed. Otherwise we repla e all super uous free variables by the onstant
+0. This operation does neither hange the endsequent nor the ordinal of d.
+Then a ording to Lemma 5.3 one of the following two ases holds.
+Case 1: d = afIndy;t
+                 F d0 g with FV(t) = ; (sin e d is losed).
+Let us assume that t is a numeral n (for the general ase f. x6).
+      d0 (y=0) d0 (y=1)
+            CutF (1)      d0 (y=2)
+                   CutF (2)        d0 (y=3)
+                               ..
+d :=                            .
+                                ..
+                                 .          d0 (y=n 1)
+                                   CutF (n 1)
+                                        
+                                        a
+Let  be the position of  in a. Then Od ( ) = !m (Od ( 0)  !) > !m (Od ( 0)  n) = Od ( ) (with m :=
+rk(F )  hgtd ( )). This yields O(d) > O(d ).
+
+                                                     29
+                        d~                 d~
+                     0                1
+Case 2: d =              0                   1            with C 2 (last(d~0 )) and :C 2 (last(d~1 )).
+                                CutC
+                                  
+                                    a
+Here we have four sub ases a ording to the shape of C . Let us onsider the ase C = 8xA. Then
+                                                     d1         d0
+     d0         d1                               W           Vy
+    Vy       Wt                         d0 (y=t) t9x:A          8xA     d1
+     8
+    xA      9 x:A
+                                        
+                                                  
+                                                                     
+       0                    1                                        0               1                  0              1
+d=                                                  and       d :=           Cut8xA                             Cut8xA
+             Cut8xA
+                                                                                                         
+                b                                                               b                                  b
+                                                                                        CutA(t)
+                                                                                                   
+               a0                                                                                 a0
+where a = a0 fbg su h that the root of b (i.e. the position of  in a0) is the uppermost node  below the root
+of 0 (or 1 ) su h that hgtd ( ) < hgtd( 0).
+Instead of proving O(d ) < O(d) in general we treat a suÆ iently informative example.
+
+Example
+By : m we indi ate the height hgtd ( ) of the respe tive position  .
+    d0               d1
+     Vy            Wt
+    8xA 0            9x:A 1
+d= Cut G 0 : m      Cut G1 :m                                   with rk(D) = n < rk(8xA)  rk(F ) = m.
+             Cut8xA:m           b
+                  CutF :n         a
+                        CutD :0
+
+Then b =
+                    b        a
+                 CutF , a0 = CutD and
+
+                   d1          d0
+                              Vy    Wk
+    d0 (y=t) 0 9x:A 1          8xA 0 d1           1
+     CutG0 :m     CutG1 :m    CutG0 :m CutG1 :m
+d =         Cut8xA:m       b          Cut8xA:m      b                                                      with k := maxfn; rk(A(t))g < m.
+                 CutF :k                  CutF :k
+                           CutA(t) :n                 a
+                                       CutD :0
+                                                                                                     
+O(d ) = !n !k n !m k ( 0 # 1 # ) # !m k ( 0 # 1 # ) # <
+                                                  
+!n !k n !m k ( 0 # 1 # ) # = !n !m n( 0 # 1 # ) # = O(d) .
+
+
+
+
+                                                                                    30
+                "0 ` Con(Z).
+Theorem PRA + TIqf
+Proof:
+We assume that Z-derivations and ordinals are oded by natural numbers su h that
+{ O(d) 2 OT for ea h d 2 Z (Z := set of all ( odes of) Z-derivations),
+{ the fun tion d 7! O(d) is primitive re ursive,
+{ there is a primitive re ursive fun tion g with 8d 2 Z (g(d) = 0 $ (d) = ;).
+Abbreviation: F (y; z ) : z 2 Z ^ O(z ) = y ! g(z ) 6= 0,    F~ (y) : 8zF (y; z )
+By TI (F~ ) we prove 8yF~ (y), i.e. 8a8d(d 2 Z ^ O(d) = a ! g(d) 6= 0):
+Assume d 2 Z ^ O(d) = a. Then there is a d 2 Z with g(d) = 0 ! O(d )  O(d) = a ^ g(d ) = 0. By IH
+we have O(d )  a ! g(d ) 6= 0. Hen e g(d) = 0 ! ?, i.e. g(d) 6= 0.
+
+It remains to derive TI (F~ ) from TIqf
+                                      .
+There are primitive re ursive fun tions q; r; p su h that
+{ a 2 OT ! q(a) 2 OT ^ o(a) = !  o(q(a)) + r(a),
+{ b 2 OT ^ k 2 IN ! p(b; k) 2 OT ^ q(p(b; k)) = b ^ r(p(b; k)) = k.
+Abb.: G(x) : x 2 OT ! F (q(x); r(x))
+(*) Prog (F~ ) ! Prog (G).
+Proof:
+Assume (1) Prog (F~ ), (2) 8y  xG(y), (3) x 2 OT.
+To prove: 8y  q(x)8zF (y; z ) [ from this using Prog (F~ ) we get F~ (q(x)) and then F (q(x); r(x)) ℄.
+Let b  q(x) and k 2 IN be given. We set a := p(b; k). Then a 2 OT ^ q(a) = b  q(x) ^ r(a) = k.
+                                     (2)
+a; x 2 OT ^ q(a)  q(x) ) a  x ) G(a) ) F (q(a); r(a)) ) F (b; k).
+
+Using TIqf (G) from (*) we get:
+Prog (F ) ) 8xG(x) ) 8x 2 OT F (q(x); r(x)) ) 8y 2 OT8zF (y; z ) ) 8y 2 OTF~ (y).
+        ~
+Trivially holds Prog (F~ ) ! 8y62OT F~ (y).
+
+
+
+
+                                                       31
+x6 Notations for in nitary derivations; the proof system Z
+The proof-system Z
+The system Z results from Z by adding the following inferen e symbols:
+        C :C
+{ (RC )           with deg(RC ) := rk(C ),
+           ;
+{ (E)
+      ;     with deg(E) unde ned,
+      ;
+and de ning o(h) and deg(h) for Z -derivations h = I h0 :::hn 1 as follows
+       8
+       >  o(h0 )#o(h1 )      if I = RC                  
+       <
+          o( h
+o(h) := o(h00 )) + !         if I = Indy;t
+                                        C , deg(h) := deg(h0 ) 1
+                                                                                                 if I = E
+       :3
+       >                     if I = E                      max(f deg(I )g [ fdeg(h i ) : i < n g) otherwise
+          supi<n (o(hi )+1) otherwise
+Note that o(h), deg(h) for Z -derivations h are de ned di erently from o(d), deg(d) for Z-derivations d.
+Remark: The de nitions of o(h) and deg(h) are motivated by the interpretation h 7! h1 (introdu ed
+                                                                                 1
+below) and Theorems 4.1,4.2. For example, sin e, a ording to Theorem 4.2, o(E (h0 ))  3o(h1
+                                                                                           0)                 and
+        0 ))  deg(h0 )  1 holds, we have de ned o(Eh0 ) := 3
+deg(E (h1           1                                          o(h0 ) and deg(Eh ) := deg(h )  1.
+                                                                                0          0
+
+Substitution
+We set RC (x=t) := RCx (t) , E(x=t) := E ; otherwise we de ne I (x=t) (and I u ) as in Z.
+Then Z is losed under substitution. In the following
+                                                        we only onsider ground substitutions, i.e. substitutions
+                                                I h   :::h                    if Eig(I ) = fxg
+(x=t) with t 2 T . Then (I h0 :::hn 1 )(x=t) = I (x=t)hn (1x=t):::h (x=t) otherwise
+                                                    0
+                                                           0       n 1
+Lemma 6.1
+If h is a Z -derivation and t 2 T then h(x=t) is a Z -derivation with (h(x=t))  (h)x (t), deg(h(x=t)) =
+deg(h), o(h(x=t)) = o(h).
+                                                       W
+De nition: FV(I ) := FV((I )) [ FV(t) if I = 9yA
+                                               t
+                      FV((I ))        otherwise
+Remark: Eig(I ) \ FV(I ) = ;.
+De nition of FV(h)
+                             S
+FV(I h0 :::hn 1 ) := FV(I ) [ i<n (FV(hi ) n Eig(I ))
+Lemma 6.2
+a) FV( (h))  FV(h),
+b) FV(h(x=t)) = FV(h) n fxg , if t 2 T .
+Proof: Let h = I h0 :::hn 1 .
+                    S
+a) (h) = (I ) [ i<n ( (hi ) n i (I )) and FV( (h)) \ Eig(I ) = ; ().
+FV((I ))  FV(I )  FV(h).
+                     ()                    IH
+FV( (hi ) n i (I ))  FV( (hi )) n Eig(I )  FV(hi ) n Eig(I )  FV(h).
+b) Abb.: I 0 := I (x=t), h0 := h(x=t).
+1. Eig(I ) = fxg: Then h0 = h and x 62 FV(h). Hen e FV(h0 ) = FV(h) = FV(h) n fxg.
+
+                                                        32
+2. Otherwise: Then h0 = I 0 h00 :::h0n 1 , and by IH FV(h0i ) = FV(hi ) n fxg.
+Moreover one easily veri es that FV(I 0 ) = FV(I ) n fxg.
+                          S
+Hen e FV(h0 ) = FV(I 0 ) [ i (FV(h0i ) n Eig(I 0 )) IH
+                                                    =
+                S                               
+(FV(I ) n fxg) [ i (FV(hi ) n fxg) n Eig(I ) =
+           S                      
+ (FV(I ) [ i (FV(hi ) n Eig(I )) n fxg = FV(h) n fxg.
+De nition
+A Z -derivation h is alled losed i FV(h) = ;.
+Lemma 6.3
+a) Every Z -derivation h with losed endsequent an be transformed into a losed Z -derivation h0 with
+     (h0 )  (h), deg(h0 ) = deg(h), o(h0 ) = o(h).
+b) If h = I h0 :::hn 1 is losed and Eig(I ) = ; then h0 ; :::; hn 1 are losed.
+ ) If h = I h0 is losed and Eig(I ) = fxg then h0 (x=t) is losed for ea h t 2 T .
+Proof:
+a) By indu tion on the ardinality of FV(h) we prove that ea h Z -derivation h an be transformed into a
+Z -derivation h0 with (h0 )  (h), deg(h0 ) = deg(h), o(h0 ) = o(h), and FV( (h0 )) = FV(h0 ):
+If FV(h) n FV( (h)) = ; then h0 := h, and the laim follows by L.6.2a.
+Now assume that x 2 FV(h) n FV( (h)). Then for h1 := h(x=0) we have (h1 )  (h)x (0) = (h),
+deg(h1 ) = deg(h), o(h1 ) = o(h), and (by L.6.2b) FV(h1 ) = FV(h) n fxg. Hen e the laim follows by IH.
+b ) FV(hi )  FV(h) [ Eig(I ).
+ ) FV(h0 )  FV(h) [ fxg = fxg ) FV(h0 (x=t)) = FV(h0 ) n fxg = ;.
+
+Interpretation of Z in Z1
+For ea h losed Z -derivation h we de ne its interpretation h1 2 Z1 as follows:
+0. (Ax )1 := Ax1  ,
+    Vy             V               
+1. ( 8xAh0 )1 := 8xA h0 (y=t)1 t2T ,
+2. (RC h0 h1 )1 := RC (h1    1
+                        0 ; h1 ) ,
+3. (Eh0 )1 := E (h1
+                  0 ),
+                     
+     (Indy;t   1      Rep y;t
+                           F                if n = 0
+4.       F h0 ) :=    Rep CutF (n) en 1 y;t if n>0
+                                                       where
+                                        F
+                                                     1                             1
+                  F `0 :F (n); F (t), e0 := h0 (y=0) , ei := CutF (i) ei 1 h0 (y=i) for i > 0 .
+     n := val(t), y;t  <!
+
+                   h0 (y=0)1 h0 (y=1)1
+                          CutF (1)        h0 (y=2)1
+                                      ..
+   (Indy;t
+       F   h 0 )1=                     .              h0 (y=n 1)1
+                                                CutF (n 1)             y;t
+                                                                       F
+                                                          CutF (n)
+                                                           Rep
+5. Otherwise: (I h0 :::hn 1 )1 := I h1        1
+                                     0 : : : hn 1 .
+
+                                                        33
+Remark
+With the help of Theorems 4.1,4.2 one easily veri es that h1 is a Z1 -derivation with h1 `deg(
+                                                                                          o(h)
+                                                                                               h) (h).
+Let us look at the Ind- ase:
+                   h0 (y=0)1         h0 (y=1)1
+                                                  h0 (y=2)            1
+                :F (0); F (1) : :F (1); F (2) :
+                        :F (0); F (2) : +1      :F (2); F (3) :                  h0 (y=n 1)1
+          1
+    F h0 ) '
+(Indy;t                                       ..                                                       y;t
+                                               .                             :F (n 1); F (n) :         F
+                                                           :F (0); F (n) : +n 1                :F (n); F (t) : k
+                                                                           :F (0); F (t) : +~n
+                                                                           :F (0); F (t) : +!
+6.4. De nition of tp(h) and h[℄ for losed Z -derivations h and  2 jtp(h)j
+By re ursion on the build-up of h we de ne a Z1 -inferen e tp(h) and losed Z -derivation(s) h[℄ in su h a
+way that
+                                                                  : : : h[℄1 : : : (2jtp(h)j)
+                            h1 = tp(h) h[℄1                    =
+                                                    2jtp(h)j                 tp(h)
+The de nition lauses for h = RC h0 h1 and h = Eh0 an be read o from the orresponding lauses in the
+de nitions of RC and E .
+1.1. h = Ax: tp(h) := Ax1 .
+           V                   V
+1.2. h = C h0 h1 : tp(h) := C , h[i℄ := hi .
+        V                 V
+1.3. h = yC h0 : tp(h) := C , h[t℄ := h0 (y=t).
+        W                W
+1.4. h = C h0 : tp(h) := C , h[0℄ := h0 .
+                                             y;t
+                                                                if n = 0
+2.   h = Indy;t
+            F h0 : tp(h) := Rep, h[0℄ :=
+                                               F                                         where
+                                              CutF (n) en 1 y;t
+                                                            F   if n>0
+     n := val(t), Z 3 y;t
+                       F `1 :F (n); F (t), e0 := h0 (y=0), ei := CutF (i) ei 1 h0 (y=i) for i > 0 .
+                           <!
+
+3. h = Eh0 :
+3.1. tp(h0 ) = CutC : tp(h) := Rep, h[0℄ := RC Eh0 [0℄Eh0 [1℄,
+3.2. otherwise: tp(h) := tp(h0 ), h[℄ := Eh0 [℄.
+4. h = RC h0 h1 :
+4.1. C 62 (tp(h0 )): tp(h) := tp(h0 ), h[℄ := RC h0 [℄h1 .
+4.2. :C 62 (tp(h1 )): tp(h) := tp(h1 ), h[℄ := RC h0 h1 [℄.
+4.3. C 2 (tp(h0 )) and :C 2 (tp(h1 )):
+4.3.0. rk(C ) = 0: tp(h) := Ax1    with  := ((tp(h0 )) n fC g) [ ((tp(h1 )) n f:C g).
+                                     W
+4.3.1. C = 8xA: Then tp(h1 ) = t:C for some t 2 T .
+       tp(h) := CutAx (t) , h[0℄ := RC h0 [t℄h1 , h[1℄ := RC h0 h1 [0℄.
+4.3.2. C = 9xA or A0 ^A1 or A0 _A1 : analogous to 4.3.1.
+
+
+
+                                                           34
+Theorem 6.5
+If h is a losed Z -derivation with I = tp(h) and h `m , then the following holds:
+a) (I )  ,
+b) deg(I )  m , i.e. (I = CutC ) rk(C ) < m),
+ ) For ea h  2 jIj: h[℄ `m ;  (I ) with  < .
+Proof by straightforward indu tion on the build-up of h:
+W.l.o.g. FV( ) = ;.
+1. h = Ax: Then I = Ax1
+                        and thus (I ) =  = (h)  and jIj = ;.
+         V                    V
+2.1. h = y8xAh0 : Then I = 8xA, (I ) = f8xAg  and h0 `m0 ; Ax (y) with             0<   .
+By ... we get h[t℄ = h0 (y=t) `m ; Ax (t) for ea h t 2 T .
+        W                          W
+2.2. h = t9xAh0 : Then t 2 T , I = t9xA , (I ) = f9xAg  and h0 `m0 ; Ax (t) with            0<   .
+        V                   W
+2.3. h = A0 ^A1 h0 h1 or h = kA0 _A1 : analogous to 2.1 and 2.2.
+3. h = CutC h0 h1 : Then I = CutC , rk(C ) < m, and h[0℄ = h0 `m0 ; C , h[1℄ = h1 `m1 ; :C with        0; 1 <   .
+                                            V               Wt
+4.1. h = RC h0 h1 with C = 8xA, tp(h0 ) = C , tp(h1 ) = :C : Then t 2 T and tp(h) = CutA(t) .
+Let := o(h0 ), := o(h1 ).
+Then h0 `m ; C , h1 `m ; :C and rk(A(t)) < rk(C )  m.
+By IH we obtain h0 [t℄ `mt ; C; A(t) with t < , and h1 [0℄ ` 0 ; :C; :A(t) with      0<   .
+Hen e h[0℄ = RC h0 [t℄h1 `mt # ; A(t) and h[1℄ = RC h0 h1 [0℄ `m# 0 ; :A(t)
+with t # ; # 0 < # = o(h)  .
+4.2. h = RC h0 h1 with tp(h0 ) = I and C 62 (I ): Let := o(h0), := o(h1).
+Then h0 `m ; C , h1 `m ; :C .
+By IH we obtain h0 [℄ `m ; C;  (I ) with  < , for all  2 jIj.
+Hen e h[℄ = RC h0 [℄h1 `m # ;  (I ) with  # < # = o(h)  .
+                                      IH
+h0 `m ; C & tp(h0 ) = I & C 62 (I ) )   (I )  & (I = CutA ) rk(A) < m).
+4.3. h = RC h0 h1 with rk(C ) = 0 and C 2 0 := (tp(h0 )), :C 2 1 := (tp(h1 )):
+Then I = Ax with  := (0 n fC g) [ (0 n f:C g), and by IH i  (hi ). Hen e (I ) =   (h)  .
+5. h = Eh0 with tp(h0 ) = CutC : Then tp(h) = Rep , h[0℄ = RC Eh0 [0℄Eh0 [1℄ and deg(h0 )  m+1.
+Let := o(h0 ). Then h0 `m+1 .
+By IH we have rk(C ) < m+1 and h0 [0℄ `m0+1 ; C , h0 [1℄ `m1+1 ; :C with 0 ; 1 < .
+Hen e Eh0 [0℄ `3m 0 ; C and Eh0 [1℄ `3m 1 ; :C .
+From this together with rk(C )  m we get h[0℄ = RC Eh0 [0℄Eh0 [1℄ `3m 1 #3 1   and 3 0 #3 1 < 3 = o(h)  .
+           F h0 : Then I = Rep, rk(F ) < m, and h0 `m ; :F (y ); F (Sy ) with := o(h0 ), + !  .
+6. h = Indy;t
+       h0 (y=0) h0 (y=1)
+             CutF (1)    h0 (y=2)
+                      .
+                                                        F `1 :F (n); F (t).
+                                                   with y;t
+h[0℄ =                ..                                     <!
+                                  h0 (y=n 1)
+                             CutF (n 1)          y;t
+                                                 F
+                                    CutF (n)
+                                                       35
+Lemma 6.6 (Consisten y of Z)
+Let Z? be the set of all losed Z -derivations h with (h) = ; & deg(h) = 0.
+a) h 2 Z? ) h[0℄ 2 Z? & o(h[0℄) < o(h),
+b) There is no Z-derivation d with (d) = ;.
+Proof:
+a) h 2 Z? 6)
+            :5
+               (tp(h))  (h) = ; & deg(tp(h)) = 0 ) tp(h) = Rep.
+h 2 Z? & tp(d) = Rep 6):5 h[0℄ 2 Z? & o(h[0℄) < o(h).
+     
+b) By trans nite indu tion up to "0 from a) we get Z? = ;. Now assume that d is a Z-derivation with (d) = ;.
+W.l.o.g. we may assume that d is losed. Let m := deg(d). Then Em d = E:::Ed 2 Z? . Contradi tion.
+
+De nition
+ 0 ( ) := , m+1 ( ) :=     m ( ) . !m := !m (1), i.e. !0 = 1; !1 = !; !2 = ! ! ; !3 = ! !! (= ! (!! ) ); ::::
+
+Corollary
+a) !  ) 3m(! ) = !m (! ),
+b) m > 0 ) 3m (!2 ) = !m+1 .
+Proof: a) 3m+1 (! ) = 3m (3! ) = 3m (3!! ) = 3m((3! )! ) = 3m(!! ) IH
+                                                                    = !m (!! ) = !m+1(! ).
+                                      a)
+b) 3m (!2 ) = 3m 1(3!! ) = 3m 1(!! ) = !m 1 (!! ) = !m+1 .
+
+Let OT  IN and  IN  IN be the primitive re ursive relations de ned in x4.
+(OT; ) has ordertype "0 . 0 is the -least element of OT.
+For < "0 let d e be the orresponding element of OT.
+
+Theorem 6.7
+If Zm ` 8x9yA(x; y) (A atomi ) then there are primitive re ursive fun tions g : IN2 ! IN,  : IN2 ! IN and
+an < maxf!2; !m+1 g su h that 8n((n; 0) = d e) and IN j= 8xA(x; f (x)) ,
+where f (n) := g(n; minfk : (n; k+1) 6 (n; k)g).
+Proof:
+We assume a anoni al arithmetization ( oding) q 7! dq e of syntax (terms, formulas, sequents, nite
+derivations, derivation terms et .). A set M of synta ti al obje ts is alled primitive re ursive if the
+set fdq e : q 2 M g is primitive re ursive. An operation (fun tion)  on synta ti al obje ts or ordi-
+nals < "0 is alled primitive re ursive if there is a primitive re ursive fun tion f : INn ! IN su h that
+f (dq1 e; :::; dqn e) = d(q1 ; :::; qn ) e for all (q1 ; :::; qn ) in the domain of .
+By Theorem 5.2 there is a Z-derivation d of 9yA(x; y) su h that rk(C )  m for ea h CutC or Indy;t
+                                                                                               C o urring
+in d. So we have Z 3 d `m+1 9yA(x; y) with o(d) < !2 .
+                         o( d )
+
+This d will be xed for the whole proof.
+W.l.o.g. we may assume that FV(d)  fxg. Hen e d(n) := d(x=n) is losed for any n 2 IN.
+
+
+
+                                                       36
+Let L0 be a nite subset of L0 (= PR), su h that
+(i) 0; S 2 L0 and ea h fun tion symbol o urring in d belongs to L0 ,
+(ii) with p 2 L0 also ea h fun tion symbol o urring in (the de nition of) p belongs to L0 .
+Let Ze be the restri tion of Z to L (X ).
+                                      0
+It is wellknown that the set TRUE0 of all true L0 -literals is primitive re ursive, and that there is a primitive
+re ursive fun tion whi h for any two L0 -terms s; t of equal value omputes a Ze -derivation of s t with
+o( ) < ! and deg( )  1. Obviously the fun tions (), o() , deg() , tp() are primitive re ursive, and  [  ℄
+restri ted to eZ is primitive re ursive too.
+Let D be the set of all losed eZ -derivations.
+De nition of the primitive re ursive fun tion red : D [ f0g ! D [ f0g:
+                  if h = 0 or tp(h) = Ax1
+         8                                             Ws
+         <0                               or tp(h) = 9yB with By (s) 2 TRUE0
+red(h) := h[1℄ if tp(h) = CutC with C 2 TRUE0 or C = :Xt
+         :
+            h[0℄ otherwise
+De nition: h(n; k) := red(k) (|E{z
+                                :::E} d(n)) ,   := 3m (o(d)).
+                                 m
+Then deg(h(n; 0)) = deg(d)  m  (m+1)  m = 1, and o(h(n; 0)) = < 3m (!2 ) = maxf!2 ; !m+1 g for all n.
+Proposition: If h(n; k) 6= 0 then
+a) o(h(n; k))  ,
+b) deg(h(n; k))  1,
+ ) (h(n; k))  f9yA(n; y)g [ fB : :B 2 TRUE0 g [ fXt : t 2 T g
+Proof by indu tion on k:
+a),b) are obvious, sin e o(h[i℄) < o(h) , deg(h[i℄)  deg(h) , o(h(n; 0)) = , deg(h(n; 0))  1.
+ ) k = 0: (h(n; 0)) = (d(n)) = f9yA(n; y)g.
+k > 0: IH ) (h(n; k 1))  f9yA(n; y)g [ fB : :B 2 TRUE0 g [ fXt : t 2 T g
+h(n;k)6=0
+   ) tp(h(n; k 1)) = Wt9yA(n;y) with :A(n; t) 2 TRUE0 or = Rep or = CutC with rk(C ) = 0
+                                                                       IH
+) (h(n; k))  (h(n; k 1)) [ fB : :B 2 TRUE0 g [ fXt : t 2 T g )            laim.
+De nition:
+(n; k) := do(h(n; k)) e (where o(0) := 0)
+                                               Wt
+g(n; k) := val(t) if k > 0 and tp(h(n; k 1)) = ( :::)
+             0       otherwise
+f (n) := g(n; minfk : (n; k+1) 6 (n; k)g).
+Now let k be the least number su h that (n; k+1) 6 (n; k).
+Assumption: h(n; k) 6= 0. Then [by Prop. )℄ tp(h(n; k)) 6= Ax and thus (n; k+1) = o(h(n; k+1)) 
+o(h(n; k)) = (n; k). Contradi tion.
+                                                                                                W
+Hen e h(n; k) = 0 and thus k > 0 and [by De nition of red℄ tp(h(n; k 1)) = Ax or tp(h(n; k 1)) = l9yB(y)
+                                                                                           W
+with B (l) 2 TRUE0 . By Proposition ) and Theorem 6.5a from this we get tp(h(n; k 1)) = t9yA(n;y) with
+A(n; t) 2 TRUE0 . Hen e f (n) = g(n; k) = val(t) and IN j= A(n; f (n)). qed
+
+                                                         37
+DIE HARDY-HIERARCHIE
+De nition (Fundamental Sequen es for ordinals < "0 )
+1. 0[n℄ := 1[n℄ := 0.
+2. ! +1 [n℄ := !  (n + 1).
+3. ! [n℄ := ![n℄ , fur  2 Lim.
+4. [n℄ := 0 + ::: + k 1 + k [n℄, falls =NF 0 + ::: + k .
+Proposition: ( + 1)[n℄ = .
+De nition N := N 1 + : : : + N k + k if = ! 1 + : : : ! k with k  0 and k  : : :    1 < "0
+
+Lemma 6.8
+a) 2 Lim ) 8n( [n℄ < [n + 1℄) & = supf [n℄ : n 2 INg
+b) > 0 ) N [0℄ < N
+ ) [n℄ < < ) [n℄  [0℄
+d) [n℄ < < ) N [n℄ < N
+e) < )  [N ℄
+Proof:
+a),b) obvious.
+ ) Let =NF 0 + ::: + k .
+1. Assume !  (n + 1) < < ! +1 . Then k > n and 0 = ::: = n = ! .
+From this we get !  (n + 1)  0 + ::: + k 1 + k [0℄ = [0℄.
+2. Assume ![n℄ < < ! und  2 Lim. Then ![n℄  0 = ! < ! .
+If k = 0 then [n℄ < <  and therefore (by IH) [n℄  [0℄. Hen e ![n℄  ! [0℄ = ! [0℄ = [0℄.
+If k > 0 then ![n℄  0 + ::: + k 1 + k [0℄ = [0℄.
+3. Assume =NF 0 + ::: + m , m > 0 and [n℄ = 0 + ::: + m 1 + m [n℄ < < . Then m  k,
+  m [n℄ < m < m and i = i for i < m. By IH we get m [n℄  m [0℄ and then [n℄  0 + ::: + m 1 +
+  m [0℄  0 + ::: + k 1 + k [0℄ = [0℄.
+d) By ) we have [n℄ = [0℄:::[0℄. Hen e N [n℄  N [0℄ < N .
+e) Let 2 Lim. A ording to a),d) we then have 8n(N [n℄ < N [n+1℄), and therefore N          N [N ℄.
+Together with d) this yields the assertion.
+
+De nition of H : IN ! IN for < "0
+1. H0 (n) := n,
+2. H (n) := H [n℄ (n + 1), for > 0.
+Lemma 6.9
+a) H (n) < H (n + 1),
+b) [m℄ < < ) H [m℄(n + 1)  H (n),
+ ) < & N  n ) H (n) < H (n),
+d) > 0 ) H (n) = minfk  n : [n℄:::[k 1℄ = 0g = n + minfl : [n℄[n + 1℄ : : : [n + l 1℄ = 0g.
+
+                                                 38
+Proof:
+a),b) simultaneous indu tion on : Let > 0.
+                                    IHa        IHb
+a) 1. 2 Lim: H (n) = H [n℄ (n+1) < H [n℄ (n+3)  H [n+1℄ (n+2) = H (n+1).
+                                 IHa
+2. = 0 +1: H (n) = H 0 (n+1) < H 0 (n+2) = H (n+1).
+b) From [m℄ < < we obtain [m℄  [n℄ < by Lemma 6.8.
+                IHb          IHa
+Hen e H [m℄(n)  H [n℄ (n) < H [n℄ (n+1) = H (n).
+ ) Indu tion on :       <    L:6:8e
+                               )        [N ℄  [n℄ a)+IH
+                                                      ) H (n) < H (n+1)  H [n℄ (n+1) = H (n).
+d) Let k  n minimal su h that [n℄:::[k 1℄ = 0.
+Then H (n) = H [n℄ (n+1) = :::: = H [n℄:::[k 1℄ (k) = H0 (k) = k.
+
+Abbreviation: NF ( ; ) :,                = 0 or    = 0 or [   = ! 0 + ::: + ! n &      = ! 0 + ::: + ! m with
+ 0  :::  n  0  :::  m ℄ .
+Proposition: NF ( ; ) & > 0 ) ( + )[n℄ = + [n℄ & NF ( ; [n℄).
+Lemma 6.10
+a) NF ( ; ) ) H + = H Æ H .
+b) H! +1 (n) = H!(n+1) (n+1) and H! (n) = H![n℄ (n+1) for  2 Lim.
+ ) For ea h primitive re ursive fun tion f there exists a k 2 IN su h that 8~x( f (~x) < H!k (maxf~xg) ).
+Proof:
+a) Indu tion on : 1. H +0 (n) = H (n) = H (H0 (n)).
+2. > 0: H + (n) = H( + )[n℄(n+1) = H + [n℄(n + 1) IH       = H (H [n℄ (n + 1)) = H (H (n)).
+                                 a) (n+1)
+b) H! +1 (n) = H! (n+1) (n+1) = H! (n+1).
+ ) From b) it follows that (k; n) 7! H!k (n) is (a variant of) the A kermann fun tion.
+
+Theorem 6.11
+Let  : IN  IN ! OT be primitive re ursive, m  1, and < !m+1 su h that 8n( (n; 0)  d e ).
+Then there is an ~ < !m+1 su h that minfl : (n; l+1) 6 (n; l)g < H ~ (n) (8n).
+Proof:
+W.l.o.g. 8n( (n; 0) = d e ).
+Let w(i; n; l) := N (!i  (k(n; l+1)k+1)) , where k  k is the isomorphism from (OT; ) onto ("0 ; <).
+One easily sees that w is primitive re ursive.
+Let g(i; n; l) := maxfw(i; n; l); i; n; lg.
+There exists a k  1 su h that g(i; n; l+1) < H!k (maxfi; n; lg) and g(i; n; 0) < H!k (maxfi; ng) (8i; n; l).
+Then we have
+(1) g(k; n; l+1) < H!k (g(k; n; l)) (8n; l).
+Abbreviation: '(n; l) := H!k k(n;l)k (g(k; n; l)).
+(2) (n; l+1)  (n; l) ) '(n; l+1) < '(n; l).
+
+
+                                                        39
+                                       (1)                                                                 ()
+Proof: H!k k(n;l+1)k(g(k; n; l+1)) < H!k k(n;l+1)k H!k (g(k; n; l)) = H!k (k(n;l+1)k+1) (g(k; n; l)) 
+ H!k k(n;l)k(g(k; n; l)) = '(n; l).
+() !k  (k(n; l + 1)k+1)  !k  k(n; l)k and N (!k  (k(n; l + 1)k+1)) = w(k; n; l)  g(k; n; l).
+(3) 9l  '(n; 0)( '(n; l+1) 6< '(n; l) ).
+Proof: [8l  j ( '(n; l+1) < '(n; l) ) ) j < '(n; 0)℄ and therefore not 8l  '(n; 0)( '(n; l+1) < '(n; l) ).
+(2) & (3) &     = k(n; 0)k ) 9 l  H!k  (g(k; n; 0))[ (n; l+1) 6 (n; l) ℄.
+H!k  (g(k; n; 0)) < H!k  H!k (maxfk; ng)  H!k ( +1)+k (n).
+m  1 ) !  !m ,         < !m+1 = !!m ) !k  ( +1) + k < !k  ( +2) < !k  !!m = !!m = !m+1 .
+
+Theorem 6.12
+If Zm ` 8x9yA(x; y) (A atomi , m  1) then there is an < !m+1 su h that 8n9l < H (n) IN j= A(n; l).
+Proof:
+By Theorem 6.7 there are primitive re ursive fun tions g;  and an 0 < !m+1 su h that 8n( k(n; 0)k = 0 )
+and 8n( IN j= A(n; f (n) ), where f (n) := g(n; f (n)) , f  (n) := minfl : (n; l+1) 6 (n; l)g).
+By 6.11 there exists < !m+1 with f (n) < H (n). Further there exists k < ! with 8n; i( g(n; i) <
+H!k (maxfn; ig) ), hen e f (n) < H!k (maxfn; f (n)g)  H!k H (n). Sin e !m+1 = sup !m          i , there is := ! i
+                                                                                                                 m
+                                                                                          i2IN
+su h that !k ; < .
+It follows that there is an n0 su h that H!k H (n)  H H (n) = H + (n) for all n  n0 . Hen e f (n) <
+H!k H (n0 +n)  H + (n0 +n) = H + +n0 (n) (and + +n0 < !m+1 ).
+
+Corollary: Zm 6` ` 8n9l( !m+1[n℄[n+1℄:::[l℄ = 0 ) '.
+Proof: Assumption: Zm ` ` 8n9l(::::) '.
+Then there is an < !m+1 su h that 8n9l < H (n)( !m+1 [n℄[n+1℄:::[l℄ = 0 ), i.e. 8n9l < H (n)( H!m+1 (n) 
+l+1 ). This implies 8n( H!m+1 (n)  H (n) ). But by L.6.9 we have 8n  N ( )( H (n) < H!m+1 (n) ).
+Contradi tion.
+
+Disgression
+Let h (n) := n, h +1 (n) := h (n + 1), and h (n) = h[n℄ (n) for  2 Lim.
+Then h (n)  H (n) < h (n + 1).
+Proof by indu tion on :
+                        IH                                              IH
+1. h +1 (n) = h (n + 1)  H (n + 1) = H +1 (n) and H +1 (n) = H (n + 1) < h (n + 2) = h +1 (n + 1).
+                                 IH                                                             L:6:9b
+2.    2 Lim: h (n) = h [n℄ (n)  H [n℄ (n) < H [n℄ (n + 1) = H (n) and H (n) = H [n℄ (n + 1) 
+            IH
+H [n+1℄ (n) < h [n+1℄(n + 1) = h (n + 1).
+
+
+
+
+                                                          40
+Appendix to x6: Comparison with Gentzen's onsisten y proof
+Modi ations of Z :
+{ all CutC are deleted,
+{ in the de nition of (Indy;t
+                            F h0 )[0℄ we use RF (i) instead of CutF (i) ,
+          y;t
+{ deg(IndF ) := rk(F ),
+           8
+           >
+           <
+              o(h0 )#o(h1 )         if I = RC
+{ o(h) := o(o(hh00)) !             if I = Indy;t
+                                              C ,
+           :!
+           >                        if I = E
+              (supi<n o(hi )) + 1 otherwise
+De nition of : Z ! Z
+  (d) 2 Z results from d by repla ing every o urren e of a symbol CutC [Indy;t                m     m y;t
+                                                                                C , resp.℄ by E RC [E IndC ,
+resp.℄ , with m := rk(C )  hgtd( ) where  is the position of CutC [IndC ℄ in d.
+De nition of b : Z ! Z
+b(h)   2 Z results from h by deleting all E's and repla ing RC by CutC .
+Proposition
+ ( (d)) = (d), deg( (d)) = 0, o( (d)) = O(d).
+Example
+Assume rk(D) = 1 and rk(8xA); rk(G0 ); rk(G1 )  rk(F ) = 3.
+                                               d0            d01
+                                             Vy0      0  W  k      0
+     d0          d1                            8xA 0        9 x :A 1
+    Vy        Wk                                RG0            RG1
+     8xA 0      9x:A 1                                R8xA            b0
+d=   CutG 0      Cut G1                (d) =                   RF
+         Cut8xA : 3        b
+                                                                 E
+              CutF : 1       a
+                                                                 E       a0
+                   CutD : 0
+                                                                   RD
+                                                                    E
+                                     
+O(d) = Od ( ) = !1 Od (0) # Od (1) =
+                              
+!1 !2 Od (00)#Od (01) # Od (1) =
+                                         
+!1 !2 Od (000) # Od (001) # Od (01) # Od (1) .
+                                                                         
+o( (d)) = !1 !2 o(d00 )+1#o( 00) # o(d01 )+1#o( 01 ) # o(b0 ) # o(a0 )
+
+Remark
+a) b( (d)) = d,
+b) 8h(deg(h) = 0 & b(h) = d ) o( (d))  o(h)).
+
+Abbreviation
+d G d : () d results from d by a \Gentzen redu tion step" in the sense of Theorem 5.4.
+                                                          41
+Theorem
+If d is a losed Z-derivation with (d) = ;, then tp( (d)) = Rep and d G b( (d)[0℄).
+                                              Z G Z
+                                              #         " b
+                                              Z ! Z
+                                                 [0℄
+Proof by example: Assume rk(D) = 1 and rk(8xA); rk(G0 ); rk(G1 )  rk(F ) = 3.
+                                            d0            d01
+                                           Vy0     00 Wk          0
+     d0            d1                       8xA           9 x :A 1
+   Vy            Wk                          RG0             RG1
+      8xA 0        9x:A 1                          R8xA             b0
+d=    CutG 0        CutG1            (d) =                   RF
+             Cut8xA       b
+                                                              E
+                  CutF      a
+                                                              E         a0
+                             CutD
+                                                                           RD
+                                                                            E
+
+                                  d01             d0
+                              Wk         0     Vy0      0 0 0
+            d00 (y=k)   00
+                                  9x:A 1          8xA 0 d1 1
+                  RG0               RG 1           RG0       RG1
+                        R8xA                 b0        R8xA      b0
+ (d)[0℄ =                           RF                      RF
+                                     E                       E
+                                                RA(k)
+                                                 E                  a0
+                                                          RD
+                                                            E
+
+                                    d1               d0
+                                   Wk              Vy
+                 d0 (y=k)     0     9x:A 1           8xA 0 d1 1
+                     CutG0           CutG1           CutG0     CutG1
+b(   (d)[0℄) =               Cut8xA               b       Cut8xA     b
+                                      CutF                    CutF
+                                                  CutA(k)              a
+                                                           CutD
+
+
+
+
+                                                              42
+Computation of (d)[0℄:
+
+     : : : hi : : :
+By                    we express that tp(h) = I and h[i℄ = hi holds for the \ orresponding" subderivation h of (d).
+          I
+
+        d00         d01             :::d00 (y=i):::      d01             d00 (y=i) 00 d01 01
+       Vy      0 Wk         0           V           00 Wk        0
+        8xA 0 9x:A 1                        8xA          9 x :A 1           :::RG0 :::     RG1
+                                                                              V           Wk
+          RG 0        RG 1                    RG0          RG1                  8xA        9x:A
+               R8xA           b0                    R8xA           b0                R8xA        b0
+ (d) =
+                      RF                                  RF                              RF
+                      E 2        a0                        E 2        a0                  E2        a0
+                           RD                                   RD                             RD
+                            E                                    E                              E
+
+                          d01                d00                                        d01               d00
+                        Wk           01   Vy        0 0 0                             Wk          01    Vy       0 0 0
+d00 (y=k)         00
+                          9x:A               8xA 0 d1 1              d00 (y=k)   00
+                                                                                        9 x :A            8xA 0 d1 1
+      RG0                    RG1               RG0      RG1                RG0             RG 1             RG0      RG 1
+                 R8xA                              R8xA                          R8xA                  b        R8xA      b0
+                                   CutA(k)                      b0                         RF                        RF
+                                                RF                                                     CutA(k)
+                                                E2                   a0                                  E2                  a0
+                                                          RD                                                       RD
+                                                           E                                                        E
+
+                                                       d01              d00
+                                                     Wk                   Vy
+                                    d00 (y=k)   00
+                                                       9x:A
+                                                                01             0 0 0
+                                                                        8xA 0 d1 1
+                                          RG0             RG1             RG0       RG1
+::::::::::::: :::::::::::::                     R8xA               b0         R8xA      b0
+    RF            RF                                      RF                       RF
+     E             E                                       E                        E
+           RA(k)                                                      RA(k)
+            Rep                                                        E                   a0
+             E              a0                                                   RD
+                  RD                                                               E
+                    E                                                            Rep
+
+
+
+
+                                                                      43
+x7 Independen e Results
+Goodstein's Theorem
+De nition von b : ! ! "0 fur 2  b < ! und b < < "0
+                                                           P
+b (x) := b (x1 )  n1 + : : : + b (xk )  nk , falls x = ki=1 bxi  ni mit x1 > : : : > xk und n1 ; :::; nk 2 f1; :::; b 1g.
+Sn (x) := nn+2
+             +1 (x) (n  1, x 2 ! ).
+GS(a; 0) := GS(a; 1) := a; GS(a; n + 1) := Sn (GS(a; n))  1 fur n  1.
+Die Folge (GS(a; n))n2IN (wobei a 2 !) heit Goodstein-Folge zu a.
+Wir werden zeigen, da jede Goodstein-Folge terminiert (d.h. 8a9n:GS(a; n) = 0), und, da diese Tatsa he
+ni ht in Z beweisbar ist.
+
+Abk.: n (x) := !n+1 (x)      (n  1, x 2 !).
+Lemma 7.1 Sei n  1.
+a) x < y < ! ) Sn (x) < Sn (y) & n (x) < n (y),
+b) n (x) = n+1 Sn (x),
+ ) x > 0 ) n (x 1) < n (x).
+Beweis dur h Induktion na h x:
+a) Man zeige: 2  b < & x < y ) b (x) < b (y). Dabei benutze man folgenden Hilfsatz:
+Ist  = 0  Æ0 + : : : + k  Æk und  = 0  0 + : : : + l  l mit  2 , 0 > : : : > k , 0 > : : : > l und
+0 < Æ0 ; :::; Æk ; 0 ; :::; l < , so gilt:
+                (
+                   k < l & 8i  k(i = i & Æi = i ) oder
+ <  ()
+                   9p  min(k; l) mit 8i < p(i = i & Æi = i ) & [ p < p oder (p = p & Æp < p ) ℄
+               Pk
+b) Sei x = i=1 (n+1)xi  ni mit x1 > : : : > xk und n1 ; :::; nk 2 f1; :::; ng.
+                      P
+Es gilt Sn (x) = ki=1 (n+2)Sn(xi )  ni , und na h a) Sn (x1 ) > : : : > Sn (xk ).
+Folgli h n+1 Sn (x) = !n+1Sn (x1 )  n1 + : : : + !n+1Sn(xk )  nk IH
+                                                                      = !n(x1 )  n1 + : : : + !n(xk )  nk = n (x).
+ ) folgt aus 7.2a,d.
+
+Sei nun an := GS(a; n). Dann gilt:
+                                                        7:1                 :1b
+an > 0 ) Sn (an ) > 0 ) n+1 (an+1 ) = n+1 (Sn (an ) 1) < n+1 (Sn (an )) 7=   n (an ).
+
+De nition Pn (0) := 0; Pn ( + 1) := ; Pn () := Pn([n℄).
+Lemma 7.2 Sei n > 0.
+a) > 0 ) Pn ( ) < ,
+b) Pn ( + ) = + Pn ( ), falls NF ( ; ),
+ ) Pn (! ) = Pn(!Pn ( )  (n+1)), falls > 0,
+d) Pn (n (x)) = n (x  1),
+e) n  1 ) n GS(a; n) = Pn :::P2 1 (a).
+
+                                                              44
+Beweis:
+a),b) klar.
+ ) Induktion na h :
+1. Pn (! +1 ) = Pn (!  (n+1)) = Pn (!Pn( +1)  (n+1)).
+2. Pn (! ) = Pn(![n℄ ) IH
+                         = Pn (!Pn([n℄)  (n+1)) = Pn (!Pn()  (n + 1)).
+d) Induktion na h x: Fur x = 0 ist die Behauptung trivial.
+                   P
+Sei also 0 < x = ki=1 (n+1)xi  ni mit x1 > : : : > xk und n0 ; :::; nk 2 f1; :::; ng.
+               P
+Dann x 1 = ik=11 (n+1)xi  ni + (n+1)xk  (nk 1) + (n+1)xk 1  n + : : : + (n+1)0  n und folgli h
+n (x 1) = !n(x1 )  n1 + : : : + !n(xk )  (nk 1) + !n(xk 1)  n + : : : + !n(0)  n HS
+                                                                                          =
+                                                        b) ; 7 : 1a
+! n 1  n1 + : : : + ! n k  (nk 1) + Pn(! n k ) = Pn (! n 1  n1 + : : : + ! n(xk )  nk ) = Pn (n (x)).
+   (x )               (x  )                     (x )              (x )                
+
+HS: z < x ) Pn(!n (z) ) = !n(z 1)  n + : : : + !n(0)  n.
+Beweis dur h Nebeninduktion na h z :
+1. Pn (!n(0) ) = Pn(1) = 0.
+                                    )                                            b)
+2. z +1 < x: Pn (!n(z+1) ) = Pn (!Pnn (z+1)  (n+1)) IH = Pn (!n(z)  (n+1)) = !n(z)  n + Pn (!n(z) ) NIH =
+! n n+! n
+   (z )        (z  1)  n + : : : + ! n  n.
+                                        (0)
+
+e) Sei ai := GS(a; i). Dann n+1 (an+1 ) Def   = n+1 (Sn (an )  1) 7=
+                                                                      :2d                     :1b
+                                                                          Pn+1 n+1 Sn (an ) 7=   Pn+1 n (an ) IH
+                                                                                                                =
+Pn+1 Pn:::P2 1 (a).
+De nition h0 (n) := n; h +1 (n) := h (n + 1); h (n) := h[n℄ (n).
+Lemma 7.3
+a) H (n) < h (n+1),
+b) > 0 ) h (n) = hPn( ) (n + 1).
+ ) h (n) = minfk  n : Pk 1 :::Pn ( ) = 0g.
+Proof:
+a) siehe x6.
+b) Induktion na h :
+1. = + 1: h (n) = h (n + 1) = hPn( ) (n + 1).
+2. 2 Lim: h (n) = h [n℄(n) = hPn ( [n℄)(n + 1) = hPn( ) (n + 1).
+ ) Fur k = minfi  n : Pi 1 :::Pn ( ) = 0g gilt o enbar
+h (n) = hPn( ) (n + 1) = hPn+1Pn( ) (n + 2) = : : : = hPk 1 :::Pn( ) (k) = h0 (k) = k.
+Satz 7.4
+Z 6` 8x9y[ GS(x; y) = 0 ℄.
+Proof
+Sei e(0) := 1; e(m + 1) := 2e(m) .
+Annahme: Z ` 8x9y[ GS(x; y) = 0 ℄.
+                                       :12
+) Z ` 8x9y[ GS(e(x) + x; y) = 0 ℄ 6)       9 < "0 8m9n < H (m)[ GS(e(m) + m; n) = 0 ℄ )
+) 9p; n[ n < H!p (p) & GS(e(p) + p; n) = 0 ℄. (p  N ( ) mit < !p ; vergl. 6.9 )
+GS(e(p)+p; n) = 0 ) n  2 & Pn:::P2 (!p +p) = n GS(e(p)+p; n) = 0 ) H!p +p (1) < h!p +p (2)  n+1 )
+H!p (p) = H!p +p (0) < H!p+p (1)  n. Widerspru h.
+
+                                                       45
+The Paris-Harrington Result
+(The proof given here is based on M. Loebl and J. Nesetril, An unprovable Ramsey-type Theorem, Report
+No 89598-OR, September 1989.)
+Abbreviations:
+Let k; m; n; r 2 IN (= !),  a ardinal, N a set.
+[N ℄m := fX  N : ard(X ) = mg
+Let f be a fun tion with dom(f ) = [N ℄m :
+X is f -homogeneous () ; 6= X  N & f [X ℄m onstant.
+N  ! ()mr :, 8f : [N ℄m ! r9X (X f -homogeneous & ard(X )  )
+N ! ()m
+        r :, 8f : [N ℄ ! r9X (X f -homogeneous & ard(X )  maxf; min(X )g)
+                       m                                                                      (for N  IN)
+Ramsey Theorem 8m; r 2 !( ! ! (!)m    r )
+Finite Ramsey Theorem 8m; r;  2 !9N 2 !( N ! ()m   r )
+                           
+PH 8m; r;  2 !9N 2 !( N ! ()m r )
+(Proof of the Finite Ramsey Theorem in PA: f. Hajek, Pudlak Ch.2, Se .1)
+Proof of PH:
+Let m; r;  2 ! be xed. To prove: 9n 2 !8f :(f; n)
+where (f; n) :, f : [n℄m ! r & 8X (X f -hom ) ard(X ) < maxf; min(X )g) .
+Assumption: 8n9f (f; n).
+By Konig's Lemma there is a fun tion f  [!℄m ! r su h that
+(+) 8n (f [n℄m ; n) .
+By Ramsey's Theorem there exists an in nite f -homogeneous set X  !. We hoose N < ! su h that
+ ard(X \ N ) > maxf; min(X )g. For f := f [N ℄m we then have f [X \ N ℄m = f  [X \ N ℄m = onstant.
+Hen e X \ N is f -homogeneous and ard(X \ N ) > maxf; min(X )g = maxf; min(X \ N )g, i.e., :(f; N ).
+Contradi tion to (+).
+[[ Constru tion of f  : Let n := ff : (f; n)g and M (f ) := fi : 9g 2 i (f  g)g. | Starting with f0 := ; we
+                                                                                                      S
+de ne a sequen e (fn )n2! su h that fn 2 n & fn  fn+1 & ard(M (fn ))  !, and we set f  := n2! fn.
+                                                                                   S
+De nition of fn+1 : Let E := ff 2 n+1 : fn  f g. Then M (fn ) = fng [ f 2E M (f ), and E is nite.
+This together with 8i > n8f 2 i ( f [n+1℄m 2 n+1 ) implies the existen e of an fn+1 2 E su h that
+  ard(M (fn+1 ))  !.℄℄
+
+Theorem 7.5 8m  18k( H!m(k) (k+1) < Rm (k) ) with Rm (k) := minfN : N ! (2m+k+4)m
+                                                                                  k+i<m 3i g
+                                                                                    +1
+
+Corollary
+a) Zm 6` 8; r9N ( N ! ()m
+                           r
+                             +1 ) (m  1)
+
+b) Z 6` 8m; ; r9N ( N ! ()m
+                             r
+                               +1 )
+
+
+
+
+                                                      46
+Proof of the Corollary:
+a) Assumption: Zm ` 8; r9N ( N ! ()m r
+                                          +1 ).
+
+Then Zm ` 8; r9N ( N ! (2m+k+4)m   k+i<m 3i g ).
+                                       +1
+
+By 6.12 there is an < !m+1 su h that 8k(Rm (k) < H (k)).
+Let k 2 ! su h that < !m(k) and N ( )  k.
+                    7:5
+Then H!m (k) (k+1) < Rm (k) < H (k) < H!m (k) (k). Contradi tion.
+b) Z ` 8n; ; r9N (N ! ()nr +1 )
+=) Zm ` 8n; ; r9N (N ! ()nr +1 ) for suitable m
+=) Zm ` 8; r9N (N ! ()m     +1
+                             r ).
+The rest of this se tion is spent with the proof of 7.5.
+
+De nition
+1. !0 ( ) := , !m+1 ( ) := !!m( )
+2. Sei = ! 1 n1 + ::: + ! t nt mit t  0 & n1; :::; nt > 0 & > 1 > ::: > t :
+r( ) := maxft; n1 ; :::; nt ; r( 1 ); :::; r( t )g.
+Lemma 7.6
+a) r( [k℄)  maxfr( ); kg + 1
+b) r( ) < n =) r( [n 1℄) < n+1
+ ) r(!m (k) + n)  n + 1, falls 1  m und k < n.
+Beweis von ): 1. k = 0 und m = 1: !m (k) + n = !0 (n + 1).
+2. k 6= 0 und m = 1: r(!m (k) + n) = maxf2; 1; n; r(k)g  n+1.
+3. m > 1: r(!m (k) + n) = maxf2; 1; n; r(!m 1 (k))g = maxf2; n; kg  n+1.
+De nition
+Sei = ! 1 n1 + ::: + ! t nt mit t  0 & n1; :::; nt > 0 & > 1 > ::: > t :
+Si ( ) := ! i ni , Ei ( ) := i , Ki ( ) := ni fur i 2 f1; :::; tg
+Si ( ) := Ei ( ) := Ki ( ) := 0 fur i 62 f1; :::; tg.
+De nition
+Fur > sei d( ; ) := minfi : Si ( ) > Si ( )g , K( ; ) := Kd( ; )( ) , E( ; ) := Ed( ; )( ).
+Lemma 7.7
+   > > & d( ; )  d( ; ) & K( ; )  K( ; ) =) E( ; ) > E( ; ).
+Beweis:
+Fall 1: d( ; ) = d( ; ) = i. Dann E( ; ) = Ei ( ), E( ; ) = Ei ( ) und Ki ( )  Ki ( ). Wegen   < und
+Ki ( )  Ki ( ) mu Ei ( ) > Ei ( ) sein.
+Fall 2: i = d( ; ) < d( ; ) = j . Dann E( ; ) = Ei ( )  Ei ( ) > Ej ( ) = E( ; ).
+De nition ( : ["0 ℄3 ! f^0; ^1; ^2g)
+Fur 0 > 1 > 8   2 sei
+                 <^0 falls d( 1 ; 2 ) < d( 0 ; 1 )
+( 0 ; 1 ; 2 ) := ^1 falls d( 0 ; 1 )  d( 1 ; 2 ) & K( 1 ; 2 ) < K( 0 ; 1 )
+                 :
+                   ^2 sonst
+
+                                                        47
+Lemma 7.8
+Sei 0 > : : : > ` mit `  2, und sei 2 f^0; ^1; ^2g mit f( i ; i+1 ; i+2 ) : i  ` 2g = f g.
+a) 2 f^0; ^1g =) `  r( 0 )
+b) = ^2 =) E( 0 ; 1 ) > : : : > E( ` 1 ; `)
+Beweis: a) Sei di := d( i ; i+1 ) und ki := K( i ; i+1 ) (i < `).
+O enbar ist d0 ; k0  r( 0 ). Ist = ^0, so d0 > d1 > : : : > d` 1  1, woraus `  d0 folgt.
+Ist = ^1, so k0 > k1 > : : : > k` 1  1, woraus `  k0 folgt. | b) folgt aus Lemma 7.7.
+De nition (km : [!m (k+1)℄m+1 ! Cm       ur m  1; k  0)
+                                       k f
+
+1. Fur = !k n0 + : : : + !0 nk > !k n00 + : : : + !0 n0 = setzen wir k1 ( ; ) := minfi : n0i < ni g.
+                                                     k
+2. Sei m  1 , !m+1 (k+1) > 0 > : : : > m+1 , Æi := E( i ; i+1 ) , und i := ( i ; i+1 ; i+2 ).
+                             
+                                                            0 = ::: = m 1 = ^
+                                k
+m+1 ( 0 ; :::; m+1 ) := ( m;(:Æ:0:; ;:::; Æm )) falls
+ k
+                                                      sonst
+                                                                            2
+                                 0        m 1
+(Man bea hte, da na h L.7.8 !m (k+1) > Æ0 > : : : > Æm , falls 0 = : : : = m 1 = ^2.
+3. C1k := f0; : : : ; kg, Cm
+                           k
+                             +1 := Cm [ f^
+                                    k        0; ^1; ^2gm
+
+Lemma 7.9
+Aus 1  m < ` & !m(k + 1) > 0 > : : : > ` & 2 Cm    k folgt:
+
+8i  ` m( km ( i ; :::; i+m ) = ) =) ` < r( 0 ) + m.
+Beweis dur h Induktion na h m:
+I. m = 1: Sei i = !k ni;0 + : : : + !0 ni;k . Dann n0; > : : : > n`; und somit `  n0;  r( 0 ) < r( 0 ) + m.
+II. m ! m+1: Sei 1  m & m+1 < ` & 2 Cm
+                                      k & !m+1 (k +1) > 0 > : : : > ` und k ( i ; :::; i+m+1 ) =
+                                        +1                                 m+1
+fur alle i  ` m 1.
+FALL 1: 2 f^0; ^1; ^2gm .
+Sei i := ( i ; i+1 ; i+2 ) (i  ` 2). Fur alle i  ` m 2 haben wir dann
+( i ; :::; i+m 1 ) = km+1 ( i ; :::; i+m+1 ) = km+1 ( i+1 ; :::; i+m+2 ) = ( i+1 ; :::; i+m ). Das impliziert
+8i  ` m 2( i = i+1 = : : : = i+m ) und somit 0 = : : : = ` 2 . Zusammen mit km+1 ( 0 ; :::; m+1 ) 2
+f^0; ^1; ^2gm folgt daraus 0 2 f^0; ^1g und dann ` < r( 0 ) + m + 1 na h Lemma 7.8a.
+FALL 2: 2 Cm       k.
+Dann 0 = : : : = ` 2 = ^2. Na h L.7.8b folgt daraus Æ0 > : : : > Æ` 1 . Ferner = km+1 ( i ; :::; i+m+1 ) =
+km (Æi ; :::; Æi+m ) fur i  ` 1 m. Na h IV folgt daraus ` 1 < r(Æ0 )+ m. Also ` < r(Æ0 )+ m +1  r( 0 )+ m +1.
+
+Proof of Theorem 7.5:
+Let m  1, k  0, n := m+k+2,  := m+n+2 = 2m+k+4, r := k + i<m 3i , H := H!m (k) (k+1).
+Then the following holds
+H < Rm (k) ,
+8n  H :(n ! ()mr +1 ) ,
+
+                                                         48
+8n  H 9f (f : [n℄m+1 ! r & 8X (X f -homogeneous ) ard(X ) < maxf; min(X )g) ,
+9N  H 9f (f : [N ℄m+1 ! r & 8X (X f -homogeneous ) ard(X ) < maxf; min(X )g) ()
+It remains to prove ().
+Sei 0 := !m (k) + n, i+1 := i [i  (m+1)℄, N := minfi : i = 0g. Dann 8i < N ( i > i+1 ).
+HS 1: 8i  n(r( i ) + m < ) und 8i  n(r( i ) + m < i).
+Beweis: i  n ) r( i ) + m  r( 0 ) + m  n+1+m < .
+r( n ) + m  k +1 + m < n; und na h L.7.6b gilt: r( i ) + m < i ) r( i+1 ) = r( i [i m 1℄) < i m+1 )
+r( i+1 ) + m < i + 1.
+HS2: H  N .
+Beweis: n  i < N ) H i (i m 1) = H i+1 (i + 1 m 1).
+Also H = H!m (k) (k + 1) = H n (n m 1) = H N (N                  m 1) = N      m 1  N.
+De nition: f : [N ℄m+1 ! r, f (fi0; :::; im g<) := km (f i0 ; :::; im g> ).
+Sei X = fi0; :::; i` g< f -homogeneous. Dann ist f i0 ; :::; i` g> km -homogen, und wegen Lemma 7.9 gilt
+                                HS1
+ ard(X ) = ` + 1  r( i0 ) + m < maxf; i0g = maxf; min(X )g.
+
+
+x8 The ollapsing fun tion
+Abbreviation:      := 1 .
+
+De nition of C ( ) and ( ) by re ursion on
+C ( ) := losure of f0g under +, x:! +x and  7! ( ) ( < &  2 C ( )).
+ ( ) := minf :  62 C ( )g.
+Lemma 8.1
+a)  ) C ( )  C ( ) & ( )  ( ),
+    < & 2 C ( ) ) ( ) < ( ),
+b) ( ) < ,
+ ) ( ) is an additive prin ipal number,
+d) ( ) = C ( ) \ ,
+e) 2 C ( ) , ( ) < ( +1).
+Proof:
+a) The rst part is trivial. { Se ond part: < &                  2 C( ) ) ( )  ( ) & ( ) 2 C( ) ) ( ) <
+ ( ). The last impli ation holds, sin e ( ) 62 C ( ).
+b) ard(C ( )) <       ) 9 < ( 62 C ( )) ) ( ) < .
+ ) Assume not. Then ( ) =  +  with ;  < ( ), and thus ( ) =  +  2 C ( ). Contradi tion.
+
+
+
+                                                           49
+d) \" follows from b).
+Proof of \" by C -indu tion, i.e. indu tion on the de nition of C ( ):
+Let 2 C ( ) \ . We have to prove < ( ).
+1.   = 0: 0 < ( ), sin e 0 2 C ( ).
+2.   =  +  with ;  2 C ( ): Then ;  < , and therefore by IH ;  < ( ). By ) we get =  +  < ( ).
+3.   = ! + : This annot be.
+4.   = ( ) with  < and  2 C ( ): In this ase the laim follows by a).
+e) \)" follows from a). \(":      62 C ( ) ) C ( +1) = C ( ) ) ( +1) = ( ).
+Remark      ( 0 ) = ( 1 ) & i 2 C ( i ) (i = 0; 1) )       0 = 1.
+Lemma 8.2
+a) !Æ1 #:::#!Æn 2 C ( ) , !Æ1 ; :::; !Æn 2 C ( ),
+b)  +  2 C ( ) )  2 C ( ).
+Proof:
+a) Proof of \)" by C-indu tion. W.l.o.g. Æ0  : : :  Æn .
+1. !Æ1 + ::: + !Æn =  +  with ;  2 C ( ):
+Then  =NF !Æ1 + ::: + !Æk + !1 + ::: + !k and  =NF !Æk+1 + ::: + !Æn . By IH we get !Æ1 ; :::; !Æn 2 C ( ).
+2. !Æ1 + ::: + !Æn = ( ) or ! + : Then n = 1 and the laim is trivial.
+b) follows from a).
+Lemma 8.3
+a) ( ) = minfÆ 2 AP : 8 < ( 2 C ( ) ) ( ) < Æ)g.
+b)  "0 ) ( ) = ! .
+Proof:
+a) Let Æ0 := minfÆ 2 AP : 8 < ( 2 C ( ) ) ( ) < Æ)g.
+By 8.1a, ,d we have Æ0  ( ) = C ( ) \ . By C-indu tion we get C ( ) \           Æ0 .
+b) Indu tion on : Let  "0. Then by IH 8 < ( < ! = ( )).
+Hen e ( ) = minfÆ 2 AP : 8 < (! < Æ)g = ! .
+Indu tive de nition of the set T of terms
+(T1) 0 2 T.
+(T2) a 2 T &  2 f0; 1g ) D a 2 T (terms of this kind are alled prin ipal terms)
+(T3) a0 ; :::; an 2 T (n  1) prin ipal terms ) (a0 ; ::; an ) 2 T
+Notation: We use a; b; as synta ti variables for elements of T. For prin ipal terms a we set (a) := a. The
+empty sequen e ( ) is identi ed with 0.
+De nition of a  b for a; b 2 T
+a  b if and only if one of the following ases holds
+( 1) a = 0 and b 6= 0
+( 2) (a = D0 a0 & b = D1 b0 ) or (a = D a0 & b = D b0 & a0  b0 )
+                                                      50
+( 3) a = (a0 ; :::; an ) & b = (b0 ; :::; bm) & 1  m+n &
+      [(n < m & 8i<n(ai = bi ) or 9k  minfm; ng(ak  bk & 8i<k(ai = bi )℄
+Lemma 8.4 a 6= b ) a  b or b  a.
+
+De nition of K a for a 2 T
+1. K 0 := ;
+                        S
+2. K (a0 ; :::; an ) := in K ai
+3. K D1 a := K a
+4. K D0 a := fag
+Abbreviation: K a  b :, 8x2K a(x  b)
+De nition of o(a) 2 On for a 2 T
+1. o(0) := 0
+2. o((a0 ; :::; an )) := o(a0 ) + ::: + o(a1 )
+3. o(D0 a) := (o(a))
+4. o(D1 a) := ! +o(a)
+Remark  is not wellfounded: :::  D0 D0          D0  . Hen e the mapping a 7! o(a) annot be order
+preserving.
+
+Indu tive de nition of the set OT  T
+(OT1) 0 2 OT.
+(OT2) a0 ; :::; an 2 OT (n  1) prin ipal terms & n  :::  a0 ) (a0 ; ::; an ) 2 OT
+(OT3) a 2 OT ) D1 a 2 OT
+(OT4) a 2 OT & Ka  a ) D0 a 2 OT
+Theorem 8.5 For a; 2 OT the following holds:
+a)  a , o( ) < o(a),
+b) K  a , o( ) 2 C (o(a)).
+Proof by indu tion on the length of :
+Due to 8.4 for a) it suÆ es to prove \)".
+1. = 0: a)  a ) a 6= 0 ) o(a) 6= 0 ) o( ) < o(a).
+b) K = ; aand o( ) = 0 2 C (o(a)).
+2. = D b:
+a) (1) a = (a0 ; :::; an ) with n  1, = a0 : trivial.
+(2) a = (D ~b; a1 ; :::; an ) with n  0 and [( = 0 &  = 1) or ( =  & b  b~)℄:
+In the rst ase we have o( ) <  o(a). In the se ond ase by IH o(b) < o(b~). For  =  = 1 this yields
+o( ) < o(a). For  =  = 0, sin e 2 OT, we have K b  b and therefore by IH o(b) 2 C (o(b)). Together
+with o(b) < o(~b) from this we get o( ) = (o(b)) < (o(~b)) = o(D0~b)  o(a).
+
+
+
+                                                     51
+b) (1) = D1 b: K = K b and o( ) 2 C (o(a)) , o(b) 2 C (o(a)).
+(2) = D0 b: Then K = fbg and K b  b. By IH the latter yields o(b) 2 C (o(b)) and then:
+K  a , b  a ,IH
+                   o(b) < o(a) , (o(b)) < (o(a)) , o( ) = (o(b)) 2 C (o(a)).
+3. = ( 0 ; :::; m ) with m  1 and a = (a0 ; :::; an ) with n  0:
+a) (1) m < n & 8i  m( i = ai ): trivial.
+(2) k  min(m; n) & 8i < k( i = ai ) & k  ak : Sin e 2 OT, we also have m  m 1  : : :  k . By IH
+we get o( m )  o( m 1 )  : : :  o( k ) < o(ak ) and from this o( ) < o(a), sin e o(ak ) 2 AP .
+b) As for a) we get o( m )  o( m 1 )  : : :  o( 0 ) ().
+Hen e: K  a , K i  a (i = 0; :::; m) ,    IH
+                                                 o( i ) 2 C (o(a)) (i = 0; :::; m) , o( ) = o( 0 ) + : : : + o( m ) 2
+C (o(a)).
+
+Theorem 8.6
+The mapping OT ! C (" +1 ); a 7! o(a) is bije tive.
+Proof:
+1. Obviously C (" +1 )  " +1 (+).
+                                                                         (+)
+a = D0 b 2 OT ) b 2 OT & Kb  b ) IH
+                                      o(b) 2 C (" +1 ) & o(b) 2 C (o(b)) ) o(a) = (o(b)) 2 C (" +1 ).
+2. From 8.4 and 8.5a it follows that ojOT is inje tive.
+3. By C-indu tion we prove: 2 C (" +1 ) ) 9a 2 OT( = o(a)).
+3.1. = 0: trivial.
+3.2. =  + : .....  = o((a0 ; :::; an )),  = o((b0 ; :::; bm)) with ai ; bi 2 OT and an  : : :  a0 , bm  : : :  b0 .
+Let bm  ak and ak+1 ; :::; an  bm. Then a := (a0 ; :::; ak ; b0 ; :::; bm) 2 OT and = o(a).
+3.3. = ! + 0 with 0 2 C (" +1 ): By IH there is a0 2 OT with 0 = o(a0 ). Hen e = o(D1 a0 ) & D1 a0 2
+OT.
+3.4. = ( ) with  < &  2 C (" +1 ) &  2 C ( ):
+                                                                :8:5 
+By IH we have b 2 OT with  = o(b). o(b) 2 C (o(b)) L)              K b  b ) D0 b 2 OT and = o(D0 b).
+
+De nition OT0 := fa 2 OT : a  D1 0g
+Lemma 8.7
+a) (" +1 ) = k(OT0 ; )k (order type of the wellordering (OT0 ; ))
+b) For ea h a 2 OT su h that a  D1 a we have o(a) = supfo(b)+1 : b 2 OT & b  ag.
+Proof:
+a 7! o(a) maps fa 2 OT : a  D1 0g order preserving onto C (" +1 ) \ = (" +1 ). Hen e k(OT0 ; )k =
+  (" +1 ) and further (for a 2 OT0 ) o(a) = supf +1 : < o(a)g = supfo(b)+1 : b 2 OT & b  D1 0 & o(b) <
+o(a)g = supfo(b)+1 : b 2 OT & b  ag.
+
+
+
+
+                                                            52
+x9 Ordinal analysis of ID1
+Indu tive De nitions
+Let M be a set and  : P (M ) ! P (M ) monotone, i.e. 8X; Y 2 P (M )(X  Y ) (X )  (Y )).
+        T
+I :=       fX 2 P (M ) : (X )  X g is alled the indu tively de ned set given by  .
+Lemma 9.1
+(1) (I ) = I .
+(2) (X )  X =) I  X , for ea h set X  M .
+(I is the least - losed set and the least xed point of .)
+Proof:
+(2) trivial.
+                    (2)
+(1) (i) (X )  X ) I  X =mon  ) : (I )  (X )  X .
+                T
+Hen e (I )  fX 2 P (M ) : (X )  X g = I .
+                            ) : (Y )  (I ) = Y (2)
+(ii) Let Y := (I ). (i) =mon                    ) I  Y = (I ).
+                                            S
+De nition I := (I< ), where I< := < I            (    2 On) .
+Lemma 9.2
+a) < ) I  I .
+                         S
+     = I ) I = I =
+b) I<Æ   Æ     Æ
+                           2On I .
+ ) 9Æ < ard(M ) ( I = I ).
+               +   Æ    <Æ
+
+Beweis:
+b) 1. By indu tion on we prove I  I : IH ) I<     I ) I = (I )  (I ) = I .
+                                                                      <
+                                                                   S
+                      ) = I it follows that I  I . Hen e I 
+2. From (IÆ ) = (I<Æ                                              2On I  I  I .
+                            Æ                       Æ          Æ                    Æ
+
+                    I . | Assumption: I $ I for all < ard(M ) . Then there is a mapping
+ ) By a) we have I<                           <                             +
+
+f : ard(M )+ ! M with f ( ) 2 I n I< for all 2 ard(M )+ , i.e. f inje tive. Contradi tion.
+De nition For b 2 I let jbj := minf : b 2 I g.
+Corollary. For b 2 I the following holds:
+a) b 2 I , jbj  , b 2 I<  , jbj <
+b) jbj = supfj j + 1 : 2 I jbj g
+                            <
+
+Proof of b)\": Let := righthandside. Then I< jbj  I<           jbj
+                                                        and thus I  I . Hen e b 2 I , i.e. jbj  .
+De nition
+If  is a binary relation on M , and (X ) = fa 2 M : 8ba(b 2 X )g (X 2 P (M )), then
+                                 S
+A () := A (M; ) := I (= fX  M : 8a 2 M (8ba(b 2 X ) ) a 2 X )g).
+Lemma 9.3
+a) a 2 A () () 8ba(b 2 A ()) (a 2 M )
+b) jaj = supfjbj + 1 : b  ag (a 2 A ())
+ ) jA () is wellfounded
+                                                        53
+d) S  M & 8a2S 8ba(b 2 S ) & jS wellfounded =) S  A ()
+e)  wellfounded =) M = A ()
+Proof:
+a) follows from 9.1(1).
+b) jaj  , a 2 (I<      ) = f 2 M : 8b (b 2 I )g , 8ba(b 2 I ) , 8ba(jbj < )g.
+                                                 <                <
+
+jaj = minf : jaj  g = minf : 8ba(jbj < )g = supfjbj + 1 : b  ag.
+ ) b  a 2 A () ) jbj < jaj .
+d) By indu tion over jS we prove: a 2 S ) a 2 A ().
+                        IH
+a 2 S ) 8ba(b 2 S ) )     8ba(b 2 A ()) ) a 2 A ().
+e) trivial.
+Example
+O(X; x) := x 0 _ (1 x 1 ^ X2 x) _ (1 x 2 ^ 8y9z (f2xg(y) ' z ^ Xz ))
+Lemma 9.4
+j0jO = 0 , j(1; a)jO = jajO + 1 , j(2; e)jO = supfjfeg(n)jO + 1 : n 2 INg
+Lemma 9.5
+Let b  a :, a = (1; b) _ (1 a = 2 ^ 9y(f2 ag(y) ' b)).
+Then O  A () and 8a 2 O( jajO = jaj ).
+Proof:
+1. a = 0: 0 2 A , sin e f :  0g. j0j = 0 = j0jO .
+2. a = (1; a0 ) and a0 2 O: IH ) a0 2 A & ja0 jO = ja0 j ) [sin e f :  ag = fa0g℄
+a 2 A & jaj = ja0 j + 1 = ja0 jO + 1 = jajO .
+3. a = (2; e) & 8y(feg(y) 2 O): IH ) 8y(feg(y) 2 A ) & 8y(jfeg(y)jO = jfeg(y)j) )
+[sin e f :  ag = ffeg(y) : y 2 INg℄ jaj = supfjfegj + 1 : n 2 INg = supfjfegjO + 1 : n 2 INg = jajO .
+The formal theory ID1
+A positive operator form is an L0 (X )-formula A, su h that
+{ FV(A)  fv0 g,
+{ A ontains no set variable ex ept X0 ,
+{ X0 o urs only positively in A.
+Notation: A(F; t) denotes the result of repla ing in Av0 (t) every subformula X0 s by F (s).
+A (X ) := fn 2 IN : IN j= A(X; n)g, (X  IN). A is monotone.
+Abbreviation: We write IA ; IA ; jnjA ; :::: for IA ; IA ; jnjA ; ::::
+L(ID1 ) := L0 (X ) [ fPA : A positive operator form g where the PA 's are new unary predi ate symbols.
+The axioms of ID1 are the axioms of Z in the language L(ID1 ), and
+(ID1) 8x(A(PA ; x) ! PA x),
+(ID2) for ea h L(ID1 )-formula F the universal losure of
+       8x(A(F; x) ! F (x)) ! 8x(PA x ! F (x)).
+                                                          54
+Lemma 9.6
+ID1 ` 8x(PA x ! A(PA ; x)).
+Proof: Let F (x) := A(PA ; x).
+(ID1) ) 8x(F (x) ! PA x) ) 8x(A(F; x) ! A(PA ; x)) ) 8x(PA x ! F (x)).
+                                                     |    {z     }
+                                                         F (x)
+Question: ID1 ` PA n =) jnjA <???
+Remark: Let A(X; x) = 8yxXy.
+Then Prog(X ) = 8x(A(X; x) ! Xx). Hen e ID1 ` Prog(PA ).
+ID1 ` TI (X; n) =) ID1 ` PA n.
+Proof: ID1 ` TI (X; n) =) TI (PA ; n) ) ID1 ` 8ynPA ) ID1 ` PA n.
+
+The language L
+For ea h positive operator form A and ea h ordinal  let PA< be a new unary predi ate symbol.
+L := L0 (X ) [ fPA< :  ; A positive operator form g
+We assume that PA< equals PA . Hen e L(ID1 )  L .
+De nition of rk(A) for ea h L -formula A
+1. rk(P < t) := rk(:P < t) := ! 
+2. rk(A) := 0, if A is an L0 (X )-literal
+3. rk(A ^ B ) := rk(A _ B ) = maxfrk(A); rk(B )g + 1
+4. rk(8xA) := rk(9xA) := rk(A)+1
+De nition of k (A) for ea h L -formula A
+1. k (P < t) := f0g, k (:P < t) := f0; g.
+2. k (A) := f0g, if A is an L0 (X )-literal.
+3. k (A ^ B ) := k (A _ B ) := k (A) [ k (B ).
+4. k (8xA) := k (9xA) := k (A).
+De nition
+k (A) := k (:A) and k(A) := k (A) [ k (A). (Hen e k(A) = k(:A).)
+k(t) := ; for t 2 T , k( ) := f g for  2 On.
+Now we `embed' L into in nitary propositional logi :
+De nition
+        W                         V
+PA< t ' < A(PA< ; t) , :PA< t ' < :A(PA< ; t) ,
+        V                     W
+A ^ B ' 2f0;1g A , A _ B ' 2f0;1g A , where A0 := A, A1 := B ,
+8xA ' Vt2T Ax (t), 9xA ' Wt2T Ax (t)
+Lemma 9.7
+a) A ' 2J A =) k (A )  k (A) [ k(),
+       V
+b) A ' 2J A =) 9 2 k (A)8 2 J [ k()   ℄.
+
+                                                               55
+ ) rk(A) = !  + n with = max(k(A)) and n < !.
+d) rk(A) = =) A = PA t or A = :PA t.
+
+The in nitary proof system ID1
+                             1
+
+The language of ID1 is L .
+                      1
+The inferen e symbols of ID1
+                           1 are
+
+(Ax1
+   )                                if  2 AX (Z1 )
+ V              : : : A : : : (2J )        V
+( A)                                  if A ' 2J A
+                       A
+ W                      A                   W
+( A )                                if A ' 2J A and  2 J
+                         A
+                      C :C
+(CutC )
+                       ;
+(Rep)
+                       ;
+                       ;
+(ClPA t )
+                   A(PA ; t)
+                   PA t
+De nition of k(I ) for ea h ID1
+                              1 -inferen e I
+k(Ax1 ) := k(Rep) := ; , k( ) := k(CutA ) := k(ClA ) := k(A) , k(  ) := k().
+                           V                                     W
+                              A                                        A
+
+Indu tive De nition of ID1    1 -derivations
+If I is an inferen e symbol of ID1                                                         1
+                                  1 , is an ordinal, and (d )2jIj is a family of ID1 -derivations su h that
+                                                    : : : d : : :
+o(d ) < for all  2 jIj, then d := I (d )2jIj :=                is an ID1
+                                                                           1 -derivation with o(d) := .
+                                                          :I
+The ut-elimination operators RC and E are assumed to be adapted to this modi ed notion of derivation
+where for E we use ! + instead of 3 ( f. proofs of 9.8 and 9.9).
+
+De nition
+A set H  On is alled ni e i          f0; 1g  H and H is losed under # ; : ! ; : ! + .
+H~ := f : k()  H g.
+Convention: In the following H is used as synta ti al variable for ni e sets.
+Remark: Every C ( ) with             ! is ni e.
+De nition
+Let d = I (d )2I : d / H (d is H - ontrolled) i k(I ) [ f g  H and 8 2 I \ H~ (d / H ).
+
+Theorem 9.8
+d0 / H & d1 / H & rk(C ) 6=            =) RC (d0 ; d1 ) / H .
+Proof:
+Abbr.:      := o(d0 ), := o(d1 ).
+                                                           56
+(Case 1) C is not main formula of I := last(d0 ):
+We have RC (d0 ; d1 ) = ( # )I (RC (d0 ; d1 ))2I where d0 =    I (d0 )2I .
+Sin e d0 / H , we also have k(I ) [ f g  H and d0 / H for all  2 I \ H~ .
+From this (together with 2 H ) we get k(I ) [ f # g  H , and (by IH) RC (d0 ; d1 ) / H for all  2 I \ H~ ,
+i.e. RC (d0 ; d1 ) / H .
+                 W                                              V
+(Case 2) C ' 2J C is main formula of last(d0 ), and :C ' 2J :C is main formula of last(d1 ):
+                    V                                     W
+Then last(d1 ) = :C , and, sin e rk(C ) 6= , last(d0 ) = C .
+                                                                               W          V
+Hen e RC (d0 ; d1 ) = ( # )CutC RC (d00 ; d1 )RC (d0 ; d1 ), where d0 = C d00 and d1 = :C (d1 )2J .
+We have k(C ) [ f ; g  k() [ k(C ) [ f ; g  H , d00 / H , and d1 / H (sin e k()  H ).
+From ; 2 H we get # 2 H . By IH we get RC (d00 ; d1 ) / H and RC (d0 ; d1 ) / H . Together with
+k(C ) [ f # g  H this yields RC (d0 ; d1 ) / H .
+Theorem 9.9
+                              +
+a) d `+1 &  6= =) E (d) `!                ,
+b) d / H =) E (d) / H .
+Proof of b):
+(Case 1) d = CutC d0 d1 with rk(C ) 6= .
+Then     2 H , d0 ; d1 / H and E (d) = ! + RepRC (E (d0 ); E (d1 )).
+By IH E (d0 ); E (d1 ) / H , and therefore by 9.8 RC (E (d0 ); E (d1 )) / H .
+From 2 H we get ! + 2 H and thus E (d) / H .
+(Case 2) otherwise: Then d = I (d )2I and E (d) = ! + I (E (d ))2I .
+                                                        IH
+d / H ) k(I ) [ f g  H & d / H for  2 I \ H~ )
+k(I ) [ f! + g  H & E (d ) / H for  2 I \ H~ ) E (d) / H .
+De nition
+For ea h L(ID1 )-formula B let B [ ; ℄ denote the result of repla ing in B every negative o urren e of PA
+by PA< , and every positive o urren e of PA by PA< .
+ [ ; ℄ := fB [ ; ℄ : B 2     g
+j= fA1 ; :::; An g : () A1 _ ::: _ An is true in the standard interpretation where the set variables may be
+interpreted arbitrarily.
+
+
+
+
+                                                         57
+De nition Let H be a olle tion of ni e sets:
+d / H :, 8H 2 H(d / H ) ,   H[℄ := fH 2 H : k()  H g.
+Lemma 9.10
+                                           T
+Let d = I (d )2I : d / H , k(I ) [ f g  H & 8 2 I (d / H[℄).
+Proof:
+d / H ,
+8H 2 H(d / H ) ,
+8H 2 H(k(I ) [ f g  H & 8 2 I \ H~ (d / H )) ,
+             T
+k(I ) [ f g  H & 8 2 I 8H 2 H(k()  H ) d / H ) ,
+             T
+k(I ) [ f g  H & 8 2 I (d / fH 2 H : k()  H g).
+                                                                                        T
+Abbreviation: H := fC ( ) :   g. | Note that                                              H = C ( ), and H [℄ = H if k()  C ( ).
+Theorem 9.11
+d ` +1 & !                           2 C ( ) & d / H =) j= [ ; ( + ! + )℄
+Proof: 8
+         >
+         >       d0                         d1
+         <
+1. d =     ;Pt :              0          ; :P t :       1
+                                                                          :    Let 0 := + ! + 0 , 1 := 0 + ! + 1 , ~ := + ! + .
+         >
+         >                                                  (CutP t )
+         :
+                    :
+d / H ) d0 ; d1 / H ) d0 / H & d1 / H 0 . d0 / H ) 0 2 C ( ) )
+                                                                                                                    0 2 C ( 0 ).
+IH =) j= ; P t [ ; 0 ℄ and j= ; :P t [ 0 ; 1 ℄ (and < 0 < 1 < ~)
+    =) j= [            ; ~ ℄; P <            0 t and =       j       [     ; ~℄; :P <    0t =     ) j= [ ; ~℄
+For the rest of this proof we set  := + ! +  and ~ := + ! + .
+       8
+       >
+       >     d0           d1
+         <
+2. d =     ;A :           0             ; :A :      1
+                                                                         with rk(A) < :
+         >
+         >                                              (CutA )
+         :
+                                   :
+IH =) j= [            ;           0 ℄; A and j= [                ;       1 ℄; :A =) j=       [    ; ~℄.
+         8
+         >
+         >            d0
+         <
+3. d =     ;   A(P; t) : 0 (Cl ) :
+         >
+         >
+         :                                  Pt
+                      :
+d0 / H      )        0 2 C( ) )               0 2 C( 0) )                     0<       ~ () .
+                                                      ()
+IH =)j= [         ;               0   ℄; A(P < 0 ; t) =) j= [                  ; ~℄; P < ~ t (= [ ; ~℄ , sin e P t 2 ).
+         8
+         >
+         >                        d
+         <
+4. d = ::: ; :A(P < ; t) :  :::( < )         : Note that f 2 : k( )  C ( )g = ( ).
+      >
+      >
+      :                                 (^:Pt )
+                  :
+d / H ) 8 < (d / H [ ℄ = H ) )
+                                         IH
+                                              8 < j= [ ; ~℄; :A(P < ; t) )
+j= [ ; ~℄; :P < (= [ ; ~℄ , sin e :P t 2 ).
+                                                                                        58
+         8
+         >
+         >            d
+         <
+5. d = ::: ; :A(P < ; t) :  :::( < Æ)             with Æ < :
+       >
+       >
+       :                                 (^:P <Æ t )
+                  :
+                                                           V
+d / H ) 8 2 Æ \ ( )(d / H [ ℄ = H ) & fÆg = k( :P <Æ t )  C ( ) \ = ( ) ) (8 < Æ)d / H              IH
+                                                                                                             )
+(8 < Æ) j= [ ; ~℄; :A(P < ; t) ) j= [ ; ~℄; :P <Æ t.
+       8
+       >
+       >       d0
+         <
+6. d =     ;   A(P < ; t) : 0 (_         with  < Æ  :
+         >
+         >
+         :                      P <Æ t )
+                 :
+d / H    ) d0 / H   )IH
+                          j= [ ; ~℄; A(P < ; t).
+It remains to prove (Æ = )  < ~): d / H ) fg  C ( ) )  2 C ( ) \                           = ( )  ~.
+
+Embedding of ID1 into ID1
+                        1
+De nition
+H := fC ( ) : k( )  C ( ) &  !g,
+d  : () d ` & d / H ,
+ID1
+  1      : () d  for some ID1    1 -derivation d
+
+Remark: A 2    ) rk(A) 2 T H
+                   T
+Lemma 9.12 For 2 H :
+a) A ' 2J A 2 & 8 2 J (ID1                     1
+       V
+                             1  ; A &  < ) ) ID1  .
+                                
+
+b) A ' 2J A 2 & ID1                                      1
+       W                                            T
+                     1  ; A & 0 < &  2 J & k()  H ) ID1  .
+                           0
+
+ ) ID1            1 1                                   1
+                                                T
+     1  ; A & ID1  ; :A & 0 ; 1 < & k(A)  H ) ID1  .
+         0
+
+Proof:
+                    T
+We have k( ) [ f g  H .
+                                                    V
+a) Assume 8 2 J (d   ; A), and let d := A (d )2J .
+       V
+Then k( A ) = k(A)  k( ), and it remains to prove d / H [℄:
+                           ()
+d   ; A ) d / H ;A ) d / H [℄. (): k( ; A )  k( ) [ k().
+                                             W               W                T
+b) Assume d0  0 ; A , and let d := A d0 . Then k( A ) = k()  H , and it remains to prove d0 / H :
+                      T
+k(A )  k( ) [ k()  H ) H = H ;A . d0  0 ; A ) d0 / H ;A .
+ ) Assume d0  0 ; A, d1  1 ; :A, and let d := CutA d0 d1 . It remains to prove di / H :
+        T
+k(A)  H ) H = H ;(:)A. di  i ; (:)A ) di / H ;(:)A.
+Lemma 9.13
+                                                                 2rk(A)
+t0 ; t1 2 T & val(t0 ) = val(t1 ) & FV(A)  fxg ) ID1
+                                                    1            0       :A(x=t0 ); A(x=t1 ).
+
+
+
+
+                                                            59
+Proof by indu tion on rk(A):
+1. A = (:)Xt or (:)(r s): trivial.
+        W                              W
+2. A ' 2J A : Then A(x=ti ) ' 2J A (x=ti ).
+               2rk(A )
+IH ) ID1    1 0          :A (t0 ); A (t1 ) (8 2 J )
+    9:12;(1 )  1    2rk(A )+1
+       ) ID1 0                   :A (t0 ); A(t1 ) (8 2 J )
+    9:12;(2 )  1    2rk(A)
+       ) ID1 0                :A(t0 ); A(t1 )
+                               T
+(1 ) k() [ f2rk(A )+1g        H:A (t0 );A(t1 ) , (2 ) 2rk(A) 2 T H:A(t0 );A(t1 ) .
+Lemma 9.14
+PL1 `k0 & FV( ) = ; =) ID1
+                         1                0
+                                              +k
+
+Proof:
+1.1. f:A; Ag  with A = Xt or A = (s t): Then 2 AX (Z1 ).
+1.2. f:P t; P tg  : The laim follows from 9.13.
+2. 8xA 2 , k > 0 and PL1 `0k 1 ; Ax (y):
+Then PL1 `0k 1 ; Ax (t) for all t 2 T , and by IH ID1      1 0
+                                                                 +k 1 ; A (t) for all t 2 T .
+                                                                         x
+                        1
+By 9.12 this implies ID1 0    + k                    V
+                                    , sin e 8xA ' t2T Ax (t).
+3. 9xA 2 , k > 0 and PL1 `0    k  1   ; Ax (t): w.l.o.g. t 2 T .
+        1                     9:12; k(t)=;
+IH) ID1 0       + k 1 ; Ax (t) =) ID1           1 0
+                                                     +k .
+
+
+Lemma 9.15
+If FV(8xF ) = ;, t 2 T , and Æ = 2rk(F ) then
+ID11 0
+      Æ+2val(t)
+                :F (0); :8x(F (x) ! F (Sx)); F (t).
+Proof by indu tion on n:
+1. val(t) = 0: By 9.13 ID1
+                         1 0 :F (0); F (t).
+                             Æ
+2. val(t) = n+1: Let G := :8)x(F (x) ! F (Sx)).
+IH ) Æ0+2n :F (0); G; F (n)                                                     ;
+                               ) Æ0+2n+1 :F (0); G; F (n) ^ :F (Sn); F (t) k(n)=
+                                                                            =) 0Æ+2(n+1) :F (0); G; F (t).
+9.13 ) 0 :F (Sn); F (t)
+           Æ
+
+Lemma 9.16
+If B (X ) is an X -positive L1 -formula then for all  :
+ID1    Æ+ 0 :8x(A(F; x) ! F (x)); :B (P < ); B (F ) , where Æ := 2rk(F ) and 0 := 2rk(B (P < )) + 2.
+   1 0
+Proof by indu tion on rk(B (P < )): Let G := :8x(A(F; x) ! F (x)) [ = 9x(A(F; x) ^ :F (x)) ℄.
+1. B (X )  Xt: Then 0 = 2! + 2 = ! + 2.
+IH ) 0Æ+!+m G; :A(P < ; t); A(F; t) for all  <
+) 0Æ+! G; :P < t; A(F; t)
+) 0Æ+! +1 G; :P < t; A(F; t) ^ :F (t); F (t) [ sin e Æ0 :F (t); F (t) ℄
+) 0Æ+! +2 G; :P < t; F (t).
+2. B L0 -literal: 9.13.
+
+
+                                                             60
+3. B  8yB0(X; y): Then rk(B (P < )) = 0 + 1 mit 0 := rk(B0 (P < ; y)).
+IH ) Æ0+2 0 +2 G; :B0 (P < ; t); B0 (F; t) for all t 2 T
+=) Æ0+2 0 +3 G; 9y:B0 (P < ; y); B0 (F; t) for all t 2 T
+=) Æ0+2( 0 +1)+2 G; :8yB0 (P < ; y); 8yB0(F; y).
+
+Lemma 9.17
+a) ID1
+     1 0
+         +! 8x(A(P ; x) ! P x),
+                     A           A
+     1
+b) ID1 0 2+ ! 8~y[8x(A(F (; ~y); x) ! F (x; ~y )) ! 8x(PA x ! F (x; ~y))℄.
+Proof:
+                                                                       (Cl )
+a) 9.13 )    0
+                 +k0 :A(P; t); A(P; t)   [with   + k0 = 2rk(A(P; x))℄ =)
+                                                                       Pt
+                                                                               0
+                                                                                   +k0 +1 :A(P; t); P t   (8t 2 T ) )
+     +k0 +4 8x(A(P; x) ! P x).
+ 0
+b) 9.16 ) Æ0+ +2 :8x(A(F (; ~s); x) ! F (x; ~s)); :P t; F (t; ~s)) for all t; ~s 2 T [ Æ := 2rk(F ) <         +! ℄
+) 2+5 :8x(A(F (; ~s); x) ! F (x; ~s)); 8x(P x ! F (x; ~s)) for all ~s 2 T .
+      0
+
+Lemma 9.18 If A is an axiom of ID1 then ID1
+                                          1             0
+                                                            2+! A.
+Proof by means of 9.13, 9.15, 9.17.
+
+Theorem 9.19 ID1 ` PA n ) jnjA < (" +1 ).
+Proof:
+Assume ID1 ` P n. Then there are ID1 -axioms A1 ; :::; Al su h that PL1 `0 :A1 ; :::; :Al ; P n.
+    2                                     2+! Ai (i = 1; :::; l) [ by 9.18℄
+  0 :A1 ; :::; :Al ; P n [ by 9.14 ℄ and 0
+=) +3m+1 P n with +m := maxf ; rk(A1 ); :::; rk(Al )g [note that k(Ai )  f0; g℄
+9:12
+  :9
+=9)    +1 P n with 2 C (" +1 ) \ " +1
+9:11
+=) j= P < n with := (! + ! + ) < (" +1 ).
+
+
+
+
+                                                        61
+APPENDIX to x4
+
+Remark: Theorem 4.16 follows from 4.19 b).
+Zu zeigen: Z ` 8h8(ni)i<! 9k(h[n0 ℄[n1 ℄:::[nk ℄ = 0) =)
+Z ` 8x9!yX hx; yi ! 9x; z0 ; z1 (X hx; z0 i ^ X hx+1; z1 i ^ :z1 1 z0 )
+8h8(ni)i<! 9k(h[n0 ℄[n1 ℄:::[nk ℄ = 0) =)
+8(hi )i<! [8i(hi+1 1 hi _ hi+1 = hi = 0) ! 9k(hk = 0)℄ =)
+8(hi )i<! 9k:(hk+1 1 hk ).
+Ann.: 8k(hk+1 1 hk ). Dann existiert ein k mit hk = 0 und folgli h hk+1 61 hk ).
+
+ad Lemma 4.17
+\=)":
+` 8x9!yGa (x; y),
+` WF/ (Ga ) ! 9x; z0 ; z1 (Ga (x; z0 ) ^ Ga (x+1; z1) ^ :(z1 / z0 ))
+` Prog/ (X ) & a 62 X ! 8x; z0; z1 (Ga (x; z0 ) ^ Ga (x+1; z1) ! z1 / z0 )
+` WF/ (Ga ) ^ Prog/ (X ) ^ a 62 X ! ?.
+A ^ :B ; A ! B ` B ^ :B
+\(=":
+Assume 8x9yX hx; yi. By /-indu tion on z we prove 9xX hx; z i ! 9x; z0 ; z1 (X hx; z0 i^X hx+1; z1i^:(z1 /z0)).
+So let X hx; z i. Then there exists z1 su h that X hx0 +1; z1i. If :(z1 / z ) we are done. If z1 / z the laim
+follows from the IH.
+
+APPENDIX to x8
+Def.: x:"~x := ordering fun tion of f0g [ f : ! =        g
+Hen e "~0 = 0 and "~1+ = " .
+Def.:   := f :   2 C ( )g
+Def.: sup+ X := minfÆ 2 AP : 8 2 X ( < Æ)g
+Lemma A.1 < '2 (0) & < "~ +1 )  + 2                      & (  + ) = !"~ + .
+Proof by indu tion on  + :
+1. = = 0: (0) = 1 = !0 = !"~ + .
+2. 0 < :
+By IH 8 < (  + 2 & (  +) = !"~ + ). Hen e (  + ) =
+sup+ f ( ) :  2 &  <  + g = sup+ f (  +) :  < g = sup+ f!"~ + :  <              g = !"~ + .
+3. = 0 & 2 Lim:
+By IH 8 < (  2 & (  ) = !"~ ). Hen e
+  (  ) = sup+ f ( ) :  2 &  <  g = sup+ f (  ) :  <          g = sup+ f!"~ :  < g = !"~ .
+                                                         62
+4.    =0& =      0 +1: Let     := !"~ , i.e., = "~ 0 +1 .
+By IH 8 < (  0 + 2 & (  0 +) = !"~ 0 + ) and thus (  0 + ) = sup+ f (  0 +) :  <            g=
+sup+ f!"~ 0 + :  < g = !"~ 0 + = .
+HS:     < )  0 + 62 C (  0 + ).
+Proof:  0 + 2 C (  0 + ) &  < )  2 C (  0 + ) \            = (  0+ ) = .
+ (  ) = (  0 + ) HS= (  0 + ) = = !"~ .
+
+Theorem A.2
+ < 'n+2 (0) & < 'n+1 ( +1) ) ( n+1 (1+ ) + n  ) = 'n ('n+1 ( ) + ).
+Corollary     ( n+1 ) = 'n+1 (0).
+
+Let  2 On and     := " .
+
+De nition of C ( ) and ( ) by re ursion on
+C ( ) := losure of f0g under +, x:! +x and  7! ( ) ( < &  2 C ( )).
+ ( ) := minf :  62 C ( )g.
+Lemma A.3
+a)  ) C ( )  C ( ) & ( )  ( ),
+    < & 2 C ( ) ) ( ) < ( ),
+b) ( ) is an additive prin ipal number,
+ ) 0 < & 8 ( 0   < )  62 C ( 0 )) =) C ( 0 ) = C ( ) & ( 0 ) = ( ).
+Proof:
+a) The rst part is trivial. { Se ond part: < & 2 C ( ) ) ( )  ( ) & ( ) 2 C ( ) )
+ ( ) < ( ). The last impli ation holds, sin e ( ) 62 C ( ).
+b) Assume not. Then ( ) =  +  with ;  < ( ), and thus ( ) =  +  2 C ( ). Contradi tion.
+ ) By de nition C ( 0 ) is losed under j 0 . From the premise it follows, that C ( 0 ) is even losed under
+  j . Hen e C ( )  C ( 0 ), sin e C ( ) is the least set losed under j ( and 0, +, x:! +x ).
+Lemma A.4
+a)  "0 & < ) ( )  ! .
+b) C ("0 ) \  "0 .
+ ) "0   ) C ( ) = C ("0 ).
+d) ( )  " .
+e) < '2 (0 ) ) C ( )  '2 (0 ), for ea h     2 On.
+Proof:
+a) Indu tion on : Let  "0 & < . By IH 8 < ( ( )  ! < ! ). Hen e C ( ) \             ! .
+Sin e ! < , this implies ! 62 C ( ), and therefore ( )  ! .
+                                                            63
+b) By a) 8 < "0 ( ( ) < "0). This yields the laim.
+ ) Let "0 <  : By b) 8 ("0   < )  62 C ("0 )). Hen e C ( ) = C ("0 ) by A.3 .
+d) By IH 8 < ( ( )  " < " ) ().
+Case 1: < "0 : By a) ( )  ! < "0 .
+Case 2: < " : Then C ( )  " and thus ( )  " .
+                                                                  )        a)
+Case 3: "0  & "  : Then "0   and "0 < . Hen e ( ) = ("0 )  !"0 < " .
+e) '2 (0 ) >   is losed under + ; x:! +x , and [ by d) ℄ also under . This yields the laim.
+
+
+
+
+                                                       64
+

@@ -1,0 +1,202 @@
+#!/usr/bin/env -S uv run --quiet python3
+"""Local pre-flight for comparator's statement-identity check. Runs on macOS.
+
+comparator itself is CI-only (`landrun` needs Linux Landlock), so a mismatch between a
+`Challenge.lean` and its `Solution.lean` normally costs a full CI round-trip to discover.
+This reproduces the part that actually catches mistakes -- *statement identity* -- locally.
+
+What comparator does (Comparator/Compare.lean, `runForUsedConsts`): for each name in
+`theorem_names` it compares the challenge's and the solution's declaration at the level of
+`ConstantVal` (name, universe params, type), then walks the transitive constant closure of that
+type -- and of the *values* of every `def` in it -- and demands a byte-identical `ConstantInfo`
+for every constant in it.
+
+What this does: elaborates the challenge module and the solution module separately, prints the
+type of each named theorem plus the type *and value* of every constant in its closure, and diffs
+the two. Identical output => the identity check will pass. It does NOT replay proofs, check
+axioms, run nanoda, or sandbox anything -- CI still does all of that. This is a pre-flight, not a
+gate.
+
+    scripts/comparator-probe                 # every Comparator/*/config.json
+    scripts/comparator-probe Goodstein       # just one
+
+# Fork note (goodstein-independence)
+
+The upstream lean-gallery probe keeps constants by NAME prefix ("Goodstein", "LeanGallery", ...).
+That is WRONG for this repo: it deliberately declares its syntactic objects under *Foundation's*
+namespace -- `LO.FirstOrder.Arithmetic.ipowDef`, `...ilogDef`, `...bumpNextDef`, `...ibumpTableDef`,
+`...ibumpDef`, `...igoodsteinDef` -- so no name prefix (not even one derived from `theorem_names`,
+which would yield "GoodsteinPA") catches them, and the probe would silently skip them and report a
+false green. The fix here keeps by DEFINING MODULE instead (`keepMod` below): a constant is
+repo-owned iff its module starts with "GoodsteinPA" (solution env) or "Comparator" (challenge env,
+where the re-declarations live). This is a strictly better fix than the "derive prefixes from
+theorem_names" idea -- it is robust to constants living under a foreign namespace.
+"""
+
+import json
+import pathlib
+import subprocess
+import sys
+import tempfile
+
+REPO = pathlib.Path(__file__).resolve().parent.parent
+
+# Emits, for each requested theorem: its type, then the type+value of every constant its type
+# transitively depends on. Core/Mathlib/Foundation constants are skipped -- both environments import
+# them at the same rev, so they agree by construction, and printing them buries the signal.
+PROBE = r"""
+import {module}
+open Lean Meta
+
+namespace CmpProbe
+
+/-- Keep constants by DEFINING MODULE, not by name. A constant is repo-owned (and so must match
+between the two environments) iff its defining module starts with `GoodsteinPA` (the solution env)
+or `Comparator` (the challenge env, where the re-declarations live). Everything from
+Mathlib/Foundation/core is skipped: both environments import it identically, so it agrees by
+construction, and printing it buries the signal.
+
+Name-based filtering is unusable here because this repo declares its syntactic objects under
+Foundation's own namespace (`LO.FirstOrder.Arithmetic.ipowDef`, `...igoodsteinDef`, ...); only the
+defining module distinguishes them. Both environments `import` the probed module, so
+`env.getModuleFor? n` returns a real module for every probed constant (the current-file `none` case
+does not arise -- the probe does `import {module}` then `#eval`). -/
+def keepMod (env : Environment) (n : Name) : Bool :=
+  match env.getModuleFor? n with
+  | some m => let s := m.toString
+    s.startsWith "GoodsteinPA" || s.startsWith "PAComparator" || s.startsWith "LeanGallery"
+  | none   => false
+
+partial def constClosure (seen : NameSet) (todo : List Name) : MetaM NameSet := do
+  match todo with
+  | [] => return seen
+  | n :: rest =>
+    if seen.contains n then constClosure seen rest
+    else
+      let env ← getEnv
+      match env.find? n with
+      | none => constClosure (seen.insert n) rest
+      | some ci =>
+        let fromType := ci.type.getUsedConstants.toList
+        let fromVal := match ci.value? with
+          | some v => v.getUsedConstants.toList
+          | none => []
+        let more := (fromType ++ fromVal).filter (keepMod env)
+        constClosure (seen.insert n) (rest ++ more)
+
+/-- Render an `Expr` the way comparator compares it: STRUCTURALLY.
+
+`ppExpr` is a liar for this purpose -- it hides implicit arguments, universe levels and proof terms,
+so two genuinely different constants (e.g. two well-founded definitions carrying different
+termination proofs) pretty-print identically and diff clean. Comparator compares full `ConstantInfo`s,
+so we dump the raw expression plus its structural hash. -/
+def render (e : Expr) : MetaM String := do
+  let pp ← withOptions (fun o =>
+      (((o.setBool `pp.all true).setBool `pp.universes true).setBool `pp.explicit true).setBool
+        `pp.proofs true)
+    (do return (← ppExpr e).pretty)
+  return s!"hash={{e.hash}} {{pp}}"
+
+def probe (names : List Name) : MetaM Unit := do
+  for n in names do
+    let env ← getEnv
+    match env.find? n with
+    | none => IO.println s!"MISSING THEOREM {{n}}"
+    | some ci =>
+      IO.println s!"THEOREM {{n}}"
+      IO.println s!"  type: {{← render ci.type}}"
+      -- comparator seeds its worklist from the *type*'s used constants; mirror that exactly.
+      let seeds := ci.type.getUsedConstants.toList.filter (keepMod env)
+      let cl ← constClosure (NameSet.empty) seeds
+      let sorted := (cl.toList.map (fun c => (c.toString, c))).toArray.qsort
+        (fun a b => a.1 < b.1)
+      for c in sorted.map Prod.snd do
+        match env.find? c with
+        | none => IO.println s!"  CONST {{c}} :: MISSING"
+        | some cci =>
+          IO.println s!"  CONST {{c}}  levels={{cci.levelParams}}"
+          IO.println s!"    type:  {{← render cci.type}}"
+          match cci.value? with
+          | some v => IO.println s!"    value: {{← render v}}"
+          | none   => IO.println s!"    value: <none>"
+
+end CmpProbe
+
+#eval CmpProbe.probe [{names}]
+"""
+
+
+def run(module: str, names: list[str]) -> tuple[bool, str]:
+    src = PROBE.format(module=module, names=", ".join(f"`{n}" for n in names))
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", dir=REPO, delete=False) as f:
+        f.write(src)
+        path = pathlib.Path(f.name)
+    try:
+        p = subprocess.run(
+            ["lake", "env", "lean", str(path)],
+            cwd=REPO, capture_output=True, text=True,
+        )
+        return p.returncode == 0, (p.stdout + p.stderr)
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def main() -> int:
+    only = sys.argv[1] if len(sys.argv) > 1 else None
+    configs = sorted((REPO / "PAComparator").glob("*/config.json"))
+    if only:
+        configs = [c for c in configs if c.parent.name == only]
+        if not configs:
+            print(f"no such result: {only}", file=sys.stderr)
+            return 2
+
+    bad = 0
+    for cfg_path in configs:
+        cfg = json.loads(cfg_path.read_text())
+        name = cfg_path.parent.name
+        names = cfg["theorem_names"]
+
+        ok_c, out_c = run(cfg["challenge_module"], names)
+        ok_s, out_s = run(cfg["solution_module"], names)
+
+        if not (ok_c and ok_s):
+            print(f"❌ {name}: probe failed to elaborate")
+            print((out_c if not ok_c else out_s)[:2000])
+            bad += 1
+            continue
+
+        # A name absent from BOTH environments produces identical output in both, which would
+        # otherwise compare equal and report a cheerful green. Fail loudly instead -- an
+        # identity check that cannot go red is worse than no check at all.
+        missing = sorted(
+            {ln.split(None, 2)[2] for ln in (out_c + out_s).splitlines()
+             if ln.startswith("MISSING THEOREM")}
+        )
+        if missing:
+            print(f"❌ {name}: theorem_names not found in the environment: {', '.join(missing)}")
+            bad += 1
+            continue
+
+        # The challenge's theorem *values* are `sorryAx`; only the solution has real proofs. The
+        # identity check is about types + the closure of the type, which is what we print, so the
+        # two outputs must agree exactly.
+        if out_c == out_s:
+            print(f"✅ {name}: statement closure identical ({len(names)} theorem(s))")
+        else:
+            print(f"❌ {name}: statement closure DIFFERS")
+            import difflib
+            diff = difflib.unified_diff(
+                out_c.splitlines(), out_s.splitlines(),
+                fromfile="challenge", tofile="solution", lineterm="",
+            )
+            for line in list(diff)[:60]:
+                print("   " + line)
+            bad += 1
+
+    print()
+    print("comparator still runs the real gate in CI (kernel replay, nanoda, axioms, sandbox).")
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
