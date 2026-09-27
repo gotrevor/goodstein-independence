@@ -115,3 +115,19 @@ ratified headline from stage 1, with the lower bound `Escapes` as a hypothesis.
 `code_sigma_one` give a Σ₁ formula for any partial-recursive relation; the work is proving
 `fun m N => toCode (battle (ofCode m) N)` is `Computable` (well-founded recursion on a nested
 inductive through `ONote`, so not auto-derived — the Goodstein analogue was `primrec_goodsteinSeq`).
+
+## 6. Progress (2026-09-26 evening)
+
+- ✅ **P1** `ord_canonStep` (lean-gallery `hydra-canonical` @ 47b095d, `Logic/Hydra/Ordinal.lean` +
+  `Canonical.lean`): `ord` redefined as the natural sum `sumTerms` (fold of `insertTerm`), with the
+  three fundamental-sequence lemmas; axiom-clean.
+- ✅ **P2** `runFrom_alive_of_lt_hardy` (`src/GoodsteinPA/HydraLowerBound.lean`).
+- ✅ **P3** `escapes : Escapes` (`src/GoodsteinPA/HydraEscape.lean`), and so the ratified
+  **`pa_not_proves_hydra`**, axiom-clean.  ⚠️ **Route deviation from §5 P3:** no Goodstein
+  comparison was needed.  The witness is `k` heads next to the hydra of `ω^P + ω^3`, `P = o + 4`;
+  the chain is `f_o(code) < f_P(code) ≤ H_{ω^P}(code) ≤ H_{ω^P}(H_{ω^3}(k)) = H_{ω^P + ω^3}(k)`
+  (`fastGrowing_lt_succ_index`, `fastGrowing_le_hardy_omega_pow`, `hardy_add_comp`), with the code
+  bounded by one squaring per head (`toCode_padded`: `code + 2 ≤ (C + 2)^(2^k)`, `code ≥ k`) and
+  `(C + 2)^(2^k) ≤ 2^(2^k·k) ≤ f_3(k)`.  The padded-Goodstein family (Astra's correction) stays
+  valid but unused.
+- ⏳ **(B)** `exists_sigma1_battle_def` — the headline does not ship without it.
