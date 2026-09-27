@@ -1,10 +1,15 @@
+module
+
+public import GoodsteinPA.WainerGeneral
+public import GoodsteinPA.PH.Statement
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.WainerGeneral
-import GoodsteinPA.PH.Statement
 
 /-!
 # PA does not prove the Paris–Harrington principle — reduction to a lower bound
@@ -34,3 +39,5 @@ theorem pa_not_proves_ph_of_escape (hesc : Escapes)
   exact hbad N hN ((hdef x N).mp hsem)
 
 end GoodsteinPA.PH
+
+end

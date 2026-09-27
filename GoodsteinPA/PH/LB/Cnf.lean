@@ -1,9 +1,14 @@
+module
+
+public import GoodsteinPA.ToMathlib.Hardy.Basic
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.Hardy
 
 /-!
 # PH lower bound: CNF data, `r(α)`, `d/K/E`, `ω_m(k)`, `fsStep`; Lemmas 7.6, 7.7, 7.8 (spec §2.1–2.6).
@@ -13,7 +18,7 @@ Part of the skeleton indexed in `GoodsteinPA/PH/LowerBound.lean`; statements are
 
 namespace GoodsteinPA.PH.LB
 
-open ONote GoodsteinPA.FastGrowing
+open ONote
 
 /-! ### §2.1–2.3  CNF data -/
 
@@ -327,3 +332,5 @@ theorem chain_Ed_desc {β : ℕ → ONote} {ℓ : ℕ} (hβ : Chain β ℓ)
 theorem rnorm_Ed_le (α β : ONote) : rnorm (Ed α β) ≤ rnorm α := rnorm_termAt_fst_le _ _
 
 end GoodsteinPA.PH.LB
+
+end

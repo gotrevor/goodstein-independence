@@ -8,3 +8,12 @@ name = "GoodsteinPA"
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation.git"
 rev = "master"
+
+# The leanprover/comparator harness (PAComparator/<Result>/{Challenge,Solution}.lean). Named
+# `PAComparator`, not `Comparator`, to avoid clashing with the gallery's own `Comparator` lib.
+# Deliberately NOT in defaultTargets and NOT reachable from the main roots: the Challenge files
+# carry `sorry` by design and the main libs build warnings-as-errors, so this must stay out of the
+# default build. Build explicitly with `lake build PAComparator`.
+[[lean_lib]]
+name = "PAComparator"
+globs = ["PAComparator.+"]

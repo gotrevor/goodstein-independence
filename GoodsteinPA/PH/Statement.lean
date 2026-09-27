@@ -1,13 +1,18 @@
+module
+
+public import Mathlib.Data.Finset.Powerset
+public import Mathlib.Order.Interval.Finset.Nat
+public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Data.Fintype.Powerset
+public import Mathlib.Data.Nat.Pairing
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import Mathlib.Data.Finset.Powerset
-import Mathlib.Order.Interval.Finset.Nat
-import Mathlib.Data.Fintype.Pi
-import Mathlib.Data.Fintype.Powerset
-import Mathlib.Data.Nat.Pairing
 
 /-!
 # The Paris–Harrington principle (stage 3 of `ROADMAP-EPSILON0.md`)
@@ -52,3 +57,5 @@ example : ¬ PH 1 2 2 2 := by decide
 example : PH 1 2 2 3 := by decide
 
 end GoodsteinPA.PH
+
+end

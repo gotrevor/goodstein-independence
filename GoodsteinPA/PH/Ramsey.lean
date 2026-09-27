@@ -1,13 +1,18 @@
+module
+
+public import Mathlib.Data.Set.Finite.Basic
+public import Mathlib.Data.Fintype.Pigeonhole
+public import Mathlib.Order.Interval.Set.Infinite
+public import Mathlib.Order.Lattice.Nat
+public import Mathlib.Order.Interval.Finset.Nat
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import Mathlib.Data.Set.Finite.Basic
-import Mathlib.Data.Fintype.Pigeonhole
-import Mathlib.Order.Interval.Set.Infinite
-import Mathlib.Order.Lattice.Nat
-import Mathlib.Order.Interval.Finset.Nat
 
 /-!
 # The infinite Ramsey theorem (all exponents)
@@ -83,3 +88,5 @@ theorem infinite_ramsey {β : Type*} [Finite β] :
       exact hcol
 
 end GoodsteinPA.PH
+
+end

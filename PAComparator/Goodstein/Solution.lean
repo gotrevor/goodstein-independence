@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
 import GoodsteinPA.Statement   -- GoodsteinPA.peano_not_proves_goodstein
-import GoodsteinPA.Bridge      -- GoodsteinPA.goodsteinSentence_faithful
+import GoodsteinPA.Encoding    -- GoodsteinPA.goodsteinSentence_faithful
 
 /-!
 # Kirby–Paris independence of Goodstein's theorem — comparator SOLUTION

@@ -1,12 +1,17 @@
+module
+
+public import GoodsteinPA.PH.LB.Colour
+public import GoodsteinPA.PH.LB.Descent
+public import GoodsteinPA.PH.Statement
+public import Mathlib.Data.Finset.Sort
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.LB.Colour
-import GoodsteinPA.PH.LB.Descent
-import GoodsteinPA.PH.Statement
-import Mathlib.Data.Finset.Sort
 
 /-!
 # PH lower bound: The bad colouring: Theorem 7.5 in repo form (spec §3).
@@ -16,7 +21,7 @@ Part of the skeleton indexed in `GoodsteinPA/PH/LowerBound.lean`; statements are
 
 namespace GoodsteinPA.PH.LB
 
-open ONote GoodsteinPA.FastGrowing
+open ONote
 
 /-! ### §3  The bad colouring and `¬ PH` -/
 
@@ -98,3 +103,5 @@ theorem not_PH_of_le_descLen {m : ℕ} (hm : 1 ≤ m) (k : ℕ) :
   rcases lt_max_iff.mp h2 with h | h <;> omega
 
 end GoodsteinPA.PH.LB
+
+end

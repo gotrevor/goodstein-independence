@@ -1,9 +1,14 @@
+module
+
+public import GoodsteinPA.PH.LB.Escape
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.LB.Escape
 
 /-!
 # The Paris–Harrington lower bound (Buchholz Thm 7.5, after Loebl–Nešetřil)
@@ -25,3 +30,5 @@ Conventions, which differ from Buchholz on purpose:
 * Our `PH` colours subsets of `{1,…,N}`; Buchholz's `[N]` is `{0,…,N−1}`.  The bad colouring reads
   element `j` as descent index `j − 1`.  Shifting only raises `min`, so the bound survives.
 -/
+
+end

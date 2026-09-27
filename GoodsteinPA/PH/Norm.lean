@@ -1,9 +1,14 @@
+module
+
+public import GoodsteinPA.ToMathlib.Hardy.Basic
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.Hardy
 
 /-!
 # The Loebl–Nešetřil norm on Cantor normal forms (Buchholz, *Beweistheorie* 1998, §7)
@@ -128,3 +133,5 @@ theorem normr_start_le {m k n : ℕ} (hk : 1 ≤ k) (hkn : k < n) : normr (start
   omega
 
 end GoodsteinPA.PH
+
+end

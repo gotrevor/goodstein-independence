@@ -1,11 +1,16 @@
+module
+
+public import GoodsteinPA.PH.Statement
+public import GoodsteinPA.PH.Ramsey
+public import Mathlib.Combinatorics.Compactness
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.Statement
-import GoodsteinPA.PH.Ramsey
-import Mathlib.Combinatorics.Compactness
 
 /-!
 # The Paris–Harrington principle is true
@@ -72,3 +77,5 @@ theorem ph_true (e r k : ℕ) : ∃ N, PH e r k N := by
     exact hb s (fun x hx => hH0H (hsH hx)) (mem_powersetCard.mp hs).2
 
 end GoodsteinPA.PH
+
+end

@@ -111,3 +111,30 @@ system, the vendored copies can be deleted and the require restored.
   `exists_sigma1_battle_def` adds `ONote.cmpStep_spec._native.native_decide.ax_1_5` (pre-existing
   FFL `native_decide`, same footprint as at `pre-ffl-rebase`).
 - Next: stage 3 (Paris–Harrington), `GoodsteinPA/PH/**` (~1900 lines).
+
+### 2026-09-27 — stage 3 (Paris–Harrington) + AxiomCheck + PAComparator: PORT COMPLETE
+
+- All 13 `GoodsteinPA/PH/**` modules ported (module headers; `GoodsteinPA.Hardy` →
+  `ToMathlib.Hardy.Basic`, `GoodsteinPA.Computability` → `ToMathlib.Goodstein.Computability`,
+  dropped the `GoodsteinPA.FastGrowing` `open`, `primrec_natPow` → `Goodstein.primrec_natPow`,
+  `GoodsteinPA.Dom.…` → `Goodstein.Dom.…`).  No mathematical change.
+- `scripts/AxiomCheck.lean`: FFL's copy was already broken (`GoodsteinPA.{Reduction,Bridge,
+  Domination}` no longer exist) — repaired to `import GoodsteinPA`, re-pointed the two stale pins
+  (`peano_not_proves_consistency` → `goodstein_independent`, `GoodsteinPA.Dom.goodstein_terminates`
+  → `Goodstein.Dom.…`), and appended the seven arc pins.  `lake env lean scripts/AxiomCheck.lean`
+  is now **silent** (all `#guard_msgs` satisfied).
+- `PAComparator` `[[lean_lib]]` stanza added (no `srcDir` override needed, as predicted);
+  `PAComparator/Goodstein/Solution.lean`'s `GoodsteinPA.Bridge` import → `GoodsteinPA.Encoding`.
+  `lake build PAComparator` green (one by-design `sorry` in `Goodstein/Challenge.lean`).
+
+**Done-when checklist**
+1. `lake build` green, 1489 jobs, every arc module imported from `GoodsteinPA.lean`. ✅
+2. `lake env lean scripts/AxiomCheck.lean` silent; all six frozen headlines on the standard three
+   axioms, `exists_sigma1_battle_def` additionally on the pre-existing `ONote.cmpStep_spec`
+   `native_decide` (same footprint as at `pre-ffl-rebase`). ✅
+3. `lake build PAComparator` green. ✅
+
+Frozen headlines, all verified against `git show pre-ffl-rebase:…` and unchanged up to the renames
+logged above: `Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing`,
+`Hydra.pa_not_proves_hydra`, `Hydra.exists_sigma1_battle_def`, `PH.pa_not_proves_ph`,
+`PH.exists_sigma1_ph_def`, `PH.ph_true`.

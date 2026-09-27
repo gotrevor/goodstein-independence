@@ -1,9 +1,14 @@
+module
+
+public import GoodsteinPA.PH.LB.Cnf
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.LB.Cnf
 
 /-!
 # PH lower bound: The colourings `χ^k_m`, the colour count, Lemma 7.9 (spec §2.7–2.8).
@@ -13,7 +18,7 @@ Part of the skeleton indexed in `GoodsteinPA/PH/LowerBound.lean`; statements are
 
 namespace GoodsteinPA.PH.LB
 
-open ONote GoodsteinPA.FastGrowing
+open ONote
 
 /-! ### §2.7  The colourings `χ^k_m` and the colour count -/
 
@@ -403,3 +408,5 @@ theorem chiK_homog_len {k m ℓ c : ℕ} {β : ℕ → ONote} (hm : 1 ≤ m) (hm
       omega
 
 end GoodsteinPA.PH.LB
+
+end

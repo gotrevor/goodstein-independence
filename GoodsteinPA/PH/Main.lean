@@ -1,11 +1,16 @@
+module
+
+public import GoodsteinPA.PH.Independence
+public import GoodsteinPA.PH.LowerBound
+public import GoodsteinPA.PH.Computable
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.Independence
-import GoodsteinPA.PH.LowerBound
-import GoodsteinPA.PH.Computable
 
 /-!
 # PA does not prove the Paris–Harrington principle (stage 3 headline)
@@ -33,3 +38,5 @@ theorem exists_sigma1_ph_def :
       ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N := exists_sigma1_PHx_def
 
 end GoodsteinPA.PH
+
+end

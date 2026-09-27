@@ -1,11 +1,16 @@
+module
+
+public import GoodsteinPA.PH.LB.Bad
+public import GoodsteinPA.PH.Independence
+public import GoodsteinPA.HydraEscape
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.LB.Bad
-import GoodsteinPA.PH.Independence
-import GoodsteinPA.HydraEscape
 
 /-!
 # PH lower bound: Escape: growth comparison and `Escapes` (STAGE3-PH-PLAN step 7).
@@ -15,7 +20,7 @@ Part of the skeleton indexed in `GoodsteinPA/PH/LowerBound.lean`; statements are
 
 namespace GoodsteinPA.PH.LB
 
-open ONote Ordinal GoodsteinPA.FastGrowing
+open ONote Ordinal
 
 /-! ### Step 7  Escape -/
 
@@ -115,7 +120,7 @@ theorem escape_growth (o : ONote) (ho : o.NF) :
   have hcode : phCode (j + 1) k ≤ hardy (oadd (ofNat 3) 1 0) k :=
     calc phCode (j + 1) k ≤ (4 * k) ^ 4 := phCode_le_pow _ _ (by omega)
       _ ≤ 2 ^ (2 ^ k * k) := pow_le_two_pow_two_pow hk4
-      _ ≤ fastGrowing (ofNat 3) k := GoodsteinPA.Dom.two_pow_le_fastGrowing_ofNat_three (by omega)
+      _ ≤ fastGrowing (ofNat 3) k := Goodstein.Dom.two_pow_le_fastGrowing_ofNat_three (by omega)
       _ ≤ hardy (oadd (ofNat 3) 1 0) k := fastGrowing_le_hardy_omega_pow _ k
   have hlt : γ < wtow (j + 1) k :=
     lt_of_lt_of_le hj (le_trans (tower_strictMono.monotone (Nat.le_succ j)) (tower_le_wtow _ _))
@@ -142,3 +147,5 @@ theorem escapes : Escapes := by
   exact not_PH_of_le_descLen hm k N hN'
 
 end GoodsteinPA.PH.LB
+
+end

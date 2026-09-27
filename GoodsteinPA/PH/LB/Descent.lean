@@ -1,9 +1,14 @@
+module
+
+public import GoodsteinPA.PH.LB.Cnf
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.LB.Cnf
 
 /-!
 # PH lower bound: The descent `α_i`, its length `N`, HS1 and HS2 (spec §3).
@@ -13,7 +18,7 @@ Part of the skeleton indexed in `GoodsteinPA/PH/LowerBound.lean`; statements are
 
 namespace GoodsteinPA.PH.LB
 
-open ONote GoodsteinPA.FastGrowing
+open ONote
 
 /-! ### §3  The descent and HS1 / HS2 -/
 
@@ -237,3 +242,4 @@ theorem hs2 {m : ℕ} (hm : 1 ≤ m) (k : ℕ) : hardy (wtow m k) (k + 1) + m + 
 
 end GoodsteinPA.PH.LB
 
+end

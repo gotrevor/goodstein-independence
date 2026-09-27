@@ -1,14 +1,19 @@
+module
+
+public import GoodsteinPA.PH.Statement
+public import GoodsteinPA.ToMathlib.Goodstein.Computability
+public import Mathlib.Combinatorics.Colex
+public import Mathlib.Computability.Primrec.List
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Foundation.FirstOrder.Arithmetic.R0.Representation
+
+@[expose] public section
+
 /-
 Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.PH.Statement
-import GoodsteinPA.Computability
-import Mathlib.Combinatorics.Colex
-import Mathlib.Computability.Primrec.List
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-!
 # The Paris–Harrington property is primitive recursive
@@ -319,7 +324,7 @@ open Primrec
 /-- `bit1` is a primitive recursive relation. -/
 theorem primrecRel_bit1 : PrimrecRel bit1 :=
   Primrec.eq.comp (Primrec.nat_mod.comp
-    (Primrec.nat_div.comp Primrec.fst (primrec_natPow.comp (Primrec.const 2) Primrec.snd))
+    (Primrec.nat_div.comp Primrec.fst (Goodstein.primrec_natPow.comp (Primrec.const 2) Primrec.snd))
     (const 2)) (const 1)
 
 theorem primrec_popL : Primrec₂ popL := by
@@ -330,7 +335,7 @@ theorem primrec_popL : Primrec₂ popL := by
   exact this.to₂.of_eq fun B n => rfl
 
 theorem primrec_pow2 : Primrec fun N : ℕ => 2 ^ (N + 1) :=
-  primrec_natPow.comp (Primrec.const 2) Primrec.succ
+  Goodstein.primrec_natPow.comp (Primrec.const 2) Primrec.succ
 
 end Primrec
 
@@ -381,7 +386,7 @@ theorem primrecRel_homogBody :
   have c3 : PrimrecPred fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ × ℕ × ℕ =>
       Colour z.2.2.2.2.2.1 z.2.1 z.1 = z.2.2.2.1 :=
     Primrec.eq.comp (Primrec.nat_mod.comp
-      (Primrec.nat_div.comp hC (primrec_natPow.comp hr ht)) hr) hi
+      (Primrec.nat_div.comp hC (Goodstein.primrec_natPow.comp hr ht)) hr) hi
   exact prImp c1 (prImp c2 c3)
 
 /-- `HomogBits` is primitive recursive.  `q = (C, h, e, r, k, N)`. -/
@@ -396,7 +401,7 @@ theorem primrecPred_homogBits :
     refine bAll (bd := fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => 2 ^ (z.2.2.2.2.2.2 + 1))
       (g := fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => (z.2.1, z.2.2.1, z.1, z.2.2.2.1, z.2.2.2.2.1,
         z.2.2.2.2.2.1, z.2.2.2.2.2.2)) ?_ ?_ primrecRel_homogBody
-    · exact primrec_natPow.comp (Primrec.const 2) (Primrec.succ.comp (Primrec.snd.comp
+    · exact Goodstein.primrec_natPow.comp (Primrec.const 2) (Primrec.succ.comp (Primrec.snd.comp
         (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))))))
     · exact (Primrec.fst.comp Primrec.snd).pair
         ((Primrec.fst.comp (Primrec.snd.comp Primrec.snd)).pair
@@ -467,7 +472,7 @@ theorem primrecPred_PHbits :
         RelLargeBits q.2.2.2.2 h ∧ HomogBits q.2.1 q.2.2.1 q.2.2.2.2 q.1 h :=
     bEx (bd := fun q : ℕ × ℕ × ℕ × ℕ × ℕ => 2 ^ (q.2.2.2.2 + 1))
       (g := fun q : ℕ × ℕ × ℕ × ℕ × ℕ => q)
-      (primrec_natPow.comp (Primrec.const 2) (Primrec.succ.comp
+      (Goodstein.primrec_natPow.comp (Primrec.const 2) (Primrec.succ.comp
         (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
       Primrec.id primrecRel_witness
   -- `p = (e, r, k, N)`
@@ -483,7 +488,7 @@ theorem primrecPred_PHbits :
           RelLargeBits p.2.2.2 h ∧ HomogBits p.1 p.2.1 p.2.2.2 C h := by
     refine bAll (bd := fun p : ℕ × ℕ × ℕ × ℕ => p.2.1 ^ 2 ^ (p.2.2.2 + 1))
       (g := fun p : ℕ × ℕ × ℕ × ℕ => p)
-      (primrec_natPow.comp hpr (primrec_natPow.comp (Primrec.const 2)
+      (Goodstein.primrec_natPow.comp hpr (Goodstein.primrec_natPow.comp (Primrec.const 2)
         (Primrec.succ.comp hpN))) Primrec.id ?_
     exact hA0.of_eq fun q => Iff.rfl
   have hzero : PrimrecPred fun p : ℕ × ℕ × ℕ × ℕ => p.2.1 = 0 ∧ p.1 ≤ p.2.2.2 :=
@@ -549,3 +554,5 @@ theorem exists_sigma1_PHx_def :
 end Existence
 
 end GoodsteinPA.PH
+
+end
