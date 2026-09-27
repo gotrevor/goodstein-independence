@@ -45,6 +45,9 @@ def PHx (x N : ℕ) : Prop := PH x.unpair.1 x.unpair.2.unpair.1 x.unpair.2.unpai
 -- Known-answer anchors (hand-computed): points (e = 1), two colours, a pair.
 -- N = 2: colour 1 and 2 differently — no monochromatic pair.  N = 3: two of {1,2,3} share a
 -- colour; any such pair {a,b} has min ≤ 2 = card.
+-- Degenerate case: with no colours (`r = 0`) the property says `e ≤ N`.
+example : ¬ PH 1 0 0 0 := by decide
+
 example : ¬ PH 1 2 2 2 := by decide
 example : PH 1 2 2 3 := by decide
 

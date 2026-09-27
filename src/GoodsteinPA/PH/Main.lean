@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
 import GoodsteinPA.PH.Independence
+import GoodsteinPA.PH.Computable
 
 /-!
 # PA does not prove the Paris–Harrington principle (stage 3 headline)
@@ -30,6 +31,6 @@ theorem pa_not_proves_ph
 /-- **Anti-vacuity**: some Σ₁ formula defines `PHx` pointwise in ℕ. -/
 theorem exists_sigma1_ph_def :
     ∃ φ : Semisentence ℒₒᵣ 2, Arithmetic.Hierarchy 𝚺 1 φ ∧
-      ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N := sorry
+      ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N := exists_sigma1_PHx_def
 
 end GoodsteinPA.PH

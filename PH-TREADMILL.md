@@ -85,3 +85,21 @@ Rewrite freely.  The design:
 ## Log
 - 2026-09-26: direction written (Ren, attended session).  Part A sketch in `PH/Computable.lean`
   (not compiling).  Target: `PH/Main.lean`.
+- 2026-09-27 (lap 1, autonomous): **Part A COMPLETE.**  `src/GoodsteinPA/PH/Computable.lean`
+  rewritten and green; `exists_sigma1_PHx_def` is kernel-clean `[propext, choice, Quot.sound]`
+  and wired into `PH/Main.lean`'s `exists_sigma1_ph_def`.  Lemma map:
+  `bits`/`code`/`lt_two_pow_iff`/`bits_subset_Icc` (mask ↔ subset of `Icc 1 N`),
+  `bit1`/`popL`/`popL_eq_card` (arithmetic bit tests), `pack`/`digit_pack`/`pack_lt` (colouring
+  packing), `Colour`/`SubMask`/`HomogBits`/`RelLargeBits`/`PHbits`, `ph_zero`, **`PHbits_iff`**
+  (`PHbits ↔ PH`), then `forall_ltb`/`exists_ltb`/`bAll`/`bEx`/`prImp` (parameterised bounded
+  quantifiers — mathlib's `PrimrecRel.forall_lt` hardwires `β = ℕ`, these generalise it),
+  `primrecRel_bit1`, `primrec_popL`, `primrecRel_SubMask`, `primrecRel_homogBody`,
+  `primrecPred_homogBits`, `primrecRel_relLargeBits`, `primrecRel_witness`,
+  **`primrecPred_PHbits`**, `PHbitsx`, `primrecRel_PHbitsx`, `phC`, `primrec_phC`, `phVec`,
+  `partrec_phVec`, `exists_sigma1_PHx_def`.  `PH/Independence.lean` + `PH/Computable.lean` are
+  now in `GoodsteinPA.lean`.  Anchor `¬ PH 1 0 0 0` added to `PH/Statement.lean`.
+  Mathlib-name notes (pinned v4.31 mathlib): the colex bit lemmas are
+  `Finset.toFinset_bitIndices_sum_two_pow` / `Finset.sum_toFinset_bitIndices_two_pow`
+  (**no** `Nat` namespace, and `Nat.equivBitIndices` does not exist); `Finset.range_succ` is
+  `Finset.range_add_one`; `Colex`/`Primrec` do not transitively import `norm_num`/`ring`.
+  **Next: Part B (`Escapes`).**

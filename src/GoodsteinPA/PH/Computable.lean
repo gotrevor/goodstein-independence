@@ -8,6 +8,7 @@ import GoodsteinPA.Computability
 import Mathlib.Combinatorics.Colex
 import Mathlib.Computability.Primrec.List
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-!
 # The Paris–Harrington property is primitive recursive
@@ -410,5 +411,141 @@ theorem primrecPred_homogBits :
   refine (bEx (bd := fun q : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => q.2.2.2.1)
     (g := fun q : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => q) ?_ Primrec.id hbody).of_eq fun q => Iff.rfl
   exact Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+
+/-- `RelLargeBits` is primitive recursive. -/
+theorem primrecRel_relLargeBits : PrimrecRel fun (N h : ℕ) => RelLargeBits N h := by
+  have hinner : PrimrecRel fun (a : ℕ) (h : ℕ) => ∀ b < a, ¬ bit1 h b :=
+    forall_ltb (R := fun (b : ℕ) (h : ℕ) => ¬ bit1 h b)
+      (primrecRel_bit1.comp Primrec.snd Primrec.fst).not
+  have hbody : PrimrecRel fun (a : ℕ) (w : ℕ × ℕ) =>
+      bit1 w.2 a → (∀ b < a, ¬ bit1 w.2 b) → a ≤ popL (w.1 + 1) w.2 := by
+    have c1 : PrimrecPred fun z : ℕ × ℕ × ℕ => bit1 z.2.2 z.1 :=
+      primrecRel_bit1.comp (Primrec.snd.comp Primrec.snd) Primrec.fst
+    have c2 : PrimrecPred fun z : ℕ × ℕ × ℕ => ∀ b < z.1, ¬ bit1 z.2.2 b :=
+      hinner.comp Primrec.fst (Primrec.snd.comp Primrec.snd)
+    have c3 : PrimrecPred fun z : ℕ × ℕ × ℕ => z.1 ≤ popL (z.2.1 + 1) z.2.2 :=
+      Primrec.nat_le.comp Primrec.fst (primrec_popL.comp
+        (Primrec.succ.comp (Primrec.fst.comp Primrec.snd)) (Primrec.snd.comp Primrec.snd))
+    exact prImp c1 (prImp c2 c3)
+  have hmain := bAll (bd := fun w : ℕ × ℕ => w.1 + 1) (g := fun w : ℕ × ℕ => w)
+    (Primrec.succ.comp Primrec.fst) Primrec.id hbody
+  exact hmain.of_eq fun w => Iff.rfl
+
+/-- The witness layer of `PHbits`: `q = (C, e, r, k, N)`, bound variable the mask `h`. -/
+theorem primrecRel_witness : PrimrecRel fun (h : ℕ) (q : ℕ × ℕ × ℕ × ℕ × ℕ) =>
+    ¬ bit1 h 0 ∧ q.2.2.2.1 ≤ popL (q.2.2.2.2 + 1) h ∧ RelLargeBits q.2.2.2.2 h ∧
+      HomogBits q.2.1 q.2.2.1 q.2.2.2.2 q.1 h := by
+  -- `z = (h, C, e, r, k, N)`
+  have hh : Primrec fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => z.1 := Primrec.fst
+  have hC : Primrec fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => z.2.1 := Primrec.fst.comp Primrec.snd
+  have he : Primrec fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => z.2.2.1 :=
+    Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hr : Primrec fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => z.2.2.2.1 :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd))
+  have hk : Primrec fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => z.2.2.2.2.1 :=
+    Primrec.fst.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  have hN : Primrec fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => z.2.2.2.2.2 :=
+    Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
+  have c1 : PrimrecPred fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => ¬ bit1 z.1 0 :=
+    (primrecRel_bit1.comp hh (Primrec.const 0)).not
+  have c2 : PrimrecPred fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ =>
+      z.2.2.2.2.1 ≤ popL (z.2.2.2.2.2 + 1) z.1 :=
+    Primrec.nat_le.comp hk (primrec_popL.comp (Primrec.succ.comp hN) hh)
+  have c3 : PrimrecPred fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ => RelLargeBits z.2.2.2.2.2 z.1 :=
+    primrecRel_relLargeBits.comp hN hh
+  have c4 : PrimrecPred fun z : ℕ × ℕ × ℕ × ℕ × ℕ × ℕ =>
+      HomogBits z.2.2.1 z.2.2.2.1 z.2.2.2.2.2 z.2.1 z.1 :=
+    primrecPred_homogBits.comp
+      (hC.pair (hh.pair (he.pair (hr.pair (hk.pair hN)))))
+  exact c1.and (c2.and (c3.and c4))
+
+/-- **`PHbits` is primitive recursive.** -/
+theorem primrecPred_PHbits :
+    PrimrecPred fun p : ℕ × ℕ × ℕ × ℕ => PHbits p.1 p.2.1 p.2.2.1 p.2.2.2 := by
+  have hA0 : PrimrecPred fun q : ℕ × ℕ × ℕ × ℕ × ℕ =>
+      ∃ h < 2 ^ (q.2.2.2.2 + 1), ¬ bit1 h 0 ∧ q.2.2.2.1 ≤ popL (q.2.2.2.2 + 1) h ∧
+        RelLargeBits q.2.2.2.2 h ∧ HomogBits q.2.1 q.2.2.1 q.2.2.2.2 q.1 h :=
+    bEx (bd := fun q : ℕ × ℕ × ℕ × ℕ × ℕ => 2 ^ (q.2.2.2.2 + 1))
+      (g := fun q : ℕ × ℕ × ℕ × ℕ × ℕ => q)
+      (primrec_natPow.comp (Primrec.const 2) (Primrec.succ.comp
+        (Primrec.snd.comp (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+      Primrec.id primrecRel_witness
+  -- `p = (e, r, k, N)`
+  have hpe : Primrec fun p : ℕ × ℕ × ℕ × ℕ => p.1 := Primrec.fst
+  have hpr : Primrec fun p : ℕ × ℕ × ℕ × ℕ => p.2.1 := Primrec.fst.comp Primrec.snd
+  have hpk : Primrec fun p : ℕ × ℕ × ℕ × ℕ => p.2.2.1 :=
+    Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hpN : Primrec fun p : ℕ × ℕ × ℕ × ℕ => p.2.2.2 :=
+    Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+  have htop : PrimrecPred fun p : ℕ × ℕ × ℕ × ℕ =>
+      ∀ C < p.2.1 ^ 2 ^ (p.2.2.2 + 1),
+        ∃ h < 2 ^ (p.2.2.2 + 1), ¬ bit1 h 0 ∧ p.2.2.1 ≤ popL (p.2.2.2 + 1) h ∧
+          RelLargeBits p.2.2.2 h ∧ HomogBits p.1 p.2.1 p.2.2.2 C h := by
+    refine bAll (bd := fun p : ℕ × ℕ × ℕ × ℕ => p.2.1 ^ 2 ^ (p.2.2.2 + 1))
+      (g := fun p : ℕ × ℕ × ℕ × ℕ => p)
+      (primrec_natPow.comp hpr (primrec_natPow.comp (Primrec.const 2)
+        (Primrec.succ.comp hpN))) Primrec.id ?_
+    exact hA0.of_eq fun q => Iff.rfl
+  have hzero : PrimrecPred fun p : ℕ × ℕ × ℕ × ℕ => p.2.1 = 0 ∧ p.1 ≤ p.2.2.2 :=
+    (Primrec.eq.comp hpr (Primrec.const 0)).and (Primrec.nat_le.comp hpe hpN)
+  have hpos : PrimrecPred fun p : ℕ × ℕ × ℕ × ℕ => 0 < p.2.1 :=
+    Primrec.nat_lt.comp (Primrec.const 0) hpr
+  exact (hzero.or (hpos.and htop)).of_eq fun p => Iff.rfl
+
+/-! ### A Σ₁ definition of `PHx` exists -/
+
+/-- `PHx` in bounded form. -/
+def PHbitsx (x N : ℕ) : Prop :=
+  PHbits x.unpair.1 x.unpair.2.unpair.1 x.unpair.2.unpair.2 N
+
+instance (x N : ℕ) : Decidable (PHbitsx x N) := by unfold PHbitsx; infer_instance
+
+theorem PHbitsx_iff (x N : ℕ) : PHbitsx x N ↔ PHx x N := PHbits_iff ..
+
+theorem primrecRel_PHbitsx : PrimrecRel PHbitsx := by
+  have hx : Primrec fun w : ℕ × ℕ => Nat.unpair w.1 := Primrec.unpair.comp Primrec.fst
+  have hx2 : Primrec fun w : ℕ × ℕ => Nat.unpair (Nat.unpair w.1).2 :=
+    Primrec.unpair.comp (Primrec.snd.comp hx)
+  exact primrecPred_PHbits.comp ((Primrec.fst.comp hx).pair
+    ((Primrec.fst.comp hx2).pair ((Primrec.snd.comp hx2).pair Primrec.snd)))
+
+/-- The characteristic function of `PHx`, as a primitive recursive function of `(x, N)`. -/
+def phC (x N : ℕ) : ℕ := if PHbitsx x N then 0 else 1
+
+theorem primrec_phC : Primrec₂ phC := by
+  obtain ⟨_, hdec⟩ := primrecRel_PHbitsx
+  have h : Primrec fun w : ℕ × ℕ => phC w.1 w.2 := by
+    refine (Primrec.ite (c := fun w : ℕ × ℕ => PHbitsx w.1 w.2) ⟨_, hdec⟩ (Primrec.const 0)
+      (Primrec.const 1)).of_eq fun w => ?_
+    simp only [phC]
+    split <;> simp_all
+  exact h.to₂
+
+section Existence
+open LO LO.FirstOrder
+
+/-- The characteristic function of `PHx` on argument vectors `![N, x]`. -/
+def phVec (v : List.Vector ℕ 2) : Part ℕ := Part.some (phC (v.get 1) (v.get 0))
+
+theorem partrec_phVec : Nat.Partrec' phVec := by
+  apply Nat.Partrec'.of_part
+  exact (primrec_phC.to_comp.comp
+    (Primrec.vector_get.to_comp.comp Computable.id (Computable.const 1))
+    (Primrec.vector_get.to_comp.comp Computable.id (Computable.const 0))).partrec
+
+/-- **Anti-vacuity for the ratified headline**: some Σ₁ formula defines `PHx` pointwise in ℕ. -/
+theorem exists_sigma1_PHx_def :
+    ∃ φ : Semisentence ℒₒᵣ 2, Arithmetic.Hierarchy 𝚺 1 φ ∧
+      ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N := by
+  refine ⟨(Arithmetic.codeOfPartrec' phVec)/[‘0’, #0, #1], ?_, fun x N => ?_⟩
+  · exact Arithmetic.Hierarchy.rew _ (by simp [Arithmetic.codeOfPartrec'])
+  · have hspec := Arithmetic.codeOfPartrec'_spec partrec_phVec (y := 0) (v := ![N, x])
+    rw [← PHbitsx_iff]
+    have hphc : phC x N = 0 ↔ PHbitsx x N := by
+      simp only [phC]; split <;> simp_all
+    rw [← hphc]
+    simpa [Semiformula.eval_substs, Matrix.comp_vecCons', phVec, eq_comm] using hspec
+
+end Existence
 
 end GoodsteinPA.PH
