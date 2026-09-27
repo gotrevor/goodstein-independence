@@ -17,7 +17,7 @@ connects them.
 
 ## Stage 1 — Wainer's bound, general (small: a few laps)
 
-**Draft statement, awaiting Trevor's ratification** (typechecks against `main` `0628d97`; kept in
+**Statement RATIFIED 2026-09-26** (Trevor + Astra review: Σ₁ matrix is the right interface, "some bounded witness" is the right conclusion since a general Σ₁ least-witness need not be computable, quantifier order and `![N, m]` placement checked; the laps estimate was *not* endorsed) (typechecks against `main` `0628d97`; kept in
 `scratch/WainerGeneralDraft.lean`):
 
 ```lean
