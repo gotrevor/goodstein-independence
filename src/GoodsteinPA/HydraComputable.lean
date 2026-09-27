@@ -308,3 +308,132 @@ theorem primrec_pickIdxC : Primrec pickIdxC := by
   exact Primrec.fst.comp (Primrec.list_foldr Primrec.id (Primrec.const (0, []))
     (hstep.comp (Primrec.fst.comp Primrec.snd) (Primrec.snd.comp Primrec.snd)).to₂)
 
+/-! ### (e) The regrowing chop, on codes -/
+
+theorem nodeC_childC (c : ℕ) : nodeC (childC c) = c := by
+  induction c using Nat.strong_induction_on with
+  | _ c ih =>
+    rcases c with _ | n
+    · rw [childC]; rfl
+    · rw [childC, nodeC]
+      have := Nat.unpair_right_le n
+      rw [ih _ (by omega)]
+      simp [Nat.pair_unpair]
+
+theorem toCode_ofCode (c : ℕ) : toCode (ofCode c) = c := by
+  induction c using Nat.strong_induction_on with
+  | _ c ih =>
+    rw [ofCode_eq, toCode_node, List.map_map]
+    conv_rhs => rw [← nodeC_childC c]
+    congr 1
+    conv_rhs => rw [← List.map_id (childC c)]
+    exact List.map_congr_left fun a ha => ih a (lt_of_mem_childC ha)
+
+def childStep (L : List (List ℕ)) : Option (List ℕ) :=
+  if L.length = 0 then some []
+  else some ((Nat.unpair (L.length - 1)).1 :: (L[(Nat.unpair (L.length - 1)).2]?).getD [])
+
+theorem childStep_spec (c : ℕ) : childStep ((List.range c).map childC) = some (childC c) := by
+  simp only [childStep, List.length_map, List.length_range]
+  rcases c with _ | n
+  · simp [childC]
+  · simp only [Nat.add_one_ne_zero, if_false, Nat.add_sub_cancel]
+    have h2 : (Nat.unpair n).2 < n + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le n)
+    rw [List.getElem?_map, List.getElem?_range h2, Option.map_some, Option.getD_some, childC]
+
+theorem primrec_childC : Primrec childC := by
+  have hlen : Primrec fun L : List (List ℕ) => L.length := Primrec.list_length
+  have hm : Primrec fun L : List (List ℕ) => Nat.unpair (L.length - 1) :=
+    Primrec.unpair.comp (Primrec.nat_sub.comp hlen (Primrec.const 1))
+  have hstep : Primrec childStep :=
+    (Primrec.option_some.comp (Primrec.ite (Primrec.eq.comp hlen (Primrec.const 0))
+      (Primrec.const []) (Primrec.list_cons.comp (Primrec.fst.comp hm)
+        (Primrec.option_getD.comp (Primrec.list_getElem?.comp Primrec.id (Primrec.snd.comp hm))
+          (Primrec.const []))))).of_eq fun L => by
+      simp only [childStep]
+      by_cases h0 : L.length = 0 <;> simp [h0]
+  have := Primrec.nat_strong_rec (fun (_ : Unit) c => childC c)
+    (hstep.comp Primrec.snd).to₂ (fun _ c => childStep_spec c)
+  exact this.comp (Primrec.const ()) Primrec.id
+
+theorem primrec_eraseIdx : Primrec₂ (fun (l : List ℕ) (i : ℕ) => l.eraseIdx i) :=
+  (Primrec.list_append.comp (Primrec.list_take.comp Primrec.snd Primrec.fst)
+    (Primrec.list_drop.comp (Primrec.succ.comp Primrec.snd) Primrec.fst)).to₂.of_eq
+    fun l i => (List.eraseIdx_eq_take_drop_succ l i).symm
+
+theorem primrec_replicate : Primrec₂ (fun (k x : ℕ) => List.replicate k x) :=
+  (Primrec.list_map (Primrec.list_range.comp Primrec.fst) (Primrec.snd.comp Primrec.fst).to₂).to₂.of_eq
+    fun k x => by simp
+
+/-- `chopC` transported to hydra codes. -/
+def chopCC (n c : ℕ) : ℕ := toCode (chopC n (ofCode c))
+
+/-- `l[i]?` under a name (the `)[` token is claimed by imported notation). -/
+def idx? (l : List ℕ) (i : ℕ) : Option ℕ := l[i]?
+
+/-- One strong-recursion step for `chopCC n`, reading the table at codes `< c`. -/
+def chopStep (n : ℕ) (L : List ℕ) : Option ℕ :=
+  some (Option.casesOn (idx? (childC L.length) (pickIdxC (childC L.length))) L.length fun ec =>
+    Option.casesOn (idx? (childC ec) (pickIdxC (childC ec))) L.length fun f =>
+      if f = 0 then
+        nodeC ((childC L.length).eraseIdx (pickIdxC (childC L.length)) ++
+          List.replicate (n + 1) (nodeC ((childC ec).eraseIdx (pickIdxC (childC ec)))))
+      else nodeC ((L[ec]?).getD 0 :: (childC L.length).eraseIdx (pickIdxC (childC L.length))))
+
+theorem map_toCode_childC (c : ℕ) : ((childC c).map ofCode).map toCode = childC c := by
+  rw [List.map_map]
+  conv_rhs => rw [← List.map_id (childC c)]
+  exact List.map_congr_left fun a _ => toCode_ofCode a
+
+theorem toCode_eq_zero {g : Hydra} : toCode g = 0 ↔ g = leaf := by
+  constructor
+  · intro h; rw [← ofCode_toCode g, h, ofCode]
+  · rintro rfl; rw [leaf, toCode]
+
+theorem chopStep_spec (n c : ℕ) :
+    chopStep n ((List.range c).map (chopCC n)) = some (chopCC n c) := by
+  simp only [chopStep, idx?, List.length_map, List.length_range]
+  congr 1
+  set ds := (childC c).map ofCode with hdsdef
+  have hc : ofCode c = node ds := ofCode_eq c
+  have hds : ds.map toCode = childC c := map_toCode_childC c
+  rw [← hds, pickIdxC_map, List.getElem?_map]
+  unfold chopCC
+  rw [hc, chopC.eq_1]
+  split
+  · rename_i hd
+    conv_lhs => rw [hd]
+    simp only [Option.map_none]
+    rw [← hc, toCode_ofCode]
+  · rename_i es hd
+    conv_lhs => rw [hd]
+    simp only [Option.map_some]
+    rw [childC_toCode_node, pickIdxC_map]
+    have hes : idx? (es.map toCode) (pickIdx es) = (es[pickIdx es]?).map toCode :=
+      List.getElem?_map ..
+    simp only [idx?] at hes
+    conv_lhs => rw [hes]
+    split
+    · rename_i he
+      conv_lhs => rw [he]
+      simp only [Option.map_none]
+      rw [← hc, toCode_ofCode]
+    · rename_i he
+      conv_lhs => rw [he]
+      simp only [Option.map_some, show toCode (node []) = 0 from toCode_eq_zero.mpr rfl, if_true]
+      rw [toCode_node, List.map_append, List.map_replicate, toCode_node, ← List.eraseIdx_map,
+        ← List.eraseIdx_map]
+    · rename_i g _ _
+      have he : es[pickIdx es]? = some g := ‹_›
+      have hg : g = node [] → False := ‹_›
+      conv_lhs => rw [he]
+      have hg0 : toCode g ≠ 0 := fun h => hg (toCode_eq_zero.mp h)
+      simp only [Option.map_some, hg0, if_false]
+      have hmem : node es ∈ ds := List.mem_of_getElem? hd
+      have hlt : toCode (node es) < c := by
+        apply lt_of_mem_childC
+        rw [← hds]; exact List.mem_map_of_mem hmem
+      rw [List.getElem?_map, List.getElem?_range hlt, Option.map_some, Option.getD_some,
+        ofCode_toCode, toCode_node (chopC n (node es) :: _), List.map_cons, ← List.eraseIdx_map]
+
+end GoodsteinPA.Hydra
