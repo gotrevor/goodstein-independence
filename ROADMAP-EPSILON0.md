@@ -15,10 +15,15 @@ the Wainer classification, PA ⊬ Hydra and Paris–Harrington are formalized **
 `rocq-community/hydra-battles` has hydra termination AND a PA development in one repo but never
 connects them.
 
-## Stage 1 — Wainer's bound, general (small: a few laps)
+## Stage 1 — Wainer's bound, general ✅ DONE 2026-09-26 (one in-session sitting, no laps)
 
-**Statement RATIFIED 2026-09-26** (Trevor + Astra review: Σ₁ matrix is the right interface, "some bounded witness" is the right conclusion since a general Σ₁ least-witness need not be computable, quantifier order and `![N, m]` placement checked; the laps estimate was *not* endorsed) (typechecks against `main` `0628d97`; kept in
-`scratch/WainerGeneralDraft.lean`):
+Landed in `src/GoodsteinPA/WainerGeneral.lean`: the general theorem, axiom-clean; the Goodstein
+bound re-derived from it as `wainer_bound_of_pa_proves_goodstein_via_general`; both pinned in
+`scripts/AxiomCheck.lean`; comparator entry `Comparator/Wainer/` (probe identical, teeth-tested
+by weakening Σ₁ to Σ₂).  The generalization really was plumbing: only `bodyE_semantic_link` is new.
+
+**Statement RATIFIED 2026-09-26** (Trevor + Astra review: Σ₁ matrix is the right interface, "some bounded witness" is the right conclusion since a general Σ₁ least-witness need not be computable, quantifier order and `![N, m]` placement checked; the laps estimate was *not* endorsed) (now proved in `src/GoodsteinPA/WainerGeneral.lean`;
+the draft file is retired):
 
 ```lean
 theorem pa_provable_pi2_eventually_witnessed_below_fastGrowing
