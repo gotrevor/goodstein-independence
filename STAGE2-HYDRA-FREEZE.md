@@ -1,6 +1,6 @@
 # Stage 2 freeze: PA ⊬ the canonical hydra battle — statement for review
 
-**Status: PROPOSED 2026-09-26, awaiting ratification.**  Decision (a) (Trevor + Astra): one
+**Status: RATIFIED 2026-09-26** (Trevor + Astra, 98%): `pa_not_proves_hydra` and `exists_sigma1_battle_def` exactly as below.  Keep the **pointwise** `(m, N)` equivalence in `hdef` (never weaken it to equivalence of the `∃ N` termination statements); the existence theorem ships with the headline; the lower bound is against the actual numeric code `m` (growth in tower height alone would not suffice); minimal-ordinal strategy, legality bridge and turn convention approved.  PA need not prove `hdef` - its truth in ℕ is all the argument uses.  Decision (a) (Trevor + Astra): one
 computable legal strategy; headline = PA cannot prove termination even for this strategy.
 
 ## 1. The object (DONE, sorry-free) — `lean-gallery` PR #18
@@ -26,7 +26,7 @@ the END, a deep result to the FRONT), so any "leftmost/rightmost in stored order
 tracking the fundamental sequence after one move.  The minimal-`ord` rule is order-independent up
 to ties between equal-ordinal children.
 
-## 2. The headline — PROPOSED
+## 2. The headline — RATIFIED
 
 Quantify over **every** Σ₁ formula that defines the battle correctly in ℕ, instead of freezing one
 hand-built internal formula:
@@ -46,8 +46,10 @@ theorem exists_sigma1_battle_def :
 Why this form:
 - **Not gameable.**  The Goodstein repo freezes a specific `igoodsteinDef`, and its bridge alone
   does not pin it (the July handoff: the iff collapses to "ℕ ⊨ γ" because the RHS is a theorem).
-  Here the only trusted objects are the ℕ-side definitions above; every correct Σ₁ encoding is
-  covered at once, including any one a reader writes.
+  Here no particular formula is trusted: every correct Σ₁ encoding is covered at once, including
+  any one a reader writes.  What a reader still audits: the ℕ-side definitions, the Σ₁
+  restriction, PA provability and the semantic interpretation `ℕ ⊧/![N, m]` (Astra's correction:
+  this *reduces* the formula-specific audit burden, it does not remove the statement from audit).
 - **No internal battle arithmetization to grind.**  `pa_not_proves_hydra` follows from stage 1
   (`pa_provable_pi2_eventually_witnessed_below_fastGrowing`) plus the lower bound below.
   `exists_sigma1_battle_def` should come from Foundation's Σ₁-representation of r.e. relations
