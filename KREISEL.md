@@ -106,3 +106,12 @@ cheaper faithfulness checks **are** discharged as `example`s in the file (`ltRel
 `prfBot z ↔ Proof 𝗣𝗔 z ⌜⊥⌝`).
 
 Ratification line for Ren goes here. → **STOP.**
+
+**RATIFIED by Ren, 2026-09-27**, with one amendment.  Checked: `TI`'s `!r y x` reads y ≺ x under the
+pinned binder orientation; headline 1 quantifies all x y with real semantics; `prfBot` is pinned to
+`Proof 𝗣𝗔 z ⌜⊥⌝` by a passing example; `good_iff` pins `good`; headline 2 uses exactly `good`.
+**Amendment (anti-vacuity):** add and prove
+`theorem nat_models_TI_kreisel : ℕ ⊧ₘ (TI kreiselLT good)` (use whatever Foundation's sentence-level
+`⊧` spelling is): the sentence PA fails to prove is TRUE.  Without it, a mis-encoding that made the
+sentence false would satisfy headline 2 for free.  Prove it from headline 1 plus ordinary strong
+induction in ℕ.  Phase 2 may start; statements are frozen except for this addition.
