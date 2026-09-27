@@ -3,10 +3,17 @@ Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.HydraLowerBound
-import GoodsteinPA.HydraIndependence
-import GoodsteinPA.Domination
-import Mathlib.Tactic.Ring
+module
+
+public import GoodsteinPA.HydraLowerBound
+public import GoodsteinPA.HydraIndependence
+public import GoodsteinPA.ToMathlib.Hardy.Structure
+public import GoodsteinPA.ToMathlib.Hardy.Comparison
+public import GoodsteinPA.ToMathlib.FastGrowing.Epsilon0
+public import GoodsteinPA.ToMathlib.Goodstein.Domination.BaseCases
+public import Mathlib.Tactic.Ring
+
+@[expose] public section
 
 /-!
 # The canonical battle escapes every `f_o` along its own codes (stage 2, P3)
@@ -20,7 +27,7 @@ stays below `f_3(k) ≤ hardy (ω^3) k`; and `f_o < f_P ≤ hardy (ω^P)` finish
 
 namespace GoodsteinPA.Hydra
 
-open ONote Ordinal GoodsteinPA.FastGrowing
+open ONote Ordinal
 open LeanGallery.Logic.Hydra LeanGallery.Logic.Hydra.Hydra
 
 /-! ### From a Cantor normal form to a hydra -/
@@ -164,7 +171,7 @@ theorem escapes : Escapes := by
     calc toCode Hk ≤ (C + 2) ^ (2 ^ k) := by omega
       _ ≤ (2 ^ k) ^ (2 ^ k) := Nat.pow_le_pow_left hCk _
       _ = 2 ^ (2 ^ k * k) := by rw [← pow_mul, mul_comm]
-      _ ≤ fastGrowing (ofNat 3) k := GoodsteinPA.Dom.two_pow_le_fastGrowing_ofNat_three hk2
+      _ ≤ fastGrowing (ofNat 3) k := Goodstein.Dom.two_pow_le_fastGrowing_ofNat_three hk2
       _ ≤ hardy (oadd (ofNat 3) 1 0) k := fastGrowing_le_hardy_omega_pow _ k
   calc N ≤ fastGrowing o (toCode Hk) := hN
     _ < fastGrowing P (toCode Hk) := hchain _ (by omega)
@@ -185,3 +192,5 @@ theorem pa_not_proves_hydra
 end Headline
 
 end GoodsteinPA.Hydra
+
+end

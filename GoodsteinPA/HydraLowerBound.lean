@@ -3,8 +3,12 @@ Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.Hardy
-import LeanGallery.Logic.Hydra.Canonical
+module
+
+public import GoodsteinPA.ToMathlib.Hardy.Basic
+public import GoodsteinPA.ToMathlib.Hydra.Canonical
+
+@[expose] public section
 
 /-!
 # The canonical hydra battle outlasts the Hardy function of its ordinal (stage 2, P2)
@@ -18,7 +22,7 @@ import LeanGallery.Logic.Hydra.Canonical
 
 namespace GoodsteinPA.Hydra
 
-open ONote Ordinal GoodsteinPA.FastGrowing
+open ONote Ordinal
 open LeanGallery.Logic.Hydra
 
 /-- The canonical battle from `h`, starting at turn `t`. -/
@@ -76,3 +80,5 @@ theorem runFrom_alive_of_lt_hardy :
             omega
 
 end GoodsteinPA.Hydra
+
+end

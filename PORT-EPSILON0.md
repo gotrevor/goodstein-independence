@@ -86,3 +86,28 @@ Then log it and stop.
   The frozen headline `pa_provable_pi2_eventually_witnessed_below_fastGrowing` is unchanged
   modulo those; `#print axioms` = `[propext, Classical.choice, Quot.sound]`.
 - Next: stage 2 (Hydra) — needs the LeanGallery `[[require]]` + manifest entry by hand.
+
+### 2026-09-27 — stage 2 (Hydra) ported green
+
+**LeanGallery could not be used as a `[[require]]`.**  The gallery is still on plain `import`, and
+Lean 4.31 refuses `cannot import non-module X from module`; this repo's root `GoodsteinPA.lean` is a
+`module`, so no arc file that reaches the gallery can be a module while importing it, and a legacy
+arc file cannot be imported from the module root either.  Resolution: **vendor** the five hydra
+files verbatim into `GoodsteinPA/ToMathlib/Hydra/{Basic,Engine,Ordinal,Statement,Canonical}.lean`
+(namespace kept as `LeanGallery.Logic.Hydra` to record provenance and keep the arc's `open` lines
+untouched), with only the module header changed.  The `[[require]]` + manifest entry were therefore
+NOT added — the port is self-contained and needs no network.  If the gallery migrates to the module
+system, the vendored copies can be deleted and the require restored.
+  - `native_decide` anchors in `Canonical.lean` needed `public meta import` lines for the sibling
+    hydra modules and `Mathlib.Data.Nat.Pairing` (without them: "IR of declaration … not available" /
+    "could not find native implementation of external declaration `Nat.pair`").
+- `Hydra{LowerBound,Independence,Escape,Computable}.lean` ported to modules; only renames:
+  `LeanGallery.Logic.Hydra.Canonical` → `GoodsteinPA.ToMathlib.Hydra.Canonical`,
+  `GoodsteinPA.Hardy`/`Domination`/`ONoteComp` → the `ToMathlib` homes,
+  dropped the now-nonexistent `GoodsteinPA.FastGrowing` / `Epsilon0Complete` / `ONoteComp` `open`s,
+  `GoodsteinPA.Dom.two_pow_le_fastGrowing_ofNat_three` → `Goodstein.Dom.…`.
+- Headlines verified verbatim against `pre-ffl-rebase`.  `#print axioms`:
+  `pa_not_proves_hydra` = `[propext, Classical.choice, Quot.sound]`;
+  `exists_sigma1_battle_def` adds `ONote.cmpStep_spec._native.native_decide.ax_1_5` (pre-existing
+  FFL `native_decide`, same footprint as at `pre-ffl-rebase`).
+- Next: stage 3 (Paris–Harrington), `GoodsteinPA/PH/**` (~1900 lines).

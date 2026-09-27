@@ -1,6 +1,10 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
 public import GoodsteinPA.Encoding
+public import GoodsteinPA.HydraComputable
+public import GoodsteinPA.HydraEscape
+public import GoodsteinPA.HydraIndependence
+public import GoodsteinPA.HydraLowerBound
 public import GoodsteinPA.Internal
 public import GoodsteinPA.OperatorZef2.Basic
 public import GoodsteinPA.OperatorZef2.CutStep
@@ -50,6 +54,11 @@ public import GoodsteinPA.ToMathlib.Hardy.Comparison
 public import GoodsteinPA.ToMathlib.Hardy.Gexp
 public import GoodsteinPA.ToMathlib.Hardy.Majorization
 public import GoodsteinPA.ToMathlib.Hardy.Structure
+public import GoodsteinPA.ToMathlib.Hydra.Basic
+public import GoodsteinPA.ToMathlib.Hydra.Canonical
+public import GoodsteinPA.ToMathlib.Hydra.Engine
+public import GoodsteinPA.ToMathlib.Hydra.Ordinal
+public import GoodsteinPA.ToMathlib.Hydra.Statement
 public import GoodsteinPA.ToMathlib.ONote.Computability
 public import GoodsteinPA.ToMathlib.OmegaTower
 public import GoodsteinPA.ToMathlib.Ordinal.Bounds

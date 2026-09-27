@@ -3,8 +3,12 @@ Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.WainerGeneral
-import LeanGallery.Logic.Hydra.Canonical
+module
+
+public import GoodsteinPA.WainerGeneral
+public import GoodsteinPA.ToMathlib.Hydra.Canonical
+
+@[expose] public section
 
 /-!
 # PA does not prove that the canonical hydra battle terminates (stage 2 of `ROADMAP-EPSILON0.md`)
@@ -46,3 +50,5 @@ theorem pa_not_proves_hydra_of_escape (hesc : Escapes)
   exact hlive N hN ((hdef m N).mp hsem)
 
 end GoodsteinPA.Hydra
+
+end

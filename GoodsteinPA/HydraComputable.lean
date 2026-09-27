@@ -3,8 +3,12 @@ Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import GoodsteinPA.ONoteComp
-import GoodsteinPA.HydraEscape
+module
+
+public import GoodsteinPA.ToMathlib.ONote.Computability
+public import GoodsteinPA.HydraEscape
+
+@[expose] public section
 
 /-!
 # The canonical hydra battle is computable on codes (stage 2, part B)
@@ -20,7 +24,7 @@ Cantor pairing as in `ofCode`/`toCode`), and every child code is `< c`, so each 
 namespace GoodsteinPA.Hydra
 
 open ONote LeanGallery.Logic.Hydra LeanGallery.Logic.Hydra.Hydra
-open GoodsteinPA.Epsilon0Complete GoodsteinPA.ONoteComp
+
 
 /-! ### (a) Child-code lists -/
 
@@ -570,3 +574,5 @@ theorem exists_sigma1_battle_def :
 end Existence
 
 end GoodsteinPA.Hydra
+
+end
