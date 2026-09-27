@@ -122,3 +122,26 @@ info: 'GoodsteinPA.Hydra.exists_sigma1_battle_def' depends on axioms: [propext,
 /-- info: 'GoodsteinPA.Kreisel.nat_models_TI_kreisel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms GoodsteinPA.Kreisel.nat_models_TI_kreisel
+
+-- Sharpness: over PA, `TI kreiselLT good` is EQUIVALENT to Con(PA) — and Con(PA) suffices to prove it.
+/-- info: 'GoodsteinPA.Kreisel.pa_proves_TI_iff_consistent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.pa_proves_TI_iff_consistent
+
+/-- info: 'GoodsteinPA.Kreisel.pa_con_proves_TI_kreisel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.pa_con_proves_TI_kreisel
+
+-- Order type ω, as an equality of relations, plus the well-foundedness it gives.
+/-- info: 'GoodsteinPA.Kreisel.kreiselLT_eq_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.kreiselLT_eq_lt
+
+/-- info: 'GoodsteinPA.Kreisel.kreiselLT_wellFounded' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.kreiselLT_wellFounded
+
+-- The ill-foundedness witness: a PA-proof of ⊥ in a model makes the relation carry a descending chain.
+/-- info: 'GoodsteinPA.Kreisel.descending_chain_of_inconsistent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Kreisel.descending_chain_of_inconsistent

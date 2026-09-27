@@ -189,6 +189,39 @@ lemma nat_good (x : ℕ) : Good x := by
 lemma nat_kreiselLT_iff (x y : ℕ) : KreiselLT x y ↔ x < y := by
   simp [KreiselLT, nat_good]
 
+/-- If `𝗣𝗔` is consistent *in the model* `V`, every element of `V` is `Good`. -/
+lemma all_good_of_consistent (h : Theory.Consistent V 𝗣𝗔) : ∀ x : V, Good x :=
+  fun _ z _ hz ↦ h ⟨z, hz⟩
+
+/-- The converse of `models_TI_imp_consistent`: consistency *implies* the transfinite induction,
+because it makes the conclusion `∀ x, good x` outright true.  So over `𝗣𝗔` the sentence
+`TI kreiselLT good` is **equivalent** to `Con(𝗣𝗔)` — headline 2's failure is exactly a consistency
+gap, no more and no less. -/
+lemma models_TI_iff_consistent : V↓[ℒₒᵣ] ⊧ (TI kreiselLT good 🡘 ↑𝗣𝗔.consistent) := by
+  simp only [models_iff, TI]
+  have H : (((∀ x : V, (∀ y : V, KreiselLT y x → Good y) → Good x) → ∀ x : V, Good x) ↔
+      Theory.Consistent V 𝗣𝗔) :=
+    ⟨fun h ↦ consistent_of_all_good (h fun x hx ↦ progressive_good x hx),
+     fun h _ ↦ all_good_of_consistent h⟩
+  simpa [models_iff, TI] using H
+
+/-- **Ill-foundedness, the reason `𝗣𝗔` cannot see the order type.**  In any model where `𝗣𝗔` is
+inconsistent — and by Gödel II `𝗣𝗔` has such models — Kreisel's relation carries an infinite
+descending chain: if `d` codes a proof of `⊥` then `d, d+1, d+2, …` is `≺`-descending, because every
+`d + n` is bad and on the bad part `≺` *reverses* `<`. -/
+lemma descending_chain_of_inconsistent (h : ¬ Theory.Consistent V 𝗣𝗔) :
+    ∃ f : ℕ → V, ∀ n : ℕ, KreiselLT (f (n + 1)) (f n) := by
+  obtain ⟨d, hd⟩ : Provable 𝗣𝗔 (⌜(⊥ : Sentence ℒₒᵣ)⌝ : V) := by
+    simpa [Theory.Consistent] using h
+  refine ⟨fun n ↦ Nat.rec d (fun _ x ↦ x + 1) n, fun n ↦ ?_⟩
+  have hge : ∀ m : ℕ, d ≤ (Nat.rec d (fun _ x ↦ x + 1) m : V) := by
+    intro m
+    induction m with
+    | zero => exact le_def.mpr (Or.inl rfl)
+    | succ m ih => exact le_trans ih (by simp)
+  have hbad : ∀ m : ℕ, ¬ Good (Nat.rec d (fun _ x ↦ x + 1) m : V) := fun m H ↦ H d (hge m) hd
+  exact Or.inr (Or.inr ⟨hbad (n + 1), hbad n, by simp⟩)
+
 end Model
 
 /-! ## Order induction for arbitrary formulas, in any model of `𝗣𝗔` -/
@@ -263,6 +296,48 @@ theorem kreiselLT_delta1 : kreiselLTΔ.ProvablyProperOn 𝗣𝗔 :=
   HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} 𝗣𝗔 fun M _ _ ↦ by
     haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
     exact HierarchySymbol.Defined.proper (R := fun v : Fin 2 → M ↦ KreiselLT (v 0) (v 1))
+
+/-- **Sharpness of headline 2.**  Over `𝗣𝗔`, the transfinite-induction sentence for Kreisel's
+relation is *equivalent* to `Con(𝗣𝗔)`.  So headline 2 is not an artefact of a weak proof: what `𝗣𝗔`
+lacks is exactly its own consistency, and `TI kreiselLT good` is a natural `𝚷₁` axiom of that
+strength. -/
+theorem pa_proves_TI_iff_consistent : 𝗣𝗔 ⊢ ↑(TI kreiselLT good) 🡘 ↑𝗣𝗔.consistent :=
+  Arithmetic.complete.{0} 𝗣𝗔 _ fun M _ _ ↦ by
+    haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
+    exact models_TI_iff_consistent
+
+/-- Corollary of sharpness: adding `Con(𝗣𝗔)` is enough to prove the induction `𝗣𝗔` cannot.
+Contrast `pa_not_proves_TI_kreisel`. -/
+theorem pa_con_proves_TI_kreisel : 𝗣𝗔 ∪ 𝗣𝗔.Con ⊢ ↑(TI kreiselLT good) := by
+  haveI hsub : 𝗣𝗔 ⪯ 𝗣𝗔 ∪ 𝗣𝗔.Con := Entailment.WeakerThan.ofSubset Set.subset_union_left
+  haveI : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔 ∪ 𝗣𝗔.Con :=
+    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔) hsub
+  refine Arithmetic.complete.{0} _ _ fun M _ _ ↦ ?_
+  haveI : M↓[ℒₒᵣ] ⊧* 𝗣𝗔 := ModelsTheory.of_add_left M 𝗣𝗔 𝗣𝗔.Con
+  haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
+  have hc : Theory.Consistent M 𝗣𝗔 := by
+    have h : M↓[ℒₒᵣ] ⊧ (↑𝗣𝗔.consistent : Sentence ℒₒᵣ) :=
+      Theory.models (T := 𝗣𝗔 ∪ 𝗣𝗔.Con) M (by simp)
+    simpa [models_iff] using h
+  have : ∀ x : M, Good x := all_good_of_consistent hc
+  simpa [models_iff, TI] using fun _ ↦ this
+
+/-- **Headline 1, in its strongest form: the relation *is* `<` as a relation on `ℕ`.**  Not merely
+pointwise equivalent — equal.  Everything true of `<` on `ℕ` (well-foundedness, trichotomy, order
+type `ω`) therefore transfers verbatim, which is what makes the contrast with
+`pa_not_proves_TI_kreisel` sharp: `𝗣𝗔` also proves transfinite induction along the *syntactic* `<`
+(`pa_proves_TI_lt`), so the difference is in the notation, not the order. -/
+theorem kreiselLT_eq_lt : (fun x y : ℕ ↦ ℕ ⊧/![x, y] kreiselLT) = (· < ·) := by
+  funext x y
+  exact propext (kreiselLT_iff_lt x y)
+
+/-- Kreisel's relation is well-founded on `ℕ` — order type `ω`.  `𝗣𝗔` cannot prove transfinite
+induction along it all the same; cf. `descending_chain_of_inconsistent`, which exhibits the infinite
+descending chain that appears in any model where `𝗣𝗔` is inconsistent.  Such models exist by Gödel
+II, and that is precisely why `𝗣𝗔` cannot see the order type. -/
+theorem kreiselLT_wellFounded : WellFounded (fun x y : ℕ ↦ ℕ ⊧/![x, y] kreiselLT) := by
+  rw [kreiselLT_eq_lt]
+  exact Nat.lt_wfRel.wf
 
 /-! ## Known-answer sanity checks -/
 
