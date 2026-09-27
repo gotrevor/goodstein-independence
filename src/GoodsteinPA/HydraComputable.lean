@@ -436,4 +436,110 @@ theorem chopStep_spec (n c : ℕ) :
       rw [List.getElem?_map, List.getElem?_range hlt, Option.map_some, Option.getD_some,
         ofCode_toCode, toCode_node (chopC n (node es) :: _), List.map_cons, ← List.eraseIdx_map]
 
+theorem primrec_idx? : Primrec₂ idx? := Primrec.list_getElem?
+
+theorem primrec_chopStep : Primrec₂ chopStep := by
+  -- `p = (n, L)`
+  have hc : Primrec fun p : ℕ × List ℕ => p.2.length := Primrec.list_length.comp Primrec.snd
+  have hD : Primrec fun p : ℕ × List ℕ => childC p.2.length := primrec_childC.comp hc
+  have hI : Primrec fun p : ℕ × List ℕ => pickIdxC (childC p.2.length) := primrec_pickIdxC.comp hD
+  have hrest : Primrec fun p : ℕ × List ℕ =>
+      (childC p.2.length).eraseIdx (pickIdxC (childC p.2.length)) := primrec_eraseIdx.comp hD hI
+  -- `q = (p, ec)`
+  have hE : Primrec fun q : (ℕ × List ℕ) × ℕ => childC q.2 := primrec_childC.comp Primrec.snd
+  have hK : Primrec fun q : (ℕ × List ℕ) × ℕ => pickIdxC (childC q.2) := primrec_pickIdxC.comp hE
+  have hA : Primrec fun q : (ℕ × List ℕ) × ℕ =>
+      nodeC ((childC q.1.2.length).eraseIdx (pickIdxC (childC q.1.2.length)) ++
+        List.replicate (q.1.1 + 1) (nodeC ((childC q.2).eraseIdx (pickIdxC (childC q.2))))) :=
+    primrec_nodeC.comp (Primrec.list_append.comp (hrest.comp Primrec.fst)
+      (primrec_replicate.comp (Primrec.succ.comp (Primrec.fst.comp Primrec.fst))
+        (primrec_nodeC.comp (primrec_eraseIdx.comp hE hK))))
+  have hB : Primrec fun q : (ℕ × List ℕ) × ℕ =>
+      nodeC ((q.1.2[q.2]?).getD 0 :: (childC q.1.2.length).eraseIdx (pickIdxC (childC q.1.2.length))) :=
+    primrec_nodeC.comp (Primrec.list_cons.comp
+      (Primrec.option_getD.comp (Primrec.list_getElem?.comp (Primrec.snd.comp Primrec.fst)
+        Primrec.snd) (Primrec.const 0)) (hrest.comp Primrec.fst))
+  have hg2 : Primrec₂ fun (q : (ℕ × List ℕ) × ℕ) (f : ℕ) =>
+      if f = 0 then
+        nodeC ((childC q.1.2.length).eraseIdx (pickIdxC (childC q.1.2.length)) ++
+          List.replicate (q.1.1 + 1) (nodeC ((childC q.2).eraseIdx (pickIdxC (childC q.2)))))
+      else nodeC ((q.1.2[q.2]?).getD 0 ::
+        (childC q.1.2.length).eraseIdx (pickIdxC (childC q.1.2.length))) :=
+    (Primrec.ite (Primrec.eq.comp Primrec.snd (Primrec.const 0)) (hA.comp Primrec.fst)
+      (hB.comp Primrec.fst)).to₂
+  have hinner : Primrec₂ fun (p : ℕ × List ℕ) (ec : ℕ) =>
+      (Option.casesOn (idx? (childC ec) (pickIdxC (childC ec))) p.2.length fun f =>
+        if f = 0 then
+          nodeC ((childC p.2.length).eraseIdx (pickIdxC (childC p.2.length)) ++
+            List.replicate (p.1 + 1) (nodeC ((childC ec).eraseIdx (pickIdxC (childC ec)))))
+        else nodeC ((p.2[ec]?).getD 0 ::
+          (childC p.2.length).eraseIdx (pickIdxC (childC p.2.length))) : ℕ) :=
+    (Primrec.option_casesOn (primrec_idx?.comp hE hK) (hc.comp Primrec.fst) hg2).to₂
+  have hmain : Primrec fun p : ℕ × List ℕ => chopStep p.1 p.2 :=
+    Primrec.option_some.comp (Primrec.option_casesOn (primrec_idx?.comp hD hI) hc hinner)
+  exact hmain.to₂
+
+/-- **The regrowing chop is primitive recursive on codes.** -/
+theorem primrec_chopCC : Primrec₂ chopCC :=
+  Primrec.nat_strong_rec chopCC primrec_chopStep chopStep_spec
+
+/-! ### (f) The canonical move, and (g) the battle, on codes -/
+
+/-- `canonStep` on hydra codes. -/
+def canonC (n c : ℕ) : ℕ :=
+  Option.casesOn (idx? (childC c) (pickIdxC (childC c))) 0 fun f =>
+    if f = 0 then nodeC ((childC c).eraseIdx (pickIdxC (childC c))) else chopCC n c
+
+theorem canonC_spec (n c : ℕ) : canonC n c = toCode (canonStep n (ofCode c)) := by
+  set ds := (childC c).map ofCode
+  have hc : ofCode c = node ds := ofCode_eq c
+  have hds : ds.map toCode = childC c := map_toCode_childC c
+  unfold canonC chopCC
+  rw [← hds, pickIdxC_map]
+  simp only [idx?]
+  rw [List.getElem?_map, hc, canonStep.eq_1]
+  split
+  · rename_i hd
+    conv_lhs => rw [hd]
+    simp only [Option.map_none]
+    exact (toCode_eq_zero.mpr rfl).symm
+  · rename_i hd
+    conv_lhs => rw [hd]
+    simp only [Option.map_some, show toCode (node []) = 0 from toCode_eq_zero.mpr rfl, if_true]
+    rw [toCode_node, List.eraseIdx_map]
+  · rename_i g _ _
+    have hd : ds[pickIdx ds]? = some g := ‹_›
+    have hg : g = node [] → False := ‹_›
+    conv_lhs => rw [hd]
+    have hg0 : toCode g ≠ 0 := fun h => hg (toCode_eq_zero.mp h)
+    simp only [Option.map_some, hg0, if_false]
+
+theorem primrec_canonC : Primrec₂ canonC := by
+  have hD : Primrec fun p : ℕ × ℕ => childC p.2 := primrec_childC.comp Primrec.snd
+  have hI : Primrec fun p : ℕ × ℕ => pickIdxC (childC p.2) := primrec_pickIdxC.comp hD
+  have hg : Primrec₂ fun (p : ℕ × ℕ) (f : ℕ) =>
+      if f = 0 then nodeC ((childC p.2).eraseIdx (pickIdxC (childC p.2))) else chopCC p.1 p.2 :=
+    (Primrec.ite (Primrec.eq.comp Primrec.snd (Primrec.const 0))
+      (primrec_nodeC.comp (primrec_eraseIdx.comp (hD.comp Primrec.fst) (hI.comp Primrec.fst)))
+      (primrec_chopCC.comp (Primrec.fst.comp Primrec.fst) (Primrec.snd.comp Primrec.fst))).to₂
+  exact (Primrec.option_casesOn (primrec_idx?.comp hD hI) (Primrec.const 0) hg).to₂
+
+/-- The battle on codes: iterate `canonC`, move `k` at turn `k`. -/
+def battleC (m N : ℕ) : ℕ := Nat.rec (motive := fun _ => ℕ) m (fun k acc => canonC k acc) N
+
+theorem battleC_spec (m : ℕ) : ∀ N, battleC m N = toCode (battle (ofCode m) N)
+  | 0 => (toCode_ofCode m).symm
+  | N + 1 => by
+    show canonC N (battleC m N) = _
+    rw [battleC_spec m N, canonC_spec, ofCode_toCode]
+    rfl
+
+theorem primrec_battleC : Primrec₂ battleC :=
+  Primrec.nat_rec Primrec.id (primrec_canonC.comp (Primrec.fst.comp Primrec.snd)
+    (Primrec.snd.comp Primrec.snd)).to₂
+
+/-- **The canonical battle is computable on codes** (Astra's sufficient target). -/
+theorem computable_battle : Computable₂ fun m N => toCode (battle (ofCode m) N) :=
+  (primrec_battleC.to_comp).of_eq fun p => battleC_spec p.1 p.2
+
 end GoodsteinPA.Hydra
