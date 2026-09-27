@@ -57,3 +57,52 @@ Faithfulness notes for the statement author:
 - Work-in-progress files stay out of `GoodsteinPA.lean` until they compile.
 
 ## Log
+
+### 2026-09-27 — Phase 1 done: statements written, STOP for ratification
+
+`GoodsteinPA/Kreisel/Statement.lean` compiles (`lake env lean GoodsteinPA/Kreisel/Statement.lean`:
+only the five disclosed `sorry` warnings).  `lake build` still green, 1489 jobs.  The file is
+deliberately **not** imported from `GoodsteinPA.lean` yet (phase 2 does that).
+
+**Foundation API actually used** (found by grep, not guessed):
+
+* `LO.FirstOrder.Arithmetic.Bootstrapping.proof 𝗣𝗔 : 𝚫₁.Semisentence 2`, with
+  `Proof T d φ := DerivationOf T d {φ}` its ℕ-side meaning
+  (`Foundation/FirstOrder/Bootstrapping/Syntax/Proof/Basic.lean:478`).  This is the same
+  arithmetized predicate under `Theory.consistent = .mkPi (∼provabilityPred T ⊥)`, since
+  `provable T = “φ. ∃ d, !(proof T).sigma d φ”`.  Gödel II is
+  `Incompleteness/Second.lean:18 consistent_unprovable`.
+* `𝗣𝗔.Δ₁` is the *theorem-backed* instance `Arithmetic.PA_delta1Definable`
+  (`Incompleteness/InductionSchemeDelta1.lean:1380`) — no axiom.  It needed an explicit import.
+* `HierarchySymbol.Semiformula`'s `⋏ ⋎ ∼ ball rew` algebra plus the matching `ProperOn.*` closure
+  lemmas (`Arithmetic/Definability/Hierarchy.lean`) — this is what makes the `Δ₁` bookkeeping for
+  `goodΔ`/`kreiselLTΔ` mechanical in phase 2.
+
+**Definitions.**  `prfBotΔ : 𝚫₁.Semisentence 1` = `proof 𝗣𝗔` rewritten by
+`Rew.subst ![#0, ⌜(⊥ : Sentence ℒₒᵣ)⌝]`.  `goodΔ` = `ball ‘x. x + 1’ (∼ prfBotΔ #0)`, i.e.
+`∀ z ≤ x, ¬ prfBot z` (Foundation's `ball t` is `#0 < bShift t`, so the `+1` is what makes it `≤`).
+`kreiselLTΔ = (good x ⋏ good y ⋏ x<y) ⋎ (good x ⋏ ∼good y) ⋎ (∼good x ⋏ ∼good y ⋏ y<x)`.
+`good`/`kreiselLT`/`prfBot` are the `.val` plain formulas; headlines 1–3 use those.
+
+**Answer to KREISEL.md's "pick the notion" question (headline 4).**  Foundation has no
+`Primrec`-of-a-formula notion, and the naive *semantic* reading ("`fun x y ↦ x ≺ y` is primitive
+recursive") is **vacuous** here — headline 1 already says that relation is `<`.  So headline 4 is
+split into the two non-vacuous syntactic claims:
+* `kreiselLT_hierarchy` (already **proved**, `by simp`): the `Σ₁` and `Π₁` halves of `kreiselLTΔ`
+  really are in `Hierarchy 𝚺 1` / `Hierarchy 𝚷 1`.  True by construction.
+* `kreiselLT_delta1` (sorry): `kreiselLTΔ.ProvablyProperOn 𝗣𝗔`, i.e. `𝗣𝗔` proves the two halves
+  equivalent.  This is exactly Foundation's `Δ₁`-ness (it is the `isDelta1` field of `Theory.Δ₁`),
+  hence "primitive recursively decidable, provably so".
+
+**Binder-notation orientation, pinned by a passing `example`:** in `“x y. …”` the first binder is
+`#0`, and `!ψ a b = Rew.subst ![a,b] ψ` puts `a` at `#0`.  So `ℕ ⊧/![3,5] “x y. x < y”` holds.
+`TI r φ := “(∀ x, (∀ y, !r y x → !φ y) → !φ x) → ∀ x, !φ x”`, with `!r y x` reading "y ≺ x".
+
+**Five open obligations** (all in `src`, all phase 2): `kreiselLT_iff_lt`,
+`pa_not_proves_TI_kreisel`, `pa_proves_TI_lt`, `kreiselLT_delta1`, and the faithfulness unfolding
+`good_iff` (`ℕ ⊧/![x] good ↔ ∀ z ≤ x, ¬ Proof 𝗣𝗔 z ⌜⊥⌝`).  `good_iff` is *not* free from `simp`:
+the `∼` of a `𝚫₁` formula evaluates via its `𝚷₁` half, so it needs properness of `prfBotΔ`.  Two
+cheaper faithfulness checks **are** discharged as `example`s in the file (`ltRel` semantics, and
+`prfBot z ↔ Proof 𝗣𝗔 z ⌜⊥⌝`).
+
+Ratification line for Ren goes here. → **STOP.**
