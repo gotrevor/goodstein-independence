@@ -98,12 +98,18 @@ ratified headline from stage 1, with the lower bound `Escapes` as a hypothesis.
   the last CNF term (`ord (node cs) = ord (node rest) + ω^(ord c)`).
 - **P2** `t + len(h, t) ≥ hardy (ord h) t`, by induction along the battle: `hardy_succ`,
   `hardy_limit`, `hardy_monotone` (all in `Hardy.lean`).
-- **P3** escape by comparison with Goodstein: a hydra `ofONote (seqONote m 0)` has
-  `hardy (seqONote m 0) 2 = goodsteinLength m + 2` (`Domination.lean`), and
-  `goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing` already escapes every `f_o`.
-  The hydra's CODE is only elementarily larger than `m` (Cantor pairing ~ squares per child), so
-  `f_o(code) ≤ f_{o'}(m)` for a slightly larger `o'` — Astra's "against the actual numeric code".
-  Needs `ofONote` with `ord (ofONote α) = α`, and the code bound.
+- **P3** escape by comparison with Goodstein, on the **padded** family (Astra correction,
+  2026-09-26): `pad m := node (leaf :: leaf :: children of ofONote (seqONote m 0))`, ordinal
+  `seqONote m 0 + 2`.  The canonical strategy chops the two root heads at turns 0 and 1, so the
+  intended hydra starts at turn 2, and P2 at argument 0 gives
+  `len (pad m) ≥ hardy (seqONote m 0 + 2) 0 = hardy (seqONote m 0) 2 = goodsteinLength m + 2`
+  (`Domination.lean`).  ⚠️ The unpadded comparison is FALSE: `seqONote 3 0 = ω+1` dies in 4 moves
+  while `goodsteinLength 3 = 5`.  Then
+  `goodsteinLength_eventually_strictly_dominates_fixed_fastGrowing` escapes every `f_o`; the code
+  bound is proved for `pad m` (Cantor pairing ~ squares per child, elementary in `m`), so
+  `f_o(code) ≤ f_{o'}(m)` for a slightly larger `o'`.  Needs `ofONote` with
+  `ord (ofONote α) = α`.  The ratified battle and headline are unchanged; only the comparison
+  family is.
 
 **(B) `exists_sigma1_battle_def`.**  Foundation's `codeOfPartrec'` (arity 2) +
 `code_sigma_one` give a Σ₁ formula for any partial-recursive relation; the work is proving
