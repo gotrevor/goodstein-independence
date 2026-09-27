@@ -7,6 +7,7 @@ import GoodsteinPA.Statement
 import GoodsteinPA.Reduction
 import GoodsteinPA.Bridge
 import GoodsteinPA.Domination
+import GoodsteinPA.WainerGeneral
 
 /-!
 # Axiom audit — the reference point of truth
@@ -50,3 +51,13 @@ reconciles each `@[goodstein_blueprint]` node's `collectAxioms` footprint agains
 /-- info: 'GoodsteinPA.goodsteinSentence_faithful' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms GoodsteinPA.goodsteinSentence_faithful
+
+-- Wainer's bound, general (ROADMAP-EPSILON0 stage 1): PA-provable Π₂ ⇒ witness below some `f_o`, `o < ε₀`.
+/-- info: 'GoodsteinPA.Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing
+
+-- The Goodstein bound re-derived as a corollary of the general theorem.
+/-- info: 'GoodsteinPA.Wainer.wainer_bound_of_pa_proves_goodstein_via_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Wainer.wainer_bound_of_pa_proves_goodstein_via_general
