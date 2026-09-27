@@ -91,10 +91,10 @@ theorem primrec_sel3 : Primrec (fun q : ℕ × ℕ × ℕ × ℕ => sel3 q.1 q.2
       (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
       (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))
 
-theorem computable_sel3 {α : Type*} [Primcodable α] {r x0 x1 x2 : α → ℕ} (hr : Computable r)
-    (h0 : Computable x0) (h1 : Computable x1) (h2 : Computable x2) :
-    Computable fun a => sel3 (r a) (x0 a) (x1 a) (x2 a) :=
-  primrec_sel3.to_comp.comp (hr.pair (h0.pair (h1.pair h2)))
+theorem primrec_sel3' {α : Type*} [Primcodable α] {r x0 x1 x2 : α → ℕ} (hr : Primrec r)
+    (h0 : Primrec x0) (h1 : Primrec x1) (h2 : Primrec x2) :
+    Primrec fun a => sel3 (r a) (x0 a) (x1 a) (x2 a) :=
+  primrec_sel3.comp (hr.pair (h0.pair (h1.pair h2)))
 
 theorem sel3_ordCode (o : Ordering) (x0 x1 x2 : ℕ) :
     sel3 (ordCode o) x0 x1 x2 = match o with | .lt => x0 | .eq => x1 | .gt => x2 := by
@@ -140,51 +140,46 @@ theorem insStep_spec (e c : ℕ) : insStep e ((List.range c).map (insC e)) = som
       simp only [insertTerm, hcmp, encodeONote, encodeONote_decodeONote] <;>
       first | rfl | simp [Nat.pair_unpair]
 
-theorem computable_insStep : Computable₂ insStep := by
-  have hlen : Computable fun p : ℕ × List ℕ => p.2.length :=
-    Computable.list_length.comp Computable.snd
-  have hm : Computable fun p : ℕ × List ℕ => Nat.unpair (p.2.length - 1) :=
-    Primrec.unpair.to_comp.comp (Primrec.nat_sub.to_comp.comp hlen (Computable.const 1))
-  have ha : Computable fun p : ℕ × List ℕ => (Nat.unpair (p.2.length - 1)).1 :=
-    Computable.fst.comp hm
-  have hmm : Computable fun p : ℕ × List ℕ => Nat.unpair (Nat.unpair (p.2.length - 1)).2 :=
-    Primrec.unpair.to_comp.comp (Computable.snd.comp hm)
-  have hk : Computable fun p : ℕ × List ℕ => (Nat.unpair (Nat.unpair (p.2.length - 1)).2).1 :=
-    Computable.fst.comp hmm
-  have hb : Computable fun p : ℕ × List ℕ => (Nat.unpair (Nat.unpair (p.2.length - 1)).2).2 :=
-    Computable.snd.comp hmm
-  have hpair : Computable₂ Nat.pair := Primrec₂.natPair.to_comp
-  have hr : Computable fun p : ℕ × List ℕ => Cnat (Nat.pair p.1 (Nat.unpair (p.2.length - 1)).1) :=
-    computable_Cnat.comp (hpair.comp Computable.fst ha)
-  have hL : Computable fun p : ℕ × List ℕ =>
+theorem primrec_insStep : Primrec₂ insStep := by
+  have hlen : Primrec fun p : ℕ × List ℕ => p.2.length := Primrec.list_length.comp Primrec.snd
+  have hm : Primrec fun p : ℕ × List ℕ => Nat.unpair (p.2.length - 1) :=
+    Primrec.unpair.comp (Primrec.nat_sub.comp hlen (Primrec.const 1))
+  have ha : Primrec fun p : ℕ × List ℕ => (Nat.unpair (p.2.length - 1)).1 := Primrec.fst.comp hm
+  have hmm : Primrec fun p : ℕ × List ℕ => Nat.unpair (Nat.unpair (p.2.length - 1)).2 :=
+    Primrec.unpair.comp (Primrec.snd.comp hm)
+  have hk : Primrec fun p : ℕ × List ℕ => (Nat.unpair (Nat.unpair (p.2.length - 1)).2).1 :=
+    Primrec.fst.comp hmm
+  have hb : Primrec fun p : ℕ × List ℕ => (Nat.unpair (Nat.unpair (p.2.length - 1)).2).2 :=
+    Primrec.snd.comp hmm
+  have hpair : Primrec₂ Nat.pair := Primrec₂.natPair
+  have hr : Primrec fun p : ℕ × List ℕ => Cnat (Nat.pair p.1 (Nat.unpair (p.2.length - 1)).1) :=
+    primrec_Cnat.comp (hpair.comp Primrec.fst ha)
+  have hL : Primrec fun p : ℕ × List ℕ =>
       (p.2[(Nat.unpair (Nat.unpair (p.2.length - 1)).2).2]?).getD 0 :=
-    Computable.option_getD (Computable.list_getElem?.comp Computable.snd hb) (Computable.const 0)
-  have hsucc : Computable Nat.succ := Primrec.succ.to_comp
-  have x0 : Computable fun p : ℕ × List ℕ =>
+    Primrec.option_getD.comp (Primrec.list_getElem?.comp Primrec.snd hb) (Primrec.const 0)
+  have x0 : Primrec fun p : ℕ × List ℕ =>
       Nat.pair (Nat.unpair (p.2.length - 1)).1
         (Nat.pair (Nat.unpair (Nat.unpair (p.2.length - 1)).2).1
           ((p.2[(Nat.unpair (Nat.unpair (p.2.length - 1)).2).2]?).getD 0)) + 1 :=
-    hsucc.comp (hpair.comp ha (hpair.comp hk hL))
-  have x1 : Computable fun p : ℕ × List ℕ =>
+    Primrec.succ.comp (hpair.comp ha (hpair.comp hk hL))
+  have x1 : Primrec fun p : ℕ × List ℕ =>
       Nat.pair (Nat.unpair (p.2.length - 1)).1
         (Nat.pair ((Nat.unpair (Nat.unpair (p.2.length - 1)).2).1 + 1)
           (Nat.unpair (Nat.unpair (p.2.length - 1)).2).2) + 1 :=
-    hsucc.comp (hpair.comp ha (hpair.comp (hsucc.comp hk) hb))
-  have x2 : Computable fun p : ℕ × List ℕ => Nat.pair p.1 (Nat.pair 0 p.2.length) + 1 :=
-    hsucc.comp (hpair.comp Computable.fst (hpair.comp (Computable.const 0) hlen))
-  have hz : Computable fun p : ℕ × List ℕ => decide (p.2.length = 0) :=
-    (Primrec.eq.decide).to_comp.comp hlen (Computable.const 0)
-  have hmain := Computable.option_some.comp
-    (Computable.cond hz (hsucc.comp (hpair.comp Computable.fst (Computable.const (Nat.pair 0 0))))
-      (computable_sel3 hr x0 x1 x2))
-  have h2 : Computable fun p : ℕ × List ℕ => insStep p.1 p.2 := hmain.of_eq fun p => by
-    simp only [insStep]
-    by_cases h0 : p.2.length = 0 <;> simp [h0]
-  exact h2.to₂
+    Primrec.succ.comp (hpair.comp ha (hpair.comp (Primrec.succ.comp hk) hb))
+  have x2 : Primrec fun p : ℕ × List ℕ => Nat.pair p.1 (Nat.pair 0 p.2.length) + 1 :=
+    Primrec.succ.comp (hpair.comp Primrec.fst (hpair.comp (Primrec.const 0) hlen))
+  have hmain : Primrec fun p : ℕ × List ℕ => insStep p.1 p.2 :=
+    (Primrec.option_some.comp (Primrec.ite (Primrec.eq.comp hlen (Primrec.const 0))
+      (Primrec.succ.comp (hpair.comp Primrec.fst (Primrec.const (Nat.pair 0 0))))
+      (primrec_sel3' hr x0 x1 x2))).of_eq fun p => by
+        simp only [insStep]
+        by_cases h0 : p.2.length = 0 <;> simp [h0]
+  exact hmain.to₂
 
-/-- **`insertTerm` is computable on ONote codes.** -/
-theorem computable_insC : Computable₂ insC :=
-  Computable.nat_strong_rec insC computable_insStep insStep_spec
+/-- **`insertTerm` is primitive recursive on ONote codes.** -/
+theorem primrec_insC : Primrec₂ insC :=
+  Primrec.nat_strong_rec insC primrec_insStep insStep_spec
 
 /-! ### (c) The ordinal of a hydra, on codes -/
 
@@ -217,27 +212,25 @@ theorem ordStep_spec (c : ℕ) : ordStep ((List.range c).map ordC) = some (ordC 
     simp only [Option.map_some, Option.getD_some]
     simp [insC, ordC, ord_ofCode_succ, decodeONote_encodeONote]
 
-theorem computable_ordStep : Computable ordStep := by
-  have hlen : Computable fun L : List ℕ => L.length := Computable.list_length
-  have hm : Computable fun L : List ℕ => Nat.unpair (L.length - 1) :=
-    Primrec.unpair.to_comp.comp (Primrec.nat_sub.to_comp.comp hlen (Computable.const 1))
-  have hA : Computable fun L : List ℕ => (L[(Nat.unpair (L.length - 1)).1]?).getD 0 :=
-    Computable.option_getD (Computable.list_getElem?.comp Computable.id (Computable.fst.comp hm))
-      (Computable.const 0)
-  have hB : Computable fun L : List ℕ => (L[(Nat.unpair (L.length - 1)).2]?).getD 0 :=
-    Computable.option_getD (Computable.list_getElem?.comp Computable.id (Computable.snd.comp hm))
-      (Computable.const 0)
-  have hz : Computable fun L : List ℕ => decide (L.length = 0) :=
-    (Primrec.eq.decide).to_comp.comp hlen (Computable.const 0)
-  have hmain := Computable.option_some.comp
-    (Computable.cond hz (Computable.const 0) (computable_insC.comp hA hB))
-  exact hmain.of_eq fun L => by
-    simp only [ordStep]
-    by_cases h0 : L.length = 0 <;> simp [h0]
+theorem primrec_ordStep : Primrec ordStep := by
+  have hlen : Primrec fun L : List ℕ => L.length := Primrec.list_length
+  have hm : Primrec fun L : List ℕ => Nat.unpair (L.length - 1) :=
+    Primrec.unpair.comp (Primrec.nat_sub.comp hlen (Primrec.const 1))
+  have hA : Primrec fun L : List ℕ => (L[(Nat.unpair (L.length - 1)).1]?).getD 0 :=
+    Primrec.option_getD.comp (Primrec.list_getElem?.comp Primrec.id (Primrec.fst.comp hm))
+      (Primrec.const 0)
+  have hB : Primrec fun L : List ℕ => (L[(Nat.unpair (L.length - 1)).2]?).getD 0 :=
+    Primrec.option_getD.comp (Primrec.list_getElem?.comp Primrec.id (Primrec.snd.comp hm))
+      (Primrec.const 0)
+  exact (Primrec.option_some.comp (Primrec.ite (Primrec.eq.comp hlen (Primrec.const 0))
+    (Primrec.const 0) (primrec_insC.comp hA hB))).of_eq fun L => by
+      simp only [ordStep]
+      by_cases h0 : L.length = 0 <;> simp [h0]
 
-theorem computable_ordC : Computable ordC := by
-  have := Computable.nat_strong_rec (fun (_ : Unit) c => ordC c)
-    (computable_ordStep.comp Computable.snd).to₂ (fun _ c => ordStep_spec c)
-  exact this.comp (Computable.const ()) Computable.id
+/-- **The Kirby–Paris ordinal is primitive recursive on hydra codes.** -/
+theorem primrec_ordC : Primrec ordC := by
+  have := Primrec.nat_strong_rec (fun (_ : Unit) c => ordC c)
+    (primrec_ordStep.comp Primrec.snd).to₂ (fun _ c => ordStep_spec c)
+  exact this.comp (Primrec.const ()) Primrec.id
 
 end GoodsteinPA.Hydra
