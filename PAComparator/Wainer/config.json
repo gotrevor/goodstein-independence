@@ -1,6 +1,6 @@
 {
-  "challenge_module": "Comparator.Wainer.Challenge",
-  "solution_module": "Comparator.Wainer.Solution",
+  "challenge_module": "PAComparator.Wainer.Challenge",
+  "solution_module": "PAComparator.Wainer.Solution",
   "theorem_names": [
     "GoodsteinPA.Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing"
   ],

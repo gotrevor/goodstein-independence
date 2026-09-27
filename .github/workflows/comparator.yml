@@ -7,7 +7,7 @@ name: Comparator
 # trusts our elaborator, our oleans, and any macro/tactic/set_option in the project.
 #
 # comparator certifies the *statements*, from outside:
-#   1. Comparator/Goodstein/Challenge.lean (+ its Support/ modules) imports ONLY Mathlib and
+#   1. PAComparator/<Result>/Challenge.lean (+ its Support/ modules) imports ONLY Mathlib and
 #      Foundation, re-declares every repo-owned definition in the statement closure verbatim, and
 #      states the headlines with `sorry`. Those files are the entire human audit surface. The trust
 #      base is Mathlib + Foundation (the FormalizedFormalLogic library the development is built on);
@@ -140,7 +140,7 @@ jobs:
         run: |
           lake exe cache get
           lake build GoodsteinPA
-          lake build Comparator
+          lake build PAComparator
 
       # --- run every challenge/solution pair -------------------------------------------------
       - name: Verify every result under comparator (Lean kernel + nanoda)
@@ -149,7 +149,7 @@ jobs:
           export PATH="$HOME/verifier-bin:$PATH"
           fail=0
           shopt -s nullglob
-          configs=(Comparator/*/config.json)
+          configs=(PAComparator/*/config.json)
           if [ ${#configs[@]} -eq 0 ]; then
             echo "::error::no comparator configs found -- the gate would pass vacuously"; exit 1
           fi

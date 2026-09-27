@@ -192,8 +192,7 @@ theorem pair_lt_pair {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ < a₂) (hb : b₁ <
     Nat.pair a₁ b₁ < Nat.pair a₂ b₂ :=
   lt_trans (Nat.pair_lt_pair_left b₁ ha) (Nat.pair_lt_pair_right a₂ hb)
 
-theorem computable_cmpStep : Computable cmpStep := by
-  apply Primrec.to_comp
+theorem primrec_cmpStep : Primrec cmpStep := by
   have c1 : PrimrecPred (fun L : List ℕ => (Nat.unpair L.length).1 = 0) :=
     Primrec.eq.comp (Primrec.fst.comp (Primrec.unpair.comp Primrec.list_length)) (Primrec.const 0)
   have c2 : PrimrecPred (fun L : List ℕ => (Nat.unpair L.length).2 = 0) :=
@@ -219,6 +218,8 @@ theorem computable_cmpStep : Computable cmpStep := by
   exact Primrec.ite c1
     (Primrec.ite c2 (Primrec.const (some 1)) (Primrec.const (some 0)))
     (Primrec.ite c2 (Primrec.const (some 2)) helse)
+
+theorem computable_cmpStep : Computable cmpStep := primrec_cmpStep.to_comp
 
 theorem cmpStep_spec (m : ℕ) : cmpStep ((List.range m).map Cnat) = some (Cnat m) := by
   unfold cmpStep;
@@ -253,6 +254,12 @@ theorem computable_Cnat : Computable Cnat := by
     have h_step_spec : ∀ n, cmpStep ((List.range n).map Cnat) = some (Cnat n) := cmpStep_spec
     exact Computable.nat_strong_rec ( fun ( _ : Unit ) n => Cnat n ) ( h_step.comp Computable.snd |> Computable.to₂ ) ( fun _ n => h_step_spec n ) |> fun h => h.comp ( Computable.const () ) Computable.id
   exact h_rec_comp
+
+/-- `Cnat` is in fact primitive recursive (the strong recursion's step is). -/
+theorem primrec_Cnat : Primrec Cnat := by
+  have := Primrec.nat_strong_rec (fun (_ : Unit) n => Cnat n)
+    (primrec_cmpStep.comp Primrec.snd).to₂ (fun _ n => cmpStep_spec n)
+  exact this.comp (Primrec.const ()) Primrec.id
 
 /-! ### Computability of the `NF` predicate (needed to enumerate `NONote`) -/
 

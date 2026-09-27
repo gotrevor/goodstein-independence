@@ -3,7 +3,7 @@ Copyright (c) 2026 Trevor Morris. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
-import Comparator.Goodstein.Support.InternalBump
+import PAComparator.Goodstein.Support.InternalBump
 
 /-!
 # Comparator challenge support — arithmetization brick 5 (the internal Goodstein run)

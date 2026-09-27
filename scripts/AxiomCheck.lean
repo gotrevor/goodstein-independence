@@ -8,6 +8,7 @@ import GoodsteinPA.Reduction
 import GoodsteinPA.Bridge
 import GoodsteinPA.Domination
 import GoodsteinPA.WainerGeneral
+import GoodsteinPA.HydraComputable
 
 /-!
 # Axiom audit — the reference point of truth
@@ -61,3 +62,14 @@ reconciles each `@[goodstein_blueprint]` node's `collectAxioms` footprint agains
 /-- info: 'GoodsteinPA.Wainer.wainer_bound_of_pa_proves_goodstein_via_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms GoodsteinPA.Wainer.wainer_bound_of_pa_proves_goodstein_via_general
+
+-- Stage 2: PA does not prove that the canonical hydra battle terminates (every faithful Σ₁ encoding).
+/-- info: 'GoodsteinPA.Hydra.pa_not_proves_hydra' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Hydra.pa_not_proves_hydra
+
+-- Stage 2 anti-vacuity: a Σ₁ definition of the battle exists.  Inherits the one `native_decide`
+-- of `ONoteComp.cmpStep_spec` (computability of `ONote.cmp`, via `primrec_Cnat`).
+/-- info: 'GoodsteinPA.Hydra.exists_sigma1_battle_def' depends on axioms: [propext, Classical.choice, Quot.sound, GoodsteinPA.ONoteComp.cmpStep_spec._native.native_decide.ax_1_5] -/
+#guard_msgs (whitespace := lax) in
+#print axioms GoodsteinPA.Hydra.exists_sigma1_battle_def
