@@ -54,7 +54,7 @@ jobs:
       # build step below overwrites its lean-toolchain with THIS repo's, so the binary is built on
       # our exact toolchain and accepts our oleans. The cache key hashes our lean-toolchain, so a
       # patch-version bump still rotates the cache even when this tag does not change.
-      LEAN4EXPORT_TAG: v4.31.0
+      LEAN4EXPORT_TAG: v4.34.0
       # The other three verifier components ship no usable release tags (landrun's tags stop at
       # v0.1.9 while it reports 0.1.15), so they are pinned by SHA. They used to be cloned from
       # `main`, which combined with the cache below was worse than merely irreproducible -- it was

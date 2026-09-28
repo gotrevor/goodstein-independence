@@ -29,7 +29,7 @@ the witness into a battle that has ended by then, and escape says it has not.
 
 namespace GoodsteinPA.Hydra
 
-open LO LO.FirstOrder ONote
+open FFL FFL.FirstOrder ONote
 open LeanGallery.Logic.Hydra
 
 /-- The lower bound the grind must deliver: for every `o < ε₀` there are arbitrarily large codes

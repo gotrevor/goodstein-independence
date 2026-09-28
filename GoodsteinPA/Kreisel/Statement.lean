@@ -1,6 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Incompleteness.InductionSchemeDelta1
+public import GoodsteinPA.ToFoundation.Compat
+public import Foundation.FirstOrder.Incompleteness.Definability
 public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Second
 
@@ -49,8 +50,9 @@ come with them.  `scripts/AxiomCheck.lean` asserts the axiom sets; `KREISEL.md` 
 
 namespace GoodsteinPA.Kreisel
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.Bootstrapping
-open LO.FirstOrder.Arithmetic.HierarchySymbol
+open FFL FFL.FirstOrder FFL.FirstOrder.Arithmetic FFL.FirstOrder.Arithmetic.Bootstrapping
+open FFL.FirstOrder.Bounding.HierarchySymbol
+open scoped FFL.FirstOrder.Bounding
 
 /-! ## The relation -/
 
@@ -65,7 +67,7 @@ noncomputable abbrev prfBot : Semisentence ℒₒᵣ 1 := prfBotΔ.val
 /-- `goodΔ x` : `∀ z ≤ x, ¬ prfBot z` — no `𝗣𝗔`-proof of `⊥` is coded at or below `x`.
 Bounded, hence still `Δ₁`. -/
 noncomputable def goodΔ : 𝚫₁.Semisentence 1 :=
-  HierarchySymbol.Semiformula.ball ‘x. x + 1’ (∼ prfBotΔ.rew (Rew.subst ![#0]))
+  Bounding.HierarchySymbol.Semiformula.arithmetic_ball ‘x. x + 1’ (∼ prfBotΔ.rew (Rew.subst ![#0]))
 
 /-- `goodΔ` as a plain formula; this is the `φ` of headline 2. -/
 noncomputable abbrev good : Semisentence ℒₒᵣ 1 := goodΔ.val
@@ -127,15 +129,15 @@ lemma prfBotΔ_rew_properOn : ((prfBotΔ.rew (Rew.subst ![#0]) : 𝚫₁.Semisen
 instance good.defined : 𝚫₁-Predicate[V] Good via goodΔ :=
   .mk ⟨by
         unfold goodΔ
-        exact HierarchySymbol.Semiformula.ProperOn.ball (t := ‘x. x + 1’)
+        exact Bounding.HierarchySymbol.Semiformula.ProperOn.ball (R := Semiformula.Operator.LT.lt) (by rfl) (t := ‘x. x + 1’)
           (prfBotΔ_rew_properOn (V := V)).neg, by
         intro v
-        simp only [goodΔ, HierarchySymbol.Semiformula.val_ball, Good]
+        simp only [goodΔ, Bounding.HierarchySymbol.Semiformula.val_arithmetic_ball, Good]
         simp [(prfBotΔ_rew_properOn (V := V)).eval_neg, lt_succ_iff_le]
         ⟩
 
 lemma goodΔ_properOn : (goodΔ : 𝚫₁.Semisentence 1).ProperOn V :=
-  HierarchySymbol.Defined.proper (R := fun v : Fin 1 → V ↦ Good (v 0))
+  Bounding.HierarchySymbol.Defined.proper (R := fun v : Fin 1 → V ↦ Good (v 0))
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma ltΔ_properOn : (ltΔ : 𝚫₁.Semisentence 2).ProperOn V := by intro e; simp [ltΔ]
@@ -152,8 +154,8 @@ instance kreiselLT.defined : 𝚫₁-Relation[V] KreiselLT via kreiselLTΔ :=
             ((((goodΔ_properOn (V := V)).rew _).neg).and
               ((((goodΔ_properOn (V := V)).rew _).neg).and (gtΔ_properOn (V := V))))), by
         intro v
-        simp only [kreiselLTΔ, KreiselLT, HierarchySymbol.Semiformula.val_or,
-          HierarchySymbol.Semiformula.val_and]
+        simp only [kreiselLTΔ, KreiselLT, Bounding.HierarchySymbol.Semiformula.val_or,
+          Bounding.HierarchySymbol.Semiformula.val_and]
         simp [((goodΔ_properOn (V := V)).rew (Rew.subst ![#1])).eval_neg,
           ((goodΔ_properOn (V := V)).rew (Rew.subst ![#0])).eval_neg, ltΔ, gtΔ]⟩
 
@@ -172,7 +174,7 @@ lemma consistent_of_all_good (h : ∀ x : V, Good x) : ¬ Provable 𝗣𝗔 (⌜
 
 /-- **The internal half of headline 2**, in every model of `𝗜𝚺₁`: transfinite induction along
 Kreisel's relation for the single formula `good` implies the consistency of `𝗣𝗔`. -/
-lemma models_TI_imp_consistent : V↓[ℒₒᵣ] ⊧ (TI kreiselLT good 🡒 ↑𝗣𝗔.consistent) := by
+lemma models_TI_imp_consistent : V↓[ℒₒᵣ] ⊧ (TI kreiselLT good 🡒 𝗣𝗔.consistent.val) := by
   simp only [models_iff, TI]
   have H : ((∀ x : V, (∀ y : V, KreiselLT y x → Good y) → Good x) → ∀ x : V, Good x) →
       Theory.Consistent V 𝗣𝗔 := fun h ↦ consistent_of_all_good (h fun x hx ↦ progressive_good x hx)
@@ -197,7 +199,7 @@ lemma all_good_of_consistent (h : Theory.Consistent V 𝗣𝗔) : ∀ x : V, Goo
 because it makes the conclusion `∀ x, good x` outright true.  So over `𝗣𝗔` the sentence
 `TI kreiselLT good` is **equivalent** to `Con(𝗣𝗔)` — headline 2's failure is exactly a consistency
 gap, no more and no less. -/
-lemma models_TI_iff_consistent : V↓[ℒₒᵣ] ⊧ (TI kreiselLT good 🡘 ↑𝗣𝗔.consistent) := by
+lemma models_TI_iff_consistent : V↓[ℒₒᵣ] ⊧ (TI kreiselLT good 🡘 𝗣𝗔.consistent.val) := by
   simp only [models_iff, TI]
   have H : (((∀ x : V, (∀ y : V, KreiselLT y x → Good y) → Good x) → ∀ x : V, Good x) ↔
       Theory.Consistent V 𝗣𝗔) :=
@@ -265,11 +267,11 @@ theorem kreiselLT_iff_lt : ∀ x y : ℕ, (ℕ ⊧/![x, y] kreiselLT) ↔ x < y 
 /-- **Headline 2.**  `𝗣𝗔` does not prove transfinite induction along `kreiselLT`, already for the
 single instance `φ := good`.  Sketch: inside `𝗣𝗔`, `good` is progressive along `kreiselLT`
 (if `¬ good x` then `y := x + 1` satisfies `¬ good y` and `y ≺ x`), so `TI kreiselLT good` yields
-`∀ x, good x`, which `𝗣𝗔` proves equivalent to `𝗣𝗔.consistent`; Gödel II
+`∀ x, good x`, which `𝗣𝗔` proves equivalent to `𝗣𝗔.consistent.val`; Gödel II
 (`consistent_unprovable`) finishes. -/
 theorem pa_not_proves_TI_kreisel : 𝗣𝗔 ⊬ ↑(TI kreiselLT good) := by
   intro h
-  have key : 𝗣𝗔 ⊢ ↑(TI kreiselLT good) 🡒 ↑𝗣𝗔.consistent :=
+  have key : 𝗣𝗔 ⊢ ↑(TI kreiselLT good) 🡒 𝗣𝗔.consistent.val :=
     Arithmetic.complete.{0} 𝗣𝗔 _ fun M _ _ ↦ by
       haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
       exact models_TI_imp_consistent
@@ -293,15 +295,15 @@ theorem kreiselLT_hierarchy :
 halves equivalent.  Together with `kreiselLT_hierarchy` this is the precise content of "the
 relation is primitive recursive". -/
 theorem kreiselLT_delta1 : kreiselLTΔ.ProvablyProperOn 𝗣𝗔 :=
-  HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} 𝗣𝗔 fun M _ _ ↦ by
+  Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} 𝗣𝗔 fun M _ _ ↦ by
     haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
-    exact HierarchySymbol.Defined.proper (R := fun v : Fin 2 → M ↦ KreiselLT (v 0) (v 1))
+    exact Bounding.HierarchySymbol.Defined.proper (R := fun v : Fin 2 → M ↦ KreiselLT (v 0) (v 1))
 
 /-- **Sharpness of headline 2.**  Over `𝗣𝗔`, the transfinite-induction sentence for Kreisel's
 relation is *equivalent* to `Con(𝗣𝗔)`.  So headline 2 is not an artefact of a weak proof: what `𝗣𝗔`
 lacks is exactly its own consistency, and `TI kreiselLT good` is a natural `𝚷₁` axiom of that
 strength. -/
-theorem pa_proves_TI_iff_consistent : 𝗣𝗔 ⊢ ↑(TI kreiselLT good) 🡘 ↑𝗣𝗔.consistent :=
+theorem pa_proves_TI_iff_consistent : 𝗣𝗔 ⊢ ↑(TI kreiselLT good) 🡘 𝗣𝗔.consistent.val :=
   Arithmetic.complete.{0} 𝗣𝗔 _ fun M _ _ ↦ by
     haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
     exact models_TI_iff_consistent
@@ -316,7 +318,7 @@ theorem pa_con_proves_TI_kreisel : 𝗣𝗔 ∪ 𝗣𝗔.Con ⊢ ↑(TI kreiselL
   haveI : M↓[ℒₒᵣ] ⊧* 𝗣𝗔 := ModelsTheory.of_add_left M 𝗣𝗔 𝗣𝗔.Con
   haveI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory (U := 𝗣𝗔) inferInstance
   have hc : Theory.Consistent M 𝗣𝗔 := by
-    have h : M↓[ℒₒᵣ] ⊧ (↑𝗣𝗔.consistent : Sentence ℒₒᵣ) :=
+    have h : M↓[ℒₒᵣ] ⊧ (𝗣𝗔.consistent.val : Sentence ℒₒᵣ) :=
       Theory.models (T := 𝗣𝗔 ∪ 𝗣𝗔.Con) M (by simp)
     simpa [models_iff] using h
   have : ∀ x : M, Good x := all_good_of_consistent hc
@@ -352,7 +354,7 @@ the properness of `prfBotΔ` (which comes from Foundation's `Proof.defined`).  P
 theorem good_iff (x : ℕ) :
     (ℕ ⊧/![x] good) ↔ ∀ z ≤ x, ¬ Proof 𝗣𝗔 z (⌜(⊥ : Sentence ℒₒᵣ)⌝ : ℕ) := by
   have h : (ℕ ⊧/![x] good) ↔ Good x :=
-    HierarchySymbol.Defined.iff (v := ![x]) (R := fun v : Fin 1 → ℕ ↦ Good (v 0)) (φ := goodΔ)
+    Bounding.HierarchySymbol.Defined.iff (v := ![x]) (R := fun v : Fin 1 → ℕ ↦ Good (v 0)) (φ := goodΔ)
   rw [h]
   constructor
   · intro H z hz; exact H z (le_def.mpr (by omega))

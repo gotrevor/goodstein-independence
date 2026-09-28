@@ -21,7 +21,7 @@ Paris–Harrington witness exceeds `f_o(x)`.
 
 namespace GoodsteinPA.PH
 
-open LO LO.FirstOrder ONote
+open FFL FFL.FirstOrder ONote
 
 /-- The lower bound the grind must deliver. -/
 def Escapes : Prop :=

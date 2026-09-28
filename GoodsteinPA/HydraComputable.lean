@@ -549,7 +549,7 @@ theorem computable_battle : Computable₂ fun m N => toCode (battle (ofCode m) N
 /-! ### (h) A Σ₁ definition of the battle exists -/
 
 section Existence
-open LO LO.FirstOrder
+open FFL FFL.FirstOrder
 
 /-- The battle's final-code function on argument vectors `![N, m]`. -/
 def battleVec (v : List.Vector ℕ 2) : Part ℕ := Part.some (battleC (v.get 1) (v.get 0))

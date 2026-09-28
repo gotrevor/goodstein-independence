@@ -22,7 +22,7 @@ lower bound (`PH/LB/`); `exists_sigma1_ph_def` is the primitive-recursive encodi
 
 namespace GoodsteinPA.PH
 
-open LO LO.FirstOrder
+open FFL FFL.FirstOrder
 
 /-- **PA does not prove Paris–Harrington**: for every Σ₁ `φ` defining `PHx` pointwise in ℕ, PA does
 not prove `∀ x, ∃ N, φ(x, N)`. -/

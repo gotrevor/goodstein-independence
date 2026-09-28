@@ -30,7 +30,7 @@ reads the true atom back as `ℕ ⊧/![n, m] φ` instead of through `igoodstein`
 
 namespace GoodsteinPA.Wainer
 
-open LO LO.FirstOrder LO.FirstOrder.ArithmeticTerm ONote Ordinal
+open FFL FFL.FirstOrder FFL.FirstOrder.ArithmeticTerm ONote Ordinal
 open GoodsteinPA.OperatorZeh GoodsteinPA.OperatorZinfty
 open GoodsteinPA.E1EmbeddingGrind GoodsteinPA.ReadoffValueGate
 
@@ -245,7 +245,7 @@ theorem pa_provable_pi2_eventually_witnessed_below_fastGrowing
 
 /-- The Σ₁ matrix of `goodsteinSentence`: `igoodstein m N = 0`. -/
 noncomputable def goodsteinMatrix : Semisentence ℒₒᵣ 2 :=
-  (↑(LO.FirstOrder.Arithmetic.igoodsteinDef) : Semisentence ℒₒᵣ 3)/[(‘0’ : Semiterm ℒₒᵣ Empty 2), #1, #0]
+  (↑(FFL.FirstOrder.Arithmetic.igoodsteinDef) : Semisentence ℒₒᵣ 3)/[(‘0’ : Semiterm ℒₒᵣ Empty 2), #1, #0]
 
 theorem goodsteinSentence_eq_pi2 : GoodsteinPA.goodsteinSentence = ∀⁰ ∃⁰ goodsteinMatrix := rfl
 

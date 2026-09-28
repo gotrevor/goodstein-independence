@@ -179,7 +179,7 @@ theorem escapes : Escapes := by
     _ ≤ hardy (oadd P 1 0) (hardy (oadd (ofNat 3) 1 0) k) := hardy_monotone _ hcode
 
 section Headline
-open LO LO.FirstOrder
+open FFL FFL.FirstOrder
 
 /-- **PA does not prove that the canonical hydra battle terminates** (ratified 2026-09-26): for
 every Σ₁ formula `φ` defining the battle pointwise in ℕ, `𝗣𝗔 ⊬ ∀ m, ∃ N, φ(m, N)`. -/

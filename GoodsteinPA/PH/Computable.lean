@@ -1,6 +1,7 @@
 module
 
 public import GoodsteinPA.PH.Statement
+public import GoodsteinPA.ToFoundation.Compat
 public import GoodsteinPA.ToMathlib.Goodstein.Computability
 public import Mathlib.Combinatorics.Colex
 public import Mathlib.Computability.Primrec.List
@@ -527,7 +528,7 @@ theorem primrec_phC : Primrec₂ phC := by
   exact h.to₂
 
 section Existence
-open LO LO.FirstOrder
+open FFL FFL.FirstOrder
 
 /-- The characteristic function of `PHx` on argument vectors `![N, x]`. -/
 def phVec (v : List.Vector ℕ 2) : Part ℕ := Part.some (phC (v.get 1) (v.get 0))
