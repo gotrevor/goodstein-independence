@@ -1,0 +1,58 @@
+inductive LeanGallery.Logic.Hydra.Hydra : Type
+number of parameters: 0
+constructors:
+LeanGallery.Logic.Hydra.Hydra.node : List LeanGallery.Logic.Hydra.Hydra → LeanGallery.Logic.Hydra.Hydra
+@[irreducible] def LeanGallery.Logic.Hydra.ord : LeanGallery.Logic.Hydra.Hydra → ONote :=
+@WellFounded.fix LeanGallery.Logic.Hydra.Hydra (fun a => ONote)
+  (@invImage LeanGallery.Logic.Hydra.Hydra LeanGallery.Logic.Hydra.Hydra (fun x => x)
+      (@sizeOfWFRel LeanGallery.Logic.Hydra.Hydra LeanGallery.Logic.Hydra.Hydra._sizeOf_inst)).1
+  LeanGallery.Logic.Hydra.ord._proof_1 fun a a_1 =>
+  LeanGallery.Logic.Hydra.ord.match_3
+    (fun x =>
+      ((y : LeanGallery.Logic.Hydra.Hydra) →
+          (@invImage LeanGallery.Logic.Hydra.Hydra LeanGallery.Logic.Hydra.Hydra (fun x => x)
+                  (@sizeOfWFRel LeanGallery.Logic.Hydra.Hydra LeanGallery.Logic.Hydra.Hydra._sizeOf_inst)).1
+              y x →
+            ONote) →
+        ONote)
+    a
+    (fun cs x =>
+      LeanGallery.Logic.Hydra.sumTerms
+        (@List.map
+          (@Subtype LeanGallery.Logic.Hydra.Hydra fun x =>
+            @Membership.mem LeanGallery.Logic.Hydra.Hydra (List LeanGallery.Logic.Hydra.Hydra)
+              (@List.instMembership LeanGallery.Logic.Hydra.Hydra) cs x)
+          ONote (fun x_1 => LeanGallery.Logic.Hydra.ord.match_1 cs (fun x => ONote) x_1 fun c property => x c ⋯)
+          (@List.attach LeanGallery.Logic.Hydra.Hydra cs)))
+    a_1
+def LeanGallery.Logic.Hydra.canonStep : Nat → LeanGallery.Logic.Hydra.Hydra → LeanGallery.Logic.Hydra.Hydra :=
+fun n x =>
+  LeanGallery.Logic.Hydra.chopC.match_6 (fun x => LeanGallery.Logic.Hydra.Hydra) x fun cs =>
+    LeanGallery.Logic.Hydra.chopC.match_1 (fun x => LeanGallery.Logic.Hydra.Hydra)
+      (@GetElem?.getElem? (List LeanGallery.Logic.Hydra.Hydra) Nat LeanGallery.Logic.Hydra.Hydra
+        (fun as i => @LT.lt Nat instLTNat i (@List.length LeanGallery.Logic.Hydra.Hydra as))
+        (@List.instGetElem?NatLtLength LeanGallery.Logic.Hydra.Hydra) cs (LeanGallery.Logic.Hydra.pickIdx cs))
+      (fun _ => LeanGallery.Logic.Hydra.Hydra.leaf)
+      (fun _ =>
+        LeanGallery.Logic.Hydra.Hydra.node
+          (@List.eraseIdx LeanGallery.Logic.Hydra.Hydra cs (LeanGallery.Logic.Hydra.pickIdx cs)))
+      fun val => LeanGallery.Logic.Hydra.chopC n (LeanGallery.Logic.Hydra.Hydra.node cs)
+def LeanGallery.Logic.Hydra.battle : LeanGallery.Logic.Hydra.Hydra → Nat → LeanGallery.Logic.Hydra.Hydra :=
+fun h x => @Nat.brecOn (fun x => LeanGallery.Logic.Hydra.Hydra) x (LeanGallery.Logic.Hydra.battle._f h)
+@[irreducible] def LeanGallery.Logic.Hydra.ofCode : Nat → LeanGallery.Logic.Hydra.Hydra :=
+@WellFounded.Nat.fix Nat (fun a => LeanGallery.Logic.Hydra.Hydra) (fun x => x) fun a a_1 =>
+  LeanGallery.Logic.Hydra.battle.match_1
+    (fun x =>
+      ((y : Nat) →
+          @InvImage Nat Nat (fun x1 x2 => @LT.lt Nat instLTNat x1 x2) (fun x => x) y x →
+            LeanGallery.Logic.Hydra.Hydra) →
+        LeanGallery.Logic.Hydra.Hydra)
+    a (fun _ x => LeanGallery.Logic.Hydra.Hydra.leaf)
+    (fun n x =>
+      have this := ⋯;
+      have this_1 := ⋯;
+      LeanGallery.Logic.Hydra.chopC.match_6 (fun x => LeanGallery.Logic.Hydra.Hydra)
+        (x (@Prod.snd Nat Nat (Nat.unpair n)) ⋯) fun cs =>
+        LeanGallery.Logic.Hydra.Hydra.node
+          (@List.cons LeanGallery.Logic.Hydra.Hydra (x (@Prod.fst Nat Nat (Nat.unpair n)) ⋯) cs))
+    a_1

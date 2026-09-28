@@ -171,7 +171,7 @@ def GoodsteinPA.InternalPow.pow.blueprint : FFL.FirstOrder.Arithmetic.PR.Bluepri
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-              GoodsteinPA.InternalPow.pow.blueprint._proof_1 (nat_lit 0))))
+              GoodsteinPA.InternalPow.pow.blueprint._proof_3 (nat_lit 0))))
         (@Matrix.vecCons
           (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
             (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat) (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
@@ -193,7 +193,7 @@ def GoodsteinPA.InternalPow.pow.blueprint : FFL.FirstOrder.Arithmetic.PR.Bluepri
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))))))
-    GoodsteinPA.InternalPow.pow.blueprint._proof_2)
+    GoodsteinPA.InternalPow.pow.blueprint._proof_1)
   (@FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula.mkSigma FFL.FirstOrder.Language.oRing
     (@FFL.FirstOrder.Bounding.lt FFL.FirstOrder.Language.oRing
       (@FFL.FirstOrder.Language.ORing.toLT FFL.FirstOrder.Language.oRing FFL.FirstOrder.Arithmetic.instORingORing))
@@ -226,7 +226,7 @@ def GoodsteinPA.InternalPow.pow.blueprint : FFL.FirstOrder.Arithmetic.PR.Bluepri
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
                 (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
-              GoodsteinPA.InternalPow.pow.blueprint._proof_3 (nat_lit 0))))
+              GoodsteinPA.InternalPow.pow.blueprint._proof_4 (nat_lit 0))))
         (@Matrix.vecCons
           (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
             (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat) (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
@@ -260,7 +260,7 @@ def GoodsteinPA.InternalPow.pow.blueprint : FFL.FirstOrder.Arithmetic.PR.Bluepri
                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
                       (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
-                    GoodsteinPA.InternalPow.pow.blueprint._proof_3 (nat_lit 1))))
+                    GoodsteinPA.InternalPow.pow.blueprint._proof_4 (nat_lit 1))))
               (@Matrix.vecCons
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -281,7 +281,7 @@ def GoodsteinPA.InternalPow.pow.blueprint : FFL.FirstOrder.Arithmetic.PR.Bluepri
                       (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
                         (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
-                      GoodsteinPA.InternalPow.pow.blueprint._proof_3 (nat_lit 3))))
+                      GoodsteinPA.InternalPow.pow.blueprint._proof_4 (nat_lit 3))))
                 (@Matrix.vecEmpty
                   (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -292,7 +292,7 @@ def GoodsteinPA.InternalPow.pow.blueprint : FFL.FirstOrder.Arithmetic.PR.Bluepri
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
                 (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))))))))
-    GoodsteinPA.InternalPow.pow.blueprint._proof_4)
+    GoodsteinPA.InternalPow.pow.blueprint._proof_2)
 def FFL.FirstOrder.Arithmetic.ipowDef : @FFL.FirstOrder.Bounding.HierarchySymbol.Semisentence
   FFL.FirstOrder.Language.oRing
   (@FFL.FirstOrder.Bounding.lt FFL.FirstOrder.Language.oRing
@@ -440,7 +440,7 @@ def FFL.FirstOrder.Arithmetic.ilogDef : @FFL.FirstOrder.Bounding.HierarchySymbol
                 (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                 (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 1)
                   (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                    FFL.FirstOrder.Arithmetic.ilogDef._proof_1 (nat_lit 1))))
+                    FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 1))))
               (@Matrix.vecEmpty
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))))))
@@ -472,7 +472,7 @@ def FFL.FirstOrder.Arithmetic.ilogDef : @FFL.FirstOrder.Bounding.HierarchySymbol
                 (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                 (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 2)
                   (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                    FFL.FirstOrder.Arithmetic.ilogDef._proof_1 (nat_lit 2))))
+                    FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 2))))
               (@Matrix.vecEmpty
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))))))))
@@ -966,7 +966,7 @@ def FFL.FirstOrder.Arithmetic.ilogDef : @FFL.FirstOrder.Bounding.HierarchySymbol
                   (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                   (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 1)
                     (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                      FFL.FirstOrder.Arithmetic.ilogDef._proof_1 (nat_lit 1))))
+                      FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 1))))
                 (@Matrix.vecEmpty
                   (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                     (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))))))
@@ -998,7 +998,7 @@ def FFL.FirstOrder.Arithmetic.ilogDef : @FFL.FirstOrder.Bounding.HierarchySymbol
                   (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                   (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 2)
                     (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                      FFL.FirstOrder.Arithmetic.ilogDef._proof_1 (nat_lit 2))))
+                      FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 2))))
                 (@Matrix.vecEmpty
                   (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                     (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))))))))
@@ -1017,7 +1017,7 @@ def FFL.FirstOrder.Arithmetic.ilogDef : @FFL.FirstOrder.Bounding.HierarchySymbol
             (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
             (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 0)
               (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                FFL.FirstOrder.Arithmetic.ilogDef._proof_1 (nat_lit 0))))
+                FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 0))))
           (@Matrix.vecCons
             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
               (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
@@ -1034,7 +1034,7 @@ def FFL.FirstOrder.Arithmetic.ilogDef : @FFL.FirstOrder.Bounding.HierarchySymbol
             (@Matrix.vecEmpty
               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                 (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))))))))
-  FFL.FirstOrder.Arithmetic.ilogDef._proof_3
+  FFL.FirstOrder.Arithmetic.ilogDef._proof_1
 def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySymbol.Semisentence
   FFL.FirstOrder.Language.oRing
   (@FFL.FirstOrder.Bounding.lt FFL.FirstOrder.Language.oRing
@@ -1116,7 +1116,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                   (@OfNat.ofNat Nat (nat_lit 4) (instOfNatNat (nat_lit 4)))
                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_1 (nat_lit 0))))
+                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_2 (nat_lit 0))))
           (@Matrix.vecCons
             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1137,7 +1137,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                     (@OfNat.ofNat Nat (nat_lit 4) (instOfNatNat (nat_lit 4)))
                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_1 (nat_lit 2))))
+                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_2 (nat_lit 2))))
             (@Matrix.vecCons
               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1158,7 +1158,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                       (@OfNat.ofNat Nat (nat_lit 4) (instOfNatNat (nat_lit 4)))
                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_1 (nat_lit 3))))
+                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_2 (nat_lit 3))))
               (@Matrix.vecEmpty
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1262,7 +1262,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                         (@OfNat.ofNat Nat (nat_lit 4) (instOfNatNat (nat_lit 4)))
                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_2 (nat_lit 0))))
+                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_3 (nat_lit 0))))
               (@Matrix.vecCons
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1291,7 +1291,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                           (@OfNat.ofNat Nat (nat_lit 4) (instOfNatNat (nat_lit 4)))
                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                      FFL.FirstOrder.Arithmetic.bumpNextDef._proof_2 (nat_lit 3))))
+                      FFL.FirstOrder.Arithmetic.bumpNextDef._proof_3 (nat_lit 3))))
                 (@Matrix.vecCons
                   (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1320,7 +1320,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                             (@OfNat.ofNat Nat (nat_lit 4) (instOfNatNat (nat_lit 4)))
                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_2 (nat_lit 1))))
+                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_3 (nat_lit 1))))
                   (@Matrix.vecEmpty
                     (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                       (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1451,7 +1451,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_3 (nat_lit 0))))
+                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_4 (nat_lit 0))))
                   (@Matrix.vecCons
                     (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                       (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1488,7 +1488,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                          FFL.FirstOrder.Arithmetic.bumpNextDef._proof_3 (nat_lit 6))))
+                          FFL.FirstOrder.Arithmetic.bumpNextDef._proof_4 (nat_lit 6))))
                     (@Matrix.vecCons
                       (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                         (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1525,7 +1525,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                            FFL.FirstOrder.Arithmetic.bumpNextDef._proof_3 (nat_lit 2))))
+                            FFL.FirstOrder.Arithmetic.bumpNextDef._proof_4 (nat_lit 2))))
                       (@Matrix.vecEmpty
                         (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                           (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1683,7 +1683,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                            FFL.FirstOrder.Arithmetic.bumpNextDef._proof_4 (nat_lit 0))))
+                            FFL.FirstOrder.Arithmetic.bumpNextDef._proof_5 (nat_lit 0))))
                       (@Matrix.vecCons
                         (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                           (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1755,7 +1755,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_4 (nat_lit 5))))
+                                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_5 (nat_lit 5))))
                             (@Matrix.vecCons
                               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -1841,7 +1841,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_4 (nat_lit 1))))
+                                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_5 (nat_lit 1))))
                           (@Matrix.vecEmpty
                             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2025,7 +2025,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_5 (nat_lit 0))))
+                                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_6 (nat_lit 0))))
                           (@Matrix.vecCons
                             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2078,7 +2078,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_5 (nat_lit 7))))
+                                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_6 (nat_lit 7))))
                             (@Matrix.vecCons
                               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2131,7 +2131,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_5 (nat_lit 3))))
+                                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_6 (nat_lit 3))))
                               (@Matrix.vecEmpty
                                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2342,7 +2342,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_6 (nat_lit 0))))
+                                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 0))))
                               (@Matrix.vecCons
                                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2403,7 +2403,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                      FFL.FirstOrder.Arithmetic.bumpNextDef._proof_6 (nat_lit 8))))
+                                      FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 8))))
                                 (@Matrix.vecCons
                                   (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2464,7 +2464,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_6 (nat_lit 4))))
+                                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 4))))
                                   (@Matrix.vecEmpty
                                     (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                       (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2702,7 +2702,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 0))))
+                                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 0))))
                                   (@Matrix.vecCons
                                     (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                       (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2771,7 +2771,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                          FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 10))))
+                                          FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 10))))
                                     (@Matrix.vecCons
                                       (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                         (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2840,7 +2840,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                 (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                            FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 1))))
+                                            FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 1))))
                                       (@Matrix.vecEmpty
                                         (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                           (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -2947,7 +2947,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 7))))
+                                        FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 7))))
                                   (@Matrix.vecCons
                                     (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                       (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3099,7 +3099,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 2))))
+                                                  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 2))))
                                             (@Matrix.vecCons
                                               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3174,7 +3174,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                         (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 3))))
+                                                    FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 3))))
                                               (@Matrix.vecEmpty
                                                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3262,7 +3262,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                                                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_7 (nat_lit 0))))
+                                                FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8 (nat_lit 0))))
                                           (@Matrix.vecEmpty
                                             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                                               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3297,7 +3297,7 @@ def FFL.FirstOrder.Arithmetic.bumpNextDef : @FFL.FirstOrder.Bounding.HierarchySy
                                               (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                             (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
                                           (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))))))))))))))))))))
-  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_8
+  FFL.FirstOrder.Arithmetic.bumpNextDef._proof_1
 def FFL.FirstOrder.Arithmetic.ibumpTableDef : @FFL.FirstOrder.Bounding.HierarchySymbol.Semisentence
   FFL.FirstOrder.Language.oRing
   (@FFL.FirstOrder.Bounding.lt FFL.FirstOrder.Language.oRing
@@ -3324,7 +3324,7 @@ def FFL.FirstOrder.Arithmetic.ibumpTableDef : @FFL.FirstOrder.Bounding.Hierarchy
         (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
         (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 0)
           (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-            FFL.FirstOrder.Arithmetic.ibumpTableDef._proof_1 (nat_lit 0))))
+            FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 0))))
       (@Matrix.vecCons
         (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
           (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
@@ -3333,7 +3333,7 @@ def FFL.FirstOrder.Arithmetic.ibumpTableDef : @FFL.FirstOrder.Bounding.Hierarchy
           (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
           (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 2)
             (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-              FFL.FirstOrder.Arithmetic.ibumpTableDef._proof_1 (nat_lit 2))))
+              FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 2))))
         (@Matrix.vecCons
           (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
             (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
@@ -3342,7 +3342,7 @@ def FFL.FirstOrder.Arithmetic.ibumpTableDef : @FFL.FirstOrder.Bounding.Hierarchy
             (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
             (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 1)
               (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                FFL.FirstOrder.Arithmetic.ibumpTableDef._proof_1 (nat_lit 1))))
+                FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 1))))
           (@Matrix.vecEmpty
             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
               (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))))))))
@@ -3434,7 +3434,7 @@ def FFL.FirstOrder.Arithmetic.ibumpDef : @FFL.FirstOrder.Bounding.HierarchySymbo
                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                   (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                FFL.FirstOrder.Arithmetic.ibumpDef._proof_1 (nat_lit 0))))
+                FFL.FirstOrder.Arithmetic.ilogDef._proof_2 (nat_lit 0))))
           (@Matrix.vecCons
             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3455,7 +3455,7 @@ def FFL.FirstOrder.Arithmetic.ibumpDef : @FFL.FirstOrder.Bounding.HierarchySymbo
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                     (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                  FFL.FirstOrder.Arithmetic.ibumpDef._proof_1 (nat_lit 2))))
+                  FFL.FirstOrder.Arithmetic.ilogDef._proof_2 (nat_lit 2))))
             (@Matrix.vecCons
               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3476,7 +3476,7 @@ def FFL.FirstOrder.Arithmetic.ibumpDef : @FFL.FirstOrder.Bounding.HierarchySymbo
                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                       (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                    FFL.FirstOrder.Arithmetic.ibumpDef._proof_1 (nat_lit 3))))
+                    FFL.FirstOrder.Arithmetic.ilogDef._proof_2 (nat_lit 3))))
               (@Matrix.vecEmpty
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3523,7 +3523,7 @@ def FFL.FirstOrder.Arithmetic.ibumpDef : @FFL.FirstOrder.Bounding.HierarchySymbo
                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                   (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                   (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                FFL.FirstOrder.Arithmetic.ibumpDef._proof_1 (nat_lit 1))))
+                FFL.FirstOrder.Arithmetic.ilogDef._proof_2 (nat_lit 1))))
           (@Matrix.vecCons
             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
               (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3544,7 +3544,7 @@ def FFL.FirstOrder.Arithmetic.ibumpDef : @FFL.FirstOrder.Bounding.HierarchySymbo
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                     (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                  FFL.FirstOrder.Arithmetic.ibumpDef._proof_1 (nat_lit 0))))
+                  FFL.FirstOrder.Arithmetic.ilogDef._proof_2 (nat_lit 0))))
             (@Matrix.vecCons
               (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                 (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
@@ -3565,13 +3565,13 @@ def FFL.FirstOrder.Arithmetic.ibumpDef : @FFL.FirstOrder.Bounding.HierarchySymbo
                     (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                       (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                       (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
-                    FFL.FirstOrder.Arithmetic.ibumpDef._proof_1 (nat_lit 3))))
+                    FFL.FirstOrder.Arithmetic.ilogDef._proof_2 (nat_lit 3))))
               (@Matrix.vecEmpty
                 (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
                   (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat)
                     (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
                     (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))))))))))
-  FFL.FirstOrder.Arithmetic.ibumpDef._proof_2
+  FFL.FirstOrder.Arithmetic.ibumpDef._proof_1
 def FFL.FirstOrder.Arithmetic.igoodsteinDef : @FFL.FirstOrder.Bounding.HierarchySymbol.Semisentence
   FFL.FirstOrder.Language.oRing
   (@FFL.FirstOrder.Bounding.lt FFL.FirstOrder.Language.oRing
@@ -3598,7 +3598,7 @@ def FFL.FirstOrder.Arithmetic.igoodsteinDef : @FFL.FirstOrder.Bounding.Hierarchy
         (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
         (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 0)
           (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-            FFL.FirstOrder.Arithmetic.igoodsteinDef._proof_1 (nat_lit 0))))
+            FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 0))))
       (@Matrix.vecCons
         (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
           (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
@@ -3607,7 +3607,7 @@ def FFL.FirstOrder.Arithmetic.igoodsteinDef : @FFL.FirstOrder.Bounding.Hierarchy
           (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
           (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 2)
             (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-              FFL.FirstOrder.Arithmetic.igoodsteinDef._proof_1 (nat_lit 2))))
+              FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 2))))
         (@Matrix.vecCons
           (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
             (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
@@ -3616,7 +3616,7 @@ def FFL.FirstOrder.Arithmetic.igoodsteinDef : @FFL.FirstOrder.Bounding.Hierarchy
             (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
             (@OfNat.ofNat (Fin (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) (nat_lit 1)
               (@Fin.instOfNat (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
-                FFL.FirstOrder.Arithmetic.igoodsteinDef._proof_1 (nat_lit 1))))
+                FFL.FirstOrder.Arithmetic.ipowDef._proof_1 (nat_lit 1))))
           (@Matrix.vecEmpty
             (FFL.FirstOrder.Semiterm FFL.FirstOrder.Language.oRing Empty
               (@OfNat.ofNat Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))))))))

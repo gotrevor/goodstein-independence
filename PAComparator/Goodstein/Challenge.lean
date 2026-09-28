@@ -8,7 +8,7 @@ import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Arithmetic.R0.Representation
 import Foundation.FirstOrder.Arithmetic.HFS
 import PAComparator.Goodstein.Support.Defs
-import PAComparator.Goodstein.Support.InternalGoodstein
+import PAComparator.Goodstein.Support.Internal
 
 /-!
 # Kirby–Paris independence of Goodstein's theorem — comparator CHALLENGE (the audit surface)

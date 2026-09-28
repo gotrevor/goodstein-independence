@@ -175,3 +175,15 @@ pattern above, commit, then create `PORT-V434-COMPARATOR.md` (tails of both buil
 development's modules; `diff` must be empty.  All 7 comparator-pinned statements are now
 expression-identical.  `scratchpad/cmp/defs-{chal,dev}.lean` does the same with `#print` on the
 definitions the Goodstein statements reach.
+29. **`_proof_N` dedup, the comparator-only trap:** the development had consolidated
+    `InternalPow → InternalLog → InternalBump → InternalGoodstein` into a single
+    `GoodsteinPA/Internal.lean`, so its `.mkSigma` / `PR.Blueprint` auxiliary proofs dedup *inside
+    that one module* (`ibumpTableDef` now reuses `ipowDef._proof_1`, etc.), while the comparator
+    support still mirrored the old four-file split and therefore produced its own
+    `ibumpTableDef._proof_1`.  Same terms, different `ConstantInfo` names → comparator
+    statement-identity would fail.  Fix: one `PAComparator/Goodstein/Support/Internal.lean`, in
+    `module` mode (the module system also changes the numbering *within* a declaration), with the
+    defs in the development's order (`pow.blueprint, ipowDef, ilogDef, bumpNextDef,
+    bumpTable.blueprint, ibumpTableDef, ibumpDef, goodstein.blueprint, igoodsteinDef`).  The
+    development's model-side `…construction`s and `𝚺₁-Function` instances need not be reproduced —
+    they own no auxiliary proof these defs dedup onto.  Verified by `scratchpad/cmp/defs-*.lean`.

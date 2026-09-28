@@ -1,0 +1,69 @@
+def GoodsteinPA.PH.RelLarge : Finset Nat → Prop :=
+fun H =>
+  ∀ (a : Nat),
+    @Membership.mem Nat (Finset Nat) (@SetLike.instMembership (Finset Nat) Nat (@Finset.instSetLike Nat)) H a →
+      (∀ (b : Nat),
+          @Membership.mem Nat (Finset Nat) (@SetLike.instMembership (Finset Nat) Nat (@Finset.instSetLike Nat)) H b →
+            @LE.le Nat instLENat a b) →
+        @LE.le Nat instLENat a (@Finset.card Nat H)
+def GoodsteinPA.PH.Homog : {N e r : Nat} →
+  ((@Subtype (Finset Nat) fun x =>
+        @Membership.mem (Finset Nat) (Finset (Finset Nat))
+          (@SetLike.instMembership (Finset (Finset Nat)) (Finset Nat) (@Finset.instSetLike (Finset Nat)))
+          (@Finset.powersetCard Nat e
+            (@Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+              (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N))
+          x) →
+      Fin r) →
+    Finset Nat → Prop :=
+fun {N e r} c H =>
+  @Exists (Fin r) fun i =>
+    ∀ (s : Finset Nat)
+      (hs :
+        @Membership.mem (Finset Nat) (Finset (Finset Nat))
+          (@SetLike.instMembership (Finset (Finset Nat)) (Finset Nat) (@Finset.instSetLike (Finset Nat)))
+          (@Finset.powersetCard Nat e
+            (@Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+              (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N))
+          s),
+      @LE.le (Finset Nat)
+          (@Preorder.toLE (Finset Nat) (@PartialOrder.toPreorder (Finset Nat) (@Finset.instPartialOrder Nat))) s H →
+        @Eq (Fin r)
+          (c
+            (@Subtype.mk (Finset Nat)
+              (fun x =>
+                @Membership.mem (Finset Nat) (Finset (Finset Nat))
+                  (@SetLike.instMembership (Finset (Finset Nat)) (Finset Nat) (@Finset.instSetLike (Finset Nat)))
+                  (@Finset.powersetCard Nat e
+                    (@Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+                      (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N))
+                  x)
+              s hs))
+          i
+def GoodsteinPA.PH.PH : Nat → Nat → Nat → Nat → Prop :=
+fun e r k N =>
+  ∀
+    (c :
+      (@Subtype (Finset Nat) fun x =>
+          @Membership.mem (Finset Nat) (Finset (Finset Nat))
+            (@SetLike.instMembership (Finset (Finset Nat)) (Finset Nat) (@Finset.instSetLike (Finset Nat)))
+            (@Finset.powersetCard Nat e
+              (@Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+                (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N))
+            x) →
+        Fin r),
+    @Exists (Finset Nat) fun H =>
+      And
+        (@Membership.mem (Finset Nat) (Finset (Finset Nat))
+          (@SetLike.instMembership (Finset (Finset Nat)) (Finset Nat) (@Finset.instSetLike (Finset Nat)))
+          (@Finset.powerset Nat
+            (@Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+              (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N))
+          H)
+        (And (@LE.le Nat instLENat k (@Finset.card Nat H))
+          (And (GoodsteinPA.PH.RelLarge H) (@GoodsteinPA.PH.Homog N e r c H)))
+def GoodsteinPA.PH.PHx : Nat → Nat → Prop :=
+fun x N =>
+  GoodsteinPA.PH.PH (@Prod.fst Nat Nat (Nat.unpair x))
+    (@Prod.fst Nat Nat (Nat.unpair (@Prod.snd Nat Nat (Nat.unpair x))))
+    (@Prod.snd Nat Nat (Nat.unpair (@Prod.snd Nat Nat (Nat.unpair x)))) N
