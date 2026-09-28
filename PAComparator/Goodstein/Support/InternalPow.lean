@@ -25,7 +25,8 @@ one-for-one. This module carries `pow.blueprint`, exactly as `InternalPow.lean` 
 structure so the arithmetization objects elaborate byte-identically.
 -/
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol
+open FFL FFL.FirstOrder FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding.HierarchySymbol
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace GoodsteinPA.InternalPow
 
@@ -37,7 +38,7 @@ def pow.blueprint : PR.Blueprint 1 where
 
 /-- `𝚺₁`-definition of `ipow` (variable-base power `b ^ x` inside a model of `IΣ₁`), with the
 argument order `(output, b, x)`. Verbatim from `src/GoodsteinPA/InternalPow.lean:53`. -/
-def _root_.LO.FirstOrder.Arithmetic.ipowDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.ipowDef : 𝚺ᴬ₁.Semisentence 3 :=
   pow.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
 
 end GoodsteinPA.InternalPow

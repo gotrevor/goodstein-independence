@@ -44,7 +44,7 @@ in full below are the ones this development *owns*.
 type and universe, which is a gameable surface. In particular a hole on `igoodsteinDef` would let a
 solution substitute *any* Σ₁ formula for the internal Goodstein run: the faithfulness anchor
 `goodsteinSentence_faithful` would **not** stop it, because its right-hand side
-`∀ m, ∃ N, goodsteinSeq m N = 0` is a *proved theorem*, so the `↔` collapses to just
+`∀ m, ∃ N, Goodstein.goodsteinSeq m N = 0` is a *proved theorem*, so the `↔` collapses to just
 `ℕ ⊧ₘ goodsteinSentence`, satisfiable by any ℕ-true PA-unprovable ∀∃-sentence. So every definition
 below carries its real body and is covered by the strict statement-identity check instead.
 
@@ -85,7 +85,8 @@ the resulting first-order sentence. Read them against Rathjen / Goodstein 1944.
 -- (Same load-bearing line as tao-collatz / lean-gallery challenges.)
 set_option warningAsError false
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol LO.Entailment
+open FFL FFL.FirstOrder FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding.HierarchySymbol FFL.Entailment
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 /-- Fork models-theory notation `V ⊧ₘ* T` (was `ModelsTheory`), now `V↓[ℒₒᵣ] ⊧* T` (`ModelsSet`).
 Copied verbatim from `src/GoodsteinPA/Compat.lean:33`; notation creates no constant, so this brings
@@ -109,7 +110,7 @@ the definition the anti-vacuity anchor `goodsteinSentence_faithful` pins the syn
 
 The syntactic objects reachable from `goodsteinSentence` are re-declared verbatim in
 `Comparator/Goodstein/Support/{InternalPow,InternalLog,InternalBump,InternalGoodstein}.lean`, one
-module per source file, under their real (`_root_.LO.FirstOrder.Arithmetic.…` or
+module per source file, under their real (`_root_.FFL.FirstOrder.Arithmetic.…` or
 `GoodsteinPA.InternalPow.…`) names.  The split is load-bearing: Lean shares identical auxiliary
 proofs (`…blueprint._proof_N`) within a module, so declaring all three `PR.Blueprint 1` objects in
 one file renumbers them and the closure no longer matches the solution's.  Every un-re-declared
@@ -123,7 +124,7 @@ namespace GoodsteinPA
 /-- **The Goodstein sentence `γ`.** The `ℒₒᵣ`-sentence "every Goodstein sequence terminates", built
 from the development's own `𝚺₁`-definable internal run via `igoodsteinDef`:
 `γ := ∀ m, ∃ N, igoodstein m N = 0`. Verbatim from `Encoding.lean:83` (`noncomputable def`). -/
-noncomputable def goodsteinSentence : Sentence ℒₒᵣ :=
+noncomputable def goodsteinSentence : ArithmeticSentence :=
   “∀ m, ∃ N, !igoodsteinDef 0 m N”
 
 /-- **Kirby–Paris (1982).** Peano Arithmetic does not prove `goodsteinSentence`, i.e. it cannot
@@ -136,6 +137,6 @@ sequence — the genuine hereditary-base process of the `goodsteinSeq` above —
 the syntactic sentence to the small, auditable definition; without it the independence claim could be
 about the wrong sentence. Stated with `sorry`; `Solution.lean` supplies the real proof. -/
 theorem goodsteinSentence_faithful :
-    (ℕ ⊧ₘ goodsteinSentence) ↔ ∀ m, ∃ N, goodsteinSeq m N = 0 := sorry
+    (ℕ ⊧ₘ goodsteinSentence) ↔ ∀ m, ∃ N, Goodstein.goodsteinSeq m N = 0 := sorry
 
 end GoodsteinPA

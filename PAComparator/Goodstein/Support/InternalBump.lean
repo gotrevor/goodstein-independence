@@ -15,13 +15,14 @@ auto-generated arity-1 proof gets its own `bumpTable.blueprint._proof_N` — the
 solution, where `pow.blueprint` sits in the imported `InternalPow.lean` (see `Support/InternalPow.lean`).
 -/
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol
+open FFL FFL.FirstOrder FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding.HierarchySymbol
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace GoodsteinPA.InternalPow
 
 /-- The `𝚺₁` graph-definition of `bumpNext` (the table step of the hereditary base-change),
 composing `ilog`, `ipow`, `znth`, `div`, `rem`. Verbatim from `src/GoodsteinPA/InternalBump.lean:31`. -/
-def _root_.LO.FirstOrder.Arithmetic.bumpNextDef : 𝚺₁.Semisentence 4 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.bumpNextDef : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
   “y b M s.
     ∃ e, !ilogDef e b M ∧ ∃ pe, !ipowDef pe b e ∧ ∃ te, !znthDef te s e ∧
       ∃ pte, !ipowDef pte (b + 1) te ∧ ∃ q, !divDef q M pe ∧ ∃ r, !remDef r M pe ∧
@@ -37,12 +38,12 @@ def bumpTable.blueprint : PR.Blueprint 1 where
 
 /-- `𝚺₁`-definition of the `bump` table `ibumpTable b n = ⟨bump b 0,…,bump b n⟩`.
 Verbatim from `src/GoodsteinPA/InternalBump.lean:74`. -/
-def _root_.LO.FirstOrder.Arithmetic.ibumpTableDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.ibumpTableDef : 𝚺ᴬ₁.Semisentence 3 :=
   bumpTable.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
 
 /-- `𝚺₁`-definition of the internalized hereditary base-change `ibump b n` (the `n`-th table entry).
 Verbatim from `src/GoodsteinPA/InternalBump.lean:85`. -/
-def _root_.LO.FirstOrder.Arithmetic.ibumpDef : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.ibumpDef : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “y b n. ∃ t, !ibumpTableDef t b n ∧ !znthDef y t n”
 
 end GoodsteinPA.InternalPow

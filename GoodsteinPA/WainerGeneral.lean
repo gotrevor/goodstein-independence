@@ -234,7 +234,7 @@ theorem wainer_bound_witness_general (φ : Semisentence ℒₒᵣ 2) (hφ : Arit
 /-- **Wainer's bound (ratified 2026-09-26).**  If PA proves `∀ m, ∃ N, φ(m, N)` with `φ` Σ₁, then a
 single `f_o`, `o < ε₀`, eventually bounds a witness. -/
 theorem pa_provable_pi2_eventually_witnessed_below_fastGrowing
-    (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
+    (φ : Semisentence ℒₒᵣ 2) (hφ : Bounding.Hierarchy ℬ[<, ℒₒᵣ] 𝚺 1 φ)
     (h : 𝗣𝗔 ⊢ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ)) :
     ∃ o : ONote, o.NF ∧ ∃ M : ℕ, ∀ m, M ≤ m →
       ∃ N ≤ fastGrowing o m, ℕ ⊧/![N, m] φ :=

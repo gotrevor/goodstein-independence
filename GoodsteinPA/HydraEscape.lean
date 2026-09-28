@@ -184,7 +184,7 @@ open FFL FFL.FirstOrder
 /-- **PA does not prove that the canonical hydra battle terminates** (ratified 2026-09-26): for
 every Σ₁ formula `φ` defining the battle pointwise in ℕ, `𝗣𝗔 ⊬ ∀ m, ∃ N, φ(m, N)`. -/
 theorem pa_not_proves_hydra
-    (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
+    (φ : Semisentence ℒₒᵣ 2) (hφ : Bounding.Hierarchy ℬ[<, ℒₒᵣ] 𝚺 1 φ)
     (hdef : ∀ m N : ℕ, (ℕ ⊧/![N, m] φ) ↔ battle (ofCode m) N = Hydra.leaf) :
     𝗣𝗔 ⊬ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) :=
   pa_not_proves_hydra_of_escape escapes φ hφ hdef

@@ -13,13 +13,14 @@ Kept in its own module to mirror the source-file boundary (see `Support/Internal
 that matters for byte-identity under comparator).
 -/
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol
+open FFL FFL.FirstOrder FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding.HierarchySymbol
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace GoodsteinPA.InternalPow
 
 /-- `𝚺₁`-graph of the base-`b` logarithm `ilog b n` (top exponent of `n` in base `b`): for
 `2 ≤ b ∧ 0 < n`, `b^e ≤ n < b^(e+1)`, else `e = 0`. Verbatim from `src/GoodsteinPA/InternalLog.lean:116`. -/
-def _root_.LO.FirstOrder.Arithmetic.ilogDef : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.ilogDef : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “e b n. (2 ≤ b ∧ 0 < n → (∃ pe, !ipowDef pe b e ∧ pe ≤ n) ∧ (∃ pf, !ipowDef pf b (e + 1) ∧ n < pf))
         ∧ (¬(2 ≤ b ∧ 0 < n) → e = 0)”
 

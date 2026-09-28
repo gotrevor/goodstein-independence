@@ -17,7 +17,8 @@ where `pow.blueprint`/`bumpTable.blueprint` sit in imported modules (see `Suppor
 `igoodstein m N = 0`.
 -/
 
-open LO LO.FirstOrder LO.FirstOrder.Arithmetic LO.FirstOrder.Arithmetic.HierarchySymbol
+open FFL FFL.FirstOrder FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding.HierarchySymbol
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace GoodsteinPA.InternalPow
 
@@ -29,7 +30,7 @@ def goodstein.blueprint : PR.Blueprint 1 where
 
 /-- `𝚺₁`-definition of the internal Goodstein sequence `igoodstein m₀ k = mₖ` (over base `k+2`).
 Verbatim from `src/GoodsteinPA/InternalGoodstein.lean:47`. -/
-def _root_.LO.FirstOrder.Arithmetic.igoodsteinDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.igoodsteinDef : 𝚺ᴬ₁.Semisentence 3 :=
   goodstein.blueprint.resultDef.rew (Rew.subst ![#0, #2, #1])
 
 end GoodsteinPA.InternalPow

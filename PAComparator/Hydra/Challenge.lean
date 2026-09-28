@@ -32,13 +32,13 @@ Trust base: Mathlib + Foundation.  Stated with `sorry`; `Solution.lean` supplies
 
 set_option warningAsError false
 
-open LO LO.FirstOrder LeanGallery.Logic.Hydra
+open FFL FFL.FirstOrder LeanGallery.Logic.Hydra
 
 namespace GoodsteinPA.Hydra
 
 theorem pa_not_proves_hydra
-    (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
+    (φ : Semisentence ℒₒᵣ 2) (hφ : Bounding.Hierarchy ℬ[<, ℒₒᵣ] 𝚺 1 φ)
     (hdef : ∀ m N : ℕ, (ℕ ⊧/![N, m] φ) ↔ battle (ofCode m) N = Hydra.leaf) :
-    𝗣𝗔 ⊬ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) := sorry
+    𝗣𝗔 ⊬ ↑(∀¹ ∃¹ φ : Sentence ℒₒᵣ) := sorry
 
 end GoodsteinPA.Hydra

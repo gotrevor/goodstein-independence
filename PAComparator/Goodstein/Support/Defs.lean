@@ -14,7 +14,7 @@ how `b ^ e` elaborates (`Monoid.toPow` instead of `instPowNat`), so `bump`'s bod
 byte-identical to the solution's.
 -/
 
-namespace GoodsteinPA
+namespace Goodstein
 
 /-- The base used to read `G k` at step `k`: `base k = k + 2` (so `G 0` is read in base 2,
 the first bump sends `2 ↦ 3`, and so on). Verbatim from `Defs.lean:25`. -/
@@ -45,4 +45,4 @@ def goodsteinSeq (m : ℕ) : ℕ → ℕ
   | 0 => m
   | k + 1 => bump (base k) (goodsteinSeq m k) - 1
 
-end GoodsteinPA
+end Goodstein

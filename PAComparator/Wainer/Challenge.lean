@@ -25,13 +25,13 @@ Foundation.  Stated with `sorry`; `Solution.lean` supplies the development's pro
 
 set_option warningAsError false
 
-open LO LO.FirstOrder
+open FFL FFL.FirstOrder
 
 namespace GoodsteinPA.Wainer
 
 theorem pa_provable_pi2_eventually_witnessed_below_fastGrowing
-    (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
-    (h : 𝗣𝗔 ⊢ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ)) :
+    (φ : Semisentence ℒₒᵣ 2) (hφ : Bounding.Hierarchy ℬ[<, ℒₒᵣ] 𝚺 1 φ)
+    (h : 𝗣𝗔 ⊢ ↑(∀¹ ∃¹ φ : Sentence ℒₒᵣ)) :
     ∃ o : ONote, o.NF ∧ ∃ M : ℕ, ∀ m, M ≤ m →
       ∃ N ≤ ONote.fastGrowing o m, ℕ ⊧/![N, m] φ := sorry
 

@@ -27,14 +27,14 @@ open FFL FFL.FirstOrder
 /-- **PA does not prove Paris–Harrington**: for every Σ₁ `φ` defining `PHx` pointwise in ℕ, PA does
 not prove `∀ x, ∃ N, φ(x, N)`. -/
 theorem pa_not_proves_ph
-    (φ : Semisentence ℒₒᵣ 2) (hφ : Arithmetic.Hierarchy 𝚺 1 φ)
+    (φ : Semisentence ℒₒᵣ 2) (hφ : Bounding.Hierarchy ℬ[<, ℒₒᵣ] 𝚺 1 φ)
     (hdef : ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N) :
     𝗣𝗔 ⊬ ↑(∀⁰ ∃⁰ φ : Sentence ℒₒᵣ) :=
   pa_not_proves_ph_of_escape LB.escapes φ hφ hdef
 
 /-- **Anti-vacuity**: some Σ₁ formula defines `PHx` pointwise in ℕ. -/
 theorem exists_sigma1_ph_def :
-    ∃ φ : Semisentence ℒₒᵣ 2, Arithmetic.Hierarchy 𝚺 1 φ ∧
+    ∃ φ : Semisentence ℒₒᵣ 2, Bounding.Hierarchy ℬ[<, ℒₒᵣ] 𝚺 1 φ ∧
       ∀ x N : ℕ, (ℕ ⊧/![N, x] φ) ↔ PHx x N := exists_sigma1_PHx_def
 
 end GoodsteinPA.PH
