@@ -9,8 +9,8 @@ structurally, and proves the order pulled back to `ℕ` via the structural codin
 
 The construction proceeds via structural strong recursion on `ONote.encodeONote`'s pairing codes:
 `Cnat` computes `ordCode ∘ ONote.cmp` (via `cmpStep_spec`), `Nfb` computes the `ONote.NF` predicate
-(via `nfStep_spec`), and `enc` enumerates normal-form codes in order. One `native_decide` call
-appears in `cmpStep_spec`'s base case.
+(via `nfStep_spec`), and `enc` enumerates normal-form codes in order.  No `native_decide`: the whole
+file is `[propext, Classical.choice, Quot.sound]`.
 -/
 module
 
@@ -188,7 +188,10 @@ lemma cmpStep_spec (m : ℕ) : cmpStep ((List.range m).map Cnat) = some (Cnat m)
   simp +decide [cmpIdxE, cmpIdxA, cmpNV];
   rcases n : Nat.unpair m with ⟨x, y⟩; rcases x with (_ | x) <;> rcases y with (_ | y) <;> simp +decide;
   · rw [show m = 0 by rw [← Nat.pair_unpair m, n]; rfl]; simp +decide [Cnat];
-    native_decide;
+    -- `decide` gets stuck here: `decodeONote` is well-founded, so its `0` case does not reduce by
+    -- whnf.  Rewriting with the equation lemma first makes the goal `1 = ordCode (zero.cmp zero)`,
+    -- which is closed by `simp` — no `native_decide` (and hence no `ofReduceBool`) needed.
+    simp [decodeONote, ONote.cmp, ordCode];
   · unfold Cnat; simp +decide [n];
     unfold decodeONote; simp +decide [ONote.cmp];
   · unfold Cnat; simp +decide [n];

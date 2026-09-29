@@ -87,3 +87,41 @@ gates green).  It is met.  The 69 `sorry`s elsewhere in `GoodsteinPA/` are pre-e
 unrelated proof debt and were deliberately untouched — the shim port changed no statement, as
 the fingerprint gate confirms.  If this run is relaunched, it should be with
 `--done-when 'deshim'`-style scoping rather than repo-wide sorry-freeness.
+
+## Follow-on 2: repo-wide axiom sweep, and the `native_decide` it found
+
+`AxiomCheck.lean` pins four *designated* theorems.  That is a spot check: a `sorry` or a
+`native_decide` anywhere else in `GoodsteinPA/` is invisible to it unless the summit happens to
+reach that declaration.  `scripts/AxiomSweep.lean` (new) closes the hole — it walks **every**
+declaration in every `GoodsteinPA*` module, calls `Lean.collectAxioms`, and throws unless each
+dependency is in `{propext, Classical.choice, Quot.sound}`.
+
+Its first run was **not** clean: 9 declarations in `GoodsteinPA/ToMathlib/ONote/Computability.lean`
+carried an `ofReduceBool` from one `native_decide` in `ONote.cmpStep_spec`'s `m = 0` base case
+(`cmpStep_spec` itself plus `computable_Cnat`, `computable_enc`, `computable_Nfb`, `computable_nfTB`,
+`computable_nfStep`, `computable_nthNF`, `computable_countNF`, `rePred_ltPull_natCode`).
+
+The `native_decide` was unnecessary.  The goal there is `1 = ordCode ((decodeONote 0).cmp (decodeONote 0))`;
+plain `decide` gets stuck because `decodeONote` is defined by well-founded recursion, so its `0` case
+does not reduce under whnf.  Rewriting with the equation lemma first makes it
+`1 = ordCode (zero.cmp zero)`, closed by `simp [decodeONote, ONote.cmp, ordCode]`.
+
+After that one-line fix:
+
+```
+$ lake env lean scripts/AxiomSweep.lean
+$ echo $?
+0
+```
+
+**All 1557 `GoodsteinPA` declarations are on exactly `[propext, Classical.choice, Quot.sound]`** —
+no `sorryAx`, no `ofReduceBool`, no blueprint axiom anywhere in the library.  Added to CI.
+
+The three audit scripts now have complementary, non-overlapping jobs:
+
+| script | claim |
+| --- | --- |
+| `AxiomCheck.lean` | the four headline *statements* are clean (narrow, human-readable, pinned) |
+| `AxiomSweep.lean` | *nothing anywhere* in `GoodsteinPA/` is dirty (broad, unconditional) |
+| `statement-check.sh` | no declaration's statement drifted from the frozen baseline |
+

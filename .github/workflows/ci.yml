@@ -135,6 +135,10 @@ jobs:
       - name: Axiom-clean gate (guarded #print axioms)
         run: lake env lean scripts/AxiomCheck.lean
 
+      # Repo-wide axiom sweep: EVERY GoodsteinPA declaration, not just the headline four.
+      - name: Repo-wide axiom sweep
+        run: lake env lean scripts/AxiomSweep.lean
+
       # De-shim gate: the Foundation compat shim is gone and nothing re-creates it.
       - name: De-shim gate
         run: scripts/deshim-check.sh
