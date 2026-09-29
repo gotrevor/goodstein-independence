@@ -326,4 +326,93 @@ theorem icmp_ifdVal_lt (n : V) : ∀ w : V, ∀ c ≤ w, isNF c → c ≠ 0 →
       rw [icmp_ocOadd, icmp_self e e le_rfl, cmpV_self, ihr]
       simp [thenV]
 
+private lemma sub_one_ne_zero {k : V} (hk0 : k ≠ 0) (hk1 : k ≠ 1) : k - 1 ≠ 0 := by
+  obtain ⟨j, hj⟩ : ∃ j, k = j + 1 :=
+    ⟨k - 1, (sub_add_self_of_le (pos_iff_one_le.mp (pos_iff_ne_zero.mpr hk0))).symm⟩
+  intro h
+  rw [hj] at h hk1
+  simp at h
+  exact hk1 (by rw [h]; simp)
+
+/-- **Normal forms are closed under the fundamental sequence**, together with the invariant that
+makes the induction go through: the leading exponent never increases. -/
+theorem isNF_ifdVal (n : V) : ∀ w : V, ∀ c ≤ w, isNF c →
+    isNF (π₂ (ifd c n)) ∧
+      (π₂ (ifd c n) = 0 ∨ icmp (ocExp (π₂ (ifd c n))) (ocExp c) ≠ 2) := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro c hcw hnf
+    rcases eq_or_ne c 0 with rfl | hc
+    · simp
+    obtain ⟨e, k, r, rfl⟩ : ∃ e k r, c = ocOadd e k r :=
+      ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+    obtain ⟨hk0, hnfe, hnfr, htc⟩ := (isNF_ocOadd e k r).mp hnf
+    have helt : e < w := exp_lt_of_le hcw
+    have hrlt : r < w := tail_lt_of_le hcw
+    rw [ifd_ocOadd]
+    by_cases hr : r = 0
+    · subst hr
+      simp only [ne_eq, not_true_eq_false, if_false]
+      by_cases h0 : π₁ (ifd e n) = 0
+      · have he0 : e = 0 := ifd_kind_eq_zero_of h0 e le_rfl
+        subst he0
+        rw [if_pos h0]
+        by_cases hk1 : k = 1
+        · simp [hk1]
+        · simp only [if_neg hk1, pi₂_pair]
+          refine ⟨(isNF_ocOadd 0 (k - 1) 0).mpr ⟨sub_one_ne_zero hk0 hk1, isNF_zero,
+            isNF_zero, Or.inl rfl⟩, Or.inr ?_⟩
+          simp only [ocExp_ocOadd]
+          rw [icmp_self (V := V) 0 0 le_rfl]
+          exact one_lt_two.ne
+      · have hene : e ≠ 0 := by rintro rfl; exact h0 (by simp)
+        obtain ⟨hnfve, -⟩ := ih e helt e le_rfl hnfe
+        have hvelt : icmp (π₂ (ifd e n)) e = 0 := icmp_ifdVal_lt n e e le_rfl hnfe hene
+        have hinner : ∀ j : V, j ≠ 0 →
+            isNF (ocOadd (π₂ (ifd e n)) j 0) := fun j hj =>
+          (isNF_ocOadd _ _ _).mpr ⟨hj, hnfve, isNF_zero, Or.inl rfl⟩
+        have houter : ∀ j : V, j ≠ 0 → k ≠ 1 →
+            isNF (ocOadd e (k - 1) (ocOadd (π₂ (ifd e n)) j 0)) := fun j hj hk1 =>
+          (isNF_ocOadd _ _ _).mpr ⟨sub_one_ne_zero hk0 hk1, hnfe, hinner j hj,
+            Or.inr (by rw [ocExp_ocOadd]; exact hvelt)⟩
+        by_cases h1 : π₁ (ifd e n) = 1
+        · rw [if_neg h0, if_pos h1]
+          by_cases hk1 : k = 1
+          · simp only [pi₂_pair, hk1, if_true]
+            exact ⟨hinner (n + 1) (by simp), Or.inr (by
+              simp only [ocExp_ocOadd]; rw [hvelt]; exact (_root_.two_pos).ne)⟩
+          · simp only [if_neg hk1, pi₂_pair]
+            exact ⟨houter (n + 1) (by simp) hk1, Or.inr (by
+              simp only [ocExp_ocOadd]; rw [icmp_self e e le_rfl]; exact one_lt_two.ne)⟩
+        · rw [if_neg h0, if_neg h1]
+          by_cases hk1 : k = 1
+          · simp only [pi₂_pair, hk1, if_true]
+            exact ⟨hinner 1 _root_.one_ne_zero, Or.inr (by
+              simp only [ocExp_ocOadd]; rw [hvelt]; exact (_root_.two_pos).ne)⟩
+          · simp only [if_neg hk1, pi₂_pair]
+            exact ⟨houter 1 _root_.one_ne_zero hk1, Or.inr (by
+              simp only [ocExp_ocOadd]; rw [icmp_self e e le_rfl]; exact one_lt_two.ne)⟩
+    · rw [if_pos hr, pi₂_pair]
+      obtain ⟨hnfvr, hexpr⟩ := ih r hrlt r le_rfl hnfr
+      have hre : icmp (ocExp r) e = 0 := htc.resolve_left hr
+      have htail : π₂ (ifd r n) = 0 ∨ icmp (ocExp (π₂ (ifd r n))) e = 0 := by
+        rcases hexpr with h | h
+        · exact Or.inl h
+        · right
+          rcases eq_or_ne (icmp (ocExp (π₂ (ifd r n))) (ocExp r)) 1 with h1 | h1
+          · have := icmp_eq_imp_eq (max (ocExp (π₂ (ifd r n))) (ocExp r))
+              _ (le_max_left _ _) _ (le_max_right _ _) h1
+            rw [this]; exact hre
+          · have h0 : icmp (ocExp (π₂ (ifd r n))) (ocExp r) = 0 :=
+              icmp_eq_zero_of_ne h1 h
+            exact icmp_trans (max (ocExp (π₂ (ifd r n))) (max (ocExp r) e))
+              _ (le_max_left _ _) _ (le_trans (le_max_left _ _) (le_max_right _ _))
+              _ (le_trans (le_max_right _ _) (le_max_right _ _)) h0 hre
+      refine ⟨(isNF_ocOadd _ _ _).mpr ⟨hk0, hnfe, hnfvr, htail⟩, Or.inr ?_⟩
+      simp only [ocExp_ocOadd]
+      rw [icmp_self e e le_rfl]
+      exact one_lt_two.ne
+
 end GoodsteinWu.InternalFund
