@@ -79,10 +79,10 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "28bfce683eeaa6156135cd2ff9cac7e12a73ec03",
+   "rev": "c88c918655e2409c0744d3a2557f981467c3cf66",
    "name": "OrdinalAnalysis",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "28bfce683eeaa6156135cd2ff9cac7e12a73ec03",
+   "inputRev": "c88c918655e2409c0744d3a2557f981467c3cf66",
    "inherited": false,
    "configFile": "lakefile.toml"
   },

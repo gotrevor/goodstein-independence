@@ -26,4 +26,4 @@ globs = ["PAComparator.+"]
 [[require]]
 name = "OrdinalAnalysis"
 git = "https://github.com/gotrevor/OrdinalAnalysis"
-rev = "28bfce683eeaa6156135cd2ff9cac7e12a73ec03"
+rev = "c88c918655e2409c0744d3a2557f981467c3cf66"
