@@ -4,9 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
 import GoodsteinPA.Statement
-import GoodsteinPA.Reduction
-import GoodsteinPA.Bridge
-import GoodsteinPA.Domination
+import GoodsteinPA.Result.ConsistencyPA
 
 /-!
 # Axiom audit — the reference point of truth
@@ -32,15 +30,15 @@ automatically. `whitespace := lax` tolerates the pretty-printer wrapping a long 
 #guard_msgs (whitespace := lax) in
 #print axioms GoodsteinPA.peano_not_proves_goodstein
 
--- Consistency corollary: `𝗣𝗔 ⊬ ↑𝗣𝗔.consistent`.
-/-- info: 'GoodsteinPA.peano_not_proves_consistency' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+-- Consistency of PA, via the cut-free `Z_∞` route: `𝗣𝗔 ⊬ ⊥`.
+/-- info: 'GoodsteinPA.Zinfty.consistency_PA' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms GoodsteinPA.peano_not_proves_consistency
+#print axioms GoodsteinPA.Zinfty.consistency_PA
 
 -- ℕ-level truth companion: every Goodstein sequence terminates (the true statement PA cannot prove).
-/-- info: 'GoodsteinPA.Dom.goodstein_terminates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Goodstein.Dom.goodstein_terminates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms GoodsteinPA.Dom.goodstein_terminates
+#print axioms Goodstein.Dom.goodstein_terminates
 
 -- Anti-vacuity anchor: the encoding is faithful (`ℕ ⊨ goodsteinSentence ↔ Goodstein terminates`).
 /-- info: 'GoodsteinPA.goodsteinSentence_faithful' depends on axioms: [propext, Classical.choice, Quot.sound] -/

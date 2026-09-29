@@ -55,6 +55,31 @@ Files that previously reached Foundation only through `Compat` (`Internal.lean`,
 
 No `axiom` or `sorry` was added.
 
+## Follow-on: the axiom gate is live again
+
+`scripts/AxiomCheck.lean` — described in `Statement.lean` as "the enforced point of truth" — had
+been silently dead: it still imported `GoodsteinPA.Reduction` / `.Bridge` / `.Domination`, modules
+that no longer exist, and CI's axiom step was commented out.  Re-pointed to the current names
+(`GoodsteinPA.Zinfty.consistency_PA` for the consistency corollary, `Goodstein.Dom.goodstein_terminates`
+for the ℕ-level companion) and re-enabled in `.github/workflows/ci.yml`, alongside the two new gates:
+
+```
+$ lake env lean scripts/AxiomCheck.lean
+$ echo $?
+0
+```
+
+Silent + exit 0 means all four `#guard_msgs`-pinned audits hold, so the de-shim introduced no
+`sorryAx` and no axiom drift:
+
+- `GoodsteinPA.peano_not_proves_goodstein`
+- `GoodsteinPA.Zinfty.consistency_PA`
+- `Goodstein.Dom.goodstein_terminates`
+- `GoodsteinPA.goodsteinSentence_faithful`
+
+each on exactly `[propext, Classical.choice, Quot.sound]`.  `lake shake GoodsteinPA --keep-public`
+reports no unused imports after the import rewiring.
+
 ## Scope note for the host
 
 This run's objective was the **bounded** DESHIM brief only (remove the compat shim; all three

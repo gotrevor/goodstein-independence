@@ -132,8 +132,16 @@ jobs:
           key: ${{ steps.project-cache.outputs.cache-primary-key }}
 
       # Axiom-clean gate: `#guard_msgs`-pinned axiom sets for the headline theorems (silent == clean).
-      # - name: Axiom-clean gate (guarded #print axioms)
-      #   run: lake env lean scripts/AxiomCheck.lean
+      - name: Axiom-clean gate (guarded #print axioms)
+        run: lake env lean scripts/AxiomCheck.lean
+
+      # De-shim gate: the Foundation compat shim is gone and nothing re-creates it.
+      - name: De-shim gate
+        run: scripts/deshim-check.sh
+
+      # Statement-fingerprint gate: no declaration's statement drifted from the frozen baseline.
+      - name: Statement-fingerprint gate
+        run: scripts/statement-check.sh
 
       # Blueprint status gate: reconcile each `@[goodstein_blueprint]` claim against its real footprint.
       # - name: Blueprint status gate (collectAxioms vs claim)
