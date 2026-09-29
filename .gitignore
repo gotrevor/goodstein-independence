@@ -34,3 +34,8 @@ import_graph.png
 
 # references
 .references
+
+# Local-only process scratch (kept on disk, not tracked)
+/scratch/
+/scratchpad/
+__pycache__/

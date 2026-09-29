@@ -9,6 +9,13 @@ name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation.git"
 rev = "master"
 
+# FFL's AlphaCentauri (Foundation-based results library).  Shared definitions live there; g-i
+# imports them rather than keeping its own copies.  Its Foundation pin and ours must agree.
+[[require]]
+name = "AlphaCentauri"
+git = "https://github.com/FormalizedFormalLogic/AlphaCentauri.git"
+rev = "main"
+
 # The leanprover/comparator harness (PAComparator/<Result>/{Challenge,Solution}.lean). Named
 # `PAComparator`, not `Comparator`, to avoid clashing with the gallery's own `Comparator` lib.
 # Deliberately NOT in defaultTargets and NOT reachable from the main roots: the Challenge files

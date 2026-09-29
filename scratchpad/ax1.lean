@@ -1,2 +1,0 @@
-import GoodsteinPA.WainerGeneral
-#print axioms GoodsteinPA.Wainer.pa_provable_pi2_eventually_witnessed_below_fastGrowing
