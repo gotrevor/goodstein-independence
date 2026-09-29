@@ -4,5 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trevor Morris
 -/
 import GoodsteinWu.Conservation
+import GoodsteinWu.FundBridge
 import GoodsteinWu.InternalFund
 import GoodsteinWu.WainerLower
