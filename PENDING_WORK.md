@@ -54,6 +54,16 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
    [old text] `𝗣𝗔 ⊢ Prog(≺, ψ)` for `ψ(c) := isNF c → ∀n ∃y F(c,n,y)`.
    Zero case trivial; limit case one step (`ifdVal c n ≺ c`); successor case is the only one
    needing induction — Σ₁-induction on `i ≤ n` building the iteration sequence `u`.
+4b. **Progressiveness in `PA[X]`** — DONE, lap 8, sorry-free (`GoodsteinWu/ProgTransfer.lean`,
+   `concrete_prog : paLX ⊢ progStatement` with `progStatement = (progAt precCode fgTotalCode).univCl`).
+   `fgTotalDef : ArithmeticSemisentence 1` is `“c. !nfDef c → ∀ n, ∃ y, !fgGraphDef c n y”`,
+   `fgTotalCode = liftCode fgTotalDef`.  Route: `arithProgStatement` (the ℒₒᵣ mirror) is proved
+   in `𝗜𝚺₁` by completeness + `fgTotal_progressive`; `map_prog_body` is the syntactic
+   `lMap toLX`-identity; `paLX_of_peano_semantic` transports.  *simp discipline*: a bare `simp`
+   on the whole statement OOM-kills the elaborator (Wu's W7) — evaluation goes through the two
+   small lemmas `eval_arithPrecAt` / `eval_arithFgAt`, and `Matrix.empty_eq` does not fire, so
+   the substitution vector is rewritten by an explicit `show … from funext`.
+
 5. **Apply `gentzen_upper_bound`** at `φ := lMap toLX (emb ψ)` and `a := o+1`, add
    `arithmetic_nonote_prec` for `o ≺ o+1`, then step 1 to come back to `𝗣𝗔`.
 6. **Read off** the frozen statement.  Only *soundness* at ℕ has to be proved —
