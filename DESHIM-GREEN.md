@@ -54,3 +54,11 @@ Files that previously reached Foundation only through `Compat` (`Internal.lean`,
 `Foundation.FirstOrder.Arithmetic.HFS` directly.
 
 No `axiom` or `sorry` was added.
+
+## Scope note for the host
+
+This run's objective was the **bounded** DESHIM brief only (remove the compat shim; all three
+gates green).  It is met.  The 69 `sorry`s elsewhere in `GoodsteinPA/` are pre-existing,
+unrelated proof debt and were deliberately untouched — the shim port changed no statement, as
+the fingerprint gate confirms.  If this run is relaunched, it should be with
+`--done-when 'deshim'`-style scoping rather than repo-wide sorry-freeness.
