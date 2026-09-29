@@ -25,25 +25,54 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
    Normal-form closure DONE, lap 5, sorry-free: `isNF_ifdVal` — `isNF c → isNF (ifdVal c n)`,
    proved together with the invariant "the leading exponent never increases", which is what the
    `r ≠ 0` branch needs to rebuild the tail condition.  **The `InternalFund` layer is complete.**
-3. **The Σ₁ graph of `fastGrowing`** — not started.  Design: a Δ₀ "justification sequence"
-   predicate.  A witness is a sequence of entries `⟪d, m, v, u⟫`, each justified by *earlier*
-   entries: `d = 0 ∧ v = m+1`; or `d` a successor with predecessor `e` and `u` a sequence with
-   `lh u = m+1`, `u_0 = m`, `u_m = v`, every `⟪e, u_i, u_{i+1}, _⟫` earlier; or `d` a limit and
-   `⟪ifdVal d m, m, v, _⟫` earlier.  `F(c,n,y) := ∃w (T(w) ∧ last w = ⟪c,n,y,_⟫)` is then Σ₁ and
-   the fast-growing recursion equations are witness surgery, not induction.
-   Functionality of `F` is only ever needed **at ℕ**, externally (step 6), never inside PA.
+3. **The Σ₁ graph of `fastGrowing`** — DONE, lap 6, sorry-free
+   (`GoodsteinWu/FastGrowingGraph.lean`).  `fgGraph c n y` ("`f_c(n) = y`") is
+   `∃ w, fgWit w ∧ fgStepIn w c n y`, with `𝚺₁.Semisentence` `fgGraphDef`.
+
+   The witness `w` is an HFS **set** of entries `⟪⟪d, m⟫, ⟪v, u⟫⟫`, every member justified by
+   other members (`fgWit`), with no index ordering — a justifier may be any member.  Clauses:
+   `d = 0 ∧ v = m+1`; `ifdKind d = 1` with an iteration sequence `u` of length `m+1` from `m`
+   to `v` all of whose steps `⟪p, u_j⟫ ↦ u_{j+1}` (`p = ifdVal d 0`) are in `w`; `ifdKind d = 2`
+   with `⟪ifdVal d m, m⟫ ↦ v` in `w`.
+
+   Why a set and not a sequence: `fgJust` is monotone in `w` (`fgJust_mono`, via
+   `le_of_subset`), so `fgWit w → fgWit w' → fgWit (w ∪ w')` (`fgWit_union`) — witnesses merge
+   for free and the progressiveness proof never concatenates or reindexes.  Well-foundedness is
+   not used inside PA at all; it is only needed externally at ℕ, where every justifier's
+   ordinal is `≺`-smaller by `icmp_ifdVal_lt`.
+
 4. **Progressiveness**: `𝗣𝗔 ⊢ Prog(≺, ψ)` for `ψ(c) := isNF c → ∀n ∃y F(c,n,y)`.
    Zero case trivial; limit case one step (`ifdVal c n ≺ c`); successor case is the only one
    needing induction — Σ₁-induction on `i ≤ n` building the iteration sequence `u`.
 5. **Apply `gentzen_upper_bound`** at `φ := lMap toLX (emb ψ)` and `a := o+1`, add
    `arithmetic_nonote_prec` for `o ≺ o+1`, then step 1 to come back to `𝗣𝗔`.
-6. **Read off** the frozen statement: Σ₁-ness of `F(⌜o⌝, ·, ·)` and its ℕ-reading
-   `↔ y = ONote.fastGrowing o n` (external induction: soundness = functionality at ℕ,
-   completeness = build the witness).
+6. **Read off** the frozen statement.  Only *soundness* at ℕ has to be proved —
+   `ℕ ⊧ fgGraph (code o) n y → y = ONote.fastGrowing o n`, by well-founded induction on `o`
+   (justifiers are `≺`-smaller, `icmp_ifdVal_lt` + `isNF_ifdVal`, and `ifd_modelCode` reads the
+   clause back as mathlib's `fundamentalSequence`).  The converse direction of the frozen
+   `↔` is then free: step 5 gives `𝗣𝗔 ⊢ ∀n ∃y φ`, hence `ℕ ⊧ ∃y φ(·, n)`, and soundness
+   identifies that `y` with `fastGrowing o n`.  So no witness needs to be built at ℕ.
 
-## Next attack (lap 6) — step 3, the Σ₁ graph of `fastGrowing`
+## Next attack (lap 7) — step 4, progressiveness
 
-Everything `InternalFund` owes is paid.  Build `GoodsteinWu/FastGrowingGraph.lean`:
+`GoodsteinWu/Progressive.lean`.  Work internally in a model `V ⊧ 𝗣𝗔` (then transfer by
+completeness, as Wu does throughout).  With `ψ(c) := isNF c → ∀ n, ∃ y, fgGraph c n y`, prove
+
+    (∀ d, isNF d → isNF c → icmp d c = 0 → ψ d) → ψ c
+
+by cases on `ifdKind c` (using `ifd_ocOadd` / `ifd_kind_ne_zero`):
+
+* `c = 0`: the singleton witness `{⟪⟪0,n⟫,⟪n+1,0⟫⟫}`.
+* `ifdKind c = 2`: `d := ifdVal c n` is `≺ c` (lap 4) and `isNF` (lap 5); take its witness `w`,
+  return `w ∪ {⟪⟪c,n⟫,⟪y,0⟫⟫}` and close with `fgWit_union` + `fgJust_mono`.
+* `ifdKind c = 1`, `p := ifdVal c 0`: `𝚺₁`-induction on `j ≤ n` for
+  `∃ w u, fgWit w ∧ Seq u ∧ lh u = j+1 ∧ znth u 0 = n ∧ ∀ i < j, fgStepIn w p (znth u i) (znth u (i+1))`
+  (a `𝚺₁` statement).  Step: apply `ψ p` at `znth u j`, union the witnesses, `seqCons` the value
+  onto `u`.  At `j = n`, add the entry `⟪⟪c,n⟫,⟪znth u n, u⟫⟫`.
+
+The only genuinely new Lean work is that `𝚺₁`-induction; everything it needs is banked.
+
+--- superseded design notes (lap 6, now implemented) ---
 
 * `fgEntry`-shaped witnesses.  A witness `w` is a `Seq` whose `i`-th entry is `⟪⟪d, m⟫, ⟪v, u⟫⟫`,
   read "`f_d(m) = v`, justified by the auxiliary iteration sequence `u`".  The justification
