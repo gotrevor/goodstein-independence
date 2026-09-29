@@ -4,6 +4,11 @@ defaultTargets = ["GoodsteinPA"]
 [[lean_lib]]
 name = "GoodsteinPA"
 
+# The bridge to KT. Wu's OrdinalAnalysis (non-module, so it cannot live in the module lib
+# `GoodsteinPA`).  Out of defaultTargets while it carries `sorry`; build with `lake build GoodsteinWu`.
+[[lean_lib]]
+name = "GoodsteinWu"
+
 [[require]]
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation.git"
@@ -17,3 +22,8 @@ rev = "master"
 [[lean_lib]]
 name = "PAComparator"
 globs = ["PAComparator.+"]
+
+[[require]]
+name = "OrdinalAnalysis"
+git = "https://github.com/gotrevor/OrdinalAnalysis"
+rev = "28bfce683eeaa6156135cd2ff9cac7e12a73ec03"
