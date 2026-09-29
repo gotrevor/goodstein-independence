@@ -80,3 +80,17 @@ alone (see `STATUS.md` → Outstanding → Long-term):
    Moving it in needs a lakefile edit, which the brief forbids.
 2. The CI axiom-clean gate in `.github/workflows/ci.yml` is commented out.  Re-enabling it and
    adding `lake build GoodsteinWu && lake env lean scripts/AxiomCheckWu.lean` is a trunk decision.
+
+## Scope boundary (why the run halts with `sorry`s still in the repo)
+
+This run was scoped to `sorry-free:GoodsteinWu/WainerLower.lean`, and that target is met: the whole
+`GoodsteinWu/` library is sorry-free.  The `sorry`s that remain in the repo are all under
+`GoodsteinPA/` — the trunk's own long-running Crux-2 / operator campaign (`Statement.lean`,
+`Kreisel/Statement.lean`, `OperatorZeh/*`, `ToMathlib/Goodstein/Domination.lean`, …).  Those are
+**designated-open** for this branch: `WAINER-LOWER.md` freezes everything under `GoodsteinPA/` that
+`scripts/AxiomCheck.lean` pins and says to add new files under `GoodsteinWu/`, touching
+`GoodsteinPA/` only to add a helper lemma.  None were attacked, moved, faked or deleted; the
+`GoodsteinPA` headlines' own axiom audit (`scripts/AxiomCheck.lean`) is untouched and still passes.
+
+Exit taken: `box done --green` (scoped objective complete), after a confirming
+`lake build GoodsteinWu` (green, 1371 jobs) and a silent `lake env lean scripts/AxiomCheckWu.lean`.
