@@ -66,6 +66,12 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
 
 5. **Apply `gentzen_upper_bound`** at `φ := lMap toLX (emb ψ)` and `a := o+1`, add
    `arithmetic_nonote_prec` for `o ≺ o+1`, then step 1 to come back to `𝗣𝗔`.
+   DONE, lap 9, sorry-free (`GoodsteinWu/ApplyTI.lean`): `peano_fg (a : NONote) : 𝗣𝗔 ⊢ arithFgClosed a`,
+   where `arithFgClosed a = (arithFgAt ⌜nonoteCode a⌝).univCl`, i.e. `𝗣𝗔` proves
+   `isNF ⌜a⌝ → ∀ n, ∃ y, fgGraph ⌜a⌝ n y`.  `b` is taken from `exists_lt_nonoteTower` rather
+   than `a+1` (no NF side condition to discharge).  Added `peano_of_paLX_semantic` to
+   `Conservation.lean` (the mirror of Wu's `paLX_of_peano_semantic`).
+
 6. **Read off** the frozen statement.  Only *soundness* at ℕ has to be proved —
    `ℕ ⊧ fgGraph (code o) n y → y = ONote.fastGrowing o n`, by well-founded induction on `o`
    (justifiers are `≺`-smaller, `icmp_ifdVal_lt` + `isNF_ifdVal`, and `ifd_modelCode` reads the

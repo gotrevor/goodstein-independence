@@ -218,4 +218,20 @@ theorem peano_of_paLX {σ : ArithmeticSentence} (h : paLX ⊢ Semiformula.lMap t
   have h3 := Semiformula.models_lMap.mp h2
   rwa [lxStr_lMap] at h3
 
+/-- **Conservation, semantic form.**  The counterpart of Wu's `paLX_of_peano_semantic`:
+convenient when universal closure changes shape under the language map. -/
+theorem peano_of_paLX_semantic {σ : ArithmeticSentence} {τ : Sentence LX}
+    (h : paLX ⊢ τ)
+    (hsem : ∀ (M : Type) [Nonempty M] [sLX : Structure LX M],
+      M↓[LX] ⊧ τ → (sLX.lMap toLX).toStruc ⊧ σ) :
+    𝗣𝗔 ⊢ σ := by
+  apply Theory.Proof.complete.{0, 0}
+  rw [consequence_iff_eq']
+  intro M _ sM _ hM
+  let _ : Structure LX M := lxStr (fun _ => False)
+  have _ : M↓[LX] ⊧* paLX := models_paLX_lxStrF hM
+  have h2 : M↓[LX] ⊧ τ := consequence_iff'.mp (Theory.Proof.sound h) M
+  have h3 := hsem M h2
+  rwa [lxStr_lMap] at h3
+
 end GoodsteinWu.Conservation
