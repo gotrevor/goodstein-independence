@@ -6,8 +6,10 @@ Authors: Trevor Morris
 import GoodsteinWu.ApplyTI
 import GoodsteinWu.Conservation
 import GoodsteinWu.FastGrowingGraph
+import GoodsteinWu.FgFormula
 import GoodsteinWu.FundBridge
 import GoodsteinWu.InternalFund
 import GoodsteinWu.ProgTransfer
 import GoodsteinWu.Progressive
+import GoodsteinWu.Readoff
 import GoodsteinWu.WainerLower
