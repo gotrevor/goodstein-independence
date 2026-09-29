@@ -41,7 +41,17 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
    not used inside PA at all; it is only needed externally at ℕ, where every justifier's
    ordinal is `≺`-smaller by `icmp_ifdVal_lt`.
 
-4. **Progressiveness**: `𝗣𝗔 ⊢ Prog(≺, ψ)` for `ψ(c) := isNF c → ∀n ∃y F(c,n,y)`.
+4. **Progressiveness** — internal half DONE, lap 7, sorry-free (`GoodsteinWu/Progressive.lean`,
+   `fgTotal_progressive`: in every model of `𝗜𝚺₁`, `(∀ d, isNF d → isNF c → icmp d c = 0 →
+   fgTotal d) → fgTotal c`, where `fgTotal c := isNF c → ∀ n, ∃ y, fgGraph c n y`).  All three
+   cases closed: zero (singleton witness), limit (one step off `icmp_ifdVal_lt` + `isNF_ifdVal`),
+   successor (`fgIter`, a `𝚺₁` succ-induction building the iteration sequence).  Helpers added to
+   `InternalFund.lean`: `ifd_kind_indep` (the kind tag does not depend on the index — needed
+   because the `fgJust` limit clause reads `ifd c n` while the successor clause reads `ifd c 0`)
+   and `ifd_kind_cases`.  **Remaining for step 4:** turn this into `𝗣𝗔 ⊢ Prog(precCode, ψ)` —
+   pick the `LX`-formula `ψ` (the image under `lMap toLX` of `fgTotalDef`, a Π₂ arithmetic
+   formula), prove its evaluation lemma in an arbitrary model, and apply completeness.
+   [old text] `𝗣𝗔 ⊢ Prog(≺, ψ)` for `ψ(c) := isNF c → ∀n ∃y F(c,n,y)`.
    Zero case trivial; limit case one step (`ifdVal c n ≺ c`); successor case is the only one
    needing induction — Σ₁-induction on `i ≤ n` building the iteration sequence `u`.
 5. **Apply `gentzen_upper_bound`** at `φ := lMap toLX (emb ψ)` and `a := o+1`, add

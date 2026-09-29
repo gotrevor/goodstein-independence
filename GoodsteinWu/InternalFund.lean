@@ -261,6 +261,48 @@ lemma ifd_kind_ne_zero (n : V) : ∀ w : V, ∀ c ≤ w, c ≠ 0 → π₁ (ifd 
     · rw [if_pos hr, pi₁_pair]
       exact ih r (tail_lt_of_le hcw) r le_rfl hr
 
+/-- **The kind tag is one of `0`, `1`, `2`.** -/
+lemma ifd_kind_cases (n : V) : ∀ w : V, ∀ c ≤ w,
+    π₁ (ifd c n) = 0 ∨ π₁ (ifd c n) = 1 ∨ π₁ (ifd c n) = 2 := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro c hcw
+    rcases eq_or_ne c 0 with rfl | hc
+    · simp
+    obtain ⟨e, k, r, rfl⟩ : ∃ e k r, c = ocOadd e k r :=
+      ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+    rw [ifd_ocOadd]
+    by_cases hr : r = 0
+    · subst hr
+      by_cases h0 : π₁ (ifd e n) = 0 <;> by_cases h1 : π₁ (ifd e n) = 1 <;>
+        simp [h0, h1]
+    · rw [if_pos hr, pi₁_pair]
+      exact ih r (tail_lt_of_le hcw) r le_rfl
+
+/-- **The kind tag does not depend on the index.**  `ifd c n` is `⟪kind, value⟫` and the kind
+is determined by `c` alone; only the value of a *limit* code depends on `n`. -/
+lemma ifd_kind_indep (m n : V) : ∀ w : V, ∀ c ≤ w, π₁ (ifd c m) = π₁ (ifd c n) := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro c hcw
+    rcases eq_or_ne c 0 with rfl | hc
+    · simp
+    obtain ⟨e, k, r, rfl⟩ : ∃ e k r, c = ocOadd e k r :=
+      ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+    rw [ifd_ocOadd, ifd_ocOadd]
+    by_cases hr : r = 0
+    · subst hr
+      have he : π₁ (ifd e m) = π₁ (ifd e n) := ih e (exp_lt_of_le hcw) e le_rfl
+      simp only [ne_eq, not_true_eq_false, if_false, he]
+      by_cases h0 : π₁ (ifd e n) = 0 <;> by_cases h1 : π₁ (ifd e n) = 1 <;>
+        simp [h0, h1]
+    · have hrr : π₁ (ifd r m) = π₁ (ifd r n) := ih r (tail_lt_of_le hcw) r le_rfl
+      rw [if_pos hr, if_pos hr, pi₁_pair, pi₁_pair, hrr]
+
 lemma ifd_kind_eq_zero_of {c n : V} (h : π₁ (ifd c n) = 0) (w : V) (hcw : c ≤ w) : c = 0 := by
   by_contra hc
   exact ifd_kind_ne_zero n w c hcw hc h

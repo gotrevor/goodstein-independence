@@ -7,4 +7,5 @@ import GoodsteinWu.Conservation
 import GoodsteinWu.FastGrowingGraph
 import GoodsteinWu.FundBridge
 import GoodsteinWu.InternalFund
+import GoodsteinWu.Progressive
 import GoodsteinWu.WainerLower
