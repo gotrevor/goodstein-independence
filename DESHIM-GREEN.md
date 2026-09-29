@@ -114,8 +114,32 @@ $ echo $?
 0
 ```
 
-**All 1557 `GoodsteinPA` declarations are on exactly `[propext, Classical.choice, Quot.sound]`** —
-no `sorryAx`, no `ofReduceBool`, no blueprint axiom anywhere in the library.  Added to CI.
+Then strengthened: the first version filtered out `isInternalDetail` names, which silently skipped
+**2006** declarations (`private` lemmas, compiler auxiliaries, `example`s) — an overstated claim.  It
+now takes the closure over *every* declaration with no name filter at all, **3564** of them, and the
+union is still exactly `[propext, Classical.choice, Quot.sound]`.  Nothing can hide behind a name.
+
+It also asserts the two anti-vacuity anchor modules are still in the import graph.  The anchors
+(`goodsteinLength 3 = 5`, `bump 2 4 = 27` — the classic `2² ↦ 3³`, …) deliberately use
+`native_decide` and are written as anonymous `example`s precisely so no named declaration can depend
+on them; they guard against definitional drift on every build without entering the trusted base.
+Nothing previously noticed if they were dropped.
+
+Both halves were confirmed by negative test, not just by passing:
+
+```
+$ # inject `theorem sweep_canary : 1 = 1 := by sorry` into Goodstein/Defs.lean
+$ lake env lean scripts/AxiomSweep.lean
+error: AxiomSweep: 1 disallowed axiom dependency/ies among 3564 GoodsteinPA declarations:
+  Goodstein.sweep_canary  depends on  sorryAx
+
+$ # drop the Anchors import from GoodsteinPA.lean
+$ lake env lean scripts/AxiomSweep.lean
+error: AxiomSweep: anti-vacuity anchor module
+  GoodsteinPA.ToMathlib.Goodstein.Domination.Anchors is missing from the import graph
+```
+
+Both canaries reverted.  Added to CI.
 
 The three audit scripts now have complementary, non-overlapping jobs:
 
