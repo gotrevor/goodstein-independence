@@ -227,4 +227,103 @@ lemma ifd_ocOadd (e k r n : V) :
   simp only [hc, ocExp_ocOadd, ocCoeff_ocOadd, ocTail_ocOadd] at htail hexp ⊢
   rw [znth_ifdTable_eq_ifd n M r htail, znth_ifdTable_eq_ifd n M e hexp]
 
+/-! ### The order laws
+
+The fast-growing recursion descends along `≺`, and that is what makes progressiveness of
+"`f_c` is total" a *one-step* argument.  The two facts below are what carries it.
+-/
+
+private lemma exp_lt_of_le {e k r w : V} (h : ocOadd e k r ≤ w) : e < w :=
+  lt_of_lt_of_le (by have h' := ocExp_lt e k r; rwa [ocExp_ocOadd] at h') h
+
+private lemma tail_lt_of_le {e k r w : V} (h : ocOadd e k r ≤ w) : r < w :=
+  lt_of_lt_of_le (by have h' := ocTail_lt e k r; rwa [ocTail_ocOadd] at h') h
+
+private lemma sub_one_lt {k : V} (hk : k ≠ 0) : k - 1 < k := by
+  obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 :=
+    ⟨k - 1, (sub_add_self_of_le (pos_iff_one_le.mp (pos_iff_ne_zero.mpr hk))).symm⟩
+  simp
+
+/-- **Only the zero code has kind `0`.** -/
+lemma ifd_kind_ne_zero (n : V) : ∀ w : V, ∀ c ≤ w, c ≠ 0 → π₁ (ifd c n) ≠ 0 := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro c hcw hc
+    obtain ⟨e, k, r, rfl⟩ : ∃ e k r, c = ocOadd e k r :=
+      ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+    rw [ifd_ocOadd]
+    by_cases hr : r = 0
+    · subst hr
+      by_cases h0 : π₁ (ifd e n) = 0 <;> by_cases h1 : π₁ (ifd e n) = 1 <;>
+        simp [h0, h1]
+    · rw [if_pos hr, pi₁_pair]
+      exact ih r (tail_lt_of_le hcw) r le_rfl hr
+
+lemma ifd_kind_eq_zero_of {c n : V} (h : π₁ (ifd c n) = 0) (w : V) (hcw : c ≤ w) : c = 0 := by
+  by_contra hc
+  exact ifd_kind_ne_zero n w c hcw hc h
+
+/-- **The fundamental-sequence value of a nonzero normal code precedes it.**
+
+This is the internal descent fact: `ifdVal c n ≺ c`, uniformly in `n`, and it is what turns
+the successor and limit cases of progressiveness into single steps. -/
+theorem icmp_ifdVal_lt (n : V) : ∀ w : V, ∀ c ≤ w, isNF c → c ≠ 0 →
+    icmp (π₂ (ifd c n)) c = 0 := by
+  intro w
+  induction w using ISigma1.sigma1_order_induction
+  · definability
+  case ind w ih =>
+    intro c hcw hnf hc
+    obtain ⟨e, k, r, rfl⟩ : ∃ e k r, c = ocOadd e k r :=
+      ⟨ocExp c, ocCoeff c, ocTail c, (ocOadd_destruct hc).symm⟩
+    obtain ⟨hk0, hnfe, hnfr, -⟩ := (isNF_ocOadd e k r).mp hnf
+    have helt : e < w := exp_lt_of_le hcw
+    have hrlt : r < w := tail_lt_of_le hcw
+    rw [ifd_ocOadd]
+    by_cases hr : r = 0
+    · subst hr
+      simp only [ne_eq, not_true_eq_false, if_false]
+      by_cases h0 : π₁ (ifd e n) = 0
+      · have he0 : e = 0 := ifd_kind_eq_zero_of h0 e le_rfl
+        subst he0
+        rw [if_pos h0]
+        by_cases hk1 : k = 1
+        · simp only [pi₂_pair, hk1, if_true]
+          exact icmp_zero_ocOadd 0 1 0
+        · simp only [if_neg hk1, pi₂_pair]
+          rw [icmp_ocOadd, icmp_self 0 0 le_rfl]
+          have : cmpV (k - 1) k = 0 := by simp [cmpV, sub_one_lt hk0]
+          rw [this]
+          simp [thenV]
+      · have hene : e ≠ 0 := by
+          rintro rfl; exact h0 (by simp)
+        have ihe : icmp (π₂ (ifd e n)) e = 0 := ih e helt e le_rfl hnfe hene
+        by_cases h1 : π₁ (ifd e n) = 1
+        · rw [if_neg h0, if_pos h1]
+          by_cases hk1 : k = 1
+          · simp only [pi₂_pair, hk1, if_true]
+            rw [icmp_ocOadd, ihe]
+            simp [thenV]
+          · simp only [if_neg hk1, pi₂_pair]
+            rw [icmp_ocOadd, icmp_self e e le_rfl]
+            have : cmpV (k - 1) k = 0 := by simp [cmpV, sub_one_lt hk0]
+            rw [this]
+            simp [thenV]
+        · rw [if_neg h0, if_neg h1]
+          by_cases hk1 : k = 1
+          · simp only [pi₂_pair, hk1, if_true]
+            rw [icmp_ocOadd, ihe]
+            simp [thenV]
+          · simp only [if_neg hk1, pi₂_pair]
+            rw [icmp_ocOadd, icmp_self e e le_rfl]
+            have : cmpV (k - 1) k = 0 := by simp [cmpV, sub_one_lt hk0]
+            rw [this]
+            simp [thenV]
+    · rw [if_pos hr, pi₂_pair]
+      have ihr : icmp (π₂ (ifd r n)) r = 0 := ih r hrlt r le_rfl hnfr hr
+      rw [icmp_ocOadd, icmp_self e e le_rfl, cmpV_self, ihr]
+      simp [thenV]
+
 end GoodsteinWu.InternalFund

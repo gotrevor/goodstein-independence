@@ -19,7 +19,10 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
    `ifd (modelCode o) n = ⟪fsKind o, modelCode (fsVal o n)⟫`.  The transcription — including
    mathlib's `i.succPNat` ↦ internal `n + 1` and the `m.natPred` coefficient bookkeeping — is
    therefore confirmed, before any internal induction is spent on it.
-   *Open*: the internal order lemmas — see "Next attack" below.
+   Internal descent DONE, lap 4, sorry-free: `ifd_kind_ne_zero` (only `0` has kind `0`) and
+   **`icmp_ifdVal_lt`** — `isNF c → c ≠ 0 → icmp (ifdVal c n) c = 0`, i.e. `c[n] ≺ c` and
+   `pred c ≺ c`, uniformly in `n`.  `𝚺₁` course-of-values induction on the code.
+   *Open*: `isNF_ifdVal` — see "Next attack" below.
 3. **The Σ₁ graph of `fastGrowing`** — not started.  Design: a Δ₀ "justification sequence"
    predicate.  A witness is a sequence of entries `⟪d, m, v, u⟫`, each justified by *earlier*
    entries: `d = 0 ∧ v = m+1`; or `d` a successor with predecessor `e` and `u` a sequence with
@@ -36,15 +39,20 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
    `↔ y = ONote.fastGrowing o n` (external induction: soundness = functionality at ℕ,
    completeness = build the witness).
 
-## Next attack (lap 4)
+## Next attack (lap 5)
 
-The internal order layer of `InternalFund`:
+`isNF_ifdVal` : `isNF c → isNF (ifdVal c n)`.  Needed because the progressive predicate is
+`ψ(c) := isNF c → ∀n ∃y F(c,n,y)` (it must be, since `y ≺ x` already carries `isNF x`, so a
+non-normal `x` has nothing below it and `ψ` has to be trivial there).
 
-* `icmp_ifdVal_lt` : `isNF c → ifdKind c ≠ 0 → icmp (ifdVal c n) c = 0`
-  (**the load-bearing internal lemma** — it is what makes step 4 a one-step argument).
-  Internal `𝚺₁` course-of-values induction on `c`, mirroring `icmp_trans`'s `∀ w, ∀ a ≤ w` shape.
-* `isNF_ifdVal` : `isNF c → isNF (ifdVal c n)`.
+The induction does **not** close on `isNF` alone: the `r ≠ 0` branch rebuilds `ocOadd e k (v_r)`
+and needs the tail condition `icmp (ocExp v_r) e = 0`.  So strengthen the statement to the
+conjunction
 
-`icmp_ifdVal_lt` is the load-bearing one and the next real wall: it is an *internal* `𝚺₁`
-course-of-values induction on the code, of the same shape as Wu's `icmp_trans`
-(`∀ w, ∀ a ≤ w, …`), and it is what turns the limit case of progressiveness into a single step.
+    isNF (ifdVal c n) ∧ (ifdVal c n = 0 ∨ icmp (ocExp (ifdVal c n)) (ocExp c) ≠ 2)
+
+(the leading exponent never increases) and induct on that.  The four branches then close with:
+`icmp_eq_imp_eq` + Wu's `icmp_trans` for `r ≠ 0`; `k ≠ 0 ∧ k ≠ 1 → k - 1 ≠ 0` for the finite
+branch; and lap 4's `icmp_ifdVal_lt` at the exponent for the two limit branches.
+
+After that the `InternalFund` layer is complete and step 3 (the Σ₁ graph) begins.
