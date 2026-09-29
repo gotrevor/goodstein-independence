@@ -1,6 +1,12 @@
 # WAINER-LOWER — open obligations
 
-Target: `GoodsteinWu.fastGrowing_provably_total` (frozen) in `GoodsteinWu/WainerLower.lean`.
+**NONE.  The target is met.**  `GoodsteinWu.fastGrowing_provably_total` and
+`GoodsteinWu.wainer_classification` are proved sorry-free with
+`#print axioms = [propext, Classical.choice, Quot.sound]` (zero mathematical axioms), audited by
+`scripts/AxiomCheckWu.lean`.  See `STATUS.md` for the overview and `DIRECTION.md` for the closing
+directive.  The route record below is kept as the reference for how it was done.
+
+Target (met): `GoodsteinWu.fastGrowing_provably_total` (frozen) in `GoodsteinWu/WainerLower.lean`.
 
 ## Route (refined lap 2; supersedes the sketch in WAINER-LOWER.md where they differ)
 
@@ -72,14 +78,27 @@ Everything is done with `φ` **X-free** (the image of an arithmetic formula unde
    than `a+1` (no NF side condition to discharge).  Added `peano_of_paLX_semantic` to
    `Conservation.lean` (the mirror of Wu's `paLX_of_peano_semantic`).
 
-6. **Read off** the frozen statement.  Only *soundness* at ℕ has to be proved —
-   `ℕ ⊧ fgGraph (code o) n y → y = ONote.fastGrowing o n`, by well-founded induction on `o`
-   (justifiers are `≺`-smaller, `icmp_ifdVal_lt` + `isNF_ifdVal`, and `ifd_modelCode` reads the
-   clause back as mathlib's `fundamentalSequence`).  The converse direction of the frozen
-   `↔` is then free: step 5 gives `𝗣𝗔 ⊢ ∀n ∃y φ`, hence `ℕ ⊧ ∃y φ(·, n)`, and soundness
-   identifies that `y` with `fastGrowing o n`.  So no witness needs to be built at ℕ.
+6. **Read off** the frozen statement — DONE, lap 10, sorry-free.
+   `GoodsteinWu/Readoff.lean`: `fgStepIn_sound` / `fgGraph_sound`, the ℕ soundness of `fgGraph`.
+   The recursion is **Lean's own**, on `o : ONote` with the order `ONote.fastGrowing` itself
+   recurses on (`InvImage.wf ONote.repr Ordinal.lt_wf`), and — the one simplification over the plan
+   — it needs **no `NF` hypothesis and no internal `icmp`/`isNF` reasoning at all**:
+   `fsVal o n < o` holds for *every* `o`, straight out of mathlib's
+   `fundamentalSequence_has_prop` (`o.repr = succ (fsVal o 0).repr` in the successor case,
+   `(h.2.1 n).2.1` in the limit case).  `FundBridge.ifd_modelCode` turns each `fgJust` clause into
+   the matching `fundamentalSequence` clause; the successor clause closes with an ordinary
+   ℕ-induction showing `znth u j = (fastGrowing (fsVal o 0))^[j] n`.
+   So `icmp_ifdVal_lt` and `isNF_ifdVal` (laps 4–5) are load-bearing for step 4 only, not step 6.
 
-## Next attack (lap 7) — step 4, progressiveness
+   `GoodsteinWu/FgFormula.lean` assembles the frozen statement:
+   `fgSem o = fgGraphDef.rew (Rew.subst ![⌜code o⌝, #1, #0])`, so `fgFormula o := (fgSem o).val` is
+   Σ₁ by `sigma_prop` (no hand-rolled hierarchy proof).  `exists_fgGraph` discharges the
+   `isNF ⌜o⌝` guard of `peano_fg` by `isNF_modelCode` in an arbitrary model of `𝗣𝗔`;
+   `peano_fgFormula` lifts that to `𝗣𝗔 ⊢ ∀ n, ∃ y, fgFormula o` by
+   `FirstOrder.Arithmetic.complete.{0} 𝗣𝗔`.  The `←` half of the frozen `↔` is the ℕ-instance of
+   that proof (no witness built by hand), with `fgGraph_sound` naming its value.
+
+## Next attack — none (target met).  Superseded record below: the lap-7 attack plan for step 4.
 
 `GoodsteinWu/Progressive.lean`.  Work internally in a model `V ⊧ 𝗣𝗔` (then transfer by
 completeness, as Wu does throughout).  With `ψ(c) := isNF c → ∀ n, ∃ y, fgGraph c n y`, prove

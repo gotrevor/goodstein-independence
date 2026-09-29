@@ -2,42 +2,32 @@
 
 ## CURRENT DIRECTIVE  (lap 10, 2026-09-29; altitude laps are the only writers; OUTRANKS the HANDOFF)
 
-**Objective (the only one).**  Discharge the single remaining `sorry`, the frozen
-`GoodsteinWu.fastGrowing_provably_total` in `GoodsteinWu/WainerLower.lean`.  Everything the route
-needs upstream of it is proved and axiom-clean.
+**OBJECTIVE MET — branch complete; STOP taken.**  `GoodsteinWu.fastGrowing_provably_total` and
+`GoodsteinWu.wainer_classification` are proved, sorry-free and axiom-clean
+(`[propext, Classical.choice, Quot.sound]`, zero mathematical axioms).  `GoodsteinWu/` holds no
+`sorry`; `lake build GoodsteinWu` is green (1371 jobs) and the full `lake build` is green (1548).
 
-**Mandated next move.**  Step 6 of `PENDING_WORK.md`, in a new file `GoodsteinWu/Readoff.lean`:
-
-1. `fgStepIn_sound : fgWit (V := ℕ) w → ∀ o : ONote, ∀ n y : ℕ,
-   fgStepIn (V := ℕ) w (NotationBridge.code o) n y → y = ONote.fastGrowing o n`
-   — well-founded recursion on `o` with the `<` that mathlib's `fastGrowing` itself recurses on
-   (`fsVal o n < o` holds for *every* `o`, so **no `NF` hypothesis is needed**), `FundBridge.ifd_modelCode`
-   to turn each `fgJust` clause into the matching `fundamentalSequence` clause, and an inner
-   ordinary `ℕ`-induction along the iteration sequence `u` in the successor clause.
-2. Assemble the headline: `φ := Rew.subst ![⌜code o⌝, #1, #0] ▹ fgGraphDef.val`, its
-   `Hierarchy 𝚺 1`, the `↔` (→ is 1; ← is free: `ApplyTI.peano_fg` + soundness at ℕ hands back the
-   witness, so nothing is built by hand at ℕ), and `𝗣𝗔 ⊢ ∀⁰ ∃⁰ φ` from `peano_fg` by completeness
-   plus `NotationBridge.isNF_modelCode` to kill the `isNF ⌜a⌝` guard.
-
-Decompose into named `sorry` leaves in `src` (`GoodsteinWu/`) on the first lap that touches it;
-raising the `sorry` count while the leaves shrink is progress.
+**Mandated next move.**  *None on this branch.*  Any further work here must be requested
+explicitly; do not invent side quests.  If resumed, the only legitimate items are the two
+non-mathematical ones listed under "Long-term" in `STATUS.md` (moving `GoodsteinWu` into
+`defaultTargets`, re-enabling the CI axiom gate), **both of which need permission** because they
+touch the lakefile / CI, which this brief forbids.
 
 **Forbidden drift.**
-* Do **not** change either frozen statement (`fastGrowing_provably_total`, `wainer_classification`).
-* Do **not** add an `axiom`; the route has **zero** math axioms and must keep zero.
-* Do **not** build an explicit `fgGraph` witness at ℕ — the `←` half of the frozen `↔` comes for
-  free from `peano_fg`; hand-building one is wasted work.
-* Do **not** reopen steps 1–5, edit `OrdinalAnalysis`, `lake update`, or push.
-* Do **not** park an active-crux `sorry` in `wip/`.
+* Do **not** change either frozen statement.
+* Do **not** add an `axiom`, edit `OrdinalAnalysis`, `lake update`, or push.
+* Do **not** "improve" the finished proofs by relocating or re-deriving them.
 
-**Why.**  Nine laps closed steps 1–5, each on the critical path, with no repetition and no leaf
-drift; step 6 is now the whole remaining obligation, so there is no scaffolding left to hide behind.
-It is also the *easiest*-looking of the six and still the crux by definition, because it is the only
-thing between a green build and the finished theorem.
+**Why.**  The objective was scoped to exactly one target (`sorry-free:GoodsteinWu/WainerLower.lean`)
+and it is met and audited (`scripts/AxiomCheckWu.lean`, silent + exit 0).  The two anti-vacuity
+anchors in `WainerLower.lean` pin the produced formula to `fastGrowing 0 = succ` and
+`fastGrowing 1 = 2·n`, so the statement is not hollow.
 
 ### Directive history
 * lap 10 (2026-09-29) — set: finish step 6 (the ℕ read-off of `fgGraph`) and assemble the frozen
   headline; steps 1–5 are closed and axiom-clean.
+* lap 10 (2026-09-29, same lap, after the work) — **MET**: step 6 closed, headline proved
+  axiom-clean, audit added, STOP taken. No further mandated work on this branch.
 
 ---
 
@@ -61,9 +51,9 @@ and `WAINER-LOWER.md` for the brief.  The required external input is
   lap 1).
 * **T-3** — `fgGraph` is not Σ₁, or its witness sets do not merge, forcing a reindexing calculus
   inside PA.  *Not fired* (`fgGraphDef` is `mkSigma`; `fgWit_union`, lap 6).
-* **T-4** — the ℕ read-off needs well-foundedness *inside* PA (not just at ℕ).  *Not fired*: the
-  read-off is external, by recursion on `o : ONote` in Lean.  If step 6 ever demands an internal
-  well-foundedness principle, T-4 has fired.
+* **T-4** — the ℕ read-off needs well-foundedness *inside* PA (not just at ℕ).  *Not fired, and now
+  settled*: `Readoff.fgStepIn_sound` is external, by Lean's recursion on `o : ONote`; no internal
+  well-foundedness principle was needed anywhere.
 
 **Invariants.** Frozen statements unchanged; zero `axiom`s; no edits to `OrdinalAnalysis`; no
 `lake update`; no push; commit every green build; a handoff each lap.
