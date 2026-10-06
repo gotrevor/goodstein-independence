@@ -9,7 +9,7 @@ The proofs here are AI-generated.  FFL
 [judged](https://github.com/FormalizedFormalLogic/goodstein-independence/pull/36#issuecomment-5386863975)
 that this formalization would be better redesigned from scratch.  FFL does not maintain this
 repository or review its pull requests.  Trevor Morris maintains it independently.  Whether these
-formalizations are successful remains an open question within FFL.
+formalizations are useful remains an open question within FFL.
 
 FFL's own experiment in AI formalization of arithmetic is
 [AlphaCentauri](https://github.com/FormalizedFormalLogic/AlphaCentauri).  There, humans choose
