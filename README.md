@@ -4,7 +4,8 @@
 [![License: Apache 2.0](https://img.shields.io/github/license/FormalizedFormalLogic/goodstein-independence)](LICENSE)
 
 **Experimental.** The proofs here are written by AI agents and are not reviewed line by line by
-FFL; the statements are the part to read.  For arithmetic metamathematics developed with human
+FFL; the statements are the part to read.  Whether these formalizations are successful remains
+an open question within FFL.  For arithmetic metamathematics developed with human
 review of every pull request, see the sister project
 [AlphaCentauri](https://github.com/FormalizedFormalLogic/AlphaCentauri).
 
