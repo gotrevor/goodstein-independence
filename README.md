@@ -3,6 +3,8 @@
 [![CI](https://github.com/FormalizedFormalLogic/goodstein-independence/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalizedFormalLogic/goodstein-independence/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/github/license/FormalizedFormalLogic/goodstein-independence)](LICENSE)
 
+## Disclaimers
+
 **Experimental.  Not maintained or reviewed by FFL.**
 
 The proofs here are AI-generated.  FFL
@@ -15,10 +17,10 @@ FFL's own experiment in AI formalization of arithmetic is
 [AlphaCentauri](https://github.com/FormalizedFormalLogic/AlphaCentauri).  There, humans choose
 each target as a GitHub issue, and AI agents write, review and maintain the Lean code.
 
-Lean 4 formalizations of independence results over Peano Arithmetic, built on
-[Foundation](https://github.com/FormalizedFormalLogic/Foundation).
+## What's here
 
-## Headlines
+Lean 4 formalizations of independence results over Peano Arithmetic, built on
+[Foundation](https://github.com/FormalizedFormalLogic/Foundation).  The headline results:
 
 | Result | Declaration |
 | --- | --- |
