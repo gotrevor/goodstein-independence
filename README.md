@@ -3,13 +3,17 @@
 [![CI](https://github.com/FormalizedFormalLogic/goodstein-independence/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalizedFormalLogic/goodstein-independence/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/github/license/FormalizedFormalLogic/goodstein-independence)](LICENSE)
 
-**Experimental, and not maintained or reviewed by FFL.** The proofs here are AI-generated.  FFL
+**Experimental.  Not maintained or reviewed by FFL.**
+
+The proofs here are AI-generated.  FFL
 [judged](https://github.com/FormalizedFormalLogic/goodstein-independence/pull/36#issuecomment-5386863975)
-that this formalization would be better redesigned from scratch, and that it carries too much
-AI/LLM-tuned code to refactor, so FFL does not maintain it and does not review pull requests
-here; Trevor Morris maintains it independently.  Whether these formalizations are successful
-remains an open question within FFL.  FFL's own, human-reviewed work on the metamathematics of
-arithmetic is [AlphaCentauri](https://github.com/FormalizedFormalLogic/AlphaCentauri).
+that this formalization would be better redesigned from scratch.  FFL does not maintain this
+repository or review its pull requests.  Trevor Morris maintains it independently.  Whether these
+formalizations are successful remains an open question within FFL.
+
+FFL's own experiment in AI formalization of arithmetic is
+[AlphaCentauri](https://github.com/FormalizedFormalLogic/AlphaCentauri).  There, humans choose
+each target as a GitHub issue, and AI agents write, review and maintain the Lean code.
 
 Lean 4 formalizations of independence results over Peano Arithmetic, built on
 [Foundation](https://github.com/FormalizedFormalLogic/Foundation).
